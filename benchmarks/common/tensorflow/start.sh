@@ -50,8 +50,9 @@ function run_model() {
     echo "RUNCMD: ${CMD} " | tee -a ${THROUGHPUT_LOGFILE}
     echo "Batch Size: ${BATCH_SIZE}" | tee -a ${THROUGHPUT_LOGFILE}
     echo "Ran inference with batch size ${BATCH_SIZE} for throughput" | tee -a ${THROUGHPUT_LOGFILE}
-    echo "Log location: ${THROUGHPUT_LOGFILE}"
 
+    LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}_throughput.log"
+    echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${THROUGHPUT_LOGFILE}
 }
 
 # NCF model
