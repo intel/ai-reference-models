@@ -50,8 +50,8 @@ function run_model() {
     echo "RUNCMD: ${CMD} " | tee -a ${THROUGHPUT_LOGFILE}
     echo "Batch Size: ${BATCH_SIZE}" | tee -a ${THROUGHPUT_LOGFILE}
     echo "Ran inference with batch size ${BATCH_SIZE} for throughput" | tee -a ${THROUGHPUT_LOGFILE}
+    echo "Log location: ${THROUGHPUT_LOGFILE}"
 
-    # TODO: add default batch size 1 for latency if requried.
 }
 
 # NCF model
@@ -131,9 +131,6 @@ function ssd_mobilenet() {
 
 THROUGHPUT_LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_throughput.log
 echo 'Log output location: ${THROUGHPUT_LOGFILE}'
-
-export PYTHONPATH=$PYTHONPATH:${MOUNT_BENCHMARK}/common
-echo $PYTHONPATH
 
 MODEL_NAME=`echo ${MODEL_NAME} | tr 'A-Z' 'a-z'`
 if [ ${MODEL_NAME} == "ncf" ]; then
