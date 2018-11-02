@@ -83,7 +83,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
         variables to start running the benchmarking job.
         """
         benchmark_scripts = os.getcwd()
-        mount_benchmark = "/workspace/benchmark"
+        mount_benchmark = "/workspace/benchmarks"
         mount_model_source = "/workspace/models"
         workspace = os.path.join(mount_benchmark, "common", args.framework)
 
