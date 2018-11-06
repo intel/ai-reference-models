@@ -4,7 +4,7 @@ Training and inference scripts with intel optimized MKL
 
 # Use Cases
 
-* Image Classification
+* Image Recognition
     * Tensorflow
         * Resnet50
         * Inceptionv3
