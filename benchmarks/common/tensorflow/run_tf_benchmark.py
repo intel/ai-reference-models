@@ -32,33 +32,10 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 dest='input_graph', default=None)
 
         args, unknown = arg_parser.parse_known_args()
-        self.validate_args(args)
 
         mi = super(ModelBenchmarkUtil, self).initialize_model(args, unknown)
         if mi is not None:  # start model initializer if not None
             mi.run()
-
-    def validate_args(self, args):
-        """validate the args for both common args and FP32 model specific args"""
-
-        # validate the args shared by fp32 models and int8 models first
-        super(ModelBenchmarkUtil, self).validate_args(args)
-
-        # check checkpoint location
-        checkpoint_dir = args.checkpoint
-        if checkpoint_dir is not None:
-            if not os.path.exists(checkpoint_dir):
-                raise IOError("The checkpoint location {} does not exist.".format(checkpoint_dir))
-            elif not os.path.isdir(checkpoint_dir):
-                raise IOError("The checkpoint location {} is not a directory.".format(checkpoint_dir))
-
-        # check if input graph file exist
-        input_graph = args.input_graph
-        if input_graph is not None:
-            if not os.path.exists(input_graph):
-                raise IOError("The input graph  {} does not exist.".format(input_graph))
-            if not os.path.isfile(input_graph):
-                raise IOError("The input graph {} must be a file.".format(input_graph))
 
 
 if __name__ == "__main__":

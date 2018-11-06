@@ -44,15 +44,15 @@ function run_model() {
     cd ${MOUNT_BENCHMARK}
 
     # Start benchm marking
-    eval ${CMD} 2>&1 | tee ${THROUGHPUT_LOGFILE}
+    eval ${CMD} 2>&1 | tee ${LOGFILE}
 
-    echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${THROUGHPUT_LOGFILE}
-    echo "RUNCMD: ${CMD} " | tee -a ${THROUGHPUT_LOGFILE}
-    echo "Batch Size: ${BATCH_SIZE}" | tee -a ${THROUGHPUT_LOGFILE}
-    echo "Ran inference with batch size ${BATCH_SIZE} for throughput" | tee -a ${THROUGHPUT_LOGFILE}
+    echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
+    echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
+    echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+    echo "Ran inference with batch size ${BATCH_SIZE} for throughput" | tee -a ${LOGFILE}
 
     LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}_throughput.log"
-    echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${THROUGHPUT_LOGFILE}
+    echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
 # NCF model
@@ -124,8 +124,13 @@ function ssd_mobilenet() {
     fi
 }
 
+<<<<<<< HEAD
 THROUGHPUT_LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_throughput.log
 echo 'Log output location: ${THROUGHPUT_LOGFILE}'
+=======
+LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_throughput.log
+echo 'Log output location: ${LOGFILE}'
+>>>>>>> dff9a497e1229c1bed4d263beede37e4ebc5ed46
 
 MODEL_NAME=`echo ${MODEL_NAME} | tr 'A-Z' 'a-z'`
 if [ ${MODEL_NAME} == "ncf" ]; then
@@ -136,5 +141,8 @@ else
     echo "Unsupported model: ${MODEL_NAME}"
     exit 1
 fi
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> dff9a497e1229c1bed4d263beede37e4ebc5ed46
