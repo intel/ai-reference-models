@@ -10,7 +10,6 @@ from common.platform_util import PlatformUtil
 
 class BaseBenchmarkUtil(object):
     """Base benchmark util class"""
-
     MODEL_INITIALIZER = "model_init"
 
     def __init__(self):

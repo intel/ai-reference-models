@@ -32,11 +32,9 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 dest='input_graph', default=None)
 
         args, unknown = arg_parser.parse_known_args()
-
         mi = super(ModelBenchmarkUtil, self).initialize_model(args, unknown)
         if mi is not None:  # start model initializer if not None
             mi.run()
-
 
 if __name__ == "__main__":
     util = ModelBenchmarkUtil()
