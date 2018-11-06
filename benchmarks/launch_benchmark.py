@@ -42,17 +42,6 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                                 help='Full path to the input graph ',
                                 dest='input_graph', default=None)
 
-        # proxy info
-        arg_parser.add_argument('--http_proxy',
-                                help='Add http_proxy information'
-                                     'while running in corporate environment',
-                                dest='http_proxy', default=None)
-
-        arg_parser.add_argument('--https_proxy',
-                                help='Add https_proxy information'
-                                     'while running in corporate environment',
-                                dest='https_proxy', default=None)
-
         args, unknown = arg_parser.parse_known_args()
         self.validate_args(args)
         self.run_docker_container(args)
@@ -128,12 +117,6 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                             args.batch_size, workspace, in_graph_filename,
                             mount_benchmark, mount_model_source,
                             args.framework))
-
-        if args.http_proxy:
-            env_vars +="--env http_proxy={} ".format(args.http_proxy)
-
-        if args.https_proxy:
-            env_vars +="--env https_proxy={} ".format(args.https_proxy)
 
         volume_mounts = ("--volume {}:{} "
                          "--volume {}:{} "
