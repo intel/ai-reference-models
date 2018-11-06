@@ -108,6 +108,8 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                     "--env FRAMEWORK={} "
                     "--env DATASET_LOCATION=/dataset "
                     "--env CHECKPOINT_DIRECTORY=/checkpoints "
+                    "--env https_proxy=http://proxy-fm.intel.com:912 "
+                    "--env http_proxy=http://proxy-fm.intel.com:911 "
                     .format(args.data_location, args.checkpoint,
                             args.model_source_dir, benchmark_scripts,
                             args.single_socket, args.model_name, args.mode,

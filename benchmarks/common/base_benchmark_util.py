@@ -141,10 +141,7 @@ class BaseBenchmarkUtil(object):
         if args.model_name:  # not empty
             current_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 
-            # TODO: change this to search for the model_init.py based on the
-            # framework, model, platform, and mode since we are going to be
-            # adding a "use case" directory at some point, so we won't know the
-            # exact location of the model_init.py file.
+            # find the path to the model_init.py file
             filename = "{}.py".format(self.MODEL_INITIALIZER)
             print("current path: {}".format(current_path))
             search_path = os.path.join(current_path, "*", args.framework, args.model_name, args.mode, args.platform, filename)

@@ -84,7 +84,6 @@ function ncf() {
 function ssd_mobilenet() {
     if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
         # install dependencies
-        # TODO: add requirements.txt and do pip  - Dina to add.
         pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
 
         original_dir=$(pwd)
