@@ -9,8 +9,7 @@ other platforms are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone the `tensorflow-models` repository, if you don't already have
-it:
+1. Clone the `tensorflow/models` repository:
 
 ```
 $ git clone git@github.com:tensorflow/models.git
@@ -150,7 +149,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --platform fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 7. The log file is saved to:
