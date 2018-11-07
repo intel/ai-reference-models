@@ -49,9 +49,9 @@ function run_model() {
     echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
     echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
     echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
-    echo "Ran inference with batch size ${BATCH_SIZE} for throughput" | tee -a ${LOGFILE}
+    echo "Ran inference with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
 
-    LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}_throughput.log"
+    LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}.log"
     echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
@@ -124,7 +124,7 @@ function ssd_mobilenet() {
     fi
 }
 
-LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_throughput.log
+LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}.log
 echo 'Log output location: ${LOGFILE}'
 
 MODEL_NAME=`echo ${MODEL_NAME} | tr 'A-Z' 'a-z'`

@@ -10,7 +10,9 @@ Training and inference scripts with intel optimized MKL
         * Inceptionv3
 * Object Detection
     * Tensorflow
-        * SDD-Mobilenet
+        * SSD-Mobilenet
+            * Inference
+                * [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions)
 * Recommendation
     * Tensorflow
         * NCF
