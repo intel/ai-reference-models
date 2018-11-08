@@ -7,6 +7,8 @@ Training and inference scripts with intel optimized MKL
 * Image Recognition
     * Tensorflow
         * Resnet50
+            * Inference
+                * [Int8](image_recognition/tensorflow/resnet50/README.md)
         * Inceptionv3
 * Object Detection
     * Tensorflow

@@ -29,7 +29,7 @@ from common.base_benchmark_util import BaseBenchmarkUtil
 
 
 class ModelBenchmarkUtil(BaseBenchmarkUtil):
-    """Benchmark util for pf32 models """
+    """Benchmark util for int8 and fp32 models """
 
     def main(self):
         super(ModelBenchmarkUtil, self).define_args()
@@ -50,6 +50,16 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
         arg_parser.add_argument('-g', "--in-graph",
                                 help='Full path to the input graph ',
                                 dest='input_graph', default=None)
+
+        arg_parser.add_argument('-k', "--benchmark-only",
+                                help='For benchmark measurement only in int8 models.',
+                                dest='benchmark_only',
+                                action='store_true')
+
+        arg_parser.add_argument("--accuracy-only",
+                                help='For accuracy measurement only in int8 models.',
+                                dest='accuracy_only',
+                                action='store_true')
 
         args, unknown = arg_parser.parse_known_args()
         mi = super(ModelBenchmarkUtil, self).initialize_model(args, unknown)
