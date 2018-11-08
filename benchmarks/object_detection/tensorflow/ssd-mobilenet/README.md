@@ -133,13 +133,29 @@ total 58132
 drwxr-sr-x. 3 myuser myuser     4096 Feb  1  2018 saved_model
 ```
 
-6. Run the `launch_benchmark.py` script with the appropriate parameters
-including: the `coco_val.record` data location (from step 4),
-the pre-trained `frozen_inference_graph.pb` input graph file (from step
-5, and the location of your `tensorflow/models` clone (from step 1).
+6. Clone the [intelai/models](https://github.com/intelai/models) repo.
+This repo has the launch script for running benchmarking, which we will
+use in the next step.
 
 ```
-$ cd /home/myuser/intel-models/benchmarks
+$ git clone git@github.com:IntelAI/models.git
+Cloning into 'models'...
+remote: Enumerating objects: 11, done.
+remote: Counting objects: 100% (11/11), done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 11 (delta 3), reused 4 (delta 0), pack-reused 0
+Receiving objects: 100% (11/11), done.
+Resolving deltas: 100% (3/3), done.
+```
+
+7. Run the `launch_benchmark.py` script from the models repo that we
+just cloned, with the appropriate parameters including: the
+`coco_val.record` data location (from step 4), the pre-trained
+`frozen_inference_graph.pb` input graph file (from step 5, and the
+location of your `tensorflow/models` clone (from step 1).
+
+```
+$ cd /home/myuser/models/benchmarks
 
 $ python launch_benchmark.py \
     --data-location /home/myuser/coco/output/coco_val.record \
@@ -152,8 +168,8 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-7. The log file is saved to:
-intel-models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference.log
+8. The log file is saved to:
+models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference.log
 
 The tail of the log output when the benchmarking completes should look
 something like this:
