@@ -22,15 +22,15 @@ to download, process and convert the ImageNet dataset to the TF records format.
 * The ImageNet dataset directory location is only required to calculate the model accuracy.
 
 2. Clone the 
-[intel-models](https://github.com/NervanaSystems/intel-models)
+[intelai/models](https://github.com/intelai/models)
 repository and check that the pre-trained model graph `final_int8_resnet50.pb` exists.
 ```
-$ git clone git@github.com:NervanaSystems/intel-models.git
+$ git clone git@github.com:IntelAI/models.git
 
-$ ls -l intel-models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/
--rw-r--r--  1 wstaie  staff         0 Nov  7 03:30 __init__.py
--rw-r--r--  1 wstaie  staff  31870200 Nov  7 03:30 final_int8_resnet50.pb
--rw-r--r--  1 wstaie  staff      4341 Nov  7 03:30 model_init.py
+$ ls -l models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/
+-rw-r--r--  1 myuser  staff         0 Nov  7 03:30 __init__.py
+-rw-r--r--  1 myuser  staff  31870200 Nov  7 03:30 final_int8_resnet50.pb
+-rw-r--r--  1 myuser  staff      4341 Nov  7 03:30 model_init.py
 ```
 
 3. Build the docker image using the quantized TensorFlow
@@ -39,18 +39,18 @@ in the official TensorFlow repository with `--config=mkl`. More instructions on
 [how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
-The optimized ResNet50 model files are attached to the `intel-models` repo and located in  `/intel-models/models/image_recognition/tensorflow/resnet50/`.
+The optimized ResNet50 model files are attached to the `models` repo and located in  `models/models/image_recognition/tensorflow/resnet50/`.
 
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2, the docker image (from step 3) and the `--accuracy-only` flag.
 ```
-$ cd /home/myuser/intel-models/benchmarks
+$ cd /home/myuser/models/benchmarks
 
 $ python launch_benchmark.py \
     --data-location /home/myuser/dataset/FullImageNetData_directory
-    --in-graph /home/myuser/intel-models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/final_int8_resnet50.pb \
-    --model-source-dir /home/myuser/intel-models/models
+    --in-graph /home/myuser/models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/final_int8_resnet50.pb \
+    --model-source-dir /home/myuser/models/models
     --model-name resnet50 \
     --framework tensorflow \
     --platform int8 \
@@ -60,7 +60,7 @@ $ python launch_benchmark.py \
     --docker-image docker_image
 ```
 The log file is saved to:
-`intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log`.
+`models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
@@ -131,11 +131,11 @@ the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2, the docker image (from step 3) and the `--benchmark-only` flag.
 
 ```
-$ cd /home/myuser/intel-models/benchmarks
+$ cd /home/myuser/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/intel-models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/final_int8_resnet50.pb \
-    --model-source-dir /home/myuser/intel-models/models
+    --in-graph /home/myuser/models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/final_int8_resnet50.pb \
+    --model-source-dir /home/myuser/models/models
     --model-name resnet50 \
     --framework tensorflow \
     --platform int8 \
