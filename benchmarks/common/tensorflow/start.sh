@@ -36,6 +36,8 @@ echo "    MODEL_NAME: ${MODEL_NAME}"
 echo "    MODE: ${MODE}"
 echo "    PLATFORM: ${PLATFORM}"
 echo "    BATCH_SIZE: ${BATCH_SIZE}"
+echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
+echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 
 ## install common dependencies
 apt update ; apt full-upgrade -y
@@ -51,7 +53,8 @@ fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
-DIR=${WORKSPACE}/${MODEL_NAME}/${PLATFORM}/${MODE}
+DIR=${WORKSPACE}/${MODEL_NAME}/${MODE}/${PLATFORM}
+
 LOG_OUTPUT=${WORKSPACE}/logs
 if [ ! -d "${LOG_OUTPUT}" ];then
     mkdir ${LOG_OUTPUT}
@@ -63,7 +66,7 @@ function run_model() {
     # since the scripts use the benchmark/common scripts as well.
     cd ${MOUNT_BENCHMARK}
 
-    # Start benchm marking
+    # Start benchmarking
     eval ${CMD} 2>&1 | tee ${LOGFILE}
 
     echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
@@ -144,6 +147,44 @@ function ssd_mobilenet() {
     fi
 }
 
+# Resnet50 int8 model
+function resnet50() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+        # For accuracy, dataset location is required, see README for more information.
+        if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ];then
+            echo "No Data directory specified, accuracy will not be calculated."
+            exit 1
+        fi
+
+        accuracy_only_arg=""
+        if [ ${ACCURACY_ONLY} == "True" ]; then
+            accuracy_only_arg="--accuracy-only"
+        fi
+
+        benchmark_only_arg=""
+        if [ ${BENCHMARK_ONLY} == "True" ]; then
+            benchmark_only_arg="--benchmark-only"
+        fi
+ 
+        export PYTHONPATH=${PYTHONPATH}:`pwd`:${MOUNT_BENCHMARK}
+        CMD="python ${RUN_SCRIPT_PATH} \
+        --framework=${FRAMEWORK} \
+        --model-name=${MODEL_NAME} \
+        --platform=${PLATFORM} \
+        --mode=${MODE} \
+        --model-source-dir=${MOUNT_MODELS_SOURCE} \
+        --batch-size=${BATCH_SIZE} \
+        ${single_socket_arg} \
+        ${accuracy_only_arg} \
+        ${benchmark_only_arg} \
+        --in-graph=${IN_GRAPH}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
+}
+
 LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}.log
 echo 'Log output location: ${LOGFILE}'
 
@@ -152,6 +193,8 @@ if [ ${MODEL_NAME} == "ncf" ]; then
     ncf
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
     ssd_mobilenet
+elif [ ${MODEL_NAME} == "resnet50" ]; then
+    resnet50
 else
     echo "Unsupported model: ${MODEL_NAME}"
     exit 1

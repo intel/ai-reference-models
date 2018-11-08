@@ -56,10 +56,21 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                                      'already been trained. ',
                                 dest='checkpoint', default=None)
 
+        arg_parser.add_argument('-k', "--benchmark-only",
+                                help='For benchmark measurement only.',
+                                dest='benchmark_only',
+                                action='store_true')
+
+        arg_parser.add_argument("--accuracy-only",
+                                help='For accuracy measurement only.',
+                                dest='accuracy_only',
+                                action='store_true')
+
         # in graph directory location
         arg_parser.add_argument('-g', "--in-graph",
                                 help='Full path to the input graph ',
                                 dest='input_graph', default=None)
+
 
         args, unknown = arg_parser.parse_known_args()
         self.validate_args(args)
@@ -96,6 +107,13 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                 raise IOError("The input graph {} must be a file.".
                               format(input_graph))
 
+        # check if benchmark-only and accuracy-only are all false for int8 models
+        if args.platform == "int8" and (not args.benchmark_only and not args.accuracy_only):
+            raise ValueError("You must specify if the inference is for benchmark or for accuracy measurement.")
+        elif args.platform != "int8" and (args.benchmark_only or args.accuracy_only):
+            raise ValueError("{} and {} arguments are Int8 platform specific, and not supported in {} inference.".
+                             format(args.benchmark_only, args.accuracy_only, args.platform))
+
     def run_docker_container(self, args):
         """
         Runs a docker container with the specified image and enviornment 
@@ -127,13 +145,16 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                     "--env FRAMEWORK={} "
                     "--env DATASET_LOCATION=/dataset "
                     "--env CHECKPOINT_DIRECTORY=/checkpoints "
+                    "--env BENCHMARK_ONLY={} "
+                    "--env ACCURACY_ONLY={} "
                     .format(args.data_location, args.checkpoint,
                             args.model_source_dir, benchmark_scripts,
                             args.single_socket, args.model_name, args.mode,
                             args.platform,
                             args.batch_size, workspace, in_graph_filename,
                             mount_benchmark, mount_model_source,
-                            args.framework))
+                            args.framework, args.benchmark_only,
+                            args.accuracy_only))
 
         volume_mounts = ("--volume {}:{} "
                          "--volume {}:{} "
