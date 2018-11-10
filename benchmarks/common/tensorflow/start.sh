@@ -28,7 +28,8 @@ echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
 echo '    Mounted volumes:'
 echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
-echo "        ${MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_MODELS_SOURCE}"
+echo "        ${EXTERNAL_MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_EXTERNAL_MODELS_SOURCE}"
+echo "        ${INTELAI_MODELS} mounted on: ${MOUNT_INTELAI_MODELS_SOURCE}"
 echo "        ${DATASET_LOCATION_VOL} mounted on: ${DATASET_LOCATION}"
 echo "        ${CHECKPOINT_DIRECTORY_VOL} mounted on: ${CHECKPOINT_DIRECTORY}"
 echo "    SINGLE_SOCKET: ${SINGLE_SOCKET}"
@@ -52,8 +53,6 @@ if [ ${SINGLE_SOCKET} == "true" ]; then
 fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
-
-DIR=${WORKSPACE}/${MODEL_NAME}/${MODE}/${PLATFORM}
 
 LOG_OUTPUT=${WORKSPACE}/logs
 if [ ! -d "${LOG_OUTPUT}" ];then
@@ -85,15 +84,16 @@ function ncf() {
         mkdir -p /dataset
     fi
 
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_MODELS_SOURCE}
-    pip install -r ${MOUNT_MODELS_SOURCE}/official/requirements.txt
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
 
     CMD="python ${RUN_SCRIPT_PATH} \
     --framework=${FRAMEWORK} \
     --model-name=${MODEL_NAME} \
     --platform=${PLATFORM} \
     --mode=${MODE} \
-    --model-source-dir=${MOUNT_MODELS_SOURCE} \
+    --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
+    --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
     --batch-size=${BATCH_SIZE} \
     ${single_socket_arg} \
     --data-location=${DATASET_LOCATION} \
@@ -110,7 +110,7 @@ function ssd_mobilenet() {
         pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
 
         original_dir=$(pwd)
-        cd "${MOUNT_MODELS_SOURCE}/research"
+        cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
 
         # install protoc, if necessary, then compile protoc files
         if [ ! -f "bin/protoc" ]; then
@@ -134,7 +134,7 @@ function ssd_mobilenet() {
         --model-name=${MODEL_NAME} \
         --platform=${PLATFORM} \
         --mode=${MODE} \
-        --model-source-dir=${MOUNT_MODELS_SOURCE} \
+        --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
         --batch-size=${BATCH_SIZE} \
         ${single_socket_arg} \
         --data-location=${DATASET_LOCATION} \
@@ -172,7 +172,7 @@ function resnet50() {
         --model-name=${MODEL_NAME} \
         --platform=${PLATFORM} \
         --mode=${MODE} \
-        --model-source-dir=${MOUNT_MODELS_SOURCE} \
+        --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
         --batch-size=${BATCH_SIZE} \
         ${single_socket_arg} \
         ${accuracy_only_arg} \

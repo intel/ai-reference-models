@@ -52,7 +52,7 @@ class BaseBenchmarkUtil(object):
                                              required=True)
 
         self._common_arg_parser.add_argument('-r', "--model-source-dir",
-                                             help="Specify the model source repositry to use " \
+                                             help="Specify the models source directory " \
                                                   "from your local machine",
                                              nargs='?',
                                              dest="model_source_dir")
