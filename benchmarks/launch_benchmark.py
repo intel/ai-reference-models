@@ -120,8 +120,10 @@ class LaunchBenchmark(BaseBenchmarkUtil):
         variables to start running the benchmarking job.
         """
         benchmark_scripts = os.getcwd()
+        intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
         mount_benchmark = "/workspace/benchmarks"
-        mount_model_source = "/workspace/models"
+        mount_external_models_source = "/workspace/models"
+        mount_intelai_models = "/workspace/intelai_models"
         workspace = os.path.join(mount_benchmark, "common", args.framework)
 
         in_graph_dir = os.path.dirname(args.input_graph) if args.input_graph \
@@ -131,7 +133,8 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 
         env_vars = ("--env DATASET_LOCATION_VOL={} "
                     "--env CHECKPOINT_DIRECTORY_VOL={} "
-                    "--env MODELS_SOURCE_DIRECTORY={} "
+                    "--env EXTERNAL_MODELS_SOURCE_DIRECTORY={} "
+                    "--env INTELAI_MODELS={} "
                     "--env BENCHMARK_SCRIPTS={} "
                     "--env SINGLE_SOCKET={} "
                     "--env MODEL_NAME={} "
@@ -141,28 +144,33 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                     "--env WORKSPACE={} "
                     "--env IN_GRAPH=/in_graph/{} "
                     "--env MOUNT_BENCHMARK={} "
-                    "--env MOUNT_MODELS_SOURCE={} "
+                    "--env MOUNT_EXTERNAL_MODELS_SOURCE={} "
+                    "--env MOUNT_INTELAI_MODELS_SOURCE={} "
                     "--env FRAMEWORK={} "
                     "--env DATASET_LOCATION=/dataset "
                     "--env CHECKPOINT_DIRECTORY=/checkpoints "
                     "--env BENCHMARK_ONLY={} "
                     "--env ACCURACY_ONLY={} "
                     .format(args.data_location, args.checkpoint,
-                            args.model_source_dir, benchmark_scripts,
-                            args.single_socket, args.model_name, args.mode,
-                            args.platform,
+                            args.model_source_dir, intelai_models,
+                            benchmark_scripts, args.single_socket,
+                            args.model_name, args.mode, args.platform,
                             args.batch_size, workspace, in_graph_filename,
-                            mount_benchmark, mount_model_source,
+                            mount_benchmark, mount_external_models_source,
+                            mount_intelai_models,
                             args.framework, args.benchmark_only,
                             args.accuracy_only))
 
         volume_mounts = ("--volume {}:{} "
                          "--volume {}:{} "
+                         "--volume {}:{} "
                          "--volume {}:/dataset "
                          "--volume {}:/checkpoints "
                          "--volume {}:/in_graph "
                          .format(benchmark_scripts, mount_benchmark,
-                                 args.model_source_dir, mount_model_source,
+                                 args.model_source_dir,
+                                 mount_external_models_source,
+                                 intelai_models, mount_intelai_models,
                                  args.data_location,
                                  args.checkpoint,
                                  in_graph_dir))

@@ -37,6 +37,12 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
         arg_parser = ArgumentParser(parents=[self._common_arg_parser],
                                     description='Parse args for benchmark interface')
 
+        arg_parser.add_argument("--intelai-models",
+                                help="Local path to the intelai optimized "
+                                     "model scripts",
+                                nargs='?',
+                                dest="intelai_models")
+
         # checkpoint directory location
         arg_parser.add_argument('-c', "--checkpoint",
                                 help='Specify the location of trained model checkpoint directory. '
