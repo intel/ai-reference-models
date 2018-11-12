@@ -140,6 +140,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                     "--env MODEL_NAME={} "
                     "--env MODE={} "
                     "--env PLATFORM={} "
+                    "--env VERBOSE={} "
                     "--env BATCH_SIZE={} "
                     "--env WORKSPACE={} "
                     "--env IN_GRAPH=/in_graph/{} "
@@ -147,6 +148,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                     "--env MOUNT_EXTERNAL_MODELS_SOURCE={} "
                     "--env MOUNT_INTELAI_MODELS_SOURCE={} "
                     "--env FRAMEWORK={} "
+                    "--env NUM_CORES={} "
                     "--env DATASET_LOCATION=/dataset "
                     "--env CHECKPOINT_DIRECTORY=/checkpoints "
                     "--env BENCHMARK_ONLY={} "
@@ -155,11 +157,20 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                             args.model_source_dir, intelai_models,
                             benchmark_scripts, args.single_socket,
                             args.model_name, args.mode, args.platform,
-                            args.batch_size, workspace, in_graph_filename,
-                            mount_benchmark, mount_external_models_source,
-                            mount_intelai_models,
-                            args.framework, args.benchmark_only,
-                            args.accuracy_only))
+                            args.verbose, args.batch_size, workspace,
+                            in_graph_filename, mount_benchmark,
+                            mount_external_models_source, mount_intelai_models,
+                            args.framework, args.num_cores,
+                            args.benchmark_only, args.accuracy_only))
+
+        # Add custom model args as env vars
+        for custom_arg in args.model_args:
+            if "=" not in custom_arg:
+                raise ValueError("Expected model args in the format "
+                                 "`name=value` but received: {}".
+                                 format(custom_arg))
+
+            env_vars = "{} --env {}".format(env_vars, custom_arg)
 
         volume_mounts = ("--volume {}:{} "
                          "--volume {}:{} "
