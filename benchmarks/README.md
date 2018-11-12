@@ -18,3 +18,5 @@ Training and inference scripts with intel optimized MKL
 * Recommendation
     * Tensorflow
         * NCF
+            * Inference
+                * [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions)
