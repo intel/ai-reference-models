@@ -48,7 +48,7 @@ pip install --upgrade pip
 pip install requests
 
 single_socket_arg=""
-if [ ${SINGLE_SOCKET} == "true" ]; then
+if [ ${SINGLE_SOCKET} == "True" ]; then
     single_socket_arg="--single-socket"
 fi
 
