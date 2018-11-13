@@ -6,10 +6,13 @@ Training and inference scripts with intel optimized MKL
 
 * Image Recognition
     * Tensorflow
+        * Inceptionv3
         * Resnet50
             * Inference
                 * [Int8](image_recognition/tensorflow/resnet50/README.md)
-        * Inceptionv3
+        * SqueezeNet
+            * Inference
+                * [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions)
 * Object Detection
     * Tensorflow
         * SSD-Mobilenet

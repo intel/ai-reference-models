@@ -64,6 +64,8 @@ if [ ! -d "${LOG_OUTPUT}" ];then
     mkdir ${LOG_OUTPUT}
 fi
 
+export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
+
 # Common execution command used by all models
 function run_model() {
     # Navigate to the main benchmark directory before executing the script,
@@ -103,9 +105,31 @@ function ncf() {
     ${single_socket_arg} \
     --data-location=${DATASET_LOCATION} \
     --checkpoint=${CHECKPOINT_DIRECTORY} \
-    --verbose"
+    ${verbose_arg}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+}
+
+# SqueezeNet
+function squeezenet() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+         CMD="python ${RUN_SCRIPT_PATH} \
+        --framework=${FRAMEWORK} \
+        --model-name=${MODEL_NAME} \
+        --platform=${PLATFORM} \
+        --mode=${MODE} \
+        --batch-size=${BATCH_SIZE} \
+        ${single_socket_arg} \
+        --data-location=${DATASET_LOCATION} \
+        --checkpoint=${CHECKPOINT_DIRECTORY} \
+        --num-cores=${NUM_CORES} \
+        --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
+        ${verbose_arg}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
 }
 
 # SSD-MobileNet models
@@ -182,7 +206,8 @@ function resnet50() {
         ${single_socket_arg} \
         ${accuracy_only_arg} \
         ${benchmark_only_arg} \
-        --in-graph=${IN_GRAPH}"
+        --in-graph=${IN_GRAPH} \
+        ${verbose_arg}"
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -232,6 +257,8 @@ echo 'Log output location: ${LOGFILE}'
 MODEL_NAME=`echo ${MODEL_NAME} | tr 'A-Z' 'a-z'`
 if [ ${MODEL_NAME} == "ncf" ]; then
     ncf
+elif [ ${MODEL_NAME} == "squeezenet" ]; then
+    squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
     ssd_mobilenet
 elif [ ${MODEL_NAME} == "resnet50" ]; then
