@@ -107,12 +107,17 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                 raise IOError("The input graph {} must be a file.".
                               format(input_graph))
 
-        # check if benchmark-only and accuracy-only are all false for int8 models
-        if args.platform == "int8" and (not args.benchmark_only and not args.accuracy_only):
-            raise ValueError("You must specify if the inference is for benchmark or for accuracy measurement.")
-        elif args.platform != "int8" and (args.benchmark_only or args.accuracy_only):
-            raise ValueError("{} and {} arguments are Int8 platform specific, and not supported in {} inference.".
-                             format(args.benchmark_only, args.accuracy_only, args.platform))
+        # check if benchmark-only and accuracy-only are all false for int8
+        if args.platform == "int8" and (
+                    not args.benchmark_only and not args.accuracy_only):
+            raise ValueError("You must specify if the inference is for "
+                             "benchmark or for accuracy measurement.")
+        elif args.platform != "int8" and (
+                    args.benchmark_only or args.accuracy_only):
+            raise ValueError("{} and {} arguments are Int8 platform specific,"
+                             " and not supported in {} inference.".
+                             format(args.benchmark_only, args.accuracy_only,
+                                    args.platform))
 
     def run_docker_container(self, args):
         """
