@@ -48,8 +48,13 @@ pip install --upgrade pip
 pip install requests
 
 single_socket_arg=""
-if [ ${SINGLE_SOCKET} == "true" ]; then
+if [ ${SINGLE_SOCKET} == "True" ]; then
     single_socket_arg="--single-socket"
+fi
+
+verbose_arg=""
+if [ ${VERBOSE} == "True" ]; then
+    verbose_arg="--verbose"
 fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
@@ -58,6 +63,8 @@ LOG_OUTPUT=${WORKSPACE}/logs
 if [ ! -d "${LOG_OUTPUT}" ];then
     mkdir ${LOG_OUTPUT}
 fi
+
+export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
 
 # Common execution command used by all models
 function run_model() {
@@ -98,9 +105,31 @@ function ncf() {
     ${single_socket_arg} \
     --data-location=${DATASET_LOCATION} \
     --checkpoint=${CHECKPOINT_DIRECTORY} \
-    --verbose"
+    ${verbose_arg}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+}
+
+# SqueezeNet
+function squeezenet() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+         CMD="python ${RUN_SCRIPT_PATH} \
+        --framework=${FRAMEWORK} \
+        --model-name=${MODEL_NAME} \
+        --platform=${PLATFORM} \
+        --mode=${MODE} \
+        --batch-size=${BATCH_SIZE} \
+        ${single_socket_arg} \
+        --data-location=${DATASET_LOCATION} \
+        --checkpoint=${CHECKPOINT_DIRECTORY} \
+        --num-cores=${NUM_CORES} \
+        --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
+        ${verbose_arg}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
 }
 
 # SSD-MobileNet models
@@ -139,7 +168,7 @@ function ssd_mobilenet() {
         ${single_socket_arg} \
         --data-location=${DATASET_LOCATION} \
         --in-graph=${IN_GRAPH} \
-        --verbose"
+        ${verbose_arg}"
 
         CMD=${CMD} run_model
     else
@@ -165,7 +194,7 @@ function resnet50() {
         if [ ${BENCHMARK_ONLY} == "True" ]; then
             benchmark_only_arg="--benchmark-only"
         fi
- 
+
         export PYTHONPATH=${PYTHONPATH}:`pwd`:${MOUNT_BENCHMARK}
         CMD="python ${RUN_SCRIPT_PATH} \
         --framework=${FRAMEWORK} \
@@ -177,11 +206,48 @@ function resnet50() {
         ${single_socket_arg} \
         ${accuracy_only_arg} \
         ${benchmark_only_arg} \
-        --in-graph=${IN_GRAPH}"
+        --in-graph=${IN_GRAPH} \
+        ${verbose_arg}"
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
         echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
+}
+        
+# Wavenet model
+function wavenet() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+
+        if [[ -z "${checkpoint_name}" ]]; then
+            echo "wavenet requires -- checkpoint_name arg to be defined"
+            exit 1
+        fi
+
+        if [[ -z "${sample}" ]]; then
+            echo "wavenet requires -- sample arg to be defined"
+            exit 1
+        fi
+
+        CMD="python ${RUN_SCRIPT_PATH} \
+        --framework=${FRAMEWORK} \
+        --model-name=${MODEL_NAME} \
+        --platform=${PLATFORM} \
+        --mode=${MODE} \
+        --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
+        ${single_socket_arg} \
+        --checkpoint=${CHECKPOINT_DIRECTORY} \
+        --num-cores=${NUM_CORES} \
+        ${verbose_arg} \
+        --checkpoint_name=${checkpoint_name} \
+        --sample=${sample}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported for wavenet"
     fi
 }
 
@@ -191,10 +257,14 @@ echo 'Log output location: ${LOGFILE}'
 MODEL_NAME=`echo ${MODEL_NAME} | tr 'A-Z' 'a-z'`
 if [ ${MODEL_NAME} == "ncf" ]; then
     ncf
+elif [ ${MODEL_NAME} == "squeezenet" ]; then
+    squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
     ssd_mobilenet
 elif [ ${MODEL_NAME} == "resnet50" ]; then
     resnet50
+elif [ ${MODEL_NAME} == "wavenet" ]; then
+    wavenet
 else
     echo "Unsupported model: ${MODEL_NAME}"
     exit 1

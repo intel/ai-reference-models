@@ -117,6 +117,12 @@ class BaseBenchmarkUtil(object):
                                              dest='verbose',
                                              action='store_true')
 
+        # Allow for additional command line args after --
+        self._common_arg_parser.add_argument("model_args", nargs="*",
+                                             help="Additional command line "
+                                                  "arguments (prefix flag "
+                                                  "start with '--').")
+
     def validate_args(self, args):
         """validate the args """
 
