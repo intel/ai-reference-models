@@ -1,16 +1,12 @@
-pipeline {
-    agent any
-
-    stages {
-        stage('Build') {
-            steps {
-                echo 'Building..'
-            }
+node() {
+    stage('Unit tests') {
+        steps {
+            echo 'Unit testing..'
         }
-        stage('Test') {
-            steps {
-                echo 'Testing..'
-            }
+    }
+    stage('Benchmarks') {
+        steps {
+            echo 'Benchmark testing..'
         }
     }
 }
