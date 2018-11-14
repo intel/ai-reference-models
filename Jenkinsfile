@@ -6,6 +6,7 @@ node() {
 
         # install flake8 into a venv
         # get flake8 command not found otherwise...
+        sudo easy_install virtualenv
         virtualenv -p python3 lintvenv
         . lintvenv/bin/activate
 
