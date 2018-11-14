@@ -1,10 +1,17 @@
 node() {
     stage('Style tests') {
-        echo 'Style checking..'
+        sh """
+        #!/bin/bash -x
+        set -e
+
+        pip install flake8
+        flake8 benchmarks
+        """
     }
-    stage('Unit tests') {
-        echo 'Unit testing..'
-    }
+    // put unit tests here later
+    // stage('Unit tests') {
+    //     echo 'Unit testing..'
+    // }
     // put benchmarks here later
     // stage('Benchmarks') {
     //     echo 'Benchmark testing..'
