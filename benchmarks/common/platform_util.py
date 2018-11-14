@@ -25,7 +25,6 @@ from __future__ import print_function
 import os
 import platform as system_platform
 import subprocess
-
 import sys
 
 NUMA_NODES_STR_ = "NUMA node(s)"
@@ -36,7 +35,10 @@ LOGICAL_CPUS_STR_ = "CPU(s)"
 
 
 class PlatformUtil:
-    '''This module implements a platform utility that exposes functions that detect platform information.'''
+    '''
+    This module implements a platform utility that exposes functions that
+    detects platform information.
+    '''
     cpu_sockets_ = 0
     cores_per_socket_ = 0
     threads_per_core_ = 0
@@ -60,17 +62,20 @@ class PlatformUtil:
 
     def linux_init(self):
         # check to see if the lscpu command is present
-        LSCPU_BIN = 'lscpu'
         lscpu_path = ''
         lscpu_path_cmd = "command -v lscpu"
         try:
             print("lscpu_path_cmd = {}".format(lscpu_path_cmd))
-            lscpu_path = subprocess.check_output(lscpu_path_cmd, shell=True, stderr=subprocess.STDOUT).strip()
+            lscpu_path = subprocess.check_output(lscpu_path_cmd, shell=True,
+                                                 stderr=subprocess.STDOUT).\
+                strip()
             print("lscpu located here: {}".format(lscpu_path))
             if not os.access(lscpu_path, os.F_OK | os.X_OK):
-                raise ValueError("{} does not exist or is not executable.".format(lscpu_path))
+                raise ValueError("{} does not exist or is not executable.".
+                                 format(lscpu_path))
 
-            lscpu_output = subprocess.check_output([lscpu_path], stderr=subprocess.STDOUT)
+            lscpu_output = subprocess.check_output([lscpu_path],
+                                                   stderr=subprocess.STDOUT)
             cpu_info = lscpu_output.decode('UTF-8').split('\n')
 
         except Exception as e:

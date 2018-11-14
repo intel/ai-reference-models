@@ -30,64 +30,68 @@ os.environ["KMP_SETTINGS"] = "1"
 
 
 class ModelInitializer:
-  """initialize mode and run benchmark"""
+    """initialize mode and run benchmark"""
 
-  def __init__(self, args, custom_args=[], platform_util=None):
+    def __init__(self, args, custom_args=[], platform_util=None):
+        self.args = args
+        self.custom_args = custom_args
+        self.platform_util = platform_util
+        self.benchmark_command = ''
 
-    self.args = args
-    self.custom_args = custom_args
-    self.platform_util = platform_util
-    self.benchmark_command = ''
+        if self.args.verbose:
+            print('Received these standard args: {}'.format(self.args))
+            print('Received these custom args: {}'.format(self.custom_args))
 
-    if self.args.verbose:
-        print('Received these standard args: {}'.format(self.args))
-        print('Received these custom args: {}'.format(self.custom_args))
+        # use default batch size if -1
+        if self.args.batch_size == -1:
+            self.args.batch_size = 256
 
-    # use default batch size if -1
-    if self.args.batch_size == -1:
-      self.args.batch_size = 256
-
-    if self.args.single_socket:
-        self.args.num_inter_threads = 1
-        self.args.num_intra_threads = int(self.platform_util.num_cores_per_socket() / 2) \
-            if self.args.num_cores == -1 else self.args.num_cores
-    else:
-        self.args.num_inter_threads = self.platform_util.num_cpu_sockets()
-
-        if self.args.num_cores == -1:
-            self.args.num_intra_threads = \
-                int(self.platform_util.num_cores_per_socket() * self.platform_util.num_cpu_sockets())
+        if self.args.single_socket:
+            self.args.num_inter_threads = 1
+            self.args.num_intra_threads = int(
+                self.platform_util.num_cores_per_socket() / 2) \
+                if self.args.num_cores == -1 else self.args.num_cores
         else:
-            self.args.num_intra_threads = self.args.num_cores
+            self.args.num_inter_threads = self.platform_util.num_cpu_sockets()
 
-    if self.args.mode == "inference":
-      benchmark_script = os.path.join(self.args.intelai_models, "recommendation",
-                                      self.args.framework, self.args.model_name,
-                                      self.args.mode, self.args.platform,"ncf_main.py")
+            if self.args.num_cores == -1:
+                self.args.num_intra_threads = \
+                    int(self.platform_util.num_cores_per_socket() *
+                        self.platform_util.num_cpu_sockets())
+            else:
+                self.args.num_intra_threads = self.args.num_cores
 
-      self.benchmark_command = "python " + benchmark_script
+        if self.args.mode == "inference":
+            benchmark_script = os.path.join(
+                self.args.intelai_models, "recommendation",
+                self.args.framework, self.args.model_name, self.args.mode,
+                self.args.platform, "ncf_main.py")
 
-      if self.args.single_socket:
-        socket_id_str = str(self.args.socket_id)
+            self.benchmark_command = "python " + benchmark_script
 
-        self.benchmark_command = \
-          'numactl --cpunodebind=' + \
-          socket_id_str + ' --membind=' + socket_id_str + ' ' + self.benchmark_command
+            if self.args.single_socket:
+                socket_id_str = str(self.args.socket_id)
 
-      os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+            self.benchmark_command = 'numactl --cpunodebind=' + socket_id_str \
+                                     + ' --membind=' + socket_id_str + ' ' + \
+                                     self.benchmark_command
 
-      self.benchmark_command = self.benchmark_command + \
-                               ' --data_dir=' + str(args.data_location) + \
-                               ' --model_dir=' + str(args.checkpoint) + \
-                               ' --intra_op_parallelism_threads=' + str(self.args.num_intra_threads) + \
-                               ' --inter_op_parallelism_threads=' + str(self.args.num_inter_threads) + \
-                               ' --batch_size=' + str(self.args.batch_size) + \
-                               ' --inference_only'
-    else:
-      print('Training is not supported currently.')
+            os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-  def run(self):
-    if self.benchmark_command:
-      if self.args.verbose:
-        print("Run model here.", self.benchmark_command)
-      os.system(self.benchmark_command)
+            self.benchmark_command = self.benchmark_command + \
+                ' --data_dir=' + str(args.data_location) + \
+                ' --model_dir=' + str(args.checkpoint) + \
+                ' --intra_op_parallelism_threads=' + str(
+                    self.args.num_intra_threads) + \
+                ' --inter_op_parallelism_threads=' + str(
+                    self.args.num_inter_threads) + \
+                ' --batch_size=' + str(self.args.batch_size) + \
+                ' --inference_only'
+        else:
+            print('Training is not supported currently.')
+
+    def run(self):
+        if self.benchmark_command:
+            if self.args.verbose:
+                print("Run model here.", self.benchmark_command)
+            os.system(self.benchmark_command)
