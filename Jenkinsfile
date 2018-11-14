@@ -4,8 +4,15 @@ node() {
         #!/bin/bash -x
         set -e
 
+        # install flake8 into a venv
+        # get flake8 command not found otherwise...
+        virtualenv -p python3 lintvenv
+        . lintvenv/bin/activate
+
         pip install flake8
         flake8 benchmarks
+        
+        deactivate
         """
     }
     // put unit tests here later
