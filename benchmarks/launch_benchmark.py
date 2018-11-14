@@ -71,7 +71,6 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                                 help='Full path to the input graph ',
                                 dest='input_graph', default=None)
 
-
         args, unknown = arg_parser.parse_known_args()
         self.validate_args(args)
         self.run_docker_container(args)
@@ -121,7 +120,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 
     def run_docker_container(self, args):
         """
-        Runs a docker container with the specified image and enviornment 
+        Runs a docker container with the specified image and environment
         variables to start running the benchmarking job.
         """
         benchmark_scripts = os.getcwd()

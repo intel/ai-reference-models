@@ -22,8 +22,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import glob
-import os
 from argparse import ArgumentParser
 from common.base_benchmark_util import BaseBenchmarkUtil
 
@@ -35,7 +33,8 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
         super(ModelBenchmarkUtil, self).define_args()
 
         arg_parser = ArgumentParser(parents=[self._common_arg_parser],
-                                    description='Parse args for benchmark interface')
+                                    description='Parse args for benchmark '
+                                                'interface')
 
         arg_parser.add_argument("--intelai-models",
                                 help="Local path to the intelai optimized "
@@ -45,11 +44,12 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
 
         # checkpoint directory location
         arg_parser.add_argument('-c', "--checkpoint",
-                                help='Specify the location of trained model checkpoint directory. '
-                                     'If mode=training model/weights will be '
-                                     'written to this location.'
-                                     'If mode=inference assumes that the location '
-                                     'points to a model that has already been trained. ',
+                                help='Specify the location of trained model '
+                                     'checkpoint directory. If mode=training '
+                                     'model/weights will be written to this '
+                                     'location. If mode=inference assumes that'
+                                     ' the location points to a model that has'
+                                     ' already been trained.',
                                 dest='checkpoint', default=None)
 
         # in graph directory location
@@ -58,12 +58,14 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 dest='input_graph', default=None)
 
         arg_parser.add_argument('-k', "--benchmark-only",
-                                help='For benchmark measurement only in int8 models.',
+                                help='For benchmark measurement only in int8 '
+                                     'models.',
                                 dest='benchmark_only',
                                 action='store_true')
 
         arg_parser.add_argument("--accuracy-only",
-                                help='For accuracy measurement only in int8 models.',
+                                help='For accuracy measurement only in int8 '
+                                     'models.',
                                 dest='accuracy_only',
                                 action='store_true')
 
@@ -71,6 +73,7 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
         mi = super(ModelBenchmarkUtil, self).initialize_model(args, unknown)
         if mi is not None:  # start model initializer if not None
             mi.run()
+
 
 if __name__ == "__main__":
     util = ModelBenchmarkUtil()

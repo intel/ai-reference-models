@@ -66,7 +66,8 @@ class ModelInitializer:
                                 type=int)
             parser.add_argument("--checkpoint_name", default=None,
                                 dest='checkpoint_name', type=str)
-            self.args = parser.parse_args(self.custom_args, namespace=self.args)
+            self.args = parser.parse_args(self.custom_args,
+                                          namespace=self.args)
 
     def run(self):
         if self.run_command:

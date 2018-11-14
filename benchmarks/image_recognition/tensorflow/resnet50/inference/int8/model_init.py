@@ -22,122 +22,115 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import os
-import sys
-
 import argparse
+import os
+
 
 class ModelInitializer:
-  """Add code here to detect the environment and set necessary variables before launching the model"""
+    """Model initializer for resnet50 int8 inference"""
 
-  args = None
-  custom_args = []
+    args = None
+    custom_args = []
 
-  def __init__(self, args, custom_args=[], platform_util=None):
-    self.args = args
-    self.custom_args = custom_args
-    if not platform_util:
-      raise ValueError("Did not find any platform info.")
-    else:
-      self.pltfrm = platform_util
+    def __init__(self, args, custom_args=[], platform_util=None):
+        self.args = args
+        self.custom_args = custom_args
+        if not platform_util:
+            raise ValueError("Did not find any platform info.")
+        else:
+            self.pltfrm = platform_util
 
-    if self.args.verbose:
-      print('Received these standard args: {}'.format(self.args))
-      print('Received these custom args: {}'.format(self.custom_args))
+        if self.args.verbose:
+            print('Received these standard args: {}'.format(self.args))
+            print('Received these custom args: {}'.format(self.custom_args))
 
-    # Environment variables
-    os.environ["OMP_NUM_THREADS"] = "{}".format(
-        self.pltfrm.num_cores_per_socket() if self.args.num_cores == -1 \
-        else self.args.num_cores)
-    os.environ["KMP_BLOCKTIME"] = "0"
-    os.environ["KMP_SETTINGS"] = "1"
-    os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+        # Environment variables
+        os.environ["OMP_NUM_THREADS"] = "{}".format(
+            self.pltfrm.num_cores_per_socket() if self.args.num_cores == -1
+            else self.args.num_cores)
 
-  def parse_args(self):
-    if self.custom_args:
-      parser = argparse.ArgumentParser()
-      parser.add_argument(
-          "--input-height", default=None,
-          dest='input_height', type=int, help="input height")
-      parser.add_argument(
-          "--input-width", default=None,
-          dest='input_width', type=int, help="input width")
-      parser.add_argument(
-          '--warmup-steps', dest='warmup_steps',
-          help='number of warmup steps',
-          type=int, default=10)
-      parser.add_argument(
-          '--steps', dest='steps',
-          help='number of steps',
-          type=int, default=50)
-      parser.add_argument(
-          '--num-inter-threads', dest='num_inter_threads',
-          help='number threads across operators',
-          type=int, default=1)
-      parser.add_argument(
-          '--num-intra-threads', dest='num_intra_threads',
-          help='number threads for an operator',
-          type=int, default=1)
-      parser.add_argument(
-          '--input-layer', dest='input_layer',
-          help='name of input layer',
-          type=str, default=None)
-      parser.add_argument(
-          '--output-layer', dest='output_layer',
-          help='name of output layer',
-          type=str, default=None)
+        os.environ["KMP_BLOCKTIME"] = "0"
+        os.environ["KMP_SETTINGS"] = "1"
+        os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
-      self.args = parser.parse_args(self.custom_args, namespace=self.args)
+    def parse_args(self):
+        if self.custom_args:
+            parser = argparse.ArgumentParser()
+            parser.add_argument("--input-height", default=None,
+                                dest='input_height', type=int,
+                                help="input height")
+            parser.add_argument("--input-width", default=None,
+                                dest='input_width', type=int,
+                                help="input width")
+            parser.add_argument('--warmup-steps', dest='warmup_steps',
+                                help='number of warmup steps', type=int,
+                                default=10)
+            parser.add_argument('--steps', dest='steps',
+                                help='number of steps', type=int, default=50)
+            parser.add_argument('--num-inter-threads',
+                                dest='num_inter_threads',
+                                help='number threads across operators',
+                                type=int, default=1)
+            parser.add_argument('--num-intra-threads',
+                                dest='num_intra_threads',
+                                help='number threads for an operator',
+                                type=int, default=1)
+            parser.add_argument('--input-layer', dest='input_layer',
+                                help='name of input layer', type=str,
+                                default=None)
+            parser.add_argument('--output-layer', dest='output_layer',
+                                help='name of output layer', type=str,
+                                default=None)
 
-  def run_benchmark(self):
-    benchmark_script = os.path.join(
-        self.args.model_source_dir, "image_recognition/tensorflow/resnet50/int8/benchmark.py")
-    script_args_list = [
-      "input_graph", "input_height", "input_width", "batch_size",
-      "input_layer", "output_layer", "num_inter_threads", "num_intra_threads",
-      "warmup_steps", "steps"]
-    cmd_prefix = "python " + benchmark_script
-    if self.args.single_socket:
-      cmd_prefix = 'numactl --cpunodebind=0 --membind=0 ' + cmd_prefix
-    for arg in vars(self.args):
-      arg_value = getattr(self.args, arg)
-      if arg == "batch_size" and arg_value == -1:
-        continue
-      if arg_value and (arg in script_args_list):
-        cmd_prefix = cmd_prefix \
-                + (' --{param}={value}').format(
+            self.args = parser.parse_args(self.custom_args,
+                                          namespace=self.args)
+
+    def run_benchmark(self):
+        benchmark_script = os.path.join(self.args.model_source_dir,
+                                        "image_recognition/tensorflow/"
+                                        "resnet50/int8/benchmark.py")
+        script_args_list = ["input_graph", "input_height", "input_width",
+                            "batch_size", "input_layer", "output_layer",
+                            "num_inter_threads", "num_intra_threads",
+                            "warmup_steps", "steps"]
+        cmd_prefix = "python " + benchmark_script
+        if self.args.single_socket:
+            cmd_prefix = 'numactl --cpunodebind=0 --membind=0 ' + cmd_prefix
+        for arg in vars(self.args):
+            arg_value = getattr(self.args, arg)
+            if arg == "batch_size" and arg_value == -1:
+                continue
+            if arg_value and (arg in script_args_list):
+                cmd_prefix = cmd_prefix + (' --{param}={value}').format(
                     param=arg, value=arg_value)
-    cmd = cmd_prefix
-    os.system(cmd)
-  
-  def run_accuracy(self):
-    accuracy_script = os.path.join(
-        self.args.model_source_dir, "image_recognition/tensorflow/resnet50/int8/accuracy.py")
-    script_args_list = [
-      "input_graph", "data_location", "input_height", "input_width",
-      "batch_size", "input_layer", "output_layer", 
-      "num_inter_threads", "num_intra_threads"]
-    cmd_prefix = "python " + accuracy_script
-    if self.args.single_socket:
-      cmd_prefix = 'numactl --cpunodebind=0 --membind=0 ' + cmd_prefix
-    for arg in vars(self.args):
-      arg_value = getattr(self.args, arg)
-      if arg == "batch_size" and arg_value == -1:
-        continue
-      if arg_value and (arg in script_args_list):
-        cmd_prefix = cmd_prefix \
-                + (' --{param}={value}').format(
+        cmd = cmd_prefix
+        os.system(cmd)
+
+    def run_accuracy(self):
+        accuracy_script = os.path.join(self.args.model_source_dir,
+                                       "image_recognition/tensorflow/resnet50"
+                                       "/int8/accuracy.py")
+        script_args_list = ["input_graph", "data_location", "input_height",
+                            "input_width", "batch_size", "input_layer",
+                            "output_layer", "num_inter_threads",
+                            "num_intra_threads"]
+        cmd_prefix = "python " + accuracy_script
+        if self.args.single_socket:
+            cmd_prefix = 'numactl --cpunodebind=0 --membind=0 ' + cmd_prefix
+        for arg in vars(self.args):
+            arg_value = getattr(self.args, arg)
+            if arg == "batch_size" and arg_value == -1:
+                continue
+            if arg_value and (arg in script_args_list):
+                cmd_prefix = cmd_prefix + (' --{param}={value}').format(
                     param=arg, value=arg_value)
-    cmd = cmd_prefix
-    os.system(cmd)
+        cmd = cmd_prefix
+        os.system(cmd)
 
-  def log(self, msg):
-    if self.args.verbose: print(msg)
-
-  def run(self):
-    # Parse custom arguments and append to self.args
-    self.parse_args()
-    if self.args.benchmark_only:
-      self.run_benchmark()
-    if self.args.accuracy_only:
-      self.run_accuracy()
+    def run(self):
+        # Parse custom arguments and append to self.args
+        self.parse_args()
+        if self.args.benchmark_only:
+            self.run_benchmark()
+        if self.args.accuracy_only:
+            self.run_accuracy()
