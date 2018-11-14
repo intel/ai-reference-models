@@ -37,6 +37,7 @@ echo "    MODEL_NAME: ${MODEL_NAME}"
 echo "    MODE: ${MODE}"
 echo "    PLATFORM: ${PLATFORM}"
 echo "    BATCH_SIZE: ${BATCH_SIZE}"
+echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 
@@ -78,10 +79,40 @@ function run_model() {
     echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
     echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
     echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
-    echo "Ran inference with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
+    echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
 
     LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}.log"
     echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
+}
+
+
+# basic run command with commonly used args
+CMD="python ${RUN_SCRIPT_PATH} \
+--framework=${FRAMEWORK} \
+--model-name=${MODEL_NAME} \
+--platform=${PLATFORM} \
+--mode=${MODE} \
+--model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
+--intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
+--num-cores=${NUM_CORES} \
+--batch-size=${BATCH_SIZE} \
+--data-location=${DATASET_LOCATION} \
+${single_socket_arg} \
+${verbose_arg}"
+
+function install_protoc() {
+    # install protoc, if necessary, then compile protoc files
+    if [ ! -f "bin/protoc" ]; then
+        install_location=$1
+        echo "protoc not found, installing protoc from ${install_location}"
+        apt-get -y install wget
+        wget -O protobuf.zip ${install_location}
+        unzip -o protobuf.zip
+        rm protobuf.zip
+    else
+        echo "protoc already found"
+    fi
+
 }
 
 # NCF model
@@ -94,89 +125,12 @@ function ncf() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
 
-    CMD="python ${RUN_SCRIPT_PATH} \
-    --framework=${FRAMEWORK} \
-    --model-name=${MODEL_NAME} \
-    --platform=${PLATFORM} \
-    --mode=${MODE} \
-    --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
-    --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
-    --batch-size=${BATCH_SIZE} \
-    ${single_socket_arg} \
-    --data-location=${DATASET_LOCATION} \
-    --checkpoint=${CHECKPOINT_DIRECTORY} \
-    ${verbose_arg}"
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
-# SqueezeNet
-function squeezenet() {
-    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
-         CMD="python ${RUN_SCRIPT_PATH} \
-        --framework=${FRAMEWORK} \
-        --model-name=${MODEL_NAME} \
-        --platform=${PLATFORM} \
-        --mode=${MODE} \
-        --batch-size=${BATCH_SIZE} \
-        ${single_socket_arg} \
-        --data-location=${DATASET_LOCATION} \
-        --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --num-cores=${NUM_CORES} \
-        --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
-        ${verbose_arg}"
-
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    else
-        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
-    fi
-}
-
-# SSD-MobileNet models
-function ssd_mobilenet() {
-    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
-        # install dependencies
-        pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
-
-        original_dir=$(pwd)
-        cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-
-        # install protoc, if necessary, then compile protoc files
-        if [ ! -f "bin/protoc" ]; then
-            echo "protoc not found, installing protoc 3.0.0"
-            apt-get -y install wget
-            wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
-            unzip -f -o protobuf.zip
-            rm protobuf.zip
-        else
-            echo "protoc already found"
-        fi
-
-        echo "Compiling protoc files"
-        ./bin/protoc object_detection/protos/*.proto --python_out=.
-
-        export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
-
-        cd $original_dir
-        CMD="python ${RUN_SCRIPT_PATH} \
-        --framework=${FRAMEWORK} \
-        --model-name=${MODEL_NAME} \
-        --platform=${PLATFORM} \
-        --mode=${MODE} \
-        --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
-        --batch-size=${BATCH_SIZE} \
-        ${single_socket_arg} \
-        --data-location=${DATASET_LOCATION} \
-        --in-graph=${IN_GRAPH} \
-        ${verbose_arg}"
-
-        CMD=${CMD} run_model
-    else
-        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
-    fi
-}
-
-# Resnet50 int8 model
+# Resnet50 model
 function resnet50() {
     if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
         # For accuracy, dataset location is required, see README for more information.
@@ -196,20 +150,53 @@ function resnet50() {
         fi
 
         export PYTHONPATH=${PYTHONPATH}:`pwd`:${MOUNT_BENCHMARK}
-        CMD="python ${RUN_SCRIPT_PATH} \
-        --framework=${FRAMEWORK} \
-        --model-name=${MODEL_NAME} \
-        --platform=${PLATFORM} \
-        --mode=${MODE} \
-        --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
-        --batch-size=${BATCH_SIZE} \
-        ${single_socket_arg} \
-        ${accuracy_only_arg} \
+
+        CMD="${CMD} ${accuracy_only_arg} \
         ${benchmark_only_arg} \
-        --in-graph=${IN_GRAPH} \
-        ${verbose_arg}"
+        --in-graph=${IN_GRAPH}"
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
+}
+
+# SqueezeNet model
+function squeezenet() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
+}
+
+# SSD-MobileNet model
+function ssd_mobilenet() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+        # install dependencies
+        pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
+
+        original_dir=$(pwd)
+        cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+
+        if [ ${BATCH_SIZE} != "-1" ]; then
+            echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
+        fi
+
+        # install protoc, if necessary, then compile protoc files
+        install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
+
+        echo "Compiling protoc files"
+        ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+        export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+
+        cd $original_dir
+
+        CMD="${CMD} --in-graph=${IN_GRAPH}"
+        CMD=${CMD} run_model
     else
         echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
     fi
@@ -232,16 +219,7 @@ function wavenet() {
             exit 1
         fi
 
-        CMD="python ${RUN_SCRIPT_PATH} \
-        --framework=${FRAMEWORK} \
-        --model-name=${MODEL_NAME} \
-        --platform=${PLATFORM} \
-        --mode=${MODE} \
-        --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
-        ${single_socket_arg} \
-        --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --num-cores=${NUM_CORES} \
-        ${verbose_arg} \
+        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
         --checkpoint_name=${checkpoint_name} \
         --sample=${sample}"
 
@@ -251,18 +229,18 @@ function wavenet() {
     fi
 }
 
-LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}.log
+LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}.log
 echo 'Log output location: ${LOGFILE}'
 
 MODEL_NAME=`echo ${MODEL_NAME} | tr 'A-Z' 'a-z'`
 if [ ${MODEL_NAME} == "ncf" ]; then
     ncf
+elif [ ${MODEL_NAME} == "resnet50" ]; then
+    resnet50
 elif [ ${MODEL_NAME} == "squeezenet" ]; then
     squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
     ssd_mobilenet
-elif [ ${MODEL_NAME} == "resnet50" ]; then
-    resnet50
 elif [ ${MODEL_NAME} == "wavenet" ]; then
     wavenet
 else
