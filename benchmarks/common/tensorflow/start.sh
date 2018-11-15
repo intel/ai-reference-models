@@ -41,6 +41,12 @@ echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 
+# Only inference is supported right now
+if [ ${MODE} != "inference" ]
+  echo "${MODE} mode is not supported"
+  exit 1
+fi
+
 ## install common dependencies
 apt update
 apt full-upgrade -y
@@ -101,7 +107,7 @@ CMD="python ${RUN_SCRIPT_PATH} \
 ${single_socket_arg} \
 ${verbose_arg}"
 
-# Add on --accuracy-only and --benchmark-only for int8 inference
+# Add on --in-graph, --accuracy-only, and --benchmark-only for int8 inference
 if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
     accuracy_only_arg=""
     if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -113,7 +119,7 @@ if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
       benchmark_only_arg="--benchmark-only"
     fi
 
-    CMD="${CMD} ${accuracy_only_arg} ${benchmark_only_arg}"
+    CMD="${CMD} --in-graph=${IN_GRAPH} ${accuracy_only_arg} ${benchmark_only_arg}"
 fi
 
 function install_protoc() {
@@ -133,7 +139,7 @@ function install_protoc() {
 
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
-    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+    if [ ${PLATFORM} == "fp32" ]; then
         if [[ -z "${config_file}" ]]; then
             echo "Fast R-CNN requires -- config_file arg to be defined"
             exit 1
@@ -161,13 +167,14 @@ function fastrcnn() {
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
      else
-        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        exit 1
     fi
 }
 
 # inceptionv3 model
 function inceptionv3() {
-  if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+  if [ ${PLATFORM} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
     if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
@@ -175,7 +182,6 @@ function inceptionv3() {
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
     input_height_arg=""
     input_width_arg=""
 
@@ -187,32 +193,37 @@ function inceptionv3() {
       input_width_arg="--input-width=${input_width}"
     fi
 
-    CMD="${CMD} --in-graph=${IN_GRAPH} ${input_height_arg} ${input_width_arg}"
-
+    CMD="${CMD} ${input_height_arg} ${input_width_arg}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
   fi
 }
 
 # NCF model
 function ncf() {
-  # For nfc, if dataset location is empty, script downloads dataset at given location.
-  if [ ! -d "${DATASET_LOCATION}" ]; then
-    mkdir -p /dataset
+  if [ ${PLATFORM} == "fp32" ]; then
+    # For nfc, if dataset location is empty, script downloads dataset at given location.
+    if [ ! -d "${DATASET_LOCATION}" ]; then
+      mkdir -p /dataset
+    fi
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
+
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
   fi
-
-  export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-  pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
-
-  CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
-
-  PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
 # Resnet50 int8 model
 function resnet50() {
-  if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+  if [ ${PLATFORM} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
     if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
@@ -220,29 +231,28 @@ function resnet50() {
     fi
 
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
-
-    CMD="${CMD} --in-graph=${IN_GRAPH}"
-
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
   fi
 }
 
 # SqueezeNet model
 function squeezenet() {
-  if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PLATFORM} == "fp32" ]; then
     CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
   fi
 }
 
 # SSD-MobileNet model
 function ssd_mobilenet() {
-  if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PLATFORM} == "fp32" ]; then
     # install dependencies
     pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
 
@@ -266,13 +276,14 @@ function ssd_mobilenet() {
     CMD="${CMD} --in-graph=${IN_GRAPH}"
     CMD=${CMD} run_model
   else
-    echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
   fi
 }
 
 # Wavenet model
 function wavenet() {
-  if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PLATFORM} == "fp32" ]; then
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
@@ -293,13 +304,14 @@ function wavenet() {
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported for wavenet"
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
   fi
 }
 
 # Wide & Deep model
 function wide_deep() {
-    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+    if [ ${PLATFORM} == "fp32" ]; then
         # install dependencies
         pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
@@ -307,7 +319,8 @@ function wide_deep() {
         CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
         CMD=${CMD} run_model
     else
-        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+        echo "PLATFORM=${PLATFORM} not supported for ${MODEL_NAME}"
+        exit 1
     fi
 }
 
