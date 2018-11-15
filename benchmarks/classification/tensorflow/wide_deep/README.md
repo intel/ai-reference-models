@@ -1,0 +1,101 @@
+# Wide & Deep
+
+This document has instructions for how to run Wide & Deep benchmark for the
+following modes/platforms:
+* [FP32 inference](#fp32-inference-instructions)
+
+Benchmarking instructions and scripts for model training and inference
+other platforms are coming later.
+
+## FP32 Inference Instructions
+
+1. Clone `tensorflow/models` 
+       
+    ```
+    # We going to use older version of the tensorflow model repo.
+    $ git clone git@github.com:tensorflow/models.git
+    $ git checkout 6ff0a53f81439d807a78f8ba828deaea3aaaf269 
+    ```
+    
+2. Download census income dataset from following link: 
+https://archive.ics.uci.edu/ml/datasets/Census+Income
+   
+   Click on Download link and download `adult.data` and `adult.test` files
+
+3. Download pre-trained model checkpoint files    
+
+       ``` 
+       $ wget https://console.cloud.google.com/storage/browser/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
+       $ tar xvf wide_deep_fp32_pretrained_model.tar.gz
+       ```
+ 
+4. Clone the [intelai/models](https://github.com/intelai/models) repo.
+This repo has the launch script for running benchmarking, which we will
+use in the next step.
+
+    ```
+    $ git clone git@github.com:IntelAI/models.git
+    ```
+    
+5. How to run benchmarks
+
+   * Running benchmarks in latency mode, set `--batch-size` = `1`
+       ``` 
+       $ cd /home/myuser/models/benchmarks
+    
+       $ python launch_benchmark.py \ 
+             --framework tensorflow \ 
+             --model-source-dir /home/myuser/path/to/tensorflow-models \
+             --platform fp32 \
+             --mode inference \
+             --model-name wide_deep \
+             --batch-size 1 \
+             --data-location /home/myuser/path/to/dataset \
+             --checkpoint /home/myuser/path/to/checkpoint \
+             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+             --verbose
+       ```
+   * Running benchmarks in throughput mode, set `--batch-size` = `1024`
+       ``` 
+       $ cd /home/myuser/models/benchmarks
+    
+       $ python launch_benchmark.py \ 
+             --framework tensorflow \ 
+             --model-source-dir /home/myuser/path/to/tensorflow-models \
+             --platform fp32 \
+             --mode inference \
+             --model-name wide_deep \
+             --batch-size 1024 \
+             --data-location /home/myuser/path/to/dataset \
+             --checkpoint /home/myuser/path/to/checkpoint \
+             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+             --verbose
+       ```
+6. The log file is saved to:
+`models/benchmarks/common/tensorflow/logs/benchmark_wide_deep_inference.log`
+
+   The tail of the log output when the benchmarking completes should look
+   something like this:
+
+    ```
+    accuracy: 1.0
+    accuracy_baseline: 1.0
+    auc: 1.0
+    auc_precision_recall: 0.0
+    average_loss: 2.1470942e-05
+    global_step: 9775
+    label/mean: 0.0
+    loss: 2.1470942e-05
+    precision: 0.0
+    prediction/mean: 2.1461743e-05
+    recall: 0.0
+    End-to-End duration is %s 36.5971579552
+    Latency is: %s 0.00224784460139
+    lscpu_path_cmd = command -v lscpu
+    lscpu located here: /usr/bin/lscpu
+    current path: /workspace/benchmarks
+    search path: /workspace/benchmarks/*/tensorflow/wide_deep/inference/fp32/model_init.py
+    Using model init: /workspace/benchmarks/classification/tensorflow/wide_deep/inference/fp32/model_init.py
+    PYTHONPATH: :/workspace/models
+    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --platform=fp32         --mode=inference         --model-source-dir=/workspace/models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
+    ```

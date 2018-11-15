@@ -4,6 +4,11 @@ Training and inference scripts with intel optimized MKL
 
 # Use Cases
 
+* Classification
+    * Tensorflow
+        * Wide & Deep
+            * Inference
+                * [FP32](classification/tensorflow/wide_deep/README.md#fp32-inference-instructions)
 * Image Recognition
     * Tensorflow
         * Resnet50
@@ -14,6 +19,9 @@ Training and inference scripts with intel optimized MKL
                 * [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions)
 * Object Detection
     * Tensorflow
+        * Fast R-CNN (ResNet50)
+            * Inference
+                * [FP32](object_detection/tensorflow/fastrcnn/README.md#fp32-inference-instructions)
         * SSD-Mobilenet
             * Inference
                 * [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions)

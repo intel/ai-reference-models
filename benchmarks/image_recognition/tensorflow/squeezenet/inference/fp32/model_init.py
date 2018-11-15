@@ -23,8 +23,6 @@ class ModelInitializer:
             ncores = self.args.num_intra_threads
 
         script_path = os.path.join(self.args.intelai_models,
-                                   "image_recognition", args.framework,
-                                   args.model_name, args.platform,
                                    "train_squeezenet.py")
 
         self.command = ("taskset -c {:.0f}-{:.0f} python {} "
