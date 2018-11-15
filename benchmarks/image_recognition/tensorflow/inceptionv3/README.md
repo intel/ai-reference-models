@@ -1,6 +1,6 @@
 # Inception V3
 
-This document has instructions for how to run inception v3 for the
+This document has instructions for how to run Inception V3 for the
 following modes/platforms:
 * [Int8 inference](#int8-inference-instructions)
 
@@ -26,7 +26,7 @@ repository:
 git clone git@github.com:tensorflow/models.git
 ```
 
-This repository is used for dependencies that the inceptionv3 model
+This repository is used for dependencies that the Inception V3 model
 requires.
 
 3. Download the pre-trained inceptionv3 model:
@@ -40,7 +40,7 @@ $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/incept
 `--config=mkl`. More instructions on
 [how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
 
-5. If you would like to run inceptionv3 inference and test for
+5. If you would like to run Inception V3 inference and test for
 accurancy, you will need the ImageNet dataset. Benchmarking for latency
 and throughput do not require the ImageNet dataset.
 
@@ -86,8 +86,8 @@ only), `--in-graph` pretrained model file path (from step 3),
 [tensorflow/models](https://github.com/tensorflow/models) repo
 (from step 2), and the name/tag for your docker image (from step 4).
 
-Inceptionv3 can be run for accuracy, latency benchmarking, or throughput
-benchmarking.  Use one of the following examples below, depending on
+Inception V3 can be run for accuracy, latency benchmarking, or throughput
+benchmarking. Use one of the following examples below, depending on
 your use case.
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
@@ -144,7 +144,7 @@ python launch_benchmark.py \
     -- input_height=299 input_width=299
 ```
 
-7.  The log file is saved to the
+7. The log file is saved to the
 `models/benchmarks/common/tensorflow/logs` directory. Below are
 examples of what the tail of your log file should look like for the
 different configs.
