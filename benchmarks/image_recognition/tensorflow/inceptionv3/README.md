@@ -1,4 +1,4 @@
-# inception v3
+# Inception V3
 
 This document has instructions for how to run inception v3 for the
 following modes/platforms:
@@ -32,27 +32,25 @@ requires.
 3. Download the pre-trained inceptionv3 model:
 
 ```
-$ mkdir pretrained_models
-$ pretrained_models
 $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
 ```
 
-4. Build a docker image using the quantized TensorFlow
-[branch](https://github.com/tensorflow/tensorflow/pull/21483)
-in the official TensorFlow repository with `--config=mkl`. More instructions on
+4. Build a docker image using master of the official
+[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
+`--config=mkl`. More instructions on
 [how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
 
 5. If you would like to run inceptionv3 inference and test for
-accurancy, you will need the ImageNet dataset.  Benchmarking for latency
+accurancy, you will need the ImageNet dataset. Benchmarking for latency
 and throughput do not require the ImageNet dataset.
 
 Register and download the
 [ImageNet dataset](http://image-net.org/download-images).
 
 Once you have the raw ImageNet dataset downloaded, we need to convert
-it to the TFRecord format.  This is done using the
+it to the TFRecord format. This is done using the
 [build_imagenet_data.py](https://github.com/tensorflow/models/blob/master/research/inception/inception/data/build_imagenet_data.py)
-script.  There are instructions in the header of the script explaining
+script. There are instructions in the header of the script explaining
 its usage.
 
 After the script has completed, you should have a directory with the
@@ -77,10 +75,10 @@ $ ll /home/myuser/datasets/ImageNet_TFRecords
 6. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a TensorFlow docker container.
-It has arguments to specify which model, framework, mode, platform, and
-docker image to use, along with your path to the ImageNet TF Records
-that you generated in step 5.
+used for starting a benchmarking run in a optimized TensorFlow docker
+container. It has arguments to specify which model, framework, mode,
+platform, and docker image to use, along with your path to the ImageNet
+TF Records that you generated in step 5.
 
 Substitute in your own `--data-location` (from step 5, for accuracy
 only), `--in-graph` pretrained model file path (from step 3),
@@ -103,11 +101,11 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 128 \
-	--docker-image tf_int8_docker_image \
-	--in-graph /home/myuser/pretrained_models/inceptionv3_int8_pretrained_model.pb \
-	--data-location /home/myuser/datasets/ImageNet_TFRecords \
-	--verbose \
-	-- input_height=299 input_width=299
+    --docker-image tf_int8_docker_image \
+    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --verbose \
+    -- input_height=299 input_width=299
 ```
 
 For latency (using `--benchmark-only`, `--single-socket` and `--batch-size 1`):
@@ -121,11 +119,11 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --single-socket \
-	--docker-image tf_int8_docker_image \
-	--in-graph /home/myuser/pretrained_models/inceptionv3_int8_pretrained_model.pb \
-	--data-location /home/myuser/datasets/ImageNet_TFRecords \
-	--verbose \
-	-- input_height=299 input_width=299
+    --docker-image tf_int8_docker_image \
+    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --verbose \
+    -- input_height=299 input_width=299
 ```
 
 For throughput (using `--benchmark-only`, `--single-socket` and `--batch-size 128`):
@@ -139,15 +137,15 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --single-socket \
-	--docker-image tf_int8_docker_image \
-	--in-graph /home/myuser/pretrained_models/inceptionv3_int8_pretrained_model.pb \
-	--data-location /home/myuser/datasets/ImageNet_TFRecords \
-	--verbose \
-	-- input_height=299 input_width=299
+    --docker-image tf_int8_docker_image \
+    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --verbose \
+    -- input_height=299 input_width=299
 ```
 
 7.  The log file is saved to the
-`models/benchmarks/common/tensorflow/logs` directory.  Below are
+`models/benchmarks/common/tensorflow/logs` directory. Below are
 examples of what the tail of your log file should look like for the
 different configs.
 
