@@ -165,7 +165,7 @@ function ncf() {
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
-# Resnet50 model
+# Resnet50 int8 model
 function resnet50() {
   if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
@@ -264,6 +264,20 @@ function wavenet() {
   fi
 }
 
+# Wide & Deep model
+function wide_deep() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+        # install dependencies
+        pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+        CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
+}
+
 LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}.log
 echo 'Log output location: ${LOGFILE}'
 
@@ -280,6 +294,8 @@ elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
+elif [ ${MODEL_NAME} == "wide_deep" ]; then
+  wide_deep
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
