@@ -84,8 +84,11 @@ function run_model() {
   eval ${CMD} 2>&1 | tee ${LOGFILE}
 
   echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
-  echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
-  echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+
+  if [ ${VERBOSE} == "True" ]; then
+    echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
+    echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+  fi
   echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
 
   LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}.log"
