@@ -142,6 +142,7 @@ function inceptionv3() {
 
     input_height_arg=""
     input_width_arg=""
+
     if [ -n "${input_height}" ]; then
       input_height_arg="--input-height=${input_height}"
     fi
@@ -176,6 +177,11 @@ function ncf() {
 # Resnet50 model
 function resnet50() {
   if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required, see README for more information.
+    if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
 
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
