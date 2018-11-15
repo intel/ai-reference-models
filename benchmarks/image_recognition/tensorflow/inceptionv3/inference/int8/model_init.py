@@ -88,10 +88,8 @@ class ModelInitializer:
                                           namespace=self.args)
 
     def run_benchmark(self):
-        benchmark_script = os.path.join(
-            self.args.intelai_models, "image_recognition",
-            self.args.framework, self.args.model_name, self.args.platform,
-            "benchmark.py")
+        benchmark_script = os.path.join(self.args.intelai_models,
+                                        "benchmark.py")
         script_args_list = [
             "input_graph", "input_height", "input_width", "batch_size",
             "input_layer", "output_layer", "num_inter_threads",
@@ -101,10 +99,7 @@ class ModelInitializer:
         os.system(cmd)
 
     def run_accuracy(self):
-        accuracy_script = os.path.join(
-            self.args.intelai_models, "image_recognition",
-            self.args.framework, self.args.model_name, self.args.platform,
-            "accuracy.py")
+        accuracy_script = os.path.join(self.args.intelai_models, "accuracy.py")
         script_args_list = [
             "input_graph", "data_location", "input_height", "input_width",
             "batch_size", "input_layer", "output_layer",
