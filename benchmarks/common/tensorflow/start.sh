@@ -83,9 +83,8 @@ function run_model() {
   # Start benchmarking
   eval ${CMD} 2>&1 | tee ${LOGFILE}
 
-  echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
-
   if [ ${VERBOSE} == "True" ]; then
+    echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
     echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
     echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
   fi
@@ -328,10 +327,9 @@ function wide_deep() {
 }
 
 LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}.log
-echo 'Log output location: ${LOGFILE}'
+echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-
 if [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
