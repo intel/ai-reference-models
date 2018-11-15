@@ -42,7 +42,7 @@ echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 
 # Only inference is supported right now
-if [ ${MODE} != "inference" ]
+if [ ${MODE} != "inference" ]; then
   echo "${MODE} mode is not supported"
   exit 1
 fi
