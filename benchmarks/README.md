@@ -14,6 +14,9 @@ Training and inference scripts with intel optimized MKL
                 * [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions)
 * Object Detection
     * Tensorflow
+        * Fast R-CNN (ResNet50)
+            * Inference
+                * [FP32](object_detection/tensorflow/fastrcnn/README.md#fp32-inference-instructions)
         * SSD-Mobilenet
             * Inference
                 * [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions)
