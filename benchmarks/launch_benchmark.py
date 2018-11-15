@@ -124,7 +124,38 @@ class LaunchBenchmark(BaseBenchmarkUtil):
         variables to start running the benchmarking job.
         """
         benchmark_scripts = os.getcwd()
-        intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
+        if args.model_name:  # not empty
+            # find the custom model path
+            print("current path: {}".format(benchmark_scripts))
+            search_path = os.path.join(
+                benchmark_scripts, os.pardir, "models", "*",
+                args.framework, args.model_name, args.mode, args.platform)
+            print("search path: {}".format(search_path))
+            matches = glob.glob(search_path)
+            if len(matches) > 1:
+                # we should never get more than one match
+                raise ValueError("Found multiple model locations for {} {} {}"
+                                 .format(args.framework,
+                                         args.model_name,
+                                         args.platform))
+            elif len(matches) == 0:
+                raise ValueError("No model was found for {} {} {}"
+                                 .format(args.framework,
+                                         args.model_name,
+                                         args.platform))
+
+            intelai_models = matches[0]
+            print ("Using the custom model in : {}".format(intelai_models))
+            if os.path.exists(intelai_models):
+                dir_list = intelai_models.split("/")
+                framework_index = dir_list.index(args.framework)
+                use_case = str(dir_list[framework_index - 1])
+            else:
+                use_case = None
+        else:
+            use_case = None
+            intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
+
         mount_benchmark = "/workspace/benchmarks"
         mount_external_models_source = "/workspace/models"
         mount_intelai_models = "/workspace/intelai_models"
@@ -151,6 +182,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                     "--env MOUNT_BENCHMARK={} "
                     "--env MOUNT_EXTERNAL_MODELS_SOURCE={} "
                     "--env MOUNT_INTELAI_MODELS_SOURCE={} "
+                    "--env USE_CASE={} "
                     "--env FRAMEWORK={} "
                     "--env NUM_CORES={} "
                     "--env DATASET_LOCATION=/dataset "
@@ -163,9 +195,10 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                             args.model_name, args.mode, args.platform,
                             args.verbose, args.batch_size, workspace,
                             in_graph_filename, mount_benchmark,
-                            mount_external_models_source, mount_intelai_models,
-                            args.framework, args.num_cores,
-                            args.benchmark_only, args.accuracy_only))
+                            mount_external_models_source,
+                            mount_intelai_models, use_case,
+                            args.framework, args.num_cores, args.benchmark_only,
+                            args.accuracy_only))
 
         # Add custom model args as env vars
         for custom_arg in args.model_args:

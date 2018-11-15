@@ -42,6 +42,11 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 nargs='?',
                                 dest="intelai_models")
 
+        arg_parser.add_argument("--use-case",
+                                help="The corresponding use case of the given model ",
+                                nargs='?',
+                                dest="use_case")
+
         # checkpoint directory location
         arg_parser.add_argument('-c', "--checkpoint",
                                 help='Specify the location of trained model '

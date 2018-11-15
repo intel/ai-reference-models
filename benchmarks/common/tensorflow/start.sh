@@ -20,6 +20,7 @@
 #
 
 echo 'Running with parameters:'
+echo "    USE_CASE: ${USE_CASE}"
 echo "    FRAMEWORK: ${FRAMEWORK}"
 echo "    WORKSPACE: ${WORKSPACE}"
 echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
@@ -88,6 +89,7 @@ function run_model() {
 # basic run command with commonly used args
 CMD="python ${RUN_SCRIPT_PATH} \
 --framework=${FRAMEWORK} \
+--use-case=${USE_CASE} \
 --model-name=${MODEL_NAME} \
 --platform=${PLATFORM} \
 --mode=${MODE} \
@@ -127,6 +129,40 @@ function install_protoc() {
     echo "protoc already found"
   fi
 
+}
+
+# Fast R-CNN (ResNet50) model
+function fastrcnn() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+        if [[ -z "${config_file}" ]]; then
+            echo "Fast R-CNN requires -- config_file arg to be defined"
+            exit 1
+        fi
+        # install dependencies
+        pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
+        original_dir=$(pwd)
+        cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+        # install protoc v3.3.0, if necessary, then compile protoc files
+        install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+        echo "Compiling protoc files"
+        ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+        export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+        # install cocoapi
+        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
+        echo "Installing COCO API"
+        make
+        cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        cd $original_dir
+        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+        --config_file=${config_file}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+     else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
 }
 
 # inceptionv3 model
@@ -174,7 +210,7 @@ function ncf() {
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
-# Resnet50 model
+# Resnet50 int8 model
 function resnet50() {
   if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
@@ -261,11 +297,28 @@ function wavenet() {
   fi
 }
 
+# Wide & Deep model
+function wide_deep() {
+    if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "fp32" ]; then
+        # install dependencies
+        pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+        CMD=${CMD} run_model
+    else
+        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+    fi
+}
+
 LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}.log
 echo 'Log output location: ${LOGFILE}'
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "inceptionv3" ]; then
+
+if [ ${MODEL_NAME} == "fastrcnn" ]; then
+  fastrcnn
+elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
@@ -277,6 +330,8 @@ elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
+elif [ ${MODEL_NAME} == "wide_deep" ]; then
+  wide_deep
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
