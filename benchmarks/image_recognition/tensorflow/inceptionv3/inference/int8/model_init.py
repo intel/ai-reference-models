@@ -125,9 +125,7 @@ class ModelInitializer:
             if arg_value and (arg in script_args_list):
                 cmd_prefix = '{} --{}={}'.format(cmd_prefix, arg, arg_value)
 
-        if self.args.verbose:
-            print("Command: {}".format(cmd_prefix))
-
+        print("Executing command: {}".format(cmd_prefix))
         return cmd_prefix
 
     def run(self):

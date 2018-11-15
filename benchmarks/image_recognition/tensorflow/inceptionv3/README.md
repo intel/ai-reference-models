@@ -104,7 +104,6 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    --verbose \
     -- input_height=299 input_width=299
 ```
 
@@ -122,7 +121,6 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    --verbose \
     -- input_height=299 input_width=299
 ```
 
@@ -140,9 +138,11 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    --verbose \
     -- input_height=299 input_width=299
 ```
+
+Note that the `--verbose` flag can be added to any of the above commands
+to get additional debug output.
 
 7. The log file is saved to the
 `models/benchmarks/common/tensorflow/logs` directory. Below are
@@ -152,18 +152,10 @@ different configs.
 Example log tail when running for accuracy:
 
 ```
-Processed 49920 images. (Top1 accuracy, Top5 accuracy) = (0.7667, 0.9336)
+Processed 49920 images. (Top1 accuracy, Top5 accuracy) = (0.7662, 0.9335)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-current path: /workspace/benchmarks
-search path: /workspace/benchmarks/*/tensorflow/inceptionv3/inference/int8/model_init.py
-Using model init: /workspace/benchmarks/image_recognition/tensorflow/inceptionv3/inference/int8/model_init.py
-Received these standard args: Namespace(accuracy_only=True, batch_size=128, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/final_int8_inceptionv3.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inceptionv3', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=False, socket_id=0, verbose=True)
-Received these custom args: ['--input-height=299', '--input-width=299']
-Command: python /workspace/intelai_models/image_recognition/tensorflow/inceptionv3/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/final_int8_inceptionv3.pb --data_location=/dataset
-PYTHONPATH: :/workspace/intelai_models:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --model-name=inceptionv3 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --data-location=/dataset  --verbose --accuracy-only  --in-graph=/in_graph/final_int8_inceptionv3.pb --input-height=299 --input-width=299
-Batch Size: 128
+Executing command: python /workspace/intelai_models/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/final_int8_inceptionv3.pb --data_location=/dataset
 Ran inference with batch size 128
 Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference.log
 ```
@@ -171,24 +163,16 @@ Log location outside container: /home/myuser/models/benchmarks/common/tensorflow
 Example log tail when benchmarking for latency:
 ```
 [Running warmup steps...]
-steps = 10, 56.7603220786 images/sec
+steps = 10, 56.7987541472 images/sec
 [Running benchmark steps...]
-steps = 10, 56.4334593598 images/sec
-steps = 20, 56.9568712656 images/sec
-steps = 30, 57.126762098 images/sec
-steps = 40, 56.7633947301 images/sec
-steps = 50, 56.7342179659 images/sec
+steps = 10, 56.853417193 images/sec
+steps = 20, 56.4623275224 images/sec
+steps = 30, 54.947453919 images/sec
+steps = 40, 56.507207717 images/sec
+steps = 50, 56.6759543274 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-current path: /workspace/benchmarks
-search path: /workspace/benchmarks/*/tensorflow/inceptionv3/inference/int8/model_init.py
-Using model init: /workspace/benchmarks/image_recognition/tensorflow/inceptionv3/inference/int8/model_init.py
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=True, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/final_int8_inceptionv3.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inceptionv3', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=True, socket_id=0, verbose=True)
-Received these custom args: ['--input-height=299', '--input-width=299']
-Command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/image_recognition/tensorflow/inceptionv3/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=1 --input_graph=/in_graph/final_int8_inceptionv3.pb --steps=50
-PYTHONPATH: :/workspace/intelai_models:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --model-name=inceptionv3 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --single-socket --verbose  --benchmark-only --in-graph=/in_graph/final_int8_inceptionv3.pb --input-height=299 --input-width=299
-Batch Size: 1
+Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=1 --input_graph=/in_graph/final_int8_inceptionv3.pb --steps=50
 Ran inference with batch size 1
 Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference.log
 ```
@@ -196,24 +180,16 @@ Log location outside container: /home/myuser/models/benchmarks/common/tensorflow
 Example log tail when benchmarking for throughput:
 ```
 [Running warmup steps...]
-steps = 10, 334.715689471 images/sec
+steps = 10, 336.523181805 images/sec
 [Running benchmark steps...]
-steps = 10, 334.040719213 images/sec
-steps = 20, 336.002964046 images/sec
-steps = 30, 335.952712516 images/sec
-steps = 40, 333.1258265 images/sec
-steps = 50, 335.220831897 images/sec
+steps = 10, 330.464868432 images/sec
+steps = 20, 337.603490289 images/sec
+steps = 30, 337.37478909 images/sec
+steps = 40, 335.896171239 images/sec
+steps = 50, 337.467250577 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-current path: /workspace/benchmarks
-search path: /workspace/benchmarks/*/tensorflow/inceptionv3/inference/int8/model_init.py
-Using model init: /workspace/benchmarks/image_recognition/tensorflow/inceptionv3/inference/int8/model_init.py
-Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=True, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/final_int8_inceptionv3.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inceptionv3', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=True, socket_id=0, verbose=True)
-Received these custom args: ['--input-height=299', '--input-width=299']
-Command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/image_recognition/tensorflow/inceptionv3/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/final_int8_inceptionv3.pb --steps=50
-PYTHONPATH: :/workspace/intelai_models:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --model-name=inceptionv3 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --data-location=/dataset --single-socket --verbose  --benchmark-only --in-graph=/in_graph/final_int8_inceptionv3.pb --input-height=299 --input-width=299
-Batch Size: 128
+Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/final_int8_inceptionv3.pb --steps=50
 Ran inference with batch size 128
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8.log
+Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference.log
 ```
