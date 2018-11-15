@@ -175,44 +175,22 @@ class BaseBenchmarkUtil(object):
         model_initializer = None
         model_init_file = None
         if args.model_name:  # not empty
-            current_path = os.path.dirname(os.path.dirname(
-                os.path.realpath(__file__)))
+            current_path = os.path.dirname(
+                os.path.dirname(os.path.realpath(__file__)))
 
             # find the path to the model_init.py file
             filename = "{}.py".format(self.MODEL_INITIALIZER)
-            print("current path: {}".format(current_path))
-            search_path = os.path.join(current_path, "*", args.framework,
-                                       args.model_name, args.mode,
-                                       args.platform, filename)
-            print("search path: {}".format(search_path))
-            matches = glob.glob(search_path)
-
-            if len(matches) > 1:
-                # we should never get more than one match
-                raise ValueError("Found multiple model_init.py files for "
-                                 "{} {} {} {}".format(
-                                    args.framework, args.model_name,
-                                    args.platform, args.mode))
-            elif len(matches) == 0:
-                raise ValueError("No model_init.py was found for {} {} {} "
-                                 "{}".format(args.framework, args.model_name,
-                                             args.platform, args.mode))
-
-            model_init_file = matches[0]
-
-            print ("Using model init: {}".format(model_init_file))
-            if os.path.exists(model_init_file):
-                dir_list = model_init_file.split("/")
-                framework_index = dir_list.index(args.framework)
-                usecase = dir_list[framework_index - 1]
-
-                package = ".".join([usecase, args.framework, args.model_name,
-                                    args.mode, args.platform])
-                model_init_module = __import__(package + "." +
-                                               self.MODEL_INITIALIZER,
-                                               fromlist=['*'])
-                model_initializer = model_init_module.ModelInitializer(
-                    args, unknown_args, self._platform_util)
+            model_init_file = os.path.join(current_path, args.use_case,
+                                           args.framework, args.model_name,
+                                           args.mode, args.platform,
+                                           filename)
+            package = ".".join([args.use_case, args.framework,
+                                args.model_name, args.mode, args.platform])
+            model_init_module = __import__(package + "." +
+                                           self.MODEL_INITIALIZER,
+                                           fromlist=['*'])
+            model_initializer = model_init_module.ModelInitializer(
+                args, unknown_args, self._platform_util)
 
         if model_initializer is None:
             raise ImportError("Unable to locate {}.".format(model_init_file))
