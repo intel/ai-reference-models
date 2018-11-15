@@ -99,6 +99,21 @@ CMD="python ${RUN_SCRIPT_PATH} \
 ${single_socket_arg} \
 ${verbose_arg}"
 
+# Add on --accuracy-only and --benchmark-only for int8 inference
+if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+    accuracy_only_arg=""
+    if [ ${ACCURACY_ONLY} == "True" ]; then
+      accuracy_only_arg="--accuracy-only"
+    fi
+
+    benchmark_only_arg=""
+    if [ ${BENCHMARK_ONLY} == "True" ]; then
+      benchmark_only_arg="--benchmark-only"
+    fi
+
+    CMD="${CMD} ${accuracy_only_arg} ${benchmark_only_arg}"
+fi
+
 function install_protoc() {
   # install protoc, if necessary, then compile protoc files
   if [ ! -f "bin/protoc" ]; then
@@ -112,6 +127,35 @@ function install_protoc() {
     echo "protoc already found"
   fi
 
+}
+
+# inceptionv3 model
+function inceptionv3() {
+  if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required, see README for more information.
+    if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    input_height_arg=""
+    input_width_arg=""
+    if [ -n "${input_height}" ]; then
+      input_height_arg="--input-height=${input_height}"
+    fi
+
+    if [ -n "${input_width}" ]; then
+      input_width_arg="--input-width=${input_width}"
+    fi
+
+    CMD="${CMD} --in-graph=${IN_GRAPH} ${input_height_arg} ${input_width_arg}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+  fi
 }
 
 # NCF model
@@ -132,27 +176,10 @@ function ncf() {
 # Resnet50 model
 function resnet50() {
   if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
-    # For accuracy, dataset location is required, see README for more information.
-    if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "No Data directory specified, accuracy will not be calculated."
-      exit 1
-    fi
-
-    accuracy_only_arg=""
-    if [ ${ACCURACY_ONLY} == "True" ]; then
-      accuracy_only_arg="--accuracy-only"
-    fi
-
-    benchmark_only_arg=""
-    if [ ${BENCHMARK_ONLY} == "True" ]; then
-      benchmark_only_arg="--benchmark-only"
-    fi
 
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
-    CMD="${CMD} ${accuracy_only_arg} \
-        ${benchmark_only_arg} \
-        --in-graph=${IN_GRAPH}"
+    CMD="${CMD} --in-graph=${IN_GRAPH}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -232,7 +259,9 @@ LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}.log
 echo 'Log output location: ${LOGFILE}'
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "ncf" ]; then
+if [ ${MODEL_NAME} == "inceptionv3" ]; then
+  inceptionv3
+elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet50" ]; then
   resnet50
