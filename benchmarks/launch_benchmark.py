@@ -124,13 +124,13 @@ class LaunchBenchmark(BaseBenchmarkUtil):
         variables to start running the benchmarking job.
         """
         benchmark_scripts = os.getcwd()
-        if args.model_name:  # not empty
-            # find the custom model path
-            print("current path: {}".format(benchmark_scripts))
+        intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
+
+        if args.model_name:
+            # find the path to the model's benchmarks folder
             search_path = os.path.join(
-                benchmark_scripts, os.pardir, "models", "*",
-                args.framework, args.model_name, args.mode, args.platform)
-            print("search path: {}".format(search_path))
+                benchmark_scripts, "*", args.framework, args.model_name,
+                args.mode, args.platform)
             matches = glob.glob(search_path)
             if len(matches) > 1:
                 # we should never get more than one match
@@ -144,17 +144,19 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                                          args.model_name,
                                          args.platform))
 
-            intelai_models = matches[0]
-            print ("Using the custom model in : {}".format(intelai_models))
-            if os.path.exists(intelai_models):
-                dir_list = intelai_models.split("/")
-                framework_index = dir_list.index(args.framework)
-                use_case = str(dir_list[framework_index - 1])
-            else:
-                use_case = None
-        else:
-            use_case = None
-            intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
+            # use the benchmarks directory path to find the use case
+            dir_list = matches[0].split("/")
+            framework_index = dir_list.index(args.framework)
+            use_case = str(dir_list[framework_index - 1])
+
+            # find the intelai_optimized model directory
+            optimized_model_dir = os.path.join(
+                benchmark_scripts, os.pardir, "models", use_case,
+                args.framework, args.model_name)
+
+            # if we find an optimized model, then we will use that path
+            if os.path.isdir(intelai_models):
+                intelai_models = optimized_model_dir
 
         mount_benchmark = "/workspace/benchmarks"
         mount_external_models_source = "/workspace/models"
@@ -197,8 +199,8 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                             in_graph_filename, mount_benchmark,
                             mount_external_models_source,
                             mount_intelai_models, use_case,
-                            args.framework, args.num_cores, args.benchmark_only,
-                            args.accuracy_only))
+                            args.framework, args.num_cores,
+                            args.benchmark_only, args.accuracy_only))
 
         # Add custom model args as env vars
         for custom_arg in args.model_args:
@@ -239,3 +241,4 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 if __name__ == "__main__":
     util = LaunchBenchmark()
     util.main()
+

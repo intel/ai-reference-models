@@ -23,7 +23,7 @@ class ModelInitializer:
             ncores = self.args.num_intra_threads
 
         script_path = os.path.join(self.args.intelai_models,
-                                   "train_squeezenet.py")
+                                   self.args.platform, "train_squeezenet.py")
 
         self.command = ("taskset -c {:.0f}-{:.0f} python {} "
                         "--data_location {} --batch_size {:.0f} "

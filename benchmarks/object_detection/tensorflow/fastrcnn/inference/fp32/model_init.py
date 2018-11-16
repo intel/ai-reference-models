@@ -40,7 +40,6 @@ class ModelInitializer:
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
-        self.benchmark_command = ''
 
         if self.args.verbose:
             print('Received these standard args: {}'.format(self.args))
@@ -50,8 +49,9 @@ class ModelInitializer:
         if args.mode == "inference":
             self.run_inference_sanity_checks(self.args, self.custom_args)
 
-            benchmark_script = os.path.join(self.args.intelai_models,
-                                            "eval.py")
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode, self.args.platform,
+                "eval.py")
             self.command_prefix = "python " + benchmark_script
             if self.args.single_socket:
                 self.args.num_inter_threads = 1
@@ -81,7 +81,7 @@ class ModelInitializer:
                 "/object_detection/log/eval"
 
         else:
-            #TODO: Add training commands
+            # TODO: Add training commands
             sys.exit("Training is currently not supported.")
 
     def parse_custom_args(self):

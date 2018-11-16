@@ -63,7 +63,8 @@ class ModelInitializer:
 
         if self.args.mode == "inference":
             benchmark_script = os.path.join(
-                self.args.intelai_models, "ncf_main.py")
+                self.args.intelai_models, self.args.mode, self.args.platform,
+                "ncf_main.py")
 
             self.benchmark_command = "python " + benchmark_script
 
