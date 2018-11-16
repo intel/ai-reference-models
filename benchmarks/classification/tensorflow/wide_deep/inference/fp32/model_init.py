@@ -54,13 +54,11 @@ class ModelInitializer:
 
             # Select script based on batch size
             if self.args.batch_size == 1:
-                executable = \
-                  " classification/tensorflow/wide_deep/inference/" \
-                  "fp32/wide_deep_inference_bs1_latency.py"
+                executable = os.path.join(self.args.mode, self.args.platform,
+                                          "wide_deep_inference_bs1_latency.py")
             else:
-                executable = \
-                  " classification/tensorflow/wide_deep/inference/" \
-                  "fp32/wide_deep_inference.py"
+                executable = os.path.join(self.args.mode, self.args.platform,
+                                          "wide_deep_inference.py")
 
         else:
             # TODO: Add support for training

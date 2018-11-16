@@ -25,6 +25,9 @@ Training and inference scripts with intel optimized MKL
         * Fast R-CNN (ResNet50)
             * Inference
                 * [FP32](object_detection/tensorflow/fastrcnn/README.md#fp32-inference-instructions)
+        * R-FCN (ResNet101)
+            * Inference
+                * [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions)
         * SSD-Mobilenet
             * Inference
                 * [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions)
