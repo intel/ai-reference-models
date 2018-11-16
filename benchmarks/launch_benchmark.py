@@ -241,3 +241,4 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 if __name__ == "__main__":
     util = LaunchBenchmark()
     util.main()
+

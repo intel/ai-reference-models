@@ -40,7 +40,6 @@ class ModelInitializer:
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
-        self.benchmark_command = ''
 
         if self.args.verbose:
             print('Received these standard args: {}'.format(self.args))
@@ -82,7 +81,7 @@ class ModelInitializer:
                 "/object_detection/log/eval"
 
         else:
-            #TODO: Add training commands
+            # TODO: Add training commands
             sys.exit("Training is currently not supported.")
 
     def parse_custom_args(self):
