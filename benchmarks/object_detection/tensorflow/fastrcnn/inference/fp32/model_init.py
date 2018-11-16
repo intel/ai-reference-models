@@ -50,8 +50,9 @@ class ModelInitializer:
         if args.mode == "inference":
             self.run_inference_sanity_checks(self.args, self.custom_args)
 
-            benchmark_script = os.path.join(self.args.intelai_models,
-                                            "eval.py")
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode, self.args.platform,
+                "eval.py")
             self.command_prefix = "python " + benchmark_script
             if self.args.single_socket:
                 self.args.num_inter_threads = 1
