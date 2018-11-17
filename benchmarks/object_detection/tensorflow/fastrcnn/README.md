@@ -151,11 +151,18 @@ The tail of the log output when the benchmarking completes should look
 something like this:
 
 ```
-Time spent : 172.880 seconds.
-Time spent per BATCH: 0.173 seconds.
-Received these standard args: Namespace(batch_size=-1, checkpoint='/checkpoints', config='/checkpoints/pipeline.config', data_location=/dataset, inference_only=True, num_cores=-1, num_inter_threads=1, num_intra_threads=28, single_socket=True, socket_id=0, verbose=True)
-Received these custom args: []
-Initialize here.
-Run model here. numactl --cpunodebind=0 --membind=0 python object_detection/eval.py --num_inter_threads 1 --num_intra_threads 28 --pipeline_config_path /checkpoints/pipeline.config --checkpoint_dir /checkpoints --eval_dir /tensorflow-models/research/object_detection/log/eval
+Time spent : 167.353 seconds.
+Time spent per BATCH: 0.167 seconds.
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='fastrcnn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='object_detection', verbose=True)
+Received these custom args: ['--config_file=pipeline.config']
+Run model here.
+current directory: /workspace/models/research
+Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/eval.py --num_inter_threads 1 --num_intra_threads 28 --pipeline_config_path /checkpoints/pipeline.config --checkpoint_dir /checkpoints --eval_dir /workspace/models/research/object_detection/log/eval
+PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/models/research/slim:/workspace/models
+RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=fastrcnn --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --single-socket --verbose --checkpoint=/checkpoints         --config_file=pipeline.config 
+Batch Size: 1
+Ran inference with batch size 1
+Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference.log
 ```
-

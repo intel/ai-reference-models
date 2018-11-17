@@ -67,11 +67,11 @@ import functools
 import os
 import tensorflow as tf
 
-from object_detection import evaluator
+import evaluator
+import dataset_util
 from object_detection.builders import dataset_builder
 from object_detection.builders import model_builder
 from object_detection.utils import config_util
-from object_detection.utils import dataset_util
 from object_detection.utils import label_map_util
 
 

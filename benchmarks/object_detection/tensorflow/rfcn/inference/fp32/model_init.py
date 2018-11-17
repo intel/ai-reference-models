@@ -42,6 +42,7 @@ class ModelInitializer:
             print('Received these standard args: {}'.format(self.args))
             print('Received these custom args: {}'.format(self.custom_args))
 
+        self.parse_custom_args()
         if args.mode == "inference":
             self.run_inference_sanity_checks(self.args, self.custom_args)
             benchmark_script = os.path.join(

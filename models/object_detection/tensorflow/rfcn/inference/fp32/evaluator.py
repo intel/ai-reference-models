@@ -43,7 +43,7 @@ import tensorflow as tf
 import os
 import time
 
-from object_detection import eval_util
+import eval_util
 from object_detection.core import prefetcher
 from object_detection.core import standard_fields as fields
 from object_detection.metrics import coco_evaluation
