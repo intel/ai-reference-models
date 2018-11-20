@@ -151,11 +151,18 @@ The tail of the log output when the benchmarking completes should look
 something like this:
 
 ```
-Average time per step: 0.276 sec
-Received these args: Namespace(batch_size=-1, checkpoint='/checkpoints', config_file='/checkpoints/rfcn_pipeline.config', data_location=None, inference_only=True, num_cores=-1, num_inter_threads=2, num_intra_threads=56, single_socket=True, socket_id=0, verbose=True)
-Received these custom args: []
-Initialize here.
+Average time per step: 0.262 sec
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='object_detection', verbose=True)
+Received these custom args: ['--config_file=rfcn_pipeline.config']
 Run model here.
-command= numactl --cpunodebind=0 --membind=0 python research/object_detection/eval.py --logtostderr --pipeline_config_path=/checkpoints/rfcn_pipeline.config --checkpoint_dir=/checkpoints --eval_dir=research/object_detection/models/rfcn/eval --run_once=True --omp=28 --intra_op=28 --inter_op=2 --blocktime=0
+current directory: /workspace/models/research
+Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/eval.py --inter_op 1 --intra_op 28 --omp 28 --pipeline_config_path /checkpoints/rfcn_pipeline.config --checkpoint_dir /checkpoints --eval_dir /workspace/models/research/object_detection/models/rfcn/eval  --logtostderr  --blocktime=0  --run_once=True 
+PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/models/research/slim:/workspace/models
+RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --single-socket --verbose --checkpoint=/checkpoints         --config_file=rfcn_pipeline.config 
+Batch Size: 1
+Ran inference with batch size 1
+Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference.log
 ```
 
