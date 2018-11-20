@@ -11,6 +11,9 @@ Training and inference scripts with intel optimized MKL
                 * [FP32](classification/tensorflow/wide_deep/README.md#fp32-inference-instructions)
 * Image Recognition
     * Tensorflow
+        * Inception V3
+            * Inference
+                * [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions)
         * Resnet50
             * Inference
                 * [Int8](image_recognition/tensorflow/resnet50/README.md)

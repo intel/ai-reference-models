@@ -33,9 +33,9 @@ $ ls -l models/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/
 -rw-r--r--  1 myuser  staff      4341 Nov  7 03:30 model_init.py
 ```
 
-3. Build the docker image using the quantized TensorFlow
-[branch](https://github.com/tensorflow/tensorflow/pull/21483)
-in the official TensorFlow repository with `--config=mkl`. More instructions on
+3. Build a docker image using master of the official
+[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
+`--config=mkl`. More instructions on
 [how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
