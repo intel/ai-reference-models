@@ -16,7 +16,9 @@ Training and inference scripts with intel optimized MKL
                 * [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions)
         * Resnet50
             * Inference
-                * [Int8](image_recognition/tensorflow/resnet50/README.md)
+                * [Int8](image_recognition/tensorflow/resnet50/README.md#int8-infrerence-instructions)
+                * [FP32](image_recognition/tensorflow/resnet50/README.md#fp32-infrerence-instructions)
+                
         * SqueezeNet
             * Inference
                 * [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions)
