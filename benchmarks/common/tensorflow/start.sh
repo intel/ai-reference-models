@@ -223,21 +223,37 @@ function ncf() {
   fi
 }
 
-# Resnet50 int8 model
+# Resnet50 int8 and fp32 models
 function resnet50() {
-  if [ ${PLATFORM} == "int8" ]; then
-    # For accuracy, dataset location is required, see README for more information.
-    if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "No Data directory specified, accuracy will not be calculated."
-      exit 1
-    fi
-
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
+
+    if [ ${PLATFORM} == "int8" ]; then
+        # For accuracy, dataset location is required, see README for more information.
+        if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+          echo "No Data directory specified, accuracy will not be calculated."
+          exit 1
+        fi
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+
+    elif [ ${PLATFORM} == "fp32" ]; then
+        # Run resnet50 fp32 inference with dummy data no --data-location is required
+        CMD="python ${RUN_SCRIPT_PATH} \
+        --framework=${FRAMEWORK} \
+        --use-case=${USE_CASE} \
+        --model-name=${MODEL_NAME} \
+        --platform=${PLATFORM} \
+        --mode=${MODE} \
+        --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
+        --batch-size=${BATCH_SIZE} \
+        ${single_socket_arg} \
+        ${verbose_arg} \
+        --in-graph=${IN_GRAPH}"
+
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        exit 1
+    fi
 }
 
 # R-FCN (ResNet101) model
