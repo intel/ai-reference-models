@@ -146,7 +146,12 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 
             # use the benchmarks directory path to find the use case
             dir_list = matches[0].split("/")
-            framework_index = dir_list.index(args.framework)
+
+            # find the last occurrence of framework in the list
+            framework_index = len(dir_list) - 1 - dir_list[::-1].index(
+                args.framework)
+
+            # grab the use case name from the path
             use_case = str(dir_list[framework_index - 1])
 
             # find the intelai_optimized model directory
@@ -241,4 +246,3 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 if __name__ == "__main__":
     util = LaunchBenchmark()
     util.main()
-
