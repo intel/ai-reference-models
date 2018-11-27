@@ -43,7 +43,8 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 dest="intelai_models")
 
         arg_parser.add_argument("--use-case",
-                                help="The corresponding use case of the given model ",
+                                help="The corresponding use case of the given "
+                                     "model ",
                                 nargs='?',
                                 dest="use_case")
 

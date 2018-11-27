@@ -24,14 +24,14 @@ import sys
 
 
 class ModelInitializer:
-    args=None
+    args = None
     command_prefix = ''
 
     def run_inference_sanity_checks(self, args, custom_args):
 
         if args.batch_size != -1 and args.batch_size != 1:
-            sys.exit('R-FCN inference supports `batch-size=1` ' +
-                     'only, please modify via the \`--batch_size\` flag.')
+            sys.exit("R-FCN inference supports 'batch-size=1' " +
+                     "only, please modify via the '--batch_size' flag.")
 
     def __init__(self, args, custom_args, platform_util):
         self.args = args
@@ -72,10 +72,6 @@ class ModelInitializer:
                     args.num_intra_threads = args.num_cores
 
             os.environ["OMP_NUM_THREADS"] = str(args.num_intra_threads)
-            cpuNumBegin = 0 if args.socket_id == 0 else \
-                (args.socket_id * platform_args.num_cores_per_socket())
-            cpuNumEnd = (cpuNumBegin + args.num_intra_threads - 1) if \
-                args.num_cores == -1 else (cpuNumBegin + args.num_cores - 1)
             self.research_dir = os.path.join(args.model_source_dir, "research")
             config_file_path = os.path.join(self.args.checkpoint,
                                             self.args.config_file)
@@ -104,10 +100,11 @@ class ModelInitializer:
                                           namespace=self.args)
 
     def run(self):
-        if self.args.verbose: print("Run model here.")
+        if self.args.verbose:
+            print("Run model here.")
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
         print("current directory: {}".format(os.getcwd()))
-        print ("Running: " + str(self.run_cmd))
+        print("Running: " + str(self.run_cmd))
         os.system(self.run_cmd)
         os.chdir(original_dir)

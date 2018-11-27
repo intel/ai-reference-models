@@ -37,8 +37,8 @@ class ModelInitializer:
             sys.exit('Please provide a path to the data directory via the '
                      '\'--data-location\' flag.')
         if not args.single_socket and args.num_cores == -1:
-            print '***Warning***: Running inference on all cores could ' \
-                  'degrade performance. Pass \'--single-socket\' instead.\n'
+            print("***Warning***: Running inference on all cores could degrade"
+                  " performance. Pass '--single-socket' instead.\n")
 
     def __init__(self, args, custom_args, platform_util):
         self.args = args
@@ -82,11 +82,10 @@ class ModelInitializer:
             sys.exit("Training is currently not supported.")
 
     def run(self):
-        if self.args.verbose:
-            print("Run model here.")
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
-        print("current directory: {}".format(os.getcwd()))
-        print "Running: " + str(self.run_cmd)
+        if self.args.verbose:
+            print("current directory: {}".format(os.getcwd()))
+            print("Running: {}".format(str(self.run_cmd)))
         os.system(self.run_cmd)
         os.chdir(original_dir)

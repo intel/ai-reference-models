@@ -78,7 +78,7 @@ class ModelInitializer:
             os.chdir(self.args.model_source_dir)
 
             if self.args.verbose:
-                print ("Run model here.", self.run_command)
+                print("Run model here.", self.run_command)
 
             # Run benchmarking
             os.system(self.run_command)

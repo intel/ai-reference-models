@@ -23,7 +23,6 @@ from __future__ import division
 from __future__ import print_function
 
 import os
-from argparse import ArgumentParser
 
 os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
@@ -72,20 +71,20 @@ class ModelInitializer:
             os.environ["OMP_NUM_THREADS"] = \
                 str(self.args.num_intra_threads)
 
-            self.benchmark_command +=' --input-graph=' + \
-                                     self.args.input_graph + \
-                                     ' --model-name=' + \
-                                     str(self.args.model_name) + \
-                                     ' --inter-op-parallelism-threads=' + \
-                                     str(self.args.num_inter_threads) + \
-                                     ' --intra-op-parallelism-threads=' + \
-                                     str(self.args.num_intra_threads) + \
-                                     ' --batch-size=' + \
-                                     str(self.args.batch_size)
-            if (self.args.data_location):
+            self.benchmark_command += ' --input-graph=' + \
+                                      self.args.input_graph + \
+                                      ' --model-name=' + \
+                                      str(self.args.model_name) + \
+                                      ' --inter-op-parallelism-threads=' + \
+                                      str(self.args.num_inter_threads) + \
+                                      ' --intra-op-parallelism-threads=' + \
+                                      str(self.args.num_intra_threads) + \
+                                      ' --batch-size=' + \
+                                      str(self.args.batch_size)
+            if self.args.data_location:
                 self.benchmark_command += ' --data-location=' + \
                                           self.args.data_location
-            if (self.args.accuracy_only):
+            if self.args.accuracy_only:
                 self.benchmark_command += ' --accuracy-only'
 
         else:
