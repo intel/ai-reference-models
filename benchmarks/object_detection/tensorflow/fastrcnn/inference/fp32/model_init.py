@@ -24,7 +24,7 @@ import sys
 
 os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
+os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
 class ModelInitializer:
@@ -33,8 +33,8 @@ class ModelInitializer:
     def run_inference_sanity_checks(self, args, custom_args):
 
         if args.batch_size != -1 and args.batch_size != 1:
-            sys.exit('Fast R-CNN inference supports `batch-size=1` ' +
-                     'only, please modify via the \`--batch_size\` flag.')
+            sys.exit("Fast R-CNN inference supports 'batch-size=1' " +
+                     "only, please modify via the '--batch_size' flag.")
 
     def __init__(self, args, custom_args, platform_util=None):
         self.args = args
@@ -93,7 +93,8 @@ class ModelInitializer:
                                           namespace=self.args)
 
     def run(self):
-        if self.args.verbose: print("Run model here.")
+        if self.args.verbose:
+            print("Run model here.")
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
         print("current directory: {}".format(os.getcwd()))

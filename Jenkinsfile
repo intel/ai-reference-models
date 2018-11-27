@@ -1,4 +1,8 @@
-node() {
+node('nervana-skx102.fm.intel.com') {
+    // pull the code
+    dir( 'intel-models' ) {
+        checkout scm
+    }
     stage('Style tests') {
         sh """
         #!/bin/bash -x
@@ -11,7 +15,7 @@ node() {
         . lintvenv/bin/activate
 
         pip install flake8
-        flake8 benchmarks
+        flake8 intel-models/benchmarks
         
         deactivate
         """

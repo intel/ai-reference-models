@@ -42,15 +42,15 @@ class ModelInitializer:
             if self.args.batch_size == -1:
                 self.args.batch_size = 1
                 if self.args.verbose:
-                    print 'Setting batch_size to 1 since it is not supplied.'
+                    print('Setting batch_size to 1 since it is not supplied.')
 
             if self.args.batch_size == 1:
                 if self.args.verbose:
-                    print 'Running Wide_Deep model Inference in Latency mode'
+                    print('Running Wide_Deep model Inference in Latency mode')
             else:
                 if self.args.verbose:
-                    print 'Running Wide_Deep model Inference in ' \
-                          'Throughput mode'
+                    print("Running Wide_Deep model Inference in "
+                          "Throughput mode")
 
             # Select script based on batch size
             if self.args.batch_size == 1:
