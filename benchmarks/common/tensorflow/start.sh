@@ -68,6 +68,7 @@ fi
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
 LOG_OUTPUT=${WORKSPACE}/logs
+LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}.log"
 if [ ! -d "${LOG_OUTPUT}" ]; then
   mkdir ${LOG_OUTPUT}
 fi
@@ -90,7 +91,7 @@ function run_model() {
   fi
   echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
 
-  LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/benchmark_${MODEL_NAME}_${MODE}.log"
+  LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/${LOG_FILENAME}"
   echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
@@ -376,8 +377,7 @@ function wide_deep() {
     fi
 }
 
-LOGFILE=${LOG_OUTPUT}/benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}.log
-echo "Log output location: ${LOGFILE}"
+echo "Log output location: ${LOG_OUTPUT}/${LOG_FILENAME}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "fastrcnn" ]; then
