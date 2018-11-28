@@ -198,6 +198,22 @@ function inceptionv3() {
 
     CMD="${CMD} ${input_height_arg} ${input_width_arg}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+
+  elif [ ${PLATFORM} == "fp32" ]; then
+    # Run inception v3 fp32 inference with dummy data no --data-location is required
+    CMD="python ${RUN_SCRIPT_PATH} \
+    --framework=${FRAMEWORK} \
+    --use-case=${USE_CASE} \
+    --model-name=${MODEL_NAME} \
+    --platform=${PLATFORM} \
+    --mode=${MODE} \
+    --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
+    --batch-size=${BATCH_SIZE} \
+    ${single_socket_arg} \
+    ${verbose_arg} \
+    --in-graph=${IN_GRAPH}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
     exit 1
