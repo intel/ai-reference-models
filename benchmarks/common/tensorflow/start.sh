@@ -68,7 +68,8 @@ fi
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
 LOG_OUTPUT=${WORKSPACE}/logs
-LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}.log"
+timestamp=`date +%Y%m%d_%H%M%S`
+LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}_${timestamp}.log"
 if [ ! -d "${LOG_OUTPUT}" ]; then
   mkdir ${LOG_OUTPUT}
 fi
@@ -393,7 +394,8 @@ function wide_deep() {
     fi
 }
 
-echo "Log output location: ${LOG_OUTPUT}/${LOG_FILENAME}"
+LOGFILE=${LOG_OUTPUT}/${LOG_FILENAME}
+echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "fastrcnn" ]; then

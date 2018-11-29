@@ -18,7 +18,7 @@ node('skx') {
             virtualenv -p python3 lintvenv
             . lintvenv/bin/activate
 
-            pip install flake8
+            pip install -r intel-models/tests/requirements.txt
             flake8 intel-models/benchmarks
         
             deactivate

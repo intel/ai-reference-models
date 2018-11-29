@@ -21,22 +21,20 @@
 import argparse
 import os
 
+from common.base_model_init import BaseModelInitializer
+
 os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
-class ModelInitializer:
+class ModelInitializer(BaseModelInitializer):
     args = None
 
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-        self.run_command = ""
+        self.command = ""
         command_prefix = "python generate.py"
-
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
 
         self.parse_custom_args()
         num_inter_threads = 1
@@ -54,8 +52,8 @@ class ModelInitializer:
                                        self.args.checkpoint_name)
 
         # create command to run benchmarking
-        self.run_command = ("{} {} --num_inter_threads={} "
-                            "--num_intra_threads={} --sample={}").format(
+        self.command = ("{} {} --num_inter_threads={} "
+                        "--num_intra_threads={} --sample={}").format(
             command_prefix, checkpoint_path, str(num_inter_threads),
             str(num_intra_threads), str(self.args.sample))
 
@@ -70,18 +68,15 @@ class ModelInitializer:
                                           namespace=self.args)
 
     def run(self):
-        if self.run_command:
+        if self.command:
             # The generate.py script expects that we run from the model source
             # directory.  Save off the current working directory so that we can
             # restore it when the script is done.
             original_dir = os.getcwd()
             os.chdir(self.args.model_source_dir)
 
-            if self.args.verbose:
-                print("Run model here.", self.run_command)
-
             # Run benchmarking
-            os.system(self.run_command)
+            self.run_command(self.command)
 
             # Change context back to the original dir
             os.chdir(original_dir)

@@ -21,6 +21,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from common.base_model_init import BaseModelInitializer
 
 import os
 
@@ -29,18 +30,14 @@ os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 os.environ["KMP_SETTINGS"] = "1"
 
 
-class ModelInitializer:
+class ModelInitializer(BaseModelInitializer):
     """initialize mode and run benchmark"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
-        self.benchmark_command = ''
-
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
+        self.benchmark_command = ""
 
         # use default batch size if -1
         if self.args.batch_size == -1:
@@ -71,26 +68,24 @@ class ModelInitializer:
             if self.args.single_socket:
                 socket_id_str = str(self.args.socket_id)
 
-            self.benchmark_command = 'numactl --cpunodebind=' + socket_id_str \
-                                     + ' --membind=' + socket_id_str + ' ' + \
+            self.benchmark_command = "numactl --cpunodebind=" + socket_id_str \
+                                     + " --membind=" + socket_id_str + " " + \
                                      self.benchmark_command
 
             os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
             self.benchmark_command = self.benchmark_command + \
-                ' --data_dir=' + str(args.data_location) + \
-                ' --model_dir=' + str(args.checkpoint) + \
-                ' --intra_op_parallelism_threads=' + str(
+                " --data_dir=" + str(args.data_location) + \
+                " --model_dir=" + str(args.checkpoint) + \
+                " --intra_op_parallelism_threads=" + str(
                     self.args.num_intra_threads) + \
-                ' --inter_op_parallelism_threads=' + str(
+                " --inter_op_parallelism_threads=" + str(
                     self.args.num_inter_threads) + \
-                ' --batch_size=' + str(self.args.batch_size) + \
-                ' --inference_only'
+                " --batch_size=" + str(self.args.batch_size) + \
+                " --inference_only"
         else:
-            print('Training is not supported currently.')
+            print("Training is not supported currently.")
 
     def run(self):
         if self.benchmark_command:
-            if self.args.verbose:
-                print("Run model here.", self.benchmark_command)
-            os.system(self.benchmark_command)
+            self.run_command(self.benchmark_command)

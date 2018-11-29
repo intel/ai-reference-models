@@ -21,21 +21,23 @@
 import os
 import sys
 
+from common.base_model_init import BaseModelInitializer
+
 os.environ['KMP_AFFINITY'] = 'granularity=fine,compact,1,0'
 os.environ['KMP_BLOCKTIME'] = '0'
 
 
-class ModelInitializer:
+class ModelInitializer(BaseModelInitializer):
     args = None
     custom_args = []
 
     def run_inference_sanity_checks(self, args, custom_args):
-        if args.input_graph:
-            sys.exit('Please provide a path to the frozen graph directory'
-                     ' via the \'--in-graph\' flag.')
-        if args.data_location:
-            sys.exit('Please provide a path to the data directory via the '
-                     '\'--data-location\' flag.')
+        if not args.input_graph:
+            sys.exit("Please provide a path to the frozen graph directory"
+                     " via the '--in-graph' flag.")
+        if not args.data_location:
+            sys.exit("Please provide a path to the data directory via the "
+                     "'--data-location' flag.")
         if not args.single_socket and args.num_cores == -1:
             print("***Warning***: Running inference on all cores could degrade"
                   " performance. Pass '--single-socket' instead.\n")
@@ -44,9 +46,6 @@ class ModelInitializer:
         self.args = args
         self.custom_args = custom_args
         platform_args = platform_util
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
 
         if args.mode == "inference":
             self.run_inference_sanity_checks(self.args, self.custom_args)
@@ -84,8 +83,5 @@ class ModelInitializer:
     def run(self):
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
-        if self.args.verbose:
-            print("current directory: {}".format(os.getcwd()))
-            print("Running: {}".format(str(self.run_cmd)))
-        os.system(self.run_cmd)
+        self.run_command(self.run_cmd)
         os.chdir(original_dir)
