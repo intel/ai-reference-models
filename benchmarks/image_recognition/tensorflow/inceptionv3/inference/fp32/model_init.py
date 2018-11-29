@@ -21,6 +21,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from common.base_model_init import BaseModelInitializer
 
 import os
 
@@ -29,7 +30,7 @@ os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 os.environ["KMP_SETTINGS"] = "1"
 
 
-class ModelInitializer:
+class ModelInitializer(BaseModelInitializer):
     """initialize mode and run benchmark"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
@@ -89,9 +90,4 @@ class ModelInitializer:
 
     def run(self):
         if self.benchmark_command:
-            if self.args.verbose:
-                print("Received these standard args: {}".format(self.args))
-                print("Received these custom args: {}".format(
-                    self.custom_args))
-            print("Executing command: {}".format(self.benchmark_command))
-            os.system(self.benchmark_command)
+            self.run_command(self.benchmark_command)

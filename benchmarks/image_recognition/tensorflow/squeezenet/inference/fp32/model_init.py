@@ -1,8 +1,30 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 from __future__ import print_function
+from common.base_model_init import BaseModelInitializer
+
 import os
 
 
-class ModelInitializer:
+class ModelInitializer (BaseModelInitializer):
     """ SqueezeNet model initializer that calls train_squeezenet.py script
      from the models/image_recognition/tensorflow/squeezenet/fp32 directory"""
 
@@ -39,9 +61,6 @@ class ModelInitializer:
 
     def run(self):
         if self.args.verbose:
-            self.command += ' --verbose '
-            print("Received these standard args: {}".format(self.args))
-            print("Received these custom args: {}".format(self.custom_args))
-            print(self.command)
+            self.command += " --verbose "
 
-        os.system(self.command)
+        self.run_command(self.command)

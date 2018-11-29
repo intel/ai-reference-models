@@ -21,12 +21,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from common.base_model_init import BaseModelInitializer
 
 import argparse
 import os
 
 
-class ModelInitializer:
+class ModelInitializer(BaseModelInitializer):
     """Model initializer for resnet50 int8 inference"""
 
     args = None
@@ -39,10 +40,6 @@ class ModelInitializer:
             raise ValueError("Did not find any platform info.")
         else:
             self.pltfrm = platform_util
-
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
 
         # Environment variables
         os.environ["OMP_NUM_THREADS"] = "{}".format(
@@ -57,29 +54,29 @@ class ModelInitializer:
         if self.custom_args:
             parser = argparse.ArgumentParser()
             parser.add_argument("--input-height", default=None,
-                                dest='input_height', type=int,
+                                dest="input_height", type=int,
                                 help="input height")
             parser.add_argument("--input-width", default=None,
-                                dest='input_width', type=int,
+                                dest="input_width", type=int,
                                 help="input width")
-            parser.add_argument('--warmup-steps', dest='warmup_steps',
-                                help='number of warmup steps', type=int,
+            parser.add_argument("--warmup-steps", dest="warmup_steps",
+                                help="number of warmup steps", type=int,
                                 default=10)
-            parser.add_argument('--steps', dest='steps',
-                                help='number of steps', type=int, default=50)
-            parser.add_argument('--num-inter-threads',
-                                dest='num_inter_threads',
-                                help='number threads across operators',
+            parser.add_argument("--steps", dest="steps",
+                                help="number of steps", type=int, default=50)
+            parser.add_argument("--num-inter-threads",
+                                dest="num_inter_threads",
+                                help="number threads across operators",
                                 type=int, default=1)
-            parser.add_argument('--num-intra-threads',
-                                dest='num_intra_threads',
-                                help='number threads for an operator',
+            parser.add_argument("--num-intra-threads",
+                                dest="num_intra_threads",
+                                help="number threads for an operator",
                                 type=int, default=1)
-            parser.add_argument('--input-layer', dest='input_layer',
-                                help='name of input layer', type=str,
+            parser.add_argument("--input-layer", dest="input_layer",
+                                help="name of input layer", type=str,
                                 default=None)
-            parser.add_argument('--output-layer', dest='output_layer',
-                                help='name of output layer', type=str,
+            parser.add_argument("--output-layer", dest="output_layer",
+                                help="name of output layer", type=str,
                                 default=None)
 
             self.args = parser.parse_args(self.custom_args,
@@ -94,16 +91,16 @@ class ModelInitializer:
                             "warmup_steps", "steps"]
         cmd_prefix = "python " + benchmark_script
         if self.args.single_socket:
-            cmd_prefix = 'numactl --cpunodebind=0 --membind=0 ' + cmd_prefix
+            cmd_prefix = "numactl --cpunodebind=0 --membind=0 " + cmd_prefix
         for arg in vars(self.args):
             arg_value = getattr(self.args, arg)
             if arg == "batch_size" and arg_value == -1:
                 continue
             if arg_value and (arg in script_args_list):
-                cmd_prefix = cmd_prefix + (' --{param}={value}').format(
+                cmd_prefix = cmd_prefix + (" --{param}={value}").format(
                     param=arg, value=arg_value)
         cmd = cmd_prefix
-        os.system(cmd)
+        self.run_command(cmd)
 
     def run_accuracy(self):
         accuracy_script = os.path.join(self.args.intelai_models,
@@ -114,16 +111,16 @@ class ModelInitializer:
                             "num_intra_threads"]
         cmd_prefix = "python " + accuracy_script
         if self.args.single_socket:
-            cmd_prefix = 'numactl --cpunodebind=0 --membind=0 ' + cmd_prefix
+            cmd_prefix = "numactl --cpunodebind=0 --membind=0 " + cmd_prefix
         for arg in vars(self.args):
             arg_value = getattr(self.args, arg)
             if arg == "batch_size" and arg_value == -1:
                 continue
             if arg_value and (arg in script_args_list):
-                cmd_prefix = cmd_prefix + (' --{param}={value}').format(
+                cmd_prefix = cmd_prefix + " --{param}={value}".format(
                     param=arg, value=arg_value)
         cmd = cmd_prefix
-        os.system(cmd)
+        self.run_command(cmd)
 
     def run(self):
         # Parse custom arguments and append to self.args

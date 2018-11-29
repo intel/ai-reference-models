@@ -22,12 +22,14 @@ import argparse
 import os
 import sys
 
+from common.base_model_init import BaseModelInitializer
+
 os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
-class ModelInitializer:
+class ModelInitializer (BaseModelInitializer):
     args = None
 
     def run_inference_sanity_checks(self, args, custom_args):
@@ -40,10 +42,6 @@ class ModelInitializer:
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
-
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
 
         self.parse_custom_args()
         if args.mode == "inference":
@@ -58,7 +56,7 @@ class ModelInitializer:
                 self.args.num_intra_threads = \
                     self.platform_util.num_cores_per_socket()
                 self.command_prefix = \
-                    'numactl --cpunodebind=0 --membind=0 ' + \
+                    "numactl --cpunodebind=0 --membind=0 " + \
                     self.command_prefix
 
             os.environ["OMP_NUM_THREADS"] = \
@@ -88,16 +86,12 @@ class ModelInitializer:
         if self.custom_args:
             parser = argparse.ArgumentParser()
             parser.add_argument("--config_file", default=None,
-                                dest='config_file', type=str)
+                                dest="config_file", type=str)
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)
 
     def run(self):
-        if self.args.verbose:
-            print("Run model here.")
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
-        print("current directory: {}".format(os.getcwd()))
-        print("Running: " + str(self.run_cmd))
-        os.system(self.run_cmd)
+        self.run_command(self.run_cmd)
         os.chdir(original_dir)

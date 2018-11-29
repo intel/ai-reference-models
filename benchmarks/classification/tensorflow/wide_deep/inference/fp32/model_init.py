@@ -21,8 +21,10 @@
 import os
 import sys
 
+from common.base_model_init import BaseModelInitializer
 
-class ModelInitializer:
+
+class ModelInitializer(BaseModelInitializer):
     '''Add code here to detect the environment and set necessary variables
     before launching the model'''
     args = None
@@ -32,21 +34,17 @@ class ModelInitializer:
         self.args = args
         self.custom_args = custom_args
 
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
-
         if args.mode == "inference":
             os.environ["OMP_NUM_THREADS"] = "1"
 
             if self.args.batch_size == -1:
                 self.args.batch_size = 1
                 if self.args.verbose:
-                    print('Setting batch_size to 1 since it is not supplied.')
+                    print("Setting batch_size to 1 since it is not supplied.")
 
             if self.args.batch_size == 1:
                 if self.args.verbose:
-                    print('Running Wide_Deep model Inference in Latency mode')
+                    print("Running Wide_Deep model Inference in Latency mode")
             else:
                 if self.args.verbose:
                     print("Running Wide_Deep model Inference in "
@@ -72,9 +70,7 @@ class ModelInitializer:
                        " --batch_size=" + str(self.args.batch_size)
 
     def run(self):
-        if self.args.verbose:
-            print("Run model here.")
         original_dir = os.getcwd()
         os.chdir(self.args.intelai_models)
-        os.system(self.run_cmd)
+        self.run_command(self.run_cmd)
         os.chdir(original_dir)

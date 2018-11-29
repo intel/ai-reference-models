@@ -22,10 +22,12 @@ import argparse
 import os
 import sys
 
+from common.base_model_init import BaseModelInitializer
 
-class ModelInitializer:
+
+class ModelInitializer(BaseModelInitializer):
     args = None
-    command_prefix = ''
+    command_prefix = ""
 
     def run_inference_sanity_checks(self, args, custom_args):
 
@@ -38,10 +40,6 @@ class ModelInitializer:
         self.custom_args = custom_args
         platform_args = platform_util
 
-        if self.args.verbose:
-            print('Received these standard args: {}'.format(self.args))
-            print('Received these custom args: {}'.format(self.custom_args))
-
         self.parse_custom_args()
         if args.mode == "inference":
             self.run_inference_sanity_checks(self.args, self.custom_args)
@@ -50,9 +48,9 @@ class ModelInitializer:
                 self.args.platform, "eval.py")
             self.command_prefix = "python " + benchmark_script
             if args.single_socket:
-                self.command_prefix = 'numactl --cpunodebind=' + \
+                self.command_prefix = "numactl --cpunodebind=" + \
                                       str(self.args.socket_id) + \
-                                      ' --membind=0 ' + self.command_prefix
+                                      " --membind=0 " + self.command_prefix
                 args.num_inter_threads = 1
                 args.num_intra_threads = platform_args.num_cores_per_socket()
             else:
@@ -62,13 +60,13 @@ class ModelInitializer:
                         platform_args.num_cores_per_socket() * \
                         args.num_inter_threads
                 if self.args.num_cores == 1:
-                    self.command_prefix = 'taskset -c 0 ' + \
+                    self.command_prefix = "taskset -c 0 " + \
                                           self.command_prefix
                     args.num_intra_threads = 1
                 else:
-                    self.command_prefix = 'taskset -c 0-' + \
+                    self.command_prefix = "taskset -c 0-" + \
                                           str(self.args.num_cores - 1) + \
-                                          ' ' + self.command_prefix
+                                          " " + self.command_prefix
                     args.num_intra_threads = args.num_cores
 
             os.environ["OMP_NUM_THREADS"] = str(args.num_intra_threads)
@@ -95,16 +93,12 @@ class ModelInitializer:
         if self.custom_args:
             parser = argparse.ArgumentParser()
             parser.add_argument("--config_file", default=None,
-                                dest='config_file', type=str)
+                                dest="config_file", type=str)
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)
 
     def run(self):
-        if self.args.verbose:
-            print("Run model here.")
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
-        print("current directory: {}".format(os.getcwd()))
-        print("Running: " + str(self.run_cmd))
-        os.system(self.run_cmd)
+        self.run_command(self.run_cmd)
         os.chdir(original_dir)
