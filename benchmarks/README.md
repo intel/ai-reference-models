@@ -42,4 +42,4 @@ Training and inference scripts with intel optimized MKL
     * Tensorflow
         * WaveNet
             * Inference
-                * [FP32](text_to_speech/tensorfow/wavenet/README.md#fp32-inference-instructions)
+                * [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions)

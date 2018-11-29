@@ -107,7 +107,6 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
---data-location=${DATASET_LOCATION} \
 ${single_socket_arg} \
 ${verbose_arg}"
 
@@ -123,7 +122,8 @@ if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
       benchmark_only_arg="--benchmark-only"
     fi
 
-    CMD="${CMD} --in-graph=${IN_GRAPH} ${accuracy_only_arg} ${benchmark_only_arg}"
+    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION} \
+    ${accuracy_only_arg} ${benchmark_only_arg}"
 fi
 
 function install_protoc() {
@@ -167,6 +167,7 @@ function fastrcnn() {
 
         cd $original_dir
         CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+        --data-location=${DATASET_LOCATION} \
         --config_file=${config_file}"
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -202,19 +203,9 @@ function inceptionv3() {
 
   elif [ ${PLATFORM} == "fp32" ]; then
     # Run inception v3 fp32 inference with dummy data no --data-location is required
-    CMD="python ${RUN_SCRIPT_PATH} \
-    --framework=${FRAMEWORK} \
-    --use-case=${USE_CASE} \
-    --model-name=${MODEL_NAME} \
-    --platform=${PLATFORM} \
-    --mode=${MODE} \
-    --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
-    --batch-size=${BATCH_SIZE} \
-    ${single_socket_arg} \
-    ${verbose_arg} \
-    --in-graph=${IN_GRAPH}"
-
+    CMD="${CMD} --in-graph=${IN_GRAPH}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+
   else
     echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
     exit 1
@@ -232,7 +223,8 @@ function ncf() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
 
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+    --data-location=${DATASET_LOCATION}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -255,18 +247,7 @@ function resnet50() {
 
     elif [ ${PLATFORM} == "fp32" ]; then
         # Run resnet50 fp32 inference with dummy data no --data-location is required
-        CMD="python ${RUN_SCRIPT_PATH} \
-        --framework=${FRAMEWORK} \
-        --use-case=${USE_CASE} \
-        --model-name=${MODEL_NAME} \
-        --platform=${PLATFORM} \
-        --mode=${MODE} \
-        --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
-        --batch-size=${BATCH_SIZE} \
-        ${single_socket_arg} \
-        ${verbose_arg} \
-        --in-graph=${IN_GRAPH}"
-
+        CMD="${CMD} --in-graph=${IN_GRAPH}"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
         echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
@@ -300,7 +281,7 @@ function rfcn() {
 
         cd $original_dir
         CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --config_file=${config_file}"
+        --config_file=${config_file} --data-location=${DATASET_LOCATION}"
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
      else
@@ -311,7 +292,8 @@ function rfcn() {
 # SqueezeNet model
 function squeezenet() {
   if [ ${PLATFORM} == "fp32" ]; then
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+    --data-location=${DATASET_LOCATION}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -343,7 +325,8 @@ function ssd_mobilenet() {
 
     cd $original_dir
 
-    CMD="${CMD} --in-graph=${IN_GRAPH}"
+    CMD="${CMD} --in-graph=${IN_GRAPH} \
+    --data-location=${DATASET_LOCATION}"
     CMD=${CMD} run_model
   else
     echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
@@ -386,7 +369,8 @@ function wide_deep() {
         pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+        --data-location=${DATASET_LOCATION}"
         CMD=${CMD} run_model
     else
         echo "PLATFORM=${PLATFORM} not supported for ${MODEL_NAME}"
