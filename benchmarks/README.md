@@ -38,6 +38,11 @@ Training and inference scripts with intel optimized MKL
         * NCF
             * Inference
                 * [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions)
+* Speech Recognition
+    * Tensorflow
+        * DeepSpeech
+            * Inference
+                * [FP32](speech_recognition/tensorflow/deep-speech/README.md#fp32-inference-instructions)
 * Text-to-Speech
     * Tensorflow
         * WaveNet
