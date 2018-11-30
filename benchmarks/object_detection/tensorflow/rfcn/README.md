@@ -135,7 +135,7 @@ $ cd /home/myuser/models/benchmarks
 $ python launch_benchmark.py \
     --data-location /home/myuser/coco/output/ \
     --model-source-dir /home/myuser/tensorflow/models \
-    --model-name fastrcnn \
+    --model-name rfcn \
     --framework tensorflow \
     --platform fp32 \
     --mode inference \
