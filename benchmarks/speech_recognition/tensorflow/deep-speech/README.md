@@ -69,13 +69,19 @@ This repo has the launch script for running benchmarking.
    something like this:
    
    ```
-    Installing collected packages: numpy, ds-ctcdecoder
-    Successfully installed ds-ctcdecoder-0.4.0a0 numpy-1.15.4
-    he wanted to go by home and tell his wife and children good by and get his clothes it was no go
+    Installing collected packages: numpy, deepspeech
+    Successfully installed deepspeech-0.4.0a0 numpy-1.15.4
+    your power is sufficient i said
     lscpu_path_cmd = command -v lscpu
     lscpu located here: /usr/bin/lscpu
-    Running: numactl --physcpubind=0-17 --membind=0 taskset -c 0-17 python -u DeepSpeech.py --log_level 1 --checkpoint_dir "/checkpoints" --one_shot_infer "/dataset/5694-64038-0019.wav" --inter_op 1 --intra_op 18 --num_omp_threads 18
+    Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', datafile_name='audio/8455-210777-0068.wav', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='deep-speech', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='speech_recognition', verbose=True)
+    Received these custom args: ['--datafile-name=audio/8455-210777-0068.wav']
+    Current directory: /workspace/models/DeepSpeech
+    Running: numactl --physcpubind=0-27 --membind=0 taskset -c 0-27 python -u DeepSpeech.py --log_level 1 --checkpoint_dir "/checkpoints" --one_shot_infer "/dataset/audio/8455-210777-0068.wav" --inter_op 1 --intra_op 28 --num_omp_threads 28
+    PYTHONPATH: :/workspace/intelai_models:/workspace/models
+    RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=speech_recognition --model-name=deep-speech --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --single-socket --verbose --checkpoint=/checkpoints     --data-location=/dataset     --datafile-name=audio/8455-210777-0068.wav
+    Batch Size: 1
     Ran inference with batch size 1
-    Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_deep-speech_inference_fp32_20181129_174240.log
-  ```
+    Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_deep-speech_inference_fp32_20181203_180229.log
+    ```
    
