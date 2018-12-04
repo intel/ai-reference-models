@@ -58,7 +58,10 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-6. The output of job should look something like this snippet for throughput and latency
+6. The log file is saved to:
+`models/benchmarks/common/tensorflow/logs`
+
+The output of job should look something like this snippet for throughput and latency
 
 Throughput with `batch_size=256`:
 ```

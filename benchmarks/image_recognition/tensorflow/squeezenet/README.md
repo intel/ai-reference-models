@@ -69,36 +69,36 @@ following example for throughput (using `--batch-size 64`):
 
 ```
 $ python launch_benchmark.py \
-	--platform fp32 \
-	--model-name squeezenet \
-	--mode inference \
-	--framework tensorflow \
+    --platform fp32 \
+    --model-name squeezenet \
+    --mode inference \
+    --framework tensorflow \
     --single-socket \
     --batch-size 64 \
-	--docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-	--checkpoint ${checkpoint_dir} \
-	--data-location /home/myuser/datasets/ImageNet_TFRecords \
-	--verbose \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --checkpoint ${checkpoint_dir} \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --verbose \
 ```
 
 Or for latency (using `--batch-size 1`):
 
 ```
 $ python launch_benchmark.py \
-	--platform fp32 \
-	--model-name squeezenet \
-	--mode inference \
-	--framework tensorflow \
+    --platform fp32 \
+    --model-name squeezenet \
+    --mode inference \
+    --framework tensorflow \
     --single-socket \
     --batch-size 1 \
-	--docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-	--checkpoint ${checkpoint_dir} \
-	--data-location /home/myuser/datasets/ImageNet_TFRecords \
-	--verbose \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --checkpoint ${checkpoint_dir} \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --verbose \
 ```
 
 5.  The log file is saved to:
-models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference.log
+`models/benchmarks/common/tensorflow/logs`
 
 The tail of the log output when the benchmarking completes should look
 something like this, when running for throughput with `--batch-size 64`:

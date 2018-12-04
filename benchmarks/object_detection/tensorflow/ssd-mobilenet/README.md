@@ -165,11 +165,12 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --platform fp32 \
     --mode inference \
+    --single-socket \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 8. The log file is saved to:
-models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference.log
+`models/benchmarks/common/tensorflow/logs`
 
 The tail of the log output when the benchmarking completes should look
 something like this:

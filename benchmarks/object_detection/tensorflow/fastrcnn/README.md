@@ -139,13 +139,14 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --platform fp32 \
     --mode inference \
+    --single-socket \
     --checkpoint /home/myuser/fast_rcnn_resnet50_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     -- config-file=pipeline.config
 ```
 
 7. The log file is saved to:
-models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference.log
+models/benchmarks/common/tensorflow/logs
 
 The tail of the log output when the benchmarking completes should look
 something like this:

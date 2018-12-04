@@ -65,7 +65,7 @@ $ python launch_benchmark.py \
     --docker-image docker_image
 ```
 The log file is saved to:
-`models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log`.
+`models/benchmarks/common/tensorflow/logs`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
@@ -215,7 +215,7 @@ $ python launch_benchmark.py \
 ```
 
 The log file is saved to:
-`models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log`.
+`models/benchmarks/common/tensorflow/logs`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
@@ -294,7 +294,7 @@ $ python launch_benchmark.py \
 ```
 
 The log file is saved to:
-`models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log`.
+`models/benchmarks/common/tensorflow/logs`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
