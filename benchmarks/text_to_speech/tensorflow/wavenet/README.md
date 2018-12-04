@@ -59,20 +59,20 @@ the name of the checkpoint to use and the sample number.
 
 ```
 python launch_benchmark.py \
-	--platform fp32 \
-	-m wavenet \
-	--mode inference \
-	--framework tensorflow \
-        --single-socket \
-        --num-cores 1 \
-	--docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-	--model-source-dir /home/myuser/wavenet/tensorflow-wavenet \
-	--checkpoint /home/myuser/models/benchmarks/text_to_speech/tensorflow/wavenet/inference/fp32/checkpoints \
+    --platform fp32 \
+    -m wavenet \
+    --mode inference \
+    --framework tensorflow \
+    --single-socket \
+    --num-cores 1 \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --model-source-dir /home/myuser/wavenet/tensorflow-wavenet \
+    --checkpoint /home/myuser/models/benchmarks/text_to_speech/tensorflow/wavenet/inference/fp32/checkpoints \
     -- checkpoint_name=model.ckpt-99 sample=8510
 ```
 
 4.  The logs are displayed in the console output as well as saved to a
-file at models/benchmarks/common/tensorflow/logs/benchmark_wavenet_inference.log
+file in `models/benchmarks/common/tensorflow/logs`.
 
 The tail of the log should look something like this:
 

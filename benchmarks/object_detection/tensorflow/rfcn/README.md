@@ -145,7 +145,7 @@ $ python launch_benchmark.py \
 ```
 
 7. The log file is saved to:
-models/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference.log
+`models/benchmarks/common/tensorflow/logs`
 
 The tail of the log output when the benchmarking completes should look
 something like this:

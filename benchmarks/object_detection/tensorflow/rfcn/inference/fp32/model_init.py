@@ -84,7 +84,7 @@ class ModelInitializer(BaseModelInitializer):
                 "/object_detection/models/rfcn/eval " + \
                 " --logtostderr " + \
                 " --blocktime=0 " + \
-                " --run_once=True "
+                " --run_once=True"
         else:
             # TODO: Add training commands
             sys.exit("Training is currently not supported.")

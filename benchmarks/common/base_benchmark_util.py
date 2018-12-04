@@ -25,7 +25,7 @@ from __future__ import print_function
 import os
 
 from argparse import ArgumentParser
-from common.platform_util import PlatformUtil
+from common import platform_util
 
 
 class BaseBenchmarkUtil(object):
@@ -34,7 +34,7 @@ class BaseBenchmarkUtil(object):
 
     def __init__(self):
         self._common_arg_parser = None
-        self._platform_util = PlatformUtil()
+        self._platform_util = platform_util.PlatformUtil()
 
     def define_args(self):
         """define args for the benchmark interface shared by FP32 and int8
@@ -129,8 +129,7 @@ class BaseBenchmarkUtil(object):
 
         # check model_name exists
         if not args.model_name:
-            raise ValueError("The model name {} is not valid".format(
-                args.model_name))
+            raise ValueError("The model name is not valid")
 
         # check data location exist
         data_dir = args.data_location

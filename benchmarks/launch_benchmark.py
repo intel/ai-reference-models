@@ -25,14 +25,20 @@ from __future__ import print_function
 import glob
 import os
 import subprocess
+import sys
 from argparse import ArgumentParser
-from common.base_benchmark_util import BaseBenchmarkUtil
+from common import base_benchmark_util
 
 
-class LaunchBenchmark(BaseBenchmarkUtil):
+class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
     """Launches benchmarking job based on the specified args """
 
     def main(self):
+        args, unknown = self.parse_args(sys.argv[1:])
+        self.validate_args(args)
+        self.run_docker_container(args)
+
+    def parse_args(self, args):
         super(LaunchBenchmark, self).define_args()
 
         arg_parser = ArgumentParser(parents=[self._common_arg_parser],
@@ -71,9 +77,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
                                 help='Full path to the input graph ',
                                 dest='input_graph', default=None)
 
-        args, unknown = arg_parser.parse_known_args()
-        self.validate_args(args)
-        self.run_docker_container(args)
+        return arg_parser.parse_known_args(args)
 
     def validate_args(self, args):
         """validate the args"""
@@ -100,7 +104,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
         input_graph = args.input_graph
         if input_graph is not None:
             if not os.path.exists(input_graph):
-                raise IOError("The input graph  {} does not exist.".
+                raise IOError("The input graph {} does not exist.".
                               format(input_graph))
             if not os.path.isfile(input_graph):
                 raise IOError("The input graph {} must be a file.".
@@ -108,11 +112,11 @@ class LaunchBenchmark(BaseBenchmarkUtil):
 
         # check if benchmark-only and accuracy-only are all false for int8
         if args.platform == "int8" and (
-                    not args.benchmark_only and not args.accuracy_only):
+                not args.benchmark_only and not args.accuracy_only):
             raise ValueError("You must specify if the inference is for "
                              "benchmark or for accuracy measurement.")
         elif args.platform != "int8" and (
-                    args.benchmark_only or args.accuracy_only):
+                args.benchmark_only or args.accuracy_only):
             raise ValueError("{} and {} arguments are Int8 platform specific,"
                              " and not supported in {} inference.".
                              format(args.benchmark_only, args.accuracy_only,
@@ -123,7 +127,7 @@ class LaunchBenchmark(BaseBenchmarkUtil):
         Runs a docker container with the specified image and environment
         variables to start running the benchmarking job.
         """
-        benchmark_scripts = os.getcwd()
+        benchmark_scripts = os.path.dirname(os.path.realpath(__file__))
         intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
 
         if args.model_name:

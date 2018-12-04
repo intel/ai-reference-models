@@ -3,3 +3,6 @@
 *.pyc
 .DS_Store
 **.log
+.pytest*
+.venv*
+.coverage

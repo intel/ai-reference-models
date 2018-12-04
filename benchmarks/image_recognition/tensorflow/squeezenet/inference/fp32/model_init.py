@@ -61,6 +61,6 @@ class ModelInitializer (BaseModelInitializer):
 
     def run(self):
         if self.args.verbose:
-            self.command += " --verbose "
+            self.command += " --verbose"
 
         self.run_command(self.command)

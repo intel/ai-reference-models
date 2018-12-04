@@ -11,23 +11,25 @@ node('skx') {
             sh """
             #!/bin/bash -x
             set -e
-
-            # install flake8 into a venv
-            # get flake8 command not found otherwise...
             sudo easy_install virtualenv
-            virtualenv -p python3 lintvenv
-            . lintvenv/bin/activate
 
-            pip install -r intel-models/tests/requirements.txt
-            flake8 intel-models/benchmarks
-        
-            deactivate
+            cd intel-models
+
+            make lint
             """
         }
-        // put unit tests here later
-        // stage('Unit tests') {
-        //     echo 'Unit testing..'
-        // }
+        stage('Unit tests') {
+            sh """
+            #!/bin/bash -x
+            set -e
+
+            cd intel-models
+
+            # we have py3 errors, just run py2 tests for now
+            # TODO: Fix py3 errors and then enable py3 testing
+            make unit_test
+            """
+        }
         // put benchmarks here later
         // stage('Benchmarks') {
         //     echo 'Benchmark testing..'
