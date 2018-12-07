@@ -14,7 +14,7 @@ repository
     $ git clone git@github.com:IntelAI/models.git
     ```
 
-2. Download the pre-trained ResNet50 model:
+2. Download the pre-trained ResNet101 model:
 
     ```
     $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/resenet101_fp32_pretrained_model.pb
