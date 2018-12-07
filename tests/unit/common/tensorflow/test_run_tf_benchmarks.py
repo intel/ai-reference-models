@@ -46,6 +46,7 @@ test_arg_values = parse_model_args_file()
 
 
 @pytest.mark.parametrize("test_args,expected_cmd", test_arg_values)
+@patch("os.listdir")
 @patch("os.path.isdir")
 @patch("os.path.exists")
 @patch("os.chdir")
@@ -55,7 +56,7 @@ test_arg_values = parse_model_args_file()
 @patch("common.base_model_init.BaseModelInitializer.run_command")
 def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
                        mock_os, mock_chdir, mock_path_exists, mock_is_dir,
-                       test_args, expected_cmd):
+                       mock_listdir, test_args, expected_cmd):
     """
     Runs through executing the specified run_tf_benchmarks.py command from the
     test_args and verifying that the model_init file calls run_command with
@@ -64,6 +65,7 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
     mock_path_exists.return_value = True
     mock_is_dir.return_value = True
     parse_model_args_file()
+    mock_listdir.return_value = True
     platform_config.set_mock_system_type(mock_platform)
     platform_config.set_mock_os_access(mock_os)
     platform_config.set_mock_lscpu_subprocess_values(mock_subprocess)

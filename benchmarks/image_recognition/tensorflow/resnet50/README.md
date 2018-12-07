@@ -193,7 +193,15 @@ repository
 $ git clone git@github.com:IntelAI/models.git
 ```
 
-3. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
+3. If running resnet50 for accuracy, the ImageNet dataset will be
+required (if running benchmarking for throughput/latency, then dummy
+data will be used).
+
+The TensorFlow models repo provides
+[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
+to download, process, and convert the ImageNet dataset to the TF records format.
+
+4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
 As benchmarking uses dummy data for inference, `--data-location` flag is not required.
@@ -210,7 +218,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --single-socket \
-    --docker-image docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --verbose
 ```
 
@@ -225,36 +233,7 @@ Iteration 1: 0.978 sec
 Iteration 2: 0.011 sec
 Iteration 3: 0.011 sec
 Iteration 4: 0.012 sec
-Iteration 5: 0.011 sec
-Iteration 6: 0.011 sec
-Iteration 7: 0.011 sec
-Iteration 8: 0.011 sec
-Iteration 9: 0.011 sec
-Iteration 10: 0.011 sec
-Iteration 11: 0.011 sec
-Iteration 12: 0.011 sec
-Iteration 13: 0.011 sec
-Iteration 14: 0.011 sec
-Iteration 15: 0.011 sec
-Iteration 16: 0.011 sec
-Iteration 17: 0.011 sec
-Iteration 18: 0.011 sec
-Iteration 19: 0.011 sec
-Iteration 20: 0.011 sec
-Iteration 21: 0.011 sec
-Iteration 22: 0.011 sec
-Iteration 23: 0.011 sec
-Iteration 24: 0.011 sec
-Iteration 25: 0.011 sec
-Iteration 26: 0.011 sec
-Iteration 27: 0.011 sec
-Iteration 28: 0.011 sec
-Iteration 29: 0.011 sec
-Iteration 30: 0.011 sec
-Iteration 31: 0.011 sec
-Iteration 32: 0.011 sec
-Iteration 33: 0.011 sec
-Iteration 34: 0.011 sec
+...
 Iteration 35: 0.011 sec
 Iteration 36: 0.011 sec
 Iteration 37: 0.011 sec
@@ -289,7 +268,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --single-socket \
-    --docker-image docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --verbose
 ```
 
@@ -304,36 +283,7 @@ Iteration 1: 1.765 sec
 Iteration 2: 0.640 sec
 Iteration 3: 0.638 sec
 Iteration 4: 0.637 sec
-Iteration 5: 0.632 sec
-Iteration 6: 0.631 sec
-Iteration 7: 0.632 sec
-Iteration 8: 0.635 sec
-Iteration 9: 0.634 sec
-Iteration 10: 0.641 sec
-Iteration 11: 0.632 sec
-Iteration 12: 0.640 sec
-Iteration 13: 0.632 sec
-Iteration 14: 0.632 sec
-Iteration 15: 0.635 sec
-Iteration 16: 0.634 sec
-Iteration 17: 0.633 sec
-Iteration 18: 0.631 sec
-Iteration 19: 0.631 sec
-Iteration 20: 0.633 sec
-Iteration 21: 0.637 sec
-Iteration 22: 0.630 sec
-Iteration 23: 0.631 sec
-Iteration 24: 0.635 sec
-Iteration 25: 0.635 sec
-Iteration 26: 0.641 sec
-Iteration 27: 0.632 sec
-Iteration 28: 0.629 sec
-Iteration 29: 0.631 sec
-Iteration 30: 0.631 sec
-Iteration 31: 0.635 sec
-Iteration 32: 0.632 sec
-Iteration 33: 0.635 sec
-Iteration 34: 0.631 sec
+...
 Iteration 35: 0.635 sec
 Iteration 36: 0.631 sec
 Iteration 37: 0.635 sec
@@ -353,4 +303,42 @@ RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorf
 Batch Size: 128
 Ran inference with batch size 128
 Log location outside container: home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log
+```
+
+* To measure the model accuracy, use the `--accuracy-only` flag and pass
+the ImageNet dataset directory from step 3 as the `--data-location`:
+```
+$ cd /home/myuser/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
+    --model-name resnet50 \
+    --framework tensorflow \
+    --platform fp32 \
+    --mode inference \
+    --accuracy-only \
+    --batch-size 100 \
+    --single-socket \
+    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --verbose
+```
+
+The log file is saved to: `models/benchmarks/common/tensorflow/logs`.
+The tail of the log output when the accuracy run completes should look
+something like this:
+```
+...
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7430, 0.9188)
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/freezed_resnet50.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet50', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
+Received these custom args: []
+Current directory: /workspace/benchmarks
+Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/freezed_resnet50.pb --model-name=resnet50 --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=100 --data-location=/dataset --accuracy-only
+PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
+RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --single-socket --accuracy-only  --verbose --in-graph=/in_graph/freezed_resnet50.pb --accuracy-only  --data-location=/dataset
+Batch Size: 100
+Ran inference with batch size 100
+Log location outside container: /tmp/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20181205_201437.log
 ```
