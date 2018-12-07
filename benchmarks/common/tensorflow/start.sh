@@ -295,6 +295,25 @@ function ncf() {
   fi
 }
 
+# ResNet101 model
+function resnet101() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # For accuracy, dataset location is required.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    if [ ${PLATFORM} == "fp32" ]; then
+      CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
+
 # Resnet50 int8 and fp32 models
 function resnet50() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
@@ -466,6 +485,8 @@ elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
+elif [ ${MODEL_NAME} == "resnet101" ]; then
+  resnet101
 elif [ ${MODEL_NAME} == "resnet50" ]; then
   resnet50
 elif [ ${MODEL_NAME} == "rfcn" ]; then
