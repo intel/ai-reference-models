@@ -65,6 +65,16 @@ if [ ${VERBOSE} == "True" ]; then
   verbose_arg="--verbose"
 fi
 
+accuracy_only_arg=""
+if [ ${ACCURACY_ONLY} == "True" ]; then
+  accuracy_only_arg="--accuracy-only"
+fi
+
+benchmark_only_arg=""
+if [ ${BENCHMARK_ONLY} == "True" ]; then
+  benchmark_only_arg="--benchmark-only"
+fi
+
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
 LOG_OUTPUT=${WORKSPACE}/logs
@@ -108,22 +118,13 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
 ${single_socket_arg} \
+${accuracy_only_arg} \
+${benchmark_only_arg} \
 ${verbose_arg}"
 
-# Add on --in-graph, --accuracy-only, and --benchmark-only for int8 inference
+# Add on --in-graph and --data-location for int8 inference
 if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
-    accuracy_only_arg=""
-    if [ ${ACCURACY_ONLY} == "True" ]; then
-      accuracy_only_arg="--accuracy-only"
-    fi
-
-    benchmark_only_arg=""
-    if [ ${BENCHMARK_ONLY} == "True" ]; then
-      benchmark_only_arg="--benchmark-only"
-    fi
-
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION} \
-    ${accuracy_only_arg} ${benchmark_only_arg}"
+    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
 fi
 
 function install_protoc() {
@@ -300,15 +301,15 @@ function resnet50() {
 
     if [ ${PLATFORM} == "int8" ]; then
         # For accuracy, dataset location is required, see README for more information.
-        if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+        if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
           echo "No Data directory specified, accuracy will not be calculated."
           exit 1
         fi
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
     elif [ ${PLATFORM} == "fp32" ]; then
-        # Run resnet50 fp32 inference with dummy data no --data-location is required
-        CMD="${CMD} --in-graph=${IN_GRAPH}"
+        # Run resnet50 fp32 inference
+        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
         echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
