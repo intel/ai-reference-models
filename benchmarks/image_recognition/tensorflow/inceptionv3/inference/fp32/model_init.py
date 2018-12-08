@@ -81,9 +81,12 @@ class ModelInitializer(BaseModelInitializer):
                 " --intra-op-parallelism-threads=" + \
                 str(self.args.num_intra_threads) + \
                 " --batch-size=" + str(self.args.batch_size)
-            if (self.args.data_location):
-                self.benchmark_command += \
-                    " --data-location=" + self.args.data_location
+            # if the data location directory is not empty, then include the arg
+            if self.args.data_location and os.listdir(self.args.data_location):
+                self.benchmark_command += " --data-location=" + \
+                                          self.args.data_location
+            if self.args.accuracy_only:
+                self.benchmark_command += " --accuracy-only"
 
         else:
             print("Training is not supported currently.")

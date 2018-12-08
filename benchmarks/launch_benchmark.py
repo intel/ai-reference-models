@@ -41,41 +41,42 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
     def parse_args(self, args):
         super(LaunchBenchmark, self).define_args()
 
-        arg_parser = ArgumentParser(parents=[self._common_arg_parser],
-                                    description='Parse args for benchmark '
-                                                'interface')
+        arg_parser = ArgumentParser(
+            parents=[self._common_arg_parser],
+            description='Parse args for benchmark interface')
 
         # docker image
-        arg_parser.add_argument("--docker-image",
-                                help='Specify the docker image/tag to use',
-                                dest='docker_image', default=None,
-                                required=True)
+        arg_parser.add_argument(
+            "--docker-image", help='Specify the docker image/tag to use',
+            dest='docker_image', default=None, required=True)
 
         # checkpoint directory location
-        arg_parser.add_argument('-c', "--checkpoint",
-                                help='Specify the location of trained model '
-                                     'checkpoint directory. '
-                                     'If mode=training model/weights will be '
-                                     'written to this location.'
-                                     'If mode=inference assumes that the '
-                                     'location points to a model that has '
-                                     'already been trained. ',
-                                dest='checkpoint', default=None)
+        arg_parser.add_argument(
+            '-c', "--checkpoint",
+            help='Specify the location of trained model checkpoint directory. '
+                 'If mode=training model/weights will be written to this '
+                 'location. If mode=inference assumes that the location points'
+                 ' to a model that has already been trained.',
+            dest='checkpoint', default=None)
 
-        arg_parser.add_argument('-k', "--benchmark-only",
-                                help='For benchmark measurement only.',
-                                dest='benchmark_only',
-                                action='store_true')
+        arg_parser.add_argument(
+            '-k', "--benchmark-only",
+            help='For benchmark measurement only. If neither --benchmark-only '
+                 'or --accuracy-only are specified, it will default to run '
+                 'benchmarking.',
+            dest='benchmark_only', action='store_true')
 
-        arg_parser.add_argument("--accuracy-only",
-                                help='For accuracy measurement only.',
-                                dest='accuracy_only',
-                                action='store_true')
+        arg_parser.add_argument(
+            "--accuracy-only",
+            help='For accuracy measurement only.  If neither --benchmark-only '
+                 'or --accuracy-only are specified, it will default to run '
+                 'benchmarking.',
+            dest='accuracy_only', action='store_true')
 
         # in graph directory location
-        arg_parser.add_argument('-g', "--in-graph",
-                                help='Full path to the input graph ',
-                                dest='input_graph', default=None)
+        arg_parser.add_argument(
+            '-g', "--in-graph", help='Full path to the input graph ',
+            dest='input_graph', default=None)
 
         return arg_parser.parse_known_args(args)
 
