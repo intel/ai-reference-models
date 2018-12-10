@@ -48,7 +48,7 @@ if [ ${MODE} != "inference" ]; then
   exit 1
 fi
 
-if [ ${NOINSTALL} != "True" ]; then
+if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
   apt update
   apt full-upgrade -y
