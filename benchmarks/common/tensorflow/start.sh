@@ -153,7 +153,7 @@ function deep-speech() {
     pip install -r "${MOUNT_BENCHMARK}/speech_recognition/tensorflow/deep-speech/requirements.txt"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     apt-get install swig libsox-dev -y
-    
+
     build_whls=true
     # If whl exists and older than 1 day, install existing whl files
     if ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl 1> /dev/null 2>&1 &&
@@ -165,9 +165,9 @@ function deep-speech() {
       if [ ! $deepspeech_whl -ot 1_day_ago ]; then
         pip install -I $deepspeech_whl
         pip install -I $decoder_whl
-        build_whls=false 
+        build_whls=false
       fi
-      rm ./1_day_ago 
+      rm ./1_day_ago
     fi
 
     if [ "$build_whls" = true ]; then
@@ -271,6 +271,25 @@ function inceptionv3() {
     echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
     exit 1
   fi
+}
+
+# inception_resnet_v2 model
+function inception_resnet_v2() {
+
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    if [ ${PLATFORM} == "int8" ]; then
+        # For accuracy, dataset location is required, see README for more information.
+        if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+          echo "No Data directory specified, accuracy will not be calculated."
+          exit 1
+        fi
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+
+    else
+        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        exit 1
+    fi
 }
 
 # NCF model
@@ -482,6 +501,8 @@ elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
+elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
+  inception_resnet_v2
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then

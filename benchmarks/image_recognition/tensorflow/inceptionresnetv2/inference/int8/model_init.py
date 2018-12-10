@@ -1,6 +1,27 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from common.base_model_init import BaseModelInitializer
 
 import os
 
@@ -9,7 +30,7 @@ os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 os.environ["KMP_SETTINGS"] = "1"
 
 
-class ModelInitializer:
+class ModelInitializer(BaseModelInitializer):
   """Detect the platform information and set necessary variables before launching the model"""
 
   def __init__(self, args, custom_args=[], platform_util=None):
@@ -75,13 +96,9 @@ class ModelInitializer:
                                ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
                                ' --batch_size=' + str(self.args.batch_size)
 
-    if self.args.verbose:
-      print('Received these args: {}'.format(self.args))
 
   def run(self):
     """run command to enable model benchmark or accuracy measurement"""
 
     if self.inference_command:
-      if self.args.verbose:
-        print("Run model here.", self.inference_command)
-      os.system(self.inference_command)
+      self.run_command(self.inference_command)
