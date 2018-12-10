@@ -87,7 +87,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         super(LaunchBenchmark, self).validate_args(args)
 
         # validate that we support this framework by checking folder names
-        if glob.glob("*/{}".format(args.framework)) == []:
+        benchmark_dir = os.path.dirname(os.path.realpath(__file__))
+        if glob.glob("{}/*/{}".format(benchmark_dir, args.framework)) == []:
             raise ValueError("The specified framework is not supported: {}".
                              format(args.framework))
 
