@@ -199,6 +199,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env CHECKPOINT_DIRECTORY=/checkpoints "
                     "--env BENCHMARK_ONLY={} "
                     "--env ACCURACY_ONLY={} "
+                    # by default we will install, user needs to set this
+                    # manually after they get into `--debug` mode
+                    # since they need to run one time without this flag
+                    # to get stuff installed
+                    "--env NOINSTALL=False"
                     .format(args.data_location, args.checkpoint,
                             args.model_source_dir, intelai_models,
                             benchmark_scripts, args.single_socket,
