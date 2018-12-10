@@ -217,6 +217,8 @@ function fastrcnn() {
             exit 1
         fi
 
+        export PYTHONPATH=$PYTHONPATH:`pwd`/${MOUNT_EXTERNAL_MODELS_SOURCE}/research:`pwd`/${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+
         if [ ${NOINSTALL} != "True" ]; then
           # install dependencies
           pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
@@ -227,7 +229,6 @@ function fastrcnn() {
           echo "Compiling protoc files"
           ./bin/protoc object_detection/protos/*.proto --python_out=.
 
-          export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
           # install cocoapi
           cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
           echo "Installing COCO API"
@@ -349,52 +350,53 @@ function resnet50() {
 
 # R-FCN (ResNet101) model
 function rfcn() {
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
-      original_dir=$(pwd)
+  export PYTHONPATH=$PYTHONPATH:`pwd`/${MOUNT_EXTERNAL_MODELS_SOURCE}/research:`pwd`/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-      # install protoc v3.3.0, if necessary, then compile protoc files
-      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-      echo "Compiling protoc files"
-      ./bin/protoc object_detection/protos/*.proto --python_out=.
+  if [ ${NOINSTALL} != "True" ]; then
+    # install dependencies
+    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+    original_dir=$(pwd)
 
-      export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
-      # install cocoapi
-      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-      echo "Installing COCO API"
-      make
-      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
-    fi
+    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+    # install protoc v3.3.0, if necessary, then compile protoc files
+    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+    echo "Compiling protoc files"
+    ./bin/protoc object_detection/protos/*.proto --python_out=.
 
-    if [ ${PLATFORM} == "int8" ]; then
-        number_of_steps_arg=""
-        split_arg=""
+    # install cocoapi
+    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
+    echo "Installing COCO API"
+    make
+    cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+  fi
 
-        if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-            number_of_steps_arg="--number_of_steps=${number_of_steps}"
-        fi
+  if [ ${PLATFORM} == "int8" ]; then
+      number_of_steps_arg=""
+      split_arg=""
 
-        if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-            split_arg="--split=${split}"
-        fi
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+          number_of_steps_arg="--number_of_steps=${number_of_steps}"
+      fi
 
-        CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
+      if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+          split_arg="--split=${split}"
+      fi
 
-    elif [ ${PLATFORM} == "fp32" ]; then
-        if [[ -z "${config_file}" ]]; then
-            echo "R-FCN requires -- config_file arg to be defined"
-            exit 1
-        fi
+      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
 
-        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --config_file=${config_file} --data-location=${DATASET_LOCATION}"
-     else
-        echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
-    fi
-    cd $original_dir
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  elif [ ${PLATFORM} == "fp32" ]; then
+      if [[ -z "${config_file}" ]]; then
+          echo "R-FCN requires -- config_file arg to be defined"
+          exit 1
+      fi
+
+      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+      --config_file=${config_file} --data-location=${DATASET_LOCATION}"
+   else
+      echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+  fi
+  cd $original_dir
+  PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
 # SqueezeNet model
@@ -417,6 +419,8 @@ function ssd_mobilenet() {
       echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
     fi
 
+    export PYTHONPATH=$PYTHONPATH:$(pwd)/${MOUNT_EXTERNAL_MODELS_SOURCE}/research:$(pwd)/slim
+
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
@@ -428,8 +432,6 @@ function ssd_mobilenet() {
 
       echo "Compiling protoc files"
       ./bin/protoc object_detection/protos/*.proto --python_out=.
-
-      export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim
 
       popd
     fi
