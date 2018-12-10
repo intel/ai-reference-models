@@ -40,6 +40,7 @@ echo "    BATCH_SIZE: ${BATCH_SIZE}"
 echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
+echo "    NOINSTALL: ${NOINSTALL}"
 
 # Only inference is supported right now
 if [ ${MODE} != "inference" ]; then
@@ -47,13 +48,15 @@ if [ ${MODE} != "inference" ]; then
   exit 1
 fi
 
-## install common dependencies
-apt update
-apt full-upgrade -y
-apt-get install python-tk numactl -y
-apt install -y libsm6 libxext6
-pip install --upgrade pip
-pip install requests
+if [ ${NOINSTALL} != "True" ]; then
+  ## install common dependencies
+  apt update
+  apt full-upgrade -y
+  apt-get install python-tk numactl -y
+  apt install -y libsm6 libxext6
+  pip install --upgrade pip
+  pip install requests
+fi
 
 single_socket_arg=""
 if [ ${SINGLE_SOCKET} == "True" ]; then
@@ -150,49 +153,52 @@ function deep-speech() {
       exit 1
     fi
 
-    pip install -r "${MOUNT_BENCHMARK}/speech_recognition/tensorflow/deep-speech/requirements.txt"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    apt-get install swig libsox-dev -y
-    
-    build_whls=true
-    # If whl exists and older than 1 day, install existing whl files
-    if ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl 1> /dev/null 2>&1 &&
-       ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/python/dist/*whl 1> /dev/null 2>&1
-    then
-      deepspeech_whl=$(ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl)
-      decoder_whl=$(ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/python/dist/*whl)
-      touch -d '1 days ago' 1_day_ago
-      if [ ! $deepspeech_whl -ot 1_day_ago ]; then
-        pip install -I $deepspeech_whl
-        pip install -I $decoder_whl
-        build_whls=false 
-      fi
-      rm ./1_day_ago 
-    fi
 
-    if [ "$build_whls" = true ]; then
-      original_dir=$(pwd)
-      # remove untracked files in model source directory so that it doesnt
-      # interfere with bazel & decoder build
-      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech && git clean -fd && cd  ..
-      export build_dir="$PWD/mozilla-build"
-      export TFDIR="$PWD/tensorflow/"
-      cd tensorflow
-      ln -s ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client .
-      \r | ./configure
-      bazel --output_base=$build_dir build --config=monolithic -c opt --copt -D_GLIBCXX_USE_CXX11_ABI=0 \
-          --copt -mfma --copt -mavx2 --copt -march=broadwell --copt=-O3 --copt=-fvisibility=hidden \
-          //native_client:libdeepspeech.so //native_client:generate_trie
-      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client
-      make deepspeech
-      PREFIX=/usr/local make install
-      cd ./python/
-      make bindings
-      pip install --upgrade dist/deepspeech*.whl
-      cd ../ctcdecode
-      make bindings NUM_PROCESSES=8
-      pip install -I dist/*.whl
-      cd $original_dir
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r "${MOUNT_BENCHMARK}/speech_recognition/tensorflow/deep-speech/requirements.txt"
+      apt-get install swig libsox-dev -y
+
+      build_whls=true
+      # If whl exists and older than 1 day, install existing whl files
+      if ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl 1> /dev/null 2>&1 &&
+         ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/python/dist/*whl 1> /dev/null 2>&1
+      then
+        deepspeech_whl=$(ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl)
+        decoder_whl=$(ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/python/dist/*whl)
+        touch -d '1 days ago' 1_day_ago
+        if [ ! $deepspeech_whl -ot 1_day_ago ]; then
+          pip install -I $deepspeech_whl
+          pip install -I $decoder_whl
+          build_whls=false
+        fi
+        rm ./1_day_ago
+      fi
+
+      if [ "$build_whls" = true ]; then
+        original_dir=$(pwd)
+        # remove untracked files in model source directory so that it doesnt
+        # interfere with bazel & decoder build
+        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech && git clean -fd && cd  ..
+        export build_dir="$PWD/mozilla-build"
+        export TFDIR="$PWD/tensorflow/"
+        cd tensorflow
+        ln -s ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client .
+        \r | ./configure
+        bazel --output_base=$build_dir build --config=monolithic -c opt --copt -D_GLIBCXX_USE_CXX11_ABI=0 \
+            --copt -mfma --copt -mavx2 --copt -march=broadwell --copt=-O3 --copt=-fvisibility=hidden \
+            //native_client:libdeepspeech.so //native_client:generate_trie
+        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client
+        make deepspeech
+        PREFIX=/usr/local make install
+        cd ./python/
+        make bindings
+        pip install --upgrade dist/deepspeech*.whl
+        cd ../ctcdecode
+        make bindings NUM_PROCESSES=8
+        pip install -I dist/*.whl
+        cd $original_dir
+      fi
     fi
     CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
     --data-location=${DATASET_LOCATION} \
@@ -210,23 +216,26 @@ function fastrcnn() {
             echo "Fast R-CNN requires -- config_file arg to be defined"
             exit 1
         fi
-        # install dependencies
-        pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
-        original_dir=$(pwd)
-        cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-        # install protoc v3.3.0, if necessary, then compile protoc files
-        install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-        echo "Compiling protoc files"
-        ./bin/protoc object_detection/protos/*.proto --python_out=.
 
-        export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
-        # install cocoapi
-        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-        echo "Installing COCO API"
-        make
-        cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+        if [ ${NOINSTALL} != "True" ]; then
+          # install dependencies
+          pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
+          original_dir=$(pwd)
+          cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+          # install protoc v3.3.0, if necessary, then compile protoc files
+          install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+          echo "Compiling protoc files"
+          ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+          export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
+          # install cocoapi
+          cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
+          echo "Installing COCO API"
+          make
+          cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+        fi
+
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
         cd $original_dir
         CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
         --data-location=${DATASET_LOCATION} \
@@ -282,7 +291,10 @@ function ncf() {
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
+
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
+    fi
 
     CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
     --data-location=${DATASET_LOCATION}"
@@ -337,22 +349,24 @@ function resnet50() {
 
 # R-FCN (ResNet101) model
 function rfcn() {
-    # install dependencies
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
-    original_dir=$(pwd)
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+      original_dir=$(pwd)
 
-    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-    # install protoc v3.3.0, if necessary, then compile protoc files
-    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-    echo "Compiling protoc files"
-    ./bin/protoc object_detection/protos/*.proto --python_out=.
+      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+      echo "Compiling protoc files"
+      ./bin/protoc object_detection/protos/*.proto --python_out=.
 
-    export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    # install cocoapi
-    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-    echo "Installing COCO API"
-    make
-    cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+      export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      # install cocoapi
+      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
+      echo "Installing COCO API"
+      make
+      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+    fi
 
     if [ ${PLATFORM} == "int8" ]; then
         number_of_steps_arg=""
@@ -399,25 +413,26 @@ function squeezenet() {
 # SSD-MobileNet model
 function ssd_mobilenet() {
   if [ ${PLATFORM} == "fp32" ]; then
-    # install dependencies
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
-
-    original_dir=$(pwd)
-    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-
     if [ ${BATCH_SIZE} != "-1" ]; then
       echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
     fi
 
-    # install protoc, if necessary, then compile protoc files
-    install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
 
-    echo "Compiling protoc files"
-    ./bin/protoc object_detection/protos/*.proto --python_out=.
+      pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
 
-    export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim
+      # install protoc, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
 
-    cd $original_dir
+      echo "Compiling protoc files"
+      ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+      export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim
+
+      popd
+    fi
 
     CMD="${CMD} --in-graph=${IN_GRAPH} \
     --data-location=${DATASET_LOCATION}"
@@ -431,10 +446,6 @@ function ssd_mobilenet() {
 # Wavenet model
 function wavenet() {
   if [ ${PLATFORM} == "fp32" ]; then
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
-    pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-
     if [[ -z "${checkpoint_name}" ]]; then
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
@@ -443,6 +454,12 @@ function wavenet() {
     if [[ -z "${sample}" ]]; then
       echo "wavenet requires -- sample arg to be defined"
       exit 1
+    fi
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
     fi
 
     CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
@@ -459,16 +476,19 @@ function wavenet() {
 # Wide & Deep model
 function wide_deep() {
     if [ ${PLATFORM} == "fp32" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+      if [ ${NOINSTALL} != "True" ]; then
         # install dependencies
         pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
-        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      fi
 
-        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --data-location=${DATASET_LOCATION}"
-        CMD=${CMD} run_model
+      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+      --data-location=${DATASET_LOCATION}"
+      CMD=${CMD} run_model
     else
-        echo "PLATFORM=${PLATFORM} not supported for ${MODEL_NAME}"
-        exit 1
+      echo "PLATFORM=${PLATFORM} not supported for ${MODEL_NAME}"
+      exit 1
     fi
 }
 

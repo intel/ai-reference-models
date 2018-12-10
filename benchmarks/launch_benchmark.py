@@ -78,6 +78,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             '-g', "--in-graph", help='Full path to the input graph ',
             dest='input_graph', default=None)
 
+        arg_parser.add_argument(
+            "--debug", help="Launches debug mode which doesn't execute "
+            "start.sh", action="store_true")
+
         return arg_parser.parse_known_args(args)
 
     def validate_args(self, args):
@@ -230,9 +234,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                                  in_graph_dir))
 
         docker_run_cmd = "docker run -it {} {} --privileged -u root:root " \
-                         "-w {} {} /bin/bash start.sh"\
+                         "-w {} {} /bin/bash"\
             .format(env_vars, volume_mounts, workspace,
                     args.docker_image)
+        if not args.debug:
+            docker_run_cmd += " start.sh"
 
         if args.verbose:
             print("Docker run command:\n{}".format(docker_run_cmd))
