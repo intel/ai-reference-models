@@ -217,7 +217,7 @@ function fastrcnn() {
             exit 1
         fi
 
-        export PYTHONPATH=$PYTHONPATH:`pwd`/${MOUNT_EXTERNAL_MODELS_SOURCE}/research:`pwd`/${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+        export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
 
         if [ ${NOINSTALL} != "True" ]; then
           # install dependencies
@@ -350,7 +350,7 @@ function resnet50() {
 
 # R-FCN (ResNet101) model
 function rfcn() {
-  export PYTHONPATH=$PYTHONPATH:`pwd`/${MOUNT_EXTERNAL_MODELS_SOURCE}/research:`pwd`/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
+  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies
@@ -419,7 +419,7 @@ function ssd_mobilenet() {
       echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
     fi
 
-    export PYTHONPATH=$PYTHONPATH:$(pwd)/${MOUNT_EXTERNAL_MODELS_SOURCE}/research:$(pwd)/slim
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
