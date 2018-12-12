@@ -25,9 +25,8 @@ node('skx') {
 
             cd intel-models
 
-            # we have py3 errors, just run py2 tests for now
-            # TODO: Fix py3 errors and then enable py3 testing
             make unit_test
+            make unit_test3
             """
         }
         // put benchmarks here later
