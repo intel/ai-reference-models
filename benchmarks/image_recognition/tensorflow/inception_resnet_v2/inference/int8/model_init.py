@@ -23,6 +23,7 @@ from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
 
+import argparse
 import os
 
 os.environ["KMP_BLOCKTIME"] = "1"
@@ -31,74 +32,117 @@ os.environ["KMP_SETTINGS"] = "1"
 
 
 class ModelInitializer(BaseModelInitializer):
-  """Detect the platform information and set necessary variables before launching the model"""
+    """Detect the platform information and set necessary variables before launching the model"""
 
-  def __init__(self, args, custom_args=[], platform_util=None):
+    def __init__(self, args, custom_args=[], platform_util=None):
 
-    self.args = args
-    self.platform_util = platform_util
-    self.inference_command = ''
+        self.args = args
+        self.custom_args = custom_args
+        if not platform_util:
+            raise ValueError("Did not find any platform info.")
+        else:
+            self.platform_util = platform_util
 
-    # use default batch size if -1
-    if self.args.batch_size == -1:
-      self.args.batch_size = 128
+        self.inference_command = ''
 
-    self.args.num_inter_threads = 1
-    self.args.num_intra_threads = self.platform_util.num_cores_per_socket()
+        self.parse_args()
 
-    if not self.args.single_socket:
-      self.args.num_intra_threads *= self.platform_util.num_cpu_sockets()
-      self.args.num_inter_threads = 2
+        # use default batch size if -1
+        if self.args.batch_size == -1:
+            self.args.batch_size = 128
 
-    if self.args.benchmark_only:
-      # benchmark_script = os.path.join(
-      #   os.path.dirname(os.path.realpath(__file__)), "eval_image_classifier_benchmark.py")
+        self.args.num_inter_threads = 1
+        self.args.num_intra_threads = self.platform_util.num_cores_per_socket()
 
-      benchmark_script = os.path.join(self.args.intelai_models,
-                                      self.args.platform, "eval_image_classifier_benchmark.py")
-      self.inference_command = "python " + benchmark_script
+        if not self.args.single_socket:
+            self.args.num_intra_threads *= self.platform_util.num_cpu_sockets()
+            self.args.num_inter_threads = 2
 
-      if self.args.single_socket:
-        socket_id_str = str(self.args.socket_id)
-        self.inference_command = \
-          'numactl --cpunodebind=' + socket_id_str + ' --membind=' + socket_id_str + ' ' + self.inference_command
+        if self.args.benchmark_only:
+            # benchmark_script = os.path.join(
+            #   os.path.dirname(os.path.realpath(__file__)), "eval_image_classifier_benchmark.py")
 
-      os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+            benchmark_script = os.path.join(self.args.intelai_models,
+                                            self.args.platform, "eval_image_classifier_benchmark.py")
+            self.inference_command = "python " + benchmark_script
 
-      self.inference_command = self.inference_command + \
-                               ' --input-graph=' + self.args.input_graph + \
-                               ' --inter-op-parallelism-threads=' + str(self.args.num_inter_threads) + \
-                               ' --intra-op-parallelism-threads=' + str(self.args.num_intra_threads) + \
-                               ' --batch-size=' + str(self.args.batch_size)
+            if self.args.single_socket:
+                socket_id_str = str(self.args.socket_id)
+                self.inference_command = \
+                    'numactl --cpunodebind=' + socket_id_str + ' --membind=' + socket_id_str + ' ' + self.inference_command
 
-    elif self.args.accuracy_only:
-      # accuracy_script = os.path.join(
-      #   os.path.dirname(os.path.realpath(__file__)), "eval_image_classifier_accuracy.py")
+            os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-      accuracy_script = os.path.join(self.args.intelai_models,
-                                     self.args.platform, "eval_image_classifier_accuracy.py")
-      self.inference_command = "python " + accuracy_script
+            self.inference_command = self.inference_command + \
+                                    ' --input-graph=' + self.args.input_graph + \
+                                    ' --inter-op-parallelism-threads=' + str(self.args.num_inter_threads) + \
+                                    ' --intra-op-parallelism-threads=' + str(self.args.num_intra_threads) + \
+                                    ' --batch-size=' + str(self.args.batch_size)
 
-      if self.args.single_socket:
-        socket_id_str = str(self.args.socket_id)
-        self.inference_command = \
-          'numactl --cpunodebind=' + socket_id_str + ' --membind=' + socket_id_str + ' ' + self.inference_command
+        elif self.args.accuracy_only:
+            # accuracy_script = os.path.join(
+            #   os.path.dirname(os.path.realpath(__file__)), "eval_image_classifier_accuracy.py")
 
-      os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+            accuracy_script = os.path.join(self.args.intelai_models,
+                                           self.args.platform, "eval_image_classifier_accuracy.py")
+            self.inference_command = "python " + accuracy_script
 
-      self.inference_command = self.inference_command + \
-                               ' --input_graph=' + self.args.input_graph + \
-                               ' --data_location=' + self.args.data_location + \
-                               ' --input_height=299' + \
-                               ' --input_width=299' + \
-                               ' --num_inter_threads=' + str(self.args.num_inter_threads) + \
-                               ' --num_intra_threads=' + str(self.args.num_intra_threads) + \
-                               ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
-                               ' --batch_size=' + str(self.args.batch_size)
+            if self.args.single_socket:
+                socket_id_str = str(self.args.socket_id)
+                self.inference_command = \
+                    'numactl --cpunodebind=' + socket_id_str + ' --membind=' + socket_id_str + ' ' + self.inference_command
 
+            os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-  def run(self):
-    """run command to enable model benchmark or accuracy measurement"""
+            self.inference_command = self.inference_command + \
+                                   ' --input_graph=' + self.args.input_graph + \
+                                   ' --data_location=' + self.args.data_location + \
+                                   ' --input_height=299' + \
+                                   ' --input_width=299' + \
+                                   ' --num_inter_threads=' + str(self.args.num_inter_threads) + \
+                                   ' --num_intra_threads=' + str(self.args.num_intra_threads) + \
+                                   ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
+                                   ' --batch_size=' + str(self.args.batch_size)
 
-    if self.inference_command:
-      self.run_command(self.inference_command)
+    def parse_args(self):
+        if self.custom_args:
+            parser = argparse.ArgumentParser()
+            parser.add_argument(
+                "--input-height", default=None,
+                dest='input_height', type=int, help="input height")
+            parser.add_argument(
+                "--input-width", default=None,
+                dest='input_width', type=int, help="input width")
+            parser.add_argument(
+                '--warmup-steps', dest='warmup_steps',
+                help='number of warmup steps',
+                type=int, default=10)
+            parser.add_argument(
+                '--steps', dest='steps',
+                help='number of steps',
+                type=int, default=200)
+            parser.add_argument(
+                '--num-inter-threads', dest='num_inter_threads',
+                help='number threads across operators',
+                type=int, default=1)
+            parser.add_argument(
+                '--num-intra-threads', dest='num_intra_threads',
+                help='number threads for an operator',
+                type=int, default=1)
+            parser.add_argument(
+                '--input-layer', dest='input_layer',
+                help='name of input layer',
+                type=str, default=None)
+            parser.add_argument(
+                '--output-layer', dest='output_layer',
+                help='name of output layer',
+                type=str, default=None)
+
+            self.args = parser.parse_args(self.custom_args,
+                                          namespace=self.args)
+
+    def run(self):
+        """run command to enable model benchmark or accuracy measurement"""
+
+        if self.inference_command:
+            self.run_command(self.inference_command)
