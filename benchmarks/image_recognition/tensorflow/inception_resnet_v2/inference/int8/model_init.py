@@ -59,9 +59,6 @@ class ModelInitializer(BaseModelInitializer):
             self.args.num_inter_threads = 2
 
         if self.args.benchmark_only:
-            # benchmark_script = os.path.join(
-            #   os.path.dirname(os.path.realpath(__file__)), "eval_image_classifier_benchmark.py")
-
             benchmark_script = os.path.join(self.args.intelai_models,
                                             self.args.platform, "eval_image_classifier_benchmark.py")
             self.inference_command = "python " + benchmark_script
@@ -80,9 +77,6 @@ class ModelInitializer(BaseModelInitializer):
                                     ' --batch-size=' + str(self.args.batch_size)
 
         elif self.args.accuracy_only:
-            # accuracy_script = os.path.join(
-            #   os.path.dirname(os.path.realpath(__file__)), "eval_image_classifier_accuracy.py")
-
             accuracy_script = os.path.join(self.args.intelai_models,
                                            self.args.platform, "eval_image_classifier_accuracy.py")
             self.inference_command = "python " + accuracy_script
