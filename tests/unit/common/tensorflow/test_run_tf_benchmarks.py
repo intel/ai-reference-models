@@ -75,4 +75,6 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
         model_benchmark.main()
     assert len(mock_run_command.call_args_list) == 1
     call_args = mock_run_command.call_args_list[0][0][0]
-    assert call_args == expected_cmd
+    # python3 argparse parses things in different order than python2
+    # we'll check that the args are all there though
+    assert sorted(call_args.split()) == sorted(expected_cmd.split())

@@ -17,7 +17,7 @@ repository
 2. Download the pre-trained ResNet101 model:
 
     ```
-    $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/resenet101_fp32_pretrained_model.pb
+    $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/resnet101_fp32_pretrained_model.pb
     ```
 3. Download ImageNet dataset.
 
@@ -56,7 +56,7 @@ repository
         --model-name resnet101 
         --batch-size 128  
         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl 
-        --in-graph /home/myuser/trained_models/resenet101_fp32_pretrained_model.pb  
+        --in-graph /home/myuser/trained_models/resnet101_fp32_pretrained_model.pb  
         --single-socket 
         --verbose
     ```
@@ -78,12 +78,12 @@ repository
         steps = 100, 133.594262281 images/sec
         lscpu_path_cmd = command -v lscpu
         lscpu located here: /usr/bin/lscpu
-        Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resenet101_fp32_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
+        Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resnet101_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
         Received these custom args: []
         Current directory: /workspace/benchmarks
-        Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/benchmark.py --batch_size=128 --num_inter_threads=2 --input_graph=/in_graph/resenet101_fp32_model.pb --num_intra_threads=56
+        Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/benchmark.py --batch_size=128 --num_inter_threads=2 --input_graph=/in_graph/resnet101_fp32_pretrained_model.pb --num_intra_threads=56
         PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-        RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --single-socket --verbose --in-graph=/in_graph/resenet101_fp32_model.pb       --data-location=/dataset
+        RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --single-socket --verbose --in-graph=/in_graph/resnet101_fp32_pretrained_model.pb       --data-location=/dataset
         Batch Size: 128
         Ran inference with batch size 128
         Log location outside container: /home/myuser/resnet101/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20181205_194744.log
@@ -99,7 +99,7 @@ repository
         --model-name resnet101 
         --batch-size 100  
         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl 
-        --in-graph /home/myuser/trained_models/resenet101_fp32_pretrained_model.pb
+        --in-graph /home/myuser/trained_models/resnet101_fp32_pretrained_model.pb
         --data-location /home/myuser/imagenet_validation_dataset 
         --accuracy-only  
         --single-socket 
@@ -121,12 +121,12 @@ repository
         Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7640, 0.9289)
         lscpu_path_cmd = command -v lscpu
         lscpu located here: /usr/bin/lscpu
-        Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resenet101_fp32_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
+        Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resnet101_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
         Received these custom args: []
         Current directory: /workspace/benchmarks
-        Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/accuracy.py --batch_size=100 --num_inter_threads=2 --input_graph=/in_graph/resenet101_fp32_model.pb --num_intra_threads=56 --data_location=/dataset
+        Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/accuracy.py --batch_size=100 --num_inter_threads=2 --input_graph=/in_graph/resnet101_fp32_pretrained_model.pb --num_intra_threads=56 --data_location=/dataset
         PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-        RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --single-socket --accuracy-only  --verbose --in-graph=/in_graph/resenet101_fp32_model.pb --data-location=/dataset
+        RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --single-socket --accuracy-only  --verbose --in-graph=/in_graph/resnet101_fp32_pretrained_model.pb --data-location=/dataset
         Batch Size: 100
         Ran inference with batch size 100
         Log location outside container: /home/myuser/resnet101/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20181207_221503.log

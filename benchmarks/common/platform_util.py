@@ -76,7 +76,11 @@ class PlatformUtil:
 
             lscpu_output = subprocess.check_output([lscpu_path],
                                                    stderr=subprocess.STDOUT)
-            cpu_info = lscpu_output.decode('UTF-8').split('\n')
+            # handle python2 vs 3 (bytes vs str type)
+            if isinstance(lscpu_output, bytes):
+                lscpu_output = lscpu_output.decode('utf-8')
+
+            cpu_info = lscpu_output.split('\n')
 
         except Exception as e:
             print("Problem getting CPU info: {}".format(e))

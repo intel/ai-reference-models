@@ -78,6 +78,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             '-g', "--in-graph", help='Full path to the input graph ',
             dest='input_graph', default=None)
 
+        arg_parser.add_argument(
+            "--debug", help="Launches debug mode which doesn't execute "
+            "start.sh", action="store_true")
+
         return arg_parser.parse_known_args(args)
 
     def validate_args(self, args):
@@ -87,7 +91,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         super(LaunchBenchmark, self).validate_args(args)
 
         # validate that we support this framework by checking folder names
-        if glob.glob("*/{}".format(args.framework)) == []:
+        benchmark_dir = os.path.dirname(os.path.realpath(__file__))
+        if glob.glob("{}/*/{}".format(benchmark_dir, args.framework)) == []:
             raise ValueError("The specified framework is not supported: {}".
                              format(args.framework))
 
@@ -194,6 +199,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env CHECKPOINT_DIRECTORY=/checkpoints "
                     "--env BENCHMARK_ONLY={} "
                     "--env ACCURACY_ONLY={} "
+                    # by default we will install, user needs to set this
+                    # manually after they get into `--debug` mode
+                    # since they need to run one time without this flag
+                    # to get stuff installed
+                    "--env NOINSTALL=False"
                     .format(args.data_location, args.checkpoint,
                             args.model_source_dir, intelai_models,
                             benchmark_scripts, args.single_socket,
@@ -229,9 +239,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                                  in_graph_dir))
 
         docker_run_cmd = "docker run -it {} {} --privileged -u root:root " \
-                         "-w {} {} /bin/bash start.sh"\
+                         "-w {} {} /bin/bash"\
             .format(env_vars, volume_mounts, workspace,
                     args.docker_image)
+        if not args.debug:
+            docker_run_cmd += " start.sh"
 
         if args.verbose:
             print("Docker run command:\n{}".format(docker_run_cmd))
