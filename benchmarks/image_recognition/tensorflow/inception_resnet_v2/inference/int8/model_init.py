@@ -43,7 +43,7 @@ class ModelInitializer(BaseModelInitializer):
         else:
             self.platform_util = platform_util
 
-        self.inference_command = ''
+        self.cmd = ''
 
         self.parse_args()
 
@@ -63,18 +63,18 @@ class ModelInitializer(BaseModelInitializer):
             run_script = os.path.join(self.args.intelai_models,
                                       self.args.platform,
                                       "eval_image_classifier_benchmark.py")
-            self.inference_command = "python " + run_script
+            self.cmd = "python " + run_script
 
             if self.args.single_socket:
                 socket_id_str = str(self.args.socket_id)
-                self.inference_command = \
+                self.cmd = \
                     'numactl --cpunodebind=' + socket_id_str + \
                     ' --membind=' + socket_id_str + ' ' + \
-                    self.inference_command
+                    self.cmd
 
             os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-            self.inference_command = self.inference_command + \
+            self.cmd = self.cmd + \
                                      ' --input-graph=' + \
                                      self.args.input_graph + \
                                      ' --inter-op-parallelism-threads=' + \
@@ -88,19 +88,19 @@ class ModelInitializer(BaseModelInitializer):
             run_script = os.path.join(self.args.intelai_models,
                                       self.args.platform,
                                       "eval_image_classifier_accuracy.py")
-            self.inference_command = "python " + run_script
+            self.cmd = "python " + run_script
 
             if self.args.single_socket:
                 socket_id_str = str(self.args.socket_id)
-                self.inference_command = \
+                self.cmd = \
                     'numactl --cpunodebind=' + socket_id_str + \
                     ' --membind=' + socket_id_str + ' ' + \
-                    self.inference_command
+                    self.cmd
 
             os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-            self.inference_command = \
-                self.inference_command + \
+            self.cmd = \
+                self.cmd + \
                 ' --input_graph=' + self.args.input_graph + \
                 ' --data_location=' + self.args.data_location + \
                 ' --input_height=299' + ' --input_width=299' + \
@@ -149,5 +149,5 @@ class ModelInitializer(BaseModelInitializer):
     def run(self):
         """run command to enable model benchmark or accuracy measurement"""
 
-        if self.inference_command:
-            self.run_command(self.inference_command)
+        if self.cmd:
+            self.run_command(self.cmd)
