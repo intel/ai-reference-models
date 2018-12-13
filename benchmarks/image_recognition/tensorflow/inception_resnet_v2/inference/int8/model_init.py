@@ -32,7 +32,7 @@ os.environ["KMP_SETTINGS"] = "1"
 
 
 class ModelInitializer(BaseModelInitializer):
-    """Detect the platform information and set necessary variables before launching the model"""
+    """Model initializer for Inception ResNet V2 int8 inference"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
 
@@ -51,52 +51,63 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        self.args.num_inter_threads = 1
-        self.args.num_intra_threads = self.platform_util.num_cores_per_socket()
+        self.args.num_intra_threads = \
+            self.platform_util.num_cores_per_socket()
 
         if not self.args.single_socket:
-            self.args.num_intra_threads *= self.platform_util.num_cpu_sockets()
+            self.args.num_intra_threads *= \
+                self.platform_util.num_cpu_sockets()
             self.args.num_inter_threads = 2
 
         if self.args.benchmark_only:
-            benchmark_script = os.path.join(self.args.intelai_models,
-                                            self.args.platform, "eval_image_classifier_benchmark.py")
-            self.inference_command = "python " + benchmark_script
+            run_script = os.path.join(self.args.intelai_models,
+                                      self.args.platform,
+                                      "eval_image_classifier_benchmark.py")
+            self.inference_command = "python " + run_script
 
             if self.args.single_socket:
                 socket_id_str = str(self.args.socket_id)
                 self.inference_command = \
-                    'numactl --cpunodebind=' + socket_id_str + ' --membind=' + socket_id_str + ' ' + self.inference_command
+                    'numactl --cpunodebind=' + socket_id_str + \
+                    ' --membind=' + socket_id_str + ' ' + \
+                    self.inference_command
 
             os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
             self.inference_command = self.inference_command + \
-                                    ' --input-graph=' + self.args.input_graph + \
-                                    ' --inter-op-parallelism-threads=' + str(self.args.num_inter_threads) + \
-                                    ' --intra-op-parallelism-threads=' + str(self.args.num_intra_threads) + \
-                                    ' --batch-size=' + str(self.args.batch_size)
+                                     ' --input-graph=' + \
+                                     self.args.input_graph + \
+                                     ' --inter-op-parallelism-threads=' + \
+                                     str(self.args.num_inter_threads) + \
+                                     ' --intra-op-parallelism-threads=' + \
+                                     str(self.args.num_intra_threads) + \
+                                     ' --batch-size=' + \
+                                     str(self.args.batch_size)
 
         elif self.args.accuracy_only:
-            accuracy_script = os.path.join(self.args.intelai_models,
-                                           self.args.platform, "eval_image_classifier_accuracy.py")
-            self.inference_command = "python " + accuracy_script
+            run_script = os.path.join(self.args.intelai_models,
+                                      self.args.platform,
+                                      "eval_image_classifier_accuracy.py")
+            self.inference_command = "python " + run_script
 
             if self.args.single_socket:
                 socket_id_str = str(self.args.socket_id)
                 self.inference_command = \
-                    'numactl --cpunodebind=' + socket_id_str + ' --membind=' + socket_id_str + ' ' + self.inference_command
+                    'numactl --cpunodebind=' + socket_id_str + \
+                    ' --membind=' + socket_id_str + ' ' + \
+                    self.inference_command
 
             os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-            self.inference_command = self.inference_command + \
-                                   ' --input_graph=' + self.args.input_graph + \
-                                   ' --data_location=' + self.args.data_location + \
-                                   ' --input_height=299' + \
-                                   ' --input_width=299' + \
-                                   ' --num_inter_threads=' + str(self.args.num_inter_threads) + \
-                                   ' --num_intra_threads=' + str(self.args.num_intra_threads) + \
-                                   ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
-                                   ' --batch_size=' + str(self.args.batch_size)
+            self.inference_command = \
+                self.inference_command + \
+                ' --input_graph=' + self.args.input_graph + \
+                ' --data_location=' + self.args.data_location + \
+                ' --input_height=299' + ' --input_width=299' + \
+                ' --num_inter_threads=' + str(self.args.num_inter_threads) + \
+                ' --num_intra_threads=' + str(self.args.num_intra_threads) + \
+                ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
+                ' --batch_size=' + str(self.args.batch_size)
 
     def parse_args(self):
         if self.custom_args:
