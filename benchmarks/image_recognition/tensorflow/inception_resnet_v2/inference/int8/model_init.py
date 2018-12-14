@@ -61,8 +61,8 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
-                        self.args.platform,
-                        "eval_image_classifier_benchmark.py")
+                                        self.args.platform,
+                                        "eval_image_classifier_benchmark.py")
             self.cmd = "python " + run_script
 
             if self.args.single_socket:
@@ -84,8 +84,8 @@ class ModelInitializer(BaseModelInitializer):
 
         elif self.args.accuracy_only:
             run_script = os.path.join(self.args.intelai_models,
-                        self.args.platform,
-                        "eval_image_classifier_accuracy.py")
+                                        self.args.platform,
+                                        "eval_image_classifier_accuracy.py")
             self.cmd = "python " + run_script
 
             if self.args.single_socket:
