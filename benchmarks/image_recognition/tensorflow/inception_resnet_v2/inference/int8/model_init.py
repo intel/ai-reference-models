@@ -23,7 +23,6 @@ from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
 
-import argparse
 import os
 
 os.environ["KMP_BLOCKTIME"] = "1"
@@ -45,12 +44,11 @@ class ModelInitializer(BaseModelInitializer):
 
         self.cmd = ''
 
-        self.parse_args()
-
         # use default batch size if -1
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
+        self.args.num_inter_threads = 1
         self.args.num_intra_threads = \
             self.platform_util.num_cores_per_socket()
 
@@ -106,43 +104,6 @@ class ModelInitializer(BaseModelInitializer):
                 ' --num_intra_threads=' + str(self.args.num_intra_threads) + \
                 ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
                 ' --batch_size=' + str(self.args.batch_size)
-
-    def parse_args(self):
-        if self.custom_args:
-            parser = argparse.ArgumentParser()
-            parser.add_argument(
-                "--input-height", default=None,
-                dest='input_height', type=int, help="input height")
-            parser.add_argument(
-                "--input-width", default=None,
-                dest='input_width', type=int, help="input width")
-            parser.add_argument(
-                '--warmup-steps', dest='warmup_steps',
-                help='number of warmup steps',
-                type=int, default=10)
-            parser.add_argument(
-                '--steps', dest='steps',
-                help='number of steps',
-                type=int, default=200)
-            parser.add_argument(
-                '--num-inter-threads', dest='num_inter_threads',
-                help='number threads across operators',
-                type=int, default=1)
-            parser.add_argument(
-                '--num-intra-threads', dest='num_intra_threads',
-                help='number threads for an operator',
-                type=int, default=1)
-            parser.add_argument(
-                '--input-layer', dest='input_layer',
-                help='name of input layer',
-                type=str, default=None)
-            parser.add_argument(
-                '--output-layer', dest='output_layer',
-                help='name of output layer',
-                type=str, default=None)
-
-            self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
 
     def run(self):
         """run command to enable model benchmark or accuracy measurement"""
