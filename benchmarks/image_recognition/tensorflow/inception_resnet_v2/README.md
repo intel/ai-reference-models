@@ -4,9 +4,6 @@ This document has instructions for how to run Inception ResNet V2 for the
 following modes/platforms:
 * [Int8 inference](#int8-inference-instructions)
 
-Benchmarking instructions and scripts for Inception ResNet V2 model inference on 'Int8'
-platforms.
-
 ## Int8 Inference Instructions
 
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
@@ -68,13 +65,11 @@ The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 platform, and docker image to use, along with your path to the ImageNet
-TF Records that you generated in step 5.
+TF Records that you generated in step 4.
 
-Substitute in your own `--data-location` (from step 5, for accuracy
-only), `--in-graph` pre-trained model file path (from step 3),
-`--model-source-dir` for the location where you cloned the
-[tensorflow/models](https://github.com/tensorflow/models) repo
-(from step 2), and the name/tag for your docker image (from step 4).
+Substitute in your own `--data-location` (from step 4, for accuracy
+only), `--in-graph` pre-trained model file path (from step 2),
+and the name/tag for your docker image (from step 3).
 
 Inception ResNet V2 can be run for accuracy, latency benchmarking, or throughput
 benchmarking. Use one of the following examples below, depending on
@@ -93,7 +88,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/final_int8_inception_resnet_v2_graph.pb \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
 For latency (using `--benchmark-only`, `--single-socket` and `--batch-size 1`):
@@ -108,7 +103,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --single-socket \
     --docker-image tf_int8_docker_image \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb
 ```
 
 For throughput (using `--benchmark-only`, `--single-socket` and `--batch-size 128`):
@@ -123,7 +118,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --single-socket \
     --docker-image tf_int8_docker_image \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
