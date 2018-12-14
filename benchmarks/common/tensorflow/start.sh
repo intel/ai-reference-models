@@ -317,7 +317,9 @@ function resnet101() {
       exit 1
     fi
 
-    if [ ${PLATFORM} == "fp32" ]; then
+    if [ ${PLATFORM} == "int8" ]; then
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    elif [ ${PLATFORM} == "fp32" ]; then
       CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
