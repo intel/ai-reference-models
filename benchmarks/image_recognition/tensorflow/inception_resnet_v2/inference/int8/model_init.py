@@ -61,8 +61,8 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
-                                      self.args.platform,
-                                      "eval_image_classifier_benchmark.py")
+                                        self.args.platform,
+                                        "eval_image_classifier_benchmark.py")
             self.cmd = "python " + run_script
 
             if self.args.single_socket:
@@ -74,20 +74,18 @@ class ModelInitializer(BaseModelInitializer):
 
             os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-            self.cmd = self.cmd + \
-                                     ' --input-graph=' + \
-                                     self.args.input_graph + \
-                                     ' --inter-op-parallelism-threads=' + \
-                                     str(self.args.num_inter_threads) + \
-                                     ' --intra-op-parallelism-threads=' + \
-                                     str(self.args.num_intra_threads) + \
-                                     ' --batch-size=' + \
-                                     str(self.args.batch_size)
+            self.cmd = self.cmd + ' --input-graph=' + \
+                    self.args.input_graph + \
+                    ' --inter-op-parallelism-threads=' + \
+                    str(self.args.num_inter_threads) + \
+                    ' --intra-op-parallelism-threads=' + \
+                    str(self.args.num_intra_threads) + \
+                    ' --batch-size=' + str(self.args.batch_size)
 
         elif self.args.accuracy_only:
             run_script = os.path.join(self.args.intelai_models,
-                                      self.args.platform,
-                                      "eval_image_classifier_accuracy.py")
+                                self.args.platform,
+                                "eval_image_classifier_accuracy.py")
             self.cmd = "python " + run_script
 
             if self.args.single_socket:
