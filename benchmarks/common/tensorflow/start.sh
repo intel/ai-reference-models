@@ -283,6 +283,18 @@ function inceptionv3() {
   fi
 }
 
+# mobilenet_v1 model
+function mobilenet_v1() {
+  if [ ${PLATFORM} == "fp32" ]; then
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # NCF model
 function ncf() {
   if [ ${PLATFORM} == "fp32" ]; then
@@ -506,6 +518,8 @@ elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
+elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
+  mobilenet_v1
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then
