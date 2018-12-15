@@ -8,11 +8,23 @@ node('skx') {
         dir( 'intel-models' ) {
             checkout scm
         }
+        stage('Install dependencies') {
+            sh """
+            #!/bin/bash -x
+            set -e
+            sudo pip install --upgrade pip
+            sudo pip install virtualenv
+
+            # don't know OS, so trying both apt-get and yum install 
+            sudo apt-get install -y python3-dev || true
+            sudo apt-get install -y python3-venv || true
+            sudo yum install -y python36-devel.x86_64 || true
+            """
+        }
         stage('Style tests') {
             sh """
             #!/bin/bash -x
             set -e
-            sudo easy_install virtualenv
 
             cd intel-models
 
