@@ -28,7 +28,7 @@ $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/incept
 [how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
 
 4. If you would like to run Inception ResNet V2 inference and test for
-accurancy, you will need the full ImageNet dataset. Benchmarking for latency
+accuracy, you will need the full ImageNet dataset. Benchmarking for latency
 and throughput do not require the ImageNet dataset.
 
 Register and download the
