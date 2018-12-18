@@ -49,7 +49,7 @@ if [ ${MODE} != "inference" ]; then
 fi
 
 if [[ ${NOINSTALL} != "True" ]]; then
-  ## install comgmon dependencies
+  ## install common dependencies
   apt update
   apt full-upgrade -y
   apt-get install python-tk numactl -y
@@ -286,20 +286,20 @@ function inceptionv3() {
 # inception_resnet_v2 model
 function inception_resnet_v2() {
 
-    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
-    if [ ${PLATFORM} == "int8" ]; then
-        # For accuracy, dataset location is required, see README for more information.
-        if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
-          echo "No Data directory specified, accuracy will not be calculated."
-          exit 1
-        fi
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-
-    else
-        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
-        exit 1
+  if [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
     fi
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
 }
 
 # NCF model
