@@ -283,6 +283,21 @@ function inceptionv3() {
   fi
 }
 
+# inceptionv4 model
+function inceptionv4() {
+  if [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required
+    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No dataset directory specified, accuracy cannot be calculated."
+      exit 1
+    fi
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # mobilenet_v1 model
 function mobilenet_v1() {
   if [ ${PLATFORM} == "fp32" ]; then
@@ -518,6 +533,8 @@ elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
+elif [ ${MODEL_NAME} == "inceptionv4" ]; then
+  inceptionv4
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
 elif [ ${MODEL_NAME} == "ncf" ]; then
