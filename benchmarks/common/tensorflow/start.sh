@@ -292,7 +292,33 @@ function inception_resnet_v2() {
       exit 1
     fi
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
 
+# inceptionv4 model
+function inceptionv4() {
+  if [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required
+    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No dataset directory specified, accuracy cannot be calculated."
+      exit 1
+    fi
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# mobilenet_v1 model
+function mobilenet_v1() {
+  if [ ${PLATFORM} == "fp32" ]; then
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
     exit 1
@@ -524,6 +550,10 @@ elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
   inception_resnet_v2
+elif [ ${MODEL_NAME} == "inceptionv4" ]; then
+  inceptionv4
+elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
+  mobilenet_v1
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then

@@ -1,4 +1,4 @@
-# Intel Optimized Models
+# Model Zoo for Intel Architecture
 
 This repository containes number of models optimized by Intel to run inferences on Xeon Processors.
 
