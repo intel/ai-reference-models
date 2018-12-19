@@ -91,7 +91,7 @@ class ModelInitializer(BaseModelInitializer):
                 " --num_intra_threads=" + str(self.args.num_intra_threads) + \
                 " --output_layer=InceptionResnetV2/Logits/Predictions" + \
                 " --batch_size=" + str(self.args.batch_size)
-
+            
         os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
         self.cmd = self.cmd + run_script + cmd_args
 
