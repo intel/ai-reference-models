@@ -37,10 +37,7 @@ class ModelInitializer(BaseModelInitializer):
 
         self.args = args
         self.custom_args = custom_args
-        if not platform_util:
-            raise ValueError("Did not find any platform info.")
-        else:
-            self.platform_util = platform_util
+        self.platform_util = platform_util
 
         self.cmd = ''
 
@@ -48,62 +45,111 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        self.args.num_inter_threads = 1
-        self.args.num_intra_threads = \
-            self.platform_util.num_cores_per_socket()
+        # self.args.num_inter_threads = 1
+        # self.args.num_intra_threads = \
+        #     self.platform_util.num_cores_per_socket()
+        #
+        # if not self.args.single_socket:
+        #     self.args.num_intra_threads *= \
+        #         self.platform_util.num_cpu_sockets()
+        #     self.args.num_inter_threads = 2
 
-        if not self.args.single_socket:
-            self.args.num_intra_threads *= \
-                self.platform_util.num_cpu_sockets()
-            self.args.num_inter_threads = 2
+
+###
+        num_cores_per_socket = platform_util.num_cores_per_socket()
+
+        if self.args.single_socket:
+            self.args.num_inter_threads = 1
+            self.args.num_intra_threads = num_cores_per_socket \
+                if self.args.num_cores == -1 else self.args.num_cores
+
+        else:
+            self.args.num_inter_threads = self.platform_util.num_cpu_sockets()
+
+            if self.args.num_cores == -1:
+                self.args.num_intra_threads = \
+                    int(self.platform_util.num_cores_per_socket() *
+                        self.platform_util.num_cpu_sockets())
+
+            else:
+                self.args.num_intra_threads = self.args.num_cores
+
+####
+
+        if self.args.single_socket:
+            socket_id_str = str(self.args.socket_id)
+            self.cmd = "numactl --cpunodebind=" + socket_id_str + \
+                       " --membind=" + socket_id_str + " python "
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
                                       self.args.platform,
                                       "eval_image_classifier_benchmark.py")
-            self.cmd = "python " + run_script
 
-            if self.args.single_socket:
-                socket_id_str = str(self.args.socket_id)
-                self.cmd = \
-                    'numactl --cpunodebind=' + socket_id_str + \
-                    ' --membind=' + socket_id_str + ' ' + \
-                    self.cmd
-
-            os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
-
-            self.cmd = self.cmd + ' --input-graph=' + \
-                self.args.input_graph + \
-                ' --inter-op-parallelism-threads=' + \
+            cmd_args = " --input-graph=" + self.args.input_graph + \
+                " --inter-op-parallelism-threads=" + \
                 str(self.args.num_inter_threads) + \
-                ' --intra-op-parallelism-threads=' + \
+                " --intra-op-parallelism-threads=" + \
                 str(self.args.num_intra_threads) + \
-                ' --batch-size=' + str(self.args.batch_size)
+                " --batch-size=" + str(self.args.batch_size)
+
+            # self.cmd = self.cmd + run_script
+
+
+
+            # if self.args.single_socket:
+            #     socket_id_str = str(self.args.socket_id)
+            #     self.cmd = \
+            #         'numactl --cpunodebind=' + socket_id_str + \
+            #         ' --membind=' + socket_id_str + ' ' + \
+            #         self.cmd
+
+            # os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+
+            # self.cmd = self.cmd + " --input-graph=" + \
+            #     self.args.input_graph + \
+            #     " --inter-op-parallelism-threads=" + \
+            #     str(self.args.num_inter_threads) + \
+            #     " --intra-op-parallelism-threads=" + \
+            #     str(self.args.num_intra_threads) + \
+            #     " --batch-size=" + str(self.args.batch_size)
 
         elif self.args.accuracy_only:
             run_script = os.path.join(self.args.intelai_models,
                                       self.args.platform,
                                       "eval_image_classifier_accuracy.py")
-            self.cmd = "python " + run_script
 
-            if self.args.single_socket:
-                socket_id_str = str(self.args.socket_id)
-                self.cmd = \
-                    'numactl --cpunodebind=' + socket_id_str + \
-                    ' --membind=' + socket_id_str + ' ' + \
-                    self.cmd
+            cmd_args = " --input_graph=" + self.args.input_graph + \
+                " --data_location=" + self.args.data_location + \
+                " --input_height=299" + " --input_width=299" + \
+                " --num_inter_threads=" + str(self.args.num_inter_threads) + \
+                " --num_intra_threads=" + str(self.args.num_intra_threads) + \
+                " --output_layer=InceptionResnetV2/Logits/Predictions" + \
+                " --batch_size=" + str(self.args.batch_size)
 
-            os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+            # self.cmd = self.cmd + run_script
 
-            self.cmd = \
-                self.cmd + \
-                ' --input_graph=' + self.args.input_graph + \
-                ' --data_location=' + self.args.data_location + \
-                ' --input_height=299' + ' --input_width=299' + \
-                ' --num_inter_threads=' + str(self.args.num_inter_threads) + \
-                ' --num_intra_threads=' + str(self.args.num_intra_threads) + \
-                ' --output_layer=InceptionResnetV2/Logits/Predictions' + \
-                ' --batch_size=' + str(self.args.batch_size)
+        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        self.cmd = self.cmd + run_script + cmd_args
+
+            # if self.args.single_socket:
+            #     socket_id_str = str(self.args.socket_id)
+            #     self.cmd = \
+            #         'numactl --cpunodebind=' + socket_id_str + \
+            #         ' --membind=' + socket_id_str + ' ' + \
+            #         self.cmd
+
+            # os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+
+            # self.cmd = \
+            #     self.cmd + \
+            #     " --input_graph=" + self.args.input_graph + \
+            #     " --data_location=" + self.args.data_location + \
+            #     " --input_height=299" + " --input_width=299" + \
+            #     " --num_inter_threads=" + str(self.args.num_inter_threads) + \
+            #     " --num_intra_threads=" + str(self.args.num_intra_threads) + \
+            #     " --output_layer=InceptionResnetV2/Logits/Predictions" + \
+            #     " --batch_size=" + str(self.args.batch_size)
 
     def run(self):
         """run command to enable model benchmark or accuracy measurement"""
