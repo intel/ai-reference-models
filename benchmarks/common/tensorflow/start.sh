@@ -285,9 +285,6 @@ function inceptionv3() {
 
 # inception_resnet_v2 model
 function inception_resnet_v2() {
-
-  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
-
   if [ ${PLATFORM} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
     if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
