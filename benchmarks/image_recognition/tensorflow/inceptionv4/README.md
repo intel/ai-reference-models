@@ -147,5 +147,5 @@ Latency: 46.514 ms
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /tmp/dmsuehir/intel-models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20181215_000616.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20181215_000616.log
 ```
