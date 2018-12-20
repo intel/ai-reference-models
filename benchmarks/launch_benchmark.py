@@ -224,6 +224,20 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
             env_vars = "{} --env {}".format(env_vars, custom_arg)
 
+        # Add proxy to env variables if any set on host
+        for environment_proxy_setting in [
+            "http_proxy",
+            "ftp_proxy",
+            "https_proxy",
+            "no_proxy",
+        ]:
+            if not os.environ.get(environment_proxy_setting):
+                continue
+            env_vars += " --env {}={} ".format(
+                environment_proxy_setting,
+                os.environ.get(environment_proxy_setting)
+            )
+
         volume_mounts = ("--volume {}:{} "
                          "--volume {}:{} "
                          "--volume {}:{} "
