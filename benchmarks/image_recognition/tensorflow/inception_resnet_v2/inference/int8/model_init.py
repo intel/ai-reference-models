@@ -39,7 +39,7 @@ class ModelInitializer(BaseModelInitializer):
         self.custom_args = custom_args
         self.platform_util = platform_util
 
-        self.cmd = ''
+        self.cmd = " python "
 
         # use default batch size if -1
         if self.args.batch_size == -1:
@@ -66,7 +66,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.single_socket:
             socket_id_str = str(self.args.socket_id)
             self.cmd = "numactl --cpunodebind=" + socket_id_str + \
-                       " --membind=" + socket_id_str + " python "
+                       " --membind=" + socket_id_str + self.cmd
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
