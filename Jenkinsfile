@@ -12,13 +12,12 @@ node('skx') {
             sh """
             #!/bin/bash -x
             set -e
-            sudo pip install --upgrade pip
-            sudo pip install virtualenv
-
-            # don't know OS, so trying both apt-get and yum install 
+            # don't know OS, so trying both apt-get and yum install
             sudo apt-get install -y python3-dev || true
-            sudo apt-get install -y python3-venv || true
             sudo yum install -y python36-devel.x86_64 || true
+
+            python2 -m pip install --user --upgrade pip virtualenv
+            python3 -m pip install --user --upgrade pip virtualenv
             """
         }
         stage('Style tests') {
@@ -27,8 +26,7 @@ node('skx') {
             set -e
 
             cd intel-models
-
-            make lint
+            tox -e py2.7-flake8 -e py3-flake8
             """
         }
         stage('Unit tests') {
@@ -37,9 +35,7 @@ node('skx') {
             set -e
 
             cd intel-models
-
-            make unit_test
-            make unit_test3
+            tox -e py2.7-py.test -e py3-py.test
             """
         }
         // put benchmarks here later
