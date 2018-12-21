@@ -474,6 +474,33 @@ function ssd_mobilenet() {
   fi
 }
 
+# SSD-VGG16 model
+function ssd_vgg16() {
+  if [ ${PLATFORM} == "int8" ]; then
+    # In-graph is required
+    if [ "${IN_GRAPH}" == None ] ; then
+      echo "In graph must be specified!"
+      exit 1
+    fi
+    # For accuracy, dataset location is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+	      DATASET_LOCATION=""
+	fi
+    if [ ${NOINSTALL} != "True" ]; then
+        pip install opencv-python
+    fi
+    CMD="${CMD} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Wavenet model
 function wavenet() {
   if [ ${PLATFORM} == "fp32" ]; then
@@ -549,6 +576,8 @@ elif [ ${MODEL_NAME} == "squeezenet" ]; then
   squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
+elif [ ${MODEL_NAME} == "ssd-vgg16" ]; then
+  ssd_vgg16
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
