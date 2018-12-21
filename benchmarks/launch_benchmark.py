@@ -233,7 +233,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         ]:
             if not os.environ.get(environment_proxy_setting):
                 continue
-            env_vars += " --env {}={} ".format(
+            env_vars += " --env {}={}".format(
                 environment_proxy_setting,
                 os.environ.get(environment_proxy_setting)
             )
