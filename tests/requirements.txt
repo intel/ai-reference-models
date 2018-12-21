@@ -1,4 +1,0 @@
-flake8
-pytest==3.7.1
-pytest-cov==2.5.1
-mock
