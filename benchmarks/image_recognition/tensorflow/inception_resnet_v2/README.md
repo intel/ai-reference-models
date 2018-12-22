@@ -87,7 +87,7 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image tf_int8_docker_image \
-    --in-graph /home/myuser/final_int8_inception_resnet_v2_graph.pb \
+    --in-graph /home/myuser/inception_resnet_v2_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
@@ -103,7 +103,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --single-socket \
     --docker-image tf_int8_docker_image \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb
+    --in-graph /home/myuser/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
 For throughput (using `--benchmark-only`, `--single-socket` and `--batch-size 128`):
@@ -118,7 +118,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --single-socket \
     --docker-image tf_int8_docker_image \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb
+    --in-graph /home/myuser/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
