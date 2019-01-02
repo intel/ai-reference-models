@@ -46,6 +46,7 @@ Training and inference scripts with intel optimized MKL
         * SSD-VGG16
             * Inference
                 * [Int8](object_detection/tensorflow/ssd-vgg16/README.md#int8-inference-instructions)
+                * [FP32](object_detection/tensorflow/ssd-vgg16/README.md#fp32-inference-instructions)
 * Recommendation
     * Tensorflow
         * NCF
