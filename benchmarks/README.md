@@ -13,7 +13,7 @@ Training and inference scripts with intel optimized MKL
     * Tensorflow
         * Inception Resnet V2
             * Inference
-                * [Int8](image_recognition/tensorflow/inceptionresnetv2/README.md#int8-inference-instructions)
+                * [Int8](image_recognition/tensorflow/inception_resnet_v2/README.md#int8-inference-instructions)
         * Inception V3
             * Inference
                 * [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions)
