@@ -16,8 +16,8 @@ node('skx') {
             sudo apt-get install -y python3-dev || true
             sudo yum install -y python36-devel.x86_64 || true
 
-            python2 -m pip install --user --upgrade pip virtualenv
-            python3 -m pip install --user --upgrade pip virtualenv
+            sudo python2 -m pip install --upgrade pip virtualenv tox
+            sudo python3 -m pip install --upgrade pip virtualenv tox
             """
         }
         stage('Style tests') {
