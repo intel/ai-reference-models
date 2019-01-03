@@ -44,10 +44,9 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-        platform_args = platform_util
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
-        num_cores_per_socket = platform_args.num_cores_per_socket()
+        num_cores_per_socket = platform_util.num_cores_per_socket()
 
         if self.args.single_socket:
             self.args.num_inter_threads = 1
@@ -55,12 +54,12 @@ class ModelInitializer(BaseModelInitializer):
                 if self.args.num_cores == -1 else self.args.num_cores
         else:
             self.args.num_inter_threads = \
-                self.platform_util.num_cpu_sockets()
+                platform_util.num_cpu_sockets()
 
             if self.args.num_cores == -1:
                 self.args.num_intra_threads = \
-                    int(self.platform_util.num_cores_per_socket() *
-                        self.platform_util.num_cpu_sockets())
+                    int(platform_util.num_cores_per_socket() *
+                        platform_util.num_cpu_sockets())
             else:
                 self.args.num_intra_threads = self.args.num_cores
 

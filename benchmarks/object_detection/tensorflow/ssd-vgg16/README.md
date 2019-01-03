@@ -128,7 +128,7 @@ python launch_benchmark.py \
     --single-socket \
     --benchmark-only \
     --docker-image tf_int8_docker_image \
-    --in-graph /home/myuser/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-vgg16 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=224  --accuracy-only  --verbose --in-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb --data-location=/dataset --in-graph=/in_graph/final_intel_qmodel_ssd.pb     --data-location=/dataset
+    --in-graph /home/myuser/ssdvgg16_int8_pretrained_model.pb
 ```
 
 For latency (using `--benchmark-only` and `--batch-size 1`):
