@@ -414,28 +414,29 @@ function rfcn() {
     cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
 
+  split_arg=""
+  if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      split_arg="--split=${split}"
+  fi
+
   if [ ${PLATFORM} == "int8" ]; then
       number_of_steps_arg=""
-      split_arg=""
 
       if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
           number_of_steps_arg="--number_of_steps=${number_of_steps}"
       fi
 
-      if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-          split_arg="--split=${split}"
-      fi
-
       CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
 
   elif [ ${PLATFORM} == "fp32" ]; then
-      if [[ -z "${config_file}" ]]; then
+      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1
       fi
 
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-      --config_file=${config_file} --data-location=${DATASET_LOCATION}"
+      --config_file=${config_file} --data-location=${DATASET_LOCATION} \
+      --in-graph=${IN_GRAPH} ${split_arg}"
    else
       echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
   fi
