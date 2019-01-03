@@ -283,6 +283,21 @@ function inceptionv3() {
   fi
 }
 
+# inception_resnet_v2 model
+function inception_resnet_v2() {
+  if [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # inceptionv4 model
 function inceptionv4() {
   if [ ${PLATFORM} == "int8" ]; then
@@ -568,6 +583,8 @@ elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
+elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
+  inception_resnet_v2
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
