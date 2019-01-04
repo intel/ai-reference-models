@@ -283,6 +283,21 @@ function inceptionv3() {
   fi
 }
 
+# inception_resnet_v2 model
+function inception_resnet_v2() {
+  if [ ${PLATFORM} == "int8" ]; then
+    # For accuracy, dataset location is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # inceptionv4 model
 function inceptionv4() {
   if [ ${PLATFORM} == "int8" ]; then
@@ -399,28 +414,29 @@ function rfcn() {
     cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
 
+  split_arg=""
+  if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      split_arg="--split=${split}"
+  fi
+
   if [ ${PLATFORM} == "int8" ]; then
       number_of_steps_arg=""
-      split_arg=""
 
       if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
           number_of_steps_arg="--number_of_steps=${number_of_steps}"
       fi
 
-      if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-          split_arg="--split=${split}"
-      fi
-
       CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
 
   elif [ ${PLATFORM} == "fp32" ]; then
-      if [[ -z "${config_file}" ]]; then
+      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1
       fi
 
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-      --config_file=${config_file} --data-location=${DATASET_LOCATION}"
+      --config_file=${config_file} --data-location=${DATASET_LOCATION} \
+      --in-graph=${IN_GRAPH} ${split_arg}"
    else
       echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
   fi
@@ -472,6 +488,41 @@ function ssd_mobilenet() {
     echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
     exit 1
   fi
+}
+
+# SSD-VGG16 model
+function ssd_vgg16() {
+    # In-graph is required
+    if [ "${IN_GRAPH}" == None ] ; then
+      echo "In graph must be specified!"
+      exit 1
+    fi
+
+    # For accuracy, dataset location is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+      DATASET_LOCATION=""
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+        pip install opencv-python
+    fi
+
+    if [ ${PLATFORM} == "int8" ]; then
+        CMD="${CMD} --data-location=${DATASET_LOCATION}"
+    elif [ ${PLATFORM} == "fp32" ]; then
+        CMD="${CMD} --in-graph=${IN_GRAPH} \
+        --data-location=${DATASET_LOCATION}"
+    else
+        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        exit 1
+    fi
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
 # Wavenet model
@@ -533,6 +584,8 @@ elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
+elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
+  inception_resnet_v2
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
@@ -549,6 +602,8 @@ elif [ ${MODEL_NAME} == "squeezenet" ]; then
   squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
+elif [ ${MODEL_NAME} == "ssd-vgg16" ]; then
+  ssd_vgg16
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then

@@ -1,10 +1,5 @@
 ## Benchmark Neural Collaborative Filtering (NCF) ##
 
-Required parameters to run NCF inference
-
-* `--model-source-dir` - Path to official tensorflow models [repo](https://github.com/NervanaSystems/tensorflow-models) on your machine.
-* `--checkpoint` - Path to checkpoint directory for the Pre-trained model
-
 This document has instructions for how to run NCF for the
 following modes/platforms:
 * [FP32 inference](#fp32-inference-instructions)
@@ -37,20 +32,28 @@ $ cd models/benchmarks
 4. We are replacing the official [ncf_main.py](https://github.com/tensorflow/models/blob/v1.11/official/recommendation/ncf_main.py)
 with our custom [ncf_main.py](../../../../models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py) which has CPU optimizations included.
 
-5. Run the `launch_benchmark.py` script with the appropriate parameters
-including: path to provided pre-trained model [checkpoints](../../../recommendation/tensorflow/ncf/inference/fp32/checkpoints/ml_1m) directory,
-and the location of your `tensorflow/models`(from step 2).
+5. Download the pre-trained model checkpoint files
+```
+$ mkdir -p pre-trained && cd pre-trained
+$ wget https://storage.cloud.google.com/intel-optimized-tensorflow-staging/models/ncf_fp32_pretrained_model.tar.gz
+$ tar -xvzf ncf_fp32_pretrained_model.tar.gz
+$ cd checkpoints/ml-1m
+$ pwd
+```
 
-*Note:* Use batch_size as needed
-For Latency: `batch_size=1`
-For Throughput: `batch_size=256`
+6. Run the `launch_benchmark.py` script with the appropriate parameters.
+* `--model-source-dir` - Path to official tensorflow models from step2.
+* `--checkpoint` - Path to checkpoint directory for the Pre-trained model from step5
+
+
+For Throughput, `--batch-size 256`, `--single-socket`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint ${PWD}/recommendation/tensorflow/ncf/inference/fp32/checkpoints/ml_1m \
-    --model-source-dir /path_to_from_step_2/models \
+    --checkpoint path_from_step5 \
+    --model-source-dir /path_from_step_2/models \
     --model-name ncf \
-    --single-socket True \
+    --single-socket \
     --batch-size 256 \
     --framework tensorflow \
     --platform fp32 \
@@ -58,12 +61,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-6. The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`
-
-The output of job should look something like this snippet for throughput and latency
-
-Throughput with `batch_size=256`:
+The tail of Throughput log, looks as below.
 ```
 ...
 2018-11-12 19:42:44.851050: step 22900, 931259.2 recommendations/sec, 0.27490 msec/batch
@@ -77,7 +75,23 @@ tep 23200, 867319.7 recommendations/sec, 0.29516 msec/batch
 Average recommendations/sec across 23594 steps: 903932.8 (0.28381 msec/batch)
 ...
 ```
-Latency with `batch_size=1`,this will take time to start benchmarking
+
+For Latency, `--batch-size 1`, `--single-socket`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
+
+```
+$ python launch_benchmark.py \
+    --checkpoint path_from_step5 \
+    --model-source-dir /path_from_step_2/models \
+    --model-name ncf \
+    --single-socket \
+    --batch-size 1 \
+    --framework tensorflow \
+    --platform fp32 \
+    --mode inference \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+```
+
+The tail of Latency log, looks as below.
 ```
 ...
 2018-11-12 20:24:24.986641: step 6039100, 4629.5 recommendations/sec, 0.21601 msec/batch

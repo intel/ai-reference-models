@@ -45,40 +45,36 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-        platform_args = platform_util
 
-        if args.mode == "inference":
-            self.run_inference_sanity_checks(self.args, self.custom_args)
-            num_cores_per_socket = platform_args.num_cores_per_socket()
+        self.run_inference_sanity_checks(self.args, self.custom_args)
+        num_cores_per_socket = platform_util.num_cores_per_socket()
 
-            if args.single_socket:
-                    args.num_inter_threads = 1
-                    args.num_intra_threads = num_cores_per_socket
-            else:
-                args.num_inter_threads = platform_args.num_cpu_sockets()
-
-            if args.num_cores == -1:
-                args.num_intra_threads = \
-                    num_cores_per_socket * args.num_inter_threads
-            else:
-                args.num_intra_threads = args.num_cores
-
-            self.research_dir = os.path.join(args.model_source_dir, "research")
-            script_path = "object_detection/inference/infer_detections.py"
-            self.run_cmd = ("OMP_NUM_THREADS={} numactl -l -N 1 "
-                            "python {} --input_tfrecord_paths {} "
-                            "--inference_graph {} "
-                            "--output_tfrecord_path="
-                            "/tmp/ssd-mobilenet-record-out "
-                            "--intra_op_parallelism_threads {} "
-                            "--inter_op_parallelism_threads {} "
-                            "--discard_image_pixels=True --inference_only").\
-                format(str(args.num_intra_threads), script_path,
-                       str(args.data_location), str(args.input_graph),
-                       str(args.num_intra_threads),
-                       str(args.num_inter_threads))
+        if args.single_socket:
+                args.num_inter_threads = 1
+                args.num_intra_threads = num_cores_per_socket
         else:
-            sys.exit("Training is currently not supported.")
+            args.num_inter_threads = platform_util.num_cpu_sockets()
+
+        if args.num_cores == -1:
+            args.num_intra_threads = \
+                num_cores_per_socket * args.num_inter_threads
+        else:
+            args.num_intra_threads = args.num_cores
+
+        self.research_dir = os.path.join(args.model_source_dir, "research")
+        script_path = "object_detection/inference/infer_detections.py"
+        self.run_cmd = ("OMP_NUM_THREADS={} numactl -l -N 1 "
+                        "python {} --input_tfrecord_paths {} "
+                        "--inference_graph {} "
+                        "--output_tfrecord_path="
+                        "/tmp/ssd-mobilenet-record-out "
+                        "--intra_op_parallelism_threads {} "
+                        "--inter_op_parallelism_threads {} "
+                        "--discard_image_pixels=True --inference_only").\
+            format(str(args.num_intra_threads), script_path,
+                   str(args.data_location), str(args.input_graph),
+                   str(args.num_intra_threads),
+                   str(args.num_inter_threads))
 
     def run(self):
         original_dir = os.getcwd()
