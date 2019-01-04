@@ -11,6 +11,9 @@ Training and inference scripts with intel optimized MKL
                 * [FP32](classification/tensorflow/wide_deep/README.md#fp32-inference-instructions)
 * Image Recognition
     * Tensorflow
+        * Inception Resnet V2
+            * Inference
+                * [Int8](image_recognition/tensorflow/inception_resnet_v2/README.md#int8-inference-instructions)
         * Inception V3
             * Inference
                 * [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions)
@@ -43,6 +46,10 @@ Training and inference scripts with intel optimized MKL
         * SSD-Mobilenet
             * Inference
                 * [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions)
+        * SSD-VGG16
+            * Inference
+                * [Int8](object_detection/tensorflow/ssd-vgg16/README.md#int8-inference-instructions)
+                * [FP32](object_detection/tensorflow/ssd-vgg16/README.md#fp32-inference-instructions)
 * Recommendation
     * Tensorflow
         * NCF

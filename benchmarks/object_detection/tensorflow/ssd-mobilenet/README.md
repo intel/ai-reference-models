@@ -98,9 +98,6 @@ will be using when running inference.
 ```
 $ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
 --2018-11-02 18:21:34--  http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
-Resolving proxy-fm.intel.com (proxy-fm.intel.com)... 10.1.192.48
-Connecting to proxy-fm.intel.com (proxy-fm.intel.com)|10.1.192.48|:911... connected.
-Proxy request sent, awaiting response... 200 OK
 Length: 76541073 (73M) [application/x-tar]
 Saving to: ‘ssd_mobilenet_v1_coco_2018_01_28.tar.gz’
 

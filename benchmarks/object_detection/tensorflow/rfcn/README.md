@@ -341,12 +341,14 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-6. Run the `launch_benchmark.py` script from the intelai/models repo
+6. Run the `launch_benchmark.py` script from the 
+[intelai/models](https://github.com/intelai/models) repo
 , with the appropriate parameters including: the 
 `coco_val.record` data location (from step 3), the pre-trained model
-`pipeline.config` file and the checkpoint location (from step 4, and the
+`pipeline.config` file and the checkpoint location (from step 4), and the
 location of your `tensorflow/models` clone (from step 1).
 
+Run benchmarking for throughput and latency:
 ```
 $ cd /home/myuser/models/benchmarks
 
@@ -359,14 +361,31 @@ $ python launch_benchmark.py \
     --mode inference \
     --checkpoint /home/myuser/rfcn_resnet101_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    -- config-file=rfcn_pipeline.config
+    -- config_file=rfcn_pipeline.config
 ```
 
-7. The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`
+Or for accuracy where the `--data-location` is the path the directory
+where your `coco_val.record` file is located and the `--in-graph` is
+the pre-trained graph located in the pre-trained model directory (from step 4):
+```
+python launch_benchmark.py \
+    --model-name rfcn \
+    --mode inference \
+    --platform fp32 \
+    --framework tensorflow \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/myuser/coco/output/coco_val.record \
+    --in-graph /home/myuser/rfcn_resnet101_fp32_coco/frozen_inference_graph.pb  \
+    --accuracy-only \
+    -- split="accuracy_message"
+```
 
-The tail of the log output when the benchmarking completes should look
-something like this:
+7. Log files are located at:
+`intelai/models/benchmarks/common/tensorflow/logs`.
+
+Below is a sample log file tail when running benchmarking for throughput
+and latency:
 
 ```
 Average time per step: 0.262 sec
@@ -381,6 +400,25 @@ PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/mod
 RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --single-socket --verbose --checkpoint=/checkpoints         --config_file=rfcn_pipeline.config 
 Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference.log
+Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference.log
 ```
 
+And here is a sample log file tail when running for accuracy:
+```
+DONE (t=1.19s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.347
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.532
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.389
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.347
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.282
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.396
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.400
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.400
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size 1
+Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference_fp32_20181221_211905.log
+```

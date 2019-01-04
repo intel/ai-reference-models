@@ -24,7 +24,7 @@ For a AWS compute instance, you may find these pages helpful:
    $ sudo usermod -aG docker `whoami`
    ```
 4. Exit and restart your SSH session so that your username is in effect in the docker group.
-5. Download *Dockerfile.mkl* and *Dockerfile.devel-mkl* from [here](https://github.com/Intel-tensorflow/serving/tree/intel/mkl_dockerfiles/tensorflow_serving/tools/docker).
+5. Download *Dockerfile.mkl* and *Dockerfile.devel-mkl* from [here](https://github.com/tensorflow/serving/tree/master/tensorflow_serving/tools/docker).
 
 Next, we will do two docker builds. **NOTE 1**: they both require a `.` path argument at the end; see
 [https://docs.docker.com/engine/reference/commandline/build/#examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
