@@ -4,7 +4,7 @@
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#    http://www.apache.org/licenses/LICENSE-2.0
+#	http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,7 +32,7 @@ all: venv
 $(ACTIVATE): tests/requirements.txt
 	@echo "Updating virtualenv dependencies in: $(VIRTUALENV_DIR)..."
 	@test -d $(VIRTUALENV_DIR) || $(VIRTUALENV_EXE) $(VIRTUALENV_DIR)
-	@. $(ACTIVATE) && python$(PY_VERSION) -m pip install -r tests/requirements.txt
+	@. $(ACTIVATE) && python$(PY_VERSION) -m pip install -r requirements-test.txt
 	@touch $(ACTIVATE)
 
 venv: $(ACTIVATE)
@@ -46,23 +46,38 @@ venv3: $(ACTIVATE)
 	@echo -n "Using "
 	@. $(ACTIVATE) && python3 --version
 
-lint: venv
-	. $(ACTIVATE) && flake8 benchmarks tests
+tox:
+	tox
 
-lint3: PY_VERSION=3
-lint3: lint
+lint:
+	@echo "Running style check..."
+	tox -e py2.7-flake8 -e py3-flake8
 
-unit_test: venv
+lint2:
+	@echo "Running style check..."
+	tox -e py2.7-flake8
+
+lint3:
+	@echo "Running style check python 3 "
+	tox -e py3-flake8
+
+unit_test:
 	@echo "Running unit tests..."
-	@. $(ACTIVATE) && PYTHONPATH=${PYTHONPATH}:${PWD}:${PWD}/benchmarks:${PWD}/tests:{PWD}/test_utils py.test -v $(TESTOPTS) --cov-report term-missing --cov=benchmarks/ tests/unit
+	tox -e py2.7-py.test -e py3-py.test
 
-unit_test3: PY_VERSION=3
-unit_test3: unit_test
+unit_test2:
+	@echo "Running unit tests python 2..."
+	tox -e py2.7-py.test
+
+unit_test3:
+	@echo "Running unit tests python 3..."
+	tox -e py3-py.test
 
 test: lint unit_test
 
-test3: PY_VERSION=3
-test3: test
+test2: lint2 unit_test2
+
+test3: lint3 unit_test3
 
 clean:
-	rm -rf .venv .venv3
+	rm -rf .venv .venv3 .tox
