@@ -29,9 +29,6 @@ os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
 class ModelInitializer(BaseModelInitializer):
-    args = None
-    custom_args = []
-
     def run_inference_sanity_checks(self, args, custom_args):
         if not args.input_graph:
             sys.exit("Please provide a path to the frozen graph directory"
@@ -41,39 +38,23 @@ class ModelInitializer(BaseModelInitializer):
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
-        self.benchmark_command = ""
+        self.benchmark_command = self.get_numactl_command(args.socket_id)
         self.run_inference_sanity_checks(self.args, self.custom_args)
 
-        if self.args.single_socket:
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = \
-                self.platform_util.num_cores_per_socket() \
-                if self.args.num_cores == -1 else self.args.num_cores
-            self.benchmark_command = "numactl --cpunodebind=" + \
-                                     str(self.args.socket_id) + \
-                                     " --membind=" + \
-                                     str(self.args.socket_id)
-        else:
-            self.args.num_inter_threads = \
-                self.platform_util.num_cpu_sockets()
-
-            if self.args.num_cores == -1:
-                self.args.num_intra_threads = \
-                    int(self.platform_util.num_cores_per_socket() *
-                        self.platform_util.num_cpu_sockets())
-            else:
-                self.args.num_intra_threads = self.args.num_cores
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(self.platform_util)
 
         benchmark_script = os.path.join(
             self.args.intelai_models, "ssd-benchmark.py")
 
         self.benchmark_command = self.benchmark_command + \
             " python " + benchmark_script
-        self.benchmark_command = self.benchmark_command + " --graph " + \
-            self.args.input_graph + " --num_intra_threads=" + \
-            str(self.args.num_intra_threads) + " --num_inter_threads=" + \
-            str(self.args.num_inter_threads) + " --batch_size=" + \
-            str(self.args.batch_size)
+        self.benchmark_command = \
+            self.benchmark_command + \
+            " --graph " + self.args.input_graph + \
+            " --num_intra_threads=" + str(self.args.num_intra_threads) + \
+            " --num_inter_threads=" + str(self.args.num_inter_threads) + \
+            " --batch_size=" + str(self.args.batch_size)
 
         if self.args.data_location:
             self.benchmark_command = self.benchmark_command + \

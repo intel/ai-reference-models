@@ -32,10 +32,10 @@ echo "        ${EXTERNAL_MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_EXTERNAL_M
 echo "        ${INTELAI_MODELS} mounted on: ${MOUNT_INTELAI_MODELS_SOURCE}"
 echo "        ${DATASET_LOCATION_VOL} mounted on: ${DATASET_LOCATION}"
 echo "        ${CHECKPOINT_DIRECTORY_VOL} mounted on: ${CHECKPOINT_DIRECTORY}"
-echo "    SINGLE_SOCKET: ${SINGLE_SOCKET}"
+echo "    SOCKET_ID: ${SOCKET_ID}"
 echo "    MODEL_NAME: ${MODEL_NAME}"
 echo "    MODE: ${MODE}"
-echo "    PLATFORM: ${PLATFORM}"
+echo "    PRECISION: ${PRECISION}"
 echo "    BATCH_SIZE: ${BATCH_SIZE}"
 echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
@@ -58,11 +58,6 @@ if [[ ${NOINSTALL} != "True" ]]; then
   pip install requests
 fi
 
-single_socket_arg=""
-if [ ${SINGLE_SOCKET} == "True" ]; then
-  single_socket_arg="--single-socket"
-fi
-
 verbose_arg=""
 if [ ${VERBOSE} == "True" ]; then
   verbose_arg="--verbose"
@@ -82,7 +77,7 @@ RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
 LOG_OUTPUT=${WORKSPACE}/logs
 timestamp=`date +%Y%m%d_%H%M%S`
-LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}_${PLATFORM}_${timestamp}.log"
+LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}_${PRECISION}_${timestamp}.log"
 if [ ! -d "${LOG_OUTPUT}" ]; then
   mkdir ${LOG_OUTPUT}
 fi
@@ -114,19 +109,19 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --framework=${FRAMEWORK} \
 --use-case=${USE_CASE} \
 --model-name=${MODEL_NAME} \
---platform=${PLATFORM} \
+--precision=${PRECISION} \
 --mode=${MODE} \
 --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
 --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
-${single_socket_arg} \
+--socket-id=${SOCKET_ID} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${verbose_arg}"
 
 # Add on --in-graph and --data-location for int8 inference
-if [ ${MODE} == "inference" ] && [ ${PLATFORM} == "int8" ]; then
+if [ ${MODE} == "inference" ] && [ ${PRECISION} == "int8" ]; then
     CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
 fi
 
@@ -147,7 +142,7 @@ function install_protoc() {
 
 # DeepSpeech model
 function deep-speech() {
-  if [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     if [[ -z "${datafile_name}" ]]; then
       echo "DeepSpeech requires -- datafile_name arg to be defined"
       exit 1
@@ -205,13 +200,13 @@ function deep-speech() {
     --datafile-name=${datafile_name}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-      echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+      echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
   fi
 }
 
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
-    if [ ${PLATFORM} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ]; then
         if [[ -z "${config_file}" ]]; then
             echo "Fast R-CNN requires -- config_file arg to be defined"
             exit 1
@@ -244,14 +239,14 @@ function fastrcnn() {
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
      else
-        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
         exit 1
     fi
 }
 
 # inceptionv3 model
 function inceptionv3() {
-  if [ ${PLATFORM} == "int8" ]; then
+  if [ ${PRECISION} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
     if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
@@ -273,19 +268,19 @@ function inceptionv3() {
     CMD="${CMD} ${input_height_arg} ${input_width_arg}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
-  elif [ ${PLATFORM} == "fp32" ]; then
+  elif [ ${PRECISION} == "fp32" ]; then
     # Run inception v3 fp32 inference
     CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
 
 # inception_resnet_v2 model
 function inception_resnet_v2() {
-  if [ ${PLATFORM} == "int8" ]; then
+  if [ ${PRECISION} == "int8" ]; then
     # For accuracy, dataset location is required, see README for more information.
     if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
@@ -293,14 +288,14 @@ function inception_resnet_v2() {
     fi
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
 
 # inceptionv4 model
 function inceptionv4() {
-  if [ ${PLATFORM} == "int8" ]; then
+  if [ ${PRECISION} == "int8" ]; then
     # For accuracy, dataset location is required
     if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No dataset directory specified, accuracy cannot be calculated."
@@ -308,26 +303,26 @@ function inceptionv4() {
     fi
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
 
 # mobilenet_v1 model
 function mobilenet_v1() {
-  if [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
 
 # NCF model
 function ncf() {
-  if [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     # For nfc, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
       mkdir -p /dataset
@@ -344,7 +339,7 @@ function ncf() {
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
@@ -359,13 +354,13 @@ function resnet101() {
       exit 1
     fi
 
-    if [ ${PLATFORM} == "int8" ]; then
+    if [ ${PRECISION} == "int8" ]; then
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    elif [ ${PLATFORM} == "fp32" ]; then
+    elif [ ${PRECISION} == "fp32" ]; then
       CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
-      echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
       exit 1
     fi
 }
@@ -374,7 +369,7 @@ function resnet101() {
 function resnet50() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
-    if [ ${PLATFORM} == "int8" ]; then
+    if [ ${PRECISION} == "int8" ]; then
         # For accuracy, dataset location is required, see README for more information.
         if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
           echo "No Data directory specified, accuracy will not be calculated."
@@ -382,12 +377,12 @@ function resnet50() {
         fi
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
-    elif [ ${PLATFORM} == "fp32" ]; then
+    elif [ ${PRECISION} == "fp32" ]; then
         # Run resnet50 fp32 inference
         CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
-        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
         exit 1
     fi
 }
@@ -419,7 +414,7 @@ function rfcn() {
       split_arg="--split=${split}"
   fi
 
-  if [ ${PLATFORM} == "int8" ]; then
+  if [ ${PRECISION} == "int8" ]; then
       number_of_steps_arg=""
 
       if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
@@ -428,7 +423,7 @@ function rfcn() {
 
       CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
 
-  elif [ ${PLATFORM} == "fp32" ]; then
+  elif [ ${PRECISION} == "fp32" ]; then
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1
@@ -438,7 +433,7 @@ function rfcn() {
       --config_file=${config_file} --data-location=${DATASET_LOCATION} \
       --in-graph=${IN_GRAPH} ${split_arg}"
    else
-      echo "MODE:${MODE} and PLATFORM=${PLATFORM} not supported"
+      echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
   fi
   cd $original_dir
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -446,20 +441,20 @@ function rfcn() {
 
 # SqueezeNet model
 function squeezenet() {
-  if [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
     --data-location=${DATASET_LOCATION}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
 
 # SSD-MobileNet model
 function ssd_mobilenet() {
-  if [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     if [ ${BATCH_SIZE} != "-1" ]; then
       echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
     fi
@@ -485,7 +480,7 @@ function ssd_mobilenet() {
     --data-location=${DATASET_LOCATION}"
     CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
@@ -512,13 +507,13 @@ function ssd_vgg16() {
         pip install opencv-python
     fi
 
-    if [ ${PLATFORM} == "int8" ]; then
+    if [ ${PRECISION} == "int8" ]; then
         CMD="${CMD} --data-location=${DATASET_LOCATION}"
-    elif [ ${PLATFORM} == "fp32" ]; then
+    elif [ ${PRECISION} == "fp32" ]; then
         CMD="${CMD} --in-graph=${IN_GRAPH} \
         --data-location=${DATASET_LOCATION}"
     else
-        echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
         exit 1
     fi
 
@@ -527,7 +522,7 @@ function ssd_vgg16() {
 
 # Wavenet model
 function wavenet() {
-  if [ ${PLATFORM} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     if [[ -z "${checkpoint_name}" ]]; then
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
@@ -550,14 +545,14 @@ function wavenet() {
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PLATFORM=${PLATFORM} is not supported for ${MODEL_NAME}"
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
 
 # Wide & Deep model
 function wide_deep() {
-    if [ ${PLATFORM} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
       if [ ${NOINSTALL} != "True" ]; then
@@ -569,7 +564,7 @@ function wide_deep() {
       --data-location=${DATASET_LOCATION}"
       CMD=${CMD} run_model
     else
-      echo "PLATFORM=${PLATFORM} not supported for ${MODEL_NAME}"
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
       exit 1
     fi
 }

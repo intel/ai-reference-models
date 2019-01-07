@@ -34,3 +34,58 @@ class BaseModelInitializer(object):
             print("Running: {}".format(str(cmd)))
 
         os.system(cmd)
+
+    def get_numactl_command(self, socket_id):
+        """
+        Returns the numactl command with --cpunodebind and --membind set to the
+        specified socket_id.  If socket_id is set to -1 (undefined) then an
+        empty string is returned.
+        """
+        return "" if socket_id == -1 else \
+            "numactl --cpunodebind={0} --membind={0} ".format(
+                str(socket_id))
+
+    def add_args_to_command(self, command, arg_list):
+        """
+        Add args that are specified in the arg list to the command.  batch_size
+        is a special case, where it's not added if it's set to -1 (undefined).
+        Returns the command string with args.
+        """
+        for arg in vars(self.args):
+            arg_value = getattr(self.args, arg)
+            if arg == "batch_size" and arg_value == -1:
+                continue
+            if arg_value and (arg in arg_list):
+                command = "{cmd} --{param}={value}".format(
+                    cmd=command, param=arg, value=arg_value)
+        return command
+
+    def set_default_inter_intra_threads(self, platform_util):
+        """
+        Sets default values for self.args.num_inter_threads and
+        self.args.num_intra_threads.
+
+        If a single socket is being used:
+         * num_inter_threads = 1
+         * num_intra_threads = The number of cores on a single socket, or
+           self.args.num_cores if a specific number of cores was defined.
+
+        If all sockets are being used:
+         * num_inter_threads = The number of sockets
+         * num_intra_threads = The total number of cores across all sockets, or
+           self.args.num_cores if a specific number of cores was defined.
+        """
+        if self.args.socket_id != -1:
+            self.args.num_inter_threads = 1
+            self.args.num_intra_threads = \
+                platform_util.num_cores_per_socket() \
+                if self.args.num_cores == -1 else self.args.num_cores
+        else:
+            self.args.num_inter_threads = platform_util.num_cpu_sockets()
+
+            if self.args.num_cores == -1:
+                self.args.num_intra_threads = \
+                    int(platform_util.num_cores_per_socket() *
+                        platform_util.num_cpu_sockets())
+            else:
+                self.args.num_intra_threads = self.args.num_cores

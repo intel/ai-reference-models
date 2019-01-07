@@ -30,10 +30,7 @@ os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
 class ModelInitializer (BaseModelInitializer):
-    args = None
-
     def run_inference_sanity_checks(self, args, custom_args):
-
         if args.batch_size != -1 and args.batch_size != 1:
             sys.exit("Fast R-CNN inference supports 'batch-size=1' " +
                      "only, please modify via the '--batch_size' flag.")
@@ -44,43 +41,31 @@ class ModelInitializer (BaseModelInitializer):
         self.platform_util = platform_util
 
         self.parse_custom_args()
-        if args.mode == "inference":
-            self.run_inference_sanity_checks(self.args, self.custom_args)
+        self.run_inference_sanity_checks(self.args, self.custom_args)
 
-            benchmark_script = os.path.join(
-                self.args.intelai_models, self.args.mode, self.args.platform,
-                "eval.py")
-            self.command_prefix = "python " + benchmark_script
-            if self.args.single_socket:
-                self.args.num_inter_threads = 1
-                self.args.num_intra_threads = \
-                    self.platform_util.num_cores_per_socket()
-                self.command_prefix = \
-                    "numactl --cpunodebind=0 --membind=0 " + \
-                    self.command_prefix
+        benchmark_script = os.path.join(
+            self.args.intelai_models, self.args.mode, self.args.precision,
+            "eval.py")
+        self.command_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + benchmark_script
+        if self.args.socket_id != -1:
+            self.args.num_inter_threads = 1
+            self.args.num_intra_threads = \
+                self.platform_util.num_cores_per_socket()
 
-            os.environ["OMP_NUM_THREADS"] = \
-                str(self.args.num_intra_threads)
-            self.research_dir = os.path.join(self.args.model_source_dir,
-                                             "research")
-            config_file_path = os.path.join(self.args.checkpoint,
-                                            self.args.config_file)
-            self.run_cmd = \
-                self.command_prefix + \
-                " --num_inter_threads " + \
-                str(self.args.num_inter_threads) + \
-                " --num_intra_threads " + \
-                str(self.args.num_intra_threads) + \
-                " --pipeline_config_path " + \
-                config_file_path + \
-                " --checkpoint_dir " + \
-                str(args.checkpoint) + \
-                " --eval_dir " + self.research_dir + \
-                "/object_detection/log/eval"
-
-        else:
-            # TODO: Add training commands
-            sys.exit("Training is currently not supported.")
+        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        self.research_dir = os.path.join(self.args.model_source_dir,
+                                         "research")
+        config_file_path = os.path.join(self.args.checkpoint,
+                                        self.args.config_file)
+        self.run_cmd = \
+            self.command_prefix + \
+            " --num_inter_threads " + str(self.args.num_inter_threads) + \
+            " --num_intra_threads " + str(self.args.num_intra_threads) + \
+            " --pipeline_config_path " + config_file_path + \
+            " --checkpoint_dir " + str(args.checkpoint) + \
+            " --eval_dir " + self.research_dir + \
+            "/object_detection/log/eval"
 
     def parse_custom_args(self):
         if self.custom_args:

@@ -1,12 +1,12 @@
 # ResNet50
 
 This document has instructions for how to run ResNet50 for the
-following platforms:
+following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for ResNet50 model inference on `Int8` and `FP32`
-platforms.
+precisions.
 
 ## Int8 Inference Instructions
 
@@ -58,7 +58,7 @@ $ python launch_benchmark.py \
     --in-graph /home/myuser/resnet50_int8_pretrained_model/final_int8_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
@@ -70,71 +70,15 @@ The log file is saved to:
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
-(Top1 accuracy, Top5 accuracy) = (0.7346, 0.9144)
-Processed 44600 images. (Top1 accuracy, Top5 accuracy) = (0.7346, 0.9143)
-Processed 44700 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9144)
-Processed 44800 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9143)
-Processed 44900 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9143)
-Processed 45000 images. (Top1 accuracy, Top5 accuracy) = (0.7344, 0.9144)
-Processed 45100 images. (Top1 accuracy, Top5 accuracy) = (0.7344, 0.9144)
-Processed 45200 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9145)
-Processed 45300 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9145)
-Processed 45400 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9145)
-Processed 45500 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9145)
-Processed 45600 images. (Top1 accuracy, Top5 accuracy) = (0.7346, 0.9145)
-Processed 45700 images. (Top1 accuracy, Top5 accuracy) = (0.7347, 0.9145)
-Processed 45800 images. (Top1 accuracy, Top5 accuracy) = (0.7345, 0.9144)
-Processed 45900 images. (Top1 accuracy, Top5 accuracy) = (0.7346, 0.9144)
-Processed 46000 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9145)
-Processed 46100 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9146)
-Processed 46200 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9145)
-Processed 46300 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9145)
-Processed 46400 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9146)
-Processed 46500 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9146)
-Processed 46600 images. (Top1 accuracy, Top5 accuracy) = (0.7347, 0.9146)
-Processed 46700 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9146)
-Processed 46800 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9146)
-Processed 46900 images. (Top1 accuracy, Top5 accuracy) = (0.7350, 0.9146)
-Processed 47000 images. (Top1 accuracy, Top5 accuracy) = (0.7350, 0.9147)
-Processed 47100 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9146)
-Processed 47200 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9146)
-Processed 47300 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9145)
-Processed 47400 images. (Top1 accuracy, Top5 accuracy) = (0.7346, 0.9144)
-Processed 47500 images. (Top1 accuracy, Top5 accuracy) = (0.7347, 0.9144)
-Processed 47600 images. (Top1 accuracy, Top5 accuracy) = (0.7348, 0.9145)
-Processed 47700 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9145)
-Processed 47800 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9145)
-Processed 47900 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9144)
-Processed 48000 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9144)
-Processed 48100 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9144)
-Processed 48200 images. (Top1 accuracy, Top5 accuracy) = (0.7349, 0.9145)
-Processed 48300 images. (Top1 accuracy, Top5 accuracy) = (0.7350, 0.9145)
-Processed 48400 images. (Top1 accuracy, Top5 accuracy) = (0.7350, 0.9145)
-Processed 48500 images. (Top1 accuracy, Top5 accuracy) = (0.7350, 0.9144)
-Processed 48600 images. (Top1 accuracy, Top5 accuracy) = (0.7350, 0.9145)
-Processed 48700 images. (Top1 accuracy, Top5 accuracy) = (0.7353, 0.9146)
-Processed 48800 images. (Top1 accuracy, Top5 accuracy) = (0.7353, 0.9146)
-Processed 48900 images. (Top1 accuracy, Top5 accuracy) = (0.7354, 0.9147)
-Processed 49000 images. (Top1 accuracy, Top5 accuracy) = (0.7356, 0.9148)
-Processed 49100 images. (Top1 accuracy, Top5 accuracy) = (0.7356, 0.9149)
-Processed 49200 images. (Top1 accuracy, Top5 accuracy) = (0.7357, 0.9148)
-Processed 49300 images. (Top1 accuracy, Top5 accuracy) = (0.7356, 0.9148)
-Processed 49400 images. (Top1 accuracy, Top5 accuracy) = (0.7358, 0.9149)
-Processed 49500 images. (Top1 accuracy, Top5 accuracy) = (0.7358, 0.9149)
-Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7359, 0.9148)
-Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7359, 0.9149)
-Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7359, 0.9149)
-Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7359, 0.9149)
-Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9149)
+Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
+Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/final_int8_resnet50.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet50', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --data-location=/dataset --single-socket --verbose --accuracy-only                          --in-graph=/in_graph/final_int8_resnet50.pb
-Batch Size: 100
 Ran inference with batch size 100
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_int8_20190104_212224.log
 ```
 
 * Evaluate the model performance: The ImageNet dataset is not needed in this case:
@@ -149,7 +93,7 @@ $ python launch_benchmark.py \
     --in-graph /home/myuser/resnet50_int8_pretrained_model/final_int8_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
@@ -158,23 +102,22 @@ $ python launch_benchmark.py \
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
-steps = 10, 462.431070436 images/sec
+[Running warmup steps...]
+steps = 10, 460.862674539 images/sec
 [Running benchmark steps...]
-steps = 10, 465.158375557 images/sec
-steps = 20, 469.24763528 images/sec
-steps = 30, 467.694254776 images/sec
-steps = 40, 470.733760164 images/sec
-steps = 50, 468.407939199 images/sec
+steps = 10, 461.002369109 images/sec
+steps = 20, 460.082656541 images/sec
+steps = 30, 464.707827579 images/sec
+steps = 40, 463.187506632 images/sec
+steps = 50, 462.725212176 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=True, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/final_int8_resnet50.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet50', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --data-location=/dataset --single-socket --verbose              --benchmark-only             --in-graph=/in_graph/final_int8_resnet50.pb
-Batch Size: 128
 Ran inference with batch size 128
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_int8_20190104_213139.log
 ```
+
+Note that the `--verbose` flag can be added to any of the above commands
+to get additional debug output.
 
 ## FP32 Inference Instructions
 
@@ -214,12 +157,11 @@ $ python launch_benchmark.py \
     --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --batch-size=1 \
-    --single-socket \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --verbose
+    --socket-id 0 \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 The log file is saved to:
@@ -229,31 +171,20 @@ The tail of the log output when the benchmarking completes should look
 something like this:
 ```
 Inference with dummy data.
-Iteration 1: 0.978 sec
-Iteration 2: 0.011 sec
-Iteration 3: 0.011 sec
-Iteration 4: 0.012 sec
+Iteration 1: 0.956 sec
+Iteration 2: 0.018 sec
 ...
-Iteration 35: 0.011 sec
-Iteration 36: 0.011 sec
-Iteration 37: 0.011 sec
 Iteration 38: 0.011 sec
 Iteration 39: 0.011 sec
 Iteration 40: 0.011 sec
 Average time: 0.011 sec
 Batch size = 1
-Latency: 10.987 ms
-Throughput: 91.020 images/sec
+Latency: 10.924 ms
+Throughput: 91.541 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint=None, data_location=None, framework='tensorflow', input_graph='/in_graph/freezed_resnet50.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet50', model_source_dir=None, num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/freezed_resnet50.pb --model-name=resnet50 --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=1
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --use-case=image_recognition         --model-name=resnet50         --platform=fp32         --mode=inference         --intelai-models=/workspace/intelai_models         --batch-size=1         --single-socket         --verbose         --in-graph=/in_graph/freezed_resnet50.pb
-Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190104_215326.log
 ```
 
 * To measure the model Throughput, set `--batch-size=128` and run the benchmark script as shown:
@@ -264,12 +195,11 @@ $ python launch_benchmark.py \
     --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --batch-size=128 \
-    --single-socket \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --verbose
+    --socket-id 0 \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 The log file is saved to:
@@ -279,30 +209,20 @@ The tail of the log output when the benchmarking completes should look
 something like this:
 ```
 Inference with dummy data.
-Iteration 1: 1.765 sec
-Iteration 2: 0.640 sec
-Iteration 3: 0.638 sec
-Iteration 4: 0.637 sec
+Iteration 1: 1.777 sec
+Iteration 2: 0.657 sec
+Iteration 3: 0.652 sec
 ...
-Iteration 35: 0.635 sec
-Iteration 36: 0.631 sec
-Iteration 37: 0.635 sec
-Iteration 38: 0.632 sec
-Iteration 39: 0.631 sec
-Iteration 40: 0.630 sec
-Average time: 0.633 sec
+Iteration 38: 0.653 sec
+Iteration 39: 0.649 sec
+Iteration 40: 0.652 sec
+Average time: 0.653 sec
 Batch size = 128
-Throughput: 202.190 images/sec
+Throughput: 196.065 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=False, checkpoint=None, data_location=None, framework='tensorflow', input_graph='/in_graph/freezed_resnet50.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet50', model_source_dir=None, num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/freezed_resnet50.pb --model-name=resnet50 --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=128
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --use-case=image_recognition         --model-name=resnet50         --platform=fp32         --mode=inference         --intelai-models=/workspace/intelai_models         --batch-size=128         --single-socket         --verbose         --in-graph=/in_graph/freezed_resnet50.pb
-Batch Size: 128
 Ran inference with batch size 128
-Log location outside container: home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190104_215655.log
 ```
 
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
@@ -314,14 +234,13 @@ $ python launch_benchmark.py \
     --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --accuracy-only \
     --batch-size 100 \
-    --single-socket \
+    --socket-id 0 \
     --data-location /home/myuser/dataset/ImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --verbose
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 The log file is saved to: `models/benchmarks/common/tensorflow/logs`.
@@ -332,13 +251,9 @@ something like this:
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7430, 0.9188)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/freezed_resnet50.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet50', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Current directory: /workspace/benchmarks
-Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/freezed_resnet50.pb --model-name=resnet50 --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=100 --data-location=/dataset --accuracy-only
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --single-socket --accuracy-only  --verbose --in-graph=/in_graph/freezed_resnet50.pb --accuracy-only  --data-location=/dataset
-Batch Size: 100
 Ran inference with batch size 100
-Log location outside container: /tmp/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20181205_201437.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
+
+Note that the `--verbose` flag can be added to any of the above commands
+to get additional debug output.

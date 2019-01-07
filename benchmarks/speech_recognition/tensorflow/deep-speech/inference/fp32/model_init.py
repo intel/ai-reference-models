@@ -26,9 +26,6 @@ from common.base_model_init import BaseModelInitializer
 
 
 class ModelInitializer(BaseModelInitializer):
-    args = None
-    custom_args = []
-
     def run_inference_sanity_checks(self, args, custom_args):
         if args.checkpoint is None:
             sys.exit("Please provide a path to the checkpoint"
@@ -39,54 +36,42 @@ class ModelInitializer(BaseModelInitializer):
         if args.batch_size > 1:
             sys.exit("Currently, only '--batch-size 1' is "
                      "supported during inference.")
-        if not args.single_socket and args.num_cores == -1:
+        if args.socket_id == -1 and args.num_cores == -1:
             print("***Warning***: Running inference on all cores could "
-                  "degrade performance. Pass '--single-socket' instead.\n")
+                  "degrade performance. Pass a '--socket-id' to specify "
+                  "running on a single socket instead.\n")
 
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
         self.parse_args()
-        platform_args = platform_util
+        self.run_inference_sanity_checks(self.args, self.custom_args)
 
-        if args.mode == "inference":
-            self.run_inference_sanity_checks(self.args, self.custom_args)
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(platform_util)
 
-            if args.single_socket:
-                args.num_inter_threads = 1
-                if args.num_cores == -1:
-                    args.num_intra_threads = \
-                        platform_args.num_cores_per_socket()
-                else:
-                    args.num_intra_threads = args.num_cores
-
-            if args.socket_id == 0:
-                cpu_num_begin = 0
-            else:
-                cpu_num_begin = \
-                    args.socket_id * platform_args.num_cores_per_socket()
-
-            if args.num_cores == -1:
-                cpu_num_end = (cpu_num_begin + args.num_intra_threads - 1)
-            else:
-                cpu_num_end = cpu_num_begin + args.num_cores - 1
-
-            self.run_cmd = "numactl --physcpubind=" + str(cpu_num_begin) \
-                + "-" + str(cpu_num_end) + " --membind=" \
-                + str(args.socket_id) + " taskset -c " \
-                + str(cpu_num_begin) + "-" + str(cpu_num_end) \
-                + " python -u DeepSpeech.py --log_level 1 " \
-                "--checkpoint_dir \"" + str(args.checkpoint) \
-                + "\" --one_shot_infer \"" \
-                + os.path.join(args.data_location,
-                               args.datafile_name) \
-                + "\" --inter_op " + str(args.num_inter_threads) \
-                + " --intra_op " + str(args.num_intra_threads) \
-                + " --num_omp_threads " + str(args.num_intra_threads)
-
+        if args.socket_id == 0:
+            cpu_num_begin = 0
         else:
-            # TODO: Add training commands
-            sys.exit("Training is currently not supported.")
+            cpu_num_begin = \
+                args.socket_id * platform_util.num_cores_per_socket()
+
+        if args.num_cores == -1:
+            cpu_num_end = (cpu_num_begin + args.num_intra_threads - 1)
+        else:
+            cpu_num_end = cpu_num_begin + args.num_cores - 1
+
+        self.run_cmd = "numactl --physcpubind=" + str(cpu_num_begin) \
+            + "-" + str(cpu_num_end) + " --membind=" \
+            + str(args.socket_id) + " taskset -c " \
+            + str(cpu_num_begin) + "-" + str(cpu_num_end) \
+            + " python -u DeepSpeech.py --log_level 1 " \
+            "--checkpoint_dir \"" + str(args.checkpoint) \
+            + "\" --one_shot_infer \"" \
+            + os.path.join(args.data_location, args.datafile_name) \
+            + "\" --inter_op " + str(args.num_inter_threads) \
+            + " --intra_op " + str(args.num_intra_threads) \
+            + " --num_omp_threads " + str(args.num_intra_threads)
 
     def parse_args(self):
         if self.custom_args:

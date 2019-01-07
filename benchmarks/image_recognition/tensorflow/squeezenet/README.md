@@ -1,11 +1,11 @@
 # SqueezeNet
 
 This document has instructions for how to run SqueezeNet for the
-following modes/platforms:
+following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -60,7 +60,7 @@ $ checkpoint_dir=$(pwd)/image_recognition/tensorflow/squeezenet/inference/fp32/c
 
 The `launch_benchmark.py` script in the `benchmarks` directory is used
 for starting a benchmarking run in a TensorFlow docker container. It has
-arguments to specify which model, framework, mode, platform, and docker
+arguments to specify which model, framework, mode, precision, and docker
 image to use, along with your path to the ImageNet TF Records that you
 generated in step 3.
 
@@ -69,33 +69,34 @@ following example for throughput (using `--batch-size 64`):
 
 ```
 $ python launch_benchmark.py \
-    --platform fp32 \
+    --precision fp32 \
     --model-name squeezenet \
     --mode inference \
     --framework tensorflow \
-    --single-socket \
+    --socket-id 0 \
     --batch-size 64 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --checkpoint ${checkpoint_dir} \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    --verbose \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
 Or for latency (using `--batch-size 1`):
 
 ```
 $ python launch_benchmark.py \
-    --platform fp32 \
+    --precision fp32 \
     --model-name squeezenet \
     --mode inference \
     --framework tensorflow \
-    --single-socket \
+    --socket-id 0 \
     --batch-size 1 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --checkpoint ${checkpoint_dir} \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    --verbose \
+    --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
+
+Note that the `--verbose` flag can be added to any of the above commands
+to get additional debug output.
 
 5.  The log file is saved to:
 `models/benchmarks/common/tensorflow/logs`
@@ -104,57 +105,29 @@ The tail of the log output when the benchmarking completes should look
 something like this, when running for throughput with `--batch-size 64`:
 
 ```
-step 246: 0.0758 sec
-step 247: 0.0758 sec
-step 248: 0.0756 sec
-step 249: 0.0784 sec
-step 250: 0.0759 sec
 SqueezeNet Inference Summary:
             250 batches x 64 bs = total 16000 images evaluated
             batch size = 64
-            throughput[med] = 841.0 image/sec
-            latency[median] = 1.189 ms
+            throughput[med] = 837.1 image/sec
+            latency[median] = 1.195 ms
 
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-current path: /workspace/benchmarks
-search path: /workspace/benchmarks/*/tensorflow/squeezenet/inference/fp32/model_init.py
-Using model init: /workspace/benchmarks/image_recognition/tensorflow/squeezenet/inference/fp32/model_init.py
-Received these standard args: Namespace(accuracy_only=False, batch_size=64, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='squeezenet', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, verbose=True)
-Received these custom args: []
-taskset -c 0-27 python /workspace/intelai_models/image_recognition/tensorflow/squeezenet/fp32/train_squeezenet.py --data_location /dataset --batch_size 64 --num_inter_threads 1 --num_intra_threads 28 --model_dir /checkpoints --inference-only --verbose
-PYTHONPATH: :/workspace/intelai_models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=squeezenet         --platform=fp32         --mode=inference         --model-source-dir=/workspace/models         --batch-size=64         --single-socket         --data-location=/dataset         --checkpoint=/checkpoints         --intelai-models=/workspace/intelai_models         --verbose
-Batch Size: 64
 Ran inference with batch size 64
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference_fp32_20190104_220051.log
 ```
 
 Or for latency (with `--batch-size 1`):
 
 ```
-step 246: 0.0089 sec
-step 247: 0.0088 sec
-step 248: 0.0085 sec
-step 249: 0.0095 sec
-step 250: 0.0084 sec
 SqueezeNet Inference Summary:
             250 batches x 1 bs = total 250 images evaluated
             batch size = 1
-            throughput[med] = 119.1 image/sec
-            latency[median] = 8.397 ms
+            throughput[med] = 115.3 image/sec
+            latency[median] = 8.67 ms
 
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-current path: /workspace/benchmarks
-search path: /workspace/benchmarks/*/tensorflow/squeezenet/inference/fp32/model_init.py
-Using model init: /workspace/benchmarks/image_recognition/tensorflow/squeezenet/inference/fp32/model_init.py
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='squeezenet', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, verbose=True)
-Received these custom args: []
-taskset -c 0-27 python /workspace/intelai_models/image_recognition/tensorflow/squeezenet/fp32/train_squeezenet.py --data_location /dataset --batch_size 1 --num_inter_threads 1 --num_intra_threads 28 --model_dir /checkpoints --inference-only --verbose
-PYTHONPATH: :/workspace/intelai_models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=squeezenet         --platform=fp32         --mode=inference         --model-source-dir=/workspace/models         --batch-size=1         --single-socket         --data-location=/dataset         --checkpoint=/checkpoints         --intelai-models=/workspace/intelai_models         --verbose
-Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference_fp32_20190104_220712.log
 ```

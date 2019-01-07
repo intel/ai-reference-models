@@ -28,9 +28,6 @@ os.environ['KMP_BLOCKTIME'] = '0'
 
 
 class ModelInitializer(BaseModelInitializer):
-    args = None
-    custom_args = []
-
     def run_inference_sanity_checks(self, args, custom_args):
         if not args.input_graph:
             sys.exit("Please provide a path to the frozen graph directory"
@@ -38,28 +35,18 @@ class ModelInitializer(BaseModelInitializer):
         if not args.data_location:
             sys.exit("Please provide a path to the data directory via the "
                      "'--data-location' flag.")
-        if not args.single_socket and args.num_cores == -1:
+        if args.socket_id == -1 and args.num_cores == -1:
             print("***Warning***: Running inference on all cores could degrade"
-                  " performance. Pass '--single-socket' instead.\n")
+                  " performance. Pass a '--socket-id' to specify running on a"
+                  " single socket instead.\n")
 
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-
         self.run_inference_sanity_checks(self.args, self.custom_args)
-        num_cores_per_socket = platform_util.num_cores_per_socket()
 
-        if args.single_socket:
-                args.num_inter_threads = 1
-                args.num_intra_threads = num_cores_per_socket
-        else:
-            args.num_inter_threads = platform_util.num_cpu_sockets()
-
-        if args.num_cores == -1:
-            args.num_intra_threads = \
-                num_cores_per_socket * args.num_inter_threads
-        else:
-            args.num_intra_threads = args.num_cores
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(platform_util)
 
         self.research_dir = os.path.join(args.model_source_dir, "research")
         script_path = "object_detection/inference/infer_detections.py"

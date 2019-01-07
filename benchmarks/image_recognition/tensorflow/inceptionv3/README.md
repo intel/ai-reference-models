@@ -1,12 +1,12 @@
 # Inception V3
 
 This document has instructions for how to run Inception V3 for the
-following modes/platforms:
+following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## Int8 Inference Instructions
 
@@ -78,7 +78,7 @@ the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
-platform, and docker image to use, along with your path to the ImageNet
+precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 5.
 
 Substitute in your own `--data-location` (from step 5, for accuracy
@@ -97,7 +97,7 @@ For accuracy (using your `--data-location`, `--accuracy-only` and
 ```
 python launch_benchmark.py \
     --model-name inceptionv3 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --accuracy-only \
@@ -108,34 +108,34 @@ python launch_benchmark.py \
     -- input_height=299 input_width=299
 ```
 
-For latency (using `--benchmark-only`, `--single-socket` and `--batch-size 1`):
+For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
     --model-name inceptionv3 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 1 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
     -- input_height=299 input_width=299
 ```
 
-For throughput (using `--benchmark-only`, `--single-socket` and `--batch-size 128`):
+For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
     --model-name inceptionv3 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 128 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
@@ -153,46 +153,45 @@ different configs.
 Example log tail when running for accuracy:
 
 ```
-Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7664, 0.9337)
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7666, 0.9333)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Executing command: python /workspace/intelai_models/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --data_location=/dataset
 Ran inference with batch size 100
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20181207_180915.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20190104_013246.log
 ```
 
 Example log tail when benchmarking for latency:
 ```
 [Running warmup steps...]
-steps = 10, 56.7987541472 images/sec
+steps = 10, 56.8087550114 images/sec
 [Running benchmark steps...]
-steps = 10, 56.853417193 images/sec
-steps = 20, 56.4623275224 images/sec
-steps = 30, 54.947453919 images/sec
-steps = 40, 56.507207717 images/sec
-steps = 50, 56.6759543274 images/sec
+steps = 10, 57.2046753318 images/sec
+steps = 20, 56.7181068289 images/sec
+steps = 30, 57.015714208 images/sec
+steps = 40, 57.4216088933 images/sec
+steps = 50, 57.491659242 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=1 --input_graph=/in_graph/final_int8_inceptionv3.pb --steps=50
 Ran inference with batch size 1
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference.log
+Log location outside container: /home/myuser/inteai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20190104_185906.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
 [Running warmup steps...]
-steps = 10, 336.523181805 images/sec
+steps = 10, 341.225945255 images/sec
 [Running benchmark steps...]
-steps = 10, 330.464868432 images/sec
-steps = 20, 337.603490289 images/sec
-steps = 30, 337.37478909 images/sec
-steps = 40, 335.896171239 images/sec
-steps = 50, 337.467250577 images/sec
+steps = 10, 340.304326771 images/sec
+steps = 20, 339.108777134 images/sec
+steps = 30, 337.139199124 images/sec
+steps = 40, 341.177805273 images/sec
+steps = 50, 338.634144926 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/final_int8_inceptionv3.pb --steps=50
+Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --steps=50
 Ran inference with batch size 128
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20190104_014141.log
 ```
 
 ## FP32 Inference Instructions
@@ -222,7 +221,7 @@ the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
-platform, and docker image.
+precision, and docker image.
 
 Substitute in your own `--in-graph` pretrained model file path (from step 2).
 
@@ -235,42 +234,32 @@ depending on your use case.
 ```
 python launch_benchmark.py \
     --model-name inceptionv3 \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 1 \
-    --single-socket \
-    --verbose \
+    --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/myuser/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when benchmarking for latency:
 ```
 Inference with dummy data.
-Iteration 1: 1.096 sec
-Iteration 2: 0.014 sec
-Iteration 3: 0.014 sec
-Iteration 4: 0.015 sec
+Iteration 1: 1.075 sec
+Iteration 2: 0.023 sec
+Iteration 3: 0.016 sec
 ...
-Iteration 36: 0.014 sec
-Iteration 37: 0.014 sec
 Iteration 38: 0.014 sec
 Iteration 39: 0.014 sec
 Iteration 40: 0.014 sec
 Average time: 0.014 sec
 Batch size = 1
-Latency: 14.434 ms
-Throughput: 69.283 images/sec
+Latency: 14.442 ms
+Throughput: 69.243 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint=None, data_location=None, framework='tensorflow', input_graph='/in_graph/inceptionv3_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inceptionv3', model_source_dir=None, num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/inceptionv3_fp32_pretrained_model.pb --model-name=inceptionv3 --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=1
-PYTHONPATH: :/workspace/intelai_models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py     --framework=tensorflow     --use-case=image_recognition     --model-name=inceptionv3     --platform=fp32     --mode=inference     --intelai-models=/workspace/intelai_models     --batch-size=1     --single-socket     --verbose     --in-graph=/in_graph/inceptionv3_fp32_pretrained_model.pb 
-Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: /home/myuser/logs/benchmark_inceptionv3_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20190104_025220.log
 ```
 
 * For throughput (using `--batch-size 128`):
@@ -278,41 +267,31 @@ Log location outside container: /home/myuser/logs/benchmark_inceptionv3_inferenc
 ```
 python launch_benchmark.py \
     --model-name inceptionv3 \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 128 \
-    --single-socket \
-    --verbose \
+    --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/myuser/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when benchmarking for throughput:
 ```
 Inference with dummy data.
-Iteration 1: 1.969 sec
-Iteration 2: 0.785 sec
-Iteration 3: 0.770 sec
-Iteration 4: 0.750 sec
+Iteration 1: 2.024 sec
+Iteration 2: 0.765 sec
+Iteration 3: 0.781 sec
 ...
-Iteration 36: 0.754 sec
-Iteration 37: 0.754 sec
-Iteration 38: 0.754 sec
-Iteration 39: 0.749 sec
-Iteration 40: 0.750 sec
-Average time: 0.750 sec
+Iteration 38: 0.756 sec
+Iteration 39: 0.760 sec
+Iteration 40: 0.757 sec
+Average time: 0.760 sec
 Batch size = 128
-Throughput: 170.579 images/sec
+Throughput: 168.431 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=False, checkpoint=None, data_location=None, framework='tensorflow', input_graph='/in_graph/inceptionv3_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inceptionv3', model_source_dir=None, num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/inceptionv3_fp32_pretrained_model.pb --model-name=inceptionv3 --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=128
-PYTHONPATH: :/workspace/intelai_models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py     --framework=tensorflow     --use-case=image_recognition     --model-name=inceptionv3     --platform=fp32     --mode=inference     --intelai-models=/workspace/intelai_models     --batch-size=128     --single-socket     --verbose     --in-graph=/in_graph/inceptionv3_fp32_pretrained_model.pb
-Batch Size: 128
 Ran inference with batch size 128
-Log location outside container: /home/myuser/logs/benchmark_inceptionv3_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20190104_024842.log
 ```
 
 * For accuracy (using `--accuracy-only`, `--batch-size 100`, and
@@ -321,32 +300,25 @@ Log location outside container: /home/myuser/logs/benchmark_inceptionv3_inferenc
 ```
 python launch_benchmark.py \
     --model-name inceptionv3 \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
     --data-location /dataset/Imagenet_Validation \
-    --verbose \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/myuser/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when benchmarking for accuracy:
 ```
-Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9341)
-Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7676, 0.9341)
-Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9341)
-Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9342)
+Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7673, 0.9341)
+Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9341)
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9342)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/inceptionv3_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inceptionv3', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=False, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Current directory: /workspace/benchmarks
-Running: python /workspace/intelai_models/fp32/eval_image_classifier_inference.py --input-graph=/in_graph/inceptionv3_fp32_pretrained_model.pb --model-name=inceptionv3 --inter-op-parallelism-threads=2 --intra-op-parallelism-threads=56 --batch-size=100 --data-location=/dataset --accuracy-only
-PYTHONPATH: :/workspace/intelai_models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inceptionv3 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100  --accuracy-only  --verbose --in-graph=/in_graph/inceptionv3_fp32_pretrained_model.pb --data-location=/dataset
-Batch Size: 100
 Ran inference with batch size 100
-Log location outside container: /thome/myuser/inteai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20181207_174021.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20190104_023816.log
 ```
+
+Note that the `--verbose` flag can be added to any of the above commands
+to get additional debug output.

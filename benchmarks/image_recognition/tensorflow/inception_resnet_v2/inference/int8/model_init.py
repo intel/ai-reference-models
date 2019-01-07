@@ -34,43 +34,21 @@ class ModelInitializer(BaseModelInitializer):
     """Model initializer for Inception ResNet V2 int8 inference"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
-
-        self.cmd = " python "
+        self.cmd = self.get_numactl_command(self.args.socket_id) + "python "
 
         # use default batch size if -1
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        num_cores_per_socket = platform_util.num_cores_per_socket()
-
-        if self.args.single_socket:
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = num_cores_per_socket \
-                if self.args.num_cores == -1 else self.args.num_cores
-
-        else:
-            self.args.num_inter_threads = self.platform_util.num_cpu_sockets()
-
-            if self.args.num_cores == -1:
-                self.args.num_intra_threads = \
-                    int(self.platform_util.num_cores_per_socket() *
-                        self.platform_util.num_cpu_sockets())
-
-            else:
-                self.args.num_intra_threads = self.args.num_cores
-
-        if self.args.single_socket:
-            socket_id_str = str(self.args.socket_id)
-            self.cmd = "numactl --cpunodebind=" + socket_id_str + \
-                       " --membind=" + socket_id_str + self.cmd
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(self.platform_util)
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
-                                      self.args.platform,
+                                      self.args.precision,
                                       "eval_image_classifier_benchmark.py")
 
             cmd_args = " --input-graph=" + self.args.input_graph + \
@@ -81,7 +59,7 @@ class ModelInitializer(BaseModelInitializer):
                 " --batch-size=" + str(self.args.batch_size)
         elif self.args.accuracy_only:
             run_script = os.path.join(self.args.intelai_models,
-                                      self.args.platform,
+                                      self.args.precision,
                                       "eval_image_classifier_accuracy.py")
 
             cmd_args = " --input_graph=" + self.args.input_graph + \

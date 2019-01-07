@@ -45,78 +45,73 @@ class BaseBenchmarkUtil(object):
             self._platform_util.num_cpu_sockets()
 
         self._common_arg_parser = ArgumentParser(
-            add_help=False, description='Parse args for base benchmark '
-                                        'interface')
+            add_help=False, description="Parse args for base benchmark "
+                                        "interface")
 
         self._common_arg_parser.add_argument(
-            '-f', "--framework",
-            help='Specify the name of the deep learning framework to use.',
-            dest='framework', default=None, required=True)
+            "-f", "--framework",
+            help="Specify the name of the deep learning framework to use.",
+            dest="framework", default=None, required=True)
 
         self._common_arg_parser.add_argument(
-            '-r', "--model-source-dir",
+            "-r", "--model-source-dir",
             help="Specify the models source directory from your local machine",
-            nargs='?', dest="model_source_dir")
+            nargs="?", dest="model_source_dir")
 
         self._common_arg_parser.add_argument(
-            '-p', "--platform",
-            help="Specify the model platform to use fp32 or int8 or ats "
-                 "or bfloat16",
-            required=True, choices=['fp32', 'int8', 'ats', 'bfloat16'],
-            dest="platform")
+            "-p", "--precision",
+            help="Specify the model precision to use: fp32, int8, or bfloat16",
+            required=True, choices=["fp32", "int8", "bfloat16"],
+            dest="precision")
 
         self._common_arg_parser.add_argument(
-            '-mo', "--mode", help="Specify the type training or inference ",
-            required=True, choices=['training', 'inference'], dest="mode")
+            "-mo", "--mode", help="Specify the type training or inference ",
+            required=True, choices=["training", "inference"], dest="mode")
 
         self._common_arg_parser.add_argument(
-            '-m', "--model-name", required=True,
-            help='model name to run benchmarks for', dest='model_name')
+            "-m", "--model-name", required=True,
+            help="model name to run benchmarks for", dest="model_name")
 
         self._common_arg_parser.add_argument(
-            '-b', "--batch-size",
-            help='Specify the batch size. If this parameter is not specified '
-                 'or is -1, the largest ideal batch size for the model will '
-                 'be used',
+            "-b", "--batch-size",
+            help="Specify the batch size. If this parameter is not specified "
+                 "or is -1, the largest ideal batch size for the model will "
+                 "be used",
             dest="batch_size", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
-            '-d', "--data-location",
-            help='Specify the location of the data. If this parameter is not '
-                 'specified, the benchmark will use random/dummy data.',
+            "-d", "--data-location",
+            help="Specify the location of the data. If this parameter is not "
+                 "specified, the benchmark will use random/dummy data.",
             dest="data_location", default=None)
 
         self._common_arg_parser.add_argument(
-            '-s', '--single-socket',
-            help='Indicates that only one socket should be used. If used in '
-                 'conjunction with --num-cores, all cores will be allocated on'
-                 ' the single socket.',
-            dest="single_socket", action='store_true')
+            "-i", "--socket-id",
+            help="Specify which socket to use. Only one socket will be used "
+                 "when this value is set. If used in conjunction with "
+                 "--num-cores, all cores will be allocated on the single "
+                 "socket.",
+            dest="socket_id", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
-            '-i', "--socket-id",
-            help='Specify which socket to use. Default is socket 0.',
-            dest="socket_id", type=int, default=0)
-
-        self._common_arg_parser.add_argument(
-            '-n', "--num-cores",
-            help='Specify the number of cores to use. If the parameter is not'
-                 ' specified or is -1, all cores will be used.',
+            "-n", "--num-cores",
+            help="Specify the number of cores to use. If the parameter is not"
+                 " specified or is -1, all cores will be used.",
             dest="num_cores", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
-            '-a', "--num_intra_threads", type=int,
+            "-a", "--num-intra-threads", type=int,
             help="Specify the number of threads within the layer",
             dest="num_intra_threads", default=DEFAULT_INTRAOP_VALUE_)
 
         self._common_arg_parser.add_argument(
-            '-e', "--num_inter_threads", type=int,
-            help='Specify the number threads between layers',
+            "-e", "--num-inter-threads", type=int,
+            help="Specify the number threads between layers",
             dest="num_inter_threads", default=DEFAULT_INTEROP_VALUE_)
 
         self._common_arg_parser.add_argument(
-            '-v', "--verbose", help='Print verbose information.',
-            dest='verbose', action='store_true')
+            "-v", "--verbose", help="Print verbose information.",
+            dest="verbose", action="store_true")
 
         # Allow for additional command line args after --
         self._common_arg_parser.add_argument(
@@ -146,16 +141,18 @@ class BaseBenchmarkUtil(object):
 
         # check if socket id is in socket number range
         num_sockets = self._platform_util.num_cpu_sockets()
-        if (args.socket_id < 0) or (args.socket_id >= num_sockets):
+        if args.socket_id != -1 and \
+                (args.socket_id >= num_sockets or args.socket_id < -1):
             raise ValueError("Socket id must be within socket number range: "
-                             "[0, {}).".format(num_sockets))
+                             "[0, {}].".format(num_sockets - 1))
 
         # check number of cores
         num_logical_cores_per_socket = \
             self._platform_util.num_cores_per_socket() * \
             self._platform_util.num_threads_per_core()
+        # if a socket_id is specified, only count cores from one socket
         system_num_cores = num_logical_cores_per_socket if \
-            args.single_socket else num_logical_cores_per_socket * \
+            args.socket_id != -1 else num_logical_cores_per_socket * \
             self._platform_util.num_cpu_sockets()
         num_cores = args.num_cores
 
@@ -180,13 +177,13 @@ class BaseBenchmarkUtil(object):
             filename = "{}.py".format(self.MODEL_INITIALIZER)
             model_init_file = os.path.join(current_path, args.use_case,
                                            args.framework, args.model_name,
-                                           args.mode, args.platform,
+                                           args.mode, args.precision,
                                            filename)
             package = ".".join([args.use_case, args.framework,
-                                args.model_name, args.mode, args.platform])
+                                args.model_name, args.mode, args.precision])
             model_init_module = __import__(package + "." +
                                            self.MODEL_INITIALIZER,
-                                           fromlist=['*'])
+                                           fromlist=["*"])
             model_initializer = model_init_module.ModelInitializer(
                 args, unknown_args, self._platform_util)
 

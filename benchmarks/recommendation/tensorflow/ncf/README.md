@@ -1,7 +1,7 @@
 ## Benchmark Neural Collaborative Filtering (NCF) ##
 
 This document has instructions for how to run NCF for the
-following modes/platforms:
+following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference.
@@ -46,17 +46,17 @@ $ pwd
 * `--checkpoint` - Path to checkpoint directory for the Pre-trained model from step5
 
 
-For Throughput, `--batch-size 256`, `--single-socket`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
+For Throughput, `--batch-size 256`, `--socket-id 0`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
 
 ```
 $ python launch_benchmark.py \
     --checkpoint path_from_step5 \
     --model-source-dir /path_from_step_2/models \
     --model-name ncf \
-    --single-socket \
+    --socket-id 0 \
     --batch-size 256 \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
@@ -76,17 +76,17 @@ Average recommendations/sec across 23594 steps: 903932.8 (0.28381 msec/batch)
 ...
 ```
 
-For Latency, `--batch-size 1`, `--single-socket`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
+For Latency, `--batch-size 1`, `--socket-id 0`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
 
 ```
 $ python launch_benchmark.py \
     --checkpoint path_from_step5 \
     --model-source-dir /path_from_step_2/models \
     --model-name ncf \
-    --single-socket \
+    --socket-id 0 \
     --batch-size 1 \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```

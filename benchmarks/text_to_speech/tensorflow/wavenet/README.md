@@ -1,11 +1,11 @@
 # WaveNet
 
 This document has instructions for how to run WaveNet for the following
-modes/platforms:
+modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -59,11 +59,11 @@ the name of the checkpoint to use and the sample number.
 
 ```
 python launch_benchmark.py \
-    --platform fp32 \
-    -m wavenet \
+    --precision fp32 \
+    --model-name wavenet \
     --mode inference \
     --framework tensorflow \
-    --single-socket \
+    --socket-id 0 \
     --num-cores 1 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --model-source-dir /home/myuser/wavenet/tensorflow-wavenet \
@@ -77,33 +77,24 @@ file in `models/benchmarks/common/tensorflow/logs`.
 The tail of the log should look something like this:
 
 ```
-Time per 500 Samples: 1.470617 sec
-Samples / sec: 339.993337
-msec / sample: 2.941234
+Time per 500 Samples: 1.530719 sec
+Samples / sec: 326.643875
+msec / sample: 3.061438
 Sample: 7500
-Time per 500 Samples: 1.454286 sec
-Samples / sec: 343.811360
-msec / sample: 2.908572
+Time per 500 Samples: 1.553019 sec
+Samples / sec: 321.953602
+msec / sample: 3.106038
 Sample: 8000
-Time per 500 Samples: 1.464048 sec
-Samples / sec: 341.518879
-msec / sample: 2.928096
+Time per 500 Samples: 1.552633 sec
+Samples / sec: 322.033594
+msec / sample: 3.105266
 Sample: 8500
 
-Average Throughput of whole run: Samples / sec: 304.013303
-Average Latency of whole run: msec / sample: 3.289330
+Average Throughput of whole run: Samples / sec: 289.351783
+Average Latency of whole run: msec / sample: 3.456001
 Finished generating. The result can be viewed in TensorBoard.
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-current path: /workspace/benchmarks
-search path: /workspace/benchmarks/*/tensorflow/wavenet/inference/fp32/model_init.py
-Using model init: /workspace/benchmarks/text_to_speech/tensorflow/wavenet/inference/fp32/model_init.py
-Received these standard args: Namespace(batch_size=-1, checkpoint='/checkpoints', data_location=None, framework='tensorflow', input_graph=None, mode='inference', model_args=[], model_name='wavenet', model_source_dir='/workspace/models', num_cores=1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, verbose=True)
-Received these custom args: ['--checkpoint_name=model.ckpt-99', '--sample=8510']
-('Run model here.', 'numactl --physcpubind=0-0 --membind=0 python generate.py /checkpoints/model.ckpt-99 --num_inter_threads=1 --num_intra_threads=1 --sample=8510')
-PYTHONPATH: :/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wavenet         --platform=fp32         --mode=inference         --model-source-dir=/workspace/models         --single-socket         --checkpoint=/checkpoints         --num-cores=1         --verbose         --checkpoint_name=model.ckpt-99         --sample=8510
-Batch Size: -1
 Ran inference with batch size -1
-Log location outside container: /tmp/myuser/models/benchmarks/common/tensorflow/logs/benchmark_wavenet_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_wavenet_inference_fp32_20190105_015022.log
 ```

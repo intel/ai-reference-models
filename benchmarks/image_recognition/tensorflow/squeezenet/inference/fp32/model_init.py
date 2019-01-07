@@ -31,13 +31,11 @@ class ModelInitializer (BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-
         cores_per_socket = platform_util.num_cores_per_socket()
-        self.args.num_inter_threads = 1
-        self.args.num_intra_threads = cores_per_socket
 
-        if not self.args.single_socket:
-            self.args.num_intra_threads *= platform_util.num_cpu_sockets()
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(platform_util)
+        self.args.num_inter_threads = 1
 
         if self.args.num_cores > 0:
             ncores = self.args.num_cores
@@ -45,7 +43,7 @@ class ModelInitializer (BaseModelInitializer):
             ncores = self.args.num_intra_threads
 
         script_path = os.path.join(self.args.intelai_models,
-                                   self.args.platform, "train_squeezenet.py")
+                                   self.args.precision, "train_squeezenet.py")
 
         self.command = ("taskset -c {:.0f}-{:.0f} python {} "
                         "--data_location {} --batch_size {:.0f} "

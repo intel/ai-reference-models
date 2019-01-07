@@ -1,11 +1,11 @@
 # Inception V4
 
 This document has instructions for how to run Inception V4 for the
-following modes/platforms:
+following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## Int8 Inference Instructions
 
@@ -41,7 +41,7 @@ the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
-platform, and docker image to use, along with your path to the ImageNet
+precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 4.
 
 Inception V4 can be run to test accuracy or benchmarking throughput or
@@ -54,43 +54,43 @@ For accuracy (using your `--data-location`, `--accuracy-only` and
 ```
 python launch_benchmark.py \
     --model-name inceptionv4 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv4_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
-For throughput benchmarking (using `--benchmark-only`, `--single-socket` and `--batch-size 240`):
+For throughput benchmarking (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
 
 ```
 python launch_benchmark.py \
     --model-name inceptionv4 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 240 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv4_int8_pretrained_model.pb
 ```
 
-For latency (using `--benchmark-only`, `--single-socket` and `--batch-size 1`):
+For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
     --model-name inceptionv4 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 1 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv4_int8_pretrained_model.pb
 ```
@@ -106,46 +106,45 @@ different configs.
 Example log tail when running for accuracy:
 
 ```
-Processed 48960 images. (Top1 accuracy, Top5 accuracy) = (0.7994, 0.9505)
-Processed 49200 images. (Top1 accuracy, Top5 accuracy) = (0.7995, 0.9505)
-Processed 49440 images. (Top1 accuracy, Top5 accuracy) = (0.7994, 0.9504)
-Processed 49680 images. (Top1 accuracy, Top5 accuracy) = (0.7996, 0.9505)
-Processed 49920 images. (Top1 accuracy, Top5 accuracy) = (0.7996, 0.9503)
+Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7997, 0.9505)
+Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7997, 0.9505)
+Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7998, 0.9505)
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7997, 0.9505)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Ran inference with batch size 240
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20181212_210600.log
+Ran inference with batch size 100
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20190104_191509.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
 [Running warmup steps...]
-steps = 10, 175.298147727 images/sec
+steps = 10, 175.53918375 images/sec
 [Running benchmark steps...]
-steps = 10, 174.898030455 images/sec
-steps = 20, 175.043739505 images/sec
-steps = 30, 174.010253581 images/sec
-steps = 40, 174.023128794 images/sec
-steps = 50, 174.824917692 images/sec
+steps = 10, 174.937300256 images/sec
+steps = 20, 175.244772337 images/sec
+steps = 30, 174.478200559 images/sec
+steps = 40, 174.701369537 images/sec
+steps = 50, 174.296242659 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 240
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20181212_210320.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20190104_012411.log
 ```
 
 Example log tail when benchmarking for latency:
 ```
 [Running warmup steps...]
-steps = 10, 21.5271353637 images/sec
+steps = 10, 21.231392241 images/sec
 [Running benchmark steps...]
-steps = 10, 20.4683066803 images/sec
-steps = 20, 15.3893434503 images/sec
-steps = 30, 22.8806842978 images/sec
-steps = 40, 22.1703834871 images/sec
-steps = 50, 21.2602339774 images/sec
-Latency: 46.514 ms
+steps = 10, 22.2226555049 images/sec
+steps = 20, 22.9158120756 images/sec
+steps = 30, 22.3323412117 images/sec
+steps = 40, 21.807397548 images/sec
+steps = 50, 22.9305954197 images/sec
+Latency: 44.916 ms
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20181215_000616.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv4_inference_int8_20190104_012204.log
 ```

@@ -31,22 +31,20 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args=[], platform_util=None):
         self.args = args
         self.custom_args = custom_args
-
         # use default batch size if -1
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(platform_util)
         self.args.num_inter_threads = 2
-        self.args.num_intra_threads = platform_util.num_cores_per_socket()
 
-        if not self.args.single_socket:
-            self.args.num_intra_threads *= platform_util.num_cpu_sockets()
-
-        script_path = os.path.join(args.intelai_models, args.mode,
-                                   args.platform, "eval_image_classifier.py")
+        script_path = os.path.join(
+            self.args.intelai_models, self.args.mode, self.args.precision,
+            "eval_image_classifier.py")
         self.command_prefix = "python {}".format(script_path)
 
-        if self.args.single_socket:
+        if self.args.socket_id != -1:
             self.command_prefix = "numactl --cpunodebind={} -l {}".format(
                 str(self.args.socket_id), self.command_prefix)
 

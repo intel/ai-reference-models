@@ -81,25 +81,13 @@ class ModelInitializer(BaseModelInitializer):
 
     def add_command_prefix(self, script_path):
         """ Uses the specified script path and adds on the command prefix """
-        cmd_prefix = "python " + script_path
-        if self.args.single_socket:
-            cmd_prefix = "numactl --cpunodebind=0 --membind=0 " + cmd_prefix
-        return cmd_prefix
-
-    def add_args_to_command(self, cmd_prefix, arg_list):
-        """ Adds the specified args to the cmd_prefix string """
-        for arg in vars(self.args):
-            arg_value = getattr(self.args, arg)
-            if arg == "batch_size" and arg_value == -1:
-                continue
-            if arg_value and (arg in arg_list):
-                cmd_prefix = "{} --{}={}".format(cmd_prefix, arg, arg_value)
-        return cmd_prefix
+        return self.get_numactl_command(self.args.socket_id) + "python " + \
+            script_path
 
     def run_benchmark(self):
         """ Setup the command string and run the benchmarking script """
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.platform, "benchmark.py")
+            self.args.intelai_models, self.args.precision, "benchmark.py")
         script_args_list = [
             "input_graph", "input_height", "input_width", "batch_size",
             "input_layer", "output_layer", "num_inter_threads",
@@ -113,7 +101,7 @@ class ModelInitializer(BaseModelInitializer):
     def run_accuracy(self):
         """ Setup the command string and run the accuracy test """
         accuracy_script = os.path.join(
-            self.args.intelai_models, self.args.platform, "accuracy.py")
+            self.args.intelai_models, self.args.precision, "accuracy.py")
         script_args_list = [
             "input_graph", "data_location", "input_height", "input_width",
             "batch_size", "input_layer", "output_layer",

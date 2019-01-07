@@ -19,7 +19,6 @@
 #
 
 import os
-import sys
 
 from common.base_model_init import BaseModelInitializer
 
@@ -27,40 +26,31 @@ from common.base_model_init import BaseModelInitializer
 class ModelInitializer(BaseModelInitializer):
     '''Add code here to detect the environment and set necessary variables
     before launching the model'''
-    args = None
-    custom_args = []
 
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
+        os.environ["OMP_NUM_THREADS"] = "1"
 
-        if args.mode == "inference":
-            os.environ["OMP_NUM_THREADS"] = "1"
+        if args.batch_size == -1:
+            args.batch_size = 1
+            if args.verbose:
+                print("Setting batch_size to 1 since it is not supplied.")
 
-            if self.args.batch_size == -1:
-                self.args.batch_size = 1
-                if self.args.verbose:
-                    print("Setting batch_size to 1 since it is not supplied.")
-
-            if self.args.batch_size == 1:
-                if self.args.verbose:
-                    print("Running Wide_Deep model Inference in Latency mode")
-            else:
-                if self.args.verbose:
-                    print("Running Wide_Deep model Inference in "
-                          "Throughput mode")
-
-            # Select script based on batch size
-            if self.args.batch_size == 1:
-                executable = os.path.join(self.args.mode, self.args.platform,
-                                          "wide_deep_inference_bs1_latency.py")
-            else:
-                executable = os.path.join(self.args.mode, self.args.platform,
-                                          "wide_deep_inference.py")
-
+        if args.batch_size == 1:
+            if args.verbose:
+                print("Running Wide_Deep model Inference in Latency mode")
         else:
-            # TODO: Add support for training
-            sys.exit("Training is currently not supported.")
+            if args.verbose:
+                print("Running Wide_Deep model Inference in Throughput mode")
+
+        # Select script based on batch size
+        if args.batch_size == 1:
+            executable = os.path.join(args.mode, args.precision,
+                                      "wide_deep_inference_bs1_latency.py")
+        else:
+            executable = os.path.join(args.mode, args.precision,
+                                      "wide_deep_inference.py")
 
         self.run_cmd = " OMP_NUM_THREADS=1" + \
                        " numactl --cpunodebind=0 --membind=0 " + \

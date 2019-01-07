@@ -26,6 +26,7 @@ Training and inference scripts with intel optimized MKL
                 * [FP32](image_recognition/tensorflow/mobilenet_v1/README.md#fp32-inference-instructions)
         * Resnet101
             * Inference
+                * [Int8](image_recognition/tensorflow/resnet101/README.md#int8-inference-instructions)
                 * [FP32](image_recognition/tensorflow/resnet101/README.md#fp32-inference-instructions)
         * Resnet50
             * Inference

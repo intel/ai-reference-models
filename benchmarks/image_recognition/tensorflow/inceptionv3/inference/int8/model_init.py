@@ -30,9 +30,6 @@ import os
 class ModelInitializer(BaseModelInitializer):
     """Model initializer for inception v3 int8 inference"""
 
-    args = None
-    custom_args = []
-
     def __init__(self, args, custom_args=[], platform_util=None):
         self.args = args
         self.custom_args = custom_args
@@ -86,45 +83,29 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
-                                        self.args.platform, "benchmark.py")
+                                        self.args.precision, "benchmark.py")
         script_args_list = [
             "input_graph", "input_height", "input_width", "batch_size",
             "input_layer", "output_layer", "num_inter_threads",
             "num_intra_threads", "warmup_steps", "steps"]
 
-        cmd = self.add_numactl_and_args(benchmark_script, script_args_list)
+        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + benchmark_script
+        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 
     def run_accuracy(self):
         accuracy_script = os.path.join(self.args.intelai_models,
-                                       self.args.platform, "accuracy.py")
+                                       self.args.precision, "accuracy.py")
         script_args_list = [
             "input_graph", "data_location", "input_height", "input_width",
             "batch_size", "input_layer", "output_layer",
             "num_inter_threads", "num_intra_threads"]
 
-        cmd = self.add_numactl_and_args(accuracy_script, script_args_list)
+        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + accuracy_script
+        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
-
-    def add_numactl_and_args(self, script_path, script_args_list):
-        """
-        Helper function for creating string that includes the python script
-        and all of the specified args.
-        """
-        cmd_prefix = "python " + script_path
-
-        if self.args.single_socket:
-            cmd_prefix = "numactl --cpunodebind=0 --membind=0 " + cmd_prefix
-
-        for arg in vars(self.args):
-            arg_value = getattr(self.args, arg)
-            if arg == "batch_size" and arg_value == -1:
-                continue
-            if arg_value and (arg in script_args_list):
-                cmd_prefix = "{} --{}={}".format(cmd_prefix, arg, arg_value)
-
-        print("Executing command: {}".format(cmd_prefix))
-        return cmd_prefix
 
     def run(self):
         # Parse custom arguments and append to self.args

@@ -1,7 +1,7 @@
 # ResNet101
 
 This document has instructions for how to run ResNet101 for the
-following modes/platforms:
+following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
@@ -64,7 +64,7 @@ the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
-platform, and docker image to use, along with your path to the ImageNet
+precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 4.
 
 Substitute in your own `--data-location` (from step 4, for accuracy
@@ -82,7 +82,7 @@ $ cd /home/myuser/models/benchmarks
 
 $ python launch_benchmark.py \
     --model-name resnet101 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --accuracy-only \
@@ -92,34 +92,34 @@ $ python launch_benchmark.py \
     --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
 ```
 
-For latency (using `--benchmark-only`, `--single-socket` and `--batch-size 1`):
+For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
     --model-name resnet101 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 1 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
-    --in-graph=/home/myuser/inceptionv3_int8_pretrained_model.pb
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
 ```
 
-For throughput (using `--benchmark-only`, `--single-socket` and `--batch-size 128`):
+For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
     --model-name resnet101 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 128 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
-    --in-graph=/home/myuser/inceptionv3_int8_pretrained_model.pb
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
@@ -132,16 +132,13 @@ different configs.
 
 Example log tail when running for accuracy:
 ```
-Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7696, 0.9309)
+Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7690, 0.9304)
+Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7691, 0.9305)
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7691, 0.9305)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resnet101_int8_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=False, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --data-location=/dataset  --verbose --in-graph=/in_graph/resnet101_int8_pretrained_model.pb --accuracy-only
-Batch Size: 100
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_int8_20190104_205838.log
 ```
 
 Example log tail when benchmarking for latency:
@@ -170,26 +167,13 @@ Log location outside container: /home/myuser/intel-models/benchmarks/common/tens
 
 Example log tail when benchmarking for throughput:
 ```
-[Running warmup steps...]
-steps = 10, 261.899492271 images/sec
-steps = 20, 264.73629574 images/sec
-steps = 30, 264.42726748 images/sec
-steps = 40, 266.918027016 images/sec
-[Running benchmark steps...]
-steps = 10, 2649.86314633 images/sec
-steps = 20, 1321.40108889 images/sec
-steps = 30, 880.866111729 images/sec
-steps = 40, 660.864211524 images/sec
-steps = 50, 528.715408097 images/sec
-steps = 60, 440.655396861 images/sec
-steps = 70, 377.691701833 images/sec
-steps = 80, 330.564774873 images/sec
-steps = 90, 293.794278281 images/sec
-steps = 100, 264.372863325 images/sec
+steps = 80, 328.404413955 images/sec
+steps = 90, 291.945088967 images/sec
+steps = 100, 262.656894016 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_int8_20190104_211412.log
 ```
 
 ## FP32 Inference Instructions
@@ -236,86 +220,63 @@ repository
 
     ```
     $ cd /home/myuser/models/benchmarks
-    $ python launch_benchmark.py
-        --framework tensorflow
-        --platform fp32
-        --mode inference
-        --model-name resnet101
-        --batch-size 128
-        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
-        --in-graph /home/myuser/trained_models/resnet101_fp32_pretrained_model.pb
-        --single-socket
-        --verbose
+    $ python launch_benchmark.py \
+        --framework tensorflow \
+        --precision fp32 \
+        --mode inference \
+        --model-name resnet101 \
+        --batch-size 128 \
+        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --in-graph /home/myuser/trained_models/resnet101_fp32_pretrained_model.pb \
+        --socket-id 0
     ```
 
     The log file is saved to: `models/benchmarks/common/tensorflow/logs/`.
 
     The tail of the log output when the benchmarking completes should look something like this:
 
-      ```
-        steps = 10, 1342.80359717 images/sec
-        steps = 20, 670.767434629 images/sec
-        steps = 30, 446.319515464 images/sec
-        steps = 40, 334.314206698 images/sec
-        steps = 50, 267.251707323 images/sec
-        steps = 60, 222.571395923 images/sec
-        steps = 70, 190.724044039 images/sec
-        steps = 80, 166.881224428 images/sec
-        steps = 90, 148.365949039 images/sec
-        steps = 100, 133.594262281 images/sec
-        lscpu_path_cmd = command -v lscpu
-        lscpu located here: /usr/bin/lscpu
-        Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resnet101_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-        Received these custom args: []
-        Current directory: /workspace/benchmarks
-        Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/benchmark.py --batch_size=128 --num_inter_threads=2 --input_graph=/in_graph/resnet101_fp32_pretrained_model.pb --num_intra_threads=56
-        PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-        RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --single-socket --verbose --in-graph=/in_graph/resnet101_fp32_pretrained_model.pb       --data-location=/dataset
-        Batch Size: 128
-        Ran inference with batch size 128
-        Log location outside container: /home/myuser/resnet101/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20181205_194744.log
-      ```
+    ```
+    steps = 70, 193.428695737 images/sec
+    steps = 80, 169.258177508 images/sec
+    steps = 90, 150.457869027 images/sec
+    steps = 100, 135.433960175 images/sec
+    lscpu_path_cmd = command -v lscpu
+    lscpu located here: /usr/bin/lscpu
+    Ran inference with batch size 128
+    Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20190104_204615.log
+    ```
 
 5. Run for accuracy
     ```
     $ cd /home/myuser/models/benchmarks
-    $ python launch_benchmark.py
-        --framework tensorflow
-        --platform fp32
-        --mode inference
-        --model-name resnet101
-        --batch-size 100
-        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
-        --in-graph /home/myuser/trained_models/resnet101_fp32_pretrained_model.pb
-        --data-location /home/myuser/imagenet_validation_dataset
-        --accuracy-only
-        --single-socket
-        --verbose
+    $ python launch_benchmark.py \
+        --framework tensorflow \
+        --precision fp32 \
+        --mode inference \
+        --model-name resnet101 \
+        --batch-size 100 \
+        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --in-graph /home/myuser/trained_models/resnet101_fp32_pretrained_model.pb \
+        --data-location /home/myuser/imagenet_validation_dataset \
+        --accuracy-only \
+        --socket-id 0
     ```
 
     The log file is saved to: `/home/myuser/resnet101/intel-models/benchmarks/common/tensorflow/logs/`.
 
     The tail of the log output when the benchmarking completes should look something like this:
 
-      ```
-        Processed 49300 images. (Top1 accuracy, Top5 accuracy) = (0.7641, 0.9290)
-        Processed 49400 images. (Top1 accuracy, Top5 accuracy) = (0.7639, 0.9289)
-        Processed 49500 images. (Top1 accuracy, Top5 accuracy) = (0.7639, 0.9289)
-        Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7638, 0.9289)
-        Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7638, 0.9288)
-        Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7640, 0.9289)
-        Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7640, 0.9289)
-        Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7640, 0.9289)
-        lscpu_path_cmd = command -v lscpu
-        lscpu located here: /usr/bin/lscpu
-        Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/resnet101_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='resnet101', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-        Received these custom args: []
-        Current directory: /workspace/benchmarks
-        Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/accuracy.py --batch_size=100 --num_inter_threads=2 --input_graph=/in_graph/resnet101_fp32_pretrained_model.pb --num_intra_threads=56 --data_location=/dataset
-        PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-        RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --single-socket --accuracy-only  --verbose --in-graph=/in_graph/resnet101_fp32_pretrained_model.pb --data-location=/dataset
-        Batch Size: 100
-        Ran inference with batch size 100
-        Log location outside container: /home/myuser/resnet101/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20181207_221503.log
+    ```
+    Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7639, 0.9289)
+    Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7639, 0.9290)
+    Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7639, 0.9289)
+    Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7641, 0.9289)
+    Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7640, 0.9289)
+    lscpu_path_cmd = command -v lscpu
+    lscpu located here: /usr/bin/lscpu
+    Ran inference with batch size 100
+    Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20190104_201506.log
     ```
 
+   Note that the `--verbose` flag can be added to any of the above commands
+   to get additional debug output.

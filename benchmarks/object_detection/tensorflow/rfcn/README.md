@@ -1,12 +1,12 @@
 # R-FCN (ResNet101)
 
 This document has instructions for how to run R-FCN for the
-following modes/platforms:
+following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for the R-FCN ResNet101 model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## Int8 Inference Instructions
 
@@ -139,7 +139,7 @@ is the path to the directory with the raw coco validation images:
 python launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
-    --platform int8 \
+    --precision int8 \
     --framework tensorflow \
     --docker-image your-docker-image \
     --model-source-dir /home/myuser/tensorflow/models \
@@ -156,13 +156,12 @@ where your `coco_val.record-00000-of-00001` file is located:
 python launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
-    --platform int8 \
+    --precision int8 \
     --framework tensorflow \
     --docker-image your-docker-image \
     --model-source-dir /home/myuser/tensorflow/models \
     --data-location /home/myuser/coco/output/coco_val.record-00000-of-00001 \
     --in-graph /home/myuser/rfcn_resnet101_int8_coco_pretrained_model.pb \
-    --verbose \
     --accuracy-only \
     -- split="accuracy_message"
 ```
@@ -173,27 +172,19 @@ python launch_benchmark.py \
 Below is a sample log file tail when running benchmarking for throughput
 and latency:
 ```
-Step 0: 10.2767250538 seconds
-Step 10: 0.123119115829 seconds
+Step 0: 10.4141180515 seconds
+Step 10: 0.262073040009 seconds
 ...
-Step 450: 0.0954110622406 seconds
-Step 460: 0.0991611480713 seconds
-Step 470: 0.0990519523621 seconds
-Step 480: 0.0993700027466 seconds
-Step 490: 0.117154121399 seconds
-Avg. Duration per Step:0.122102419376
+Step 450: 0.161545991898 seconds
+Step 460: 0.275990009308 seconds
+Step 470: 0.164253950119 seconds
+Step 480: 0.150436162949 seconds
+Step 490: 0.13734793663 seconds
+Avg. Duration per Step:0.184123309612
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=-1, benchmark_only=True, checkpoint=None, data_location='/dataset', evaluate_tensor=None, framework='tensorflow', input_graph='/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, number_of_steps=500, platform='int8', print_accuracy=False, single_socket=False, socket_id=0, split=None, timeline=None, use_case='object_detection', verbose=True, visualize=False)
-Received these custom args: ['--number_of_steps=500']
-Current directory: /workspace/models/research
-Running: /usr/bin/python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb -x 500 -d /dataset
-PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/models/research/slim:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1  --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset      --benchmark-only --number_of_steps=500  
-Batch Size: -1
 Ran inference with batch size -1
-Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference_int8_20181206_204825.log
-
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference_int8_20190104_222703.log
 ```
 
 And here is a sample log file tail when running for accuracy:
@@ -213,12 +204,12 @@ DONE (t=0.01s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=True, batch_size=-1, benchmark_only=False, checkpoint=None, data_location='/dataset', evaluate_tensor=None, framework='tensorflow', input_graph='/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, number_of_steps=None, platform='int8', print_accuracy=False, single_socket=False, socket_id=0, split='accuracy_message', timeline=None, use_case='object_detection', verbose=True, visualize=False)
+Received these standard args: Namespace(accuracy_only=True, batch_size=-1, benchmark_only=False, checkpoint=None, data_location='/dataset', evaluate_tensor=None, framework='tensorflow', input_graph='/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, number_of_steps=None, precision='int8', print_accuracy=False, socket_id=-1, split='accuracy_message', timeline=None, use_case='object_detection', verbose=True, visualize=False)
 Received these custom args: ['--split=accuracy_message']
 Current directory: /workspace/models/research
 Running: FROZEN_GRAPH=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb TF_RECORD_FILE=/dataset SPLIT=accuracy_message TF_MODELS_ROOT=/workspace/models /workspace/intelai_models/inference/int8/coco_mAP.sh
 PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/models/research/slim:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1  --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset     --accuracy-only   --split=accuracy_message 
+RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1  --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset     --accuracy-only   --split=accuracy_message
 Batch Size: -1
 Ran inference with batch size -1
 Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference_int8_20181206_225054.log
@@ -357,8 +348,9 @@ $ python launch_benchmark.py \
     --model-source-dir /home/myuser/tensorflow/models \
     --model-name rfcn \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
+    --socket-id 0 \
     --checkpoint /home/myuser/rfcn_resnet101_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     -- config_file=rfcn_pipeline.config
@@ -371,7 +363,7 @@ the pre-trained graph located in the pre-trained model directory (from step 4):
 python launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
-    --platform fp32 \
+    --precision fp32 \
     --framework tensorflow \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --model-source-dir /home/myuser/tensorflow/models \
@@ -391,13 +383,13 @@ and latency:
 Average time per step: 0.262 sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, use_case='object_detection', verbose=True)
+Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32, socket_id=0, use_case='object_detection', verbose=True)
 Received these custom args: ['--config_file=rfcn_pipeline.config']
 Run model here.
 current directory: /workspace/models/research
 Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/eval.py --inter_op 1 --intra_op 28 --omp 28 --pipeline_config_path /checkpoints/rfcn_pipeline.config --checkpoint_dir /checkpoints --eval_dir /workspace/models/research/object_detection/models/rfcn/eval  --logtostderr  --blocktime=0  --run_once=True 
 PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/models/research/slim:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --platform=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --single-socket --verbose --checkpoint=/checkpoints         --config_file=rfcn_pipeline.config 
+RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --socket-id 0 --verbose --checkpoint=/checkpoints         --config_file=rfcn_pipeline.config
 Batch Size: 1
 Ran inference with batch size 1
 Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference.log
