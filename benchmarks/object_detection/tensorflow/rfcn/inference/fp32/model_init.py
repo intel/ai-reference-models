@@ -26,7 +26,6 @@ from common.base_model_init import BaseModelInitializer
 
 
 class ModelInitializer(BaseModelInitializer):
-    args = None
     accuracy_script = "coco_mAP.sh"
     accuracy_script_path = ""
 
@@ -38,13 +37,13 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-        self.platform_args = platform_util
+        self.platform_util = platform_util
         self.accuracy_script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.platform,
+            self.args.intelai_models, self.args.mode, self.args.precision,
             self.accuracy_script)
         self.benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode,
-            self.args.platform, "eval.py")
+            self.args.precision, "eval.py")
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.parse_custom_args()
@@ -52,21 +51,13 @@ class ModelInitializer(BaseModelInitializer):
                                          "research")
 
     def run_benchmark(self):
-        command_prefix = "python " + self.benchmark_script
-        if self.args.single_socket:
-            command_prefix = "numactl --cpunodebind=" + \
-                                  str(self.args.socket_id) + \
-                                  " --membind=0 " + command_prefix
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = \
-                self.platform_args.num_cores_per_socket()
-        else:
-            self.args.num_inter_threads = \
-                self.platform_args.num_cpu_sockets()
-            if self.args.num_cores == -1:
-                self.args.num_intra_threads = \
-                    self.platform_args.num_cores_per_socket() * \
-                    self.args.num_inter_threads
+        command_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + self.benchmark_script
+
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(self.platform_util)
+
+        if self.args.socket_id == -1:
             if self.args.num_cores == 1:
                 command_prefix = "taskset -c 0 " + \
                                  command_prefix
@@ -75,7 +66,7 @@ class ModelInitializer(BaseModelInitializer):
                 command_prefix = "taskset -c 0-" + \
                                  str(self.args.num_cores - 1) + \
                                  " " + command_prefix
-                self.args.num_intra_threads = self.args.num_cores
+
         os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
         config_file_path = os.path.join(self.args.checkpoint,
                                         self.args.config_file)

@@ -1,11 +1,11 @@
 # SSD-MobileNet
 
 This document has instructions for how to run SSD-MobileNet for the
-following modes/platforms:
+following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -160,9 +160,9 @@ $ python launch_benchmark.py \
     --model-source-dir /home/myuser/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
-    --platform fp32 \
+    --precision fp32 \
     --mode inference \
-    --single-socket \
+    --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
@@ -178,11 +178,8 @@ INFO:tensorflow:Processed 4980 images...
 INFO:tensorflow:Processed 4990 images...
 INFO:tensorflow:Processed 5000 images...
 INFO:tensorflow:Finished processing records
-Using model init: /workspace/benchmark/tensorflow/ssd-mobilenet/fp32/inference/model_init.py
-Received these standard args: Namespace(batch_size=256, checkpoint=None, data_location='/dataset', inference_only=True, input_graph='/in_graph/frozen_inference_graph.pb', mode='inference', model_name='ssd-mobilenet', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='fp32', single_socket=True, socket_id=0, verbose=True)
-Received these custom args: []
-Initialize here.
-Run model here.
-current directory: /workspace/models/research
-Running: OMP_NUM_THREADS=28 numactl -l -N 1 python object_detection/inference/infer_detections.py --input_tfrecord_paths /dataset --inference_graph /in_graph/frozen_inference_graph.pb --output_tfrecord_path=/tmp/ssd-mobilenet-record-out --intra_op_parallelism_threads 28 --inter_op_parallelism_threads 1 --discard_image_pixels=True --inference_only
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size -1
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference_fp32_20190104_230409.log
 ```

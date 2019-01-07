@@ -33,14 +33,14 @@ from test_utils import platform_config
 test_model_name = "resnet50"
 test_framework = "tensorflow"
 test_mode = "inference"
-test_platform = "fp32"
+test_precision = "fp32"
 test_docker_image = "foo"
 test_batch_size = "100"
 test_num_cores = "1"
 example_req_args = ["--model-name", test_model_name,
                     "--framework", test_framework,
                     "--mode", test_mode,
-                    "--platform", test_platform,
+                    "--precision", test_precision,
                     "--docker-image", test_docker_image,
                     "--batch-size", test_batch_size,
                     "--num-cores", test_num_cores]
@@ -81,7 +81,7 @@ def test_launch_benchmark_parse_args(mock_platform_util):
     assert args.model_name == test_model_name
     assert args.framework == test_framework
     assert args.mode == test_mode
-    assert args.platform == test_platform
+    assert args.precision == test_precision
     assert args.docker_image == test_docker_image
     assert unknown_args == []
 

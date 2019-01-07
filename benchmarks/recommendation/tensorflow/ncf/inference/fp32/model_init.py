@@ -42,35 +42,15 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 256
 
-        num_cores_per_socket = platform_util.num_cores_per_socket()
-
-        if self.args.single_socket:
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = num_cores_per_socket \
-                if self.args.num_cores == -1 else self.args.num_cores
-        else:
-            self.args.num_inter_threads = \
-                platform_util.num_cpu_sockets()
-
-            if self.args.num_cores == -1:
-                self.args.num_intra_threads = \
-                    int(platform_util.num_cores_per_socket() *
-                        platform_util.num_cpu_sockets())
-            else:
-                self.args.num_intra_threads = self.args.num_cores
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(platform_util)
 
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.platform,
+            self.args.intelai_models, self.args.mode, self.args.precision,
             "ncf_main.py")
 
-        self.benchmark_command = "python " + benchmark_script
-
-        if self.args.single_socket:
-            socket_id_str = str(self.args.socket_id)
-
-            self.benchmark_command = "numactl --cpunodebind=" + socket_id_str \
-                                     + " --membind=" + socket_id_str + " " + \
-                                     self.benchmark_command
+        self.benchmark_command = self.get_numactl_command(args.socket_id) + \
+            "python " + benchmark_script
 
         os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 

@@ -1,11 +1,11 @@
 # Wide & Deep
 
 This document has instructions for how to run Wide & Deep benchmark for the
-following modes/platforms:
+following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training and inference
-other platforms are coming later.
+other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -14,6 +14,7 @@ other platforms are coming later.
     ```
     # We going to use older version of the tensorflow model repo.
     $ git clone git@github.com:tensorflow/models.git
+    $ cd models
     $ git checkout 6ff0a53f81439d807a78f8ba828deaea3aaaf269 
     ```
     
@@ -46,7 +47,7 @@ use in the next step.
        $ python launch_benchmark.py \ 
              --framework tensorflow \ 
              --model-source-dir /home/myuser/path/to/tensorflow-models \
-             --platform fp32 \
+             --precision fp32 \
              --mode inference \
              --model-name wide_deep \
              --batch-size 1 \
@@ -62,7 +63,7 @@ use in the next step.
        $ python launch_benchmark.py \ 
              --framework tensorflow \ 
              --model-source-dir /home/myuser/path/to/tensorflow-models \
-             --platform fp32 \
+             --precision fp32 \
              --mode inference \
              --model-name wide_deep \
              --batch-size 1024 \
@@ -97,5 +98,5 @@ use in the next step.
     search path: /workspace/benchmarks/*/tensorflow/wide_deep/inference/fp32/model_init.py
     Using model init: /workspace/benchmarks/classification/tensorflow/wide_deep/inference/fp32/model_init.py
     PYTHONPATH: :/workspace/models
-    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --platform=fp32         --mode=inference         --model-source-dir=/workspace/models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
+    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --precision=fp32         --mode=inference         --model-source-dir=/workspace/models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
     ```

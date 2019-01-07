@@ -1,7 +1,7 @@
 # MobileNet V1
 
 This document has instructions for how to run MobileNet V1 for the
-following modes/platforms:
+following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Benchmarking instructions and scripts for model training is coming
@@ -59,28 +59,28 @@ later.
    * Run benchmarking for latency (with `--batch-size 1`):
      ```
      python launch_benchmark.py \
-         --platform fp32 \
+         --precision fp32 \
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
          --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
          --model-source-dir /home/myuser/tensorflow/models  \
          --batch-size 1 \
-         --single-socket \
+         --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/myuser/mobilenet_v1_fp32_pretrained_model
      ```
     * Run benchmarking for throughput (with `--batch-size 100`):
       ```
       python launch_benchmark.py \
-         --platform fp32 \
+         --precision fp32 \
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
          --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
          --model-source-dir /home/myuser/tensorflow/models  \
          --batch-size 100 \
-         --single-socket \
+         --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/myuser/mobilenet_v1_fp32_pretrained_model
       ```
@@ -90,35 +90,35 @@ later.
 
    * Below is a sample log file snippet when benchmarking latency:
      ```
-     2018-12-13 19:18:05.340448: step 80, 76.3 images/sec
-     2018-12-13 19:18:05.459113: step 90, 82.6 images/sec
-     2018-12-13 19:18:05.578525: step 100, 84.0 images/sec
+     2019-01-04 20:02:23.855441: step 80, 78.3 images/sec
+     2019-01-04 20:02:23.974862: step 90, 83.7 images/sec
+     2019-01-04 20:02:24.097476: step 100, 84.0 images/sec
      eval/Accuracy[0]
-     eval/Recall_5[0.01]
-     INFO:tensorflow:Finished evaluation at 2018-12-13-19:18:05
-     self._total_images_per_sec = 830.8
+     eval/Recall_5[0]
+     INFO:tensorflow:Finished evaluation at 2019-01-04-20:02:24
+     self._total_images_per_sec = 809.6
      self._displayed_steps = 10
-     Total images/sec = 83.1
-     Latency ms/step = 12.0
+     Total images/sec = 81.0
+     Latency ms/step = 12.4
      lscpu_path_cmd = command -v lscpu
      lscpu located here: /usr/bin/lscpu
      Ran inference with batch size 1
-     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mobilenet_v1_inference_fp32_20181213_191800.log
+     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mobilenet_v1_inference_fp32_20190104_200218.log
      ```
 
    * Below is a sample log file snippet when benchmarking throughput:
      ```
-     2018-12-14 00:56:39.793218: step 80, 183.7 images/sec
-     2018-12-14 00:56:45.391790: step 90, 181.9 images/sec
-     2018-12-14 00:56:51.082103: step 100, 178.3 images/sec
-     eval/Accuracy[0.0012]
-     eval/Recall_5[0.0051]
-     INFO:tensorflow:Finished evaluation at 2018-12-14-00:56:51
-     self._total_images_per_sec = 1795.6
+     2019-01-04 20:06:01.151312: step 80, 184.0 images/sec
+     2019-01-04 20:06:06.719081: step 90, 180.5 images/sec
+     2019-01-04 20:06:12.346302: step 100, 174.1 images/sec
+     eval/Accuracy[0.0009]
+     eval/Recall_5[0.0049]
+     INFO:tensorflow:Finished evaluation at 2019-01-04-20:06:12
+     self._total_images_per_sec = 1810.2
      self._displayed_steps = 10
-     Total images/sec = 179.6
+     Total images/sec = 181.0
      lscpu_path_cmd = command -v lscpu
      lscpu located here: /usr/bin/lscpu
      Ran inference with batch size 100
-     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mobilenet_v1_inference_fp32_20181214_005550.log
+     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mobilenet_v1_inference_fp32_20190104_200512.log
      ```

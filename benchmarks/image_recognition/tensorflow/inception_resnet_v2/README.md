@@ -1,7 +1,7 @@
 # Inception ResNet V2
 
 This document has instructions for how to run Inception ResNet V2 for the
-following modes/platforms:
+following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 
 ## Int8 Inference Instructions
@@ -64,7 +64,7 @@ the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
-platform, and docker image to use, along with your path to the ImageNet
+precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 4.
 
 Substitute in your own `--data-location` (from step 4, for accuracy
@@ -81,7 +81,7 @@ For accuracy (using your `--data-location`, `--accuracy-only` and
 ```
 python launch_benchmark.py \
     --model-name inception_resnet_v2 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --accuracy-only \
@@ -91,32 +91,32 @@ python launch_benchmark.py \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
-For latency (using `--benchmark-only`, `--single-socket` and `--batch-size 1`):
+For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
     --model-name inception_resnet_v2 \
-    --platform int8 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 1 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
-For throughput (using `--benchmark-only`, `--single-socket` and `--batch-size 128`):
+For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
-    --model-name inceptionv3 \
-    --platform int8 \
+    --model-name inception_resnet_v2 \
+    --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 128 \
-    --single-socket \
+    --socket-id 0 \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inception_resnet_v2_int8_pretrained_model.pb
 ```
@@ -132,57 +132,38 @@ different configs.
 Example log tail when running for accuracy:
 
 ```
-Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.8018, 0.9519)
+Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.8015, 0.9523)
+Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.8016, 0.9524)
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.8015, 0.9524)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=True, batch_size=100, benchmark_only=False, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/inception_resnet_v2_int8_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inception_resnet_v2', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, platform='int8', single_socket=False, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Current directory: /workspace/benchmarks
-Running: python /workspace/intelai_models/int8/eval_image_classifier_accuracy.py --input_graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data_location=/dataset --input_height=299 --input_width=299 --num_inter_threads=2 --num_intra_threads=56 --output_layer=InceptionResnetV2/Logits/Predictions --batch_size=100
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100  --accuracy-only  --verbose --in-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data-location=/dataset
-Batch Size: 100
 Ran inference with batch size 100
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_int8_20181212_204045.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_int8_20190104_193854.log
 ```
 
 Example log tail when benchmarking for latency:
 ```
-Iteration 39: 0.051 sec
+Iteration 39: 0.052 sec
 Iteration 40: 0.052 sec
-Average time: 0.051 sec
+Average time: 0.052 sec
 Batch size = 1
-Latency: 51.476 ms
-Throughput: 19.427 images/sec
+Latency: 52.347 ms
+Throughput: 19.103 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=True, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/inception_resnet_v2_int8_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inception_resnet_v2', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='int8', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Current directory: /workspace/benchmarks
-Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/eval_image_classifier_benchmark.py --input-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=1
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --single-socket  --benchmark-only --verbose --in-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data-location=/dataset
-Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_int8_20181212_213939.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_int8_20190104_194938.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
-Iteration 39: 0.976 sec
-Iteration 40: 0.977 sec
-Average time: 0.976 sec
+Iteration 39: 0.993 sec
+Iteration 40: 1.023 sec
+Average time: 0.996 sec
 Batch size = 128
-Throughput: 131.141 images/sec
+Throughput: 128.458 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=128, benchmark_only=True, checkpoint=None, data_location='/dataset', framework='tensorflow', input_graph='/in_graph/inception_resnet_v2_int8_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='inception_resnet_v2', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=1, num_intra_threads=28, platform='int8', single_socket=True, socket_id=0, use_case='image_recognition', verbose=True)
-Received these custom args: []
-Current directory: /workspace/benchmarks
-Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/eval_image_classifier_benchmark.py --input-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=128
-PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --platform=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --single-socket  --benchmark-only --verbose --in-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data-location=/dataset
-Batch Size: 128
 Ran inference with batch size 128
-Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_int8_20181212_214327.log
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_int8_20190104_195504.log
 ```

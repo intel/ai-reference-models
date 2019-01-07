@@ -43,40 +43,40 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         arg_parser = ArgumentParser(
             parents=[self._common_arg_parser],
-            description='Parse args for benchmark interface')
+            description="Parse args for benchmark interface")
 
         # docker image
         arg_parser.add_argument(
-            "--docker-image", help='Specify the docker image/tag to use',
-            dest='docker_image', default=None, required=True)
+            "--docker-image", help="Specify the docker image/tag to use",
+            dest="docker_image", default=None, required=True)
 
         # checkpoint directory location
         arg_parser.add_argument(
-            '-c', "--checkpoint",
-            help='Specify the location of trained model checkpoint directory. '
-                 'If mode=training model/weights will be written to this '
-                 'location. If mode=inference assumes that the location points'
-                 ' to a model that has already been trained.',
-            dest='checkpoint', default=None)
+            "-c", "--checkpoint",
+            help="Specify the location of trained model checkpoint directory. "
+                 "If mode=training model/weights will be written to this "
+                 "location. If mode=inference assumes that the location points"
+                 " to a model that has already been trained.",
+            dest="checkpoint", default=None)
 
         arg_parser.add_argument(
-            '-k', "--benchmark-only",
-            help='For benchmark measurement only. If neither --benchmark-only '
-                 'or --accuracy-only are specified, it will default to run '
-                 'benchmarking.',
-            dest='benchmark_only', action='store_true')
+            "-k", "--benchmark-only",
+            help="For benchmark measurement only. If neither --benchmark-only "
+                 "or --accuracy-only are specified, it will default to run "
+                 "benchmarking.",
+            dest="benchmark_only", action="store_true")
 
         arg_parser.add_argument(
             "--accuracy-only",
-            help='For accuracy measurement only.  If neither --benchmark-only '
-                 'or --accuracy-only are specified, it will default to run '
-                 'benchmarking.',
-            dest='accuracy_only', action='store_true')
+            help="For accuracy measurement only.  If neither --benchmark-only "
+                 "or --accuracy-only are specified, it will default to run "
+                 "benchmarking.",
+            dest="accuracy_only", action="store_true")
 
         # in graph directory location
         arg_parser.add_argument(
-            '-g', "--in-graph", help='Full path to the input graph ',
-            dest='input_graph', default=None)
+            "-g", "--in-graph", help="Full path to the input graph ",
+            dest="input_graph", default=None)
 
         arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
@@ -133,19 +133,19 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             # find the path to the model's benchmarks folder
             search_path = os.path.join(
                 benchmark_scripts, "*", args.framework, args.model_name,
-                args.mode, args.platform)
+                args.mode, args.precision)
             matches = glob.glob(search_path)
             if len(matches) > 1:
                 # we should never get more than one match
                 raise ValueError("Found multiple model locations for {} {} {}"
                                  .format(args.framework,
                                          args.model_name,
-                                         args.platform))
+                                         args.precision))
             elif len(matches) == 0:
                 raise ValueError("No model was found for {} {} {}"
                                  .format(args.framework,
                                          args.model_name,
-                                         args.platform))
+                                         args.precision))
 
             # use the benchmarks directory path to find the use case
             dir_list = matches[0].split("/")
@@ -181,10 +181,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env EXTERNAL_MODELS_SOURCE_DIRECTORY={} "
                     "--env INTELAI_MODELS={} "
                     "--env BENCHMARK_SCRIPTS={} "
-                    "--env SINGLE_SOCKET={} "
+                    "--env SOCKET_ID={} "
                     "--env MODEL_NAME={} "
                     "--env MODE={} "
-                    "--env PLATFORM={} "
+                    "--env PRECISION={} "
                     "--env VERBOSE={} "
                     "--env BATCH_SIZE={} "
                     "--env WORKSPACE={} "
@@ -206,8 +206,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env NOINSTALL=False"
                     .format(args.data_location, args.checkpoint,
                             args.model_source_dir, intelai_models,
-                            benchmark_scripts, args.single_socket,
-                            args.model_name, args.mode, args.platform,
+                            benchmark_scripts, args.socket_id,
+                            args.model_name, args.mode, args.precision,
                             args.verbose, args.batch_size, workspace,
                             in_graph_filename, mount_benchmark,
                             mount_external_models_source,

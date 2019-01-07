@@ -29,12 +29,12 @@ from test_utils import platform_config
 test_model_name = "resnet50"
 test_framework = "tensorflow"
 test_mode = "inference"
-test_platform = "fp32"
+test_precision = "fp32"
 test_docker_image = "foo"
 example_req_args = ["--model-name", test_model_name,
                     "--framework", test_framework,
                     "--mode", test_mode,
-                    "--platform", test_platform,
+                    "--precision", test_precision,
                     "--docker-image", test_docker_image]
 
 

@@ -30,9 +30,6 @@ from common.base_model_init import BaseModelInitializer
 
 
 class ModelInitializer(BaseModelInitializer):
-
-    args = None
-    custom_args = []
     command = []
     RFCN_PERF_SCRIPT = "run_rfcn_inference.py"
     RFCN_ACCURACY_SCRIPT = "coco_mAP.sh"
@@ -44,10 +41,10 @@ class ModelInitializer(BaseModelInitializer):
         self.custom_args = custom_args
         self.platform_util = platform_util
         self.perf_script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.platform,
+            self.args.intelai_models, self.args.mode, self.args.precision,
             self.RFCN_PERF_SCRIPT)
         self.accuracy_script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.platform,
+            self.args.intelai_models, self.args.mode, self.args.precision,
             self.RFCN_ACCURACY_SCRIPT)
 
         # remove intelai models path, so that imports don't conflict
@@ -118,7 +115,7 @@ class ModelInitializer(BaseModelInitializer):
 
         os.environ["OMP_NUM_THREADS"] = num_cores
 
-        if self.args.single_socket:
+        if self.args.socket_id != -1:
             self.command.append("numactl")
             if self.args.socket_id:
                 socket_id = self.args.socket_id

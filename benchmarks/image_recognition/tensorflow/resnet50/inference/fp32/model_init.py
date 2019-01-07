@@ -33,11 +33,7 @@ os.environ["KMP_SETTINGS"] = "1"
 class ModelInitializer(BaseModelInitializer):
     """initialize mode and run benchmark"""
 
-    args = None
-    custom_args = []
-
     def __init__(self, args, custom_args, platform_util=None):
-
         self.custom_args = custom_args
         self.args = args
         self.platform_util = platform_util
@@ -46,52 +42,36 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        self.args.num_inter_threads = 1
-        self.args.num_intra_threads = \
-            self.platform_util.num_cores_per_socket()
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(self.platform_util)
 
-        if not self.args.single_socket:
-            self.args.num_intra_threads *= \
-                self.platform_util.num_cpu_sockets()
-            self.args.num_inter_threads = 2
+        benchmark_script = os.path.join(
+            self.args.intelai_models,
+            self.args.precision, "eval_image_classifier_inference.py")
 
-        if self.args.mode == "inference":
-            benchmark_script = os.path.join(
-                self.args.intelai_models,
-                self.args.platform, "eval_image_classifier_inference.py")
+        self.benchmark_command = self.get_numactl_command(self.args.socket_id)\
+            + "python " + benchmark_script
 
-            self.benchmark_command = "python " + benchmark_script
+        os.environ["OMP_NUM_THREADS"] = \
+            str(self.args.num_intra_threads)
 
-            if self.args.single_socket:
-                socket_id_str = str(self.args.socket_id)
-                self.benchmark_command = \
-                    "numactl --cpunodebind=" + socket_id_str + \
-                    " --membind=" + socket_id_str + " " + \
-                    self.benchmark_command
+        self.benchmark_command += " --input-graph=" + \
+                                  self.args.input_graph + \
+                                  " --model-name=" + \
+                                  str(self.args.model_name) + \
+                                  " --inter-op-parallelism-threads=" + \
+                                  str(self.args.num_inter_threads) + \
+                                  " --intra-op-parallelism-threads=" + \
+                                  str(self.args.num_intra_threads) + \
+                                  " --batch-size=" + \
+                                  str(self.args.batch_size)
 
-            os.environ["OMP_NUM_THREADS"] = \
-                str(self.args.num_intra_threads)
-
-            self.benchmark_command += " --input-graph=" + \
-                                      self.args.input_graph + \
-                                      " --model-name=" + \
-                                      str(self.args.model_name) + \
-                                      " --inter-op-parallelism-threads=" + \
-                                      str(self.args.num_inter_threads) + \
-                                      " --intra-op-parallelism-threads=" + \
-                                      str(self.args.num_intra_threads) + \
-                                      " --batch-size=" + \
-                                      str(self.args.batch_size)
-
-            # if the data location directory is not empty, then include the arg
-            if self.args.data_location and os.listdir(self.args.data_location):
-                self.benchmark_command += " --data-location=" + \
-                                          self.args.data_location
-            if self.args.accuracy_only:
-                self.benchmark_command += " --accuracy-only"
-
-        else:
-            print("Training is not supported currently.")
+        # if the data location directory is not empty, then include the arg
+        if self.args.data_location and os.listdir(self.args.data_location):
+            self.benchmark_command += " --data-location=" + \
+                                      self.args.data_location
+        if self.args.accuracy_only:
+            self.benchmark_command += " --accuracy-only"
 
     def run(self):
         if self.benchmark_command:

@@ -28,8 +28,6 @@ os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
 class ModelInitializer(BaseModelInitializer):
-    args = None
-
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
@@ -41,9 +39,10 @@ class ModelInitializer(BaseModelInitializer):
         num_intra_threads = int(self.args.num_cores)
         os.environ["OMP_NUM_THREADS"] = str(self.args.num_cores)
 
-        if self.args.single_socket:
-            command_prefix = "numactl --physcpubind=0-{} --membind=0 {}".\
-                format(str(int(self.args.num_cores)-1), command_prefix)
+        if self.args.socket_id != -1:
+            command_prefix = "numactl --physcpubind=0-{} --membind={} {}".\
+                format(str(int(self.args.num_cores)-1), self.args.socket_id,
+                       command_prefix)
         else:
             command_prefix = "numactl --physcpubind=0-{} -l {}".format(
                 str(int(self.args.num_cores)-1), command_prefix)

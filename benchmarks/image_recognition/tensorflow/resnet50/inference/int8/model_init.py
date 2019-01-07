@@ -30,21 +30,16 @@ import os
 class ModelInitializer(BaseModelInitializer):
     """Model initializer for resnet50 int8 inference"""
 
-    args = None
-    custom_args = []
-
     def __init__(self, args, custom_args=[], platform_util=None):
         self.args = args
         self.custom_args = custom_args
         if not platform_util:
             raise ValueError("Did not find any platform info.")
-        else:
-            self.pltfrm = platform_util
 
         # Environment variables
-        os.environ["OMP_NUM_THREADS"] = "{}".format(
-            self.pltfrm.num_cores_per_socket() if self.args.num_cores == -1
-            else self.args.num_cores)
+        os.environ["OMP_NUM_THREADS"] = \
+            str(platform_util.num_cores_per_socket()) \
+            if self.args.num_cores == -1 else str(self.args.num_cores)
 
         os.environ["KMP_BLOCKTIME"] = "0"
         os.environ["KMP_SETTINGS"] = "1"
@@ -84,42 +79,26 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
-                                        self.args.platform, "benchmark.py")
+                                        self.args.precision, "benchmark.py")
         script_args_list = ["input_graph", "input_height", "input_width",
                             "batch_size", "input_layer", "output_layer",
                             "num_inter_threads", "num_intra_threads",
                             "warmup_steps", "steps"]
-        cmd_prefix = "python " + benchmark_script
-        if self.args.single_socket:
-            cmd_prefix = "numactl --cpunodebind=0 --membind=0 " + cmd_prefix
-        for arg in vars(self.args):
-            arg_value = getattr(self.args, arg)
-            if arg == "batch_size" and arg_value == -1:
-                continue
-            if arg_value and (arg in script_args_list):
-                cmd_prefix = cmd_prefix + (" --{param}={value}").format(
-                    param=arg, value=arg_value)
-        cmd = cmd_prefix
+        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + benchmark_script
+        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 
     def run_accuracy(self):
         accuracy_script = os.path.join(self.args.intelai_models,
-                                       self.args.platform, "accuracy.py")
+                                       self.args.precision, "accuracy.py")
         script_args_list = ["input_graph", "data_location", "input_height",
                             "input_width", "batch_size", "input_layer",
                             "output_layer", "num_inter_threads",
                             "num_intra_threads"]
-        cmd_prefix = "python " + accuracy_script
-        if self.args.single_socket:
-            cmd_prefix = "numactl --cpunodebind=0 --membind=0 " + cmd_prefix
-        for arg in vars(self.args):
-            arg_value = getattr(self.args, arg)
-            if arg == "batch_size" and arg_value == -1:
-                continue
-            if arg_value and (arg in script_args_list):
-                cmd_prefix = cmd_prefix + " --{param}={value}".format(
-                    param=arg, value=arg_value)
-        cmd = cmd_prefix
+        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + accuracy_script
+        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 
     def run(self):
