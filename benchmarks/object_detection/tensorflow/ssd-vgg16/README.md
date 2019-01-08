@@ -73,12 +73,7 @@ $ pwd
 
 ```
 
-3. Download the pre-trained model
-```
-$ mkdir -p pre-trained && cd pre-trained
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/ssdvgg16_int8_pretrained_model.pb
-$ pwd
-
+3. A link to download the pre-trained model is coming soon.
 ```
 4. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
@@ -275,13 +270,7 @@ $ pwd
 
 ```
 
-3. Download the pre-trained model
-```
-$ mkdir -p pre-trained && cd pre-trained
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/ssdvgg16_fp32_pretrained_model.pb
-$ pwd
-
-```
+3. A link to download the pre-trained model is coming soon.
 
 4. Navigate to the `benchmarks` directory in the cloned [intelai/models](https://github.com/intelai/models) repo,
 which is where the launch script is located.

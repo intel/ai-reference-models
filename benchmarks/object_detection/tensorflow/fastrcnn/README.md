@@ -89,25 +89,7 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. Download the pre-trained model fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz.
-The pre-trained model includes the checkpoint files and the Fast R-CNN ResNet50 model `pipeline.config`.
-Extract and check out its contents as shown:
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
-$ tar -xzvf fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
-$ ls -l fast_rcnn_resnet50_fp32_coco
-total 374848
--rw-r--r--  1 myuser  myuser         77 Nov 12 22:33 checkpoint
--rw-r--r--  1 myuser  myuser  176914228 Nov 12 22:33 model.ckpt.data-00000-of-00001
--rw-r--r--  1 myuser  myuser      14460 Nov 12 22:33 model.ckpt.index
--rw-r--r--  1 myuser  myuser    5675175 Nov 12 22:33 model.ckpt.meta
--rwxr--r--  1 myuser  myuser       5056 Nov 12 22:33 mscoco_label_map.pbtxt
--rwxr-xr-x  1 myuser  myuser       3244 Nov 12 22:33 pipeline.config
-drwxr-xr-x  4 myuser  myuser        128 Nov 12 22:30 saved_model
-
-```
-Make sure that the `eval_input_reader` section in the `pipeline.config` file has the mounted 
-`coco_val.record` data and pre-trained model `mscoco_label_map.pbtxt` location.
+4. A link to download the pre-trained model is coming soon.
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking.

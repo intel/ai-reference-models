@@ -18,11 +18,7 @@ $ git clone git@github.com:IntelAI/models.git
 
 This repository includes launch scripts for running benchmarks.
 
-2. Download the pre-trained Inception V4 Int8 model:
-
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/inceptionv4_int8_pretrained_model.pb
-```
+2. A link to download the pre-trained model is coming soon.
 
 3. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with

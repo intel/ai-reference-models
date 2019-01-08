@@ -16,11 +16,7 @@ $ git clone git@github.com:IntelAI/models.git
 This repository includes launch scripts for running benchmarks and the
 an optimized version of the Inception ResNet V2 model code.
 
-2. Download the pre-trained Inception ResNet V2 model:
-
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/inception_resnet_v2_int8_pretrained_model.pb
-```
+2. A link to download the pre-trained model is coming soon.
 
 3. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with

@@ -118,10 +118,7 @@ $ git checkout master
 
 The `coco_val.record-00000-of-00001` file is what we will use in this inference example.
 
-5. download the pre-trained model:
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/rfcn_resnet101_int8_coco_pretrained_model.pb
-```
+5. A link to download the pre-trained model is coming soon.
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo
 and then run the benchmarking scripts for either benchmarking throughput
@@ -298,25 +295,7 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. Download the pre-trained model rfcn_resnet101_fp32_coco_pretrained_model.tar.gz.
-The pre-trained model includes the checkpoint files and the R-FCN ResNet101 model `rfcn_pipeline.config`.
-Extract and check out its contents as shown:
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
-$ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
-$ ls -l rfcn_resnet101_fp32_coco
-total 374848
--rw-r--r--  1 myuser  myuser         77 Nov 12 22:33 checkpoint
--rw-r--r--  1 myuser  myuser  176914228 Nov 12 22:33 model.ckpt.data-00000-of-00001
--rw-r--r--  1 myuser  myuser      14460 Nov 12 22:33 model.ckpt.index
--rw-r--r--  1 myuser  myuser    5675175 Nov 12 22:33 model.ckpt.meta
--rwxr--r--  1 myuser  myuser       5056 Nov 12 22:33 mscoco_label_map.pbtxt
--rwxr-xr-x  1 myuser  myuser       3244 Nov 12 22:33 rfcn_pipeline.config
-drwxr-xr-x  4 myuser  myuser        128 Nov 12 22:30 saved_model
-
-```
-Make sure that the `eval_input_reader` section in the `rfcn_pipeline.config` file has the mounted 
-`coco_val.record` data and pre-trained model `mscoco_label_map.pbtxt` location.
+4. A link to download the pre-trained model is coming soon.
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking.

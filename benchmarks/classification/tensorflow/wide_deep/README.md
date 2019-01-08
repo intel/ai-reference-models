@@ -23,12 +23,7 @@ https://archive.ics.uci.edu/ml/datasets/Census+Income
    
    Click on Download link and download `adult.data` and `adult.test` files
 
-3. Download pre-trained model checkpoint files    
-
-       ``` 
-       $ wget https://console.cloud.google.com/storage/browser/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
-       $ tar xvf wide_deep_fp32_pretrained_model.tar.gz
-       ```
+3. A link to download the pre-trained model is coming soon.
  
 4. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking, which we will
