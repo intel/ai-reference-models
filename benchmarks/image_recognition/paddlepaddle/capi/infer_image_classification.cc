@@ -177,15 +177,14 @@ bool ReadNextBatch(PaddleTensor &input_data, PaddleTensor &input_labels,
 
 void PrepareConfig(contrib::AnalysisConfig &config) {
   if (FLAGS_one_file_params) {
-    config.param_file = FLAGS_infer_model + "/params";
-    config.prog_file = FLAGS_infer_model + "/model";
+    config.SetProgFile(FLAGS_infer_model + "/model");
+    config.SetParamsFile(FLAGS_infer_model + "/params");
   } else {
-    config.model_dir = FLAGS_infer_model;
+    config.SetModel(FLAGS_infer_model);
   }
-  config.use_gpu = false;
-  config.device = 0;
-  config.enable_ir_optim = !FLAGS_skip_passes;
-  config.specify_input_name = false;
+  config.DisableGpu();
+  config.SwitchIrOptim(!FLAGS_skip_passes);
+  config.SwitchSpecifyInputNames(false);
   config.SetCpuMathLibraryNumThreads(FLAGS_paddle_num_threads);
   if (FLAGS_use_mkldnn)
     config.EnableMKLDNN();
