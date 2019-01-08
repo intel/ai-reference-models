@@ -252,9 +252,12 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                                  args.checkpoint,
                                  in_graph_dir))
 
-        docker_run_cmd = "docker run -it {} {} --privileged -u root:root " \
+        # only use -it when debugging, otherwise we might get TTY error
+        interactive_flag = "-it" if args.debug else ""
+
+        docker_run_cmd = "docker run {} {} {} --privileged -u root:root " \
                          "-w {} {} /bin/bash"\
-            .format(env_vars, volume_mounts, workspace,
+            .format(interactive_flag, env_vars, volume_mounts, workspace,
                     args.docker_image)
         if not args.debug:
             docker_run_cmd += " start.sh"
