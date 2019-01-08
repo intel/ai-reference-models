@@ -48,21 +48,22 @@ $ ll /home/myuser/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
 ```
 
-4. Next, navigate to the `benchmarks` directory in your local clone of
+4. A link to download the pre-trained model is coming soon.
+
+5. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step
-1, and get the path the to squeezenet checkpoint files:
+1.
 
 ```
 $ cd /home/myuser/models/benchmarks
-
-$ checkpoint_dir=$(pwd)/image_recognition/tensorflow/squeezenet/inference/fp32/checkpoints
 ```
 
 The `launch_benchmark.py` script in the `benchmarks` directory is used
 for starting a benchmarking run in a TensorFlow docker container. It has
 arguments to specify which model, framework, mode, precision, and docker
 image to use, along with your path to the ImageNet TF Records that you
-generated in step 3.
+generated in step 3 and the checkpoint files that you downloaded in
+step 4.
 
 Substitute in your own `--data-location` and follow the steps in the
 following example for throughput (using `--batch-size 64`):
@@ -76,7 +77,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 64 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --checkpoint ${checkpoint_dir} \
+    --checkpoint /home/myuser/squeezenet_checkpoints \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
@@ -91,7 +92,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 1 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --checkpoint ${checkpoint_dir} \
+    --checkpoint /home/myuser/squeezenet_checkpoints \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 

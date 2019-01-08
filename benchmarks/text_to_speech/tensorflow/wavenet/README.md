@@ -50,12 +50,14 @@ $ git clone git@github.com:IntelAI/models.git
 $ cd models/benchmarks
 ```
 
-3. Start benchmarking by executing the launch script and passing args
+3. A link to download the pre-trained model is coming soon.
+
+4. Start benchmarking by executing the launch script and passing args
 specifying that we are running wavenet fp32 inference using TensorFlow,
 along with a dockerfile that includes Intel Optimizations for TensorFlow
 and the path to the model source dir (from step 1) and the checkpoint
-files.  We are also passing a couple of extra model args for wavenet:
-the name of the checkpoint to use and the sample number.
+files (from step 3).  We are also passing a couple of extra model args
+for wavenet: the name of the checkpoint to use and the sample number.
 
 ```
 python launch_benchmark.py \
@@ -67,7 +69,7 @@ python launch_benchmark.py \
     --num-cores 1 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --model-source-dir /home/myuser/wavenet/tensorflow-wavenet \
-    --checkpoint /home/myuser/models/benchmarks/text_to_speech/tensorflow/wavenet/inference/fp32/checkpoints \
+    --checkpoint /home/myuser/wavenet_checkpoints \
     -- checkpoint_name=model.ckpt-99 sample=8510
 ```
 

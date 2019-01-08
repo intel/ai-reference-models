@@ -22,14 +22,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 
 * The ImageNet dataset directory location is only required to calculate the model accuracy.
 
-2. Download the pre-trained ResNet50 model:
-
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/resnet50_int8_pretrained_model.tar.gz
-$ tar -xzvf resnet50_int8_pretrained_model.tar.gz 
-resnet50_int8_pretrained_model/
-resnet50_int8_pretrained_model/final_int8_resnet50.pb
-```
+2. A link to download the pre-trained model is coming soon.
 
 3. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
@@ -121,14 +114,8 @@ to get additional debug output.
 
 ## FP32 Inference Instructions
 
-1. Download the pre-trained ResNet50 model:
+1. A link to download the pre-trained model is coming soon.
 
-```
-$ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/resnet50_fp32_pretrained_model.tar.gz
-$ tar -xzvf resnet50_fp32_pretrained_model.tar.gz 
-resnet50_fp32_pretrained_model/
-resnet50_fp32_pretrained_model/freezed_resnet50.pb
-```
 2. Clone the 
 [intelai/models](https://github.com/intelai/models)
 repository
