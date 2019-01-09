@@ -140,6 +140,22 @@ function install_protoc() {
 
 }
 
+# A3C model
+function a3c() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    pip install opencv-python
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # DeepSpeech model
 function deep-speech() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -573,7 +589,9 @@ LOGFILE=${LOG_OUTPUT}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "deep-speech" ]; then
+if [ ${MODEL_NAME} == "a3c" ]; then
+  a3c
+elif [ ${MODEL_NAME} == "deep-speech" ]; then
   deep-speech
 elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
