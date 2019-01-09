@@ -56,6 +56,11 @@ Training and inference scripts with intel optimized MKL
         * NCF
             * Inference
                 * [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions)
+* Reinforcement Learning
+    * Tensorflow
+        * A3C
+            * Inference
+                * [FP32](reinforcement_learning/tensorflow/a3c/README.md#fp32-inference-instructions)
 * Speech Recognition
     * Tensorflow
         * DeepSpeech
