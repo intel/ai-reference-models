@@ -39,12 +39,12 @@ with our custom [ncf_main.py](../../../../models/recommendation/tensorflow/ncf/i
 * `--checkpoint` - Path to checkpoint directory for the Pre-trained model from step5
 
 
-For Throughput, `--batch-size 256`, `--socket-id 0`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
+For Throughput, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint path_from_step5 \
-    --model-source-dir /path_from_step_2/models \
+    --checkpoint /home/myuser/ncf_fp32_pretrained_model \
+    --model-source-dir /home/myuser/tensorflow/models \
     --model-name ncf \
     --socket-id 0 \
     --batch-size 256 \
@@ -69,12 +69,12 @@ Average recommendations/sec across 23594 steps: 903932.8 (0.28381 msec/batch)
 ...
 ```
 
-For Latency, `--batch-size 1`, `--socket-id 0`, `--checkpoint path_from_step5`, `--model-source-dir /path_from_step_2/models`
+For Latency, `--batch-size 1`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint path_from_step5 \
-    --model-source-dir /path_from_step_2/models \
+    --checkpoint /home/myuser/ncf_fp32_pretrained_model \
+    --model-source-dir /home/myuser/tensorflow/models \
     --model-name ncf \
     --socket-id 0 \
     --batch-size 1 \
@@ -100,4 +100,27 @@ The tail of Latency log, looks as below.
 Average recommendations/sec across 6040001 steps: 4573.0 (0.21920 msec/batch)
 ...
 ```
+For Accuracy, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
 
+```
+$ python launch_benchmark.py \
+    --checkpoint /home/myuser/ncf_fp32_pretrained_model \
+    --model-source-dir /home/myuser/tensorflow/models \
+    --model-name ncf \
+    --socket-id 0 \
+    --accuracy-only \
+    --batch-size 256 \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+```
+
+The tail of accuracy log, looks as below.
+HR: Hit Ratio (HR)
+NDCG: Normalized Discounted Cumulative Gain
+```
+...
+E0104 20:03:50.940653 140470332344064 tf_logging.py:110] CRITICAL - Iteration 1: HR = 0.2290, NDCG = 0.1148
+...
+```
