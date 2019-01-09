@@ -33,7 +33,6 @@
 # limitations under the License.
 # ==============================================================================
 """NCF framework to train and evaluate the NeuMF model.
-
 The NeuMF model assembles both MF and MLP models under the NCF framework. Check
 `neumf_model.py` for more details about the models.
 """
@@ -109,33 +108,26 @@ class LoggerHook(tf.train.SessionRunHook):
 def get_hit_rate_and_ndcg(predicted_scores_by_user, items_by_user, top_k=_TOP_K,
                           match_mlperf=False):
   """Returns the hit rate and the normalized DCG for evaluation.
-
   `predicted_scores_by_user` and `items_by_user` are parallel NumPy arrays with
   shape (num_users, num_items) such that `predicted_scores_by_user[i, j]` is the
   predicted score that user `i` would rate item `items_by_user[i][j]`.
-
   `items_by_user[i, 0]` is the item that user `i` interacted with, while
   `items_by_user[i, 1:] are items that user `i` did not interact with. The goal
   of the NCF model to give a high score for `predicted_scores_by_user[i, 0]`
   compared to `predicted_scores_by_user[i, 1:]`, and the returned HR and NDCG
   will be higher the more successful the model is at this goal.
-
   If `match_mlperf` is True, then the HR and NDCG computations are done in a
   slightly unusual way to match the MLPerf reference implementation.
   Specifically, if `items_by_user[i, :]` contains duplicate items, it will be
   treated as if the item only appeared once. Effectively, for duplicate items in
   a row, the predicted score for all but one of the items will be set to
   -infinity
-
   For example, suppose we have that following inputs:
   predicted_scores_by_user: [[ 2,  3,  3],
                              [ 5,  4,  4]]
-
   items_by_user:            [[10, 20, 20],
                              [30, 40, 40]]
-
   top_k: 2
-
   Then with match_mlperf=True, the HR would be 2/2 = 1.0. With
   match_mlperf=False, the HR would be 1/2 = 0.5. This is because each user has
   predicted scores for only 2 unique items: 10 and 20 for the first user, and 30
@@ -143,7 +135,6 @@ def get_hit_rate_and_ndcg(predicted_scores_by_user, items_by_user, top_k=_TOP_K,
   first item's score is in the top 2. With match_mlperf=False, this function
   would compute the first user's first item is not in the top 2, because item 20
   has a higher score, and item 20 occurs twice.
-
   Args:
     predicted_scores_by_user: 2D Numpy array of the predicted scores.
       `predicted_scores_by_user[i, j]` is the predicted score that user `i`
@@ -157,7 +148,6 @@ def get_hit_rate_and_ndcg(predicted_scores_by_user, items_by_user, top_k=_TOP_K,
       user's first item is in the `top_k` top scores.
     match_mlperf: If True, compute HR and NDCG slightly differently to match the
       MLPerf reference implementation.
-
   Returns:
     (hr, ndcg) tuple of floats, averaged across all users.
   """
@@ -210,18 +200,15 @@ def get_hit_rate_and_ndcg(predicted_scores_by_user, items_by_user, top_k=_TOP_K,
 def evaluate_model(estimator, ncf_dataset, pred_input_fn):
   # type: (tf.estimator.Estimator, prepare.NCFDataset, typing.Callable) -> dict
   """Model evaluation with HR and NDCG metrics.
-
   The evaluation protocol is to rank the test interacted item (truth items)
   among the randomly chosen 999 items that are not interacted by the user.
   The performance of the ranked list is judged by Hit Ratio (HR) and Normalized
   Discounted Cumulative Gain (NDCG).
-
   For evaluation, the ranked list is truncated at 10 for both metrics. As such,
   the HR intuitively measures whether the test item is present on the top-10
   list, and the NDCG accounts for the position of the hit by assigning higher
   scores to hits at top ranks. Both metrics are calculated for each test user,
   and the average scores are reported.
-
   Args:
     estimator: The Estimator.
     ncf_dataset: An NCFDataSet object, which contains the information about
@@ -230,7 +217,6 @@ def evaluate_model(estimator, ncf_dataset, pred_input_fn):
         test_data: The points which are used for consistent evaluation. These
           are already included in the pred_input_fn.
     pred_input_fn: The input function for the test data.
-
   Returns:
     eval_results: A dict of evaluation results for benchmark logging.
       eval_results = {
@@ -252,9 +238,10 @@ def evaluate_model(estimator, ncf_dataset, pred_input_fn):
   os.environ["KMP_AFFINITY"] = "granularity=fine,noverbose,compact,1,0"
 
   # Get predictions
+  prediction_hooks = None if FLAGS.accuracy_only else [LoggerHook()]
   predictions = estimator.predict(input_fn=pred_input_fn,
                                   yield_single_examples=False,
-                                  hooks=[LoggerHook()])
+                                  hooks=prediction_hooks)
   predictions = list(predictions)
 
   prediction_batches = [p[movielens.RATING_COLUMN] for p in predictions]
@@ -288,14 +275,12 @@ def evaluate_model(estimator, ncf_dataset, pred_input_fn):
 def construct_estimator(num_gpus, model_dir, params, batch_size,
                         eval_batch_size):
   """Construct either an Estimator or TPUEstimator for NCF.
-
   Args:
     num_gpus: The number of gpus (Used to select distribution strategy)
     model_dir: The model directory for the estimator
     params: The params dict for the estimator
     batch_size: The mini-batch size for training.
     eval_batch_size: The batch size used during evaluation.
-
   Returns:
     An Estimator or TPUEstimator.
   """
@@ -565,6 +550,18 @@ def define_ncf_flags():
       name="inference_only", default=False,
       help=flags_core.help_wrap(
           "If set, runs only the forward pass."))
+
+  flags.DEFINE_bool(
+      name="accuracy_only", default=False,
+      help=flags_core.help_wrap(
+          "If set, only accuracy (i.e. no performance benchmarking) "
+          "metrics are computed."))
+
+  flags.DEFINE_bool(
+      name="benchmark_only", default=True,
+      help=flags_core.help_wrap(
+          "If set, only performance benchmarking (i.e. no accuracy) "
+          "metrics are computed."))
 
 if __name__ == "__main__":
   tf.logging.set_verbosity(tf.logging.FATAL)

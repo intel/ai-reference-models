@@ -64,6 +64,14 @@ class ModelInitializer(BaseModelInitializer):
             " --batch_size=" + str(self.args.batch_size) + \
             " --inference_only"
 
+        if self.args.benchmark_only:
+            self.benchmark_command = self.benchmark_command + \
+                                     " --benchmark_only"
+
+        if self.args.accuracy_only:
+            self.benchmark_command = self.benchmark_command + \
+                                     " --accuracy_only"
+
     def run(self):
         if self.benchmark_command:
             self.run_command(self.benchmark_command)
