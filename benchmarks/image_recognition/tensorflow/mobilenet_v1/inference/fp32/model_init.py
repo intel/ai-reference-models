@@ -39,9 +39,11 @@ class ModelInitializer(BaseModelInitializer):
         self.set_default_inter_intra_threads(platform_util)
         self.args.num_inter_threads = 2
 
+        script_name = "accuracy.py" if self.args.accuracy_only \
+            else "eval_image_classifier.py"
         script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
-            "eval_image_classifier.py")
+            script_name)
         self.command_prefix = "python {}".format(script_path)
 
         if self.args.socket_id != -1:
@@ -50,20 +52,29 @@ class ModelInitializer(BaseModelInitializer):
 
         os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
-        self.command_prefix = ("{prefix} "
-                               "--dataset_name imagenet "
-                               "--checkpoint_path {checkpoint} "
-                               "--dataset_dir {dataset} "
-                               "--dataset_split_name=validation "
-                               "--clone_on_cpu=True "
-                               "--model_name {model} "
-                               "--inter_op_parallelism_threads {inter} "
-                               "--intra_op_parallelism_threads {intra} "
-                               "--batch_size {bz}").format(
-            prefix=self.command_prefix, checkpoint=self.args.checkpoint,
-            dataset=self.args.data_location, model=self.args.model_name,
-            inter=self.args.num_inter_threads,
-            intra=self.args.num_intra_threads, bz=self.args.batch_size)
+        if not self.args.accuracy_only:
+            self.command_prefix = ("{prefix} "
+                                   "--dataset_name imagenet "
+                                   "--checkpoint_path {checkpoint} "
+                                   "--dataset_dir {dataset} "
+                                   "--dataset_split_name=validation "
+                                   "--clone_on_cpu=True "
+                                   "--model_name {model} "
+                                   "--inter_op_parallelism_threads {inter} "
+                                   "--intra_op_parallelism_threads {intra} "
+                                   "--batch_size {bz}").format(
+                prefix=self.command_prefix, checkpoint=self.args.checkpoint,
+                dataset=self.args.data_location, model=self.args.model_name,
+                inter=self.args.num_inter_threads,
+                intra=self.args.num_intra_threads, bz=self.args.batch_size)
+        else:
+            # add args for the accuracy script
+            script_args_list = [
+                "input_graph", "data_location", "input_height", "input_width",
+                "batch_size", "input_layer", "output_layer",
+                "num_inter_threads", "num_intra_threads"]
+            self.command_prefix = self.add_args_to_command(
+                self.command_prefix, script_args_list)
 
     def run(self):
         self.run_command(self.command_prefix)

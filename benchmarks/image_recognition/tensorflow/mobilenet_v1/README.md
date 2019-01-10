@@ -56,7 +56,7 @@ later.
    [tensorflow/models](https://github.com/tensorflow/models) repo that
    was cloned in step 3.
 
-   * Run benchmarking for latency (with `--batch-size 1`):
+   * Run benchmarking for latency (with `--batch-size 1` and `--checkpoint` with a path to the checkpoint file directory):
      ```
      python launch_benchmark.py \
          --precision fp32 \
@@ -70,7 +70,7 @@ later.
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/myuser/mobilenet_v1_fp32_pretrained_model
      ```
-    * Run benchmarking for throughput (with `--batch-size 100`):
+    * Run benchmarking for throughput (with `--batch-size 100` and `--checkpoint` with a path to the checkpoint file directory):
       ```
       python launch_benchmark.py \
          --precision fp32 \
@@ -84,6 +84,22 @@ later.
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/myuser/mobilenet_v1_fp32_pretrained_model
       ```
+    * Run benchmarking for accuracy (with `--batch-size 100`, `--accuracy-only` and `--in-graph` with a path to the frozen graph .pb file):
+      ```
+      python launch_benchmark.py \
+         --precision fp32 \
+         --model-name mobilenet_v1 \
+         --mode inference \
+         --framework tensorflow \
+         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+         --model-source-dir /home/myuser/tensorflow/models  \
+         --batch-size 100 \
+         --accuracy-only \
+         --data-location /dataset/Imagenet_Validation \
+         --in-graph /home/myuser/mobilenet_v1_fp32_pretrained_model/mobilenet_v1_1.0_224_frozen.pb
+      ```
+      Note that the `--verbose` flag can be added to any of the above commands
+      to get additional debug output.
 
 5. The log files for each benchmarking run are saved at:
    `intelai/models/benchmarks/common/tensorflow/logs`.
@@ -121,4 +137,14 @@ later.
      lscpu located here: /usr/bin/lscpu
      Ran inference with batch size 100
      Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mobilenet_v1_inference_fp32_20190104_200512.log
+     ```
+   * Below is a sample lof file snippet when testing accuracy:
+     ```
+     Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7104, 0.8999)
+     Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7103, 0.8999)
+     Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7102, 0.8999)
+     lscpu_path_cmd = command -v lscpu
+     lscpu located here: /usr/bin/lscpu
+     Ran inference with batch size 100
+     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mobilenet_v1_inference_fp32_20190110_211648.log
      ```

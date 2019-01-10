@@ -327,7 +327,7 @@ function inceptionv4() {
 # mobilenet_v1 model
 function mobilenet_v1() {
   if [ ${PRECISION} == "fp32" ]; then
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
