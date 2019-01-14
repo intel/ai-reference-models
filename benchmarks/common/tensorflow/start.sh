@@ -223,18 +223,24 @@ function deep-speech() {
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
     if [ ${PRECISION} == "fp32" ]; then
-        if [[ -z "${config_file}" ]]; then
+        config_file_arg=""
+        if [ -n "${config_file}" ]; then
+            config_file_arg="--config_file=${config_file}"
+        fi
+
+        if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
             echo "Fast R-CNN requires -- config_file arg to be defined"
             exit 1
         fi
-
-        export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
 
         if [ ${NOINSTALL} != "True" ]; then
           # install dependencies
           pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
           original_dir=$(pwd)
           cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:$(pwd):$(pwd)/slim:$(pwd)/object_detection
+
           # install protoc v3.3.0, if necessary, then compile protoc files
           install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
           echo "Compiling protoc files"
@@ -251,7 +257,7 @@ function fastrcnn() {
         cd $original_dir
         CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
         --data-location=${DATASET_LOCATION} \
-        --config_file=${config_file}"
+        --in-graph=${IN_GRAPH} ${config_file_arg}"
 
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
      else
