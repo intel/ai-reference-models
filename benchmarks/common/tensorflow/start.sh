@@ -324,6 +324,31 @@ function inceptionv4() {
   fi
 }
 
+# Mask R-CNN model
+function maskrcnn() {
+  if [ ${PRECISION} == "fp32" ]; then
+    original_dir=$(pwd)
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+
+      # install cocoapi
+      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco/PythonAPI
+      echo "Installing COCO API"
+      make
+      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
+    fi
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
+    cd ${original_dir}
+    CMD="${CMD} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # mobilenet_v1 model
 function mobilenet_v1() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -601,6 +626,8 @@ elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
   inception_resnet_v2
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
+elif [ ${MODEL_NAME} == "maskrcnn" ]; then
+  maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
 elif [ ${MODEL_NAME} == "ncf" ]; then

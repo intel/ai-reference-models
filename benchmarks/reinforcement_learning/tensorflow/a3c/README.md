@@ -32,7 +32,7 @@ This repository includes launch scripts for running benchmarks and the
 an optimized version of the A3C model code.
 
 4. Navigate to the `benchmarks` directory in your local clone of
-the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
+the [intelai/models](https://github.com/IntelAI/models) repo from step 3.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
@@ -45,7 +45,7 @@ Run benchmarking for throughput and latency with `--batch-size=1` :
 $ cd /home/myuser/models/benchmarks
 
 $ python launch_benchmark.py \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --model-source-dir /home/myuser/Arcade-Learning-Environment \
     --model-name a3c \
     --framework tensorflow \
     --precision fp32 \

@@ -35,6 +35,11 @@ Training and inference scripts with intel optimized MKL
         * SqueezeNet
             * Inference
                 * [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions)
+* Image Segmentation
+    * Tensorflow
+        * Mask R-CNN
+            * Inference
+                * [FP32](image_segmentation/tensorflow/maskrcnn/README.md#fp32-inference-instructions)
 * Object Detection
     * Tensorflow
         * Fast R-CNN (ResNet50)
