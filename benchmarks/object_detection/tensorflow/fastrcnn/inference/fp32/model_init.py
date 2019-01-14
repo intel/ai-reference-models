@@ -40,32 +40,50 @@ class ModelInitializer (BaseModelInitializer):
         self.custom_args = custom_args
         self.platform_util = platform_util
 
-        self.parse_custom_args()
-        self.run_inference_sanity_checks(self.args, self.custom_args)
-
-        benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            "eval.py")
-        self.command_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + benchmark_script
-        if self.args.socket_id != -1:
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = \
-                self.platform_util.num_cores_per_socket()
-
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
         self.research_dir = os.path.join(self.args.model_source_dir,
                                          "research")
-        config_file_path = os.path.join(self.args.checkpoint,
-                                        self.args.config_file)
-        self.run_cmd = \
-            self.command_prefix + \
-            " --num_inter_threads " + str(self.args.num_inter_threads) + \
-            " --num_intra_threads " + str(self.args.num_intra_threads) + \
-            " --pipeline_config_path " + config_file_path + \
-            " --checkpoint_dir " + str(args.checkpoint) + \
-            " --eval_dir " + self.research_dir + \
-            "/object_detection/log/eval"
+        self.run_inference_sanity_checks(self.args, self.custom_args)
+
+        # set num_inter_threads and num_intra_threads
+        self.set_default_inter_intra_threads(platform_util)
+
+        os.environ["OMP_NUM_THREADS"] = \
+            str(self.args.num_intra_threads)
+
+        if self.args.accuracy_only:
+            accuracy_script = os.path.join(
+                self.args.intelai_models, self.args.mode, self.args.precision,
+                "coco_accuracy.sh")
+            if not os.path.exists(accuracy_script):
+                raise ValueError("Unable to locate the Fast R-CNN accuracy "
+                                 "script: {}".format(accuracy_script))
+            self.run_cmd = "sh {} {} {}/coco_val.record {}".format(
+                accuracy_script, self.args.input_graph,
+                self.args.data_location, self.args.model_source_dir)
+        else:
+            self.parse_custom_args()
+
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode, self.args.precision,
+                "eval.py")
+            self.command_prefix = \
+                self.get_numactl_command(self.args.socket_id) + "python " + \
+                benchmark_script
+
+            config_file_path = os.path.join(self.args.checkpoint,
+                                            self.args.config_file)
+            self.run_cmd = \
+                self.command_prefix + \
+                " --num_inter_threads " + \
+                str(self.args.num_inter_threads) + \
+                " --num_intra_threads " + \
+                str(self.args.num_intra_threads) + \
+                " --pipeline_config_path " + \
+                config_file_path + \
+                " --checkpoint_dir " + \
+                str(args.checkpoint) + \
+                " --eval_dir " + self.research_dir + \
+                "/object_detection/log/eval"
 
     def parse_custom_args(self):
         if self.custom_args:

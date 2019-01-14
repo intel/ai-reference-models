@@ -21,6 +21,28 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
+For the accuracy test, a modification is required in the cloned models repo until [this issue](https://github.com/tensorflow/models/issues/5411)
+gets fixed in the TensorFlow repository.
+This can be done either manually or using the command line as shown:
+
+Open the file models/research/object_detection/metrics/offline_eval_map_corloc.py,
+then apply the following fixes:
+Line 162: change `configs['eval_input_config']` to `configs['eval_input_configs']`
+Line 91, 92, and 95: change `input_config` to `input_config[0]`
+
+Or using the command line:
+```
+cd models/research/object_detection
+chmod 777 metrics
+cd "metrics"
+chmod 777 offline_eval_map_corloc.py
+sed -i.bak 162s/eval_input_config/eval_input_configs/ offline_eval_map_corloc.py
+sed -i.bak 91s/input_config/input_config[0]/ offline_eval_map_corloc.py
+sed -i.bak 92s/input_config/input_config[0]/ offline_eval_map_corloc.py
+sed -i.bak 95s/input_config/input_config[0]/ offline_eval_map_corloc.py
+
+```
+
 2.  Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
@@ -111,6 +133,7 @@ Resolving deltas: 100% (3/3), done.
 `pipeline.config` file and the checkpoint location (from step 4, and the
 location of your `tensorflow/models` clone (from step 1).
 
+Run benchmarking for throughput and latency:
 ```
 $ cd /home/myuser/models/benchmarks
 
@@ -124,14 +147,30 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --checkpoint /home/myuser/fast_rcnn_resnet50_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    -- config-file=pipeline.config
+    -- config_file=pipeline.config
+```
+
+Or for accuracy where the `--data-location` is the path the directory
+where your `coco_val.record` file is located and the `--in-graph` is
+the pre-trained graph located in the pre-trained model directory (from step 4):
+```
+python launch_benchmark.py \
+    --model-name fastrcnn \
+    --mode inference \
+    --precision fp32 \
+    --framework tensorflow \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/myuser/coco/output \
+    --in-graph /home/myuser/fast_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb  \
+    --accuracy-only
 ```
 
 7. The log file is saved to:
 models/benchmarks/common/tensorflow/logs
 
-The tail of the log output when the benchmarking completes should look
-something like this:
+Below is a sample log file tail when running benchmarking for throughput
+and latency:
 
 ```
 Time spent : 167.353 seconds.
@@ -148,4 +187,25 @@ RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --us
 Batch Size: 1
 Ran inference with batch size 1
 Log location outside container: /home/myuser/models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference.log
+```
+
+And here is a sample log file tail when running for accuracy:
+```
+DONE (t=1.35s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.316
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.489
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.355
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.316
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.271
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.380
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.383
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.383
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size 1
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference_fp32_20190114_205714.log
 ```
