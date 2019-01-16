@@ -11,5 +11,5 @@
 * Intel-Optimized TensorFlow (*coming soon*)
 * Intel-Optimized TensorFlow Serving:
     * [Image Recognition](image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
-    * [Object Detection](object_detection/tensorflow_serving/Tutorial.md) (R-FCN)
+    * Object Detection (*coming soon*)
       
