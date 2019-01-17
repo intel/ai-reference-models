@@ -13,7 +13,7 @@ other precisions are coming later.
 This repo has the launch script for running benchmarking.
 
     ```
-    $ git clone git@github.com:IntelAI/models.git
+    $ git clone https://github.com/IntelAI/models.git
     ```
     
 2. Clone Mozilla DeepSpeech and tensorflow git repositories

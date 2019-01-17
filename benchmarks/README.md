@@ -1,6 +1,6 @@
 ## Benchmark scripts ##
 
-Training and inference scripts with intel optimized MKL
+Training and inference scripts with Intel-optimized MKL
 
 # Use Cases
 

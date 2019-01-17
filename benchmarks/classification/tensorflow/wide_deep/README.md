@@ -13,7 +13,7 @@ other precisions are coming later.
        
     ```
     # We going to use older version of the tensorflow model repo.
-    $ git clone git@github.com:tensorflow/models.git
+    $ git clone https://github.com/tensorflow/models.git
     $ cd models
     $ git checkout 6ff0a53f81439d807a78f8ba828deaea3aaaf269 
     ```
@@ -30,7 +30,7 @@ This repo has the launch script for running benchmarking, which we will
 use in the next step.
 
     ```
-    $ git clone git@github.com:IntelAI/models.git
+    $ git clone https://github.com/IntelAI/models.git
     ```
     
 5. How to run benchmarks

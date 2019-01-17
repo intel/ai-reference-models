@@ -25,7 +25,7 @@ $ pip install .
 repository:
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 This repository includes launch scripts for running benchmarks and the

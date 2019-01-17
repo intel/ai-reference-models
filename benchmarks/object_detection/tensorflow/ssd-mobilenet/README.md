@@ -12,7 +12,7 @@ other precisions are coming later.
 1. Clone the `tensorflow/models` repository:
 
 ```
-$ git clone git@github.com:tensorflow/models.git
+$ git clone https://github.com/tensorflow/models.git
 ```
 
 The TensorFlow models repo will be used for running inference as well as
@@ -135,7 +135,7 @@ This repo has the launch script for running benchmarking, which we will
 use in the next step.
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 Cloning into 'models'...
 remote: Enumerating objects: 11, done.
 remote: Counting objects: 100% (11/11), done.

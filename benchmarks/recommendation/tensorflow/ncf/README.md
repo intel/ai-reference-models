@@ -17,7 +17,7 @@ If you want to download movielens 1M dataset and provide that path to `--data-lo
 2. Clone the official `tensorflow/models` repository with  tag `v1.11`
 
 ```
-$ git clone --branch v1.11 git@github.com:tensorflow/models.git
+$ git clone --branch v1.11 https://github.com/tensorflow/models.git
 $ cd models
 $ pwd
 ```
