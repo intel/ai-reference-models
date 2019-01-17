@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,26 +18,24 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
 
 import os
 
 os.environ["KMP_BLOCKTIME"] = "1"
+os.environ["KMP_SETTING"] = "1"
 os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["KMP_SETTINGS"] = "1"
 
 
 class ModelInitializer(BaseModelInitializer):
-    """Model initializer for Inception ResNet V2 int8 inference"""
+    """Model initializer for Inception Resnet V2 FP32 inference"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
         self.args = args
         self.custom_args = custom_args
-        self.platform_util = platform_util
         self.cmd = self.get_numactl_command(self.args.socket_id) + "python "
+
+        self.platform_util = platform_util
 
         # use default batch size if -1
         if self.args.batch_size == -1:
@@ -45,30 +43,39 @@ class ModelInitializer(BaseModelInitializer):
 
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(self.platform_util)
+        self.args.num_inter_threads = 2
+
+        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
-                                      "eval_image_classifier_benchmark.py")
+                                      "eval_image_classifier.py")
 
-            cmd_args = " --input-graph=" + self.args.input_graph + \
-                " --inter-op-parallelism-threads=" + \
+            cmd_args = " --dataset_name=imagenet" + \
+                " --checkpoint_path=" + self.args.checkpoint + \
+                " --eval_dir=" + self.args.checkpoint + \
+                " --dataset_dir=" + self.args.data_location + \
+                " --dataset_split_name=validation" + \
+                " --clone_on_cpu=True" + \
+                " --model_name=" + str(self.args.model_name) + \
+                " --inter_op_parallelism_threads=" + \
                 str(self.args.num_inter_threads) + \
-                " --intra-op-parallelism-threads=" + \
+                " --intra_op_parallelism_threads=" + \
                 str(self.args.num_intra_threads) + \
-                " --batch-size=" + str(self.args.batch_size)
+                " --batch_size=" + str(self.args.batch_size)
         elif self.args.accuracy_only:
             run_script = os.path.join(self.args.intelai_models,
                                       "eval_image_classifier_accuracy.py")
-
             cmd_args = " --input_graph=" + self.args.input_graph + \
                 " --data_location=" + self.args.data_location + \
                 " --input_height=299" + " --input_width=299" + \
-                " --num_inter_threads=" + str(self.args.num_inter_threads) + \
-                " --num_intra_threads=" + str(self.args.num_intra_threads) + \
+                " --num_inter_threads=" + \
+                       str(self.args.num_inter_threads) + \
+                " --num_intra_threads=" + \
+                       str(self.args.num_intra_threads) + \
                 " --output_layer=InceptionResnetV2/Logits/Predictions" + \
                 " --batch_size=" + str(self.args.batch_size)
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
         self.cmd = self.cmd + run_script + cmd_args
 
     def run(self):
