@@ -34,7 +34,7 @@ $ wget -q https://github.com/matterport/Mask_RCNN/releases/download/v2.0/mask_rc
 repository:
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 This repository includes launch scripts for running benchmarks and the

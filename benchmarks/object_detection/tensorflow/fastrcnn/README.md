@@ -12,7 +12,7 @@ other precisions are coming later.
 1. Clone the `tensorflow/models` and `cocoapi` repositories:
 
 ```
-$ git clone git@github.com:tensorflow/models.git
+$ git clone https://github.com/tensorflow/models.git
 $ cd models
 $ git clone https://github.com/cocodataset/cocoapi.git
 
@@ -117,7 +117,7 @@ The `coco_val.record` file is what we will use in this inference example.
 This repo has the launch script for running benchmarking.
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 Cloning into 'models'...
 remote: Enumerating objects: 11, done.
 remote: Counting objects: 100% (11/11), done.

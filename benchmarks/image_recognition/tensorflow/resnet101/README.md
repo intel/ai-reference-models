@@ -11,7 +11,7 @@ following modes/precisions:
 repository:
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 This repository includes launch scripts for running benchmarks and the
@@ -178,7 +178,7 @@ Log location outside container: /home/myuser/intelai/models/benchmarks/common/te
 [intelai/models](https://github.com/intelai/models)
 repository
     ```
-    $ git clone git@github.com:IntelAI/models.git
+    $ git clone https://github.com/IntelAI/models.git
     ```
 
 2. A link to download the pre-trained model is coming soon.

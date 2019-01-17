@@ -14,7 +14,7 @@ other precisions are coming later.
 repository:
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 This repository includes launch scripts for running benchmarks and the
@@ -24,7 +24,7 @@ an optimized version of the inceptionv3 model code.
 repository:
 
 ```
-git clone git@github.com:tensorflow/models.git
+git clone https://github.com/tensorflow/models.git
 ```
 
 This repository is used for dependencies that the Inception V3 model
@@ -196,7 +196,7 @@ Log location outside container: /home/myuser/intelai/models/benchmarks/common/te
 repository:
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 2. A link to download the pre-trained model is coming soon.

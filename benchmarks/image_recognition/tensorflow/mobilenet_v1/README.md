@@ -44,7 +44,7 @@ later.
    and then navigate to the benchmarks directory:
 
    ```
-   $ git clone git@github.com:IntelAI/models.git
+   $ git clone https://github.com/IntelAI/models.git
    $ cd models/benchmarks
    ```
 

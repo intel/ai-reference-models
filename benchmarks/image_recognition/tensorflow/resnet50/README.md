@@ -14,7 +14,7 @@ precisions.
 
 * Clone the tensorflow/models repository:
 ```
-$ git clone git@github.com:tensorflow/models.git
+$ git clone https://github.com/tensorflow/models.git
 ``` 
 The TensorFlow models repo provides
 [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
@@ -33,7 +33,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 5. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
@@ -120,7 +120,7 @@ to get additional debug output.
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be

@@ -15,7 +15,7 @@ This repo has the launch script for running benchmarking, the SSD-VGG16 model sc
 for the dataset preparation.
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 2. Download the VOC 2007 dataset and convert them as per
@@ -213,7 +213,7 @@ This repo has the launch script for running benchmarking, the SSD-VGG16 model sc
 for the dataset preparation.
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 ```
 
 2. Download the VOC 2007 dataset and convert them as per

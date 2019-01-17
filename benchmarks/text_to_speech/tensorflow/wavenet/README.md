@@ -15,7 +15,7 @@ the cloned repo will be passed as the model source directory when
 running the benchmarking script.
 
 ```
-$ git clone git@github.com:ibab/tensorflow-wavenet.git
+$ git clone https://github.com/ibab/tensorflow-wavenet.git
 Cloning into 'tensorflow-wavenet'...
 remote: Enumerating objects: 1, done.
 remote: Counting objects: 100% (1/1), done.
@@ -45,7 +45,7 @@ navigate to the benchmarks directory, which is where the launch script
 is located.
 
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 
 $ cd models/benchmarks
 ```
