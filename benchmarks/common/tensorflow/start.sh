@@ -302,11 +302,20 @@ function inceptionv3() {
 
 # inception_resnet_v2 model
 function inception_resnet_v2() {
+  # For accuracy, dataset location is required, see README for more information.
+  if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+    echo "No Data directory specified, accuracy will not be calculated."
+    exit 1
+  fi
+
   if [ ${PRECISION} == "int8" ]; then
-    # For accuracy, dataset location is required, see README for more information.
-    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "No Data directory specified, accuracy will not be calculated."
-      exit 1
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  elif [ ${PRECISION} == "fp32" ]; then
+    # Add on --in-graph and --data-location for int8 inference
+    if [ ${MODE} == "inference" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+    elif [ ${MODE} == "inference" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
     fi
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
