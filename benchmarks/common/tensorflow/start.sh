@@ -222,47 +222,51 @@ function deep-speech() {
 
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
+      original_dir=$(pwd)
+      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+      echo "Compiling protoc files"
+      ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+      # install cocoapi
+      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
+      echo "Installing COCO API"
+      make
+      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+    fi
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
     if [ ${PRECISION} == "fp32" ]; then
-        config_file_arg=""
-        if [ -n "${config_file}" ]; then
-            config_file_arg="--config_file=${config_file}"
-        fi
+      config_file_arg=""
+      if [ -n "${config_file}" ]; then
+        config_file_arg="--config_file=${config_file}"
+      fi
 
-        if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-            echo "Fast R-CNN requires -- config_file arg to be defined"
-            exit 1
-        fi
-
-        if [ ${NOINSTALL} != "True" ]; then
-          # install dependencies
-          pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
-          original_dir=$(pwd)
-          cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-
-          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:$(pwd):$(pwd)/slim:$(pwd)/object_detection
-
-          # install protoc v3.3.0, if necessary, then compile protoc files
-          install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-          echo "Compiling protoc files"
-          ./bin/protoc object_detection/protos/*.proto --python_out=.
-
-          # install cocoapi
-          cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-          echo "Installing COCO API"
-          make
-          cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
-        fi
-
-        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-        cd $original_dir
-        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --data-location=${DATASET_LOCATION} \
-        --in-graph=${IN_GRAPH} ${config_file_arg}"
-
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-     else
-        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
+      fi
+      cd $original_dir
+      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+      --data-location=${DATASET_LOCATION} \
+      --in-graph=${IN_GRAPH} ${config_file_arg}"
+    elif [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --number-of-steps=${number_of_steps}"
+      fi
+      cd $original_dir
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
     fi
 }
 

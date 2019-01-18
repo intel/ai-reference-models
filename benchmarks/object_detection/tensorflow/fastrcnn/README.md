@@ -3,6 +3,7 @@
 This document has instructions for how to run FastRCNN for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
+* [Int8 inference](#int8-inference-instructions)
 
 Benchmarking instructions and scripts for the Fast R-CNN ResNet50 model training and inference
 other precisions are coming later.
@@ -209,3 +210,105 @@ lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference_fp32_20190114_205714.log
 ```
+
+## Int8 Inference Instructions
+
+1. Please follow step 1, 2 and 3 of Fast R-CNN FP32 instructions written above.
+
+2. A link to download the pre-trained model is coming soon.
+
+3. Clone the [intelai/models](https://github.com/intelai/models) repo.
+This repo has the launch script for running benchmarking.
+
+```
+$ git clone https://github.com/IntelAI/models.git
+Cloning into 'models'...
+remote: Enumerating objects: 11, done.
+remote: Counting objects: 100% (11/11), done.
+remote: Compressing objects: 100% (7/7), done.
+remote: Total 11 (delta 3), reused 4 (delta 0), pack-reused 0
+Receiving objects: 100% (11/11), done.
+Resolving deltas: 100% (3/3), done.
+```
+
+4. Run the `launch_benchmark.py` script from the intelai/models repo,
+with the appropriate parameters. To run on single socket use `--socket_id` switch,
+by default it will be using all available sockets. Optional parameter `number_of_steps`
+(default value = 5000) can be added at the end of command after `--` as shown below:
+
+Run benchmarking for throughput and latency:
+```
+$ cd /home/myuser/models/benchmarks
+
+$ python launch_benchmark.py \
+    --data-location /home/myuser/coco/output/ \
+    --model-source-dir /home/myuser/tensorflow/models \
+    --model-name fastrcnn \
+    --framework tensorflow \
+    --precision int8 \
+    --mode inference \
+    --socket-id 0 \
+    --in-graph /home/myuser/pretrained_int8_fastrcnn_model.pb \
+    --docker-image tf_int8_docker_image
+    --benchmark-only
+    -- number_of_steps=5000
+```
+
+Or for accuracy where the `--data-location` is the path the directory
+where your `coco_val.record` file is located and the `--in-graph` is
+the pre-trained graph model:
+```
+python launch_benchmark.py \
+    --model-name fastrcnn \
+    --mode inference \
+    --precision int8 \
+    --framework tensorflow \
+    --socket-id 0 \
+    --docker-image tf_int8_docker_image \
+    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/myuser/coco_dataset/coco_val.record \
+    --in-graph /home/myuser/pretrained_int8_fastrcnn_model.pb  \
+    --accuracy-only
+```
+
+5. The log file is saved to:
+models/benchmarks/common/tensorflow/logs
+
+Below is a sample log file tail when running benchmarking for throughput
+and latency:
+
+```
+Step 4950: 0.0722849369049 seconds
+Step 4960: 0.0763049125671 seconds
+Step 4970: 0.070191860199 seconds
+Step 4980: 0.0755469799042 seconds
+Step 4990: 0.0742928981781 seconds
+Avg. Duration per Step:0.0760930150986
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size -1
+Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference_int8_20190117_232539.log
+```
+
+And here is a sample log file tail when running for accuracy:
+```
+Accumulating evaluation results...
+DONE (t=1.34s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.310
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.479
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.351
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.310
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.267
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.372
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.375
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.375
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size -1
+Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_fastrcnn_inference_int8_20190117_231937.log
+```
+
