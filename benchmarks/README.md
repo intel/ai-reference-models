@@ -4,6 +4,11 @@ Training and inference scripts with Intel-optimized MKL
 
 # Use Cases
 
+* Adversarial Networks
+    * Tensorflow
+        * DCGAN
+            * Inference
+                * [FP32](adversarial_networks/tensorflow/dcgan/README.md#fp32-inference-instructions)
 * Classification
     * Tensorflow
         * Wide & Deep
