@@ -74,7 +74,7 @@ $ pwd
 ```
 
 3. A link to download the pre-trained model is coming soon.
-```
+
 4. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
 `--config=mkl`. More instructions on
