@@ -14,6 +14,11 @@ Training and inference scripts with Intel-optimized MKL
         * Wide & Deep
             * Inference
                 * [FP32](classification/tensorflow/wide_deep/README.md#fp32-inference-instructions)
+* Content Creation
+    * Tensorflow
+        * DRAW
+            * Inference
+                * [FP32](content_creation/tensorflow/draw/README.md#fp32-inference-instructions)
 * Image Recognition
     * Tensorflow
         * Inception Resnet V2

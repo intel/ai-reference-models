@@ -234,6 +234,17 @@ function deep-speech() {
   fi
 }
 
+# DRAW model
+function draw() {
+  if [ ${PRECISION} == "fp32" ]; then
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
     export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
@@ -653,6 +664,8 @@ elif [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "deep-speech" ]; then
   deep-speech
+elif [ ${MODEL_NAME} == "draw" ]; then
+  draw
 elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
