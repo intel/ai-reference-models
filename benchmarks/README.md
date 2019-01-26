@@ -48,6 +48,9 @@ Training and inference scripts with Intel-optimized MKL
                 * [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions)
 * Image Segmentation
     * Tensorflow
+        * 3D UNet
+            * Inference
+                * [FP32](image_segmentation/tensorflow/3d_unet/README.md#fp32-inference-instructions)
         * Mask R-CNN
             * Inference
                 * [FP32](image_segmentation/tensorflow/maskrcnn/README.md#fp32-inference-instructions)
