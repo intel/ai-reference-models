@@ -265,7 +265,8 @@ def test_launch_benchmark_validate_model(
     launch_benchmark.run_docker_container(args)
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
-    assert "docker run" in args[0]
+    assert "docker" == args[0][0]
+    assert "run" == args[0][1]
 
 
 def test_launch_benchmark_validate_bad_model(mock_platform_util):

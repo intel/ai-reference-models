@@ -176,44 +176,35 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         in_graph_filename = os.path.basename(args.input_graph) if \
             args.input_graph else ""
 
-        env_vars = ("--env DATASET_LOCATION_VOL={} "
-                    "--env CHECKPOINT_DIRECTORY_VOL={} "
-                    "--env EXTERNAL_MODELS_SOURCE_DIRECTORY={} "
-                    "--env INTELAI_MODELS={} "
-                    "--env BENCHMARK_SCRIPTS={} "
-                    "--env SOCKET_ID={} "
-                    "--env MODEL_NAME={} "
-                    "--env MODE={} "
-                    "--env PRECISION={} "
-                    "--env VERBOSE={} "
-                    "--env BATCH_SIZE={} "
-                    "--env WORKSPACE={} "
-                    "--env IN_GRAPH=/in_graph/{} "
-                    "--env MOUNT_BENCHMARK={} "
-                    "--env MOUNT_EXTERNAL_MODELS_SOURCE={} "
-                    "--env MOUNT_INTELAI_MODELS_SOURCE={} "
-                    "--env USE_CASE={} "
-                    "--env FRAMEWORK={} "
-                    "--env NUM_CORES={} "
-                    "--env DATASET_LOCATION=/dataset "
-                    "--env CHECKPOINT_DIRECTORY=/checkpoints "
-                    "--env BENCHMARK_ONLY={} "
-                    "--env ACCURACY_ONLY={} "
-                    # by default we will install, user needs to set this
-                    # manually after they get into `--debug` mode
-                    # since they need to run one time without this flag
-                    # to get stuff installed
-                    "--env NOINSTALL=False"
-                    .format(args.data_location, args.checkpoint,
-                            args.model_source_dir, intelai_models,
-                            benchmark_scripts, args.socket_id,
-                            args.model_name, args.mode, args.precision,
-                            args.verbose, args.batch_size, workspace,
-                            in_graph_filename, mount_benchmark,
-                            mount_external_models_source,
-                            mount_intelai_models, use_case,
-                            args.framework, args.num_cores,
-                            args.benchmark_only, args.accuracy_only))
+        env_vars = ["--env", "DATASET_LOCATION_VOL={}".format(args.data_location),
+                    "--env", "CHECKPOINT_DIRECTORY_VOL={}".format(args.checkpoint),
+                    "--env", "EXTERNAL_MODELS_SOURCE_DIRECTORY={}".format(args.model_source_dir),
+                    "--env", "INTELAI_MODELS={}".format(intelai_models),
+                    "--env", "BENCHMARK_SCRIPTS={}".format(benchmark_scripts),
+                    "--env", "SOCKET_ID={}".format(args.socket_id),
+                    "--env", "MODEL_NAME={}".format(args.model_name),
+                    "--env", "MODE={}".format(args.mode),
+                    "--env", "PRECISION={}".format(args.precision),
+                    "--env", "VERBOSE={}".format(args.verbose),
+                    "--env", "BATCH_SIZE={}".format(args.batch_size),
+                    "--env", "WORKSPACE={}".format(workspace),
+                    "--env", "IN_GRAPH=/in_graph/{}".format(in_graph_filename),
+                    "--env", "MOUNT_BENCHMARK={}".format(mount_benchmark),
+                    "--env", "MOUNT_EXTERNAL_MODELS_SOURCE={}".format(mount_external_models_source),
+                    "--env", "MOUNT_INTELAI_MODELS_SOURCE={}".format(mount_intelai_models),
+                    "--env", "USE_CASE={}".format(use_case),
+                    "--env", "FRAMEWORK={}".format(args.framework),
+                    "--env", "NUM_CORES={}".format(args.num_cores),
+                    "--env", "DATASET_LOCATION=/dataset",
+                    "--env", "CHECKPOINT_DIRECTORY=/checkpoints",
+                    "--env", "BENCHMARK_ONLY={}".format(args.benchmark_only),
+                    "--env", "ACCURACY_ONLY={}".format(args.accuracy_only),
+                    "--env", "NOINSTALL=False"]
+
+        # by default we will install, user needs to set NOINSTALL=True
+        # manually after they get into `--debug` mode
+        # since they need to run one time without this flag
+        # to get stuff installed
 
         # Add custom model args as env vars
         for custom_arg in args.model_args:
@@ -221,8 +212,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                 raise ValueError("Expected model args in the format "
                                  "`name=value` but received: {}".
                                  format(custom_arg))
-
-            env_vars = "{} --env {}".format(env_vars, custom_arg)
+            env_vars.append("--env")
+            env_vars.append("{}".format(custom_arg))
 
         # Add proxy to env variables if any set on host
         for environment_proxy_setting in [
@@ -233,40 +224,36 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         ]:
             if not os.environ.get(environment_proxy_setting):
                 continue
-            env_vars += " --env {}={}".format(
+            env_vars.append("--env")
+            env_vars.append("{}={}".format(
                 environment_proxy_setting,
                 os.environ.get(environment_proxy_setting)
-            )
+            ))
 
-        volume_mounts = ("--volume {}:{} "
-                         "--volume {}:{} "
-                         "--volume {}:{} "
-                         "--volume {}:/dataset "
-                         "--volume {}:/checkpoints "
-                         "--volume {}:/in_graph "
-                         .format(benchmark_scripts, mount_benchmark,
-                                 args.model_source_dir,
-                                 mount_external_models_source,
-                                 intelai_models, mount_intelai_models,
-                                 args.data_location,
-                                 args.checkpoint,
-                                 in_graph_dir))
+        volume_mounts = ["--volume", "{}:{}".format(benchmark_scripts, mount_benchmark),
+                         "--volume", "{}:{}".format(args.model_source_dir, mount_external_models_source),
+                         "--volume", "{}:{}".format(intelai_models, mount_intelai_models),
+                         "--volume", "{}:/dataset".format(args.data_location),
+                         "--volume", "{}:/checkpoints".format(args.checkpoint),
+                         "--volume", "{}:/in_graph".format(in_graph_dir)]
+
+        docker_run_cmd = ["docker", "run"]
 
         # only use -it when debugging, otherwise we might get TTY error
-        interactive_flag = "-it" if args.debug else ""
+        if args.debug:
+            docker_run_cmd.append("-it")
 
-        docker_run_cmd = "docker run {} {} {} --privileged -u root:root " \
-                         "-w {} {} /bin/bash"\
-            .format(interactive_flag, env_vars, volume_mounts, workspace,
-                    args.docker_image)
+        docker_run_cmd = docker_run_cmd + env_vars + volume_mounts + [
+            "--privileged", "-u", "root:root", "-w",
+            workspace, args.docker_image, "/bin/bash"]
+
         if not args.debug:
-            docker_run_cmd += " start.sh"
+            docker_run_cmd.append("start.sh")
 
         if args.verbose:
             print("Docker run command:\n{}".format(docker_run_cmd))
 
-        # TODO: switch command to not be shell command
-        p = subprocess.Popen(docker_run_cmd, shell=True)
+        p = subprocess.Popen(docker_run_cmd)
         p.communicate()
 
 
