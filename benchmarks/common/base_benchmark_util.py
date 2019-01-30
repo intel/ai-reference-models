@@ -122,9 +122,24 @@ class BaseBenchmarkUtil(object):
     def validate_args(self, args):
         """validate the args """
 
+        # check model source directory exists
+        model_source_dir = args.model_source_dir
+        if model_source_dir is not None:
+            if not os.path.exists(model_source_dir) or \
+                    not os.path.isdir(model_source_dir):
+                raise IOError("The model source directory {} "
+                              "does not exist or is not a directory.".
+                              format(model_source_dir))
+
         # check model_name exists
         if not args.model_name:
             raise ValueError("The model name is not valid")
+
+        # check batch size
+        batch_size = args.batch_size
+        if batch_size == 0 or batch_size < -1:
+            raise ValueError("The batch size {} is not valid.".format(
+                batch_size))
 
         # check data location exist
         data_dir = args.data_location
@@ -132,12 +147,6 @@ class BaseBenchmarkUtil(object):
             if not os.path.exists(data_dir):
                 raise IOError("The data location {} does not exist.".format(
                     data_dir))
-
-        # check batch size
-        batch_size = args.batch_size
-        if batch_size == 0 or batch_size < -1:
-            raise ValueError("The batch size {} is not valid.".format(
-                batch_size))
 
         # check if socket id is in socket number range
         num_sockets = self._platform_util.num_cpu_sockets()
@@ -163,6 +172,18 @@ class BaseBenchmarkUtil(object):
         elif num_cores > system_num_cores:
             raise ValueError("Number of cores exceeds system core number: {}".
                              format(system_num_cores))
+
+        # check no.of intra threads > 0
+        num_intra_threads = args.num_intra_threads
+        if num_intra_threads <= 0:
+            raise ValueError("Number of intra threads "
+                             "value should be greater than 0")
+
+        # check no.of inter threads > 0
+        num_inter_threads = args.num_inter_threads
+        if num_inter_threads <= 0:
+            raise ValueError("Number of inter threads "
+                             "value should be greater than 0")
 
     def initialize_model(self, args, unknown_args):
         """Create model initializer for the specified model"""
