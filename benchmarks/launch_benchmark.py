@@ -90,6 +90,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # validate the shared args first
         super(LaunchBenchmark, self).validate_args(args)
 
+        # Check for spaces in docker image
+        if ' ' in args.docker_image:
+            raise ValueError("docker image string "
+                             "should not have whitespace(s)")
+
         # validate that we support this framework by checking folder names
         benchmark_dir = os.path.dirname(os.path.realpath(__file__))
         if glob.glob("{}/*/{}".format(benchmark_dir, args.framework)) == []:
