@@ -112,6 +112,7 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --precision=${PRECISION} \
 --mode=${MODE} \
 --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
+--benchmark-dir=${MOUNT_BENCHMARK} \
 --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
@@ -559,7 +560,7 @@ function ssd_mobilenet() {
       echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
     fi
 
-    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies

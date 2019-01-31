@@ -42,6 +42,11 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 nargs='?',
                                 dest="intelai_models")
 
+        arg_parser.add_argument("--benchmark-dir",
+                                help="Local path intelai benchmark directory",
+                                nargs='?',
+                                dest="benchmark_dir")
+
         arg_parser.add_argument("--use-case",
                                 help="The corresponding use case of the given "
                                      "model ",

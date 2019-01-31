@@ -9,10 +9,13 @@ other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone the `tensorflow/models` repository:
+1. Clone the `tensorflow/models` repository with the specified SHA,
+since we are using an older version of the models repo for
+SSD-MobileNet.
 
 ```
 $ git clone https://github.com/tensorflow/models.git
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
 The TensorFlow models repo will be used for running inference as well as
@@ -83,9 +86,9 @@ total 1598276
 -rw-rw-r--. 1 myuser myuser         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 myuser myuser 818336740 Nov  2 21:46 coco_val.record
 
-# Go back to the main models directory and get master code
+# Go back to the main models directory and checkout the SHA that we are using for SSD-MobileNet
 $ cd /home/myuser/models
-$ git checkout master
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
@@ -97,13 +100,6 @@ will be using when running inference.
 
 ```
 $ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
---2018-11-02 18:21:34--  http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
-Length: 76541073 (73M) [application/x-tar]
-Saving to: ‘ssd_mobilenet_v1_coco_2018_01_28.tar.gz’
-
-100%[==================================================================================================================================================>] 76,541,073  4.63MB/s   in 21s
-
-2018-11-02 18:21:55 (3.53 MB/s) - ‘ssd_mobilenet_v1_coco_2018_01_28.tar.gz’ saved [76541073/76541073]
 
 $ tar -xvf ssd_mobilenet_v1_coco_2018_01_28.tar.gz
 ssd_mobilenet_v1_coco_2018_01_28/
@@ -145,11 +141,16 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-7. Run the `launch_benchmark.py` script from the models repo that we
-just cloned, with the appropriate parameters including: the
-`coco_val.record` data location (from step 4), the pre-trained
-`frozen_inference_graph.pb` input graph file (from step 5, and the
-location of your `tensorflow/models` clone (from step 1).
+7. Next, navigate to the `benchmarks` directory of the
+[intelai/models](https://github.com/intelai/models) repo that was just
+cloned in the previous step. SSD-MobileNet can be run for benchmarking
+throughput and latency, or testing accuracy.
+
+To benchmarking for throughput and latency, use the following command,
+but replace in your path to the unzipped coco dataset images from step 3
+for the `--dataset-location`, the path to the frozen graph that you
+downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`
+flag:
 
 ```
 $ cd /home/myuser/models/benchmarks
@@ -163,23 +164,61 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --benchmark-only
+```
+
+To test accuracy, use the following command but replace in your path to
+the tf record file that you generated in step 4 for the `--data-location`,
+the path to the frozen graph that you downloaded in step 5 as the
+`--in-graph`, and use the `--accuracy-only` flag:
+
+```
+$ python launch_benchmark.py \
+    --data-location /home/myuser/coco/output/coco_val.record \
+    --in-graph /home/myuser/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --model-source-dir /home/myuser/tensorflow/models \
+    --model-name ssd-mobilenet \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --socket-id 0 \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --accuracy-only
 ```
 
 8. The log file is saved to:
 `models/benchmarks/common/tensorflow/logs`
 
-The tail of the log output when the benchmarking completes should look
-something like this:
+Below is a sample log file tail when running benchmarking:
 
 ```
-INFO:tensorflow:Processed 4970 images...
-INFO:tensorflow:Processed 4980 images...
-INFO:tensorflow:Processed 4990 images...
-INFO:tensorflow:Processed 5000 images...
+INFO:tensorflow:Processed 5001 images... moving average latency 37 ms
 INFO:tensorflow:Finished processing records
+Latency: min = 33.8, max = 6635.9, mean= 38.4, median = 37.2
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference_fp32_20190104_230409.log
+Log location outside container: /home/intelai/models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference_fp32_20190130_225108.log
+```
+
+Below is a sample log file tail when testing accuracy:
+
+```
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.231
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.349
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.254
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.231
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.209
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.264
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.264
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.264
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size -1
+Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference_fp32_20190123_225145.log
 ```
