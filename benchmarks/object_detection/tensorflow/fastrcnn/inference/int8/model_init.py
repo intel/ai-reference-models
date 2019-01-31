@@ -46,7 +46,7 @@ class ModelInitializer(BaseModelInitializer):
         self.validate_args()
 
     def validate_args(self):
-        if not (self.args.batch_size is -1 or self.args.batch_size is 1):
+        if not (self.args.batch_size == -1 or self.args.batch_size == 1):
             raise ValueError(
                 "Batch Size specified: {}. fast RCNN inference only supports "
                 "batch size = 1".format(self.args.batch_size))
