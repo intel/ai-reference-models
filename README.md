@@ -1,11 +1,6 @@
-# Model Zoo for Intel Architecture
+# Model Zoo for Intel® Architecture
 
-This repository containes number of models optimized by Intel to run inferences on Xeon Processors.
-
-## Contribution guidelines
-
-If you want to contribute to models, be sure to review the [contribution guidelines](...).
-
-## License
-
-[...](LICENSE)
+This repository contains a number of models optimized by Intel to run machine 
+learning workloads on Intel® Xeon® Scalable processors. For information on 
+how to run key benchmarks, see the [README](https://github.com/NervanaSystems/intel-models/tree/master/benchmarks) 
+in the benchmarks folder. How-tos and tutorials can be found in the [docs](https://github.com/NervanaSystems/intel-models/tree/master/docs) folder.
