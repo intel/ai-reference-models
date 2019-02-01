@@ -16,8 +16,9 @@ node('skx') {
             sudo apt-get install -y python3-dev || true
             sudo yum install -y python36-devel.x86_64 || true
 
-            sudo python2 -m pip install --upgrade pip virtualenv tox
-            sudo python3 -m pip install --upgrade pip virtualenv tox
+            # virtualenv 16.3.0 is broken do not use it
+            sudo python2 -m pip install --upgrade pip virtualenv!=16.3.0 tox
+            sudo python3 -m pip install --upgrade pip virtualenv!=16.3.0 tox
             """
         }
         stage('Style tests') {
