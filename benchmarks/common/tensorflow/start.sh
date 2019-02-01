@@ -140,6 +140,21 @@ function install_protoc() {
 
 }
 
+# 3D UNet model
+function 3d_unet() {
+  if [ ${PRECISION} == "fp32" ]; then
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+    fi
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
+    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # A3C model
 function a3c() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -156,6 +171,20 @@ function a3c() {
   fi
 }
 
+# DCGAN model
+function dcgan() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/gan/cifar
+
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
 # DeepSpeech model
 function deep-speech() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -220,49 +249,64 @@ function deep-speech() {
   fi
 }
 
+# DRAW model
+function draw() {
+  if [ ${PRECISION} == "fp32" ]; then
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
+      original_dir=$(pwd)
+      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+      echo "Compiling protoc files"
+      ./bin/protoc object_detection/protos/*.proto --python_out=.
+
+      # install cocoapi
+      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
+      echo "Installing COCO API"
+      make
+      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+    fi
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
     if [ ${PRECISION} == "fp32" ]; then
-        config_file_arg=""
-        if [ -n "${config_file}" ]; then
-            config_file_arg="--config_file=${config_file}"
-        fi
+      config_file_arg=""
+      if [ -n "${config_file}" ]; then
+        config_file_arg="--config_file=${config_file}"
+      fi
 
-        if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-            echo "Fast R-CNN requires -- config_file arg to be defined"
-            exit 1
-        fi
-
-        if [ ${NOINSTALL} != "True" ]; then
-          # install dependencies
-          pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
-          original_dir=$(pwd)
-          cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-
-          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:$(pwd):$(pwd)/slim:$(pwd)/object_detection
-
-          # install protoc v3.3.0, if necessary, then compile protoc files
-          install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-          echo "Compiling protoc files"
-          ./bin/protoc object_detection/protos/*.proto --python_out=.
-
-          # install cocoapi
-          cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-          echo "Installing COCO API"
-          make
-          cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
-        fi
-
-        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-        cd $original_dir
-        CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --data-location=${DATASET_LOCATION} \
-        --in-graph=${IN_GRAPH} ${config_file_arg}"
-
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-     else
-        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
+      fi
+      cd $original_dir
+      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+      --data-location=${DATASET_LOCATION} \
+      --in-graph=${IN_GRAPH} ${config_file_arg}"
+    elif [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --number-of-steps=${number_of_steps}"
+      fi
+      cd $original_dir
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
     fi
 }
 
@@ -629,10 +673,16 @@ LOGFILE=${LOG_OUTPUT}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "a3c" ]; then
+if [ ${MODEL_NAME} == "3d_unet" ]; then
+  3d_unet
+elif [ ${MODEL_NAME} == "a3c" ]; then
   a3c
+elif [ ${MODEL_NAME} == "dcgan" ]; then
+  dcgan
 elif [ ${MODEL_NAME} == "deep-speech" ]; then
   deep-speech
+elif [ ${MODEL_NAME} == "draw" ]; then
+  draw
 elif [ ${MODEL_NAME} == "fastrcnn" ]; then
   fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then

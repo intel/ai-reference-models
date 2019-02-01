@@ -171,6 +171,22 @@ def test_launch_benchmark_validate_checkpoint_dir(
         os.rmdir(temp_dir)
 
 
+def test_launch_benchmark_validate_model_source_dir(
+        mock_system_platform, mock_os, mock_subprocess):
+    """
+    Verifies that a valid model source path passes.
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    args, _ = launch_benchmark.parse_args(example_req_args)
+    temp_dir = tempfile.mkdtemp()
+    args.model_source_dir = temp_dir
+    try:
+        launch_benchmark.validate_args(args)
+    finally:
+        os.rmdir(temp_dir)
+
+
 def test_launch_benchmark_validate_bad_in_graph(
         mock_system_platform, mock_os, mock_subprocess):
     """
@@ -265,7 +281,8 @@ def test_launch_benchmark_validate_model(
     launch_benchmark.run_docker_container(args)
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
-    assert "docker run" in args[0]
+    assert "docker" == args[0][0]
+    assert "run" == args[0][1]
 
 
 def test_launch_benchmark_validate_bad_model(mock_platform_util):
@@ -278,6 +295,57 @@ def test_launch_benchmark_validate_bad_model(mock_platform_util):
     with pytest.raises(ValueError) as e:
         launch_benchmark.run_docker_container(args)
     assert "No model was found for" in str(e)
+
+
+def test_launch_benchmark_validate_bad_docker_image(
+        mock_system_platform, mock_os, mock_subprocess):
+    """
+    Verifies that an invalid docker image fails.
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    args, _ = launch_benchmark.parse_args(example_req_args)
+
+    args.docker_image = "test "
+    with pytest.raises(ValueError) as e:
+        launch_benchmark.validate_args(args)
+
+    assert "docker image string should " \
+           "not have whitespace(s)" in str(e)
+
+
+def test_launch_benchmark_validate_bad_intra_threads(
+        mock_system_platform, mock_os, mock_subprocess):
+    """
+    Verifies that an invalid num intra threads fails.
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    args, _ = launch_benchmark.parse_args(example_req_args)
+
+    args.num_intra_threads = -1
+    with pytest.raises(ValueError) as e:
+        launch_benchmark.validate_args(args)
+
+    assert "Number of intra threads " \
+           "value should be greater than 0" in str(e)
+
+
+def test_launch_benchmark_validate_bad_inter_threads(
+        mock_system_platform, mock_os, mock_subprocess):
+    """
+    Verifies that an invalid num inter threads fails.
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    args, _ = launch_benchmark.parse_args(example_req_args)
+
+    args.num_inter_threads = -1
+    with pytest.raises(ValueError) as e:
+        launch_benchmark.validate_args(args)
+
+    assert "Number of inter threads " \
+           "value should be greater than 0" in str(e)
 
 
 def test_launch_benchmark_validate_empty_model(mock_platform_util):
