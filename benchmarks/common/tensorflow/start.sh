@@ -621,6 +621,26 @@ function ssd_vgg16() {
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
+# UNet model
+function unet() {
+  if [ ${PRECISION} == "fp32" ]; then
+    if [[ -z "${checkpoint_name}" ]]; then
+      echo "wavenet requires -- checkpoint_name arg to be defined"
+      exit 1
+    fi
+    if [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "Accuracy testing is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --checkpoint_name=${checkpoint_name}"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -710,6 +730,8 @@ elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "ssd-vgg16" ]; then
   ssd_vgg16
+elif [ ${MODEL_NAME} == "unet" ]; then
+  unet
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
