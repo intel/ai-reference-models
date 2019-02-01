@@ -24,20 +24,25 @@ For a AWS compute instance, you may find these pages helpful:
    $ sudo usermod -aG docker `whoami`
    ```
 4. Exit and restart your SSH session so that your username is in effect in the docker group.
-5. Download *Dockerfile.mkl* and *Dockerfile.devel-mkl* from [here](https://github.com/tensorflow/serving/tree/master/tensorflow_serving/tools/docker).
+5. Clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository.
+    ```
+    $ git clone https://github.com/tensorflow/serving.git
+    $ cd serving/tensorflow_serving/tools/docker/
+    ```
+   Next, we will do two docker builds.
 
-Next, we will do two docker builds. **NOTE 1**: they both require a `.` path argument at the end; see
-[https://docs.docker.com/engine/reference/commandline/build/#examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
-**NOTE 2**: if your machine is behind a proxy, you will need to pass proxy arguments to both build commands. For example:
-```
---build-arg http_proxy="your company http proxy" --build-arg https_proxy="your company https proxy"
-```
+   **NOTE:**
+    * They both require a `.` path argument at the end; see [this](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
+    * If your machine is behind a proxy, you will need to pass proxy arguments to both build commands. For example:
+      ```
+      --build-arg http_proxy="your company http proxy" --build-arg https_proxy="your company https proxy"
+      ```
 
-6. Build *Dockerfile.devel-mkl* which contains all the required development tools to build sources. This build will take the longest.
+6. Build **Dockerfile.devel-mkl** which contains all the required development tools to build sources. This build will take the longest.
    ```
    $ docker build -f Dockerfile.devel-mkl -t tensorflow/serving:latest-devel-mkl .
    ```
-7. Finally, build *Dockerfile.mkl* which creates a light-weight image without any development tools in it.
+7. Finally, build **Dockerfile.mkl** which creates a light-weight image without any development tools in it.
    ```
    $ docker build -f Dockerfile.mkl -t tensorflow/serving:mkl .
    ```
