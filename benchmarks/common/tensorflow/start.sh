@@ -186,69 +186,6 @@ function dcgan() {
     exit 1
   fi
 }
-# DeepSpeech model
-function deep-speech() {
-  if [ ${PRECISION} == "fp32" ]; then
-    if [[ -z "${datafile_name}" ]]; then
-      echo "DeepSpeech requires -- datafile_name arg to be defined"
-      exit 1
-    fi
-
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
-    if [ ${NOINSTALL} != "True" ]; then
-      pip install -r "${MOUNT_BENCHMARK}/speech_recognition/tensorflow/deep-speech/requirements.txt"
-      apt-get install swig libsox-dev -y
-
-      build_whls=true
-      # If whl exists and older than 1 day, install existing whl files
-      if ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl 1> /dev/null 2>&1 &&
-         ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/python/dist/*whl 1> /dev/null 2>&1
-      then
-        deepspeech_whl=$(ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/ctcdecode/dist/*whl)
-        decoder_whl=$(ls ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client/python/dist/*whl)
-        touch -d '1 days ago' 1_day_ago
-        if [ ! $deepspeech_whl -ot 1_day_ago ]; then
-          pip install -I $deepspeech_whl
-          pip install -I $decoder_whl
-          build_whls=false
-        fi
-        rm ./1_day_ago
-      fi
-
-      if [ "$build_whls" = true ]; then
-        original_dir=$(pwd)
-        # remove untracked files in model source directory so that it doesnt
-        # interfere with bazel & decoder build
-        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech && git clean -fd && cd  ..
-        export build_dir="$PWD/mozilla-build"
-        export TFDIR="$PWD/tensorflow/"
-        cd tensorflow
-        ln -s ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client .
-        \r | ./configure
-        bazel --output_base=$build_dir build --config=monolithic -c opt --copt -D_GLIBCXX_USE_CXX11_ABI=0 \
-            --copt -mfma --copt -mavx2 --copt -march=broadwell --copt=-O3 --copt=-fvisibility=hidden \
-            //native_client:libdeepspeech.so //native_client:generate_trie
-        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/DeepSpeech/native_client
-        make deepspeech
-        PREFIX=/usr/local make install
-        cd ./python/
-        make bindings
-        pip install --upgrade dist/deepspeech*.whl
-        cd ../ctcdecode
-        make bindings NUM_PROCESSES=8
-        pip install -I dist/*.whl
-        cd $original_dir
-      fi
-    fi
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-    --data-location=${DATASET_LOCATION} \
-    --datafile-name=${datafile_name}"
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-      echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
-  fi
-}
 
 # DRAW model
 function draw() {
@@ -700,8 +637,6 @@ elif [ ${MODEL_NAME} == "a3c" ]; then
   a3c
 elif [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
-elif [ ${MODEL_NAME} == "deep-speech" ]; then
-  deep-speech
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
 elif [ ${MODEL_NAME} == "fastrcnn" ]; then
