@@ -358,3 +358,89 @@ def test_launch_benchmark_validate_empty_model(mock_platform_util):
     with pytest.raises(ValueError) as e:
         launch_benchmark.validate_args(args)
     assert "The model name is not valid" in str(e)
+
+
+@pytest.mark.parametrize("arg_name",
+                         ["input_graph"])
+def test_link_file_input_validation(
+        mock_system_platform, mock_os, mock_subprocess,
+        arg_name):
+    """
+    Tests args that take a file path to ensure that sym links and hard links
+    are not allowed. Creates a symlink and hard link of a temporary file and
+    verifies that the launch script fails with an appropriate error message.
+    """
+
+    with tempfile.NamedTemporaryFile() as temp_file:
+        # directory where the temp file is located
+        parent_dir = os.path.dirname(temp_file.name)
+
+        # create sym link to the temp file
+        symlink_file = os.path.join(parent_dir, "temp_symlink_file")
+        if os.path.exists(symlink_file):
+            os.remove(symlink_file)
+        os.symlink(temp_file.name, symlink_file)
+
+        # create hard link to the temp file
+        hardlink_file = os.path.join(parent_dir, "temp_hardlink_file")
+        if os.path.exists(hardlink_file):
+            os.remove(hardlink_file)
+        os.link(temp_file.name, hardlink_file)
+
+        try:
+            setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+            launch_benchmark = LaunchBenchmark()
+            args, _ = launch_benchmark.parse_args(example_req_args)
+            args_dict = vars(args)
+
+            # Test that hard link errors
+            args_dict[arg_name] = hardlink_file
+            print(args_dict)
+            with pytest.raises(ValueError) as e:
+                launch_benchmark.validate_args(args)
+            assert "cannot be a link" in str(e)
+
+            # Test that sym link errors
+            args_dict[arg_name] = symlink_file
+            with pytest.raises(ValueError) as e:
+                launch_benchmark.validate_args(args)
+            assert "cannot be a link" in str(e)
+        finally:
+            if os.path.exists(symlink_file):
+                os.remove(symlink_file)
+            if os.path.exists(hardlink_file):
+                os.remove(hardlink_file)
+
+
+@pytest.mark.parametrize("arg_name",
+                         ["model_source_dir", "checkpoint", "data_location"])
+def test_symlink_directory_input_validation(mock_system_platform, mock_os,
+                                            mock_subprocess, arg_name):
+    """
+    Tests args that take a directory path to ensure that symlinks are not
+    allowed. Creates a symlink of a temporary directory and verifies that the
+    launch script fails with an appropriate error message.
+    """
+    # create temp directory
+    temp_dir = tempfile.mkdtemp()
+    parent_dir = os.path.dirname(temp_dir)
+
+    # create sym link to the temp directory
+    symlink_dir = os.path.join(parent_dir, "temp_symlink_dir")
+    if os.path.exists(symlink_dir):
+        os.remove(symlink_dir)
+    os.symlink(temp_dir, symlink_dir)
+
+    try:
+        setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+        launch_benchmark = LaunchBenchmark()
+        args, _ = launch_benchmark.parse_args(example_req_args)
+        args_dict = vars(args)
+        args_dict[arg_name] = symlink_dir
+        with pytest.raises(ValueError) as e:
+            launch_benchmark.validate_args(args)
+        assert "cannot be a link" in str(e)
+    finally:
+        if os.path.exists(symlink_dir):
+            os.remove(symlink_dir)
+        os.rmdir(temp_dir)

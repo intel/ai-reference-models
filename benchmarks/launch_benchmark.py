@@ -35,7 +35,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
     def main(self):
         args, unknown = self.parse_args(sys.argv[1:])
-        self.validate_args(args)
+        try:
+            self.validate_args(args)
+        except (IOError, ValueError) as e:
+            print("\nError: {}".format(e))
+            sys.exit(1)
         self.run_docker_container(args)
 
     def parse_args(self, args):
@@ -110,6 +114,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             elif not os.path.isdir(checkpoint_dir):
                 raise IOError("The checkpoint location {} is not a directory.".
                               format(checkpoint_dir))
+            self.check_for_link("checkpoint directory", checkpoint_dir)
 
         # check if input graph file exists
         input_graph = args.input_graph
@@ -120,6 +125,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             if not os.path.isfile(input_graph):
                 raise IOError("The input graph {} must be a file.".
                               format(input_graph))
+            self.check_for_link("input graph", input_graph)
 
         # if neither benchmark_only or accuracy_only are specified, then enable
         # benchmark_only as the default

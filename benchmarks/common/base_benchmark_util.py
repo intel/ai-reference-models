@@ -119,6 +119,16 @@ class BaseBenchmarkUtil(object):
             help="Additional command line arguments (prefix flag start with"
                  " '--').")
 
+    def check_for_link(self, arg_name, path):
+        """
+        Throws an error if the specified path is a link. os.islink returns
+        True for sym links.  For files, we also look at the number of links in
+        os.stat() to determine if it's a hard link.
+        """
+        if os.path.islink(path) or \
+                (os.path.isfile(path) and os.stat(path).st_nlink > 1):
+            raise ValueError("The {} cannot be a link.".format(arg_name))
+
     def validate_args(self, args):
         """validate the args """
 
@@ -130,6 +140,7 @@ class BaseBenchmarkUtil(object):
                 raise IOError("The model source directory {} "
                               "does not exist or is not a directory.".
                               format(model_source_dir))
+            self.check_for_link("model source directory", model_source_dir)
 
         # check model_name exists
         if not args.model_name:
@@ -147,6 +158,7 @@ class BaseBenchmarkUtil(object):
             if not os.path.exists(data_dir):
                 raise IOError("The data location {} does not exist.".format(
                     data_dir))
+            self.check_for_link("data location", data_dir)
 
         # check if socket id is in socket number range
         num_sockets = self._platform_util.num_cpu_sockets()
