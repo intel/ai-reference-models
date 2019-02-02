@@ -33,5 +33,4 @@ dependencies to be installed:
 | Object Detection       | TensorFlow    | SSD-VGG16           | Inference | [Int8](object_detection/tensorflow/ssd-vgg16/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/ssd-vgg16/README.md#fp32-inference-instructions) |
 | Recommendation         | TensorFlow    | NCF                 | Inference | [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions) |
 | Reinforcement Learning | TensorFlow    | A3C                 | Inference | [FP32](reinforcement_learning/tensorflow/a3c/README.md#fp32-inference-instructions) |
-| Speech Recognition     | TensorFlow    | Deep Speech         | Inference | [FP32](speech_recognition/tensorflow/deep-speech/README.md#fp32-inference-instructions) |
 | Text-to-Speech         | TensorFlow    | WaveNet             | Inference | [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions) |
