@@ -39,7 +39,11 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
 2. **(Optional) Download Data**: If you are interested only in testing latency and throughput, not accuracy, you can skip this step and use synthetic data.
    If you want to verify prediction accuracy by testing on real data, follow the instructions in one of the READMEs above to download the ImageNet dataset.
 
-3. **Clone this repository**: Clone the intel-models repo and `cd` into the `docs/image_recognition/tensorflow_serving/src` directory.
+3. **Clone this repository**: Clone the [intelai/models](https://github.com/intelai/models) repository and `cd` into the `docs/image_recognition/tensorflow_serving/src` directory.
+   ```
+   $ git clone https://github.com/IntelAI/models.git
+   $ cd models/docs/image_recognition/tensorflow_serving/src
+   ```
 
 4. **Set up your environment**: In this tutorial, we use a virtual environment to install a few required Python packages. 
    If you do not have pip or virtualenv, you will need to get them first:
@@ -53,7 +57,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    $ source venv/bin/activate
    (venv)$ pip install grpc
    (venv)$ pip install requests
-   (venv)$ pip install https://storage.googleapis.com/intel-optimized-tensorflow/tensorflow-1.12.0-cp27-cp27mu-linux_x86_64.whl
+   (venv)$ pip install intel-tensorflow
    (venv)$ pip install tensorflow-serving-api
    ```
 5. **Create a SavedModel**: Using the conversion script `model_graph_to_saved_model.py`, convert the pre-trained model graph to a SavedModel.
@@ -87,7 +91,16 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    
    For our example with 56 physical cores, these values are 56 and 14:
    ```
-   (venv)$ docker run --name=tfserving --rm -d -p 8500:8500 -v "/tmp:/models/inceptionv3" -e MODEL_NAME=inceptionv3 -e OMP_NUM_THREADS=56 -e TENSORFLOW_SESSION_PARALLELISM=14 tensorflow/serving:mkl
+   (venv)$ docker run \
+           --name=tfserving \
+           --rm \
+           -d \
+           -p 8500:8500 \
+           -v "/tmp:/models/inceptionv3" \
+           -e MODEL_NAME=inceptionv3 \
+           -e OMP_NUM_THREADS=56 \
+           -e TENSORFLOW_SESSION_PARALLELISM=14 \
+           tensorflow/serving:mkl
    ```
    Note: For some models, playing around with these settings values can improve performance even further. 
    We are exploring approaches to fine-tuning the parameters and will present our findings in a future version of this document. 
@@ -123,7 +136,18 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    * OMP_NUM_THREADS = 1
    * TENSORFLOW_SESSION_PARALLELISM = 1
    ```
-   (venv)$ docker run --name=tfserving --rm --cpuset-cpus="0" --cpus="1" -d -p 8500:8500 -v "/tmp:/models/inceptionv3" -e MODEL_NAME=inceptionv3 -e OMP_NUM_THREADS=1 -e TENSORFLOW_SESSION_PARALLELISM=1 tensorflow/serving:mkl
+   (venv)$ docker run \
+           --name=tfserving \
+           --rm \
+           --cpuset-cpus="0" \
+           --cpus="1" \
+           -d \
+           -p 8500:8500 \
+           -v "/tmp:/models/inceptionv3" \
+           -e MODEL_NAME=inceptionv3 \
+           -e OMP_NUM_THREADS=1 \
+           -e TENSORFLOW_SESSION_PARALLELISM=1 \
+           tensorflow/serving:mkl
    ```
 
 10. **Maximum throughput**: Regardless of hardware, the best batch size for throughput is 128. 
