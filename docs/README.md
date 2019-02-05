@@ -2,10 +2,13 @@
 
 ## Best Practices
 
-* Intel-Optimized TensorFlow (*coming soon*)
+* Intel-Optimized TensorFlow
+    * [Installation Guide](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide)
+    
 * Intel-Optimized TensorFlow Serving:
     * [Installation Guide](general/tensorflow_serving/InstallationGuide.md)
     * [General Best Practices](general/tensorflow_serving/GeneralBestPractices.md)
+    
 ## Tutorials by Use Case
 
 * Intel-Optimized TensorFlow (*coming soon*)
