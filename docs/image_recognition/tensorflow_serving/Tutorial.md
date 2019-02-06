@@ -81,7 +81,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    For example, for a machine with `Core(s) per socket: 28` and `Socket(s): 2`, *num_physical_cores* = 28 * 2 = 56.
 
 7. **Start the server**: Now let's start up the TensorFlow model server. To optimize overall performance, use the following recommended settings from the
-   [General Best Practices](../../general/tensorflow_serving/GeneralBestPractices.md):
+   [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md):
    * OMP_NUM_THREADS = *num_physical_cores*
    * TENSORFLOW_SESSION_PARALLELISM = *num_physical_cores*/4
    
