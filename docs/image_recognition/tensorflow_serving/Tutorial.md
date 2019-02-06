@@ -11,12 +11,12 @@ It also provides sample code that you can use to get your optimized TensorFlow m
 ## Prerequisites
 
 This tutorial assumes you have already:
-* [Installed TensorFlow Serving](../../general/tensorflow_serving/InstallationGuide.md)
-* Read and understood the [General Best Practices](../../general/tensorflow_serving/GeneralBestPractices.md),
+* [Installed TensorFlow Serving](/docs/general/tensorflow_serving/InstallationGuide.md)
+* Read and understood the [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md),
   especially these sections:
    * **Performance Metrics**
    * **TensorFlow Serving Configuration Settings**
-* Ran an example end-to-end using a GRPC client, such as the one in the [Installation Guide](../../general/tensorflow_serving/InstallationGuide.md#option-2-using-grpc-this-is-the-fastest-method-but-the-client-has-more-dependencies)
+* Ran an example end-to-end using a GRPC client, such as the one in the [Installation Guide](/docs/general/tensorflow_serving/InstallationGuide.md#option-2-using-grpc-this-is-the-fastest-method-but-the-client-has-more-dependencies)
   
 ## Background
 
@@ -31,8 +31,8 @@ Tuning TensorFlow Serving to take full advantage of your hardware for image reco
 ## Hands-on Tutorial - ResNet50 or InceptionV3
 
 For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
-* [ResNet50 README](../../../benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
-* [InceptionV3 README](../../../benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
+* [ResNet50 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
+* [InceptionV3 README](/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
 
 1. **Download the Model**: Download and extract the ResNet50 or InceptionV3 pre-trained model (FP32), using the instructions in one of the READMEs above.
 
