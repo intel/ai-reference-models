@@ -155,22 +155,6 @@ function 3d_unet() {
   fi
 }
 
-# A3C model
-function a3c() {
-  if [ ${PRECISION} == "fp32" ]; then
-
-    pip install opencv-python
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
-
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
 # DCGAN model
 function dcgan() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -289,29 +273,12 @@ function inception_resnet_v2() {
     exit 1
   fi
 
-  if [ ${PRECISION} == "int8" ]; then
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  elif [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
     # Add on --in-graph and --data-location for int8 inference
     if [ ${MODE} == "inference" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
     elif [ ${MODE} == "inference" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
-    fi
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# inceptionv4 model
-function inceptionv4() {
-  if [ ${PRECISION} == "int8" ]; then
-    # For accuracy, dataset location is required
-    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "No dataset directory specified, accuracy cannot be calculated."
-      exit 1
     fi
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -451,16 +418,7 @@ function rfcn() {
       split_arg="--split=${split}"
   fi
 
-  if [ ${PRECISION} == "int8" ]; then
-      number_of_steps_arg=""
-
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          number_of_steps_arg="--number_of_steps=${number_of_steps}"
-      fi
-
-      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
-
-  elif [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1
@@ -522,41 +480,6 @@ function ssd_mobilenet() {
   fi
 }
 
-# SSD-VGG16 model
-function ssd_vgg16() {
-    # In-graph is required
-    if [ "${IN_GRAPH}" == None ] ; then
-      echo "In graph must be specified!"
-      exit 1
-    fi
-
-    # For accuracy, dataset location is required, see README for more information.
-    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "No Data directory specified, accuracy will not be calculated."
-      exit 1
-    fi
-
-    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-      DATASET_LOCATION=""
-    fi
-
-    if [ ${NOINSTALL} != "True" ]; then
-        pip install opencv-python
-    fi
-
-    if [ ${PRECISION} == "int8" ]; then
-        CMD="${CMD} --data-location=${DATASET_LOCATION}"
-    elif [ ${PRECISION} == "fp32" ]; then
-        CMD="${CMD} --in-graph=${IN_GRAPH} \
-        --data-location=${DATASET_LOCATION}"
-    else
-        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-        exit 1
-    fi
-
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-}
-
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -612,8 +535,6 @@ echo "Log output location: ${LOGFILE}"
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "3d_unet" ]; then
   3d_unet
-elif [ ${MODEL_NAME} == "a3c" ]; then
-  a3c
 elif [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "draw" ]; then
@@ -624,8 +545,6 @@ elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
   inception_resnet_v2
-elif [ ${MODEL_NAME} == "inceptionv4" ]; then
-  inceptionv4
 elif [ ${MODEL_NAME} == "maskrcnn" ]; then
   maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
@@ -642,8 +561,6 @@ elif [ ${MODEL_NAME} == "squeezenet" ]; then
   squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
-elif [ ${MODEL_NAME} == "ssd-vgg16" ]; then
-  ssd_vgg16
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
