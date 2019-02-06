@@ -11,12 +11,12 @@ It also provides sample code that you can use to get your optimized TensorFlow m
 ## Prerequisites
 
 This tutorial assumes you have already:
-* [Installed TensorFlow Serving](https://github.com/NervanaSystems/intel-models/blob/master/docs/general/tensorflow_serving/InstallationGuide.md)
-* Read and understood the [General Best Practices](https://github.com/NervanaSystems/intel-models/blob/master/docs/general/tensorflow_serving/GeneralBestPractices.md),
+* [Installed TensorFlow Serving](/docs/general/tensorflow_serving/InstallationGuide.md)
+* Read and understood the [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md),
   especially these sections:
    * **Performance Metrics**
    * **TensorFlow Serving Configuration Settings**
-* Ran an example end-to-end using a GRPC client, such as the one in the [Installation Guide](https://github.com/NervanaSystems/intel-models/blob/master/docs/general/tensorflow_serving/InstallationGuide.md)
+* Ran an example end-to-end using a GRPC client, such as the one in the [Installation Guide](/docs/general/tensorflow_serving/InstallationGuide.md#option-2-using-grpc-this-is-the-fastest-method-but-the-client-has-more-dependencies)
   
 ## Background
 
@@ -31,8 +31,8 @@ Tuning TensorFlow Serving to take full advantage of your hardware for image reco
 ## Hands-on Tutorial - ResNet50 or InceptionV3
 
 For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
-* [ResNet50 README](https://github.com/NervanaSystems/intel-models/tree/master/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
-* [InceptionV3 README](https://github.com/NervanaSystems/intel-models/tree/master/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
+* [ResNet50 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
+* [InceptionV3 README](/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
 
 1. **Download the Model**: Download and extract the ResNet50 or InceptionV3 pre-trained model (FP32), using the instructions in one of the READMEs above.
 
@@ -85,7 +85,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    For example, for a machine with `Core(s) per socket: 28` and `Socket(s): 2`, *num_physical_cores* = 28 * 2 = 56.
 
 7. **Start the server**: Now let's start up the TensorFlow model server. To optimize overall performance, use the following recommended settings from the
-   [General Best Practices](https://github.com/NervanaSystems/intel-models/blob/master/docs/general/tensorflow_serving/GeneralBestPractices.md):
+   [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md):
    * OMP_NUM_THREADS = *num_physical_cores*
    * TENSORFLOW_SESSION_PARALLELISM = *num_physical_cores*/4
    
