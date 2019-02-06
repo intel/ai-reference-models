@@ -1,193 +1,292 @@
 # Intel-Optimized TensorFlow Serving Installation (Linux)
 
-## Pre-installation
+## Goal
+This tutorial will guide you through step-by-step instructions for
+* [Installing Intel optimized TensorFlow Serving as Docker image](#installation)
+* Running an example - [serving ResNet-50 v1 saved model using REST API and GRPC](#example-serving-resnet-50-v1-model).
 
-Whether you are installing TensorFlow Serving on baremetal or a cloud VM, the machine/instance should have at least 20 GB of free disk space (required) and at least 8 logical cores (highly recommended).
-It also needs to have HTTP/S traffic enabled and you must be able to login using SSH (for details, see your system administrator or cloud provider console documentation).
-We recommend Ubuntu 16.04 as these instructions were written and tested for it, but the process should be very similar for any other Linux distribution.
+## Prerequisites
+1.  Access to a machine with the following configurations:
+	* **Hardware recommendations**
+		* minimum of **20 GB of free disk space** (required) 
+		* minimum of **8 logical cores** (highly recommended).
+		* We recommend the following Instance types for cloud VM's which have the latest Intel® Xeon® Processors:
+			* AWS: [C5 Instances](https://aws.amazon.com/ec2/instance-types/c5/) (Helpful guides: [Get_Started](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html), [Accessing_Instances](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html))
+			* GCP: ["Intel Skylake" CPU Platform](https://cloud.google.com/compute/docs/cpu-platforms) (Helpful guides: [Get_Started](https://cloud.google.com/compute/docs/instances/create-start-instance), [Accessing_Instances](https://cloud.google.com/sdk/gcloud/reference/compute/ssh))
+			* Azure: [Fsv2-series](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/#f-series) or [Hc-series](https://azure.microsoft.com/en-us/pricing/details/virtual-machines/linux/#hc-series) (Helpful guides: [Get_Started](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/), [Accessing_Instances](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-cli))
 
-For a Google Cloud compute instance, you may find these pages helpful:
-* [https://cloud.google.com/compute/docs/instances/create-start-instance](https://cloud.google.com/compute/docs/instances/create-start-instance)
-* [https://cloud.google.com/sdk/gcloud/reference/compute/ssh](https://cloud.google.com/sdk/gcloud/reference/compute/ssh)
+	* **Software recommendations**
+		* Ubuntu 16.04 as these instructions were written and tested for it, but the process should be very similar for any other Linux distribution.
+		* SSH login and HTTP/S traffic enabled. For details, contact your system administrator or see cloud provider console documentation ([AWS](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html), [GCP](https://cloud.google.com/sdk/gcloud/reference/compute/ssh), [Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/quick-create-cli)).
 
-For a AWS compute instance, you may find these pages helpful:
-* [https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EC2_GetStarted.html)
-* [https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/AccessingInstances.html)
+2. **Install Docker CE**
+	*  Click [here](https://docs.docker.com/install/linux/docker-ce/ubuntu) for Ubuntu instructions. For other OS platforms, see [here](https://docs.docker.com/install/).
+	* Setup docker to be used as a non-root user, to run `docker` commands without `sudo` . Exit and restart your SSH session so that your username is in effect in the docker group.
+		```
+		sudo usermod -aG docker `whoami`
+		```
+	* After exiting and restarting your SSH session, you should be able to run `docker` commands without `sudo`.
+		```
+		docker run hello-world
+		```
+		**NOTE**: If your machine is behind a proxy, See **HTTP/HTTPS proxy** section [here](https://docs.docker.com/config/daemon/systemd/)
 
 ## Installation
+We will break down the installation into 2 steps: 
+* Step 1: Build Intel Optimized TensorFlow Serving Docker image
+* Step 2: Verify the Docker image by serving a simple model - half_plus_two
 
-1. SSH into the machine or VM.
-2. Install Docker and run the hello-world test to verify it is working properly. Instructions for Ubuntu can be found at
-[https://docs.docker.com/install/linux/docker-ce/ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu) and you can use the menu on the left of that page if you are using a different Linux distribution.
-3. Add your username to the docker group:
-   ```
-   $ sudo usermod -aG docker `whoami`
-   ```
-4. Exit and restart your SSH session so that your username is in effect in the docker group.
-5. Clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository.
+### Step 1: Build Intel Optimized TensorFlow Serving Docker image
+The recommended way of using TensorFlow Serving is with Docker images. Lets build a docker image with Intel Optimized TensorFlow Serving. 
+
+* Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 
+	```
+	$ git clone https://github.com/tensorflow/serving.git
+	$ export TF_SERVING_ROOT=$(pwd)/serving
+	$ echo "export TF_SERVING_ROOT=$(pwd)/serving" >> ~/.bashrc
+	```
+* Using `Dockerfile.devel.mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
+	```
+	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
+	$ docker build -f Dockerfile.devel-mkl -t tensorflow/serving:latest-devel-mkl .
+	```
+* Next, using `Dockerfile.mkl`, build a serving image which is a light-weight image without any development tools in it. `Dockerfile.mkl` will build a serving image by copying Intel optimized libraries and ModelServer from the development image built in the previous step - `tensorflow/serving:latest-devel-mkl `
+	```
+	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
+	$ docker build -f Dockerfile.mkl -t tensorflow/serving:mkl .
+	```
+
+	**NOTE 1**: Docker build command require a `.` path argument at the end; see [docker examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
+		
+	**NOTE 2**: If your machine is behind a proxy, you will need to pass proxy arguments to both build commands. For example:
+	```
+	--build-arg http_proxy="http://proxy.url:proxy_port" --build-arg https_proxy="http://proxy.url:proxy_port"
+	```
+* Once you built both the images, you should be able to list them using command `docker images`
+	```
+	$ docker images
+	REPOSITORY           TAG                 IMAGE ID            CREATED             SIZE
+	tensorflow/serving   mkl                 d33c8d849aa3        7 minutes ago       520MB
+	tensorflow/serving   latest-devel-mkl    a2e69840d5cc        8 minutes ago       5.21GB
+	ubuntu               18.04               20bb25d32758        13 days ago         87.5MB
+	hello-world          latest              fce289e99eb9        5 weeks ago         1.84kB
+	```
+	
+### Step 2: Verify the Docker image by serving a simple model - half_plus_two
+
+Let us test the server by serving a simple mkl version of half_plus_two model which is included in the repo which we cloned in the previous step.
+
+* Set the location of test model data:
+	```
+	$ export TEST_DATA=$TF_SERVING_ROOT/tensorflow_serving/servables/tensorflow/testdata
+	```
+* Start the container 
+	* with `-p`, publish the container’s port 8501 to host's port 8501 where the TF serving listens to REST API requests
+	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
+	* with `-v`,  mount the host local model directory `$TEST_DATA/saved_model_half_plus_two_mkl` on the container `/models/half_plus_two`.
+	* with `-e`, setting an environment variable in the container which is read by TF serving
+	* with `tensorflow/serving:mkl` docker image 
+	* with `&` at the end, runs the container as a background process. Press enter after executing the following cmd:
+	```
+	$ docker run \
+	  -p 8501:8501 \
+	  --name tfserving_half_plus_two \
+	  -v $TEST_DATA/saved_model_half_plus_two_mkl:/models/half_plus_two \
+	  -e MODEL_NAME=half_plus_two \
+	  tensorflow/serving:mkl &
+	```
+
+* Query the model using the predict API:
+	```
+	$ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
+	-X POST http://localhost:8501/v1/models/half_plus_two:predict
+	```
+	You should see the following output:
+	```
+	{
+	"predictions": [2.5, 3.0, 4.5]
+	}
+	```
+* After you are fininshed with querying, you can stop the container which is running in the background. To restart the container with the same name, you need to stop and remove the container from the registry. To view your running containers run `docker ps`.
+	```
+	$ docker rm -f tfserving_half_plus_two
+	```
+
+ *  **Note:** If you want to confirm that MKL optimizations are being used, add `-e MKLDNN_VERBOSE=1` to the `docker run` command.   This will log MKL messages in the docker logs, which you can inspect after a request is processed.
+	```
+	$ docker run \
+	  -p 8501:8501 \
+	  --name tfserving_half_plus_two \
+	  -v $TEST_DATA/saved_model_half_plus_two_mkl:/models/half_plus_two \
+	  -e MODEL_NAME=half_plus_two \
+	  -e MKLDNN_VERBOSE=1 \
+	  tensorflow/serving:mkl &
+	```  
+	 Query the model using the predict API as before:
     ```
-    $ git clone https://github.com/tensorflow/serving.git
-    $ cd serving/tensorflow_serving/tools/docker/
+    $ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
+    -X POST http://localhost:8501/v1/models/half_plus_two:predict
     ```
-   Next, we will do two docker builds.
-
-   **NOTE:**
-    * They both require a `.` path argument at the end; see [this](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
-    * If your machine is behind a proxy, you will need to pass proxy arguments to both build commands. For example:
-      ```
-      --build-arg http_proxy="your company http proxy" --build-arg https_proxy="your company https proxy"
-      ```
-
-6. Build **Dockerfile.devel-mkl** which contains all the required development tools to build sources. This build will take the longest.
-   ```
-   $ docker build -f Dockerfile.devel-mkl -t tensorflow/serving:latest-devel-mkl .
-   ```
-7. Finally, build **Dockerfile.mkl** which creates a light-weight image without any development tools in it.
-   ```
-   $ docker build -f Dockerfile.mkl -t tensorflow/serving:mkl .
-   ```
-
-## Testing the Server
-
-Run TensorFlow Serving using the above image and test it using the official [TensorFlow Serving example](https://www.tensorflow.org/serving/).
-- Clone the repository:
-  ```
-  $ git clone https://github.com/tensorflow/serving
-  ```
-- Set the location of test models:
-  ```
-  $ TESTDATA="$(pwd)/serving/tensorflow_serving/servables/tensorflow/testdata"
-  ```
-- Start the TensorFlow Serving container and open the REST API port:
-  ```
-  $ docker run -t --rm -p 8501:8501 -v "$TESTDATA/saved_model_half_plus_two_cpu:/models/half_plus_two" -e MODEL_NAME=half_plus_two tensorflow/serving:mkl &
-  ```
-  Note: If you want to confirm that MKL optimizations are being used, add `-e MKLDNN_VERBOSE=1` to the `docker run` command.
-  This will log MKL messages in the docker logs, which you can inspect after a request is processed.
-
-- Query the model using the predict API:
-  ```
-  $ curl -d '{"instances": [1.0, 2.0, 5.0]}' -X POST http://localhost:8501/v1/models/half_plus_two:predict
-  ```
-- Output:
-  ```
-  {
-    "predictions": [2.5, 3.0, 4.5]
-  }
-  ```
-- Finally, since the container is running in the background, you will need to stop it. View your running containers with `docker ps`.
-To stop one, copy the Container ID and run `docker stop <container_id>`.
-
-## ResNet50 Examples
-
-The following examples use [pre-trained models](https://github.com/tensorflow/models/tree/master/official/resnet#pre-trained-model)
-and [client code](https://github.com/tensorflow/serving/tree/master/tensorflow_serving/example) from the TensorFlow repository.
-NOTE: NCHW data format is optimal for Intel-optimized TensorFlow Serving.
-
-* Download a ResNet50 saved model:
-  ```
-  $ wget http://download.tensorflow.org/models/official/20181001_resnet/savedmodels/resnet_v1_fp32_savedmodel_NCHW_jpg.tar.gz
-  ```
-* Untar it:
-  ```
-  $ tar -xvzf resnet_v1_fp32_savedmodel_NCHW_jpg.tar.gz
-  ```
-
-### Option 1: Using the REST API (simple to set up, but performance is not as good as GRPC)
-
-* If a running container is using port 8501, you need to stop it. View your running containers with `docker ps`.
-To stop one, copy the Container ID and run `docker stop <container_id>`.
-* Run the image with the saved model using port 8501:
-  ```
-  $ docker run --name=tfserving_mkl --rm -d -p 8501:8501 -v "$(pwd)/resnet_v1_fp32_savedmodel_NCHW_jpg:/models/resnet" -e MODEL_NAME=resnet tensorflow/serving:mkl &
-  ```
-* Run the example resnet_client.py script from the TensorFlow Serving repository,
-which you should already have cloned in your home directory (if not, see the half_plus_two example):
-  ```
-  python serving/tensorflow_serving/example/resnet_client.py
-  ```
-* Output:
-  ```
-  Prediction class: 286, avg latency: 34.7315 ms
-  ```
-  Note: The real avg latency you see will depend on your hardware, environment, and whether or not you have configured the server parameters optimally. See the [General Best Practices](GeneralBestPractices.md) for more information.
-
-### Option 2: Using GRPC (this is the fastest method, but the client has more dependencies)
-
-* If a running container is using port 8500, you need to stop it. View your running containers with `docker ps`.
-To stop one, copy the Container ID and run `docker stop <container_id>`.
-* Run the image with the saved model using port 8500:
-  ```
-  $ docker run --name=tfserving_mkl --rm -d -p 8500:8500 -v "$(pwd)/resnet_v1_fp32_savedmodel_NCHW_jpg:/models/resnet" -e MODEL_NAME=resnet tensorflow/serving:mkl &
-  ```
-* You will need a few python packages in order to run the client, so if they are not already on your VM, we recommend installing them in a virtual environment.
-Get pip if you do not already have it, install virtualenv if not available, create an environment, and activate it.
-  ```
-  $ sudo apt-get install python-pip
-  $ pip install virtualenv
-  $ virtualenv venv
-  $ source venv/bin/activate
-  ```
-* Install the packages needed for the GRPC client.
-  ```
-  (venv)$ pip install grpc
-  (venv)$ pip install requests
-  (venv)$ pip install tensorflow
-  (venv)$ pip install tensorflow-serving-api
-  ```
-  Note: Although not necessary for running the client code, you can use the latest
-  [Intel Optimization for TensorFlow pip wheel file](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#pip_27)
-  instead of installing the default tensorflow.
-
-* Run the example resnet_client_grpc.py script from the TensorFlow Serving repository, which you should already have cloned in your home directory (if not, see the half_plus_two example).
-  ```
-  (venv)$ python serving/tensorflow_serving/example/resnet_client_grpc.py
-  ```
-  Output:
-  ```
-  outputs {
-    key: "classes"
-    value {
-      dtype: DT_INT64
-      tensor_shape {
-        dim {
-          size: 1
-        }
-      }
-      int64_val: 286
+    You should see the result with MKLDNN verbose output like below:
+    ```
+    mkldnn_verbose,exec,reorder,simple:any,undef,in:f32_nhwc out:f32_nChw16c,num:1,1x1x10x10,0.00488281     
+    mkldnn_verbose,exec,reorder,simple:any,undef,in:f32_hwio out:f32_OIhw16i16o,num:1,1x1x1x1,0.000976562
+    mkldnn_verbose,exec,convolution,jit_1x1:avx512_common,forward_training,fsrc:nChw16c fwei:OIhw16i16o fbia:x fdst:nChw16c,alg:convolution_direct,mb1_g1ic1oc1_ih10oh10kh1sh1dh0ph0_iw10ow10kw1sw1dw0pw0,0.00805664
+    mkldnn_verbose,exec,reorder,simple:any,undef,in:f32_nChw16c out:f32_nhwc,num:1,1x1x10x10,0.012207
+    {
+        "predictions": [2.5, 3.0, 4.5]
     }
-  }
-  outputs {
-    key: "probabilities"
-    value {
-      dtype: DT_FLOAT
-      tensor_shape {
-        dim {
-          size: 1
-        }
-        dim {
-          size: 1001
-        }
-      }
-      float_val: ...
-      ...
-    }
-  }
-  model_spec {
-    name: "resnet"
-    version {
-      value: 1538686847
-    }
-    signature_name: "serving_default"
-  }
-  ```
+    ```
+
+## Example: Serving ResNet-50 v1 Model
+
+TensorFlow Serving requires the model to be in SavedModel format. In this example, we will :
+* Download a [pre-trained ResNet-50  v1 SavedModel](https://github.com/tensorflow/models/tree/master/official/resnet#pre-trained-model) and 
+* use the [python client code](https://github.com/tensorflow/serving/tree/master/tensorflow_serving/example) from the TensorFlow Serving repository and query using two methods:
+	* [Using REST API](#option-1-query-using-rest-api), which is simple to set up, but lacks performance when compared with GRPC
+	* [Using GRPC](#option-2-query-using-grpc), which has optimal performance but the client code requires additional dependencies to be installed.
+
+**NOTE:** NCHW data format is optimal for Intel-optimized TensorFlow Serving.
+
+#### Download and untar a ResNet-50 v1 SavedModel to `/tmp/resnet`
+```
+$ mkdir /tmp/resnet  
+$ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmodels/resnet_v1_fp32_savedmodel_NCHW_jpg.tar.gz \
+| tar --strip-components=2 -C /tmp/resnet -xvz
+```
+
+### Option 1: Query using REST API 
+* Querying using REST API is simple to set up, but lacks performance when compared with GRPC.
+
+* If a running container is using port 8501, you need to stop it. View your running containers with `docker ps`.  To stop and remove the contatiner from the registry, copy the `CONTAINER ID` from the  `docker ps` output and run `docker rm -f <container_id>`.
+
+* Start the container 
+	* with `-p`, publish the container’s port 8501 to host's port 8501 where the TF serving listens to REST API requests
+	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
+	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
+	* with `-e`, setting an environment variable in the container which is read by TF serving
+	* with `tensorflow/serving:mkl` docker image 
+	* with `&` at the end, runs the container as a background process. Press enter after executing the following cmd:
+	```
+	 $ docker run \
+	 -p 8501:8501 \
+	 --name=tfserving_resnet_restapi \
+	 -v "/tmp/resnet:/models/resnet" \
+	 -e MODEL_NAME=resnet \
+	 tensorflow/serving:mkl &
+	```
+* Install the prerequisites for running the python client code
+	```
+	$ sudo apt-get install -y python python-requests
+	```
+* Run the example `resnet_client.py` script from the TensorFlow Serving repository
+	```
+	$ python $TF_SERVING_ROOT/tensorflow_serving/example/resnet_client.py
+	```
+	You should see the following output:
+	```
+	Prediction class: 286, avg latency: 34.7315 ms
+	```
+  **Note:** The real avg latency you see will depend on your hardware, environment, and whether or not you have configured the server parameters optimally. See the [General Best Practices](GeneralBestPractices.md) for more information.
+  
+* After you are fininshed with querying, you can stop the container which is running in the background. To restart the container with the same name, you need to stop and remove the container from the registry. To view your running containers run `docker ps`. 
+	```
+	$ docker rm -f tfserving_resnet_restapi
+	```
+
+### Option 2: Query using GRPC 
+* Querying using GRPC will have optimal performance but the client code requires additional dependencies to be installed.
+
+* If a running container is using port 8500, you need to stop it. View your running containers with `docker ps`.  To stop and remove the contatiner from the registry, copy the `CONTAINER ID` from the  `docker ps` output and run `docker rm -f <container_id>`.
+
+* Start a container 
+	* with `-p`, publish the container’s port 8500 to host's port 8500 where the TF serving listens to GRPC requests
+	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
+	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
+	* with `-e`, setting an environment variable in the container which is read by TF serving
+	* with `tensorflow/serving:mkl` docker image 
+ 	* with `&` at the end, runs the container as a background process. Press enter after executing the following cmd:
+	```
+	 $ docker run \
+	 -p 8500:8500 \
+	 --name=tfserving_resnet_grpc \
+	 -v "/tmp/resnet:/models/resnet" \
+	 -e MODEL_NAME=resnet \
+	 tensorflow/serving:mkl &
+	```
+* You will need a few python packages in order to run the client, we recommend installing them in a virtual environment. 
+	```
+	$ sudo apt-get install -y python python-pip
+	$ pip install virtualenv
+	```
+* Create and activate the python virtual envirnoment. Install the packages needed for the GRPC client.
+	```
+	$ cd ~
+	$ virtualenv tfserving_venv
+	$ source tfserving_venv/bin/activate
+	(tfserving_venv)$ pip install grpc requests tensorflow tensorflow-serving-api
+	```
+* Run the example `resnet_client_grpc.py` script from the TensorFlow Serving repository, which you cloned earlier.
+	```
+	(tfserving_venv)$ python $TF_SERVING_ROOT/tensorflow_serving/example/resnet_client_grpc.py
+	```
+  You should see the similar output as below:
+	```
+	outputs {
+	  key: "classes"
+	  value {
+	    dtype: DT_INT64
+	    tensor_shape {
+	      dim {
+	        size: 1
+	      }
+	    }
+	    int64_val: 286
+	  }
+	}
+	outputs {
+	  key: "probabilities"
+	  value {
+	    dtype: DT_FLOAT
+	    tensor_shape {
+	      dim {
+	        size: 1
+	      }
+	      dim {
+	        size: 1001
+	      }
+	    }
+	    float_val: 7.8115895974e-08
+	    float_val: 3.93756813821e-08
+	    float_val: 6.0871172991e-07
+	  .....
+	  .....
+	  }
+	}
+	model_spec {
+	  name: "resnet"
+	  version {
+	    value: 1538686758
+	  }
+	  signature_name: "serving_default"
+	}
+	```
+  
+ 
 * To deactivate your virtual environment:
-  ```
-  (venv)$ deactivate
-  ```
+	```
+	(tensorflow-serving-api)$ deactivate
+	```
+
+* After you are fininshed with querying, you can stop the container which is running in the background. To restart the container with the same name, you need to stop and remove the container from the registry. To view your running containers run `docker ps`. 
+	```
+	$ docker rm -f tfserving_resnet_grpc
+	```
+
 
 ## Debugging
 
 If you have any problems while making a request, the best way to debug is to check the docker logs.
 First, find the Container ID of your running docker container with `docker ps` and then view its logs with `docker logs <container_id>`.
 If you have added `-e MKLDNN_VERBOSE=1` to the `docker run` command, you should see mkldnn_verbose messages too.
+
