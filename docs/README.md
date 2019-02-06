@@ -4,12 +4,12 @@
 
 * Intel-Optimized TensorFlow (*coming soon*)
 * Intel-Optimized TensorFlow Serving:
-    * [Installation Guide](general/tensorflow_serving/InstallationGuide.md)
-    * [General Best Practices](general/tensorflow_serving/GeneralBestPractices.md)
+    * [Installation Guide](/docs/general/tensorflow_serving/InstallationGuide.md)
+    * [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md)
 ## Tutorials by Use Case
 
 * Intel-Optimized TensorFlow (*coming soon*)
 * Intel-Optimized TensorFlow Serving:
-    * [Image Recognition](image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
+    * [Image Recognition](/docs/image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
     * Object Detection (*coming soon*)
       
