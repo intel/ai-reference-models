@@ -11,3 +11,7 @@
 
 # You can also use email addresses if you prefer.
 #docs/*  docs@example.com
+
+# paddlepaddle
+**/paddlepaddle/** @kbinias @sfraczek @Sand3r- @lidanqing-intel @ddokupil @pmajchrzak @wojtuss
+**/PaddlePaddle/** @kbinias @sfraczek @Sand3r- @lidanqing-intel @ddokupil @pmajchrzak @wojtuss
