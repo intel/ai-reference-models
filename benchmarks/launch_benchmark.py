@@ -24,6 +24,7 @@ from __future__ import print_function
 
 import glob
 import os
+import signal
 import subprocess
 import sys
 from argparse import ArgumentParser
@@ -264,8 +265,15 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.verbose:
             print("Docker run command:\n{}".format(docker_run_cmd))
 
-        p = subprocess.Popen(docker_run_cmd)
-        p.communicate()
+        self._run_docker_cmd(docker_run_cmd)
+
+    def _run_docker_cmd(self, docker_run_cmd):
+        """runs docker proc and exits on ctrl c"""
+        p = subprocess.Popen(docker_run_cmd, preexec_fn=os.setsid)
+        try:
+            p.communicate()
+        except KeyboardInterrupt:
+            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
 
 
 if __name__ == "__main__":
