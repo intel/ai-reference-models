@@ -107,6 +107,29 @@ Let us test the server by serving a simple mkl version of half_plus_two model wh
 	"predictions": [2.5, 3.0, 4.5]
 	}
 	```
+	NOTE: If you see any issues as below after sending predict request, please make sure to set your proxy (inside corporate environment)
+	```
+	$curl -d '{"instances": [1.0, 2.0, 5.0]}' \
+		-X POST http://localhost:8501/v1/models/half_plus_two:predict \
+		<http://localhost:8501/v1/models/half_plus_two:predict>
+	<HTML>
+	<HEAD><TITLE>Redirection</TITLE></HEAD>
+	<BODY><H1>Redirect</H1></BODY>
+	```
+	Place this proxy information in your `~/.bashrc` or `/etc/environment`
+	```
+	export http_proxy="<http_proxy>"
+	export https_proxy="<https_proxy>"
+	export ftp_proxy="<ftp_proxy>"
+	export socks_proxy="<socks_proxy>"
+	export HTTP_PROXY=${http_proxy}
+	export HTTPS_PROXY=${https_proxy}
+	export FTP_PROXY=${ftp_proxy}
+	export SOCKS_PROXY=${socks_proxy}
+	export no_proxy=localhost,127.0.0.1,<add_your_machine_ip>,<add_your_machine_hostname>
+	export NO_PROXY=${no_proxy}
+	```
+
 * After you are fininshed with querying, you can stop the container which is running in the background. To restart the container with the same name, you need to stop and remove the container from the registry. To view your running containers run `docker ps`.
 	```
 	$ docker rm -f tfserving_half_plus_two
