@@ -501,6 +501,47 @@ function unet() {
   fi
 }
 
+# transformer language model
+function transformer_language() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    if [[ -z "${decode_from_file}" ]]; then
+        echo "transformer-language requires -- decode_from_file arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${reference}" ]]; then
+        echo "transformer-language requires -- reference arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
+        echo "transformer-language requires --checkpoint arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${DATASET_LOCATION}" ]]; then
+        echo "transformer-language requires --data-location arg to be defined"
+        exit 1
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      echo "Installing tensor2tensor for CPU..."
+      pip install tensor2tensor[tensorflow]
+    fi
+
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/decoding.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/tensor2tensor/utils/decoding.py
+
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+    --data-location=${DATASET_LOCATION} \
+    --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file} \
+    --reference=${CHECKPOINT_DIRECTORY}/${reference}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -584,6 +625,8 @@ elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "unet" ]; then
   unet
+elif [ ${MODEL_NAME} == "transformer_language" ]; then
+  transformer_language
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
