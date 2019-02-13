@@ -22,11 +22,7 @@
 import os
 
 from common.base_model_init import BaseModelInitializer
-
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine, compact"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -38,8 +34,12 @@ class ModelInitializer(BaseModelInitializer):
         self.platform_util = platform_util
 
         self.set_default_inter_intra_threads(platform_util)
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
-        os.environ['KMP_HW_SUBSET'] = "28c,1T"
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars(kmp_affinity="granularity=fine, compact")
+        set_env_var("KMP_HW_SUBSET",
+                    "{}c,1T".format(self.args.num_intra_threads))
         script_path = os.path.join(self.args.intelai_models, self.args.mode,
                                    self.args.precision, "brats", "predict.py")
 

@@ -21,6 +21,7 @@
 import os
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -30,7 +31,8 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         self.args = args
         self.custom_args = custom_args
-        os.environ["OMP_NUM_THREADS"] = "1"
+
+        set_env_var("OMP_NUM_THREADS", "1")
 
         if args.batch_size == -1:
             args.batch_size = 1

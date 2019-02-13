@@ -22,10 +22,7 @@ import os
 import sys
 
 from common.base_model_init import BaseModelInitializer
-
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["KMP_BLOCKTIME"] = "0"
-os.environ["KMP_SETTINGS"] = "1"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -47,10 +44,13 @@ class ModelInitializer(BaseModelInitializer):
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.research_dir = os.path.join(args.model_source_dir, "research")
 
+        # Set KMP env vars, except override the default KMP_BLOCKTIME value
+        self.set_kmp_vars(kmp_blocktime="0")
+
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(platform_util)
         self.args.num_inter_threads = 2
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.accuracy_only:
             # get accuracy test command

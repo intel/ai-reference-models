@@ -23,10 +23,7 @@ import os
 import sys
 
 from common.base_model_init import BaseModelInitializer
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer (BaseModelInitializer):
@@ -47,8 +44,10 @@ class ModelInitializer (BaseModelInitializer):
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(platform_util)
 
-        os.environ["OMP_NUM_THREADS"] = \
-            str(self.args.num_intra_threads)
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars()
+
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.accuracy_only:
             accuracy_script = os.path.join(

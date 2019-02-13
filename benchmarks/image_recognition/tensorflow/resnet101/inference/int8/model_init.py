@@ -22,6 +22,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 import os
 import argparse
@@ -36,14 +37,12 @@ class ModelInitializer(BaseModelInitializer):
         if not platform_util:
             raise ValueError("Did not find any platform info.")
 
-        # Environment variables
-        os.environ["OMP_NUM_THREADS"] = \
-            str(platform_util.num_cores_per_socket()) if args.num_cores == -1 \
-            else str(args.num_cores)
+        # Set env vars, if they haven't already been set
+        set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket()
+                    if args.num_cores == -1 else args.num_cores)
 
-        os.environ["KMP_BLOCKTIME"] = "0"
-        os.environ["KMP_SETTINGS"] = "1"
-        os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+        # Set KMP env vars, but override default KMP_BLOCKTIME value
+        self.set_kmp_vars(kmp_blocktime="0")
 
     def parse_args(self):
         if self.custom_args:

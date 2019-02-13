@@ -22,12 +22,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 import os
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["KMP_SETTINGS"] = "1"
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -40,6 +37,9 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_command = ""
         if not platform_util:
             raise ValueError("Did not find any platform info.")
+
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars()
 
         # use default batch size if -1
         if self.args.batch_size == -1:
@@ -55,7 +55,7 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_command = self.get_numactl_command(args.socket_id) + \
             "python " + benchmark_script
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.benchmark_command = \
             self.benchmark_command + \

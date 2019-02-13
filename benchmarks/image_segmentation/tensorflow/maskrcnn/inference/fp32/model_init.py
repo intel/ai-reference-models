@@ -22,13 +22,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 import os
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine, compact, 1, 0"
-os.environ["KMP_HW_SUBSET"] = "1T"
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -42,12 +38,16 @@ class ModelInitializer(BaseModelInitializer):
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(self.platform_util)
 
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars(kmp_affinity="granularity=fine, compact, 1, 0")
+        set_env_var("KMP_HW_SUBSET", "1T")
+
         benchmark_script = os.path.join(
             self.args.intelai_models, "coco.py")
         self.benchmark_command = self.get_numactl_command(args.socket_id) + \
             "python3 " + benchmark_script + " evaluate "
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.benchmark_command = self.benchmark_command + \
             " --dataset=" + str(self.args.data_location) + \

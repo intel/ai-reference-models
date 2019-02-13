@@ -110,12 +110,15 @@ FLAGS = flags.FLAGS
 
 def main(unused_argv):
   if (FLAGS.omp > 0):
-    logging.info('OMP_NUM_THREADS value= %d', FLAGS.omp)
-    logging.info('KMP_BLOCKTIME value= %d', FLAGS.blocktime)
-    os.environ["OMP_NUM_THREADS"] = str(FLAGS.omp)
-    os.environ["KMP_BLOCKTIME"] = str(FLAGS.blocktime)
-    os.environ["KMP_SETTINGS"] = "1"
-    #os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
+    if not os.environ.get("OMP_NUM_THREADS"):
+      logging.info('OMP_NUM_THREADS value= %d', FLAGS.omp)
+      os.environ["OMP_NUM_THREADS"] = str(FLAGS.omp)
+    if not os.environ.get("KMP_BLOCKTIME"):
+      logging.info('KMP_BLOCKTIME value= %d', FLAGS.blocktime)
+      os.environ["KMP_BLOCKTIME"] = str(FLAGS.blocktime)
+    if not os.environ.get("KMP_SETTINGS"):
+      os.environ["KMP_SETTINGS"] = "1"
+    # os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
   assert FLAGS.checkpoint_dir, '`checkpoint_dir` is missing.'
   assert FLAGS.eval_dir, '`eval_dir` is missing.'
   tf.gfile.MakeDirs(FLAGS.eval_dir)

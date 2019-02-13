@@ -19,12 +19,9 @@
 #
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 import os
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_SETTING"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -34,8 +31,10 @@ class ModelInitializer(BaseModelInitializer):
         self.args = args
         self.custom_args = custom_args
         self.cmd = self.get_numactl_command(self.args.socket_id) + "python "
-
         self.platform_util = platform_util
+
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars()
 
         # use default batch size if -1
         if self.args.batch_size == -1:
@@ -45,7 +44,7 @@ class ModelInitializer(BaseModelInitializer):
         self.set_default_inter_intra_threads(self.platform_util)
         self.args.num_inter_threads = 2
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,

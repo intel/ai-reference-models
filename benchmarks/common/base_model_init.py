@@ -21,6 +21,20 @@
 import os
 
 
+def set_env_var(env_var, value, overwrite_existing=False):
+    """
+    Sets the specified environment variable.
+
+    If overwrite_existing is False, it will only set the new env var value
+    if the environment variable is not already set.
+
+    If overwrite_existing is True, the environment variable will always be
+    set to the specified value.
+    """
+    if overwrite_existing or not os.environ.get(env_var):
+        os.environ[env_var] = str(value)
+
+
 class BaseModelInitializer(object):
     def run_command(self, cmd):
         """
@@ -89,3 +103,15 @@ class BaseModelInitializer(object):
                         platform_util.num_cpu_sockets())
             else:
                 self.args.num_intra_threads = self.args.num_cores
+
+    def set_kmp_vars(self, kmp_settings="1", kmp_blocktime="1", kmp_affinity="granularity=fine,verbose,compact,1,0"):
+        """
+        Sets KMP_* environment variables to the specified value, if the environment variable has not already been set.
+        The default values for this function's args are the most common values that we have seen in the model zoo.
+        """
+        if kmp_settings:
+            set_env_var("KMP_SETTINGS", kmp_settings)
+        if kmp_blocktime:
+            set_env_var("KMP_BLOCKTIME", kmp_blocktime)
+        if kmp_affinity:
+            set_env_var("KMP_AFFINITY", kmp_affinity)

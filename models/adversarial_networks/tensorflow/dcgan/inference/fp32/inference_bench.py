@@ -104,10 +104,13 @@ flags.DEFINE_integer('bs', 100,
 #                     'the data location')
 
 def mkl_setup():
-    os.environ['KMP_BLOCKTIME'] = str(FLAGS.kmp_blocktime)
-    os.environ['KMP_SETTINGS'] = str(FLAGS.kmp_settings)
-    os.environ['KMP_AFFINITY'] = 'granularity=fine,verbose,compact,1,0'
-    if FLAGS.num_intra_threads > 0:
+    if not os.environ.get('KMP_BLOCKTIME'):
+        os.environ['KMP_BLOCKTIME'] = str(FLAGS.kmp_blocktime)
+    if not os.environ.get('KMP_SETTINGS'):
+        os.environ['KMP_SETTINGS'] = str(FLAGS.kmp_settings)
+    if not os.environ.get('KMP_AFFINITY'):
+        os.environ['KMP_AFFINITY'] = 'granularity=fine,verbose,compact,1,0'
+    if FLAGS.num_intra_threads > 0 and not os.environ.get('OMP_NUM_THREADS'):
         os.environ['OMP_NUM_THREADS'] = str(FLAGS.num_intra_threads)
 
 

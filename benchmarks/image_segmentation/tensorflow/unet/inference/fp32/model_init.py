@@ -22,10 +22,6 @@ import argparse
 import os
 from common.base_model_init import BaseModelInitializer
 
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine, compact"
-
 
 class ModelInitializer(BaseModelInitializer):
     """ Model initializer for UNet FP32 inference """
@@ -44,6 +40,9 @@ class ModelInitializer(BaseModelInitializer):
         self.platform_util = platform_util
         self.parse_custom_args()
         self.set_default_inter_intra_threads(self.platform_util)
+
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars(kmp_affinity="granularity=fine, compact")
 
         # Get path to the inference script
         script_path = os.path.join(

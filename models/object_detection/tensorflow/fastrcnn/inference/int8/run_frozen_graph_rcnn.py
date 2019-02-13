@@ -36,9 +36,6 @@ import time
 import argparse
 from tensorflow.python.client import timeline
 
-os.environ["KMP_BLOCKTIME"] = "0"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--graph', help='Path to input graph to run', type=str, required=True)
@@ -50,6 +47,8 @@ parser.add_argument('-t', '--timeline', help='Output file name for TF timeline',
 parser.add_argument('-e', '--evaluate_tensor', help='Full tensor name to evaluate', type=str, default=None)
 parser.add_argument('-p', '--print_accuracy', help='Print accuracy results', action='store_true')
 parser.add_argument('-n', '--number_of_steps', help='Run for n number of steps', type=int, default=None)
+parser.add_argument('--num-inter-threads', help='Num inter threads', type=int, default=None, dest="num_inter_threads")
+parser.add_argument('--num-intra-threads', help='Num intra threads', type=int, default=None, dest="num_intra_threads")
 
 args = parser.parse_args()
 
@@ -121,16 +120,10 @@ IMAGE_SIZE = (12, 8)
 
 def run_inference_for_single_image(graph):
   sess_config = tf.ConfigProto()
-  if args.single_socket:
-   print("in single socket")
-   sess_config.intra_op_parallelism_threads = 28
-   sess_config.inter_op_parallelism_threads = 2
-   os.environ["OMP_NUM_THREADS"] = "28"
-  else: 
-   print("in two socket")
-   sess_config.intra_op_parallelism_threads = 56 
-   sess_config.inter_op_parallelism_threads = 2
-   os.environ["OMP_NUM_THREADS"] = "56"
+  sess_config.intra_op_parallelism_threads = args.num_intra_threads
+  sess_config.inter_op_parallelism_threads = args.num_inter_threads
+  if not os.environ.get("OMP_NUM_THREADS"):
+    os.environ["OMP_NUM_THREADS"] = args.num_intra_threads
 
   with graph.as_default():
     with tf.Session(config=sess_config) as sess:
