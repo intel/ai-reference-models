@@ -23,6 +23,7 @@ import os
 import sys
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -44,6 +45,9 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode,
             self.args.precision, "eval.py")
+
+        # Set KMP env vars, except override the default KMP_BLOCKTIME and KMP_AFFINITY values
+        self.set_kmp_vars(kmp_blocktime="0", kmp_affinity=None)
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.parse_custom_args()
@@ -67,9 +71,10 @@ class ModelInitializer(BaseModelInitializer):
                                  str(self.args.num_cores - 1) + \
                                  " " + command_prefix
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         config_file_path = os.path.join(self.args.checkpoint,
                                         self.args.config_file)
+
         run_cmd = command_prefix + \
             " --inter_op " + str(self.args.num_inter_threads) + \
             " --intra_op " + str(self.args.num_intra_threads) + \

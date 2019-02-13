@@ -233,9 +233,12 @@ def evaluate_model(estimator, ncf_dataset, pred_input_fn):
 
   # OpenMP settings
   #os.environ["OMP_NUM_THREADS"] = "11"
-  os.environ["KMP_BLOCKTIME"] = "1"
-  os.environ["KMP_SETTINGS"] = "1"
-  os.environ["KMP_AFFINITY"] = "granularity=fine,noverbose,compact,1,0"
+  if not os.environ.get("KMP_BLOCKTIME"):
+    os.environ["KMP_BLOCKTIME"] = "1"
+  if not os.environ.get("KMP_SETTINGS"):
+    os.environ["KMP_SETTINGS"] = "1"
+  if not os.environ.get("KMP_AFFINITY"):
+    os.environ["KMP_AFFINITY"] = "granularity=fine,noverbose,compact,1,0"
 
   # Get predictions
   prediction_hooks = None if FLAGS.accuracy_only else [LoggerHook()]

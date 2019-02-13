@@ -22,11 +22,7 @@
 import os
 import sys
 from common.base_model_init import BaseModelInitializer
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["KMP_HW_SUBSET"] = "1T"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -36,6 +32,10 @@ class ModelInitializer(BaseModelInitializer):
         self.args = args
         self.custom_args = custom_args
         self.platform_util = platform_util
+
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars()
+        set_env_var("KMP_HW_SUBSET", "1T")
 
         if self.args.accuracy_only:
             print("Accuracy testing for DRAW inference is not supported yet.")

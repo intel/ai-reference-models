@@ -20,9 +20,7 @@
 
 import os
 from common.base_model_init import BaseModelInitializer
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -34,6 +32,9 @@ class ModelInitializer(BaseModelInitializer):
         # use default batch size if -1
         if self.args.batch_size == -1:
             self.args.batch_size = 128
+
+        # Set KMP env vars (except KMP_SETTINGS is not set)
+        self.set_kmp_vars(kmp_settings=None)
 
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(platform_util)
@@ -50,7 +51,7 @@ class ModelInitializer(BaseModelInitializer):
             self.command_prefix = "numactl --cpunodebind={} -l {}".format(
                 str(self.args.socket_id), self.command_prefix)
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if not self.args.accuracy_only:
             self.command_prefix = ("{prefix} "
