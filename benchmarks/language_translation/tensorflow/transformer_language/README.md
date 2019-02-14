@@ -129,7 +129,7 @@ BLEU_cased =  22.20
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_transformer_language_inference_fp32_20190210_050451.log
+Log location outside container: {--output-dir value}/benchmark_transformer_language_inference_fp32_20190210_050451.log
 ```
 
 Example log tail when benchmarking for throughput:
@@ -145,5 +145,5 @@ BLEU_cased =  22.20
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 32
-Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_transformer_language_inference_fp32_20190210_072635.log
+Log location outside container: {--output-dir value}/benchmark_transformer_language_inference_fp32_20190210_072635.log
 ```

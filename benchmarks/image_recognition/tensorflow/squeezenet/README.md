@@ -96,11 +96,10 @@ $ python launch_benchmark.py \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..
 
-5.  The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`
+5.  The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the benchmarking completes should look
 something like this, when running for throughput with `--batch-size 64`:
@@ -115,7 +114,7 @@ SqueezeNet Inference Summary:
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 64
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference_fp32_20190104_220051.log
+Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220051.log
 ```
 
 Or for latency (with `--batch-size 1`):
@@ -130,5 +129,5 @@ SqueezeNet Inference Summary:
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_squeezenet_inference_fp32_20190104_220712.log
+Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220712.log
 ```

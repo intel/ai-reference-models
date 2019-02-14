@@ -41,6 +41,7 @@ echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 echo "    NOINSTALL: ${NOINSTALL}"
+echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
 # Only inference is supported right now
 if [ ${MODE} != "inference" ]; then
@@ -75,11 +76,10 @@ fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
-LOG_OUTPUT=${WORKSPACE}/logs
 timestamp=`date +%Y%m%d_%H%M%S`
 LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}_${PRECISION}_${timestamp}.log"
-if [ ! -d "${LOG_OUTPUT}" ]; then
-  mkdir ${LOG_OUTPUT}
+if [ ! -d "${OUTPUT_DIR}" ]; then
+  mkdir ${OUTPUT_DIR}
 fi
 
 export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
@@ -100,7 +100,13 @@ function run_model() {
   fi
   echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
 
-  LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/${LOG_FILENAME}"
+  # if it starts with /workspace then it's not a separate mounted dir
+  # so it's custom and is in same spot as LOGFILE is, otherwise it's mounted in a different place
+  if [[ "${OUTPUT_DIR}" = "/workspace"* ]]; then
+    LOG_LOCATION_OUTSIDE_CONTAINER=${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/${LOG_FILENAME}
+  else
+    LOG_LOCATION_OUTSIDE_CONTAINER=${LOGFILE}
+  fi
   echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
@@ -591,7 +597,7 @@ function wide_deep() {
     fi
 }
 
-LOGFILE=${LOG_OUTPUT}/${LOG_FILENAME}
+LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')

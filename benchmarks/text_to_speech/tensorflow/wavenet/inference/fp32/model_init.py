@@ -42,11 +42,11 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.socket_id != -1:
             command_prefix = "numactl --physcpubind=0-{} --membind={} {}".\
-                format(str(int(self.args.num_cores)-1), self.args.socket_id,
+                format(str(int(self.args.num_cores) - 1), self.args.socket_id,
                        command_prefix)
         else:
             command_prefix = "numactl --physcpubind=0-{} -l {}".format(
-                str(int(self.args.num_cores)-1), command_prefix)
+                str(int(self.args.num_cores) - 1), command_prefix)
 
         checkpoint_path = os.path.join(self.args.checkpoint,
                                        self.args.checkpoint_name)

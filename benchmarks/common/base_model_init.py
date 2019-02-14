@@ -98,9 +98,8 @@ class BaseModelInitializer(object):
             self.args.num_inter_threads = platform_util.num_cpu_sockets()
 
             if self.args.num_cores == -1:
-                self.args.num_intra_threads = \
-                    int(platform_util.num_cores_per_socket() *
-                        platform_util.num_cpu_sockets())
+                self.args.num_intra_threads = int(
+                    platform_util.num_cores_per_socket() * platform_util.num_cpu_sockets())
             else:
                 self.args.num_intra_threads = self.args.num_cores
 

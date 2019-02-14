@@ -79,7 +79,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('-OF', '--decode_to_file',
                                 help='inference output file with path',
                                 dest="decode_to_file",
-                                default=TEMP_DIR+"/output_infer")
+                                default=TEMP_DIR + "/output_infer")
         arg_parser.add_argument('-RF', '--reference',
                                 help='inference ref file with path',
                                 dest="reference",

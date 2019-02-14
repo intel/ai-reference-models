@@ -65,8 +65,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3
 ```
 
-5. Log files are located at:
-`intelai/models/benchmarks/common/tensorflow/logs`.
+5. Log files are located at the value of `--output-dir`.
 
 Below is a sample log file tail when running benchmarking for throughput
 and latency:
@@ -94,5 +93,5 @@ Total samples/sec: 1.6402 samples/s
 Total time:  35.407243490219116
 lscpu_path_cmd = command -v lscpu
 lscpu located here: b'/usr/bin/lscpu'
-Log location outside container: /home/user/intelai/models/benchmarks/common/tensorflow/logs/benchmark_maskrcnn_inference_fp32_20190111_205935.log
+Log location outside container: {--output-dir value}/benchmark_maskrcnn_inference_fp32_20190111_205935.log
 ```
