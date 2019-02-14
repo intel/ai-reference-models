@@ -57,8 +57,7 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --docker-image docker_image
 ```
-The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`.
+The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
@@ -71,7 +70,7 @@ Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_int8_20190104_212224.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_212224.log
 ```
 
 * Evaluate the model performance: The ImageNet dataset is not needed in this case:
@@ -106,11 +105,11 @@ steps = 50, 462.725212176 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_int8_20190104_213139.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_213139.log
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..
 
 ## FP32 Inference Instructions
 
@@ -151,8 +150,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`.
+The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
@@ -171,7 +169,7 @@ Throughput: 91.541 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190104_215326.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215326.log
 ```
 
 * To measure the model Throughput, set `--batch-size=128` and run the benchmark script as shown:
@@ -189,8 +187,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`.
+The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the benchmarking completes should look
 something like this:
@@ -209,7 +206,7 @@ Throughput: 196.065 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190104_215655.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215655.log
 ```
 
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
@@ -230,7 +227,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-The log file is saved to: `models/benchmarks/common/tensorflow/logs`.
+The log file is saved to the value of `--output-dir`.
 The tail of the log output when the accuracy run completes should look
 something like this:
 ```
@@ -239,8 +236,8 @@ Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7430, 0.9188)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190104_213452.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..

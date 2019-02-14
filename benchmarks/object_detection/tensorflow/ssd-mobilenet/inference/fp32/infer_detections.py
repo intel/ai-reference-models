@@ -93,17 +93,17 @@ def main(_):
             inter_op_parallelism_threads=FLAGS.num_inter_threads,
             intra_op_parallelism_threads=FLAGS.num_intra_threads)) as sess:
         input_tfrecord_paths = [
-                v for v in FLAGS.input_tfrecord_paths.split(',') if v]
+            v for v in FLAGS.input_tfrecord_paths.split(',') if v]
         tf.logging.info('Reading input from %d files', len(input_tfrecord_paths))
         serialized_example_tensor, image_tensor = detection_inference.build_input(
-                input_tfrecord_paths)
+            input_tfrecord_paths)
         tf.logging.info('Reading graph and building model...')
         (detected_boxes_tensor, detected_scores_tensor,
          detected_labels_tensor) = detection_inference.build_inference_graph(
-                 image_tensor, FLAGS.inference_graph)
+            image_tensor, FLAGS.inference_graph)
 
         tf.logging.info('Running inference and writing output to {}'.format(
-                FLAGS.output_tfrecord_path))
+            FLAGS.output_tfrecord_path))
         sess.run(tf.local_variables_initializer())
         tf.train.start_queue_runners()
 
@@ -115,7 +115,7 @@ def main(_):
                     tf.logging.log_every_n(
                         tf.logging.INFO,
                         'Processed %d images... moving average latency %d ms',
-                        200, counter+1, np.mean(latency[-200:]))
+                        200, counter + 1, np.mean(latency[-200:]))
                     start = time.time()
                     tf_example = detection_inference.\
                         infer_detections_and_add_to_example(
@@ -123,7 +123,7 @@ def main(_):
                             detected_scores_tensor, detected_labels_tensor,
                             FLAGS.discard_image_pixels)
                     duration = time.time() - start
-                    latency.append(duration*1000)
+                    latency.append(duration * 1000)
                     tf_record_writer.write(tf_example.SerializeToString())
             except tf.errors.OutOfRangeError:
                 tf.logging.info('Finished processing records')

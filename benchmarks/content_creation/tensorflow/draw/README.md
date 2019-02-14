@@ -63,11 +63,10 @@ modes/precisions:
             --batch-size 100 \
             --socket-id 0
       ```
-      Note that the `--verbose` flag can be added to any of the above
-      commands to get additional debug output.
+      Note that the `--verbose` or `--output-dir` flag can be added to any of the above
+      commands to get additional debug output or change the default output location.
 
-4. The log files for each benchmarking run are saved at:
-   `intelai/models/benchmarks/common/tensorflow/logs`.
+4. The log files for each benchmarking run are saved at the value of `--output-dir`.
 
    * Below is a sample log file tail when benchmarking latency:
      ```
@@ -82,7 +81,7 @@ modes/precisions:
      lscpu_path_cmd = command -v lscpu
      lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 1
-     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_draw_inference_fp32_20190123_012947.log
+     Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_012947.log
      ```
 
    * Below is a sample log file tail when benchmarking throughput:
@@ -97,5 +96,5 @@ modes/precisions:
      lscpu_path_cmd = command -v lscpu
      lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 100
-     Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_draw_inference_fp32_20190123_013432.log
+     Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_013432.log
      ```

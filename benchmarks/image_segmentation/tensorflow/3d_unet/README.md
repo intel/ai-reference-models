@@ -53,11 +53,10 @@ modes/precisions:
         --socket-id 0 \
    ```
 
-   Note that the `--verbose` flag can be added to the above command to
-   get additional debug output.
+   Note that the `--verbose` or `--output-dir` flag can be added to the above command
+   to get additional debug output or change the default output location.
 
-5. Log files are located in the
-   `models/benchmarks/common/tensorflow/logs` directory.
+5. Log files are located in the `--output-dir` directory.
 
    Below is an example tail of log file when benchmarking throughput and
    latency:
@@ -69,5 +68,5 @@ modes/precisions:
    lscpu_path_cmd = command -v lscpu
    lscpu located here: b'/usr/bin/lscpu'
    Ran inference with batch size 1
-   Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_3d_unet_inference_fp32_20190116_234659.log
+   Log location outside container: {--output-dir value}/benchmark_3d_unet_inference_fp32_20190116_234659.log
    ```

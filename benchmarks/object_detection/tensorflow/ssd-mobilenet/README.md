@@ -187,8 +187,7 @@ $ python launch_benchmark.py \
     --accuracy-only
 ```
 
-8. The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`
+8. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running benchmarking:
 
@@ -199,7 +198,7 @@ Latency: min = 33.8, max = 6635.9, mean= 38.4, median = 37.2
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
-Log location outside container: /home/intelai/models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference_fp32_20190130_225108.log
+Log location outside container: {--output-dir value}/benchmark_ssd-mobilenet_inference_fp32_20190130_225108.log
 ```
 
 Below is a sample log file tail when testing accuracy:
@@ -220,5 +219,5 @@ Below is a sample log file tail when testing accuracy:
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_ssd-mobilenet_inference_fp32_20190123_225145.log
+Log location outside container: {--output-dir value}/benchmark_ssd-mobilenet_inference_fp32_20190123_225145.log
 ```

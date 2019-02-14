@@ -124,11 +124,11 @@ python launch_benchmark.py \
     --data-location /home/myuser/datasets/ImageNet_TFRecords
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..
 
-6. The log file is saved to the
-`models/benchmarks/common/tensorflow/logs` directory. Below are
+6. The log file is saved to the value
+of `--output-dir`. Below are
 examples of what the tail of your log file should look like for the
 different configs.
 
@@ -141,7 +141,7 @@ Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.8037, 0.9525)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_fp32_20190109_081637.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190109_081637.log
 ```
 
 Example log tail when benchmarking for latency:
@@ -156,7 +156,7 @@ Latency ms/step = 143.4
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_fp32_20190108_015057.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015057.log
 ```
 
 Example log tail when benchmarking for throughput:
@@ -170,5 +170,5 @@ Total images/sec = 45.7
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inception_resnet_v2_inference_fp32_20190108_015440.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015440.log
 

@@ -165,7 +165,7 @@ explanation on ```launch_benchmarking.py``` script [here](https://github.com/Ner
 	lscpu_path_cmd = command -v lscpu
 	lscpu located here: /usr/bin/lscpu
 	Ran inference with batch size 128
-	Log location outside container: /home/myuser/intel-models/models/benchmarks/common/tensorflow/logs/benchmark_resnet50
+	Log location outside container: {--output-dir value}/benchmark_resnet50
 	
 
 The logs are captured in a directory outside of the container.<br> 
@@ -235,7 +235,7 @@ All other flags will be defaulted to values passed in the first ```launch_benchm
 	lscpu_path_cmd = command -v lscpu
 	lscpu located here: /usr/bin/lscpu
 	Ran inference with batch size 128
-	Log location outside container: /localdisk/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet50_inference_fp32_20190205_201632.log
+	Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190205_201632.log
 	
 	
 

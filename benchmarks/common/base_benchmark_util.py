@@ -113,6 +113,10 @@ class BaseBenchmarkUtil(object):
             "-v", "--verbose", help="Print verbose information.",
             dest="verbose", action="store_true")
 
+        self._common_arg_parser.add_argument(
+            "--output-dir", help="Folder to dump output into.",
+            default="/models/benchmarks/common/tensorflow/logs")
+
         # Allow for additional command line args after --
         self._common_arg_parser.add_argument(
             "model_args", nargs="*",
@@ -214,9 +218,8 @@ class BaseBenchmarkUtil(object):
                                            filename)
             package = ".".join([args.use_case, args.framework,
                                 args.model_name, args.mode, args.precision])
-            model_init_module = __import__(package + "." +
-                                           self.MODEL_INITIALIZER,
-                                           fromlist=["*"])
+            model_init_module = __import__(
+                package + "." + self.MODEL_INITIALIZER, fromlist=["*"])
             model_initializer = model_init_module.ModelInitializer(
                 args, unknown_args, self._platform_util)
 

@@ -67,8 +67,7 @@ use in the next step.
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
-6. The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`
+6. The log file is saved to the value of `--output-dir`.
 
    The tail of the log output when the benchmarking completes should look
    something like this:

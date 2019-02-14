@@ -59,11 +59,10 @@ modes/precisions:
        -- checkpoint_name=model.cpkt
    ```
 
-   Note that the `--verbose` flag can be added to the above command to
-   get additional debug output.
+   Note that the `--verbose` or `--output-dir` flag can be added to the above
+   command to get additional debug output or change the default output location.
 
-6. The log file is saved to the
-   `models/benchmarks/common/tensorflow/logs` directory.
+6. The log file is saved to the value of `--output-dir`.
 
    Below is an example of what the log file tail:
 
@@ -73,5 +72,5 @@ modes/precisions:
    lscpu_path_cmd = command -v lscpu
    lscpu located here: /usr/bin/lscpu
    Ran inference with batch size 1
-   Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_unet_inference_fp32_20190201_205601.log
+   Log location outside container: {--output-dir value}/benchmark_unet_inference_fp32_20190201_205601.log
    ```

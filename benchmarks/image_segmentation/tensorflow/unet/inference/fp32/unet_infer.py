@@ -32,7 +32,7 @@ arg_parser = ArgumentParser(
     description="The launchpad for all performance scripts.")
 arg_parser.add_argument("-bs", "--batch_size", help="The batch size", type=int,
                         dest="batch_size", default=1)
-arg_parser.add_argument("-p",  help="do tfprofile", dest="do_tfprofile",
+arg_parser.add_argument("-p", help="do tfprofile", dest="do_tfprofile",
                         default=False)
 arg_parser.add_argument("-i", "--profile_absdir",
                         help="The profile abs directory", dest="profile_path",
