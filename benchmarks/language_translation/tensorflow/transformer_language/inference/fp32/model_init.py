@@ -23,10 +23,7 @@ import shutil
 from argparse import ArgumentParser
 
 from common.base_model_init import BaseModelInitializer
-
-os.environ["KMP_BLOCKTIME"] = "0"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,compact,1,0"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -42,12 +39,15 @@ class ModelInitializer(BaseModelInitializer):
 
         self.set_default_inter_intra_threads(self.platform_util)
 
+        # Set the KMP env vars
+        self.set_kmp_vars(kmp_blocktime="0", kmp_affinity="granularity=fine,compact,1,0")
+
         TEMP_DIR = str(self.args.model_source_dir) + "/out_dir"
         if os.path.exists(TEMP_DIR):
             shutil.rmtree(TEMP_DIR)
         os.mkdir(TEMP_DIR)
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.socket_id != -1:
             if self.args.num_cores != -1:
