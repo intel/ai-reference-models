@@ -30,7 +30,10 @@ git clone https://github.com/tensorflow/models.git
 This repository is used for dependencies that the Inception V3 model
 requires.
 
-3. A link to download the pre-trained model is coming soon.
+3. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
+```
 
 4. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
@@ -199,7 +202,10 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_fp32_pretrained_model.pb
+```
 
 3. If you would like to run Inception V3 FP32 inference and test for
 accuracy, you will need the ImageNet dataset. Benchmarking for latency

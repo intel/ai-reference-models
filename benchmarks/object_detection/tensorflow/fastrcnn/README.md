@@ -112,7 +112,11 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. A link to download the pre-trained model is coming soon.
+4. Download and extract the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+$ tar -xzvf fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking.
@@ -163,7 +167,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --model-source-dir /home/myuser/tensorflow/models \
     --data-location /home/myuser/coco/output \
-    --in-graph /home/myuser/fast_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb  \
+    --in-graph /home/myuser/fast_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
     --accuracy-only
 ```
 
@@ -214,7 +218,10 @@ Log location outside container: {--output-dir value}/benchmark_fastrcnn_inferenc
 
 1. Please follow step 1, 2 and 3 of Fast R-CNN FP32 instructions written above.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/fastrcnn_int8_pretrained_model.pb
+```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking.
@@ -247,7 +254,7 @@ $ python launch_benchmark.py \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
-    --in-graph /home/myuser/pretrained_int8_fastrcnn_model.pb \
+    --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb \
     --docker-image tf_int8_docker_image
     --benchmark-only
     -- number_of_steps=5000
@@ -266,7 +273,7 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --model-source-dir /home/myuser/tensorflow/models \
     --data-location /home/myuser/coco_dataset/coco_val.record \
-    --in-graph /home/myuser/pretrained_int8_fastrcnn_model.pb  \
+    --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb  \
     --accuracy-only
 ```
 
