@@ -17,7 +17,10 @@ $ git clone https://github.com/IntelAI/models.git
 This repository includes launch scripts for running benchmarks and the
 an optimized version of the ResNet101 model code.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_int8_pretrained_model.pb
+```
 
 3. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
@@ -181,7 +184,10 @@ repository
     $ git clone https://github.com/IntelAI/models.git
     ```
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_fp32_pretrained_model.pb
+```
 
 3. Download ImageNet dataset.
 

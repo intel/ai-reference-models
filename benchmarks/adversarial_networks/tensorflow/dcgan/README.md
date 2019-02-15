@@ -55,6 +55,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size 100 \
     --socket-id 0 \
+    --checkpoint /home/myuser/dcgan_fp32_unconditional_cifar10_pretrained_model \
     --data-location /home/myuser/cifar10 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```

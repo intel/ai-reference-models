@@ -32,7 +32,11 @@ $ cd models/benchmarks
 4. We are replacing the official [ncf_main.py](https://github.com/tensorflow/models/blob/v1.11/official/recommendation/ncf_main.py)
 with our custom [ncf_main.py](../../../../models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py) which has CPU optimizations included.
 
-5. A link to download the pre-trained model is coming soon.
+5. Download and extract the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ncf_fp32_pretrained_model.tar.gz
+$ tar -xzvf ncf_fp32_pretrained_model.tar.gz
+```
 
 6. Run the `launch_benchmark.py` script with the appropriate parameters.
 * `--model-source-dir` - Path to official tensorflow models from step2.

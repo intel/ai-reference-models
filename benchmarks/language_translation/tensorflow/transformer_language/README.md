@@ -29,11 +29,10 @@ $ PYTHONPATH=$PYTHONPATH:$RootDirOfTensor2tensor \
     --tmp_dir=~/home/myuser/t2t_data/tmp
 ```
 
-3. Download and extract the pre-trained Transformer Language checkpoint directory:
-
-A link to download the pre-trained model is coming soon.
-
+3. Download and extract the pre-trained model.
 ```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/transformer_lt_fp32_pretrained_model.tar.gz
+$ tar -xzvf transformer_lt_fp32_pretrained_model.tar.gz
 $ ls -l transformer_lt_fp32_pretrained_model
 total 750000
 -rw-r--r-- 1 myuser myuser      1003 Dec  7 15:20 checkpoint
