@@ -16,7 +16,6 @@ dependencies to be installed:
 | Use Case               | Framework     | Model               | Mode      | Benchmarking Instructions    |
 | -----------------------| --------------| ------------------- | --------- |------------------------------|
 | Adversarial Networks   | TensorFlow    | DCGAN               | Inference | [FP32](adversarial_networks/tensorflow/dcgan/README.md#fp32-inference-instructions) |
-| Classification         | TensorFlow    | Wide & Deep         | Inference | [FP32](classification/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Content Creation       | TensorFlow    | DRAW                | Inference | [FP32](content_creation/tensorflow/draw/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | Inception ResNet V2 | Inference | [FP32](image_recognition/tensorflow/inception_resnet_v2/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | Inception V3        | Inference | [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
@@ -32,4 +31,5 @@ dependencies to be installed:
 | Object Detection       | TensorFlow    | R-FCN               | Inference | [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | SSD-MobileNet       | Inference | [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions) |
 | Recommendation         | TensorFlow    | NCF                 | Inference | [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions) |
+| Recommendation         | TensorFlow    | Wide & Deep         | Inference | [FP32](recommendation/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Text-to-Speech         | TensorFlow    | WaveNet             | Inference | [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions) |
