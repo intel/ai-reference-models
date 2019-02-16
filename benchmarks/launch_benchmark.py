@@ -24,6 +24,7 @@ from __future__ import print_function
 
 import glob
 import os
+import signal
 import subprocess
 import sys
 from argparse import ArgumentParser
@@ -182,6 +183,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         mount_intelai_models = "/workspace/intelai_models"
         workspace = os.path.join(mount_benchmark, "common", args.framework)
 
+        mount_output_dir = False
+        output_dir = os.path.join(workspace, 'logs')
+        if args.output_dir != "/models/benchmarks/common/tensorflow/logs":
+            # we don't need to mount log dir otherwise since default is workspace folder
+            mount_output_dir = True
+            output_dir = args.output_dir
+
         in_graph_dir = os.path.dirname(args.input_graph) if args.input_graph \
             else ""
         in_graph_filename = os.path.basename(args.input_graph) if \
@@ -210,7 +218,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env", "CHECKPOINT_DIRECTORY=/checkpoints",
                     "--env", "BENCHMARK_ONLY={}".format(args.benchmark_only),
                     "--env", "ACCURACY_ONLY={}".format(args.accuracy_only),
-                    "--env", "NOINSTALL=False"]
+                    "--env", "NOINSTALL=False",
+                    "--env", "OUTPUT_DIR={}".format(output_dir)]
 
         # by default we will install, user needs to set NOINSTALL=True
         # manually after they get into `--debug` mode
@@ -248,6 +257,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                          "--volume", "{}:/checkpoints".format(args.checkpoint),
                          "--volume", "{}:/in_graph".format(in_graph_dir)]
 
+        if mount_output_dir:
+            volume_mounts.extend([
+                "--volume", "{}:{}".format(output_dir, output_dir)])
+
         docker_run_cmd = ["docker", "run"]
 
         # only use -it when debugging, otherwise we might get TTY error
@@ -264,8 +277,15 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.verbose:
             print("Docker run command:\n{}".format(docker_run_cmd))
 
-        p = subprocess.Popen(docker_run_cmd)
-        p.communicate()
+        self._run_docker_cmd(docker_run_cmd)
+
+    def _run_docker_cmd(self, docker_run_cmd):
+        """runs docker proc and exits on ctrl c"""
+        p = subprocess.Popen(docker_run_cmd, preexec_fn=os.setsid)
+        try:
+            p.communicate()
+        except KeyboardInterrupt:
+            os.killpg(os.getpgid(p.pid), signal.SIGKILL)
 
 
 if __name__ == "__main__":

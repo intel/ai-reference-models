@@ -22,12 +22,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 import os
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-os.environ["KMP_SETTINGS"] = "1"
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -42,6 +39,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 256
 
+        # Set KMP env vars, if they haven't already been set
+        self.set_kmp_vars()
+
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(platform_util)
 
@@ -52,7 +52,7 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_command = self.get_numactl_command(args.socket_id) + \
             "python " + benchmark_script
 
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_intra_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.benchmark_command = self.benchmark_command + \
             " --data_dir=" + str(args.data_location) + \
@@ -66,11 +66,11 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.benchmark_only:
             self.benchmark_command = self.benchmark_command + \
-                                     " --benchmark_only"
+                " --benchmark_only"
 
         if self.args.accuracy_only:
             self.benchmark_command = self.benchmark_command + \
-                                     " --accuracy_only"
+                " --accuracy_only"
 
     def run(self):
         if self.benchmark_command:

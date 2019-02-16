@@ -41,6 +41,7 @@ echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 echo "    NOINSTALL: ${NOINSTALL}"
+echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
 # Only inference is supported right now
 if [ ${MODE} != "inference" ]; then
@@ -75,11 +76,10 @@ fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
-LOG_OUTPUT=${WORKSPACE}/logs
 timestamp=`date +%Y%m%d_%H%M%S`
 LOG_FILENAME="benchmark_${MODEL_NAME}_${MODE}_${PRECISION}_${timestamp}.log"
-if [ ! -d "${LOG_OUTPUT}" ]; then
-  mkdir ${LOG_OUTPUT}
+if [ ! -d "${OUTPUT_DIR}" ]; then
+  mkdir ${OUTPUT_DIR}
 fi
 
 export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
@@ -100,7 +100,13 @@ function run_model() {
   fi
   echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
 
-  LOG_LOCATION_OUTSIDE_CONTAINER="${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/${LOG_FILENAME}"
+  # if it starts with /workspace then it's not a separate mounted dir
+  # so it's custom and is in same spot as LOGFILE is, otherwise it's mounted in a different place
+  if [[ "${OUTPUT_DIR}" = "/workspace"* ]]; then
+    LOG_LOCATION_OUTSIDE_CONTAINER=${BENCHMARK_SCRIPTS}/common/${FRAMEWORK}/logs/${LOG_FILENAME}
+  else
+    LOG_LOCATION_OUTSIDE_CONTAINER=${LOGFILE}
+  fi
   echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
@@ -112,6 +118,7 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --precision=${PRECISION} \
 --mode=${MODE} \
 --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
+--benchmark-dir=${MOUNT_BENCHMARK} \
 --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
@@ -454,7 +461,7 @@ function ssd_mobilenet() {
       echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
     fi
 
-    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
@@ -474,6 +481,67 @@ function ssd_mobilenet() {
     CMD="${CMD} --in-graph=${IN_GRAPH} \
     --data-location=${DATASET_LOCATION}"
     CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# UNet model
+function unet() {
+  if [ ${PRECISION} == "fp32" ]; then
+    if [[ -z "${checkpoint_name}" ]]; then
+      echo "wavenet requires -- checkpoint_name arg to be defined"
+      exit 1
+    fi
+    if [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "Accuracy testing is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --checkpoint_name=${checkpoint_name}"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# transformer language model
+function transformer_language() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    if [[ -z "${decode_from_file}" ]]; then
+        echo "transformer-language requires -- decode_from_file arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${reference}" ]]; then
+        echo "transformer-language requires -- reference arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
+        echo "transformer-language requires --checkpoint arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${DATASET_LOCATION}" ]]; then
+        echo "transformer-language requires --data-location arg to be defined"
+        exit 1
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      echo "Installing tensor2tensor for CPU..."
+      pip install tensor2tensor[tensorflow]
+    fi
+
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/decoding.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/tensor2tensor/utils/decoding.py
+
+    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
+    --data-location=${DATASET_LOCATION} \
+    --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file} \
+    --reference=${CHECKPOINT_DIRECTORY}/${reference}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
@@ -529,7 +597,7 @@ function wide_deep() {
     fi
 }
 
-LOGFILE=${LOG_OUTPUT}/${LOG_FILENAME}
+LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
@@ -561,6 +629,10 @@ elif [ ${MODEL_NAME} == "squeezenet" ]; then
   squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
+elif [ ${MODEL_NAME} == "unet" ]; then
+  unet
+elif [ ${MODEL_NAME} == "transformer_language" ]; then
+  transformer_language
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then

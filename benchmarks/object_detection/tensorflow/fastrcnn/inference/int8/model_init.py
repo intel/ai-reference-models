@@ -22,6 +22,7 @@ import argparse
 import os
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -40,10 +41,14 @@ class ModelInitializer(BaseModelInitializer):
         self.accuracy_script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
             self.RFCN_ACCURACY_SCRIPT)
-        os.environ["KMP_BLOCKTIME"] = "0"
-        os.environ["KMP_SETTINGS"] = "1"
-        os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+
+        # Set KMP env vars, except override the default KMP_BLOCKTIME value
+        self.set_kmp_vars(kmp_blocktime="0")
+
         self.validate_args()
+
+        self.set_default_inter_intra_threads(self.platform_util)
+        self.args.num_inter_threads = 2
 
     def validate_args(self):
         if not (self.args.batch_size == -1 or self.args.batch_size == 1):
@@ -76,6 +81,7 @@ class ModelInitializer(BaseModelInitializer):
                                           namespace=self.args)
 
     def run_perf_command(self):
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         self.parse_args()
         command = self.get_numactl_command(self.args.socket_id)
         command += " python " + self.perf_script_path
@@ -84,15 +90,18 @@ class ModelInitializer(BaseModelInitializer):
             command += " -n " + str(self.args.number_of_steps)
         if self.args.socket_id != -1:
             command += " -x "
-        command += " -d " + self.args.data_location
+        command += \
+            " -d " + self.args.data_location + \
+            " --num-inter-threads " + str(self.args.num_inter_threads) + \
+            " --num-intra-threads " + str(self.args.num_intra_threads)
         self.run_command(command)
 
     def run_accuracy_command(self):
         num_cores = str(self.platform_util.num_cores_per_socket())
-        if self.args.num_cores is not -1:
+        if self.args.num_cores != -1:
             num_cores = str(self.args.num_cores)
 
-        os.environ["OMP_NUM_THREADS"] = num_cores
+        set_env_var("OMP_NUM_THREADS", num_cores)
 
         command = "{} {} {} {}".format(self.accuracy_script_path,
                                        self.args.input_graph,

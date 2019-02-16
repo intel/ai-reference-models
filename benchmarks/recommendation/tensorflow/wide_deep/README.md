@@ -23,7 +23,11 @@ https://archive.ics.uci.edu/ml/datasets/Census+Income
    
    Click on Download link and download `adult.data` and `adult.test` files
 
-3. A link to download the pre-trained model is coming soon.
+3. Download and extract the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
+$ tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
+```
  
 4. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking, which we will
@@ -47,7 +51,7 @@ use in the next step.
              --model-name wide_deep \
              --batch-size 1 \
              --data-location /home/myuser/path/to/dataset \
-             --checkpoint /home/myuser/path/to/checkpoint \
+             --checkpoint /home/myuser/path/to/wide_deep_fp32_pretrained_model \
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
@@ -63,12 +67,11 @@ use in the next step.
              --model-name wide_deep \
              --batch-size 1024 \
              --data-location /home/myuser/path/to/dataset \
-             --checkpoint /home/myuser/path/to/checkpoint \
+             --checkpoint /home/myuser/path/to/wide_deep_fp32_pretrained_model \
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
-6. The log file is saved to:
-`models/benchmarks/common/tensorflow/logs`
+6. The log file is saved to the value of `--output-dir`.
 
    The tail of the log output when the benchmarking completes should look
    something like this:

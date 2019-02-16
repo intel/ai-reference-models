@@ -74,7 +74,7 @@ python launch_benchmark.py \
 ```
 
 4.  The logs are displayed in the console output as well as saved to a
-file in `models/benchmarks/common/tensorflow/logs`.
+file in the value of `--output-dir`.
 
 The tail of the log should look something like this:
 
@@ -98,5 +98,5 @@ Finished generating. The result can be viewed in TensorBoard.
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_wavenet_inference_fp32_20190105_015022.log
+Log location outside container: {--output-dir value}/benchmark_wavenet_inference_fp32_20190105_015022.log
 ```

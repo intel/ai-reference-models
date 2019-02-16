@@ -22,9 +22,7 @@ import os
 import sys
 
 from common.base_model_init import BaseModelInitializer
-
-os.environ['KMP_AFFINITY'] = 'granularity=fine,compact,1,0'
-os.environ['KMP_BLOCKTIME'] = '0'
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -44,24 +42,45 @@ class ModelInitializer(BaseModelInitializer):
         self.args = args
         self.custom_args = custom_args
         self.run_inference_sanity_checks(self.args, self.custom_args)
+        self.research_dir = os.path.join(args.model_source_dir, "research")
+
+        # Set KMP env vars, except override the default KMP_BLOCKTIME value
+        self.set_kmp_vars(kmp_blocktime="0")
 
         # set num_inter_threads and num_intra_threads
         self.set_default_inter_intra_threads(platform_util)
+        self.args.num_inter_threads = 2
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        self.research_dir = os.path.join(args.model_source_dir, "research")
-        script_path = "object_detection/inference/infer_detections.py"
-        self.run_cmd = ("OMP_NUM_THREADS={} numactl -l -N 1 "
-                        "python {} --input_tfrecord_paths {} "
-                        "--inference_graph {} "
-                        "--output_tfrecord_path="
-                        "/tmp/ssd-mobilenet-record-out "
-                        "--intra_op_parallelism_threads {} "
-                        "--inter_op_parallelism_threads {} "
-                        "--discard_image_pixels=True --inference_only").\
-            format(str(args.num_intra_threads), script_path,
-                   str(args.data_location), str(args.input_graph),
-                   str(args.num_intra_threads),
-                   str(args.num_inter_threads))
+        if self.args.accuracy_only:
+            # get accuracy test command
+            script_path = os.path.join(
+                self.args.benchmark_dir, self.args.use_case,
+                self.args.framework, self.args.model_name, self.args.mode,
+                "ssdmobilenet_accuracy.sh")
+            self.run_cmd = "sh {} {} {}".format(
+                script_path, self.args.input_graph, self.args.data_location)
+        elif self.args.benchmark_only:
+            # get benchmark command
+            benchmark_script = os.path.join(
+                self.args.benchmark_dir, self.args.use_case,
+                self.args.framework, self.args.model_name, self.args.mode,
+                self.args.precision, "infer_detections.py")
+
+            # get command with numactl
+            self.run_cmd = self.get_numactl_command(
+                self.args.socket_id) + "python {}".format(benchmark_script)
+
+            output_tf_record_path = os.path.join(os.path.dirname(
+                self.args.data_location), "SSD-mobilenet-out.tfrecord")
+
+            self.run_cmd += " --input_tfrecord_paths={} " \
+                            "--output_tfrecord_path={} --inference_graph={} " \
+                            "--discard_image_pixels=True " \
+                            "--num_inter_threads={} --num_intra_threads={}".\
+                format(self.args.data_location, output_tf_record_path,
+                       self.args.input_graph, self.args.num_inter_threads,
+                       self.args.num_intra_threads)
 
     def run(self):
         original_dir = os.getcwd()

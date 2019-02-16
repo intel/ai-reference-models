@@ -28,7 +28,8 @@ def parse_csv_file(file_path, expected_num_columns):
     """
     values = []
     with open(file_path) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
+        csv_reader = csv.reader(csv_file, delimiter=',',
+                                skipinitialspace=True)
         for row in csv_reader:
             assert len(row) == expected_num_columns
             values.append(tuple(row))

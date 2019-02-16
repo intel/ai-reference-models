@@ -17,7 +17,10 @@ $ git clone https://github.com/IntelAI/models.git
 This repository includes launch scripts for running benchmarks and the
 an optimized version of the ResNet101 model code.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_int8_pretrained_model.pb
+```
 
 3. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
@@ -118,11 +121,11 @@ python launch_benchmark.py \
     --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..
 
-6. The log file is saved to the
-`models/benchmarks/common/tensorflow/logs` directory. Below are
+6. The log file is saved to the value
+of `--output-dir`. Below are
 examples of what the tail of your log file should look like for the
 different configs.
 
@@ -134,7 +137,7 @@ Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7691, 0.9305)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_int8_20190104_205838.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190104_205838.log
 ```
 
 Example log tail when benchmarking for latency:
@@ -158,7 +161,7 @@ steps = 100, 53.6588898046 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intel-models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference.log
 ```
 
 Example log tail when benchmarking for throughput:
@@ -169,7 +172,7 @@ steps = 100, 262.656894016 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_int8_20190104_211412.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190104_211412.log
 ```
 
 ## FP32 Inference Instructions
@@ -181,7 +184,10 @@ repository
     $ git clone https://github.com/IntelAI/models.git
     ```
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_fp32_pretrained_model.pb
+```
 
 3. Download ImageNet dataset.
 
@@ -224,7 +230,7 @@ repository
         --socket-id 0
     ```
 
-    The log file is saved to: `models/benchmarks/common/tensorflow/logs/`.
+    The log file is saved to the value of `--output-dir`.
 
     The tail of the log output when the benchmarking completes should look something like this:
 
@@ -236,7 +242,7 @@ repository
     lscpu_path_cmd = command -v lscpu
     lscpu located here: /usr/bin/lscpu
     Ran inference with batch size 128
-    Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20190104_204615.log
+    Log location outside container: {--output-dir value}/benchmark_resnet101_inference_fp32_20190104_204615.log
     ```
 
 5. Run for accuracy
@@ -255,7 +261,7 @@ repository
         --socket-id 0
     ```
 
-    The log file is saved to: `/home/myuser/resnet101/intel-models/benchmarks/common/tensorflow/logs/`.
+    The log file is saved to the value of `--output-dir`.
 
     The tail of the log output when the benchmarking completes should look something like this:
 
@@ -268,8 +274,8 @@ repository
     lscpu_path_cmd = command -v lscpu
     lscpu located here: /usr/bin/lscpu
     Ran inference with batch size 100
-    Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_resnet101_inference_fp32_20190104_201506.log
+    Log location outside container: {--output-dir value}/benchmark_resnet101_inference_fp32_20190104_201506.log
     ```
 
-   Note that the `--verbose` flag can be added to any of the above commands
-   to get additional debug output.
+   Note that the `--verbose` or `--output-dir` flag can be added to any of the above
+   commands to get additional debug output or change the default output location.

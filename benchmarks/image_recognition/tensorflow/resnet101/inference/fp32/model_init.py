@@ -26,6 +26,7 @@ import argparse
 import os
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -37,15 +38,15 @@ class ModelInitializer(BaseModelInitializer):
         if not platform_util:
             raise ValueError("Did not find any platform info.")
 
-        # Environment variables
+        # Set env vars, if they haven't already been set
         if self.args.num_cores == -1:
-            os.environ["OMP_NUM_THREADS"] = \
-                str(platform_util.num_cores_per_socket())
+            set_env_var("OMP_NUM_THREADS",
+                        platform_util.num_cores_per_socket())
         else:
-            os.environ["OMP_NUM_THREADS"] = str(self.args.num_cores)
-        os.environ["KMP_BLOCKTIME"] = "0"
-        os.environ["KMP_SETTINGS"] = "1"
-        os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+            set_env_var("OMP_NUM_THREADS", self.args.num_cores)
+
+        # Set KMP env vars, but override the default KMP_BLOCKTIME value
+        self.set_kmp_vars(kmp_blocktime="0")
 
         self.parse_args()
         if self.args.benchmark_only:

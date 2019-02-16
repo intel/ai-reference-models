@@ -22,9 +22,7 @@ import argparse
 import os
 
 from common.base_model_init import BaseModelInitializer
-
-os.environ["KMP_BLOCKTIME"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -34,18 +32,21 @@ class ModelInitializer(BaseModelInitializer):
         self.command = ""
         command_prefix = "python generate.py"
 
+        # Set default KMP env vars, except for KMP_SETTINGS
+        self.set_kmp_vars(kmp_settings=None)
+
         self.parse_custom_args()
         num_inter_threads = 1
         num_intra_threads = int(self.args.num_cores)
-        os.environ["OMP_NUM_THREADS"] = str(self.args.num_cores)
+        set_env_var("OMP_NUM_THREADS", self.args.num_cores)
 
         if self.args.socket_id != -1:
             command_prefix = "numactl --physcpubind=0-{} --membind={} {}".\
-                format(str(int(self.args.num_cores)-1), self.args.socket_id,
+                format(str(int(self.args.num_cores) - 1), self.args.socket_id,
                        command_prefix)
         else:
             command_prefix = "numactl --physcpubind=0-{} -l {}".format(
-                str(int(self.args.num_cores)-1), command_prefix)
+                str(int(self.args.num_cores) - 1), command_prefix)
 
         checkpoint_path = os.path.join(self.args.checkpoint,
                                        self.args.checkpoint_name)

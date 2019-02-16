@@ -74,7 +74,7 @@ The order of the four letters indicates how pixel data are stored in 1-dimension
 Therefore, NCHW indicates pixel data are stored first width-wise (the inner-most dimension), followed by height, then channel, and finally batch (Figure 1).
 TensorFlow supports both NCHW and NHWC data formats. While NHWC is the default format, NCHW is more efficient for Intel-Optimized TensorFlow Serving with MKL-DNN and is the recommended layout for image data.
 
-![NCHW format](../../images/nchw.png)
+![NCHW format](nchw.png)
 
 Figure 1. NCHW format
 

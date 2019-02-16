@@ -146,8 +146,7 @@ python launch_benchmark.py \
     -- split="accuracy_message"
 ```
 
-7. Log files are located at:
-`intelai/models/benchmarks/common/tensorflow/logs`.
+7. Log files are located at the value of `--output-dir`.
 
 Below is a sample log file tail when running benchmarking for throughput
 and latency:
@@ -165,7 +164,7 @@ PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/mod
 RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --socket-id 0 --verbose --checkpoint=/checkpoints         --config_file=rfcn_pipeline.config
 Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference.log
+Log location outside container: {--output-dir value}/benchmark_rfcn_inference.log
 ```
 
 And here is a sample log file tail when running for accuracy:
@@ -185,5 +184,5 @@ DONE (t=1.19s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/benchmarks/common/tensorflow/logs/benchmark_rfcn_inference_fp32_20181221_211905.log
+Log location outside container: {--output-dir value}/benchmark_rfcn_inference_fp32_20181221_211905.log
 ```

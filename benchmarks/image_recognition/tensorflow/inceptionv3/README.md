@@ -30,7 +30,10 @@ git clone https://github.com/tensorflow/models.git
 This repository is used for dependencies that the Inception V3 model
 requires.
 
-3. A link to download the pre-trained model is coming soon.
+3. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
+```
 
 4. Build a docker image using master of the official
 [TensorFlow](https://github.com/tensorflow/tensorflow) repository with
@@ -138,11 +141,11 @@ python launch_benchmark.py \
     -- input_height=299 input_width=299
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..
 
-7. The log file is saved to the
-`models/benchmarks/common/tensorflow/logs` directory. Below are
+7. The log file is saved to the value
+of `--output-dir`. Below are
 examples of what the tail of your log file should look like for the
 different configs.
 
@@ -154,7 +157,7 @@ lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Executing command: python /workspace/intelai_models/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --data_location=/dataset
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20190104_013246.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_013246.log
 ```
 
 Example log tail when benchmarking for latency:
@@ -170,7 +173,7 @@ steps = 50, 57.491659242 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/inteai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20190104_185906.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_185906.log
 ```
 
 Example log tail when benchmarking for throughput:
@@ -187,7 +190,7 @@ lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --steps=50
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_int8_20190104_014141.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_014141.log
 ```
 
 ## FP32 Inference Instructions
@@ -199,7 +202,10 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_fp32_pretrained_model.pb
+```
 
 3. If you would like to run Inception V3 FP32 inference and test for
 accuracy, you will need the ImageNet dataset. Benchmarking for latency
@@ -251,7 +257,7 @@ Throughput: 69.243 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20190104_025220.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_025220.log
 ```
 
 * For throughput (using `--batch-size 128`):
@@ -283,7 +289,7 @@ Throughput: 168.431 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20190104_024842.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_024842.log
 ```
 
 * For accuracy (using `--accuracy-only`, `--batch-size 100`, and
@@ -309,8 +315,8 @@ Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9342)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
-Log location outside container: /home/myuser/intelai/models/benchmarks/common/tensorflow/logs/benchmark_inceptionv3_inference_fp32_20190104_023816.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_023816.log
 ```
 
-Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location..
