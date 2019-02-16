@@ -104,7 +104,7 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    -- input_height=299 input_width=299
+    --input_height=299 input_width=299
 ```
 
 For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
@@ -121,7 +121,7 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    -- input_height=299 input_width=299
+    --input_height=299 input_width=299
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -138,7 +138,7 @@ python launch_benchmark.py \
     --docker-image tf_int8_docker_image \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    -- input_height=299 input_width=299
+    --input_height=299 input_width=299
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands

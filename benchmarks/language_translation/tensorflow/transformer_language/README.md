@@ -85,7 +85,7 @@ python launch_benchmark.py \
     --checkpoint /home/myuser/transformer_lt_fp32_pretrained_model \
     --data-location /home/myuser/t2t_data \
     --model-source-dir /home/myuser/tensor2tensor/ \
-    -- decode_from_file=newstest2015.en reference=newstest2015.de
+    --decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 
 For throughput (using `--socket-id 0` and `--batch-size 32`):
@@ -102,7 +102,7 @@ python launch_benchmark.py \
     --checkpoint /home/myuser/transformer_lt_fp32_pretrained_model \
     --data-location /home/myuser/t2t_data \
     --model-source-dir /home/myuser/tensor2tensor/ \
-    -- decode_from_file=newstest2015.en reference=newstest2015.de
+    --decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands

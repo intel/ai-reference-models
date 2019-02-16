@@ -56,7 +56,7 @@ modes/precisions:
        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
        --checkpoint /home/myuser/unet_trained \
        --model-source-dir /home/myuser/tf_unet \
-       -- checkpoint_name=model.cpkt
+       --checkpoint_name=model.cpkt
    ```
 
    Note that the `--verbose` or `--output-dir` flag can be added to the above

@@ -218,7 +218,7 @@ function fastrcnn() {
       fi
 
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        echo "Fast R-CNN requires -- config_file arg to be defined"
+        echo "Fast R-CNN requires --config_file arg to be defined"
         exit 1
       fi
       cd $original_dir
@@ -427,7 +427,7 @@ function rfcn() {
 
   if [ ${PRECISION} == "fp32" ]; then
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          echo "R-FCN requires -- config_file arg to be defined"
+          echo "R-FCN requires --config_file arg to be defined"
           exit 1
       fi
 
@@ -491,7 +491,7 @@ function ssd_mobilenet() {
 function unet() {
   if [ ${PRECISION} == "fp32" ]; then
     if [[ -z "${checkpoint_name}" ]]; then
-      echo "wavenet requires -- checkpoint_name arg to be defined"
+      echo "wavenet requires --checkpoint_name arg to be defined"
       exit 1
     fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -512,11 +512,11 @@ function transformer_language() {
   if [ ${PRECISION} == "fp32" ]; then
 
     if [[ -z "${decode_from_file}" ]]; then
-        echo "transformer-language requires -- decode_from_file arg to be defined"
+        echo "transformer-language requires --decode_from_file arg to be defined"
         exit 1
     fi
     if [[ -z "${reference}" ]]; then
-        echo "transformer-language requires -- reference arg to be defined"
+        echo "transformer-language requires --reference arg to be defined"
         exit 1
     fi
     if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
@@ -552,12 +552,12 @@ function transformer_language() {
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
     if [[ -z "${checkpoint_name}" ]]; then
-      echo "wavenet requires -- checkpoint_name arg to be defined"
+      echo "wavenet requires --checkpoint_name arg to be defined"
       exit 1
     fi
 
     if [[ -z "${sample}" ]]; then
-      echo "wavenet requires -- sample arg to be defined"
+      echo "wavenet requires --sample arg to be defined"
       exit 1
     fi
 

@@ -126,7 +126,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --checkpoint /home/myuser/rfcn_resnet101_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    -- config_file=rfcn_pipeline.config
+    --config_file=rfcn_pipeline.config
 ```
 
 Or for accuracy where the `--data-location` is the path the directory
@@ -143,7 +143,7 @@ python launch_benchmark.py \
     --data-location /home/myuser/coco/output/coco_val.record \
     --in-graph /home/myuser/rfcn_resnet101_fp32_coco/frozen_inference_graph.pb  \
     --accuracy-only \
-    -- split="accuracy_message"
+    --split="accuracy_message"
 ```
 
 7. Log files are located at the value of `--output-dir`.

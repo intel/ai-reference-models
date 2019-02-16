@@ -70,7 +70,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --model-source-dir /home/myuser/wavenet/tensorflow-wavenet \
     --checkpoint /home/myuser/wavenet_checkpoints \
-    -- checkpoint_name=model.ckpt-99 sample=8510
+    --checkpoint_name=model.ckpt-99 sample=8510
 ```
 
 4.  The logs are displayed in the console output as well as saved to a

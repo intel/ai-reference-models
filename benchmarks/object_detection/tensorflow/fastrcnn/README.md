@@ -152,7 +152,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --checkpoint /home/myuser/fast_rcnn_resnet50_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    -- config_file=pipeline.config
+    --config_file=pipeline.config
 ```
 
 Or for accuracy where the `--data-location` is the path the directory
@@ -257,7 +257,7 @@ $ python launch_benchmark.py \
     --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb \
     --docker-image tf_int8_docker_image
     --benchmark-only
-    -- number_of_steps=5000
+    --number_of_steps=5000
 ```
 
 Or for accuracy where the `--data-location` is the path the directory

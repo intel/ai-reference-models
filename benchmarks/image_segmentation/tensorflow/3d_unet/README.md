@@ -50,7 +50,7 @@ modes/precisions:
         --in-graph /home/myuser/pretrained_models/tumor_segmentation_model.h5 \
         --data-location /home/myuser/3dunet_data/brats \
         --batch-size 1 \
-        --socket-id 0 \
+        --socket-id 0
    ```
 
    Note that the `--verbose` or `--output-dir` flag can be added to the above command
