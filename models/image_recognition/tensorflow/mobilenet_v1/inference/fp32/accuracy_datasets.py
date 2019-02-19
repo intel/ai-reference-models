@@ -44,7 +44,7 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
 from tensorflow.python.platform import gfile
-import preprocessing
+import accuracy_preprocessing as preprocessing
 
 
 IMAGENET_NUM_TRAIN_IMAGES = 1281167

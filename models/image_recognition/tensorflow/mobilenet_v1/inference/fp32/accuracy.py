@@ -44,8 +44,8 @@ import numpy as np
 
 from google.protobuf import text_format
 import tensorflow as tf
-import preprocessing
-import datasets
+import accuracy_preprocessing as preprocessing
+import accuracy_datasets as datasets
 
 NUM_TEST_IMAGES = 50000
 
