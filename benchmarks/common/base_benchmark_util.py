@@ -110,6 +110,38 @@ class BaseBenchmarkUtil(object):
             dest="num_inter_threads", default=DEFAULT_INTEROP_VALUE_)
 
         self._common_arg_parser.add_argument(
+            "-c", "--checkpoint",
+            help="Specify the location of trained model checkpoint directory. "
+                 "If mode=training model/weights will be written to this "
+                 "location. If mode=inference assumes that the location points"
+                 " to a model that has already been trained.",
+            dest="checkpoint", default=None)
+
+        self._common_arg_parser.add_argument(
+            "-g", "--in-graph", help="Full path to the input graph ",
+            dest="input_graph", default=None)
+
+        self._common_arg_parser.add_argument(
+            "-k", "--benchmark-only",
+            help="For benchmark measurement only. If neither --benchmark-only "
+                 "or --accuracy-only are specified, it will default to run "
+                 "benchmarking.",
+            dest="benchmark_only", action="store_true")
+
+        self._common_arg_parser.add_argument(
+            "--accuracy-only",
+            help="For accuracy measurement only.  If neither --benchmark-only "
+                 "or --accuracy-only are specified, it will default to run "
+                 "benchmarking.",
+            dest="accuracy_only", action="store_true")
+
+        self._common_arg_parser.add_argument(
+            "--output-results",
+            help="Writes inference output to a file, when used in conjunction "
+                 "with --accuracy-only and --mode=inference.",
+            dest="output_results", action="store_true")
+
+        self._common_arg_parser.add_argument(
             "-v", "--verbose", help="Print verbose information.",
             dest="verbose", action="store_true")
 
@@ -200,6 +232,12 @@ class BaseBenchmarkUtil(object):
         if num_inter_threads <= 0:
             raise ValueError("Number of inter threads "
                              "value should be greater than 0")
+
+        if args.output_results and (args.mode != "inference" or not args.accuracy_only):
+            raise ValueError("--output-results can only be used when running "
+                             "with --mode=inference and --accuracy-only")
+        elif args.output_results and (args.model_name != "resnet50" or args.precision != "fp32"):
+            raise ValueError("--output-results is currently only supported for resnet50 FP32 inference.")
 
     def initialize_model(self, args, unknown_args):
         """Create model initializer for the specified model"""

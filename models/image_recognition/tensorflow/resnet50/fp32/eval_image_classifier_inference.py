@@ -75,6 +75,11 @@ class eval_classifier_optimized_graph:
     arg_parser.add_argument('-r', "--accuracy-only",
                             help='For accuracy measurement only.',
                             dest='accuracy_only', action='store_true')
+
+    arg_parser.add_argument("--results-file-path",
+                            help="File path for the inference results",
+                            dest="results_file_path", default=None)
+
     # parse the arguments
     self.args = arg_parser.parse_args()
     # validate the arguements
@@ -119,7 +124,7 @@ class eval_classifier_optimized_graph:
             tf.float32,  # data_type for input fed to the graph
             train=False,  # doing inference
             resize_method='crop')
-          images, labels = preprocessor.minibatch(dataset, subset='validation')
+          images, labels, filenames = preprocessor.minibatch(dataset, subset='validation')
           num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
                                  - num_processed_images
         else:
@@ -165,15 +170,30 @@ class eval_classifier_optimized_graph:
         else:  # accuracy check
           total_accuracy1, total_accuracy5 = (0.0, 0.0)
 
+          # If a results file path is provided, then start the prediction output file
+          if self.args.results_file_path:
+            with open(self.args.results_file_path, "w+") as fp:
+              fp.write("filename,actual,prediction\n")
+
           while num_remaining_images >= self.args.batch_size:
             # Reads and preprocess data
-            np_images, np_labels = sess.run([images[0], labels[0]])
+            np_images, np_labels, tf_filenames = sess.run(
+                [images[0], labels[0], filenames[0]])
             num_processed_images += self.args.batch_size
             num_remaining_images -= self.args.batch_size
 
             # Compute inference on the preprocessed data
             predictions = sess.run(output_tensor,
                                    {input_tensor: np_images})
+
+            # Write out the file name, expected label, and top prediction
+            if self.args.results_file_path:
+              top_predictions = np.argmax(predictions, 1)
+              with open(self.args.results_file_path, "a") as fp:
+                for filename, expected_label, top_prediction in \
+                        zip(tf_filenames, np_labels, top_predictions):
+                  fp.write("{},{},{}\n".format(filename, expected_label, top_prediction))
+
             accuracy1 = tf.reduce_sum(
               tf.cast(tf.nn.in_top_k(tf.constant(predictions),
                                      tf.constant(np_labels), 1), tf.float32))

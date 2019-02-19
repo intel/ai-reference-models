@@ -85,6 +85,8 @@ def parse_example_proto(example_serialized):
                                               default_value=-1),
       'image/class/text': tf.FixedLenFeature([], dtype=tf.string,
                                              default_value=''),
+      'image/filename': tf.FixedLenFeature([], dtype=tf.string,
+                                           default_value=''),
   }
   sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
   # Sparse features in Example proto.
@@ -110,7 +112,7 @@ def parse_example_proto(example_serialized):
   bbox = tf.expand_dims(bbox, 0)
   bbox = tf.transpose(bbox, [0, 2, 1])
 
-  return features['image/encoded'], label, bbox, features['image/class/text']
+  return features['image/encoded'], label, bbox, features['image/class/text'], features['image/filename']
 
 
 def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
@@ -382,6 +384,7 @@ class ImagePreprocessor(object):
     with tf.name_scope('batch_processing'):
       images = [[] for i in range(self.device_count)]
       labels = [[] for i in range(self.device_count)]
+      filenames = [[] for i in range(self.device_count)]
       record_input = data_flow_ops.RecordInput(
           file_pattern=dataset.tf_record_pattern(subset),
           seed=randint(0, 9000),
@@ -394,11 +397,12 @@ class ImagePreprocessor(object):
       records = [tf.reshape(record, []) for record in records]
       for i in xrange(self.batch_size):
         value = records[i]
-        image_buffer, label_index, bbox, _ = parse_example_proto(value)
+        image_buffer, label_index, bbox, _, filename = parse_example_proto(value)
         image = self.preprocess(image_buffer, bbox, i % 4)
         device_index = i % self.device_count
         images[device_index].append(image)
         labels[device_index].append(label_index)
+        filenames[device_index].append(filename)
       label_index_batch = [None] * self.device_count
       for device_index in xrange(self.device_count):
         images[device_index] = tf.parallel_stack(images[device_index])
@@ -415,4 +419,4 @@ class ImagePreprocessor(object):
         # Display the training images in the visualizer.
         # tf.summary.image('images', images)
 
-      return images, label_index_batch
+      return images, label_index_batch, filenames

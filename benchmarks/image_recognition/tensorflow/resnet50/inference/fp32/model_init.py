@@ -25,6 +25,7 @@ from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
 
 import os
+import time
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -35,6 +36,7 @@ class ModelInitializer(BaseModelInitializer):
         self.args = args
         self.platform_util = platform_util
         self.benchmark_command = ""  # use default batch size if -1
+        self.results_file_path = ""
 
         if self.args.batch_size == -1:
             self.args.batch_size = 128
@@ -72,6 +74,17 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.accuracy_only:
             self.benchmark_command += " --accuracy-only"
 
+            # if output results is enabled, generate a results file name and pass it to the inference script
+            if self.args.output_results:
+                self.results_filename = "{}_{}_{}_results_{}.txt".format(
+                    self.args.model_name, self.args.precision, self.args.mode,
+                    time.strftime("%Y%m%d_%H%M%S", time.gmtime()))
+                self.results_file_path = os.path.join(self.args.output_dir, self.results_filename)
+                self.benchmark_command += " --results-file-path {}".format(self.results_file_path)
+
     def run(self):
         if self.benchmark_command:
             self.run_command(self.benchmark_command)
+
+            if self.results_file_path:
+                print("Inference results file in the output directory: {}".format(self.results_filename))

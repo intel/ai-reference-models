@@ -32,6 +32,7 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
     def main(self):
         super(ModelBenchmarkUtil, self).define_args()
 
+        # Additional args that are used internally for the start script to call the model_init.py
         arg_parser = ArgumentParser(parents=[self._common_arg_parser],
                                     description='Parse args for benchmark '
                                                 'interface')
@@ -52,33 +53,6 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                      "model ",
                                 nargs='?',
                                 dest="use_case")
-
-        # checkpoint directory location
-        arg_parser.add_argument('-c', "--checkpoint",
-                                help='Specify the location of trained model '
-                                     'checkpoint directory. If mode=training '
-                                     'model/weights will be written to this '
-                                     'location. If mode=inference assumes that'
-                                     ' the location points to a model that has'
-                                     ' already been trained.',
-                                dest='checkpoint', default=None)
-
-        # in graph directory location
-        arg_parser.add_argument('-g', "--in-graph",
-                                help='Full path to the input graph ',
-                                dest='input_graph', default=None)
-
-        arg_parser.add_argument('-k', "--benchmark-only",
-                                help='For benchmark measurement only in int8 '
-                                     'models.',
-                                dest='benchmark_only',
-                                action='store_true')
-
-        arg_parser.add_argument("--accuracy-only",
-                                help='For accuracy measurement only in int8 '
-                                     'models.',
-                                dest='accuracy_only',
-                                action='store_true')
 
         args, unknown = arg_parser.parse_known_args()
         mi = super(ModelBenchmarkUtil, self).initialize_model(args, unknown)

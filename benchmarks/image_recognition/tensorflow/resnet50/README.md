@@ -245,5 +245,44 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
 
+* The `--output-results` flag can be used along with above accuracy test
+settings in order to also output a file with the inference results
+(file name, actual label, and the predicted label). The command for this
+is the same as the accuracy command above, with the `--output-results`
+flag added:
+```
+$ cd /home/myuser/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
+    --model-name resnet50 \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --accuracy-only \
+    --output-results \
+    --batch-size 100 \
+    --socket-id 0 \
+    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+```
+The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg. Below is an
+example of what the inference results file will look like:
+```
+filename,actual,prediction
+ILSVRC2012_val_00025616.JPEG,96,96
+ILSVRC2012_val_00037570.JPEG,656,656
+ILSVRC2012_val_00038006.JPEG,746,746
+ILSVRC2012_val_00023384.JPEG,413,793
+ILSVRC2012_val_00014392.JPEG,419,419
+ILSVRC2012_val_00015258.JPEG,740,740
+ILSVRC2012_val_00042399.JPEG,995,995
+ILSVRC2012_val_00022226.JPEG,528,528
+ILSVRC2012_val_00021512.JPEG,424,424
+...
+```
+
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
-to get additional debug output or change the default output location..
+to get additional debug output or change the default output location.
