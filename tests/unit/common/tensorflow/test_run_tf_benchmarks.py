@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+import fnmatch
 import os
 import pytest
 import sys
@@ -79,4 +80,6 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
     call_args = mock_run_command.call_args_list[0][0][0]
     # python3 argparse parses things in different order than python2
     # we'll check that the args are all there though
-    assert sorted(call_args.split()) == sorted(expected_cmd.split())
+    for actual_arg, expected_arg in zip(sorted(call_args.split()), sorted(expected_cmd.split())):
+        # use fnmatch in case we have file names with wildcards (like timestamps in output files)
+        assert fnmatch.fnmatch(actual_arg, expected_arg)

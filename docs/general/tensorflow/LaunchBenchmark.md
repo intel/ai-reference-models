@@ -88,6 +88,10 @@ optional arguments:
   --accuracy-only       For accuracy measurement only. If neither --benchmark-
                         only or --accuracy-only are specified, it will default
                         to run benchmarking.
+  --output-results      Writes inference output to a file, when used in
+                        conjunction with --accuracy-only and --mode=inference.
+  --output-dir OUTPUT_DIR
+                        Folder to dump output into.
   -g INPUT_GRAPH, --in-graph INPUT_GRAPH
                         Full path to the input graph
   --debug               Launches debug mode which doesn't execute start.sh

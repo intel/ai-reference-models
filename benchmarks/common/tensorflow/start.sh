@@ -40,6 +40,7 @@ echo "    BATCH_SIZE: ${BATCH_SIZE}"
 echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
+echo "    OUTPUT_RESULTS: ${OUTPUT_RESULTS}"
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
@@ -72,6 +73,11 @@ fi
 benchmark_only_arg=""
 if [ ${BENCHMARK_ONLY} == "True" ]; then
   benchmark_only_arg="--benchmark-only"
+fi
+
+output_results_arg=""
+if [ ${OUTPUT_RESULTS} == "True" ]; then
+  output_results_arg="--output-results"
 fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
@@ -123,8 +129,10 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
 --socket-id=${SOCKET_ID} \
+--output-dir=${OUTPUT_DIR} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
+${output_results_arg} \
 ${verbose_arg}"
 
 # Add on --in-graph and --data-location for int8 inference
