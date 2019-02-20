@@ -199,11 +199,11 @@ function draw() {
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
     export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    original_dir=$(pwd)
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
-      original_dir=$(pwd)
       cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
       # install protoc v3.3.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
@@ -217,8 +217,6 @@ function fastrcnn() {
       cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
     fi
 
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
     if [ ${PRECISION} == "fp32" ]; then
       config_file_arg=""
       if [ -n "${config_file}" ]; then
@@ -229,21 +227,21 @@ function fastrcnn() {
         echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
       fi
-      cd $original_dir
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
       --data-location=${DATASET_LOCATION} \
       --in-graph=${IN_GRAPH} ${config_file_arg}"
+
     elif [ ${PRECISION} == "int8" ]; then
       number_of_steps_arg=""
       if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
         CMD="${CMD} --number-of-steps=${number_of_steps}"
       fi
-      cd $original_dir
-      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
       exit 1
     fi
+    cd $original_dir
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
 # inceptionv3 model
