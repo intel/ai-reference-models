@@ -135,6 +135,14 @@ ${benchmark_only_arg} \
 ${output_results_arg} \
 ${verbose_arg}"
 
+if [ ${NUM_INTER_THREADS} != "None" ]; then
+  CMD="${CMD} --num-inter-threads=${NUM_INTER_THREADS}"
+fi
+
+if [ ${NUM_INTRA_THREADS} != "None" ]; then
+  CMD="${CMD} --num-intra-threads=${NUM_INTRA_THREADS}"
+fi
+
 # Add on --in-graph and --data-location for int8 inference
 if [ ${MODE} == "inference" ] && [ ${PRECISION} == "int8" ]; then
     CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"

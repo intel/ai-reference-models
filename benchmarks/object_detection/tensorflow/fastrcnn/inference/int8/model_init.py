@@ -32,9 +32,8 @@ class ModelInitializer(BaseModelInitializer):
     accuracy_script_path = ""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
-        self.platform_util = platform_util
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         self.perf_script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
             self.RFCN_PERF_SCRIPT)
@@ -47,8 +46,8 @@ class ModelInitializer(BaseModelInitializer):
 
         self.validate_args()
 
-        self.set_default_inter_intra_threads(self.platform_util)
-        self.args.num_inter_threads = 2
+        # set num_inter_threads and num_intra_threds (override inter threads to 2)
+        self.set_num_inter_intra_threads(num_inter_threads=2)
 
     def validate_args(self):
         if not (self.args.batch_size == -1 or self.args.batch_size == 1):

@@ -29,11 +29,9 @@ class ModelInitializer(BaseModelInitializer):
     """ Model initializer for 3D UNet"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
-        self.platform_util = platform_util
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
-        self.set_default_inter_intra_threads(platform_util)
+        self.set_num_inter_intra_threads()
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         # Set KMP env vars, if they haven't already been set

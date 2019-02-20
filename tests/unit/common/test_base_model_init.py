@@ -20,7 +20,7 @@
 
 import os
 
-from mock import patch
+from mock import MagicMock, patch
 
 from benchmarks.common.base_model_init import BaseModelInitializer
 from benchmarks.common.base_model_init import set_env_var
@@ -57,13 +57,12 @@ def test_base_model_initializer(
     launch_benchmark = LaunchBenchmark()
     args, _ = launch_benchmark.parse_args(example_req_args)
     test_run_command = "python foo.py"
+    platform_util = MagicMock()
 
     # Setup base model init with test settings
-    base_model_init = BaseModelInitializer()
-    base_model_init.args = args
-    base_model_init.args.verbose = True
-    base_model_init.args.model_name = test_model_name
-    base_model_init.custom_args = []
+    args.verbose = True
+    args.model_name = test_model_name
+    base_model_init = BaseModelInitializer(args, [], platform_util)
 
     # call run_command and then check the output
     base_model_init.run_command(test_run_command)

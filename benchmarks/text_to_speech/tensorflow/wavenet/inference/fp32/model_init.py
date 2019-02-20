@@ -27,8 +27,8 @@ from common.base_model_init import set_env_var
 
 class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         self.command = ""
         command_prefix = "python generate.py"
 
@@ -36,8 +36,8 @@ class ModelInitializer(BaseModelInitializer):
         self.set_kmp_vars(kmp_settings=None)
 
         self.parse_custom_args()
-        num_inter_threads = 1
-        num_intra_threads = int(self.args.num_cores)
+        # Set the num_inter_threads and num_intra_threads (override inter threads to 1)
+        self.set_num_inter_intra_threads(num_inter_threads=1)
         set_env_var("OMP_NUM_THREADS", self.args.num_cores)
 
         if self.args.socket_id != -1:
@@ -54,8 +54,8 @@ class ModelInitializer(BaseModelInitializer):
         # create command to run benchmarking
         self.command = ("{} {} --num_inter_threads={} "
                         "--num_intra_threads={} --sample={}").format(
-            command_prefix, checkpoint_path, str(num_inter_threads),
-            str(num_intra_threads), str(self.args.sample))
+            command_prefix, checkpoint_path, str(self.args.num_inter_threads),
+            str(self.args.num_intra_threads), str(self.args.sample))
 
     def parse_custom_args(self):
         if self.custom_args:

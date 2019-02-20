@@ -30,14 +30,12 @@ class ModelInitializer(BaseModelInitializer):
     """Model initializer for Transformer LT FP32 inference"""
 
     def __init__(self, args, custom_args, platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         self.cmd = self.get_numactl_command(self.args.socket_id)
         self.bleu_params = ""
 
-        self.platform_util = platform_util
-
-        self.set_default_inter_intra_threads(self.platform_util)
+        self.set_num_inter_intra_threads()
 
         # Set the KMP env vars
         self.set_kmp_vars(kmp_blocktime="0", kmp_affinity="granularity=fine,compact,1,0")

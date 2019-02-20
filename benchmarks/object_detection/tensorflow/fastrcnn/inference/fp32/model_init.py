@@ -33,16 +33,14 @@ class ModelInitializer (BaseModelInitializer):
                      "only, please modify via the '--batch_size' flag.")
 
     def __init__(self, args, custom_args, platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
-        self.platform_util = platform_util
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         self.research_dir = os.path.join(self.args.model_source_dir,
                                          "research")
         self.run_inference_sanity_checks(self.args, self.custom_args)
 
         # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(platform_util)
+        self.set_num_inter_intra_threads()
 
         # Set KMP env vars, if they haven't already been set
         self.set_kmp_vars()

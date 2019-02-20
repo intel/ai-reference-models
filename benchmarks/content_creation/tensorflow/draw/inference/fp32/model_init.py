@@ -29,9 +29,7 @@ class ModelInitializer(BaseModelInitializer):
     """ Model initializer for the DRAW model """
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
-        self.platform_util = platform_util
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         # Set KMP env vars, if they haven't already been set
         self.set_kmp_vars()
@@ -42,7 +40,7 @@ class ModelInitializer(BaseModelInitializer):
             sys.exit(1)
 
         # Set the num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(self.platform_util)
+        self.set_num_inter_intra_threads()
 
         # Create the command prefix with numactl and executing the script
         script_path = os.path.join(self.args.intelai_models, self.args.mode,

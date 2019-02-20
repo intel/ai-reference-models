@@ -28,10 +28,8 @@ class ModelInitializer(BaseModelInitializer):
     """Model initializer for Inception Resnet V2 FP32 inference"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
         self.cmd = self.get_numactl_command(self.args.socket_id) + "python "
-        self.platform_util = platform_util
 
         # Set KMP env vars, if they haven't already been set
         self.set_kmp_vars()
@@ -40,9 +38,8 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(self.platform_util)
-        self.args.num_inter_threads = 2
+        # set num_inter_threads and num_intra_threads (override inter threads to 2)
+        self.set_num_inter_intra_threads(num_inter_threads=2)
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 

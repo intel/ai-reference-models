@@ -33,10 +33,10 @@ class ModelInitializer(BaseModelInitializer):
     """initialize mode and run benchmark"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
-        if not platform_util:
-            raise ValueError("Did not find any platform info.")
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
+        # Set the num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads(num_inter_threads=2)
 
         # Set env vars, if they haven't already been set
         if self.args.num_cores == -1:
@@ -45,8 +45,8 @@ class ModelInitializer(BaseModelInitializer):
         else:
             set_env_var("OMP_NUM_THREADS", self.args.num_cores)
 
-        # Set KMP env vars, but override the default KMP_BLOCKTIME value
-        self.set_kmp_vars(kmp_blocktime="0")
+        # Set KMP env vars, if they aren't already set
+        self.set_kmp_vars()
 
         self.parse_args()
         if self.args.benchmark_only:
@@ -84,12 +84,6 @@ class ModelInitializer(BaseModelInitializer):
             parser.add_argument(
                 "--steps", dest="steps",
                 help="number of steps", type=int, default=200)
-            parser.add_argument(
-                "--num-inter-threads", dest="num_inter_threads",
-                help="number threads across operators", type=int, default=1)
-            parser.add_argument(
-                "--num-intra-threads", dest="num_intra_threads",
-                help="number threads for an operator", type=int, default=1)
             parser.add_argument(
                 "--input-layer", dest="input_layer",
                 help="name of input layer", type=str, default=None)
