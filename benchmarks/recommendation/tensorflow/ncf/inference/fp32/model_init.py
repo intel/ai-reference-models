@@ -31,8 +31,8 @@ class ModelInitializer(BaseModelInitializer):
     """initialize mode and run benchmark"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         self.benchmark_command = ""
 
         # use default batch size if -1
@@ -43,7 +43,7 @@ class ModelInitializer(BaseModelInitializer):
         self.set_kmp_vars()
 
         # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(platform_util)
+        self.set_num_inter_intra_threads()
 
         benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,

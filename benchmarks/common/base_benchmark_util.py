@@ -40,10 +40,6 @@ class BaseBenchmarkUtil(object):
         """define args for the benchmark interface shared by FP32 and int8
         models"""
 
-        DEFAULT_INTEROP_VALUE_ = self._platform_util.num_cpu_sockets()
-        DEFAULT_INTRAOP_VALUE_ = self._platform_util.num_cores_per_socket() * \
-            self._platform_util.num_cpu_sockets()
-
         self._common_arg_parser = ArgumentParser(
             add_help=False, description="Parse args for base benchmark "
                                         "interface")
@@ -102,12 +98,12 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-a", "--num-intra-threads", type=int,
             help="Specify the number of threads within the layer",
-            dest="num_intra_threads", default=DEFAULT_INTRAOP_VALUE_)
+            dest="num_intra_threads", default=None)
 
         self._common_arg_parser.add_argument(
             "-e", "--num-inter-threads", type=int,
             help="Specify the number threads between layers",
-            dest="num_inter_threads", default=DEFAULT_INTEROP_VALUE_)
+            dest="num_inter_threads", default=None)
 
         self._common_arg_parser.add_argument(
             "-c", "--checkpoint",
@@ -223,13 +219,13 @@ class BaseBenchmarkUtil(object):
 
         # check no.of intra threads > 0
         num_intra_threads = args.num_intra_threads
-        if num_intra_threads <= 0:
+        if num_intra_threads and num_intra_threads <= 0:
             raise ValueError("Number of intra threads "
                              "value should be greater than 0")
 
         # check no.of inter threads > 0
         num_inter_threads = args.num_inter_threads
-        if num_inter_threads <= 0:
+        if num_inter_threads and num_inter_threads <= 0:
             raise ValueError("Number of inter threads "
                              "value should be greater than 0")
 

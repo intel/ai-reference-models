@@ -36,6 +36,15 @@ def set_env_var(env_var, value, overwrite_existing=False):
 
 
 class BaseModelInitializer(object):
+
+    def __init__(self, args, custom_args=[], platform_util=None):
+        self.args = args
+        self.custom_args = custom_args
+        self.platform_util = platform_util
+
+        if not platform_util:
+            raise ValueError("Did not find any platform info.")
+
     def run_command(self, cmd):
         """
         Prints debug messages when verbose is enabled, and then runs the
@@ -74,10 +83,14 @@ class BaseModelInitializer(object):
                     cmd=command, param=arg, value=arg_value)
         return command
 
-    def set_default_inter_intra_threads(self, platform_util):
+    def set_num_inter_intra_threads(self, num_inter_threads=None, num_intra_threads=None):
         """
         Sets default values for self.args.num_inter_threads and
-        self.args.num_intra_threads.
+        self.args.num_intra_threads, only if they are not already set.
+
+        If num_inter_threads and/or num_intra_threads are specified, then those
+        are the values that will be used. Otherwise, if they are None, then the
+        following criteria applies:
 
         If a single socket is being used:
          * num_inter_threads = 1
@@ -89,19 +102,35 @@ class BaseModelInitializer(object):
          * num_intra_threads = The total number of cores across all sockets, or
            self.args.num_cores if a specific number of cores was defined.
         """
-        if self.args.socket_id != -1:
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = \
-                platform_util.num_cores_per_socket() \
-                if self.args.num_cores == -1 else self.args.num_cores
-        else:
-            self.args.num_inter_threads = platform_util.num_cpu_sockets()
+        # if num_inter_threads is specified, use that value as long as the arg isn't set
+        if num_inter_threads and not self.args.num_inter_threads:
+            self.args.num_inter_threads = num_inter_threads
 
-            if self.args.num_cores == -1:
-                self.args.num_intra_threads = int(
-                    platform_util.num_cores_per_socket() * platform_util.num_cpu_sockets())
-            else:
-                self.args.num_intra_threads = self.args.num_cores
+        # if num_intra_threads is specified, use that value as long as the arg isn't set
+        if num_intra_threads and not self.args.num_intra_threads:
+            self.args.num_intra_threads = num_intra_threads
+
+        if self.args.socket_id != -1:
+            if not self.args.num_inter_threads:
+                self.args.num_inter_threads = 1
+            if not self.args.num_intra_threads:
+                self.args.num_intra_threads = \
+                    self.platform_util.num_cores_per_socket() \
+                    if self.args.num_cores == -1 else self.args.num_cores
+        else:
+            if not self.args.num_inter_threads:
+                self.args.num_inter_threads = self.platform_util.num_cpu_sockets()
+            if not self.args.num_intra_threads:
+                if self.args.num_cores == -1:
+                    self.args.num_intra_threads = \
+                        int(self.platform_util.num_cores_per_socket() *
+                            self.platform_util.num_cpu_sockets())
+                else:
+                    self.args.num_intra_threads = self.args.num_cores
+
+        if self.args.verbose:
+            print("num_inter_threads: {}\nnum_intra_threads: {}".format(
+                self.args.num_inter_threads, self.args.num_intra_threads))
 
     def set_kmp_vars(self, kmp_settings="1", kmp_blocktime="1", kmp_affinity="granularity=fine,verbose,compact,1,0"):
         """

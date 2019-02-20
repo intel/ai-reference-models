@@ -29,8 +29,7 @@ class ModelInitializer(BaseModelInitializer):
     before launching the model'''
 
     def __init__(self, args, custom_args, platform_util):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         set_env_var("OMP_NUM_THREADS", "1")
 
