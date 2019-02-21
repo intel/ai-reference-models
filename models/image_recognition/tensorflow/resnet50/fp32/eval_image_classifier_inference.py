@@ -82,7 +82,7 @@ class eval_classifier_optimized_graph:
                             dest='accuracy_only', action='store_true')
     # parse the arguments
     self.args = arg_parser.parse_args()
-    # validate the arguements
+    # validate the arguments
     self.validate_args()
 
   def run(self):
@@ -97,7 +97,7 @@ class eval_classifier_optimized_graph:
 
       with tf.Session(config=config) as sess:
 
-        # convert the freezed graph to optimized graph
+        # convert the frozen graph to optimized graph
         graph_def = tf.GraphDef()
         with tf.gfile.FastGFile(self.args.input_graph, 'rb') as input_file:
           input_graph_content = input_file.read()
