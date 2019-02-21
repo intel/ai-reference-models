@@ -72,6 +72,11 @@ class eval_classifier_optimized_graph:
                                  'the benchmark will use random/dummy data.',
                             dest="data_location", default=None)
 
+    arg_parser.add_argument('-i', "--iteration",
+                            help='Specify the number of inference iterations.',
+                            dest="iterations", default=40)
+
+
     arg_parser.add_argument('-r', "--accuracy-only",
                             help='For accuracy measurement only.',
                             dest='accuracy_only', action='store_true')
@@ -129,10 +134,9 @@ class eval_classifier_optimized_graph:
         if (not self.args.accuracy_only):  # performance check
           iteration = 0
           warm_up_iteration = 10
-          total_run = 40
           total_time = 0
 
-          while num_remaining_images >= self.args.batch_size and iteration < total_run:
+          while num_remaining_images >= self.args.batch_size and iteration < self.args.itereations:
             iteration += 1
 
             # Reads and preprocess data
