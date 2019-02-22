@@ -163,21 +163,6 @@ function install_protoc() {
 
 }
 
-# 3D UNet model
-function 3d_unet() {
-  if [ ${PRECISION} == "fp32" ]; then
-    if [ ${NOINSTALL} != "True" ]; then
-      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
-    fi
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
 # DCGAN model
 function dcgan() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -615,9 +600,7 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "3d_unet" ]; then
-  3d_unet
-elif [ ${MODEL_NAME} == "dcgan" ]; then
+if [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
