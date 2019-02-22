@@ -15,7 +15,9 @@ SSD-MobileNet.
 
 ```
 $ git clone https://github.com/tensorflow/models.git
+$ cd models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
+$ git clone https://github.com/cocodataset/cocoapi.git
 ```
 
 The TensorFlow models repo will be used for running inference as well as
@@ -144,7 +146,8 @@ Resolving deltas: 100% (3/3), done.
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-MobileNet can be run for benchmarking
-throughput and latency, or testing accuracy.
+throughput and latency, or testing accuracy. Note that we are running
+SSD-MobileNet with a TensorFlow 1.12 docker image.
 
 To benchmarking for throughput and latency, use the following command,
 but replace in your path to the unzipped coco dataset images from step 3
@@ -164,7 +167,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.12.0-mkl \
     --benchmark-only
 ```
 
@@ -183,7 +186,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.12.0-mkl \
     --accuracy-only
 ```
 
