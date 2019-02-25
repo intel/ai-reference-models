@@ -35,12 +35,7 @@ requires.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
 ```
 
-4. Build a docker image using master of the official
-[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
-`--config=mkl`. More instructions on
-[how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
-
-5. If you would like to run Inception V3 inference and test for
+4. If you would like to run Inception V3 inference and test for
 accuracy, you will need the ImageNet dataset. Benchmarking for latency
 and throughput do not require the ImageNet dataset.
 
@@ -72,19 +67,19 @@ $ ll /home/myuser/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
 ```
 
-6. Next, navigate to the `benchmarks` directory in your local clone of
+5. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the ImageNet
-TF Records that you generated in step 5.
+TF Records that you generated in step 4.
 
-Substitute in your own `--data-location` (from step 5, for accuracy
-only), `--in-graph` pretrained model file path (from step 3),
+Substitute in your own `--data-location` (from step 4, for accuracy
+only), `--in-graph` pretrained model file path (from step 3) and
 `--model-source-dir` for the location where you cloned the
 [tensorflow/models](https://github.com/tensorflow/models) repo
-(from step 2), and the name/tag for your docker image (from step 4).
+(from step 2).
 
 Inception V3 can be run for accuracy, latency benchmarking, or throughput
 benchmarking. Use one of the following examples below, depending on
@@ -101,7 +96,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
     -- input_height=299 input_width=299
@@ -123,7 +118,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
     -- input_height=299 input_width=299 warmup_steps=50 steps=500
@@ -140,11 +135,17 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
     -- input_height=299 input_width=299 warmup_steps=50 steps=500
 ```
+
+The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+used in the commands above were built using
+[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
