@@ -255,8 +255,8 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb \
-    --docker-image tf_int8_docker_image
-    --benchmark-only
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --benchmark-only \
     -- number_of_steps=5000
 ```
 
@@ -270,12 +270,18 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --model-source-dir /home/myuser/tensorflow/models \
     --data-location /home/myuser/coco_dataset/coco_val.record \
     --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb  \
     --accuracy-only
 ```
+
+The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+used in the commands above were built using
+[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 5. The log file is saved to the value of `--output-dir`.
 

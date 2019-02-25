@@ -58,7 +58,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image docker_image
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -95,7 +95,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
@@ -111,6 +111,12 @@ lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
 ```
+
+The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+used in the commands above were built using
+[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
