@@ -163,6 +163,22 @@ function install_protoc() {
 
 }
 
+function add_steps_args() {
+  # returns string with --steps and --warmup_steps, if there are values specified
+  local steps_arg=""
+  local warmup_steps_arg=""
+
+  if [ -n "${steps}" ]; then
+    steps_arg="--steps=${steps}"
+  fi
+
+  if [ -n "${warmup_steps}" ]; then
+    warmup_steps_arg="--warmup-steps=${warmup_steps}"
+  fi
+
+  echo "${steps_arg} ${warmup_steps_arg}"
+}
+
 # DCGAN model
 function dcgan() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -258,7 +274,7 @@ function inceptionv3() {
       input_width_arg="--input-width=${input_width}"
     fi
 
-    CMD="${CMD} ${input_height_arg} ${input_width_arg}"
+    CMD="${CMD} ${input_height_arg} ${input_width_arg} $(add_steps_args)"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
   elif [ ${PRECISION} == "fp32" ]; then
@@ -365,6 +381,7 @@ function resnet101() {
     fi
 
     if [ ${PRECISION} == "int8" ]; then
+        CMD="${CMD} $(add_steps_args)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     elif [ ${PRECISION} == "fp32" ]; then
       CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
@@ -385,6 +402,8 @@ function resnet50() {
           echo "No Data directory specified, accuracy will not be calculated."
           exit 1
         fi
+
+        CMD="${CMD} $(add_steps_args)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
     elif [ ${PRECISION} == "fp32" ]; then

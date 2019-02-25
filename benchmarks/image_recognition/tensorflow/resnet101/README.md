@@ -91,6 +91,11 @@ $ python launch_benchmark.py \
     --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
 ```
 
+When running performance benchmarking, it is optional to specify the
+number of `warmup_steps` and `steps` as extra args, as shown in the
+commands below. If these values are not specified, the script will
+default to use `warmup_steps=40` and `steps=100`.
+
 For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
@@ -103,7 +108,8 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image tf_int8_docker_image \
-    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
+    -- warmup_steps=50 steps=500
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -118,7 +124,8 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --docker-image tf_int8_docker_image \
-    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
+    -- warmup_steps=50 steps=500
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
@@ -142,37 +149,28 @@ Log location outside container: {--output-dir value}/benchmark_resnet101_inferen
 
 Example log tail when benchmarking for latency:
 ```
-[Running warmup steps...]
-steps = 10, 53.3022912987 images/sec
-steps = 20, 54.8999856019 images/sec
-steps = 30, 54.5288420286 images/sec
-steps = 40, 54.3775556506 images/sec
-[Running benchmark steps...]
-steps = 10, 537.185143822 images/sec
-steps = 20, 268.75073286 images/sec
-steps = 30, 179.033434653 images/sec
-steps = 40, 134.356211634 images/sec
-steps = 50, 107.403547389 images/sec
-steps = 60, 89.3812766404 images/sec
-steps = 70, 76.565932747 images/sec
-steps = 80, 67.0330362294 images/sec
-steps = 90, 59.6184242546 images/sec
-steps = 100, 53.6588898046 images/sec
+...
+steps = 470, 48.3195530058 images/sec
+steps = 480, 47.2792312364 images/sec
+steps = 490, 46.3175214744 images/sec
+steps = 500, 45.4044245083 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_resnet101_inference.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_191406.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
-steps = 80, 328.404413955 images/sec
-steps = 90, 291.945088967 images/sec
-steps = 100, 262.656894016 images/sec
+...
+steps = 470, 328.906266308 images/sec
+steps = 480, 322.0451309 images/sec
+steps = 490, 315.455582114 images/sec
+steps = 500, 309.142758646 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190104_211412.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_192438.log
 ```
 
 ## FP32 Inference Instructions
