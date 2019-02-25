@@ -55,10 +55,10 @@ class ModelInitializer(BaseModelInitializer):
                                 help="input width")
             parser.add_argument('--warmup-steps', dest='warmup_steps',
                                 help='number of warmup steps', type=int,
-                                default=10)
+                                default=40)
             parser.add_argument('--steps', dest='steps',
                                 help='number of steps', type=int,
-                                default=200)
+                                default=100)
             parser.add_argument('--input-layer', dest='input_layer',
                                 help='name of input layer', type=str,
                                 default=None)

@@ -79,7 +79,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * Evaluate the model performance: The ImageNet dataset is not needed in this case:
 Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
-2, the docker image (from step 3) and the `--benchmark-only` flag.
+2, the docker image (from step 3) and the `--benchmark-only` flag. It is
+optional to specify the number of `warmup_steps` and `steps` as extra
+args, as shown in the command below. If these values are not specified,
+the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
 $ cd /home/myuser/models/benchmarks
@@ -92,23 +95,21 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image docker_image
+    --docker-image docker_image \
+    -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
-[Running warmup steps...]
-steps = 10, 460.862674539 images/sec
-[Running benchmark steps...]
-steps = 10, 461.002369109 images/sec
-steps = 20, 460.082656541 images/sec
-steps = 30, 464.707827579 images/sec
-steps = 40, 463.187506632 images/sec
-steps = 50, 462.725212176 images/sec
+...
+steps = 470, 460.113806562 images/sec
+steps = 480, 460.073982602 images/sec
+steps = 490, 463.289831148 images/sec
+steps = 500, 463.521427264 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_213139.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
