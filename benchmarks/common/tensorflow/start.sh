@@ -615,6 +615,44 @@ function wide_deep() {
     fi
 }
 
+# Wide & Deep large dataset model
+function wide_deep_large_ds() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # Depends on the Ubuntu version the ldpreload gets installed on various places.
+    # Hence getting the best available one from ldconfig and setting it up
+
+    TCMALLOC_LIB="libtcmalloc.so.4"
+    LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
+
+    if [[ -z "${LIBTCMALLOC}" ]]; then
+      echo "libtcmalloc.so.4 not found, trying to install"
+      apt-get update
+      apt-get install google-perftools --fix-missing -y
+    fi
+
+    LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
+    echo $LIBTCMALLOC
+    export LD_PRELOAD=$LIBTCMALLOC
+    if [[ -z "${LIBTCMALLOC}" ]]; then
+      echo "Failed to load $TCMALLOC_LIB"
+    fi
+
+    # Dataset file is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == None ]; then
+      echo "Wide & Deep requires --data-location arg to be defined"
+      exit 1
+    fi
+
+    if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
+        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+        exit 1
+    fi
+}
+
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
@@ -653,6 +691,8 @@ elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
+elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
+  wide_deep_large_ds  
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

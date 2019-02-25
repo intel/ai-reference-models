@@ -30,5 +30,6 @@ dependencies to be installed:
 | Object Detection       | TensorFlow    | R-FCN               | Inference | [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | SSD-MobileNet       | Inference | [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions) |
 | Recommendation         | TensorFlow    | NCF                 | Inference | [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions) |
+| Recommendation         | TensorFlow    | Wide & Deep Large Dataset	| Inference | [Int8](recommendation/tensorflow/wide_deep_large_ds/README.md#int8-inference-instructions) [FP32](recommendation/tensorflow/wide_deep_large_ds/README.md#fp32-inference-instructions) |
 | Recommendation         | TensorFlow    | Wide & Deep         | Inference | [FP32](recommendation/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Text-to-Speech         | TensorFlow    | WaveNet             | Inference | [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions) |
