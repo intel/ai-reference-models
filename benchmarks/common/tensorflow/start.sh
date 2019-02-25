@@ -601,11 +601,6 @@ function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-      if [ ${NOINSTALL} != "True" ]; then
-        # install dependencies
-        pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
-      fi
-
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
       --data-location=${DATASET_LOCATION}"
       CMD=${CMD} run_model
