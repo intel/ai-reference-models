@@ -36,9 +36,8 @@ class ModelInitializer(BaseModelInitializer):
                      "only, please modify via the '--batch_size' flag.")
 
     def __init__(self, args, custom_args, platform_util):
-        self.args = args
-        self.custom_args = custom_args
-        self.platform_util = platform_util
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         self.accuracy_script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
             self.accuracy_script)
@@ -59,7 +58,7 @@ class ModelInitializer(BaseModelInitializer):
             "python " + self.benchmark_script
 
         # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(self.platform_util)
+        self.set_num_inter_intra_threads()
 
         if self.args.socket_id == -1:
             if self.args.num_cores == 1:

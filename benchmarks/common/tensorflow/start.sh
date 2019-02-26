@@ -40,6 +40,7 @@ echo "    BATCH_SIZE: ${BATCH_SIZE}"
 echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
+echo "    OUTPUT_RESULTS: ${OUTPUT_RESULTS}"
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
@@ -72,6 +73,11 @@ fi
 benchmark_only_arg=""
 if [ ${BENCHMARK_ONLY} == "True" ]; then
   benchmark_only_arg="--benchmark-only"
+fi
+
+output_results_arg=""
+if [ ${OUTPUT_RESULTS} == "True" ]; then
+  output_results_arg="--output-results"
 fi
 
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
@@ -123,9 +129,19 @@ CMD="python ${RUN_SCRIPT_PATH} \
 --num-cores=${NUM_CORES} \
 --batch-size=${BATCH_SIZE} \
 --socket-id=${SOCKET_ID} \
+--output-dir=${OUTPUT_DIR} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
+${output_results_arg} \
 ${verbose_arg}"
+
+if [ ${NUM_INTER_THREADS} != "None" ]; then
+  CMD="${CMD} --num-inter-threads=${NUM_INTER_THREADS}"
+fi
+
+if [ ${NUM_INTRA_THREADS} != "None" ]; then
+  CMD="${CMD} --num-intra-threads=${NUM_INTRA_THREADS}"
+fi
 
 # Add on --in-graph and --data-location for int8 inference
 if [ ${MODE} == "inference" ] && [ ${PRECISION} == "int8" ]; then
@@ -147,19 +163,20 @@ function install_protoc() {
 
 }
 
-# 3D UNet model
-function 3d_unet() {
-  if [ ${PRECISION} == "fp32" ]; then
-    if [ ${NOINSTALL} != "True" ]; then
-      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
-    fi
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
+function add_steps_args() {
+  # returns string with --steps and --warmup_steps, if there are values specified
+  local steps_arg=""
+  local warmup_steps_arg=""
+
+  if [ -n "${steps}" ]; then
+    steps_arg="--steps=${steps}"
   fi
+
+  if [ -n "${warmup_steps}" ]; then
+    warmup_steps_arg="--warmup-steps=${warmup_steps}"
+  fi
+
+  echo "${steps_arg} ${warmup_steps_arg}"
 }
 
 # DCGAN model
@@ -191,11 +208,11 @@ function draw() {
 # Fast R-CNN (ResNet50) model
 function fastrcnn() {
     export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    original_dir=$(pwd)
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
-      original_dir=$(pwd)
       cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
       # install protoc v3.3.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
@@ -209,8 +226,6 @@ function fastrcnn() {
       cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
     fi
 
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
     if [ ${PRECISION} == "fp32" ]; then
       config_file_arg=""
       if [ -n "${config_file}" ]; then
@@ -221,21 +236,21 @@ function fastrcnn() {
         echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
       fi
-      cd $original_dir
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
       --data-location=${DATASET_LOCATION} \
       --in-graph=${IN_GRAPH} ${config_file_arg}"
+
     elif [ ${PRECISION} == "int8" ]; then
       number_of_steps_arg=""
       if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
         CMD="${CMD} --number-of-steps=${number_of_steps}"
       fi
-      cd $original_dir
-      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
       exit 1
     fi
+    cd $original_dir
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
 # inceptionv3 model
@@ -259,7 +274,7 @@ function inceptionv3() {
       input_width_arg="--input-width=${input_width}"
     fi
 
-    CMD="${CMD} ${input_height_arg} ${input_width_arg}"
+    CMD="${CMD} ${input_height_arg} ${input_width_arg} $(add_steps_args)"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
   elif [ ${PRECISION} == "fp32" ]; then
@@ -366,6 +381,7 @@ function resnet101() {
     fi
 
     if [ ${PRECISION} == "int8" ]; then
+        CMD="${CMD} $(add_steps_args)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     elif [ ${PRECISION} == "fp32" ]; then
       CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
@@ -386,6 +402,8 @@ function resnet50() {
           echo "No Data directory specified, accuracy will not be calculated."
           exit 1
         fi
+
+        CMD="${CMD} $(add_steps_args)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 
     elif [ ${PRECISION} == "fp32" ]; then
@@ -583,11 +601,6 @@ function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-      if [ ${NOINSTALL} != "True" ]; then
-        # install dependencies
-        pip install -r "${MOUNT_BENCHMARK}/classification/tensorflow/wide_deep/requirements.txt"
-      fi
-
       CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
       --data-location=${DATASET_LOCATION}"
       CMD=${CMD} run_model
@@ -597,13 +610,49 @@ function wide_deep() {
     fi
 }
 
+# Wide & Deep large dataset model
+function wide_deep_large_ds() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # Depends on the Ubuntu version the ldpreload gets installed on various places.
+    # Hence getting the best available one from ldconfig and setting it up
+
+    TCMALLOC_LIB="libtcmalloc.so.4"
+    LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
+
+    if [[ -z "${LIBTCMALLOC}" ]]; then
+      echo "libtcmalloc.so.4 not found, trying to install"
+      apt-get update
+      apt-get install google-perftools --fix-missing -y
+    fi
+
+    LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
+    echo $LIBTCMALLOC
+    export LD_PRELOAD=$LIBTCMALLOC
+    if [[ -z "${LIBTCMALLOC}" ]]; then
+      echo "Failed to load $TCMALLOC_LIB"
+    fi
+
+    # Dataset file is required, see README for more information.
+    if [ "${DATASET_LOCATION_VOL}" == None ]; then
+      echo "Wide & Deep requires --data-location arg to be defined"
+      exit 1
+    fi
+
+    if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
+        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+        exit 1
+    fi
+}
+
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "3d_unet" ]; then
-  3d_unet
-elif [ ${MODEL_NAME} == "dcgan" ]; then
+if [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
@@ -637,6 +686,8 @@ elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
+elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
+  wide_deep_large_ds  
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

@@ -35,12 +35,7 @@ requires.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
 ```
 
-4. Build a docker image using master of the official
-[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
-`--config=mkl`. More instructions on
-[how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
-
-5. If you would like to run Inception V3 inference and test for
+4. If you would like to run Inception V3 inference and test for
 accuracy, you will need the ImageNet dataset. Benchmarking for latency
 and throughput do not require the ImageNet dataset.
 
@@ -72,19 +67,19 @@ $ ll /home/myuser/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
 ```
 
-6. Next, navigate to the `benchmarks` directory in your local clone of
+5. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the ImageNet
-TF Records that you generated in step 5.
+TF Records that you generated in step 4.
 
-Substitute in your own `--data-location` (from step 5, for accuracy
-only), `--in-graph` pretrained model file path (from step 3),
+Substitute in your own `--data-location` (from step 4, for accuracy
+only), `--in-graph` pretrained model file path (from step 3) and
 `--model-source-dir` for the location where you cloned the
 [tensorflow/models](https://github.com/tensorflow/models) repo
-(from step 2), and the name/tag for your docker image (from step 4).
+(from step 2).
 
 Inception V3 can be run for accuracy, latency benchmarking, or throughput
 benchmarking. Use one of the following examples below, depending on
@@ -101,11 +96,16 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
     -- input_height=299 input_width=299
 ```
+
+When running performance benchmarking, it is optional to specify the
+number of `warmup_steps` and `steps` as extra args, as shown in the
+commands below. If these values are not specified, the script will
+default to use `warmup_steps=10` and `steps=50`.
 
 For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
@@ -118,10 +118,10 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    -- input_height=299 input_width=299
+    -- input_height=299 input_width=299 warmup_steps=50 steps=500
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -135,11 +135,17 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/myuser/datasets/ImageNet_TFRecords \
-    -- input_height=299 input_width=299
+    -- input_height=299 input_width=299 warmup_steps=50 steps=500
 ```
+
+The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+used in the commands above were built using
+[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -162,35 +168,28 @@ Log location outside container: {--output-dir value}/benchmark_inceptionv3_infer
 
 Example log tail when benchmarking for latency:
 ```
-[Running warmup steps...]
-steps = 10, 56.8087550114 images/sec
-[Running benchmark steps...]
-steps = 10, 57.2046753318 images/sec
-steps = 20, 56.7181068289 images/sec
-steps = 30, 57.015714208 images/sec
-steps = 40, 57.4216088933 images/sec
-steps = 50, 57.491659242 images/sec
+...
+steps = 470, 53.7256017113 images/sec
+steps = 480, 52.5430812016 images/sec
+steps = 490, 52.9076139058 images/sec
+steps = 500, 53.5021876395 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_185906.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194002.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
-[Running warmup steps...]
-steps = 10, 341.225945255 images/sec
-[Running benchmark steps...]
-steps = 10, 340.304326771 images/sec
-steps = 20, 339.108777134 images/sec
-steps = 30, 337.139199124 images/sec
-steps = 40, 341.177805273 images/sec
-steps = 50, 338.634144926 images/sec
+...
+steps = 470, 370.435654276 images/sec
+steps = 480, 369.710160177 images/sec
+steps = 490, 369.083388904 images/sec
+steps = 500, 370.287978128 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Executing command: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --input_height=299 --input_width=299 --warmup_steps=10 --num_intra_threads=56 --num_inter_threads=2 --batch_size=128 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --steps=50
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_014141.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194314.log
 ```
 
 ## FP32 Inference Instructions

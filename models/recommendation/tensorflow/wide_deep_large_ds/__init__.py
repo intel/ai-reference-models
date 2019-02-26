@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2018 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,5 +18,3 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-from .nilearn_custom_utils.nilearn_utils import crop_img_to, crop_img
-from .utils import pickle_dump, pickle_load, read_image

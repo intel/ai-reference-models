@@ -27,8 +27,8 @@ class ModelInitializer(BaseModelInitializer):
     """ Model initializer for MobileNet V1 FP32 inference """
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         # use default batch size if -1
         if self.args.batch_size == -1:
             self.args.batch_size = 128
@@ -36,9 +36,8 @@ class ModelInitializer(BaseModelInitializer):
         # Set KMP env vars (except KMP_SETTINGS is not set)
         self.set_kmp_vars(kmp_settings=None)
 
-        # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(platform_util)
-        self.args.num_inter_threads = 2
+        # set num_inter_threads and num_intra_threads (override inter threads to 2)
+        self.set_num_inter_intra_threads(num_inter_threads=2)
 
         script_name = "accuracy.py" if self.args.accuracy_only \
             else "eval_image_classifier.py"

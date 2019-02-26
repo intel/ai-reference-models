@@ -39,17 +39,16 @@ class ModelInitializer(BaseModelInitializer):
                   " single socket instead.\n")
 
     def __init__(self, args, custom_args, platform_util):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.research_dir = os.path.join(args.model_source_dir, "research")
 
         # Set KMP env vars, except override the default KMP_BLOCKTIME value
         self.set_kmp_vars(kmp_blocktime="0")
 
-        # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(platform_util)
-        self.args.num_inter_threads = 2
+        # set num_inter_threads and num_intra_threads (override inter threads to 2)
+        self.set_num_inter_intra_threads(num_inter_threads=2)
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.accuracy_only:

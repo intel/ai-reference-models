@@ -444,3 +444,60 @@ def test_symlink_directory_input_validation(mock_system_platform, mock_os,
         if os.path.exists(symlink_dir):
             os.remove(symlink_dir)
         os.rmdir(temp_dir)
+
+
+def test_output_results_with_benchmarking(mock_system_platform, mock_os, mock_subprocess):
+    """
+    Tests that the launch script fails when trying to get inference results when benchmarking
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    test_args = ["--model-name", test_model_name,
+                 "--framework", test_framework,
+                 "--mode", "training",
+                 "--precision", test_precision,
+                 "--docker-image", test_docker_image,
+                 "--benchmark-only",
+                 "--output-results"]
+    args, _ = launch_benchmark.parse_args(test_args)
+    with pytest.raises(ValueError) as e:
+        launch_benchmark.validate_args(args)
+    assert "--output-results can only be used when running " \
+           "with --mode=inference and --accuracy-only" in str(e)
+
+
+def test_output_results_with_training(mock_system_platform, mock_os, mock_subprocess):
+    """
+    Tests that the launch script fails when trying to get inference results when training
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    test_args = ["--model-name", test_model_name,
+                 "--framework", test_framework,
+                 "--mode", "training",
+                 "--precision", test_precision,
+                 "--docker-image", test_docker_image,
+                 "--accuracy-only",
+                 "--output-results"]
+    args, _ = launch_benchmark.parse_args(test_args)
+    with pytest.raises(ValueError) as e:
+        launch_benchmark.validate_args(args)
+    assert "--output-results can only be used when running " \
+           "with --mode=inference and --accuracy-only" in str(e)
+
+
+def test_output_results_with_accuracy(mock_system_platform, mock_os, mock_subprocess):
+    """
+    Tests that the launch script validation passes when running accuracy with output
+    """
+    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
+    launch_benchmark = LaunchBenchmark()
+    test_args = ["--model-name", test_model_name,
+                 "--framework", test_framework,
+                 "--mode", test_mode,
+                 "--precision", test_precision,
+                 "--docker-image", test_docker_image,
+                 "--accuracy-only",
+                 "--output-results"]
+    args, _ = launch_benchmark.parse_args(test_args)
+    launch_benchmark.validate_args(args)

@@ -32,10 +32,10 @@ class ModelInitializer(BaseModelInitializer):
     """Model initializer for resnet101 int8 inference"""
 
     def __init__(self, args, custom_args=[], platform_util=None):
-        self.args = args
-        self.custom_args = custom_args
-        if not platform_util:
-            raise ValueError("Did not find any platform info.")
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
+        # Set the num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads()
 
         # Set env vars, if they haven't already been set
         set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket()
@@ -55,18 +55,10 @@ class ModelInitializer(BaseModelInitializer):
                                 help="input width")
             parser.add_argument('--warmup-steps', dest='warmup_steps',
                                 help='number of warmup steps', type=int,
-                                default=10)
+                                default=40)
             parser.add_argument('--steps', dest='steps',
                                 help='number of steps', type=int,
-                                default=200)
-            parser.add_argument('--num-inter-threads',
-                                dest='num_inter_threads',
-                                help='number threads across operators',
-                                type=int, default=1)
-            parser.add_argument('--num-intra-threads',
-                                dest='num_intra_threads',
-                                help='number threads for an operator',
-                                type=int, default=1)
+                                default=100)
             parser.add_argument('--input-layer', dest='input_layer',
                                 help='name of input layer', type=str,
                                 default=None)

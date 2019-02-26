@@ -38,41 +38,48 @@ class ModelInitializer(BaseModelInitializer):
         self.results_file_path = ""
 
         if self.args.batch_size == -1:
-            self.args.batch_size = 128
+            self.args.batch_size = 1024
 
+        # get number of cores if there is no core info passed in.
+        if self.args.num_cores == -1:
+            self.args.num_cores = self.platform_util.num_cores_per_socket()
+
+        num_of_parallel_batches = self.platform_util.num_cores_per_socket()
+        kmp_blocktime = "0"
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
-
+        self.set_kmp_vars(kmp_settings="1", kmp_blocktime=kmp_blocktime,
+                          kmp_affinity="noverbose,warnings,respect,granularity=core,none")
         # set num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads()
+        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_cores, num_intra_threads=1)
 
         benchmark_script = os.path.join(
             self.args.intelai_models,
-            self.args.precision, "eval_image_classifier_inference.py")
+            self.args.mode,
+            "inference.py")
 
         self.benchmark_command = self.get_numactl_command(self.args.socket_id)\
             + "python " + benchmark_script
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
         self.benchmark_command += " --input-graph=" + \
                                   self.args.input_graph + \
-                                  " --model-name=" + \
-                                  str(self.args.model_name) + \
                                   " --inter-op-parallelism-threads=" + \
                                   str(self.args.num_inter_threads) + \
                                   " --intra-op-parallelism-threads=" + \
                                   str(self.args.num_intra_threads) + \
+                                  " --omp-num-threads=" + \
+                                  str(self.args.num_intra_threads) + \
                                   " --batch-size=" + \
-                                  str(self.args.batch_size)
+                                  str(self.args.batch_size) + \
+                                  " --num-of-parallel-batches=" + \
+                                  str(num_of_parallel_batches) + \
+                                  " --kmp-blocktime=" + \
+                                  str(kmp_blocktime)
 
         # if the data location directory is not empty, then include the arg
-        if self.args.data_location and os.listdir(self.args.data_location):
-            self.benchmark_command += " --data-location=" + \
+        if self.args.data_location:
+            self.benchmark_command += " --datafile-path=" + \
                                       self.args.data_location
-        if self.args.accuracy_only:
-            self.benchmark_command += " --accuracy-only"
-
             # if output results is enabled, generate a results file name and pass it to the inference script
             if self.args.output_results:
                 self.results_filename = "{}_{}_{}_results_{}.txt".format(
@@ -83,7 +90,7 @@ class ModelInitializer(BaseModelInitializer):
 
     def run(self):
         if self.benchmark_command:
+            print(self.benchmark_command)
             self.run_command(self.benchmark_command)
-
             if self.results_file_path:
                 print("Inference results file in the output directory: {}".format(self.results_filename))

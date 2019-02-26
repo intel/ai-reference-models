@@ -58,7 +58,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image docker_image
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -79,7 +79,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * Evaluate the model performance: The ImageNet dataset is not needed in this case:
 Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
-2, the docker image (from step 3) and the `--benchmark-only` flag.
+2, the docker image (from step 3) and the `--benchmark-only` flag. It is
+optional to specify the number of `warmup_steps` and `steps` as extra
+args, as shown in the command below. If these values are not specified,
+the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
 $ cd /home/myuser/models/benchmarks
@@ -92,24 +95,28 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image docker_image
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
+    -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
-[Running warmup steps...]
-steps = 10, 460.862674539 images/sec
-[Running benchmark steps...]
-steps = 10, 461.002369109 images/sec
-steps = 20, 460.082656541 images/sec
-steps = 30, 464.707827579 images/sec
-steps = 40, 463.187506632 images/sec
-steps = 50, 462.725212176 images/sec
+...
+steps = 470, 460.113806562 images/sec
+steps = 480, 460.073982602 images/sec
+steps = 490, 463.289831148 images/sec
+steps = 500, 463.521427264 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_213139.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
 ```
+
+The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+used in the commands above were built using
+[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -245,5 +252,44 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
 
+* The `--output-results` flag can be used along with above accuracy test
+settings in order to also output a file with the inference results
+(file name, actual label, and the predicted label). The command for this
+is the same as the accuracy command above, with the `--output-results`
+flag added:
+```
+$ cd /home/myuser/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
+    --model-name resnet50 \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --accuracy-only \
+    --output-results \
+    --batch-size 100 \
+    --socket-id 0 \
+    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+```
+The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg. Below is an
+example of what the inference results file will look like:
+```
+filename,actual,prediction
+ILSVRC2012_val_00025616.JPEG,96,96
+ILSVRC2012_val_00037570.JPEG,656,656
+ILSVRC2012_val_00038006.JPEG,746,746
+ILSVRC2012_val_00023384.JPEG,413,793
+ILSVRC2012_val_00014392.JPEG,419,419
+ILSVRC2012_val_00015258.JPEG,740,740
+ILSVRC2012_val_00042399.JPEG,995,995
+ILSVRC2012_val_00022226.JPEG,528,528
+ILSVRC2012_val_00021512.JPEG,424,424
+...
+```
+
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
-to get additional debug output or change the default output location..
+to get additional debug output or change the default output location.

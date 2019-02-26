@@ -46,42 +46,14 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
     def parse_args(self, args):
         super(LaunchBenchmark, self).define_args()
 
+        # Additional args that are only used with the launch script
         arg_parser = ArgumentParser(
             parents=[self._common_arg_parser],
             description="Parse args for benchmark interface")
 
-        # docker image
         arg_parser.add_argument(
             "--docker-image", help="Specify the docker image/tag to use",
             dest="docker_image", default=None, required=True)
-
-        # checkpoint directory location
-        arg_parser.add_argument(
-            "-c", "--checkpoint",
-            help="Specify the location of trained model checkpoint directory. "
-                 "If mode=training model/weights will be written to this "
-                 "location. If mode=inference assumes that the location points"
-                 " to a model that has already been trained.",
-            dest="checkpoint", default=None)
-
-        arg_parser.add_argument(
-            "-k", "--benchmark-only",
-            help="For benchmark measurement only. If neither --benchmark-only "
-                 "or --accuracy-only are specified, it will default to run "
-                 "benchmarking.",
-            dest="benchmark_only", action="store_true")
-
-        arg_parser.add_argument(
-            "--accuracy-only",
-            help="For accuracy measurement only.  If neither --benchmark-only "
-                 "or --accuracy-only are specified, it will default to run "
-                 "benchmarking.",
-            dest="accuracy_only", action="store_true")
-
-        # in graph directory location
-        arg_parser.add_argument(
-            "-g", "--in-graph", help="Full path to the input graph ",
-            dest="input_graph", default=None)
 
         arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
@@ -105,28 +77,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if glob.glob("{}/*/{}".format(benchmark_dir, args.framework)) == []:
             raise ValueError("The specified framework is not supported: {}".
                              format(args.framework))
-
-        # check checkpoint location
-        checkpoint_dir = args.checkpoint
-        if checkpoint_dir is not None:
-            if not os.path.exists(checkpoint_dir):
-                raise IOError("The checkpoint location {} does not exist.".
-                              format(checkpoint_dir))
-            elif not os.path.isdir(checkpoint_dir):
-                raise IOError("The checkpoint location {} is not a directory.".
-                              format(checkpoint_dir))
-            self.check_for_link("checkpoint directory", checkpoint_dir)
-
-        # check if input graph file exists
-        input_graph = args.input_graph
-        if input_graph is not None:
-            if not os.path.exists(input_graph):
-                raise IOError("The input graph {} does not exist.".
-                              format(input_graph))
-            if not os.path.isfile(input_graph):
-                raise IOError("The input graph {} must be a file.".
-                              format(input_graph))
-            self.check_for_link("input graph", input_graph)
 
         # if neither benchmark_only or accuracy_only are specified, then enable
         # benchmark_only as the default
@@ -214,10 +164,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env", "USE_CASE={}".format(use_case),
                     "--env", "FRAMEWORK={}".format(args.framework),
                     "--env", "NUM_CORES={}".format(args.num_cores),
+                    "--env", "NUM_INTER_THREADS={}".format(args.num_inter_threads),
+                    "--env", "NUM_INTRA_THREADS={}".format(args.num_intra_threads),
                     "--env", "DATASET_LOCATION=/dataset",
                     "--env", "CHECKPOINT_DIRECTORY=/checkpoints",
                     "--env", "BENCHMARK_ONLY={}".format(args.benchmark_only),
                     "--env", "ACCURACY_ONLY={}".format(args.accuracy_only),
+                    "--env", "OUTPUT_RESULTS={}".format(args.output_results),
                     "--env", "NOINSTALL=False",
                     "--env", "OUTPUT_DIR={}".format(output_dir)]
 

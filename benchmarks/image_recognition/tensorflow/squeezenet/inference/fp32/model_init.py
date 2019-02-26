@@ -29,13 +29,12 @@ class ModelInitializer (BaseModelInitializer):
      from the models/image_recognition/tensorflow/squeezenet/fp32 directory"""
 
     def __init__(self, args, custom_args, platform_util):
-        self.args = args
-        self.custom_args = custom_args
+        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
         cores_per_socket = platform_util.num_cores_per_socket()
 
-        # set num_inter_threads and num_intra_threads
-        self.set_default_inter_intra_threads(platform_util)
-        self.args.num_inter_threads = 1
+        # set num_inter_threads and num_intra_threads (override inter threads to 1)
+        self.set_num_inter_intra_threads(num_inter_threads=1)
 
         if self.args.num_cores > 0:
             ncores = self.args.num_cores

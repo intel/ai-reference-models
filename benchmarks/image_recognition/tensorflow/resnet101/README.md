@@ -22,12 +22,7 @@ an optimized version of the ResNet101 model code.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_int8_pretrained_model.pb
 ```
 
-3. Build a docker image using master of the official
-[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
-`--config=mkl`. More instructions on
-[how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
-
-4. If you would like to run ResNet101 inference and test for
+3. If you would like to run ResNet101 inference and test for
 accurancy, you will need the full ImageNet dataset.
 
 Register and download the
@@ -58,17 +53,16 @@ $ ll /home/myuser/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
 ```
 
-5. Next, navigate to the `benchmarks` directory in your local clone of
+4. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a benchmarking run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the ImageNet
-TF Records that you generated in step 4.
+TF Records that you generated in step 3.
 
-Substitute in your own `--data-location` (from step 4, for accuracy
-only), `--in-graph` pre-trained model file path (from step 2),
-and the name/tag for your docker image (from step 3).
+Substitute in your own `--data-location` (from step 3, for accuracy
+only) and `--in-graph` pre-trained model file path (from step 2).
 
 ResNet101 can be run for accuracy or performance benchmarking. Use one of
 the following examples below, depending on your use case.
@@ -86,10 +80,15 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image tf_int8_docker_image \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --data-location /home/myuser/dataset/FullImageNetData_directory \
     --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
 ```
+
+When running performance benchmarking, it is optional to specify the
+number of `warmup_steps` and `steps` as extra args, as shown in the
+commands below. If these values are not specified, the script will
+default to use `warmup_steps=40` and `steps=100`.
 
 For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
@@ -102,8 +101,9 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
-    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
+    -- warmup_steps=50 steps=500
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -117,9 +117,16 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image tf_int8_docker_image \
-    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
+    -- warmup_steps=50 steps=500
 ```
+
+The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+used in the commands above were built using
+[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -142,37 +149,28 @@ Log location outside container: {--output-dir value}/benchmark_resnet101_inferen
 
 Example log tail when benchmarking for latency:
 ```
-[Running warmup steps...]
-steps = 10, 53.3022912987 images/sec
-steps = 20, 54.8999856019 images/sec
-steps = 30, 54.5288420286 images/sec
-steps = 40, 54.3775556506 images/sec
-[Running benchmark steps...]
-steps = 10, 537.185143822 images/sec
-steps = 20, 268.75073286 images/sec
-steps = 30, 179.033434653 images/sec
-steps = 40, 134.356211634 images/sec
-steps = 50, 107.403547389 images/sec
-steps = 60, 89.3812766404 images/sec
-steps = 70, 76.565932747 images/sec
-steps = 80, 67.0330362294 images/sec
-steps = 90, 59.6184242546 images/sec
-steps = 100, 53.6588898046 images/sec
+...
+steps = 470, 48.3195530058 images/sec
+steps = 480, 47.2792312364 images/sec
+steps = 490, 46.3175214744 images/sec
+steps = 500, 45.4044245083 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_resnet101_inference.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_191406.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
-steps = 80, 328.404413955 images/sec
-steps = 90, 291.945088967 images/sec
-steps = 100, 262.656894016 images/sec
+...
+steps = 470, 328.906266308 images/sec
+steps = 480, 322.0451309 images/sec
+steps = 490, 315.455582114 images/sec
+steps = 500, 309.142758646 images/sec
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190104_211412.log
+Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_192438.log
 ```
 
 ## FP32 Inference Instructions
