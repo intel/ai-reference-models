@@ -72,10 +72,9 @@ class eval_classifier_optimized_graph:
                                  'the benchmark will use random/dummy data.',
                             dest="data_location", default=None)
 
-    arg_parser.add_argument('-i', "--iteration",
-                            help='Specify the number of inference iterations.',
-                            dest="iterations", default=40)
-
+    arg_parser.add_argument('-s', "--steps",
+                            help='Specify the number of inference steps.',
+                            dest="steps", default=40)
 
     arg_parser.add_argument('-r', "--accuracy-only",
                             help='For accuracy measurement only.',
@@ -132,12 +131,12 @@ class eval_classifier_optimized_graph:
           num_remaining_images = IMAGENET_VALIDATION_IMAGES
 
         if (not self.args.accuracy_only):  # performance check
-          iteration = 0
+          step = 0
           warm_up_iteration = 10
           total_time = 0
 
-          while num_remaining_images >= self.args.batch_size and iteration < self.args.itereations:
-            iteration += 1
+          while num_remaining_images >= self.args.batch_size and step < self.args.steps:
+            step += 1
 
             # Reads and preprocess data
             if (self.args.data_location):
@@ -153,11 +152,11 @@ class eval_classifier_optimized_graph:
             (predicts) = sess.run([output_tensor], feed_dict={input_tensor: image_np})
             time_consume = time.time() - start_time
 
-            print('Iteration %d: %.3f sec' % (iteration, time_consume))
-            if iteration > warm_up_iteration:
+            print('Iteration %d: %.3f sec' % (step, time_consume))
+            if step > warm_up_iteration:
               total_time += time_consume
 
-          time_average = total_time / (iteration - warm_up_iteration)
+          time_average = total_time / (step - warm_up_iteration)
           print('Average time: %.3f sec' % (time_average))
 
           print('Batch size = %d' % self.args.batch_size)
