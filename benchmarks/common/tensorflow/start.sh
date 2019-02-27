@@ -205,14 +205,14 @@ function draw() {
   fi
 }
 
-# Faster R-CNN (ResNet50) model
-function faster_rcnn() {
+# Fast R-CNN (ResNet50) model
+function fastrcnn() {
     export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
     original_dir=$(pwd)
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/fastrcnn/requirements.txt"
       cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
       # install protoc v3.3.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
@@ -656,8 +656,8 @@ if [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
-elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
-  faster_rcnn
+elif [ ${MODEL_NAME} == "fastrcnn" ]; then
+  fastrcnn
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
@@ -687,7 +687,7 @@ elif [ ${MODEL_NAME} == "wavenet" ]; then
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
 elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
-  wide_deep_large_ds
+  wide_deep_large_ds  
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

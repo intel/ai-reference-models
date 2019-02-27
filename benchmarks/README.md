@@ -26,7 +26,7 @@ dependencies to be installed:
 | Image Segmentation     | TensorFlow    | Mask R-CNN          | Inference | [FP32](image_segmentation/tensorflow/maskrcnn/README.md#fp32-inference-instructions) |
 | Image Segmentation     | TensorFlow    | UNet                | Inference | [FP32](image_segmentation/tensorflow/unet/README.md#fp32-inference-instructions) |
 | Language Translation   | TensorFlow    | Transformer Language| Inference | [FP32](language_translation/tensorflow/transformer_language/README.md#fp32-inference-instructions) |
-| Object Detection       | TensorFlow    | Faster R-CNN          | Inference | [Int8](object_detection/tensorflow/faster_rcnn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/faster_rcnn/README.md#fp32-inference-instructions) |
+| Object Detection       | TensorFlow    | Fast R-CNN          | Inference | [Int8](object_detection/tensorflow/fastrcnn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/fastrcnn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | R-FCN               | Inference | [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | SSD-MobileNet       | Inference | [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions) |
 | Recommendation         | TensorFlow    | NCF                 | Inference | [FP32](recommendation/tensorflow/ncf/README.md#fp32-inference-instructions) |
