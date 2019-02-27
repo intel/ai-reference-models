@@ -1,11 +1,11 @@
-# Fast R-CNN (ResNet50)
+# Faster R-CNN (ResNet50)
 
-This document has instructions for how to run FastRCNN for the
+This document has instructions for how to run Faster R-CNN for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 * [Int8 inference](#int8-inference-instructions)
 
-Benchmarking instructions and scripts for the Fast R-CNN ResNet50 model training and inference
+Benchmarking instructions and scripts for the Faster R-CNN ResNet50 model training and inference
 other precisions are coming later.
 
 ## FP32 Inference Instructions
@@ -114,8 +114,8 @@ The `coco_val.record` file is what we will use in this inference example.
 
 4. Download and extract the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
-$ tar -xzvf fast_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+$ tar -xzvf faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -133,7 +133,7 @@ Resolving deltas: 100% (3/3), done.
 ```
 
 6. Run the `launch_benchmark.py` script from the intelai/models repo
-, with the appropriate parameters including: the 
+, with the appropriate parameters including: the
 `coco_val.record` data location (from step 3), the pre-trained model
 `pipeline.config` file and the checkpoint location (from step 4, and the
 location of your `tensorflow/models` clone (from step 1).
@@ -145,12 +145,12 @@ $ cd /home/myuser/models/benchmarks
 $ python launch_benchmark.py \
     --data-location /home/myuser/coco/output/ \
     --model-source-dir /home/myuser/tensorflow/models \
-    --model-name fastrcnn \
+    --model-name faster_rcnn \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --checkpoint /home/myuser/fast_rcnn_resnet50_fp32_coco \
+    --checkpoint /home/myuser/faster_rcnn_resnet50_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     -- config_file=pipeline.config
 ```
@@ -160,14 +160,14 @@ where your `coco_val.record` file is located and the `--in-graph` is
 the pre-trained graph located in the pre-trained model directory (from step 4):
 ```
 python launch_benchmark.py \
-    --model-name fastrcnn \
+    --model-name faster_rcnn \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --model-source-dir /home/myuser/tensorflow/models \
     --data-location /home/myuser/coco/output \
-    --in-graph /home/myuser/fast_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
+    --in-graph /home/myuser/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
     --accuracy-only
 ```
 
@@ -181,16 +181,16 @@ Time spent : 167.353 seconds.
 Time spent per BATCH: 0.167 seconds.
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
-Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='fastrcnn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32', socket_id=0, use_case='object_detection', verbose=True)
+Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='faster_rcnn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32', socket_id=0, use_case='object_detection', verbose=True)
 Received these custom args: ['--config_file=pipeline.config']
 Run model here.
 current directory: /workspace/models/research
 Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/eval.py --num_inter_threads 1 --num_intra_threads 28 --pipeline_config_path /checkpoints/pipeline.config --checkpoint_dir /checkpoints --eval_dir /workspace/models/research/object_detection/log/eval
 PYTHONPATH: :/workspace/intelai_models:/workspace/models/research:/workspace/models/research/slim:/workspace/models
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=fastrcnn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --socket-id 0 --verbose --checkpoint=/checkpoints         --config_file=pipeline.config
+RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=faster_rcnn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --data-location=/dataset --socket-id 0 --verbose --checkpoint=/checkpoints         --config_file=pipeline.config
 Batch Size: 1
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_fastrcnn_inference.log
+Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference.log
 ```
 
 And here is a sample log file tail when running for accuracy:
@@ -211,16 +211,16 @@ DONE (t=1.35s).
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_fastrcnn_inference_fp32_20190114_205714.log
+Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_fp32_20190114_205714.log
 ```
 
 ## Int8 Inference Instructions
 
-1. Please follow step 1, 2 and 3 of Fast R-CNN FP32 instructions written above.
+1. Please follow step 1, 2 and 3 of Faster R-CNN FP32 instructions written above.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/fastrcnn_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_int8_pretrained_model.pb
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -249,12 +249,12 @@ $ cd /home/myuser/models/benchmarks
 $ python launch_benchmark.py \
     --data-location /home/myuser/coco/output/ \
     --model-source-dir /home/myuser/tensorflow/models \
-    --model-name fastrcnn \
+    --model-name faster_rcnn \
     --framework tensorflow \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
-    --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb \
+    --in-graph /home/myuser/faster_rcnn_int8_pretrained_model.pb \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --benchmark-only \
     -- number_of_steps=5000
@@ -265,7 +265,7 @@ where your `coco_val.record` file is located and the `--in-graph` is
 the pre-trained graph model:
 ```
 python launch_benchmark.py \
-    --model-name fastrcnn \
+    --model-name faster_rcnn \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
@@ -273,7 +273,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --model-source-dir /home/myuser/tensorflow/models \
     --data-location /home/myuser/coco_dataset/coco_val.record \
-    --in-graph /home/myuser/fastrcnn_int8_pretrained_model.pb  \
+    --in-graph /home/myuser/faster_rcnn_int8_pretrained_model.pb  \
     --accuracy-only
 ```
 
@@ -298,7 +298,7 @@ Avg. Duration per Step:0.0760930150986
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
-Log location outside container: {--output-dir value}/benchmark_fastrcnn_inference_int8_20190117_232539.log
+Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_int8_20190117_232539.log
 ```
 
 And here is a sample log file tail when running for accuracy:
@@ -320,6 +320,6 @@ DONE (t=1.34s).
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
-Log location outside container: {--output-dir value}/benchmark_fastrcnn_inference_int8_20190117_231937.log
+Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_int8_20190117_231937.log
 ```
 
