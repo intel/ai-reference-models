@@ -29,7 +29,7 @@ from common.base_model_init import set_env_var
 class ModelInitializer (BaseModelInitializer):
     def run_inference_sanity_checks(self, args, custom_args):
         if args.batch_size != -1 and args.batch_size != 1:
-            sys.exit("Faster R-CNN inference supports 'batch-size=1' " +
+            sys.exit("Fast R-CNN inference supports 'batch-size=1' " +
                      "only, please modify via the '--batch_size' flag.")
 
     def __init__(self, args, custom_args, platform_util=None):
@@ -52,7 +52,7 @@ class ModelInitializer (BaseModelInitializer):
                 self.args.intelai_models, self.args.mode, self.args.precision,
                 "coco_accuracy.sh")
             if not os.path.exists(accuracy_script):
-                raise ValueError("Unable to locate the Faster R-CNN accuracy "
+                raise ValueError("Unable to locate the Fast R-CNN accuracy "
                                  "script: {}".format(accuracy_script))
             self.run_cmd = "sh {} {} {}/coco_val.record {}".format(
                 accuracy_script, self.args.input_graph,

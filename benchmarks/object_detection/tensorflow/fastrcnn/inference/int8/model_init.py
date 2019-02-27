@@ -52,17 +52,17 @@ class ModelInitializer(BaseModelInitializer):
     def validate_args(self):
         if not (self.args.batch_size == -1 or self.args.batch_size == 1):
             raise ValueError(
-                "Batch Size specified: {}. faster RCNN inference only supports "
+                "Batch Size specified: {}. fast RCNN inference only supports "
                 "batch size = 1".format(self.args.batch_size))
 
         if not os.path.exists(self.perf_script_path)\
                 and self.args.bechmark_only:
-            raise ValueError("Unable to locate the faster RCNN perf script: {}".
+            raise ValueError("Unable to locate the fast RCNN perf script: {}".
                              format(self.perf_script_path))
 
         if not os.path.exists(self.accuracy_script_path)\
                 and self.args.accuracy_only:
-            raise ValueError("Unable to locate the faster RCNN  accuracy script: "
+            raise ValueError("Unable to locate the fast RCNN  accuracy script: "
                              "{}".format(self.accuracy_script_path))
 
         if not self.args.model_source_dir or not os.path.isdir(
