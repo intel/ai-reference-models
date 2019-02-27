@@ -443,7 +443,16 @@ function rfcn() {
       split_arg="--split=${split}"
   fi
 
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+          number_of_steps_arg="--number_of_steps=${number_of_steps}"
+      fi
+
+      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
+
+  elif [ ${PRECISION} == "fp32" ]; then
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1

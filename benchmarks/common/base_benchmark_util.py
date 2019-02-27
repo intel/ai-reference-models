@@ -142,7 +142,9 @@ class BaseBenchmarkUtil(object):
             dest="verbose", action="store_true")
 
         self._common_arg_parser.add_argument(
-            "--output-dir", help="Folder to dump output into.",
+            "--output-dir",
+            help="Folder to dump output into. The output directory will default to "
+                 "'models/benchmarks/common/tensorflow/logs' if no path is specified.",
             default="/models/benchmarks/common/tensorflow/logs")
 
         # Allow for additional command line args after --
