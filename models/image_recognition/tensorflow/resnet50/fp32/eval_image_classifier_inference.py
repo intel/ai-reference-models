@@ -114,6 +114,7 @@ class eval_classifier_optimized_graph:
         tf.global_variables_initializer()
 
         num_processed_images = 0
+        num_remaining_images = IMAGENET_VALIDATION_IMAGES
 
         if (self.args.data_location):
           print("Inference with real data.")
@@ -129,7 +130,8 @@ class eval_classifier_optimized_graph:
                                  - num_processed_images
         else:
           print("Inference with dummy data.")
-          num_remaining_images = IMAGENET_VALIDATION_IMAGES
+          input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
+          images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
 
         if (not self.args.accuracy_only):  # performance check
           iteration = 0
@@ -145,7 +147,7 @@ class eval_classifier_optimized_graph:
               preprocessed_images = sess.run([images[0]])
               image_np = preprocessed_images[0]
             else:
-              image_np = np.random.rand(self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3).astype(np.uint8)
+              image_np = sess.run(images)
 
             num_processed_images += self.args.batch_size
             num_remaining_images -= self.args.batch_size
