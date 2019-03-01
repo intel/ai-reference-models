@@ -149,6 +149,8 @@ if [ ${MODE} == "inference" ] && [ ${PRECISION} == "int8" ]; then
 fi
 
 function install_protoc() {
+  pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+
   # install protoc, if necessary, then compile protoc files
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
@@ -161,6 +163,37 @@ function install_protoc() {
     echo "protoc already found"
   fi
 
+  echo "Compiling protoc files"
+  ./bin/protoc object_detection/protos/*.proto --python_out=.
+  popd
+}
+
+function get_cocoapi() {
+  # get arg for where the cocoapi repo was cloned
+  cocoapi_dir=${1}
+
+  # get arg for the location where we want the pycocotools
+  parent_dir=${2}
+  pycocotools_dir=${parent_dir}/pycocotools
+
+  # If pycoco tools aren't already found, then builds the coco python API
+  if [ ! -d ${pycocotools_dir} ]; then
+    # This requires that the cocoapi is cloned in the external model source dir
+    if [ -d "${cocoapi_dir}/PythonAPI" ]; then
+      # install cocoapi
+      pushd ${cocoapi_dir}/PythonAPI
+      echo "Installing COCO API"
+      make
+      cp -r pycocotools ${parent_dir}
+      popd
+    else
+      echo "${cocoapi_dir}/PythonAPI directory was not found"
+      echo "Unable to install the python cocoapi."
+      exit 1
+    fi
+  else
+    echo "pycocotools were found at: ${pycocotools_dir}"
+  fi
 }
 
 function add_steps_args() {
@@ -216,14 +249,9 @@ function faster_rcnn() {
       cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
       # install protoc v3.3.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-      echo "Compiling protoc files"
-      ./bin/protoc object_detection/protos/*.proto --python_out=.
 
       # install cocoapi
-      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-      echo "Installing COCO API"
-      make
-      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+      get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
     fi
 
     if [ ${PRECISION} == "fp32" ]; then
@@ -319,10 +347,7 @@ function maskrcnn() {
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
 
       # install cocoapi
-      cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco/PythonAPI
-      echo "Installing COCO API"
-      make
-      cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
+      get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
     fi
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
     cd ${original_dir}
@@ -428,14 +453,9 @@ function rfcn() {
     cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
     # install protoc v3.3.0, if necessary, then compile protoc files
     install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-    echo "Compiling protoc files"
-    ./bin/protoc object_detection/protos/*.proto --python_out=.
 
     # install cocoapi
-    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi/PythonAPI
-    echo "Installing COCO API"
-    make
-    cp -r pycocotools ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+    get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
 
   split_arg=""
@@ -494,15 +514,11 @@ function ssd_mobilenet() {
       # install dependencies
       pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
 
-      pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-
       # install protoc, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
 
-      echo "Compiling protoc files"
-      ./bin/protoc object_detection/protos/*.proto --python_out=.
-
-      popd
+      # install cocoapi
+      get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
     fi
 
     CMD="${CMD} --in-graph=${IN_GRAPH} \
