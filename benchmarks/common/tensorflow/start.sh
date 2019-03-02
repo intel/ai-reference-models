@@ -196,6 +196,13 @@ function get_cocoapi() {
   fi
 }
 
+function add_arg() {
+  local arg_str=""
+  if [ -n "${2}" ]; then
+    arg_str=" ${1}=${2}"
+  fi
+  echo "${arg_str}"
+
 function add_steps_args() {
   # returns string with --steps and --warmup_steps, if there are values specified
   local steps_arg=""
@@ -279,6 +286,24 @@ function faster_rcnn() {
     fi
     cd $original_dir
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+}
+
+# GNMT model
+function gnmt() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    if [ ${PRECISION} == "fp32" ]; then
+
+      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION} \
+      $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
+      $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
+      $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
+      $(add_arg "--infer_mode" ${infer_mode})"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
+    fi
 }
 
 # inceptionv3 model
@@ -683,6 +708,8 @@ elif [ ${MODEL_NAME} == "draw" ]; then
   draw
 elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
+elif [ ${MODEL_NAME} == "gnmt" ]; then
+  gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
