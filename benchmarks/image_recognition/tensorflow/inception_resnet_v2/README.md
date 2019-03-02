@@ -171,4 +171,3 @@ lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015440.log
-

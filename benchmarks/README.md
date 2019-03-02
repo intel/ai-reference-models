@@ -25,6 +25,7 @@ dependencies to be installed:
 | Image Recognition      | TensorFlow    | SqueezeNet          | Inference | [FP32](image_recognition/tensorflow/squeezenet/README.md#fp32-inference-instructions) |
 | Image Segmentation     | TensorFlow    | Mask R-CNN          | Inference | [FP32](image_segmentation/tensorflow/maskrcnn/README.md#fp32-inference-instructions) |
 | Image Segmentation     | TensorFlow    | UNet                | Inference | [FP32](image_segmentation/tensorflow/unet/README.md#fp32-inference-instructions) |
+| Language Translation   | TensorFlow    | GNMT                | Inference | [FP32](language_translation/tensorflow/gnmt/README.md#fp32-inference-instructions) |
 | Language Translation   | TensorFlow    | Transformer Language| Inference | [FP32](language_translation/tensorflow/transformer_language/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | R-FCN               | Inference | [Int8](object_detection/tensorflow/rfcn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | Faster R-CNN        | Inference | [Int8](object_detection/tensorflow/faster_rcnn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/faster_rcnn/README.md#fp32-inference-instructions) |
