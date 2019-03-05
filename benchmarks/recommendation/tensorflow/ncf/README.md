@@ -17,8 +17,9 @@ If you want to download movielens 1M dataset and provide that path to `--data-lo
 2. Clone the official `tensorflow/models` repository with  tag `v1.11`
 
 ```
-$ git clone --branch v1.11 https://github.com/tensorflow/models.git
+$ git clone https://github.com/tensorflow/models.git
 $ cd models
+$ git checkout v1.11
 $ pwd
 ```
 
@@ -29,18 +30,15 @@ $ git clone https://github.com/IntelAI/models.git
 $ cd models/benchmarks
 ```
 
-4. We are replacing the official [ncf_main.py](https://github.com/tensorflow/models/blob/v1.11/official/recommendation/ncf_main.py)
-with our custom [ncf_main.py](../../../../models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py) which has CPU optimizations included.
-
-5. Download and extract the pre-trained model.
+4. Download and extract the pre-trained model.
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ncf_fp32_pretrained_model.tar.gz
 $ tar -xzvf ncf_fp32_pretrained_model.tar.gz
 ```
 
-6. Run the `launch_benchmark.py` script with the appropriate parameters.
+5. Run the `launch_benchmark.py` script with the appropriate parameters.
 * `--model-source-dir` - Path to official tensorflow models from step2.
-* `--checkpoint` - Path to checkpoint directory for the Pre-trained model from step5
+* `--checkpoint` - Path to checkpoint directory for the Pre-trained model from step4
 
 
 For Throughput, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
