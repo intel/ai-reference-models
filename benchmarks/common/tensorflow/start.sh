@@ -546,6 +546,9 @@ function ssd_mobilenet() {
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
     fi
 
+    chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
+    sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
+
     CMD="${CMD} --in-graph=${IN_GRAPH} \
     --data-location=${DATASET_LOCATION}"
     CMD=${CMD} run_model
