@@ -294,7 +294,7 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. Download and extract the pretrained model:
+4. <a name="download_fp32_pretrained_model"></a>Download and extract the pretrained model:
 
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
