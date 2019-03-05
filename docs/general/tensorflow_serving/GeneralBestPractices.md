@@ -85,6 +85,4 @@ Figure 1. NCHW format
     - ***OMP_NUM_THREADS*** = *num_physical_cores*
     - ***TENSORFLOW_SESSION_PARALLELISM*** = *num_physical_cores*/4
 3. Use NCHW data format for images
-4. See one of the hands-on tutorials for an advanced walkthrough of your use case:
-   * [Image Recognition](/docs/image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
-   * Object Detection (*coming soon*)
+4. See one of the hands-on [tutorials](/docs/README.md) for an advanced walkthrough of your use case
