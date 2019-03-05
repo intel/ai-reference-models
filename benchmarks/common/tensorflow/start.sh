@@ -202,6 +202,7 @@ function add_arg() {
     arg_str=" ${1}=${2}"
   fi
   echo "${arg_str}"
+}
 
 function add_steps_args() {
   # returns string with --steps and --warmup_steps, if there are values specified
