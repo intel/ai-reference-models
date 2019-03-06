@@ -42,8 +42,8 @@ import time
 import numpy as np
 import tensorflow as tf
 
-import evaluation_utils
-import misc_utils as utils
+from fp32.utils import evaluation_utils
+from fp32.utils import misc_utils as utils
 
 __all__ = ["decode_and_evaluate", "get_translation"]
 
