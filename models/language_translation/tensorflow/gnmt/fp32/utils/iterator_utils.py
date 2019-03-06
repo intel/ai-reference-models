@@ -19,7 +19,7 @@ import collections
 
 import tensorflow as tf
 
-import vocab_utils
+from fp32.utils import vocab_utils
 
 
 __all__ = ["BatchedInput", "get_iterator", "get_infer_iterator"]
