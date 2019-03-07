@@ -19,6 +19,7 @@ dependencies to be installed:
 | Content Creation       | TensorFlow    | DRAW                | Inference | [FP32](content_creation/tensorflow/draw/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | Inception ResNet V2 | Inference | [FP32](image_recognition/tensorflow/inception_resnet_v2/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | Inception V3        | Inference | [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
+| Image Recognition      | TensorFlow    | Inception V4        | Inference | [Int8](image_recognition/tensorflow/inceptionv4/README.md#int8-inference-instructions) |
 | Image Recognition      | TensorFlow    | MobileNet V1        | Inference | [FP32](image_recognition/tensorflow/mobilenet_v1/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | ResNet 101          | Inference | [Int8](image_recognition/tensorflow/resnet101/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet101/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | ResNet 50           | Inference | [Int8](image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet50/README.md#fp32-inference-instructions) |
