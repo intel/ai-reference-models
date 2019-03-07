@@ -356,6 +356,25 @@ function inceptionv3() {
   fi
 }
 
+# inceptionv4 model
+function inceptionv4() {
+  if [ ${PRECISION} == "int8" ]; then
+    # For accuracy, dataset location is required
+    if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No dataset directory specified, accuracy cannot be calculated."
+      exit 1
+    fi
+    # add extra model specific args and then run the model
+    CMD="${CMD} $(add_steps_args) $(add_arg "--input-height" ${input_height}) \
+    $(add_arg "--input-width" ${input_width}) $(add_arg "--input-layer" ${input_layer}) \
+    $(add_arg "--output-layer" ${output_layer})"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # inception_resnet_v2 model
 function inception_resnet_v2() {
   # For accuracy, dataset location is required, see README for more information.
@@ -733,6 +752,8 @@ elif [ ${MODEL_NAME} == "gnmt" ]; then
   gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   inceptionv3
+elif [ ${MODEL_NAME} == "inceptionv4" ]; then
+  inceptionv4
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
   inception_resnet_v2
 elif [ ${MODEL_NAME} == "maskrcnn" ]; then
