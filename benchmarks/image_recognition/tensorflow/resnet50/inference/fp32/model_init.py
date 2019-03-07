@@ -73,13 +73,13 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.accuracy_only:
             self.benchmark_command += " --accuracy-only"
 
-            # if output results is enabled, generate a results file name and pass it to the inference script
-            if self.args.output_results:
-                self.results_filename = "{}_{}_{}_results_{}.txt".format(
-                    self.args.model_name, self.args.precision, self.args.mode,
-                    time.strftime("%Y%m%d_%H%M%S", time.gmtime()))
-                self.results_file_path = os.path.join(self.args.output_dir, self.results_filename)
-                self.benchmark_command += " --results-file-path {}".format(self.results_file_path)
+        # if output results is enabled, generate a results file name and pass it to the inference script
+        if self.args.output_results:
+            self.results_filename = "{}_{}_{}_results_{}.txt".format(
+                self.args.model_name, self.args.precision, self.args.mode,
+                time.strftime("%Y%m%d_%H%M%S", time.gmtime()))
+            self.results_file_path = os.path.join(self.args.output_dir, self.results_filename)
+            self.benchmark_command += " --results-file-path {}".format(self.results_file_path)
 
     def run(self):
         if self.benchmark_command:

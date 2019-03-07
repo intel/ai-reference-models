@@ -252,11 +252,13 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
 
-* The `--output-results` flag can be used along with above accuracy test
-settings in order to also output a file with the inference results
-(file name, actual label, and the predicted label). The command for this
-is the same as the accuracy command above, with the `--output-results`
-flag added:
+* The `--output-results` flag can be used along with above benchmarking
+or accuracy test, in order to also output a file with the inference
+results (file name, actual label, and the predicted label). The results
+output can only be used with real data.
+
+For example, the command below is the same as the accuracy test above,
+except with the `--output-results` flag added:
 ```
 $ cd /home/myuser/models/benchmarks
 
