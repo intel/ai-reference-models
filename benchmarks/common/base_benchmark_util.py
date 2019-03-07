@@ -253,11 +253,10 @@ class BaseBenchmarkUtil(object):
             raise ValueError("Number of inter threads "
                              "value should be greater than 0")
 
-        if args.output_results and (args.mode != "inference" or not args.accuracy_only):
-            raise ValueError("--output-results can only be used when running "
-                             "with --mode=inference and --accuracy-only")
-        elif args.output_results and (args.model_name != "resnet50" or args.precision != "fp32"):
+        if args.output_results and (args.model_name != "resnet50" or args.precision != "fp32"):
             raise ValueError("--output-results is currently only supported for resnet50 FP32 inference.")
+        elif args.output_results and (args.mode != "inference" or not args.data_location):
+            raise ValueError("--output-results can only be used when running inference with a dataset.")
 
     def initialize_model(self, args, unknown_args):
         """Create model initializer for the specified model"""
