@@ -448,7 +448,7 @@ def test_symlink_directory_input_validation(mock_system_platform, mock_os,
 
 def test_output_results_with_benchmarking(mock_system_platform, mock_os, mock_subprocess):
     """
-    Tests that the launch script fails when trying to get inference results when benchmarking
+    Tests that the launch script fails when trying to get inference results without a dataset
     """
     setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
     launch_benchmark = LaunchBenchmark()
@@ -462,8 +462,7 @@ def test_output_results_with_benchmarking(mock_system_platform, mock_os, mock_su
     args, _ = launch_benchmark.parse_args(test_args)
     with pytest.raises(ValueError) as e:
         launch_benchmark.validate_args(args)
-    assert "--output-results can only be used when running " \
-           "with --mode=inference and --accuracy-only" in str(e)
+    assert "--output-results can only be used when running inference with a dataset" in str(e)
 
 
 def test_output_results_with_training(mock_system_platform, mock_os, mock_subprocess):
@@ -482,8 +481,7 @@ def test_output_results_with_training(mock_system_platform, mock_os, mock_subpro
     args, _ = launch_benchmark.parse_args(test_args)
     with pytest.raises(ValueError) as e:
         launch_benchmark.validate_args(args)
-    assert "--output-results can only be used when running " \
-           "with --mode=inference and --accuracy-only" in str(e)
+    assert "--output-results can only be used when running inference with a dataset" in str(e)
 
 
 def test_output_results_with_accuracy(mock_system_platform, mock_os, mock_subprocess):
@@ -497,6 +495,7 @@ def test_output_results_with_accuracy(mock_system_platform, mock_os, mock_subpro
                  "--mode", test_mode,
                  "--precision", test_precision,
                  "--docker-image", test_docker_image,
+                 "--data-location", ".",
                  "--accuracy-only",
                  "--output-results"]
     args, _ = launch_benchmark.parse_args(test_args)
