@@ -73,6 +73,10 @@ optional arguments:
                         Specify the number of threads within the layer
   -e NUM_INTER_THREADS, --num-inter-threads NUM_INTER_THREADS
                         Specify the number threads between layers
+  --data-num-intra-threads DATA_NUM_INTRA_THREADS
+                        The number intra op threads for the data layer config
+  --data-num-inter-threads DATA_NUM_INTER_THREADS
+                        The number inter op threads for the data layer config
   -v, --verbose         Print verbose information.
   --docker-image DOCKER_IMAGE
                         Specify the docker image/tag to use
