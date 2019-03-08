@@ -28,6 +28,13 @@ from argparse import ArgumentParser
 from common import platform_util
 
 
+def positive_integer(arg_value):
+    """ Arg parser type check for positive values greater than 0 """
+    if int(arg_value) <= 0:
+        raise ValueError("Must be a positive integer, but received: {}".format(arg_value))
+    return arg_value
+
+
 class BaseBenchmarkUtil(object):
     """Base benchmark util class"""
     MODEL_INITIALIZER = "model_init"
@@ -96,14 +103,24 @@ class BaseBenchmarkUtil(object):
             dest="num_cores", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
-            "-a", "--num-intra-threads", type=int,
+            "-a", "--num-intra-threads", type=positive_integer,
             help="Specify the number of threads within the layer",
             dest="num_intra_threads", default=None)
 
         self._common_arg_parser.add_argument(
-            "-e", "--num-inter-threads", type=int,
+            "-e", "--num-inter-threads", type=positive_integer,
             help="Specify the number threads between layers",
             dest="num_inter_threads", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--data-num-intra-threads", type=positive_integer,
+            help="The number intra op threads for the data layer config",
+            dest="data_num_intra_threads", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--data-num-inter-threads", type=positive_integer,
+            help="The number inter op threads for the data layer config",
+            dest="data_num_inter_threads", default=None)
 
         self._common_arg_parser.add_argument(
             "-c", "--checkpoint",
@@ -240,18 +257,6 @@ class BaseBenchmarkUtil(object):
         elif num_cores > system_num_cores:
             raise ValueError("Number of cores exceeds system core number: {}".
                              format(system_num_cores))
-
-        # check no.of intra threads > 0
-        num_intra_threads = args.num_intra_threads
-        if num_intra_threads and num_intra_threads <= 0:
-            raise ValueError("Number of intra threads "
-                             "value should be greater than 0")
-
-        # check no.of inter threads > 0
-        num_inter_threads = args.num_inter_threads
-        if num_inter_threads and num_inter_threads <= 0:
-            raise ValueError("Number of inter threads "
-                             "value should be greater than 0")
 
         if args.output_results and (args.model_name != "resnet50" or args.precision != "fp32"):
             raise ValueError("--output-results is currently only supported for resnet50 FP32 inference.")

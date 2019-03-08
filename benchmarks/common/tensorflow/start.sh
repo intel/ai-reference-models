@@ -143,6 +143,14 @@ if [ ${NUM_INTRA_THREADS} != "None" ]; then
   CMD="${CMD} --num-intra-threads=${NUM_INTRA_THREADS}"
 fi
 
+if [ ${DATA_NUM_INTER_THREADS} != "None" ]; then
+  CMD="${CMD} --data-num-inter-threads=${DATA_NUM_INTER_THREADS}"
+fi
+
+if [ ${DATA_NUM_INTRA_THREADS} != "None" ]; then
+  CMD="${CMD} --data-num-intra-threads=${DATA_NUM_INTRA_THREADS}"
+fi
+
 # Add on --in-graph and --data-location for int8 inference
 if [ ${MODE} == "inference" ] && [ ${PRECISION} == "int8" ]; then
     CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
