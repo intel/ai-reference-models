@@ -314,38 +314,29 @@ def test_launch_benchmark_validate_bad_docker_image(
            "not have whitespace(s)" in str(e)
 
 
-def test_launch_benchmark_validate_bad_intra_threads(
-        mock_system_platform, mock_os, mock_subprocess):
+@pytest.mark.parametrize("test_arg_name,test_arg_value",
+                         (["--num-inter-threads", "0"],
+                          ["--num-intra-threads", "0"],
+                          ["--data-num-inter-threads", "0"],
+                          ["--data-num-intra-threads", "0"],
+                          ["--num-inter-threads", "-1"],
+                          ["--num-intra-threads", "-1"],
+                          ["--data-num-inter-threads", "-1"],
+                          ["--data-num-intra-threads", "-1"]))
+def test_launch_benchmark_validate_bad_inter_intra_threads(
+        mock_system_platform, mock_os, mock_subprocess, test_arg_name, test_arg_value, capfd):
     """
-    Verifies that an invalid num intra threads fails.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-
-    args.num_intra_threads = -1
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-
-    assert "Number of intra threads " \
-           "value should be greater than 0" in str(e)
-
-
-def test_launch_benchmark_validate_bad_inter_threads(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that an invalid num inter threads fails.
+    Verifies that invalid num intra/inter threads value fails.
     """
     setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
     launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
+    test_args = example_req_args + [test_arg_name, test_arg_value]
 
-    args.num_inter_threads = -1
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
+    with pytest.raises(SystemExit):
+        args, _ = launch_benchmark.parse_args(test_args)
 
-    assert "Number of inter threads " \
-           "value should be greater than 0" in str(e)
+    _, err = capfd.readouterr()
+    assert "{}: invalid positive_integer value: '{}'".format(test_arg_name, test_arg_value) in err
 
 
 def test_launch_benchmark_validate_empty_model(mock_platform_util):
