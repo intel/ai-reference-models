@@ -166,6 +166,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env", "NUM_CORES={}".format(args.num_cores),
                     "--env", "NUM_INTER_THREADS={}".format(args.num_inter_threads),
                     "--env", "NUM_INTRA_THREADS={}".format(args.num_intra_threads),
+                    "--env", "DATA_NUM_INTER_THREADS={}".format(args.data_num_inter_threads),
+                    "--env", "DATA_NUM_INTRA_THREADS={}".format(args.data_num_intra_threads),
                     "--env", "DATASET_LOCATION=/dataset",
                     "--env", "CHECKPOINT_DIRECTORY=/checkpoints",
                     "--env", "BENCHMARK_ONLY={}".format(args.benchmark_only),
