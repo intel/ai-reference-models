@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -45,6 +46,10 @@ import numpy as np
 
 from google.protobuf import text_format
 import tensorflow as tf
+import preprocessing
+import datasets
+
+NUM_TEST_IMAGES = 50000
 
 def load_graph(model_file):
   graph = tf.Graph()
@@ -60,6 +65,7 @@ def load_graph(model_file):
       graph_def.ParseFromString(f.read())
   with graph.as_default():
     tf.import_graph_def(graph_def, name='')
+    tf.train.write_graph(graph_def, '/tmp/', 'optimized_graph.pb',as_text=False)
 
   return graph
 
@@ -67,6 +73,8 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--input_graph", default=None,
                       help="graph/model to be executed")
+  parser.add_argument("--data_location", default=None,
+                      help="full path to the validation data")
   parser.add_argument("--input_height", default=None,
                       type=int, help="input height")
   parser.add_argument("--input_width", default=None,
@@ -85,9 +93,6 @@ if __name__ == "__main__":
       '--num_intra_threads',
       help='number threads for an operator',
       type=int, default=1)
-  parser.add_argument("--warmup_steps", type=int, default=40,
-                      help="number of warmup steps")
-  parser.add_argument("--steps", type=int, default=100, help="number of steps")
   args = parser.parse_args()
 
   if args.input_graph:
@@ -105,53 +110,65 @@ if __name__ == "__main__":
   batch_size = args.batch_size
   input_layer = args.input_layer
   output_layer = args.output_layer
-  warmup_steps = args.warmup_steps
-  steps = args.steps
-  print(steps)
-  assert steps > 10, "Benchmark steps should be at least 10."
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
-
-  input_shape = [batch_size, input_height, input_width, 3]
-  images = tf.truncated_normal(
-        input_shape,
-        dtype=tf.float32,
-        stddev=10,
-        name='synthetic_images')
-
-  image_data = None
-  with tf.Session() as sess:
-    image_data = sess.run(images)
-
+  data_location = args.data_location
+  dataset = datasets.ImagenetData(data_location)
+  preprocessor = preprocessing.ImagePreprocessor(
+      input_height, input_width, batch_size,
+      1, # device count
+      tf.float32, # data_type for input fed to the graph
+      train=False, # doing inference
+      resize_method='crop')
+  images, labels = preprocessor.minibatch(dataset, subset='train')
   graph = load_graph(model_file)
-
-  input_tensor = graph.get_tensor_by_name(input_layer + ":0");
-  output_tensor = graph.get_tensor_by_name(output_layer + ":0");
-
+  input_tensor = graph.get_tensor_by_name(input_layer + ":0")
+  output_tensor = graph.get_tensor_by_name(output_layer + ":0")
+  
   config = tf.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
   config.intra_op_parallelism_threads = num_intra_threads
-  #os.environ["OMP_NUM_THREADS"] = "14"
 
-  with tf.Session(graph=graph, config=config) as sess:
-    sys.stdout.flush()
-    print("[Running warmup steps...]")
-    for t in range(warmup_steps):
-      start_time = time.time()
-      sess.run(output_tensor, {input_tensor: image_data})
-      elapsed_time = time.time() - start_time
-      if((t+1) % 10 == 0):
-        print("steps = {0}, {1} images/sec"
-              "".format(t+1, batch_size/elapsed_time))
-    avg = 0
-    print("[Running benchmark steps...]")
-    total_time   = 0;
-    total_images = 0;
-    for t in range(steps):
-      start_time = time.time()
-      results = sess.run(output_tensor, {input_tensor: image_data})
-      elapsed_time = time.time() - start_time
-      avg += elapsed_time
-      if((t+1) % 10 == 0):
-        print("steps = {0}, {1} images/sec"
-			"".format(t+1, batch_size*steps/avg));
+  total_accuracy1, total_accuracy5 = (0.0, 0.0)
+  num_processed_images = 0
+  num_remaining_images = 5000
+  top1 = 0
+  with tf.Session() as sess:
+    sess_graph = tf.Session(graph=graph, config=config)
+    
+    while num_remaining_images >= batch_size:
+      # Reads and preprocess data
+      np_images, np_labels = sess.run([images[0], labels[0]])
+      np_labels -= 1
+      #print(np_labels.shape)
+      num_processed_images += batch_size
+      num_remaining_images -= batch_size
+      # Compute inference on the preprocessed data
+      predictions1 = sess_graph.run(output_tensor,
+                             {input_tensor: np_images})
+      #predictions = predictions +1 
+      #print(predictions1)
+      predictions2 = tf.argmax(predictions1, axis=1)
+      predictions = sess.run(predictions2)
+      top1 += batch_size - (np.count_nonzero(predictions - np_labels))
+      #print(top1/num_processed_images)
+      #print(num_processed_images) 
+      #print(predictions)
+      #accuracy1 = tf.reduce_sum(
+      #                         tf.nn.in_top_k(tf.cast(tf.Variable(predictions2), tf.float32),
+      #                         tf.cast((tf.constant(np_labels), 1), tf.float32)))
+      accuracy1 = tf.reduce_sum(
+          tf.cast(tf.nn.in_top_k(tf.constant(predictions1),
+              tf.constant(np_labels), 1), tf.float32))
+
+      accuracy5 = tf.reduce_sum(
+          tf.cast(tf.nn.in_top_k(tf.constant(predictions1),
+              tf.constant(np_labels), 5), tf.float32))
+      np_accuracy1, np_accuracy5 =  sess.run([accuracy1, accuracy5])
+
+      ##print(labels)
+      total_accuracy1 += np_accuracy1
+      total_accuracy5 += np_accuracy5
+      print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
+          % (num_processed_images, total_accuracy1/num_processed_images,
+          total_accuracy5/num_processed_images))

@@ -40,14 +40,11 @@ from __future__ import print_function
 
 import argparse
 import sys
-import os
-import time
-import numpy as np
 
-from google.protobuf import text_format
-import tensorflow as tf
-import preprocessing
 import datasets
+import preprocessing
+import tensorflow as tf
+from google.protobuf import text_format
 
 NUM_TEST_IMAGES = 50000
 
@@ -74,9 +71,9 @@ if __name__ == "__main__":
                       help="graph/model to be executed")
   parser.add_argument("--data_location", default=None,
                       help="full path to the validation data")
-  parser.add_argument("--input_height", default=None,
+  parser.add_argument("--input_height", default=224,
                       type=int, help="input height")
-  parser.add_argument("--input_width", default=None,
+  parser.add_argument("--input_width", default=224,
                       type=int, help="input width")
   parser.add_argument("--batch_size", default=32,
                       type=int, help="batch size")
@@ -84,6 +81,8 @@ if __name__ == "__main__":
                       help="name of input layer")
   parser.add_argument("--output_layer", default="predict",
                       help="name of output layer")
+  parser.add_argument("--calibrate", default=False,
+                      type=bool, help="calibrate=[True/False]")
   parser.add_argument(
       '--num_inter_threads',
       help='number threads across operators',
@@ -112,6 +111,10 @@ if __name__ == "__main__":
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
   data_location = args.data_location
+  if args.calibrate:
+    subset = 'calibration'
+  else:
+    subset = 'validation'
   dataset = datasets.ImagenetData(data_location)
   preprocessor = preprocessing.ImagePreprocessor(
       input_height, input_width, batch_size,
@@ -119,18 +122,18 @@ if __name__ == "__main__":
       tf.float32, # data_type for input fed to the graph
       train=False, # doing inference
       resize_method='crop')
-  images, labels = preprocessor.minibatch(dataset, subset='validation')
+  images, labels, _ = preprocessor.minibatch(dataset, subset=subset)
   graph = load_graph(model_file)
   input_tensor = graph.get_tensor_by_name(input_layer + ":0")
   output_tensor = graph.get_tensor_by_name(output_layer + ":0")
-  
+
   config = tf.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
   config.intra_op_parallelism_threads = num_intra_threads
 
   total_accuracy1, total_accuracy5 = (0.0, 0.0)
   num_processed_images = 0
-  num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
+  num_remaining_images = dataset.num_examples_per_epoch(subset=subset) \
                             - num_processed_images
   with tf.Session() as sess:
     sess_graph = tf.Session(graph=graph, config=config)

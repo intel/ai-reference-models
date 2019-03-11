@@ -19,18 +19,23 @@
 #
 
 import time
+import numpy as np
 from argparse import ArgumentParser
 
 import tensorflow as tf
 import tensorflow.tools.graph_transforms as graph_transforms
 
+from tensorflow.python.client import timeline
+from tensorflow.python.platform import gfile
 import datasets
+import preprocessing
 
 INPUTS = 'input'
-OUTPUTS = 'predict'
+OUTPUTS = 'resnet_v1_101/predictions/Reshape_1'
 OPTIMIZATION = 'strip_unused_nodes remove_nodes(op=Identity, op=CheckNumerics) fold_constants(ignore_errors=true) fold_batch_norms fold_old_batch_norms'
 
-INCEPTION_V3_IMAGE_SIZE = 299
+RESNET_IMAGE_SIZE = 224
+IMAGENET_VALIDATION_IMAGES = 50000
 
 
 class eval_classifier_optimized_graph:
@@ -55,6 +60,10 @@ class eval_classifier_optimized_graph:
                             help='The number of intra-thread.',
                             dest='num_intra_threads', type=int, default=0)
 
+    arg_parser.add_argument('-m', "--model-name",
+                            help='Specify the model name to run benchmark for',
+                            dest='model_name')
+
     arg_parser.add_argument('-g', "--input-graph",
                             help='Specify the input graph for the transform tool',
                             dest='input_graph')
@@ -73,23 +82,9 @@ class eval_classifier_optimized_graph:
                             help="number of warmup steps")
     arg_parser.add_argument("--steps", type=int, default=50,
                             help="number of steps")
-
-    arg_parser.add_argument(
-      '--data-num-inter-threads', dest='data_num_inter_threads',
-      help='number threads across operators',
-      type=int, default=16)
-    arg_parser.add_argument(
-      '--data-num-intra-threads', dest='data_num_intra_threads',
-      help='number threads for data layer operator',
-      type=int, default=14)
-    arg_parser.add_argument(
-      '--num-cores', dest='num_cores',
-      help='number of cores',
-      type=int, default=28)
-
+    # parse the arguments
     self.args = arg_parser.parse_args()
-
-    # validate the arguments specific for InceptionV3
+    # validate the arguements
     self.validate_args()
 
   def run(self):
@@ -98,8 +93,8 @@ class eval_classifier_optimized_graph:
     print("Run inference")
 
     data_config = tf.ConfigProto()
-    data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
-    data_config.inter_op_parallelism_threads = self.args.data_num_inter_threads
+    data_config.intra_op_parallelism_threads = 14 
+    data_config.inter_op_parallelism_threads = 16
     data_config.use_per_session_threads = 1
 
     infer_config = tf.ConfigProto()
@@ -113,45 +108,51 @@ class eval_classifier_optimized_graph:
         print("Inference with real data.")
         dataset = datasets.ImagenetData(self.args.data_location)
         preprocessor = dataset.get_image_preprocessor()(
-          INCEPTION_V3_IMAGE_SIZE, INCEPTION_V3_IMAGE_SIZE, self.args.batch_size,
-          num_cores=self.args.num_cores,
-          resize_method='bilinear')
+            RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, self.args.batch_size,
+            intra_threads=self.args.num_intra_threads,
+            resize_method='crop')
         images, labels = preprocessor.minibatch(dataset, subset='validation')
       else:
         print("Inference with dummy data.")
-        input_shape = [self.args.batch_size, INCEPTION_V3_IMAGE_SIZE, INCEPTION_V3_IMAGE_SIZE, 3]
-        images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
+        input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
+        images = tf.random.uniform(input_shape, 0.0, 255.0,dtype=tf.float32,name='synthetic_images')
 
     infer_graph = tf.Graph()
     with infer_graph.as_default():
+      # convert the freezed graph to optimized graph
       graph_def = tf.GraphDef()
       with tf.gfile.FastGFile(self.args.input_graph, 'rb') as input_file:
         input_graph_content = input_file.read()
         graph_def.ParseFromString(input_graph_content)
 
       output_graph = graph_transforms.TransformGraph(graph_def,
-                                                     [INPUTS], [OUTPUTS], [OPTIMIZATION])
+                                                       [INPUTS], [OUTPUTS], [OPTIMIZATION])
       tf.import_graph_def(output_graph, name='')
 
     # Definite input and output Tensors for detection_graph
     input_tensor = infer_graph.get_tensor_by_name('input:0')
-    output_tensor = infer_graph.get_tensor_by_name('predict:0')
-
+    #output_tensor = infer_graph.get_tensor_by_name('resnet_v1_101/SpatialSqueeze:0')
+    output_tensor = infer_graph.get_tensor_by_name('resnet_v1_101/predictions/Reshape_1:0')
+      
+    #tf.global_variables_initializer()
     data_sess  = tf.Session(graph=data_graph,  config=data_config)
     infer_sess = tf.Session(graph=infer_graph, config=infer_config)
 
     num_processed_images = 0
-    num_remaining_images = datasets.IMAGENET_NUM_VAL_IMAGES
+    num_remaining_images = IMAGENET_VALIDATION_IMAGES
 
-    if (not self.args.accuracy_only):
+    if (not self.args.accuracy_only):  # performance check
       iteration = 0
       warm_up_iteration = self.args.warmup_steps
       total_run = self.args.steps
       total_time = 0
+      #options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+      #run_metadata = tf.RunMetadata()
 
       while num_remaining_images >= self.args.batch_size and iteration < total_run:
         iteration += 1
 
+        # Reads and preprocess data
         data_load_start = time.time()
         image_np = data_sess.run(images)
         data_load_time = time.time() - data_load_start
@@ -167,47 +168,51 @@ class eval_classifier_optimized_graph:
         if self.args.data_location:
           time_consume += data_load_time
 
-        print('Iteration %d: %.6f sec' % (iteration, time_consume))
+        #trace = timeline.Timeline(step_stats=run_metadata.step_stats)
+        #with gfile.Open('resnet101_fp32_int8_master', 'w') as trace_file:
+        #    trace_file.write(trace.generate_chrome_trace_format(show_memory=False))
+
+        print('Iteration %d: %.3f sec' % (iteration, time_consume))
         if iteration > warm_up_iteration:
           total_time += time_consume
 
       time_average = total_time / (iteration - warm_up_iteration)
-      print('Average time: %.6f sec' % (time_average))
+      print('Average time: %.3f sec' % (time_average))
 
       print('Batch size = %d' % self.args.batch_size)
       if (self.args.batch_size == 1):
         print('Latency: %.3f ms' % (time_average * 1000))
-
+      # print throughput for both batch size 1 and 128
       print('Throughput: %.3f images/sec' % (self.args.batch_size / time_average))
 
     else:  # accuracy check
       total_accuracy1, total_accuracy5 = (0.0, 0.0)
 
+
       while num_remaining_images >= self.args.batch_size:
         # Reads and preprocess data
         np_images, np_labels = data_sess.run([images, labels])
+        np_labels -= 1
         num_processed_images += self.args.batch_size
         num_remaining_images -= self.args.batch_size
 
         # Compute inference on the preprocessed data
         predictions = infer_sess.run(output_tensor,
-                                     {input_tensor: np_images})
-
+                               {input_tensor: np_images})
         with tf.Graph().as_default() as accu_graph:
+          # Putting all code within this make things faster.
           accuracy1 = tf.reduce_sum(
             tf.cast(tf.nn.in_top_k(tf.constant(predictions),
-                                   tf.constant(np_labels), 1), tf.float32))
+                                 tf.constant(np_labels), 1), tf.float32))
 
           accuracy5 = tf.reduce_sum(
             tf.cast(tf.nn.in_top_k(tf.constant(predictions),
-                                   tf.constant(np_labels), 5), tf.float32))
+                                 tf.constant(np_labels), 5), tf.float32))
           with tf.Session() as accu_sess:
             np_accuracy1, np_accuracy5 = accu_sess.run([accuracy1, accuracy5])
-
           total_accuracy1 += np_accuracy1
           total_accuracy5 += np_accuracy5
-
-        print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
+          print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
               % (num_processed_images, total_accuracy1 / num_processed_images,
                  total_accuracy5 / num_processed_images))
 

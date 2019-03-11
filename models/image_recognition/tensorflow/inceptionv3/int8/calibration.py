@@ -1,23 +1,3 @@
-#
-# -*- coding: utf-8 -*-
-#
-# Copyright (c) 2018 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#    http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-#
-# SPDX-License-Identifier: EPL-2.0
-#
-
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -64,7 +44,6 @@ def load_graph(model_file):
       graph_def.ParseFromString(f.read())
   with graph.as_default():
     tf.import_graph_def(graph_def, name='')
-    tf.train.write_graph(graph_def, '/tmp/', 'optimized_graph.pb',as_text=False)
 
   return graph
 
@@ -74,15 +53,15 @@ if __name__ == "__main__":
                       help="graph/model to be executed")
   parser.add_argument("--data_location", default=None,
                       help="full path to the validation data")
-  parser.add_argument("--input_height", default=None,
+  parser.add_argument("--input_height", default=299,
                       type=int, help="input height")
-  parser.add_argument("--input_width", default=None,
+  parser.add_argument("--input_width", default=299,
                       type=int, help="input width")
   parser.add_argument("--batch_size", default=32,
                       type=int, help="batch size")
   parser.add_argument("--input_layer", default="input",
                       help="name of input layer")
-  parser.add_argument("--output_layer", default="resnet_v1_101/SpatialSqueeze",
+  parser.add_argument("--output_layer", default="predict",
                       help="name of output layer")
   parser.add_argument(
       '--num_inter_threads',
@@ -113,13 +92,15 @@ if __name__ == "__main__":
   num_intra_threads = args.num_intra_threads
   data_location = args.data_location
   dataset = datasets.ImagenetData(data_location)
-  preprocessor = preprocessing.ImagePreprocessor(
+  preprocessor = dataset.get_image_preprocessor()(
       input_height, input_width, batch_size,
       1, # device count
       tf.float32, # data_type for input fed to the graph
       train=False, # doing inference
-      resize_method='crop')
-  images, labels = preprocessor.minibatch(dataset, subset='validation')
+      resize_method='bilinear')
+
+  images, labels = preprocessor.minibatch(dataset, subset='train',
+                    use_datasets=True, cache_data=False)
   graph = load_graph(model_file)
   input_tensor = graph.get_tensor_by_name(input_layer + ":0")
   output_tensor = graph.get_tensor_by_name(output_layer + ":0")
@@ -130,43 +111,26 @@ if __name__ == "__main__":
 
   total_accuracy1, total_accuracy5 = (0.0, 0.0)
   num_processed_images = 0
-  num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
+  num_remaining_images = dataset.num_examples_per_epoch(subset='train') \
                             - num_processed_images
-  top1 = 0
   with tf.Session() as sess:
     sess_graph = tf.Session(graph=graph, config=config)
-    
-    while num_remaining_images >= batch_size:
+    while (num_remaining_images >= batch_size) and (num_processed_images < 10000):
       # Reads and preprocess data
       np_images, np_labels = sess.run([images[0], labels[0]])
-      np_labels -= 1
-      #print(np_labels.shape)
       num_processed_images += batch_size
       num_remaining_images -= batch_size
       # Compute inference on the preprocessed data
-      predictions1 = sess_graph.run(output_tensor,
+      predictions = sess_graph.run(output_tensor,
                              {input_tensor: np_images})
-      #predictions = predictions +1 
-      #print(predictions1)
-      predictions2 = tf.argmax(predictions1, axis=1)
-      predictions = sess.run(predictions2)
-      top1 += batch_size - (np.count_nonzero(predictions - np_labels))
-      #print(top1/num_processed_images)
-      #print(num_processed_images) 
-      #print(predictions)
-      #accuracy1 = tf.reduce_sum(
-      #                         tf.nn.in_top_k(tf.cast(tf.Variable(predictions2), tf.float32),
-      #                         tf.cast((tf.constant(np_labels), 1), tf.float32)))
       accuracy1 = tf.reduce_sum(
-          tf.cast(tf.nn.in_top_k(tf.constant(predictions1),
+          tf.cast(tf.nn.in_top_k(tf.constant(predictions),
               tf.constant(np_labels), 1), tf.float32))
 
       accuracy5 = tf.reduce_sum(
-          tf.cast(tf.nn.in_top_k(tf.constant(predictions1),
+          tf.cast(tf.nn.in_top_k(tf.constant(predictions),
               tf.constant(np_labels), 5), tf.float32))
       np_accuracy1, np_accuracy5 =  sess.run([accuracy1, accuracy5])
-
-      ##print(labels)
       total_accuracy1 += np_accuracy1
       total_accuracy5 += np_accuracy5
       print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \

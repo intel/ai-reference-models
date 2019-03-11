@@ -33,48 +33,15 @@
 """Benchmark dataset utilities.
 """
 
-from abc import abstractmethod
 import os
+from abc import abstractmethod
 
-import numpy as np
-from six.moves import cPickle
-from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.python.platform import gfile
 import preprocessing
-
 
 IMAGENET_NUM_TRAIN_IMAGES = 1281167
 IMAGENET_NUM_VAL_IMAGES = 50000
-
-
-def create_dataset(data_dir, data_name):
-  """Create a Dataset instance based on data_dir and data_name."""
-  supported_datasets = {
-      'imagenet': ImagenetData,
-      'cifar10': Cifar10Data,
-  }
-  if not data_dir and not data_name:
-    # When using synthetic data, use synthetic imagenet images by default.
-    data_name = 'imagenet'
-
-  if data_name is None:
-    for supported_name in supported_datasets:
-      if supported_name in data_dir:
-        data_name = supported_name
-        break
-
-  if data_name is None:
-    raise ValueError('Could not identify name of dataset. '
-                     'Please specify with --data_name option.')
-
-  if data_name not in supported_datasets:
-    raise ValueError('Unknown dataset. Must be one of %s', ', '.join(
-        [key for key in sorted(supported_datasets.keys())]))
-
-  return supported_datasets[data_name](data_dir)
-
 
 class Dataset(object):
   """Abstract class for cnn benchmarks dataset."""
@@ -136,57 +103,5 @@ class ImagenetData(Dataset):
       raise ValueError('Invalid data subset "%s"' % subset)
 
   def get_image_preprocessor(self):
-    if self.use_synthetic_gpu_images():
-      return preprocessing.SyntheticImagePreprocessor
-    else:
-      return preprocessing.RecordInputImagePreprocessor
+    return preprocessing.RecordInputImagePreprocessor
 
-
-class Cifar10Data(Dataset):
-  """Configuration for cifar 10 dataset.
-
-  It will mount all the input images to memory.
-  """
-
-  def __init__(self, data_dir=None):
-    super(Cifar10Data, self).__init__('cifar10', 32, 32, data_dir=data_dir,
-                                      queue_runner_required=True,
-                                      num_classes=10)
-
-  def read_data_files(self, subset='train'):
-    """Reads from data file and returns images and labels in a numpy array."""
-    assert self.data_dir, ('Cannot call `read_data_files` when using synthetic '
-                           'data')
-    if subset == 'train':
-      filenames = [os.path.join(self.data_dir, 'data_batch_%d' % i)
-                   for i in xrange(1, 6)]
-    elif subset == 'validation':
-      filenames = [os.path.join(self.data_dir, 'test_batch')]
-    else:
-      raise ValueError('Invalid data subset "%s"' % subset)
-
-    inputs = []
-    for filename in filenames:
-      with gfile.Open(filename, 'r') as f:
-        inputs.append(cPickle.load(f))
-    # See http://www.cs.toronto.edu/~kriz/cifar.html for a description of the
-    # input format.
-    all_images = np.concatenate(
-        [each_input['data'] for each_input in inputs]).astype(np.float32)
-    all_labels = np.concatenate(
-        [each_input['labels'] for each_input in inputs])
-    return all_images, all_labels
-
-  def num_examples_per_epoch(self, subset='train'):
-    if subset == 'train':
-      return 50000
-    elif subset == 'validation':
-      return 10000
-    else:
-      raise ValueError('Invalid data subset "%s"' % subset)
-
-  def get_image_preprocessor(self):
-    if self.use_synthetic_gpu_images():
-      return preprocessing.SyntheticImagePreprocessor
-    else:
-      return preprocessing.Cifar10ImagePreprocessor

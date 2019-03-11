@@ -76,7 +76,8 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_212224.log
 ```
 
-* Evaluate the model performance: The ImageNet dataset is not needed in this case:
+* Evaluate the model performance: If just evaluate performance for dummy data, the `--data-location` is not needed.
+Otherwise `--data-location` argument needs to be specified:
 Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
 2, the docker image (from step 3) and the `--benchmark-only` flag. It is
@@ -146,7 +147,8 @@ to download, process, and convert the ImageNet dataset to the TF records format.
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
-As benchmarking uses dummy data for inference, `--data-location` flag is not required.
+If benchmarking uses dummy data for inference, `--data-location` flag is not required. Otherwise,
+`--data-location` needs to point to point to ImageNet dataset location.
 
 * To measure the model latency, set `--batch-size=1` and run the benchmark script as shown:
 ```
