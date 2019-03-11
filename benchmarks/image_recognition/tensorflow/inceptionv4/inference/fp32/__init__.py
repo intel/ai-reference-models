@@ -17,12 +17,3 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-
-from image_recognition.tensorflow.inceptionv4.inference.inceptionv4_model_init import InceptionV4ModelInitializer
-
-
-class ModelInitializer(InceptionV4ModelInitializer):
-    """Model initializer for InceptionV4 FP32 inference"""
-
-    def __init__(self, args, custom_args=[], platform_util=None):
-        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
