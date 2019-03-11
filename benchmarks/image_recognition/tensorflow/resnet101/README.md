@@ -22,7 +22,7 @@ an optimized version of the ResNet101 model code.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_int8_pretrained_model.pb
 ```
 
-3. If you would like to run ResNet101 inference and test for
+3. If you would like to run ResNet101 inference with real data or test for
 accurancy, you will need the full ImageNet dataset.
 
 Register and download the
@@ -90,7 +90,7 @@ number of `warmup_steps` and `steps` as extra args, as shown in the
 commands below. If these values are not specified, the script will
 default to use `warmup_steps=40` and `steps=100`.
 
-For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For latency with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -106,7 +106,24 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+For latency with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+
+```
+python launch_benchmark.py \
+    --model-name resnet101 \
+    --precision int8 \
+    --mode inference \
+    --framework tensorflow \
+    --benchmark-only \
+    --batch-size 1 \
+    --socket-id 0 \
+    --data-location /home/myuser/dataset/FullImageNetData_directory \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
+    -- warmup_steps=50 steps=500
+```
+
+For throughput with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -121,6 +138,24 @@ python launch_benchmark.py \
     --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
+
+For throughput with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+
+```
+python launch_benchmark.py \
+    --model-name resnet101 \
+    --precision int8 \
+    --mode inference \
+    --framework tensorflow \
+    --benchmark-only \
+    --batch-size 128 \
+    --data-location /home/myuser/dataset/FullImageNetData_directory \
+    --socket-id 0 \
+    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --in-graph=/home/myuser/resnet101_int8_pretrained_model.pb \
+    -- warmup_steps=50 steps=500
+```
+
 
 The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
 used in the commands above were built using
@@ -213,7 +248,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
     ```
 4. Run the benchmark.
 
-    For latency measurements set `--batch-size 1` and for throughput benchmarking set `--batch-size 128`
+    For latency measurements with dummy data set `--batch-size 1` and for throughput benchmarking set `--batch-size 128`
 
     ```
     $ cd /home/myuser/models/benchmarks

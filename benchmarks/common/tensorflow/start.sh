@@ -216,6 +216,7 @@ function add_steps_args() {
   # returns string with --steps and --warmup_steps, if there are values specified
   local steps_arg=""
   local warmup_steps_arg=""
+  local kmp_blocktime_arg=""
 
   if [ -n "${steps}" ]; then
     steps_arg="--steps=${steps}"
@@ -225,7 +226,22 @@ function add_steps_args() {
     warmup_steps_arg="--warmup-steps=${warmup_steps}"
   fi
 
-  echo "${steps_arg} ${warmup_steps_arg}"
+  if [ -n "${kmp_blocktime}" ]; then
+    kmp_blocktime_arg="--kmp-blocktime=${kmp_blocktime}"
+  fi
+
+  echo "${steps_arg} ${warmup_steps_arg} ${kmp_blocktime_arg}"
+}
+
+function add_calibration_arg() {
+  # returns string with --calibration-only, if True is specified
+  local calibration_arg=""
+
+  if [[ ${calibration_only} == "True" ]]; then
+    calibration_arg="--calibration-only"
+  fi
+
+  echo "${calibration_arg}"
 }
 
 # 3D UNet model
@@ -328,40 +344,6 @@ function gnmt() {
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
       exit 1
     fi
-}
-
-# inceptionv3 model
-function inceptionv3() {
-  if [ ${PRECISION} == "int8" ]; then
-    # For accuracy, dataset location is required, see README for more information.
-    if [ ! -d "${DATASET_LOCATION}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "No Data directory specified, accuracy will not be calculated."
-      exit 1
-    fi
-
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    input_height_arg=""
-    input_width_arg=""
-
-    if [ -n "${input_height}" ]; then
-      input_height_arg="--input-height=${input_height}"
-    fi
-
-    if [ -n "${input_width}" ]; then
-      input_width_arg="--input-width=${input_width}"
-    fi
-
-    CMD="${CMD} ${input_height_arg} ${input_width_arg} $(add_steps_args)"
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-
-  elif [ ${PRECISION} == "fp32" ]; then
-    # Run inception v3 fp32 inference
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
 }
 
 # inceptionv4 model
@@ -467,8 +449,8 @@ function ncf() {
   fi
 }
 
-# ResNet101 model
-function resnet101() {
+# ResNet50, ResNet101, InceptionV3 model
+function resnet50_101_inceptionv3() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
     # For accuracy, dataset location is required.
@@ -478,10 +460,10 @@ function resnet101() {
     fi
 
     if [ ${PRECISION} == "int8" ]; then
-        CMD="${CMD} $(add_steps_args)"
+        CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     elif [ ${PRECISION} == "fp32" ]; then
-      CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+      CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION} $(add_steps_args)"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -489,29 +471,6 @@ function resnet101() {
     fi
 }
 
-# Resnet50 int8 and fp32 models
-function resnet50() {
-    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
-
-    if [ ${PRECISION} == "int8" ]; then
-        # For accuracy, dataset location is required, see README for more information.
-        if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
-          echo "No Data directory specified, accuracy will not be calculated."
-          exit 1
-        fi
-
-        CMD="${CMD} $(add_steps_args)"
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-
-    elif [ ${PRECISION} == "fp32" ]; then
-        # Run resnet50 fp32 inference
-        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    else
-        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-        exit 1
-    fi
-}
 
 # R-FCN (ResNet101) model
 function rfcn() {
@@ -763,7 +722,7 @@ elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
 elif [ ${MODEL_NAME} == "gnmt" ]; then
   gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
-  inceptionv3
+  resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
@@ -775,9 +734,9 @@ elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then
-  resnet101
+  resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "resnet50" ]; then
-  resnet50
+  resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "rfcn" ]; then
   rfcn
 elif [ ${MODEL_NAME} == "squeezenet" ]; then

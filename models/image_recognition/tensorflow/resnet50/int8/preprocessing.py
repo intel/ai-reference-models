@@ -416,4 +416,4 @@ class ImagePreprocessor(object):
         # Display the training images in the visualizer.
         # tf.summary.image('images', images)
 
-      return images, label_index_batch
+      return images, label_index_batch, records
