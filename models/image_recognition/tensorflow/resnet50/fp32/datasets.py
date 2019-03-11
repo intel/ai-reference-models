@@ -41,6 +41,11 @@ import os
 
 import tensorflow as tf
 
+import preprocessing
+
+IMAGENET_NUM_TRAIN_IMAGES = 1281167
+IMAGENET_NUM_VAL_IMAGES = 50000
+IMAGENET_NUM_CLASSES = 1000
 
 class Dataset(object):
   """Abstract class for cnn benchmarks dataset."""
@@ -69,35 +74,21 @@ class Dataset(object):
     return self.name
 
 
-class FlowersData(Dataset):
-
-  def __init__(self, data_dir=None):
-    super(FlowersData, self).__init__('Flowers', data_dir)
-
-  def num_classes(self):
-    return 5
-
-  def num_examples_per_epoch(self, subset):
-    if subset == 'train':
-      return 3170
-    elif subset == 'validation':
-      return 500
-    else:
-      raise ValueError('Invalid data subset "%s"' % subset)
-
-
 class ImagenetData(Dataset):
 
   def __init__(self, data_dir=None):
     super(ImagenetData, self).__init__('ImageNet', data_dir)
 
   def num_classes(self):
-    return 1000
+    return IMAGENET_NUM_CLASSES
 
   def num_examples_per_epoch(self, subset='train'):
     if subset == 'train':
-      return 1281167
+      return IMAGENET_NUM_TRAIN_IMAGES
     elif subset == 'validation':
-      return 50000
+      return IMAGENET_NUM_VAL_IMAGES
     else:
       raise ValueError('Invalid data subset "%s"' % subset)
+
+  def get_image_preprocessor(self):
+    return preprocessing.RecordInputImagePreprocessor

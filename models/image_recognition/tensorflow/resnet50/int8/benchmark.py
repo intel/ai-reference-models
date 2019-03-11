@@ -40,52 +40,45 @@ from __future__ import print_function
 
 import argparse
 import sys
-import os
 import time
-import numpy as np
 
-from google.protobuf import text_format
+import datasets
 import tensorflow as tf
-
-def load_graph(model_file):
-  graph = tf.Graph()
-  graph_def = tf.GraphDef()
-
-  import os
-  file_ext = os.path.splitext(model_file)[1]
-
-  with open(model_file, "rb") as f:
-    if file_ext == '.pbtxt':
-      text_format.Merge(f.read(), graph_def)
-    else:
-      graph_def.ParseFromString(f.read())
-  with graph.as_default():
-    tf.import_graph_def(graph_def, name='')
-
-  return graph
 
 if __name__ == "__main__":
   parser = argparse.ArgumentParser()
   parser.add_argument("--input_graph", default=None,
                       help="graph/model to be executed")
-  parser.add_argument("--input_height", default=None,
+  parser.add_argument("--input_height", default=224,
                       type=int, help="input height")
-  parser.add_argument("--input_width", default=None,
+  parser.add_argument("--input_width", default=224,
                       type=int, help="input width")
   parser.add_argument("--batch_size", default=32,
                       type=int, help="batch size")
+  parser.add_argument("--data_location", default=None,
+                      help="dataset location")
   parser.add_argument("--input_layer", default="input",
                       help="name of input layer")
   parser.add_argument("--output_layer", default="predict",
                       help="name of output layer")
+  parser.add_argument("--num_cores", default=28,
+                      type=int, help="number of physical cores")
   parser.add_argument(
-      '--num_inter_threads',
-      help='number threads across operators',
-      type=int, default=1)
+    '--num_inter_threads',
+    help='number threads across operators',
+    type=int, default=1)
   parser.add_argument(
-      '--num_intra_threads',
-      help='number threads for an operator',
-      type=int, default=1)
+    '--num_intra_threads',
+    help='number threads for an operator',
+    type=int, default=1)
+  parser.add_argument(
+    '--data_num_inter_threads',
+    help='number threads across data layer operators',
+    type=int, default=16)
+  parser.add_argument(
+    '--data_num_intra_threads',
+    help='number threads for an data layer operator',
+    type=int, default=14)
   parser.add_argument("--warmup_steps", type=int, default=10,
                       help="number of warmup steps")
   parser.add_argument("--steps", type=int, default=50, help="number of steps")
@@ -112,44 +105,91 @@ if __name__ == "__main__":
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
 
-  input_shape = [batch_size, input_height, input_width, 3]
-  images = tf.truncated_normal(
-        input_shape,
-        dtype=tf.float32,
-        stddev=10,
-        name='synthetic_images')
+  data_config = tf.ConfigProto()
+  data_config.intra_op_parallelism_threads = args.data_num_intra_threads
+  data_config.inter_op_parallelism_threads = args.data_num_inter_threads
+  data_config.use_per_session_threads = 1
 
-  image_data = None
-  with tf.Session() as sess:
-    image_data = sess.run(images)
+  infer_config = tf.ConfigProto()
+  infer_config.intra_op_parallelism_threads = num_intra_threads
+  infer_config.inter_op_parallelism_threads = num_inter_threads
+  infer_config.use_per_session_threads = 1
 
-  graph = load_graph(model_file)
+  data_graph = tf.Graph()
+  with data_graph.as_default():
+    if args.data_location:
+      print("inference with real data")
+      # get the images from dataset
+      dataset = datasets.ImagenetData(args.data_location)
+      preprocessor = dataset.get_image_preprocessor(benchmark=True)(
+        input_height, input_width, batch_size,
+        num_cores=args.num_cores,
+        resize_method='crop')
+      images = preprocessor.minibatch(dataset, subset='validation')
+    else:
+      # synthetic images
+      print("inference with dummy data")
+      input_shape = [batch_size, input_height, input_width, 3]
+      images = tf.random.uniform(
+        input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
 
-  input_tensor = graph.get_tensor_by_name(input_layer + ":0");
-  output_tensor = graph.get_tensor_by_name(output_layer + ":0");
+  infer_graph = tf.Graph()
+  with infer_graph.as_default():
+    graph_def = tf.GraphDef()
+    with open(model_file, "rb") as f:
+      graph_def.ParseFromString(f.read())
+    tf.import_graph_def(graph_def, name='')
 
-  config = tf.ConfigProto()
-  config.inter_op_parallelism_threads = num_inter_threads
-  config.intra_op_parallelism_threads = num_intra_threads
+  input_tensor = infer_graph.get_tensor_by_name(input_layer + ":0")
+  output_tensor = infer_graph.get_tensor_by_name(output_layer + ":0")
+  tf.global_variables_initializer()
 
-  with tf.Session(graph=graph, config=config) as sess:
-    sys.stdout.flush()
-    print("[Running warmup steps...]")
-    for t in range(warmup_steps):
+  data_sess = tf.Session(graph=data_graph, config=data_config)
+  infer_sess = tf.Session(graph=infer_graph, config=infer_config)
+
+  print("[Running warmup steps...]")
+  for t in range(warmup_steps):
+    data_start_time = time.time()
+    image_data = data_sess.run(images)
+    data_load_time = time.time() - data_start_time
+
+    start_time = time.time()
+    infer_sess.run(output_tensor, {input_tensor: image_data})
+    elapsed_time = time.time() - start_time
+
+    # only count the data loading and processing time for real data
+    if args.data_location:
+      elapsed_time += data_load_time
+
+    if ((t + 1) % 10 == 0):
+      print("steps = {0}, {1} images/sec"
+            "".format(t + 1, batch_size / elapsed_time))
+
+  print("[Running benchmark steps...]")
+  total_time = 0
+  total_images = 0
+
+  for t in range(steps):
+    try:
+      data_start_time = time.time()
+      image_data = data_sess.run(images)
+      data_load_time = time.time() - data_start_time
+
       start_time = time.time()
-      sess.run(output_tensor, {input_tensor: image_data})
+      infer_sess.run(output_tensor, {input_tensor: image_data})
       elapsed_time = time.time() - start_time
-      if((t+1) % 10 == 0):
-        print("steps = {0}, {1} images/sec"
-              "".format(t+1, batch_size/elapsed_time))
 
-    print("[Running benchmark steps...]")
-    total_time   = 0;
-    total_images = 0;
-    for t in range(steps):
-      start_time = time.time()
-      results = sess.run(output_tensor, {input_tensor: image_data})
-      elapsed_time = time.time() - start_time
-      if((t+1) % 10 == 0):
+      # only count the data loading and processing time for real data
+      if args.data_location:
+        elapsed_time += data_load_time
+
+      total_time += elapsed_time
+      total_images += batch_size
+      if ((t + 1) % 10 == 0):
         print("steps = {0}, {1} images/sec"
-              "".format(t+1, batch_size/elapsed_time));
+              "".format(t + 1, batch_size / elapsed_time))
+    except tf.errors.OutOfRangeError:
+      print("Running out of images from dataset.")
+      break
+
+  print("Average throughput for batch size {0}: {1} images/sec".format(batch_size, total_images / total_time))
