@@ -1,3 +1,24 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2018 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: EPL-2.0
+#
+
+
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,6 +43,8 @@ import sys
 import os
 import time
 import numpy as np
+from collections import namedtuple
+from operator import attrgetter
 
 from google.protobuf import text_format
 import tensorflow as tf
@@ -53,9 +76,9 @@ if __name__ == "__main__":
                       help="graph/model to be executed")
   parser.add_argument("--data_location", default=None,
                       help="full path to the validation data")
-  parser.add_argument("--input_height", default=299,
+  parser.add_argument("--input_height", default=224,
                       type=int, help="input height")
-  parser.add_argument("--input_width", default=299,
+  parser.add_argument("--input_width", default=224,
                       type=int, help="input width")
   parser.add_argument("--batch_size", default=32,
                       type=int, help="batch size")
@@ -80,11 +103,11 @@ if __name__ == "__main__":
   if args.input_height:
     input_height = args.input_height
   else:
-    input_height = 299
+    input_height = 224
   if args.input_width:
     input_width = args.input_width
   else:
-    input_width = 299
+    input_width = 224
   batch_size = args.batch_size
   input_layer = args.input_layer
   output_layer = args.output_layer
@@ -92,15 +115,13 @@ if __name__ == "__main__":
   num_intra_threads = args.num_intra_threads
   data_location = args.data_location
   dataset = datasets.ImagenetData(data_location)
-  preprocessor = dataset.get_image_preprocessor()(
+  preprocessor = preprocessing.ImagePreprocessor(
       input_height, input_width, batch_size,
       1, # device count
       tf.float32, # data_type for input fed to the graph
       train=False, # doing inference
-      resize_method='bilinear')
-
-  images, labels = preprocessor.minibatch(dataset, subset='validation',
-                    use_datasets=True, cache_data=False)
+      resize_method='crop')
+  images, labels, tf_records = preprocessor.minibatch(dataset, subset='train')
   graph = load_graph(model_file)
   input_tensor = graph.get_tensor_by_name(input_layer + ":0")
   output_tensor = graph.get_tensor_by_name(output_layer + ":0")
@@ -111,18 +132,33 @@ if __name__ == "__main__":
 
   total_accuracy1, total_accuracy5 = (0.0, 0.0)
   num_processed_images = 0
-  num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
+  num_remaining_images = dataset.num_examples_per_epoch(subset='train') \
                             - num_processed_images
+
+  CALIBRATION_POOL_SIZE = 1000
+  CALIBRATION_SET_SIZE = 100
+  calibration_pool = []
+  ImageWithConfidence = namedtuple('ImageWithConfidence',
+                                   ['tf_record', 'confidence'])
+  current_pool_size = 0
   with tf.Session() as sess:
     sess_graph = tf.Session(graph=graph, config=config)
     while num_remaining_images >= batch_size:
       # Reads and preprocess data
-      np_images, np_labels = sess.run([images[0], labels[0]])
+      np_images, np_labels, serialized_images = sess.run(
+          [images[0], labels[0], tf_records])
       num_processed_images += batch_size
       num_remaining_images -= batch_size
       # Compute inference on the preprocessed data
       predictions = sess_graph.run(output_tensor,
                              {input_tensor: np_images})
+      selected_img_indices = np.where(
+          predictions.argmax(axis=1) == np_labels)[0].tolist()
+      current_pool_size += len(selected_img_indices)
+      for indx in selected_img_indices:
+        calibration_pool.append(ImageWithConfidence(
+            serialized_images[indx], predictions[indx].max()))  
+
       accuracy1 = tf.reduce_sum(
           tf.cast(tf.nn.in_top_k(tf.constant(predictions),
               tf.constant(np_labels), 1), tf.float32))
@@ -136,3 +172,12 @@ if __name__ == "__main__":
       print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
           % (num_processed_images, total_accuracy1/num_processed_images,
           total_accuracy5/num_processed_images))
+      if current_pool_size >= CALIBRATION_POOL_SIZE:
+        break
+
+  writer = tf.python_io.TFRecordWriter('calibration-1-of-1')
+  calibration_pool = sorted(calibration_pool, 
+                            key=attrgetter('confidence'), reverse=True)
+  for i in range(CALIBRATION_SET_SIZE):
+    writer.write(calibration_pool[i].tf_record)
+  writer.close()
