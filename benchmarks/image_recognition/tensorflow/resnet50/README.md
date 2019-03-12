@@ -27,25 +27,26 @@ to download, process and convert the ImageNet dataset to the TF records format.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_int8_pretrained_model.pb
 ```
 
-3. Build a docker image using master of the official
-[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
-`--config=mkl`. More instructions on
-[how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
-
-4. Clone the 
+3. Clone the 
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-5. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
+4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
 
+    The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+    used in the commands above were built using
+    [TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+    ([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+    [PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
+
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
-2, the docker image (from step 3) and the `--accuracy-only` flag.
+2), and the `--accuracy-only` flag.
 ```
 $ cd /home/myuser/models/benchmarks
 
@@ -80,7 +81,7 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 Otherwise `--data-location` argument needs to be specified:
 Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
-2, the docker image (from step 3) and the `--benchmark-only` flag. It is
+2), and the `--benchmark-only` flag. It is
 optional to specify the number of `warmup_steps` and `steps` as extra
 args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
@@ -112,12 +113,6 @@ lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
 ```
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
