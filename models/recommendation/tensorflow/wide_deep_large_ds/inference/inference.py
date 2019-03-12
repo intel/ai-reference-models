@@ -21,7 +21,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
+import sys
 import os
 import numpy as np
 import argparse
@@ -37,51 +37,62 @@ from tensorflow.python.framework import ops
 from tensorflow.core.framework import graph_pb2
 from google.protobuf import text_format
 
+
+def str2bool(v):
+    if v.lower() in ('true'):
+        return True
+    else:
+        return False
+
 parser = argparse.ArgumentParser()
-parser.add_argument('--input-graph', type=str,
+parser.add_argument('--input_graph', type=str,
                     help='file name for graph',
                     dest='input_graph',
                     required=True)
-parser.add_argument('--datafile-path', type=str,
+parser.add_argument('--data_location', type=str,
                     help='full path of data file',
-                    dest='datafile_path',
+                    dest='data_location',
                     required=True)
-parser.add_argument('--batch-size', type=int,
+parser.add_argument('--batch_size', type=int,
                     help='batch size for inference.Default is 512',
                     default=512,
                     dest='batch_size')
-parser.add_argument('--intra-op-parallelism-threads', type=int,
+parser.add_argument('--num_intra_threads', type=int,
                     help='number of threads for an operator',
                     required=False,
                     default=28,
                     dest='num_intra_threads')
-parser.add_argument('--inter-op-parallelism-threads', type=int,
+parser.add_argument('--num_inter_threads', type=int,
                     help='number of threads across operators',
                     required=False,
                     default=2,
                     dest='num_inter_threads')
-parser.add_argument('--omp-num-threads', type=str,
+parser.add_argument('--num_omp_threads', type=str,
                     help='number of threads to use',
                     required=False,
-                    default="20",
-                    dest='omp_num_threads')
-parser.add_argument('--num-of-parallel-batches', type=int,
+                    default=None,
+                    dest='num_omp_threads')
+parser.add_argument('--num_parallel_batches', type=int,
                     help='number of parallel batches',
                     required=False,
                     default=28,
                     dest='num_parallel_batches')
-parser.add_argument('--kmp-blocktime', type=str,
+parser.add_argument('--kmp_blocktime', type=str,
                     help='KMP_BLOCKTIME value',
                     required=False,
-                    default="0",
+                    default=None,
                     dest='kmp_blocktime')
-
+parser.add_argument("--accuracy_only", type=str2bool,
+                    nargs='?', const=True, default=False,
+                    dest='compute_accuracy', required=False,
+                    help="Enable accuracy calculation")
 
 args = parser.parse_args()
-
-os.environ["KMP_BLOCKTIME"] = args.kmp_blocktime
+if args.kmp_blocktime:
+    os.environ["KMP_BLOCKTIME"] = args.kmp_blocktime
 os.environ["KMP_SETTINGS"] = "1"
-os.environ["OMP_NUM_THREADS"] = args.omp_num_threads
+if args.num_omp_threads:
+    os.environ["OMP_NUM_THREADS"] = args.num_omp_threads
 
 num_parallel_batches = args.num_parallel_batches
 output_probabilities_node = 'import/import/head/predictions/probabilities'
@@ -105,23 +116,22 @@ with open(args.input_graph, "rb") as f:
     else:
         graph_def.ParseFromString(f.read())
 
-# 1-13 inclusive
-CONTINUOUS_COLUMNS = ["I"+str(i) for i in range(1, 14)]
-# 1-26 inclusive
-CATEGORICAL_COLUMNS1 = ["C"+str(i)+"_embedding" for i in range(1, 27)]
-CATEGORICAL_COLUMNS = ["C1"]
-LABEL_COLUMN = ["clicked"]
-TRAIN_DATA_COLUMNS = LABEL_COLUMN + CONTINUOUS_COLUMNS + CATEGORICAL_COLUMNS
+numeric_feature_names = ["numeric_1"]
+string_feature_names = ["string_1"]
+if args.compute_accuracy:
+    full_features_names = numeric_feature_names + string_feature_names + ["label"]
+    feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)]+[tf.FixedLenSequenceFeature(
+            [], tf.int64, default_value=0, allow_missing=True)]+[tf.FixedLenSequenceFeature([], tf.int64, default_value=0, allow_missing=True)]
+else:
+    full_features_names = numeric_feature_names + string_feature_names
+    feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)]+[tf.FixedLenSequenceFeature(
+            [], tf.int64, default_value=0, allow_missing=True)]
+
+
 
 def input_fn(data_file, num_epochs, shuffle, batch_size):
     """Generate an input function for the Estimator."""
     def _parse_function(proto):
-        numeric_feature_names = ["numeric_1"]
-        string_feature_names = ["string_1"]
-        full_features_names = numeric_feature_names + \
-            string_feature_names+["label"]
-        feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)]+[tf.FixedLenSequenceFeature(
-            [], tf.int64, default_value=0, allow_missing=True)]+[tf.FixedLenSequenceFeature([], tf.int64, default_value=0, allow_missing=True)]
         f = collections.OrderedDict(
             zip(full_features_names, feature_datatypes))
         parsed_features = tf.parse_example(proto, f)
@@ -129,10 +139,10 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
             parsed_features["numeric_1"], shape=[-1, 13])]
         parsed_feature_vals_str = [tf.reshape(
             parsed_features["string_1"], shape=[-1, 2]) for i in string_feature_names]
-        parsed_feature_vals_label = [tf.reshape(
-            parsed_features[i], shape=[-1]) for i in ["label"]]
-        parsed_feature_vals = parsed_feature_vals_num + \
-            parsed_feature_vals_str+parsed_feature_vals_label
+        parsed_feature_vals = parsed_feature_vals_num + parsed_feature_vals_str
+        if args.compute_accuracy:
+            parsed_feature_vals_label = [tf.reshape(parsed_features[i], shape=[-1]) for i in ["label"]]
+            parsed_feature_vals = parsed_feature_vals + parsed_feature_vals_label
         return parsed_feature_vals
 
     # Extract lines from input files using the Dataset API.
@@ -146,11 +156,9 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
     return dataset
 
 
-data_file = args.datafile_path
+data_file = args.data_location
 no_of_test_samples = sum(1 for _ in tf.python_io.tf_record_iterator(data_file))
-
 no_of_batches = math.ceil(float(no_of_test_samples)/batch_size)
-
 with graph.as_default():
     tf.import_graph_def(graph_def)
     res_dataset = input_fn(data_file, 1, False, batch_size)
@@ -188,15 +196,17 @@ graph = ops.Graph()
 with graph.as_default():
     i = tf.constant(0)
     arr = tf.TensorArray(dtype=tf.int32, size=2000, dynamic_size=True)
-
     def _body(i, arr):
         tf.import_graph_def(new_graph_def)
         output_tensor = graph.get_tensor_by_name(while_probabilities_node)
-        labels_tensor = graph.get_tensor_by_name(
-            "while/import/IteratorGetNext:2")
-        predicted_labels = tf.argmax(output_tensor,1,output_type=tf.int64)
-        correctly_predicted_bool = tf.equal(predicted_labels, labels_tensor)
-        num_correct_predictions_batch = tf.reduce_sum(tf.cast(correctly_predicted_bool, tf.int32))
+        if args.compute_accuracy:
+            labels_tensor = graph.get_tensor_by_name("while/import/IteratorGetNext:2")
+            predicted_labels = tf.argmax(output_tensor,1,output_type=tf.int64)
+            correctly_predicted_bool = tf.equal(predicted_labels, labels_tensor)
+            num_correct_predictions_batch = tf.reduce_sum(tf.cast(correctly_predicted_bool, tf.int32))
+        else:
+            predicted_labels = tf.argmax(output_tensor,1,output_type=tf.int32)
+            num_correct_predictions_batch = tf.reduce_sum(predicted_labels)
         arr = arr.write(i, num_correct_predictions_batch)
         i = tf.add(i, 1)
         return i, arr
@@ -205,22 +215,29 @@ with graph.as_default():
 
 with tf.Session(config=config, graph=graph) as sess:
     inference_start = time.time()
-    num_correct_predictions_batch = sess.run(array_gather)
+    try:
+        num_correct_predictions_batch = sess.run(array_gather)
+    except Exception as e:
+        print('--------------------------------------------------')
+        print("The dataset doesn't contain labels. So, not feasible to determine classification accuracy")
+        print('--------------------------------------------------')
+        sys.exit()
     total_num_correct_predictions = num_correct_predictions_batch.sum(axis=0)
     inference_end = time.time()
-
-accuracy = (
-    float(total_num_correct_predictions)/float(no_of_test_samples))
+if args.compute_accuracy:
+    accuracy = (float(total_num_correct_predictions)/float(no_of_test_samples))
 evaluate_duration = inference_end - inference_start
-latency = (1000 * float(evaluate_duration)/float(no_of_test_samples))
+latency = (1000 * float(batch_size * num_parallel_batches) * float(evaluate_duration) / float(no_of_test_samples))
+
 throughput = no_of_test_samples/evaluate_duration
 print('--------------------------------------------------')
 print('Total test records           : ', no_of_test_samples)
-print('No of correct predicitons    : ', int(total_num_correct_predictions))
 print('Batch size is                : ', batch_size)
 print('Number of batches            : ', int(no_of_batches))
-print('Classification accuracy (%)  : ', round((accuracy * 100), 4))
+if args.compute_accuracy:
+    print('Classification accuracy (%)  : ', round((accuracy * 100), 4))
+    print('No of correct predictions    : ', int(total_num_correct_predictions))
 print('Inference duration (seconds) : ', round(evaluate_duration, 4))
-print('Latency (millisecond/batch)  :  {0:f}'.format(latency))
+print('Average Latency (ms/batch)   : ', round(latency,4))
 print('Throughput is (records/sec)  : ', round(throughput, 3))
 print('--------------------------------------------------')

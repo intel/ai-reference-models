@@ -21,16 +21,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-
 import os
 import sys
 import pandas
 import argparse
 import numpy as np
 import tensorflow as tf
-
 tf.enable_eager_execution()
-
 parser = argparse.ArgumentParser()
 parser.add_argument('--csv-datafile', type=str,
                     help='full path of data file e.g. eval.csv',
@@ -59,37 +56,45 @@ if file_ext != ".tfrecords":
     output_file = output_file + ".tfrecords"
 
 output_file = "{}_{}".format(in_filename,output_file)
-
-if os.path.isfile(output_file):
-    confirmation = input('The output file {} already exists, Do you want to overwrite it ? [y/N]'.format(output_file)).lower()
-    if not confirmation.startswith('y'):
-        sys.exit(0)
-
-csv = pandas.read_csv(csv_file, header=None).values
-
+csv = pandas.read_csv(csv_file, header=None)
+if len(csv.columns)==39:
+    dataset_type = 'test'
+else:
+    dataset_type = 'eval'
+fill_na_dict  = {}
+if dataset_type=='test':
+    for i in range(0,13):
+        fill_na_dict[i]=0.0
+    for i in range(13,39):
+        fill_na_dict[i]=""
+else:
+    for i in range(1,14):
+        fill_na_dict[i]=0.0
+    for i in range(14,40):
+        fill_na_dict[i]=""
+csv=csv.fillna(value=fill_na_dict).values
 numeric_feature_names = ["numeric_1"]
 string_feature_names = ["string_1"]
-
-print(numeric_feature_names, len(numeric_feature_names))
 LABEL_COLUMN =["clicked"]
 CATEGORICAL_COLUMNS1 = ["C"+str(i)+"_embedding" for i in range(1, 27)]
 NUMERIC_COLUMNS1 = ["I"+str(i) for i in range(1, 14)]
-TRAIN_DATA_COLUMNS = LABEL_COLUMN+ NUMERIC_COLUMNS1 + CATEGORICAL_COLUMNS1
+if dataset_type=='eval':
+    DATA_COLUMNS = LABEL_COLUMN + NUMERIC_COLUMNS1 + CATEGORICAL_COLUMNS1
+else:
+    DATA_COLUMNS = NUMERIC_COLUMNS1 + CATEGORICAL_COLUMNS1
 CATEGORICAL_COLUMNS2 = ["C"+str(i)+"_embedding" for i in range(1, 27)]
 NUMERIC_COLUMNS2 = ["I"+str(i) for i in range(1, 14)]
 
 CATEGORICAL_COLUMNS1.sort()
 NUMERIC_COLUMNS1.sort()
-print("categorical columns", CATEGORICAL_COLUMNS1)
-print("numeric column", NUMERIC_COLUMNS1)
 no_of_rows = 0
-
 with open(csv_file, 'r') as f:
-        nums=[line.strip('\n').split(',') for line in f.readlines()]
+        nums=[line.strip('\n\r').split(',') for line in f.readlines()]
         numpy_arr = np.array(nums)
+        numpy_arr[numpy_arr=='']='0'
         min_list,max_list,range_list = [],[],[]
-        for i in range(len(TRAIN_DATA_COLUMNS)):
-          if TRAIN_DATA_COLUMNS[i] in NUMERIC_COLUMNS1:
+        for i in range(len(DATA_COLUMNS)):
+          if DATA_COLUMNS[i] in NUMERIC_COLUMNS1:
             col_min = numpy_arr[:,i].astype(np.float32).min()
             col_max = numpy_arr[:,i].astype(np.float32).max()
             min_list.append(col_min)
@@ -100,17 +105,25 @@ with open(csv_file, 'r') as f:
         print('range list',range_list)
 
 
-
 with tf.python_io.TFRecordWriter(output_file) as writer:
     print('*****Processing data******')
     for row in csv:
         no_of_rows = no_of_rows+1
-        unnormalized_vals = np.array(row[1:14])
+        if dataset_type == 'eval':
+            unnormalized_vals = np.array(row[1:14])
+        else:
+            unnormalized_vals = np.array(row[0:13])
         normalized_vals = (unnormalized_vals-min_list)/range_list
-        new_categorical_dict = dict(zip(CATEGORICAL_COLUMNS2, row[14:40]))
+        if dataset_type == 'eval':
+            new_categorical_dict = dict(zip(CATEGORICAL_COLUMNS2, row[14:40]))
+        else:
+            new_categorical_dict = dict(zip(CATEGORICAL_COLUMNS2, row[13:39]))
         new_categorical_list = []
         for i in CATEGORICAL_COLUMNS1:
-            new_categorical_list.append(new_categorical_dict[i])
+            if pandas.isnull(new_categorical_dict[i]):
+                new_categorical_list.append("")
+            else:
+                new_categorical_list.append(new_categorical_dict[i])
         hash_values = tf.string_to_hash_bucket_fast(
             new_categorical_list, 1000).numpy()
         new_numerical_dict = dict(zip(NUMERIC_COLUMNS2, normalized_vals))
@@ -120,8 +133,8 @@ with tf.python_io.TFRecordWriter(output_file) as writer:
         for i in range(0, 26):
             example.features.feature[string_feature_names[0]].int64_list.value.extend([i])
             example.features.feature[string_feature_names[0]].int64_list.value.extend([hash_values[i]])
-
-        example.features.feature["label"].int64_list.value.append(row[0])
+        if dataset_type == 'eval':
+            example.features.feature["label"].int64_list.value.append(row[0])
         writer.write(example.SerializeToString())
 
 print('Total number of rows ', no_of_rows)
