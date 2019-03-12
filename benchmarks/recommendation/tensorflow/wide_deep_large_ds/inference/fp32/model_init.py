@@ -25,72 +25,49 @@ from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
 
 import os
-import time
+import argparse
 
 
 class ModelInitializer(BaseModelInitializer):
-    """initialize mode and run benchmark"""
+    """Model initializer for Wide and deep large dataset FP32 inference"""
 
-    def __init__(self, args, custom_args, platform_util=None):
+    def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-
-        self.benchmark_command = ""  # use default batch size if -1
-        self.results_file_path = ""
-
-        if self.args.batch_size == -1:
-            self.args.batch_size = 1024
-
-        # get number of cores if there is no core info passed in.
-        if self.args.num_cores == -1:
-            self.args.num_cores = self.platform_util.num_cores_per_socket()
-
-        num_of_parallel_batches = self.platform_util.num_cores_per_socket()
-        kmp_blocktime = "0"
-        # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars(kmp_settings="1", kmp_blocktime=kmp_blocktime,
+        # Set the num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_cores_per_socket(),
+                                         num_intra_threads=1)
+        # Use default KMP AFFINITY values, override KMP_BLOCKTIME & enable KMP SETTINGS
+        self.set_kmp_vars(kmp_settings="1", kmp_blocktime="0",
                           kmp_affinity="noverbose,warnings,respect,granularity=core,none")
-        # set num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_cores, num_intra_threads=1)
 
-        benchmark_script = os.path.join(
-            self.args.intelai_models,
-            self.args.mode,
-            "inference.py")
-
-        self.benchmark_command = self.get_numactl_command(self.args.socket_id)\
-            + "python " + benchmark_script
-
+        # Set env vars, if they haven't already been set
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-        self.benchmark_command += " --input-graph=" + \
-                                  self.args.input_graph + \
-                                  " --inter-op-parallelism-threads=" + \
-                                  str(self.args.num_inter_threads) + \
-                                  " --intra-op-parallelism-threads=" + \
-                                  str(self.args.num_intra_threads) + \
-                                  " --omp-num-threads=" + \
-                                  str(self.args.num_intra_threads) + \
-                                  " --batch-size=" + \
-                                  str(self.args.batch_size) + \
-                                  " --num-of-parallel-batches=" + \
-                                  str(num_of_parallel_batches) + \
-                                  " --kmp-blocktime=" + \
-                                  str(kmp_blocktime)
 
-        # if the data location directory is not empty, then include the arg
-        if self.args.data_location:
-            self.benchmark_command += " --datafile-path=" + \
-                                      self.args.data_location
-            # if output results is enabled, generate a results file name and pass it to the inference script
-            if self.args.output_results:
-                self.results_filename = "{}_{}_{}_results_{}.txt".format(
-                    self.args.model_name, self.args.precision, self.args.mode,
-                    time.strftime("%Y%m%d_%H%M%S", time.gmtime()))
-                self.results_file_path = os.path.join(self.args.output_dir, self.results_filename)
-                self.benchmark_command += " --results-file-path {}".format(self.results_file_path)
+    def parse_args(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--num-parallel-batches", default=-1,
+            type=int, help="num of parallel batches")
+
+        self.args = parser.parse_args(self.custom_args,
+                                      namespace=self.args)
+
+    def run_benchmark(self):
+        benchmark_script = os.path.join(self.args.intelai_models,
+                                        self.args.mode, "inference.py")
+
+        if self.args.num_parallel_batches == -1:
+            self.args.num_parallel_batches = self.platform_util.num_cores_per_socket()
+
+        script_args_list = ["input_graph", "num_parallel_batches", "batch_size",
+                            "num_inter_threads", "num_intra_threads", "accuracy_only", "data_location"]
+
+        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+            "python " + benchmark_script
+        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
+        self.run_command(cmd)
 
     def run(self):
-        if self.benchmark_command:
-            print(self.benchmark_command)
-            self.run_command(self.benchmark_command)
-            if self.results_file_path:
-                print("Inference results file in the output directory: {}".format(self.results_filename))
+        # Parse custom arguments and append to self.args
+        self.parse_args()
+        self.run_benchmark()
