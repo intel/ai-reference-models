@@ -79,6 +79,12 @@ class ModelInitializer(BaseModelInitializer):
             " --batch-size=" + str(self.args.batch_size) + \
             " --warmup-steps=" + str(self.args.warmup_steps) + \
             " --steps=" + str(self.args.steps)
+
+        if self.args.data_num_inter_threads:
+            self.benchmark_command += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)
+        if self.args.data_num_intra_threads:
+            self.benchmark_command += " --data-num-intra-threads=" + str(self.args.data_num_intra_threads)
+
         # need to add data-num-inter-threads, data-num-intra-thread to the args list once
         # they are ready from common interface
         # " --data-num-inter-threads=" + str(self.args.data_num_inter_threads) + \
