@@ -19,16 +19,12 @@
 #
 
 import time
-import numpy as np
 from argparse import ArgumentParser
 
 import tensorflow as tf
 import tensorflow.tools.graph_transforms as graph_transforms
 
-from tensorflow.python.client import timeline
-from tensorflow.python.platform import gfile
 import datasets
-import preprocessing
 
 INPUTS = 'input'
 OUTPUTS = 'resnet_v1_101/predictions/Reshape_1'
@@ -82,6 +78,14 @@ class eval_classifier_optimized_graph:
                             help="number of warmup steps")
     arg_parser.add_argument("--steps", type=int, default=50,
                             help="number of steps")
+    arg_parser.add_argument(
+        '--data-num-inter-threads', dest='data_num_inter_threads',
+        help='number threads across operators',
+        type=int, default=16)
+    arg_parser.add_argument(
+        '--data-num-intra-threads', dest='data_num_intra_threads',
+        help='number threads for data layer operator',
+        type=int, default=14)
     # parse the arguments
     self.args = arg_parser.parse_args()
     # validate the arguements
@@ -93,8 +97,8 @@ class eval_classifier_optimized_graph:
     print("Run inference")
 
     data_config = tf.ConfigProto()
-    data_config.intra_op_parallelism_threads = 14 
-    data_config.inter_op_parallelism_threads = 16
+    data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
+    data_config.inter_op_parallelism_threads = self.args.data_num_inter_threads
     data_config.use_per_session_threads = 1
 
     infer_config = tf.ConfigProto()
