@@ -71,7 +71,7 @@ class ModelInitializer(BaseModelInitializer):
             # comment it out for now since start.sh added data-location=/dataset
             # "data_location",
             "num_inter_threads", "num_intra_threads",
-            # "data_num_inter_threads", "data_num_intra_threads",
+            "data_num_inter_threads", "data_num_intra_threads",
             "warmup_steps", "steps"]
 
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \

@@ -52,7 +52,7 @@ class ModelInitializer(BaseModelInitializer):
         parser.add_argument(
             '--kmp-blocktime', dest='kmp_blocktime',
             help='number of kmp block time',
-            type=int, default=0)
+            type=int, default=1)
         parser.add_argument(
             "--calibration-only",
             help="Calibrate the accuracy.",
@@ -70,7 +70,7 @@ class ModelInitializer(BaseModelInitializer):
             "input_graph", "batch_size",
             # "data_location",    # comment it out for now since start.sh added data-location=/dataset
             "num_inter_threads", "num_intra_threads",
-            # "data_num_inter_threads", "data_num_intra_threads",
+            "data_num_inter_threads", "data_num_intra_threads",
             "warmup_steps", "steps"]
 
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
