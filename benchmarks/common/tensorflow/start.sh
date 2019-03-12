@@ -698,8 +698,14 @@ function wide_deep_large_ds() {
       exit 1
     fi
 
+    num_parallel_batches_arg=""
+
+    if [ -n "${num_parallel_batches}" ]; then
+      num_parallel_batches_arg="--num-parallel-batches=${num_parallel_batches}"
+    fi
+
     if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
-        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
+        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION} ${num_parallel_batches_arg} "
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
         echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
