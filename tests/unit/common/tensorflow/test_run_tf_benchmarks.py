@@ -21,6 +21,7 @@
 import fnmatch
 import os
 import pytest
+import re
 import sys
 
 from mock import patch
@@ -89,6 +90,8 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
     platform_config.set_mock_system_type(mock_platform)
     platform_config.set_mock_os_access(mock_os)
     platform_config.set_mock_lscpu_subprocess_values(mock_subprocess)
+    test_args = re.sub(" +", " ", test_args)        # get rid of extra spaces in the test_args string
+    expected_cmd = re.sub(" +", " ", expected_cmd)  # get rid of extra spaces in the expected_cmd string
     test_arg_list = test_args.split(" ")
     with patch.object(sys, "argv", test_arg_list):
         model_benchmark = ModelBenchmarkUtil()
