@@ -13,6 +13,7 @@
 
 * Intel-Optimized TensorFlow:
 	* [Image Recognition](/docs/image_recognition/tensorflow/Tutorial.md) (ResNet50, ResNet101 and InceptionV3)
+  * [Image Segmentation](/docs/image_segmentation/tensorflow/Tutorial.md) (3D U-Net)
 * Intel-Optimized TensorFlow Serving:
     * [Image Recognition](/docs/image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
     * [Object Detection](/docs/object_detection/tensorflow_serving/Tutorial.md) (R-FCN)
