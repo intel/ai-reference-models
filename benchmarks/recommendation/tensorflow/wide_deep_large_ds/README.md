@@ -19,7 +19,7 @@ Benchmarking instructions and scripts for model training coming later.
 
 2. Pre-process the downloaded dataset to tfrecords using [preprocess_csv_tfrecords.py](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py)
 
-    Copy the eval.csv and test.csv into your current working directory and launch
+    Copy the eval.csv and test.csv into your current working directory (i.e. root of models repo) and launch
 
     * Launch docker
         ```
@@ -49,8 +49,9 @@ Benchmarking instructions and scripts for model training coming later.
                 --csv-datafile test.csv \
                 --outputfile-name preprocessed_test
         ```
+        Now preprocessed eval and test datasets will be stored as eval_preprocessed_eval.tfrecords and  test_preprocessed_test.tfrecords in /home/myuser/models/ directory
 
-    Now preprocessed eval and test datasets will be stored as dataset_preprocessed_eval.tfrecords and  dataset_preprocessed_test.tfrecords in /home/myuser/models/ directory
+        Exit out of docker once the dataset pre-processing completes.
 
 ## INT8 Inference Instructions
 
@@ -76,7 +77,6 @@ Benchmarking instructions and scripts for model training coming later.
             --precision int8 \
             --mode inference \
             --framework tensorflow \
-            --benchmark-only \
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
@@ -129,12 +129,11 @@ Benchmarking instructions and scripts for model training coming later.
         No of correct predictions    :  1549508
         Batch size is                :  512
         Number of batches            :  1954
-        Classification accuracy (%)  :  77.4754
+        Classification accuracy (%)  :  77.5087
         Inference duration (seconds) :  1.9765
         Latency (millisecond/batch)  :  0.000988
         Throughput is (records/sec)  :  1151892.25
         --------------------------------------------------
-        numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/inference.py --input-graph=/in_graph/wide_deep_int8_pretrained_model.pb --inter-op-parallelism-threads=28 --intra-op-parallelism-threads=1 --omp-num-threads=1 --batch-size=512 --kmp-blocktime=0 --datafile-path=/dataset
         Ran inference with batch size 512
         Log location outside container:  {--output-dir value}/benchmark_wide_deep_large_ds_inference_int8_20190225_061815.log
         ```
@@ -164,7 +163,6 @@ Benchmarking instructions and scripts for model training coming later.
             --precision fp32 \
             --mode inference \
             --framework tensorflow \
-            --benchmark-only \
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
@@ -222,7 +220,6 @@ Benchmarking instructions and scripts for model training coming later.
         Latency (millisecond/batch)  :  0.001749
         Throughput is (records/sec)  :  571802.228
         --------------------------------------------------
-        numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/inference.py --input-graph=/in_graph/wide_deep_fp32_pretrained_model.pb --inter-op-parallelism-threads=28 --intra-op-parallelism-threads=1 --omp-num-threads=1 --batch-size=512 --kmp-blocktime=0 --datafile-path=/dataset
         Ran inference with batch size 512
         Log location outside container: {--output-dir value}/benchmark_wide_deep_large_ds_inference_fp32_20190225_062206.log
         ```
