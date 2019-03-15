@@ -26,7 +26,7 @@ To run style checks using python 2:
 make lint2
 ```
 
-To run style checks using python 2:
+To run style checks using python 3:
 ```
 make lint3
 ```
