@@ -25,8 +25,8 @@ We will get the training data of it as an example:
 $ PYTHONPATH=$PYTHONPATH:$RootDirOfTensor2tensor \
   ./tensor2tensor/bin/t2t-datagen \
     --problem=translate_ende_wmt32k \
-    --data_dir=/home/myuser/t2t_data \
-    --tmp_dir=~/home/myuser/t2t_data/tmp
+    --data_dir=/home/<user>/t2t_data \
+    --tmp_dir=~/home/<user>/t2t_data/tmp
 ```
 
 3. Download and extract the pre-trained model.
@@ -35,17 +35,17 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/transfor
 $ tar -xzvf transformer_lt_fp32_pretrained_model.tar.gz
 $ ls -l transformer_lt_fp32_pretrained_model
 total 750000
--rw-r--r-- 1 myuser myuser      1003 Dec  7 15:20 checkpoint
--rw-r--r-- 1 myuser myuser       939 Dec  7 15:20 flags_t2t.txt
--rw-r--r-- 1 myuser myuser      1432 Dec  7 15:20 flags.txt
--rw-r--r-- 1 myuser myuser  19752171 Dec  7 15:20 graph.pbtxt
--rw-r--r-- 1 myuser myuser      3218 Dec  7 15:20 hparams.json
--rw-r--r-- 1 myuser myuser        24 Dec  7 15:20 model.ckpt-340000.data-00000-of-00002
--rw-r--r-- 1 myuser myuser 736542728 Dec  7 15:20 model.ckpt-340000.data-00001-of-00002
--rw-r--r-- 1 myuser myuser     29961 Dec  7 15:20 model.ckpt-340000.index
--rw-r--r-- 1 myuser myuser  11127562 Dec  7 15:20 model.ckpt-340000.meta
--rw-r--r-- 1 myuser myuser    268951 Dec  7 15:20 newstest2015.de
--rw-r--r-- 1 myuser myuser    241016 Dec  7 15:20 newstest2015.en
+-rw-r--r-- 1 <user> <group>      1003 Dec  7 15:20 checkpoint
+-rw-r--r-- 1 <user> <group>       939 Dec  7 15:20 flags_t2t.txt
+-rw-r--r-- 1 <user> <group>      1432 Dec  7 15:20 flags.txt
+-rw-r--r-- 1 <user> <group>  19752171 Dec  7 15:20 graph.pbtxt
+-rw-r--r-- 1 <user> <group>      3218 Dec  7 15:20 hparams.json
+-rw-r--r-- 1 <user> <group>        24 Dec  7 15:20 model.ckpt-340000.data-00000-of-00002
+-rw-r--r-- 1 <user> <group> 736542728 Dec  7 15:20 model.ckpt-340000.data-00001-of-00002
+-rw-r--r-- 1 <user> <group>     29961 Dec  7 15:20 model.ckpt-340000.index
+-rw-r--r-- 1 <user> <group>  11127562 Dec  7 15:20 model.ckpt-340000.meta
+-rw-r--r-- 1 <user> <group>    268951 Dec  7 15:20 newstest2015.de
+-rw-r--r-- 1 <user> <group>    241016 Dec  7 15:20 newstest2015.en
 ```
 
 4. Clone this [intelai/models](https://github.com/IntelAI/models)
@@ -82,9 +82,9 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --checkpoint /home/myuser/transformer_lt_fp32_pretrained_model \
-    --data-location /home/myuser/t2t_data \
-    --model-source-dir /home/myuser/tensor2tensor/ \
+    --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
+    --data-location /home/<user>/t2t_data \
+    --model-source-dir /home/<user>/tensor2tensor/ \
     -- decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 
@@ -99,9 +99,9 @@ python launch_benchmark.py \
     --batch-size 32 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --checkpoint /home/myuser/transformer_lt_fp32_pretrained_model \
-    --data-location /home/myuser/t2t_data \
-    --model-source-dir /home/myuser/tensor2tensor/ \
+    --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
+    --data-location /home/<user>/t2t_data \
+    --model-source-dir /home/<user>/tensor2tensor/ \
     -- decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 

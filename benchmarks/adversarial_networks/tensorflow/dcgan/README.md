@@ -45,18 +45,18 @@ for `--model-source-dir` (from step 1) `--data-location` (from step 2), and `--c
 
 Run benchmarking for throughput and latency with `--batch-size=100` :
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name dcgan \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --batch-size 100 \
     --socket-id 0 \
-    --checkpoint /home/myuser/dcgan_fp32_unconditional_cifar10_pretrained_model \
-    --data-location /home/myuser/cifar10 \
+    --checkpoint /home/<user>/dcgan_fp32_unconditional_cifar10_pretrained_model \
+    --data-location /home/<user>/cifar10 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 

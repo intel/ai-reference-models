@@ -62,7 +62,7 @@ Next, compute ***OMP_NUM_THREADS*** = *num_physical_cores* = 16 and ***TENSORFLO
 and start the model server container from the Intel-optimized docker image with a command that sets the environment variables to these values
 (this assumes some familiarity with docker and the `docker run` command):
 ```
-docker run --name=tfserving_mkl --rm -d -p 8500:8500 -v "/path/to/savedmodel/directory:/models/my_model"
+docker run --name=tfserving_mkl --rm -d -p 8500:8500 -v "/home/<user>/<saved_model_directory>:/models/<model_name>"
 -e MODEL_NAME=my_model -e OMP_NUM_THREADS=16 -e TENSORFLOW_SESSION_PARALLELISM=4 tensorflow/serving:mkl
 ```
 

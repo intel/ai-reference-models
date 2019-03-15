@@ -45,8 +45,8 @@ modes/precisions:
             --mode inference \
             --framework tensorflow \
             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
-            --checkpoint /home/myuser/draw_fp32_pretrained_model \
-            --data-location /home/myuser/mnist \
+            --checkpoint /home/<user>/draw_fp32_pretrained_model \
+            --data-location /home/<user>/mnist \
             --batch-size 1 \
             --socket-id 0
      ```
@@ -58,8 +58,8 @@ modes/precisions:
             --mode inference \
             --framework tensorflow \
             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
-            --checkpoint /home/myuser/draw_fp32_pretrained_model \
-            --data-location /home/myuser/mnist \
+            --checkpoint /home/<user>/draw_fp32_pretrained_model \
+            --data-location /home/<user>/mnist \
             --batch-size 100 \
             --socket-id 0
       ```
@@ -77,7 +77,7 @@ modes/precisions:
      Batchsize: 1
      Time spent per BATCH: 6.6667 ms
      Total samples/sec: 149.9996 samples/s
-     Outputs saved in file: /home/myuser/mnist/draw_data.npy
+     Outputs saved in file: /home/<user>/mnist/draw_data.npy
      lscpu_path_cmd = command -v lscpu
      lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 1
@@ -92,7 +92,7 @@ modes/precisions:
      Batchsize: 100
      Time spent per BATCH: 28.1952 ms
      Total samples/sec: 3546.7006 samples/s
-     Outputs saved in file: /home/myuser/mnist/draw_data.npy
+     Outputs saved in file: /home/<user>/mnist/draw_data.npy
      lscpu_path_cmd = command -v lscpu
      lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 100
