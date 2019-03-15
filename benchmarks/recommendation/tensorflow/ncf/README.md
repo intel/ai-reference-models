@@ -45,8 +45,8 @@ For Throughput, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from st
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint /home/myuser/ncf_fp32_pretrained_model \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --checkpoint /home/<user>/ncf_fp32_pretrained_model \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ncf \
     --socket-id 0 \
     --batch-size 256 \
@@ -75,8 +75,8 @@ For Latency, `--batch-size 1`, `--socket-id 0`, `--checkpoint` path from step5, 
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint /home/myuser/ncf_fp32_pretrained_model \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --checkpoint /home/<user>/ncf_fp32_pretrained_model \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ncf \
     --socket-id 0 \
     --batch-size 1 \
@@ -106,8 +106,8 @@ For Accuracy, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint /home/myuser/ncf_fp32_pretrained_model \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --checkpoint /home/<user>/ncf_fp32_pretrained_model \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ncf \
     --socket-id 0 \
     --accuracy-only \

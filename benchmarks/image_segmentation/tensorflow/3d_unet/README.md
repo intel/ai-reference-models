@@ -39,7 +39,7 @@ modes/precisions:
    command (replace in your `--data-location` and `--in-graph`):
 
    ```
-   $ cd /home/myuser/intelai/models/benchmarks
+   $ cd /home/<user>/intelai/models/benchmarks
 
    $ python launch_benchmark.py \
         --precision fp32 \
@@ -47,8 +47,8 @@ modes/precisions:
         --mode inference \
         --framework tensorflow \
         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
-        --in-graph /home/$USER/tumor_segmentation_model.h5 \
-        --data-location /home/$USER/3dunet_data/BraTS \
+        --in-graph /home/<user>/tumor_segmentation_model.h5 \
+        --data-location /home/<user>/3dunet_data/BraTS \
         --batch-size 1 \
         --socket-id 0
    ```

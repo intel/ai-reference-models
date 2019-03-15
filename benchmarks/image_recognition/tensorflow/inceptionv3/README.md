@@ -51,7 +51,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/myuser/datasets/ImageNet_TFRecords
+$ ll /home/<user>/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -96,8 +96,8 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords
+    --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
+    --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
 When running performance benchmarking, it is optional to specify the
@@ -117,8 +117,8 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
+    --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
 ```
 
@@ -134,7 +134,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
 
@@ -150,8 +150,8 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords \
+    --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
+    --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
 ```
 
@@ -167,7 +167,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_int8_pretrained_model.pb \
+    --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
 
@@ -267,7 +267,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_fp32_pretrained_model.pb
+    --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when benchmarking for latency:
 ```
@@ -300,7 +300,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_fp32_pretrained_model.pb
+    --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when benchmarking for throughput:
 ```
@@ -334,7 +334,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --data-location /dataset/Imagenet_Validation \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --in-graph /home/myuser/inceptionv3_fp32_pretrained_model.pb
+    --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when benchmarking for accuracy:
 ```

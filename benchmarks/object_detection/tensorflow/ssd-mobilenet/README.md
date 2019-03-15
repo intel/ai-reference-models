@@ -74,22 +74,22 @@ $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/myuser/coco/empty_dir" \
-      --val_image_dir="/home/myuser/coco/val/val2017" \
-      --test_image_dir="/home/myuser/coco/empty_dir" \
-      --train_annotations_file="/home/myuser/coco/annotations/empty.json" \
-      --val_annotations_file="/home/myuser/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/myuser/coco/annotations/empty.json" \
-      --output_dir="/home/myuser/coco/output"
+      --train_image_dir="/home/<user>/coco/empty_dir" \
+      --val_image_dir="/home/<user>/coco/val/val2017" \
+      --test_image_dir="/home/<user>/coco/empty_dir" \
+      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
+      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --output_dir="/home/<user>/coco/output"
 
-$ ll /home/myuser/coco/output
+$ ll /home/<user>/coco/output
 total 1598276
--rw-rw-r--. 1 myuser myuser         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 myuser myuser         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 myuser myuser 818336740 Nov  2 21:46 coco_val.record
+-rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
+-rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
+-rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and checkout the SHA that we are using for SSD-MobileNet
-$ cd /home/myuser/models
+$ cd /home/<user>/models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
@@ -119,13 +119,13 @@ $ cd ssd_mobilenet_v1_coco_2018_01_28
 
 $ ll
 total 58132
--rw-r--r--. 1 myuser myuser       77 Feb  1  2018 checkpoint
--rw-r--r--. 1 myuser myuser 29103956 Feb  1  2018 frozen_inference_graph.pb
--rw-r--r--. 1 myuser myuser 27380740 Feb  1  2018 model.ckpt.data-00000-of-00001
--rw-r--r--. 1 myuser myuser     8937 Feb  1  2018 model.ckpt.index
--rw-r--r--. 1 myuser myuser  3006546 Feb  1  2018 model.ckpt.meta
--rw-r--r--. 1 myuser myuser     4138 Feb  1  2018 pipeline.config
-drwxr-sr-x. 3 myuser myuser     4096 Feb  1  2018 saved_model
+-rw-r--r--. 1 <user> <group>       77 Feb  1  2018 checkpoint
+-rw-r--r--. 1 <user> <group> 29103956 Feb  1  2018 frozen_inference_graph.pb
+-rw-r--r--. 1 <user> <group> 27380740 Feb  1  2018 model.ckpt.data-00000-of-00001
+-rw-r--r--. 1 <user> <group>     8937 Feb  1  2018 model.ckpt.index
+-rw-r--r--. 1 <user> <group>  3006546 Feb  1  2018 model.ckpt.meta
+-rw-r--r--. 1 <user> <group>     4138 Feb  1  2018 pipeline.config
+drwxr-sr-x. 3 <user> <group>     4096 Feb  1  2018 saved_model
 ```
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -156,12 +156,12 @@ downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`
 flag:
 
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/myuser/coco/output/coco_val.record \
-    --in-graph /home/myuser/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/<user>/coco/output/coco_val.record \
+    --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
@@ -178,9 +178,9 @@ the path to the frozen graph that you downloaded in step 5 as the
 
 ```
 $ python launch_benchmark.py \
-    --data-location /home/myuser/coco/output/coco_val.record \
-    --in-graph /home/myuser/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/<user>/coco/output/coco_val.record \
+    --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \

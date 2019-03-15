@@ -32,14 +32,14 @@ remote: Total 1247 (delta 0), reused 0 (delta 0), pack-reused 1247
 Receiving objects: 100% (1247/1247), 1.23 MiB | 7.72 MiB/s, done.
 Resolving deltas: 100% (891/891), done.
 
-$nmt/scripts/wmt16_en_de.sh /home/myuser/wmt16
+$nmt/scripts/wmt16_en_de.sh /home/<user>/wmt16
 ```
 
 After the script has completed, you should have a directory with the
 dataset looks like:
 
 ```
-$ ls /home/myuser/wmt16/
+$ ls /home/<user>/wmt16/
 bpe.32000                      newstest2010.tok.de            newstest2012.tok.en            newstest2015.de                train.de
 data                           newstest2010.tok.en            newstest2013.de                newstest2015.en                train.en
 mosesdecoder                   newstest2011.de                newstest2013.en                newstest2015.tok.bpe.32000.de  train.tok.bpe.32000.de
@@ -80,8 +80,8 @@ python launch_benchmark.py \
 --benchmark-only \
 --batch-size 1 \
 --socket-id 0 \
---checkpoint /home/myuser/gnmt_checkpoints \
---data-location /home/myuser/wmt16 \
+--checkpoint /home/<user>/gnmt_checkpoints \
+--data-location /home/<user>/wmt16 \
 --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
 -- infer_mode=beam_search
 ```
@@ -97,8 +97,8 @@ python launch_benchmark.py \
 --benchmark-only \
 --batch-size 32 \
 --socket-id 0 \
---checkpoint /home/myuser/gnmt_checkpoints \
---data-location /home/myuser/wmt16 \
+--checkpoint /home/<user>/gnmt_checkpoints \
+--data-location /home/<user>/wmt16 \
 --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
 -- infer_mode=beam_search
 ```
