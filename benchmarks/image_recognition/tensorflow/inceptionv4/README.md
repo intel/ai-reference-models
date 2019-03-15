@@ -50,8 +50,8 @@ other precisions are coming later.
        --batch-size 100 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl  \
-       --in-graph /home/$USER/inceptionv4_int8_pretrained_model.pb \
-       --data-location /home/$USER/ImageNet_TFRecords
+       --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb \
+       --data-location /home/<user>/ImageNet_TFRecords
    ```
 
    For throughput benchmarking (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
@@ -65,7 +65,7 @@ other precisions are coming later.
        --batch-size 240 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-       --in-graph /home/$USER/inceptionv4_int8_pretrained_model.pb
+       --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
    For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
@@ -79,7 +79,7 @@ other precisions are coming later.
        --batch-size 1 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-       --in-graph /home/$USER/inceptionv4_int8_pretrained_model.pb
+       --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
    The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
@@ -184,8 +184,8 @@ other precisions are coming later.
        --batch-size 100 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-       --in-graph /home/$USER/inceptionv4_fp32_pretrained_model.pb \
-       --data-location /home/$USER/ImageNet_TFRecords
+       --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb \
+       --data-location /home/<user>/ImageNet_TFRecords
    ```
 
    For throughput benchmarking (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
@@ -199,7 +199,7 @@ other precisions are coming later.
        --batch-size 240 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-       --in-graph /home/$USER/inceptionv4_fp32_pretrained_model.pb
+       --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
    For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
@@ -213,7 +213,7 @@ other precisions are coming later.
        --batch-size 1 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-       --in-graph /home/$USER/inceptionv4_fp32_pretrained_model.pb
+       --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
    Note that the `--verbose` flag can be added to any of the above commands

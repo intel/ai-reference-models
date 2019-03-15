@@ -139,15 +139,15 @@ a. [ResNet50](https://github.com/IntelAI/models/tree/master/benchmarks/image_rec
 b. [ResNet101](https://github.com/IntelAI/models/tree/master/benchmarks/image_recognition/tensorflow/resnet101) <br>
 c. [InceptionV3](https://github.com/IntelAI/models/tree/master/benchmarks/image_recognition/tensorflow/inceptionv3) <br>
 
-3. (optional) Download and setup directory location for ```real_dataset``` folder that has image files in TFrecord format if you are inferring on real-dataset. You can refer to [ImageNet](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data) / [Coco Dataset](http://cocodataset.org/#home) that has images converted to TFrecords
-(or) you can run the [build_image_data.py](https://github.com/tensorflow/models/blob/f87a58cd96d45de73c9a8330a06b2ab56749a7fa/research/inception/inception/data/build_image_data.py) to convert raw images into TFRecords.
+3. (optional) Download and setup a data directory that has image files in TFRecord format if you are inferring on a real dataset. 
+You can refer to [ImageNet](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data) or [Coco Dataset](http://cocodataset.org/#home) which have images converted to TFRecords, or you can run the [build_image_data.py](https://github.com/tensorflow/models/blob/f87a58cd96d45de73c9a8330a06b2ab56749a7fa/research/inception/inception/data/build_image_data.py) script to convert raw images into TFRecords.
 
-4. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs on a Docker container
+4. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs on a Docker container.
 
 ### Run inference
 
-1. Pull the relevant Intel-optimized TensorFlow Docker image. We'll be running the pretrained model to infer on Docker container
-. [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images
+1. Pull the relevant Intel-optimized TensorFlow Docker image. We'll be running the pretrained model to infer on Docker container. 
+[Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
 docker pull docker.io/intelaipg/intel-optimized-tensorflow:latest
 ```
@@ -159,8 +159,8 @@ cd ~/models/benchmarks
 ```launch_benchmark.py``` script can be treated as an entry point to conveniently perform out-of-box high performance 
 inference on pretrained models trained of popular topologies. 
 The script will automatically set the recommended run-time options for supported topologies, 
-but if you choose to set your own options, refer to full of available flags and a detailed
-explanation on ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
+but if you choose to set your own options, refer to the full list of available flags and a detailed
+explanation of the ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to the [Step 4](#step_4) to interactively run the script on the container.
 
 3.1. <b> *Real Time inference*</b>(batch_size=1 for latency)
@@ -173,7 +173,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
  *Synthetic data*
 	
 	python launch_benchmark.py \
-		--in-graph ~/resnet50_fp32_pretrained_model.pb \
+		--in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
 		--model-name resnet50 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -186,8 +186,8 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 *Real data*
 
 	python launch_benchmark.py \
-		--data-location ~/real_dataset \
-		--in-graph ~/resnet50_fp32_pretrained_model.pb \
+		--data-location /home/<user>/<tfrecords_dataset_directory> \
+		--in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
 		--model-name resnet50 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -203,7 +203,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 *Synthetic data*
 	
 	python launch_benchmark.py \
-		--in-graph ~/resnet101_fp32_pretrained_model.pb \
+		--in-graph /home/<user>/resnet101_fp32_pretrained_model.pb \
 		--model-name resnet101 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -215,8 +215,8 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 *Real data*
 
 	python launch_benchmark.py \
-		--data-location ~/real_dataset \
-		--in-graph ~/resnet101_fp32_pretrained_model.pb \
+		--data-location /home/<user>/<tfrecords_dataset_directory> \
+		--in-graph /home/<user>/resnet101_fp32_pretrained_model.pb \
 		--model-name resnet101 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -232,7 +232,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 *Synthetic data*
 	
 	python launch_benchmark.py \
-		--in-graph ~/inceptionv3_fp32_pretrained_model.pb \
+		--in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb \
 		--model-name inceptionv3 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -245,8 +245,8 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 *Real data*
 
 	python launch_benchmark.py \
-		--data-location ~/real_dataset \
-		--in-graph ~/inceptionv3_fp32_pretrained_model.pb \
+		--data-location /home/<user>/<tfrecords_dataset_directory> \
+		--in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb \
 		--model-name inceptionv3 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -266,7 +266,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
  *Synthetic data*
 	
 	python launch_benchmark.py \
-		--in-graph ~/resnet50_fp32_pretrained_model.pb \
+		--in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
 		--model-name resnet50 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -279,8 +279,8 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 *Real data*
 
 	python launch_benchmark.py \
-		--data-location ~/real_dataset \
-		--in-graph ~/resnet50_fp32_pretrained_model.pb \
+		--data-location /home/<user>/<tfrecords_dataset_directory> \
+		--in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
 		--model-name resnet50 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -296,7 +296,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 *Synthetic data*
 	
 	python launch_benchmark.py \
-		--in-graph ~/resnet101_fp32_pretrained_model.pb \
+		--in-graph /home/<user>/resnet101_fp32_pretrained_model.pb \
 		--model-name resnet101 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -308,8 +308,8 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 *Real data*
 
 	python launch_benchmark.py \
-		--data-location ~/real_dataset \
-		--in-graph ~/resnet101_fp32_pretrained_model.pb \
+		--data-location /home/<user>/<tfrecords_dataset_directory> \
+		--in-graph /home/<user>/resnet101_fp32_pretrained_model.pb \
 		--model-name resnet101 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -325,7 +325,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 *Synthetic data*
 	
 	python launch_benchmark.py \
-		--in-graph ~/inceptionv3_fp32_pretrained_model.pb \
+		--in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb \
 		--model-name inceptionv3 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -338,8 +338,8 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 *Real data*
 
 	python launch_benchmark.py \
-		--data-location ~/real_dataset \
-		--in-graph ~/inceptionv3_fp32_pretrained_model.pb \
+		--data-location /home/<user>/<tfrecords_dataset_directory> \
+		--in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb \
 		--model-name inceptionv3 \
 		--framework tensorflow \
 		--precision fp32 \
@@ -374,7 +374,7 @@ performs necessary installs, runs the ```launch_benchmark.py``` script and does 
 you can implement the same strategy on different use cases demoed in Step 3.
 		
 		python launch_benchmark.py \
-			--in-graph ~/resnet50_fp32_pretrained_model.pb \
+			--in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
 			--model-name resnet50 \
 			--framework tensorflow \
 			--precision fp32 \
@@ -409,9 +409,9 @@ All other flags will be defaulted to values passed in the first ```launch_benchm
     CHECKPOINT_DIRECTORY: /checkpoints
     IN_GRAPH: /in_graph/freezed_resnet50.pb
     Mounted volumes:
-        /localdisk/myuser/intel-models/benchmarks mounted on: /workspace/benchmarks
+        /localdisk/<user>/models/benchmarks mounted on: /workspace/benchmarks
         None mounted on: /workspace/models
-        /localdisk/myuser/intel-models/benchmarks/../models/image_recognition/tensorflow/resnet50 mounted on: /workspace/intelai_models
+        /localdisk/<user>/models/benchmarks/../models/image_recognition/tensorflow/resnet50 mounted on: /workspace/intelai_models
         None mounted on: /dataset
         None mounted on: /checkpoints
     SOCKET_ID: -1

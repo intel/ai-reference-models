@@ -23,7 +23,7 @@ Benchmarking instructions and scripts for model training coming later.
 
     * Launch docker
         ```
-        cd /home/myuser/models/
+        cd /home/<user>/models/
 
         docker run -it --privileged -u root:root \
                     -w /models \
@@ -49,7 +49,7 @@ Benchmarking instructions and scripts for model training coming later.
                 --csv-datafile test.csv \
                 --outputfile-name preprocessed_test
         ```
-        Now preprocessed eval and test datasets will be stored as eval_preprocessed_eval.tfrecords and  test_preprocessed_test.tfrecords in /home/myuser/models/ directory
+        Now preprocessed eval and test datasets will be stored as eval_preprocessed_eval.tfrecords and  test_preprocessed_test.tfrecords in /home/<user>/models/ directory
 
         Exit out of docker once the dataset pre-processing completes.
 
@@ -70,7 +70,7 @@ Benchmarking instructions and scripts for model training coming later.
 
     * Running inference to check accuracy, set `--batch-size 1000`
         ```
-        cd /home/myuser/models/benchmarks
+        cd /home/<user>/models/benchmarks
 
         python launch_benchmark.py
             --model-name wide_deep_large_ds \
@@ -90,7 +90,7 @@ Benchmarking instructions and scripts for model training coming later.
    * Running benchmarks in latency mode, set `--batch-size 1`
 
        ``` 
-       cd /home/myuser/models/benchmarks
+       cd /home/<user>/models/benchmarks
 
        python launch_benchmark.py
             --model-name wide_deep_large_ds \
@@ -107,7 +107,7 @@ Benchmarking instructions and scripts for model training coming later.
        ```
    * Running benchmarks in throughput mode, set `--batch-size 512`
        ``` 
-        cd /home/myuser/models/benchmarks
+        cd /home/<user>/models/benchmarks
     
         python launch_benchmark.py
             --model-name wide_deep_large_ds \
@@ -156,7 +156,7 @@ Benchmarking instructions and scripts for model training coming later.
 
     * Running inference for checking accuracy, set `--batch-size 1000`
         ```
-        cd /home/myuser/models/benchmarks
+        cd /home/<user>/models/benchmarks
 
         python launch_benchmark.py
             --model-name wide_deep_large_ds \
@@ -176,7 +176,7 @@ Benchmarking instructions and scripts for model training coming later.
     * Running benchmarks in latency mode, set `--batch-size 1`
 
         ```
-        cd /home/myuser/models/benchmarks
+        cd /home/<user>/models/benchmarks
 
         python launch_benchmark.py
             --model-name wide_deep_large_ds \
@@ -193,7 +193,7 @@ Benchmarking instructions and scripts for model training coming later.
         ```
     * Running benchmarks in throughput mode, set `--batch-size 512`
         ```
-        cd /home/myuser/models/benchmarks
+        cd /home/<user>/models/benchmarks
 
         python launch_benchmark.py
             --model-name wide_deep_large_ds \

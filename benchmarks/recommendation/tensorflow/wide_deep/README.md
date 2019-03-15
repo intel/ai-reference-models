@@ -38,40 +38,40 @@ use in the next step.
    using `--http_proxy` and `--https_proxy` arguments.
    ```
    $ cd models
-   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/myuser/widedeep_dataset
+   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
    ```
 
 5. How to run benchmarks
 
    * Running benchmarks in latency mode, set `--batch-size` = `1`
        ``` 
-       $ cd /home/myuser/models/benchmarks
+       $ cd /home/<user>/models/benchmarks
     
        $ python launch_benchmark.py \ 
              --framework tensorflow \ 
-             --model-source-dir /home/myuser/path/to/tensorflow-models \
+             --model-source-dir /home/<user>/path/to/tensorflow-models \
              --precision fp32 \
              --mode inference \
              --model-name wide_deep \
              --batch-size 1 \
-             --data-location /home/myuser/widedeep_dataset \
-             --checkpoint /home/myuser/path/to/wide_deep_fp32_pretrained_model \
+             --data-location /home/<user>/widedeep_dataset \
+             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
    * Running benchmarks in throughput mode, set `--batch-size` = `1024`
        ``` 
-       $ cd /home/myuser/models/benchmarks
+       $ cd /home/<user>/models/benchmarks
     
        $ python launch_benchmark.py \ 
              --framework tensorflow \ 
-             --model-source-dir /home/myuser/path/to/tensorflow-models \
+             --model-source-dir /home/<user>/path/to/tensorflow-models \
              --precision fp32 \
              --mode inference \
              --model-name wide_deep \
              --batch-size 1024 \
-             --data-location /home/myuser/path/to/dataset \
-             --checkpoint /home/myuser/path/to/wide_deep_fp32_pretrained_model \
+             --data-location /home/<user>/path/to/dataset \
+             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
