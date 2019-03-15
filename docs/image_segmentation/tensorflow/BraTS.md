@@ -92,4 +92,4 @@ It is our hope that this can save some time and frustration, but if there is any
     ```
 
 ## Conclusion
-Now you are ready to run the benchmarking script with the `--data-location` flag set to `~/3DUnetCNN/brats`.
+Now you are ready to run the benchmarking script with the `--data-location` flag set to `/home/<user>/3DUnetCNN/brats`.

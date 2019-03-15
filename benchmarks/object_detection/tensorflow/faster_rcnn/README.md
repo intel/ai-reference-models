@@ -91,22 +91,22 @@ $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/myuser/coco/empty_dir" \
-      --val_image_dir="/home/myuser/coco/val/val2017" \
-      --test_image_dir="/home/myuser/coco/empty_dir" \
-      --train_annotations_file="/home/myuser/coco/annotations/empty.json" \
-      --val_annotations_file="/home/myuser/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/myuser/coco/annotations/empty.json" \
-      --output_dir="/home/myuser/coco/output"
+      --train_image_dir="/home/<user>/coco/empty_dir" \
+      --val_image_dir="/home/<user>/coco/val/val2017" \
+      --test_image_dir="/home/<user>/coco/empty_dir" \
+      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
+      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --output_dir="/home/<user>/coco/output"
 
-$ ll /home/myuser/coco/output
+$ ll /home/<user>/coco/output
 total 1598276
--rw-rw-r--. 1 myuser myuser         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 myuser myuser         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 myuser myuser 818336740 Nov  2 21:46 coco_val.record
+-rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
+-rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
+-rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and get master code
-$ cd /home/myuser/models
+$ cd /home/<user>/models
 $ git checkout master
 ```
 
@@ -140,17 +140,17 @@ location of your `tensorflow/models` clone (from step 1).
 
 Run benchmarking for throughput and latency:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/myuser/coco/output/ \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/<user>/coco/output/ \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name faster_rcnn \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --checkpoint /home/myuser/faster_rcnn_resnet50_fp32_coco \
+    --checkpoint /home/<user>/faster_rcnn_resnet50_fp32_coco \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     -- config_file=pipeline.config
 ```
@@ -165,9 +165,9 @@ python launch_benchmark.py \
     --precision fp32 \
     --framework tensorflow \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --model-source-dir /home/myuser/tensorflow/models \
-    --data-location /home/myuser/coco/output \
-    --in-graph /home/myuser/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
+    --model-source-dir /home/<user>/tensorflow/models \
+    --data-location /home/<user>/coco/output \
+    --in-graph /home/<user>/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
     --accuracy-only
 ```
 
@@ -244,17 +244,17 @@ by default it will be using all available sockets. Optional parameter `number_of
 
 Run benchmarking for throughput and latency:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/myuser/coco/output/ \
-    --model-source-dir /home/myuser/tensorflow/models \
+    --data-location /home/<user>/coco/output/ \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name faster_rcnn \
     --framework tensorflow \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
-    --in-graph /home/myuser/faster_rcnn_int8_pretrained_model.pb \
+    --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
     --benchmark-only \
     -- number_of_steps=5000
@@ -271,9 +271,9 @@ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
-    --model-source-dir /home/myuser/tensorflow/models \
-    --data-location /home/myuser/coco_dataset/coco_val.record \
-    --in-graph /home/myuser/faster_rcnn_int8_pretrained_model.pb  \
+    --model-source-dir /home/<user>/tensorflow/models \
+    --data-location /home/<user>/coco_dataset/coco_val.record \
+    --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb  \
     --accuracy-only
 ```
 

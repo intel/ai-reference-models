@@ -46,7 +46,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/myuser/datasets/ImageNet_TFRecords
+$ ll /home/<user>/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -88,8 +88,8 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --in-graph /home/myuser/inception_resnet_v2_int8_pretrained_model.pb \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords
+    --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
+    --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
 For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
@@ -103,9 +103,9 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --checkpoint /home/myuser/checkpoints \
+    --checkpoint /home/<user>/checkpoints \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords
+    --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -119,9 +119,9 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --checkpoint /home/myuser/checkpoints \
+    --checkpoint /home/<user>/checkpoints \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords
+    --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands

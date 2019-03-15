@@ -51,17 +51,17 @@ for `--model-source-dir` (from step 2) and `--data-location` (from step 1).
 
 Run benchmarking for throughput and latency with `--batch-size=1` :
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --model-source-dir /home/myuser/Mask_RCNN \
+    --model-source-dir /home/<user>/Mask_RCNN \
     --model-name maskrcnn \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --batch-size 1 \
     --socket-id 0 \
-    --data-location /home/myuser/COCO2014 \
+    --data-location /home/<user>/COCO2014 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3
 ```
 

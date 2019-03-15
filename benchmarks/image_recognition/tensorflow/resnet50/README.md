@@ -48,11 +48,11 @@ located at `models/models/image_recognition/tensorflow/resnet50/`.
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2), and the `--accuracy-only` flag.
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/myuser/dataset/FullImageNetData_directory
-    --in-graph /home/myuser/resnet50_int8_pretrained_model.pb \
+    --data-location /home/<user>/dataset/FullImageNetData_directory
+    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
@@ -87,10 +87,10 @@ args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_int8_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
@@ -147,10 +147,10 @@ If benchmarking uses dummy data for inference, `--data-location` flag is not req
 
 * To measure the model latency, set `--batch-size=1` and run the benchmark script as shown:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -184,10 +184,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure the model Throughput, set `--batch-size=128` and run the benchmark script as shown:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -222,10 +222,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -233,7 +233,7 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --data-location /home/<user>/dataset/ImageNetData_directory \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
@@ -257,10 +257,10 @@ output can only be used with real data.
 For example, the command below is the same as the accuracy test above,
 except with the `--output-results` flag added:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -269,7 +269,7 @@ $ python launch_benchmark.py \
     --output-results \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --data-location /home/<user>/dataset/ImageNetData_directory \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 The results file will be written to the
