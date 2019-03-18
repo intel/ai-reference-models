@@ -45,33 +45,32 @@ class ModelInitializer(BaseModelInitializer):
         self.set_kmp_vars(kmp_blocktime="0")
 
     def parse_args(self):
-        if self.custom_args:
-            parser = argparse.ArgumentParser()
-            parser.add_argument("--input-height", default=None,
-                                dest='input_height', type=int,
-                                help="input height")
-            parser.add_argument("--input-width", default=None,
-                                dest='input_width', type=int,
-                                help="input width")
-            parser.add_argument('--warmup-steps', dest='warmup_steps',
-                                help='number of warmup steps', type=int,
-                                default=40)
-            parser.add_argument('--steps', dest='steps',
-                                help='number of steps', type=int,
-                                default=100)
-            parser.add_argument('--input-layer', dest='input_layer',
-                                help='name of input layer', type=str,
-                                default=None)
-            parser.add_argument('--output-layer', dest='output_layer',
-                                help='name of output layer', type=str,
-                                default=None)
-            parser.add_argument(
-                "--calibration-only",
-                help="Calibrate the accuracy.",
-                dest="calibration_only", action="store_true")
+        parser = argparse.ArgumentParser()
+        parser.add_argument("--input-height", default=None,
+                            dest='input_height', type=int,
+                            help="input height")
+        parser.add_argument("--input-width", default=None,
+                            dest='input_width', type=int,
+                            help="input width")
+        parser.add_argument('--warmup-steps', dest='warmup_steps',
+                            help='number of warmup steps', type=int,
+                            default=40)
+        parser.add_argument('--steps', dest='steps',
+                            help='number of steps', type=int,
+                            default=100)
+        parser.add_argument('--input-layer', dest='input_layer',
+                            help='name of input layer', type=str,
+                            default=None)
+        parser.add_argument('--output-layer', dest='output_layer',
+                            help='name of output layer', type=str,
+                            default=None)
+        parser.add_argument(
+            "--calibration-only",
+            help="Calibrate the accuracy.",
+            dest="calibration_only", action="store_true")
 
-            self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
+        self.args = parser.parse_args(self.custom_args,
+                                      namespace=self.args)
 
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
