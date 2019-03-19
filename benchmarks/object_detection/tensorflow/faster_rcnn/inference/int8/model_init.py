@@ -96,7 +96,7 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(command)
 
     def run_accuracy_command(self):
-        num_cores = str(self.platform_util.num_cores_per_socket())
+        num_cores = str(self.platform_util.num_cores_per_socket)
         if self.args.num_cores != -1:
             num_cores = str(self.args.num_cores)
 
