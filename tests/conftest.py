@@ -26,7 +26,7 @@ import sys
 from mock import MagicMock
 
 
-MODULES = ('intel-models.tests',)
+MODULES = ('common',)
 MODULES_REPLACE = ('tests.unit', 'benchmarks')
 
 

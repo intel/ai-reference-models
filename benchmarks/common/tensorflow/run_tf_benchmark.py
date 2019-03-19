@@ -30,8 +30,6 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
     """Benchmark util for int8 and fp32 models """
 
     def main(self):
-        super(ModelBenchmarkUtil, self).define_args()
-
         # Additional args that are used internally for the start script to call the model_init.py
         arg_parser = ArgumentParser(parents=[self._common_arg_parser],
                                     description='Parse args for benchmark '
@@ -55,7 +53,7 @@ class ModelBenchmarkUtil(BaseBenchmarkUtil):
                                 dest="use_case")
 
         args, unknown = arg_parser.parse_known_args()
-        mi = super(ModelBenchmarkUtil, self).initialize_model(args, unknown)
+        mi = self.initialize_model(args, unknown)
         if mi is not None:  # start model initializer if not None
             mi.run()
 

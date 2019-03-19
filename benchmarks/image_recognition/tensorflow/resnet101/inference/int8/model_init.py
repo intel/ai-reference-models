@@ -39,7 +39,7 @@ class ModelInitializer(BaseModelInitializer):
 
         # Set env vars, if they haven't already been set
         set_env_var("OMP_NUM_THREADS",
-                    platform_util.num_cores_per_socket() if args.num_cores == -1 else args.num_cores)
+                    platform_util.num_cores_per_socket if args.num_cores == -1 else args.num_cores)
 
         # Set KMP env vars, but override default KMP_BLOCKTIME value
         self.set_kmp_vars(kmp_blocktime="0")

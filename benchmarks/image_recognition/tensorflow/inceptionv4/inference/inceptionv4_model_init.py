@@ -36,11 +36,11 @@ class InceptionV4ModelInitializer(BaseModelInitializer):
         super(InceptionV4ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         # Environment variables
-        set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket()
+        set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket
                     if self.args.num_cores == -1 else self.args.num_cores)
         self.set_kmp_vars(kmp_blocktime="0")
-        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_threads_per_core(),
-                                         num_intra_threads=platform_util.num_cores_per_socket())
+        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_threads_per_core,
+                                         num_intra_threads=platform_util.num_cores_per_socket)
 
     def parse_args(self):
         if self.custom_args:

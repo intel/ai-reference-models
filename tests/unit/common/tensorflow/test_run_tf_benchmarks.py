@@ -24,7 +24,7 @@ import pytest
 import re
 import sys
 
-from mock import patch
+from mock import MagicMock, patch
 
 from benchmarks.common.tensorflow.run_tf_benchmark import ModelBenchmarkUtil
 from test_utils import platform_config
@@ -68,14 +68,16 @@ test_arg_values = parse_model_args_file()
 @patch("shutil.rmtree")
 @patch("os.listdir")
 @patch("os.path.isdir")
+@patch("os.path.isfile")
 @patch("os.path.exists")
+@patch("os.stat")
 @patch("os.chdir")
 @patch("common.platform_util.os")
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("common.base_model_init.BaseModelInitializer.run_command")
 def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
-                       mock_os, mock_chdir, mock_path_exists, mock_is_dir,
+                       mock_os, mock_chdir, mock_stat, mock_path_exists, mock_is_file, mock_is_dir,
                        mock_listdir, mock_rmtree, mock_mkdir, test_args, expected_cmd):
     """
     Runs through executing the specified run_tf_benchmarks.py command from the
@@ -84,6 +86,8 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
     """
     mock_path_exists.return_value = True
     mock_is_dir.return_value = True
+    mock_is_file.return_value = True
+    mock_stat.return_value = MagicMock(st_nlink=0)
     parse_model_args_file()
     mock_listdir.return_value = True
     clear_kmp_env_vars()
