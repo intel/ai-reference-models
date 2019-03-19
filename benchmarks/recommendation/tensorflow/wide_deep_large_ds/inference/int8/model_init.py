@@ -34,7 +34,7 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
         # Set the num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_cores_per_socket(),
+        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_cores_per_socket,
                                          num_intra_threads=1)
         # Use default KMP AFFINITY values, override KMP_BLOCKTIME & enable KMP SETTINGS
         self.set_kmp_vars(kmp_settings="1", kmp_blocktime="0",
@@ -56,7 +56,7 @@ class ModelInitializer(BaseModelInitializer):
                                         self.args.mode, "inference.py")
 
         if self.args.num_parallel_batches == -1:
-            self.args.num_parallel_batches = self.platform_util.num_cores_per_socket()
+            self.args.num_parallel_batches = self.platform_util.num_cores_per_socket
 
         script_args_list = ["input_graph", "num_parallel_batches", "batch_size",
                             "num_inter_threads", "num_intra_threads", "accuracy_only", "data_location"]

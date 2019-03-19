@@ -77,7 +77,7 @@ class ModelInitializer(BaseModelInitializer):
             "python " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         # add num_cores
-        num_cores = self.platform_util.num_cores_per_socket() if self.args.num_cores == -1 \
+        num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
             else self.args.num_cores
         cmd += " --num_cores=" + str(num_cores)
         # workaround the --data-location problem

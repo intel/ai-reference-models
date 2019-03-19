@@ -31,7 +31,7 @@ class ModelInitializer (BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
-        cores_per_socket = platform_util.num_cores_per_socket()
+        cores_per_socket = platform_util.num_cores_per_socket
 
         # set num_inter_threads and num_intra_threads (override inter threads to 1)
         self.set_num_inter_intra_threads(num_inter_threads=1)
