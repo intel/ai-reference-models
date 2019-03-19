@@ -29,23 +29,25 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from common import base_benchmark_util
+from common.utils.validators import check_no_spaces
 
 
 class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
     """Launches benchmarking job based on the specified args """
 
-    def main(self):
-        args, unknown = self.parse_args(sys.argv[1:])
+    def __init__(self, *args, **kwargs):
+        super(LaunchBenchmark, self).__init__(*args, **kwargs)
+
+        self.args, self.unknown_args = self.parse_args()
         try:
-            self.validate_args(args)
+            self.validate_args()
         except (IOError, ValueError) as e:
-            print("\nError: {}".format(e))
-            sys.exit(1)
-        self.run_docker_container(args)
+            sys.exit("\nError: {}".format(e))
 
-    def parse_args(self, args):
-        super(LaunchBenchmark, self).define_args()
+    def main(self):
+        self.run_docker_container()
 
+    def parse_args(self):
         # Additional args that are only used with the launch script
         arg_parser = ArgumentParser(
             parents=[self._common_arg_parser],
@@ -53,41 +55,33 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         arg_parser.add_argument(
             "--docker-image", help="Specify the docker image/tag to use",
-            dest="docker_image", default=None, required=True)
+            dest="docker_image", default=None, required=True, type=check_no_spaces)
 
         arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
             "start.sh", action="store_true")
 
-        return arg_parser.parse_known_args(args)
+        return arg_parser.parse_known_args()
 
-    def validate_args(self, args):
+    def validate_args(self):
         """validate the args"""
-
-        # validate the shared args first
-        super(LaunchBenchmark, self).validate_args(args)
-
-        # Check for spaces in docker image
-        if ' ' in args.docker_image:
-            raise ValueError("docker image string "
-                             "should not have whitespace(s)")
-
         # validate that we support this framework by checking folder names
         benchmark_dir = os.path.dirname(os.path.realpath(__file__))
-        if glob.glob("{}/*/{}".format(benchmark_dir, args.framework)) == []:
+        if glob.glob("{}/*/{}".format(benchmark_dir, self.args.framework)) == []:
             raise ValueError("The specified framework is not supported: {}".
-                             format(args.framework))
+                             format(self.args.framework))
 
         # if neither benchmark_only or accuracy_only are specified, then enable
         # benchmark_only as the default
-        if not args.benchmark_only and not args.accuracy_only:
-            args.benchmark_only = True
+        if not self.args.benchmark_only and not self.args.accuracy_only:
+            self.args.benchmark_only = True
 
-    def run_docker_container(self, args):
+    def run_docker_container(self):
         """
         Runs a docker container with the specified image and environment
         variables to start running the benchmarking job.
         """
+        args = self.args
         benchmark_scripts = os.path.dirname(os.path.realpath(__file__))
         intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
 
