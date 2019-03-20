@@ -234,11 +234,18 @@ function add_steps_args() {
 }
 
 function add_calibration_arg() {
-  # returns string with --calibration-only, if True is specified
+  # returns string with --calibration-only, if True is specified,
+  # in this case a subset (~ 100 images) of the ImageNet dataset
+  # is generated to be used later on in calibrating the Int8 model.
+  # also this function returns a string with --calibrate, if True is specified,
+  # which enables resnet50 Int8 benchmark to run accuracy using the previously
+  # generated ImageNet data subset.
   local calibration_arg=""
 
   if [[ ${calibration_only} == "True" ]]; then
     calibration_arg="--calibration-only"
+  elif [[ ${calibrate} == "True" ]]; then
+    calibration_arg="--calibrate=True"
   fi
 
   echo "${calibration_arg}"
