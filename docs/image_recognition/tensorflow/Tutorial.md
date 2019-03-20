@@ -2,8 +2,8 @@
 
 
 ## Goal
-This tutorial will introduce CPU performance considerations for three image recognition deep learning models, and how to use Intel’s TensorFlow 
-optimizations to improve inference time on CPU. This tutorial will also provide code examples to use Model Zoo's pretrained model that can be copy/pasted for quick off-the-ground implementation with synthetic and real data.
+This tutorial will introduce CPU performance considerations for three image recognition deep learning models, and how to use Intel® Optimizations for TensorFlow to improve inference time on CPUs. 
+This tutorial will also provide code examples to use with Model Zoo's pretrained model that can be copy/pasted for quick off-the-ground implementation with synthetic and real data.
 
 ## Background
 Image recognition with deep learning is a computationally expensive endeavor. 
@@ -17,10 +17,9 @@ ResNet models use gate and skip logic to address issue #1 and lower the number o
 
 ##  Recommended Settings 
 
-In addition to TensorFlow optimizations offered by Intel MKLDNN in Intel-optimized TensorFlow to utilize instructions sets appropriately, the runtime settings also significantly contribute to improved performance. Tuning these options to optimize CPU workloads is vital to enable max performance out of Intel Optimization of TensorFlow. 
-Below are the set of run-time options recommended by Intel on
-ResNet50, ResNet101 and InceptionV3 through empirical testing.  
-
+In addition to TensorFlow optimizations that use the Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) to utilize instruction sets appropriately, runtime settings also significantly contribute to improved performance. 
+Tuning these options for CPU workloads is vital to optimize performance of TensorFlow on Intel® processors. 
+Below are the set of run-time options recommended by Intel on ResNet50, ResNet101 and InceptionV3 through empirical testing. 
 
 <table class="tg">
   <tr>
@@ -77,7 +76,7 @@ ResNet50, ResNet101 and InceptionV3 through empirical testing.
 </table>
 <br>
 
-*Note: Refer to the [link](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) here to learn in-detail about the run time options.*
+*Note: Refer to the [link](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) here to learn more about the run time options.*
 
 Run the following commands to get your processor information
 
@@ -113,7 +112,7 @@ tf.Session(config=config)
 ```
 
 ## Hands-on Tutorial
-This section shows how to do measure inference performance on Intel's Model Zoo pretrained model( or your pretrained model) by setting the above-discussed run time flags. 
+This section shows how to measure inference performance on Intel's Model Zoo pretrained model (or your pretrained model) by setting the above-discussed run time flags. 
 ### FP32 inference
  
 ### Initial Setup
@@ -135,9 +134,9 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_fp32_pretrained_model.pb
 ```
 Refer to following Readme files to get the latest locations of pretrained models <br>
-a. [ResNet50](https://github.com/IntelAI/models/tree/master/benchmarks/image_recognition/tensorflow/resnet50) <br>
-b. [ResNet101](https://github.com/IntelAI/models/tree/master/benchmarks/image_recognition/tensorflow/resnet101) <br>
-c. [InceptionV3](https://github.com/IntelAI/models/tree/master/benchmarks/image_recognition/tensorflow/inceptionv3) <br>
+a. [ResNet50](/benchmarks/image_recognition/tensorflow/resnet50) <br>
+b. [ResNet101](/benchmarks/image_recognition/tensorflow/resnet101) <br>
+c. [InceptionV3](/benchmarks/image_recognition/tensorflow/inceptionv3) <br>
 
 3. (optional) Download and setup a data directory that has image files in TFRecord format if you are inferring on a real dataset. 
 You can refer to [ImageNet](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data) or [Coco Dataset](http://cocodataset.org/#home) which have images converted to TFRecords, or you can run the [build_image_data.py](https://github.com/tensorflow/models/blob/f87a58cd96d45de73c9a8330a06b2ab56749a7fa/research/inception/inception/data/build_image_data.py) script to convert raw images into TFRecords.

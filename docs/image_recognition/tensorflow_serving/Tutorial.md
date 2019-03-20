@@ -4,8 +4,7 @@ Models: ResNet50, InceptionV3
 
 ## Goal
 
-This tutorial will introduce you to the CPU performance considerations for image recognition deep learning models and
-how to use Intel’s optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPU. 
+This tutorial will introduce you to the CPU performance considerations for image recognition deep learning models and how to use Intel® Optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
 It also provides sample code that you can use to get your optimized TensorFlow model server and GRPC client up and running quickly.
 
 ## Prerequisites
@@ -21,7 +20,7 @@ This tutorial assumes you have already:
 ## Background
 
 Convolutional neural networks (CNNs) for image recognition are computationally expensive. 
-The Intel MKL-DNN (Math Kernel Library for Deep Neural Networks) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations via efficient vectorization and multi-threading.
+The Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations via efficient vectorization and multi-threading.
 Tuning TensorFlow Serving to take full advantage of your hardware for image recognition deep learning inference involves:
 1. Working through this tutorial to set up servable versions of the well-known [ResNet50](https://arxiv.org/pdf/1512.03385.pdf) and [InceptionV3](https://arxiv.org/pdf/1512.00567v1.pdf) CNN models
 2. Running a TensorFlow Serving docker container configured for performance given your hardware resources
