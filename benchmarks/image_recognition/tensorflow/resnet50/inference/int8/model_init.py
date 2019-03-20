@@ -57,6 +57,11 @@ class ModelInitializer(BaseModelInitializer):
             "--calibration-only",
             help="Calibrate the accuracy.",
             dest="calibration_only", action="store_true")
+        parser.add_argument(
+            "--calibrate", dest="calibrate",
+            help=" run accuracy with calibration data, "
+                 "to generate min_max ranges, calibrate=[True/False]",
+            type=bool, default=False)
 
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
@@ -92,7 +97,7 @@ class ModelInitializer(BaseModelInitializer):
         script_args_list = [
             "input_graph", "data_location",
             "batch_size",
-            "num_inter_threads", "num_intra_threads"]
+            "num_inter_threads", "num_intra_threads", "calibrate"]
 
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
             "python " + accuracy_script
