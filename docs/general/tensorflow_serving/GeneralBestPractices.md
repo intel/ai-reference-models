@@ -1,9 +1,9 @@
-# General Best Practices for Intel-Optimized TensorFlow Serving
+# General Best Practices for Intel® Optimization of TensorFlow Serving
 
 ## Introduction
 
-On Intel architectures, Intel-Optimized TensorFlow Serving built with MKL-DNN can perform inferencing tasks significantly faster than the default installation.
-To install Intel-Optimized TensorFlow Serving, please refer to the [TensorFlow Serving Installation Guide](InstallationGuide.md).
+The Intel® Optimization of TensorFlow Serving leverages Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) to perform inferencing tasks significantly faster than the default installation on Intel® processors.
+To install Intel Optimization of TensorFlow Serving, please refer to the [TensorFlow Serving Installation Guide](InstallationGuide.md).
 Here we provide a brief description of the available TensorFlow model server settings and some general best practices for optimal performance.
 Due to potential differences in environment, memory, network, model topology, and other factors,
 we recommend that you explore a variety of settings and hand-tune TensorFlow Serving for your particular workload and metric of interest,
@@ -20,7 +20,7 @@ However, if you want to prioritize one metric over the other or further tune Ten
 
 ## TensorFlow Serving Configuration Settings
 
-There are two parameters you need to set when running the TensorFlow Serving with MKL-DNN docker container.
+There are two parameters you need to set when running the TensorFlow Serving with Intel MKL-DNN docker container.
 * ***OMP_NUM_THREADS*** is the maximum number of threads available. A good guideline is to set it equal to the number of physical cores.
 * ***TENSORFLOW_SESSION_PARALLELISM*** is the number of threads to use for a TensorFlow session.
 A good guideline we have found by experimenting is to set it equal to one-quarter the number of physical cores
@@ -59,7 +59,7 @@ NUMA node0 CPU(s):     0-31
 Flags:                 fpu vme de pse tsc ...
 ```
 Next, compute ***OMP_NUM_THREADS*** = *num_physical_cores* = 16 and ***TENSORFLOW_SESSION_PARALLELISM*** = *num_physical_cores*/4 = 4
-and start the model server container from the Intel-optimized docker image with a command that sets the environment variables to these values
+and start the model server container from the TensorFlow Serving docker image with a command that sets the environment variables to these values
 (this assumes some familiarity with docker and the `docker run` command):
 ```
 docker run --name=tfserving_mkl --rm -d -p 8500:8500 -v "/home/<user>/<saved_model_directory>:/models/<model_name>"
@@ -72,7 +72,7 @@ Data format can play an important role in inference performance. For example, th
 Image data format can be represented by 4 letters for a 2-dimensional image - N: number of images in a batch, C: number of channels in an image, W: width of an image in pixels, and H: height of an image in pixels.
 The order of the four letters indicates how pixel data are stored in 1-dimensional memory space, with the outer-most dimension first and the inner-most dimension last.
 Therefore, NCHW indicates pixel data are stored first width-wise (the inner-most dimension), followed by height, then channel, and finally batch (Figure 1).
-TensorFlow supports both NCHW and NHWC data formats. While NHWC is the default format, NCHW is more efficient for Intel-Optimized TensorFlow Serving with MKL-DNN and is the recommended layout for image data.
+TensorFlow supports both NCHW and NHWC data formats. While NHWC is the default format, NCHW is more efficient for Intel Optimization of TensorFlow Serving with Intel MKL-DNN and is the recommended layout for image data.
 
 ![NCHW format](nchw.png)
 

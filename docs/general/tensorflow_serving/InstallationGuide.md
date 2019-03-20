@@ -1,8 +1,8 @@
-# Intel-Optimized TensorFlow Serving Installation (Linux)
+# Intel® Optimization for TensorFlow Serving Installation (Linux)
 
 ## Goal
 This tutorial will guide you through step-by-step instructions for
-* [Installing Intel optimized TensorFlow Serving as Docker image](#installation)
+* [Installing Intel® Optimization for TensorFlow Serving as Docker image](#installation)
 * Running an example - [serving ResNet-50 v1 saved model using REST API and GRPC](#example-serving-resnet-50-v1-model).
 
 ## Prerequisites
@@ -36,8 +36,8 @@ We will break down the installation into 2 steps:
 * Step 1: Build Intel Optimized TensorFlow Serving Docker image
 * Step 2: Verify the Docker image by serving a simple model - half_plus_two
 
-### Step 1: Build Intel Optimized TensorFlow Serving Docker image
-The recommended way of using TensorFlow Serving is with Docker images. Lets build a docker image with Intel Optimized TensorFlow Serving. 
+### Step 1: Build TensorFlow Serving Docker image
+The recommended way to use TensorFlow Serving is with Docker images. Let’s build a docker image with TensorFlow Serving optimized for Intel® Processors. 
 
 * Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 
 	```
@@ -135,7 +135,7 @@ Let us test the server by serving a simple mkl version of half_plus_two model wh
 	$ docker rm -f tfserving_half_plus_two
 	```
 
- *  **Note:** If you want to confirm that MKL optimizations are being used, add `-e MKLDNN_VERBOSE=1` to the `docker run` command.   This will log MKL messages in the docker logs, which you can inspect after a request is processed.
+ *  **Note:** If you want to confirm that Intel® Math Kernel Network for Deep Neural Networks (Intel® MKL-DNN) optimizations are being used, add `-e MKLDNN_VERBOSE=1` to the `docker run` command.   This will log Intel MKL-DNN messages in the docker logs, which you can inspect after a request is processed.
 	```
 	$ docker run \
 	  -p 8501:8501 \
@@ -150,7 +150,7 @@ Let us test the server by serving a simple mkl version of half_plus_two model wh
     $ curl -d '{"instances": [1.0, 2.0, 5.0]}' \
     -X POST http://localhost:8501/v1/models/half_plus_two:predict
     ```
-    You should see the result with MKLDNN verbose output like below:
+    You should see the result with Intel MKL-DNN verbose output like below:
     ```
     mkldnn_verbose,exec,reorder,simple:any,undef,in:f32_nhwc out:f32_nChw16c,num:1,1x1x10x10,0.00488281     
     mkldnn_verbose,exec,reorder,simple:any,undef,in:f32_hwio out:f32_OIhw16i16o,num:1,1x1x1x1,0.000976562
