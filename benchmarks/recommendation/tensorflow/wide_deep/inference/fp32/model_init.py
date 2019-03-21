@@ -50,7 +50,7 @@ class ModelInitializer(BaseModelInitializer):
 
         self.run_cmd = " OMP_NUM_THREADS=1" + \
                        " numactl --cpunodebind=0 --membind=0 " + \
-                       " python " + executable + \
+                       self.python_exe + " " + executable + \
                        " --data_dir=" + self.args.data_location + \
                        " --model_dir=" + self.args.checkpoint + \
                        " --batch_size=" + str(self.args.batch_size)

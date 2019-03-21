@@ -44,7 +44,7 @@ class ModelInitializer(BaseModelInitializer):
         script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
             script_name)
-        self.command_prefix = "python {}".format(script_path)
+        self.command_prefix = "{} {}".format(self.python_exe, script_path)
 
         if self.args.socket_id != -1:
             self.command_prefix = "numactl --cpunodebind={} -l {}".format(

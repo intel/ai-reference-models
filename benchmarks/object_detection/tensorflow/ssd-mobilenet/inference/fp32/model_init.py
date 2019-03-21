@@ -68,7 +68,7 @@ class ModelInitializer(BaseModelInitializer):
 
             # get command with numactl
             self.run_cmd = self.get_numactl_command(
-                self.args.socket_id) + "python {}".format(benchmark_script)
+                self.args.socket_id) + "{} {}".format(self.python_exe, benchmark_script)
 
             output_tf_record_path = os.path.join(os.path.dirname(
                 self.args.data_location), "SSD-mobilenet-out.tfrecord")

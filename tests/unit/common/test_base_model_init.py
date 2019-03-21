@@ -48,6 +48,7 @@ def test_base_model_initializer(
     # Setup base model init with test settings
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
+    os.environ["PYTHON_EXE"] = "python"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
     # call run_command and then check the output

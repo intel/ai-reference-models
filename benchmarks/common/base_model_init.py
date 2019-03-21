@@ -42,6 +42,9 @@ class BaseModelInitializer(object):
         self.custom_args = custom_args
         self.platform_util = platform_util
 
+        # Ensure that we are using the proper version of python to run the benchmarking script
+        self.python_exe = os.environ["PYTHON_EXE"]
+
         if not platform_util:
             raise ValueError("Did not find any platform info.")
 

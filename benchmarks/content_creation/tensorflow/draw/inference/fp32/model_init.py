@@ -46,7 +46,7 @@ class ModelInitializer(BaseModelInitializer):
         script_path = os.path.join(self.args.intelai_models, self.args.mode,
                                    self.args.precision, "draw_inf.py")
         self.command_prefix = self.get_numactl_command(args.socket_id) + \
-            " python {} ".format(script_path)
+            " {} {} ".format(self.python_exe, script_path)
 
         # Add additional args to the command
         self.command_prefix += "--cp {} --num_inter_threads {} " \

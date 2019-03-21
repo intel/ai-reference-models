@@ -50,7 +50,7 @@ class ModelInitializer(BaseModelInitializer):
             "ncf_main.py")
 
         self.benchmark_command = self.get_numactl_command(args.socket_id) + \
-            "python " + benchmark_script
+            self.python_exe + " " + benchmark_script
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
