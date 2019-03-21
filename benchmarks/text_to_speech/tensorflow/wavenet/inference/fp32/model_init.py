@@ -30,7 +30,7 @@ class ModelInitializer(BaseModelInitializer):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         self.command = ""
-        command_prefix = "python generate.py"
+        command_prefix = "{} generate.py".format(self.python_exe)
 
         # Set default KMP env vars, except for KMP_SETTINGS
         self.set_kmp_vars(kmp_settings=None)

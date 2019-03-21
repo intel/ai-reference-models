@@ -136,7 +136,7 @@ class ModelInitializer(BaseModelInitializer):
             self.command.append("-m")
             self.command.append("{}".format(socket_id))
 
-        self.command += ("python", self.perf_script_path)
+        self.command += (self.python_exe, self.perf_script_path)
         self.command += ("-m", self.args.model_source_dir)
         self.command += ("-g", self.args.input_graph)
         self.command += ("--num-intra-threads", str(self.args.num_intra_threads))

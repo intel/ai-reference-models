@@ -84,6 +84,7 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
     test_args and verifying that the model_init file calls run_command with
     the expected_cmd string.
     """
+    os.environ["PYTHON_EXE"] = "python"
     mock_path_exists.return_value = True
     mock_is_dir.return_value = True
     mock_is_file.return_value = True

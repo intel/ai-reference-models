@@ -26,12 +26,16 @@ echo "    WORKSPACE: ${WORKSPACE}"
 echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
-echo '    Mounted volumes:'
-echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
-echo "        ${EXTERNAL_MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_EXTERNAL_MODELS_SOURCE}"
-echo "        ${INTELAI_MODELS} mounted on: ${MOUNT_INTELAI_MODELS_SOURCE}"
-echo "        ${DATASET_LOCATION_VOL} mounted on: ${DATASET_LOCATION}"
-echo "        ${CHECKPOINT_DIRECTORY_VOL} mounted on: ${CHECKPOINT_DIRECTORY}"
+
+if [ ${DOCKER} == "True" ]; then
+  echo "    Mounted volumes:"
+  echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
+  echo "        ${EXTERNAL_MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_EXTERNAL_MODELS_SOURCE}"
+  echo "        ${INTELAI_MODELS} mounted on: ${MOUNT_INTELAI_MODELS_SOURCE}"
+  echo "        ${DATASET_LOCATION_VOL} mounted on: ${DATASET_LOCATION}"
+  echo "        ${CHECKPOINT_DIRECTORY_VOL} mounted on: ${CHECKPOINT_DIRECTORY}"
+fi
+
 echo "    SOCKET_ID: ${SOCKET_ID}"
 echo "    MODEL_NAME: ${MODEL_NAME}"
 echo "    MODE: ${MODE}"
@@ -117,13 +121,12 @@ function run_model() {
 }
 
 # basic run command with commonly used args
-CMD="python ${RUN_SCRIPT_PATH} \
+CMD="${PYTHON_EXE} ${RUN_SCRIPT_PATH} \
 --framework=${FRAMEWORK} \
 --use-case=${USE_CASE} \
 --model-name=${MODEL_NAME} \
 --precision=${PRECISION} \
 --mode=${MODE} \
---model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE} \
 --benchmark-dir=${MOUNT_BENCHMARK} \
 --intelai-models=${MOUNT_INTELAI_MODELS_SOURCE} \
 --num-cores=${NUM_CORES} \
@@ -134,6 +137,22 @@ ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
 ${verbose_arg}"
+
+if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
+  CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
+fi
+
+if [[ -n "${IN_GRAPH}" && ${IN_GRAPH} != "" ]]; then
+  CMD="${CMD} --in-graph=${IN_GRAPH}"
+fi
+
+if [[ -n "${CHECKPOINT_DIRECTORY}" && ${CHECKPOINT_DIRECTORY} != "" ]]; then
+  CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+fi
+
+if [[ -n "${DATASET_LOCATION}" && ${DATASET_LOCATION} != "" ]]; then
+  CMD="${CMD} --data-location=${DATASET_LOCATION}"
+fi
 
 if [ ${NUM_INTER_THREADS} != "None" ]; then
   CMD="${CMD} --num-inter-threads=${NUM_INTER_THREADS}"
@@ -149,11 +168,6 @@ fi
 
 if [ ${DATA_NUM_INTRA_THREADS} != "None" ]; then
   CMD="${CMD} --data-num-intra-threads=${DATA_NUM_INTRA_THREADS}"
-fi
-
-# Add on --in-graph and --data-location for int8 inference
-if [ ${MODE} == "inference" ] && [ ${PRECISION} == "int8" ]; then
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
 fi
 
 function install_protoc() {
@@ -258,7 +272,6 @@ function 3d_unet() {
       pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
     fi
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -272,8 +285,6 @@ function dcgan() {
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/gan/cifar
 
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
-
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -284,7 +295,6 @@ function dcgan() {
 # DRAW model
 function draw() {
   if [ ${PRECISION} == "fp32" ]; then
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -309,18 +319,14 @@ function faster_rcnn() {
     fi
 
     if [ ${PRECISION} == "fp32" ]; then
-      config_file_arg=""
       if [ -n "${config_file}" ]; then
-        config_file_arg="--config_file=${config_file}"
+        CMD="${CMD} --config_file=${config_file}"
       fi
 
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
         echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
       fi
-      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-      --data-location=${DATASET_LOCATION} \
-      --in-graph=${IN_GRAPH} ${config_file_arg}"
 
     elif [ ${PRECISION} == "int8" ]; then
       number_of_steps_arg=""
@@ -341,8 +347,7 @@ function gnmt() {
 
     if [ ${PRECISION} == "fp32" ]; then
 
-      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION} \
-      $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
+      CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
       $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
       $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
       $(add_arg "--infer_mode" ${infer_mode})"
@@ -368,7 +373,6 @@ function inceptionv4() {
   if [ ${PRECISION} == "int8" ]; then
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   elif [ ${PRECISION} == "fp32" ]; then
-    CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -385,12 +389,6 @@ function inception_resnet_v2() {
   fi
 
   if [ ${PRECISION} == "fp32" ]; then
-    # Add on --in-graph and --data-location for int8 inference
-    if [ ${MODE} == "inference" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
-    elif [ ${MODE} == "inference" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --data-location=${DATASET_LOCATION}"
-    fi
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -412,7 +410,6 @@ function maskrcnn() {
     fi
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
     cd ${original_dir}
-    CMD="${CMD} --data-location=${DATASET_LOCATION}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -423,7 +420,6 @@ function maskrcnn() {
 # mobilenet_v1 model
 function mobilenet_v1() {
   if [ ${PRECISION} == "fp32" ]; then
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION}"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -446,9 +442,6 @@ function ncf() {
       pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
     fi
 
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-    --data-location=${DATASET_LOCATION}"
-
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -470,7 +463,7 @@ function resnet50_101_inceptionv3() {
         CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     elif [ ${PRECISION} == "fp32" ]; then
-      CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION} $(add_steps_args)"
+      CMD="${CMD} $(add_steps_args)"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -516,9 +509,7 @@ function rfcn() {
           exit 1
       fi
 
-      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-      --config_file=${config_file} --data-location=${DATASET_LOCATION} \
-      --in-graph=${IN_GRAPH} ${split_arg}"
+      CMD="${CMD} --config_file=${config_file} ${split_arg}"
    else
       echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
   fi
@@ -529,9 +520,6 @@ function rfcn() {
 # SqueezeNet model
 function squeezenet() {
   if [ ${PRECISION} == "fp32" ]; then
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-    --data-location=${DATASET_LOCATION}"
-
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -562,8 +550,6 @@ function ssd_mobilenet() {
     chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
     sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
 
-    CMD="${CMD} --in-graph=${IN_GRAPH} \
-    --data-location=${DATASET_LOCATION}"
     CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -582,7 +568,7 @@ function unet() {
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
       exit 1
     fi
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} --checkpoint_name=${checkpoint_name}"
+    CMD="${CMD} --checkpoint_name=${checkpoint_name}"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -620,9 +606,7 @@ function transformer_language() {
 
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/decoding.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/tensor2tensor/utils/decoding.py
 
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-    --data-location=${DATASET_LOCATION} \
-    --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file} \
+    CMD="${CMD} --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file} \
     --reference=${CHECKPOINT_DIRECTORY}/${reference}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -651,8 +635,7 @@ function wavenet() {
       pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
     fi
 
-    CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-        --checkpoint_name=${checkpoint_name} \
+    CMD="${CMD} --checkpoint_name=${checkpoint_name} \
         --sample=${sample}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -667,8 +650,6 @@ function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-      CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY} \
-      --data-location=${DATASET_LOCATION}"
       CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
@@ -712,7 +693,7 @@ function wide_deep_large_ds() {
     fi
 
     if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
-        CMD="${CMD} --in-graph=${IN_GRAPH} --data-location=${DATASET_LOCATION} ${num_parallel_batches_arg} "
+        CMD="${CMD} ${num_parallel_batches_arg} "
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
         echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
