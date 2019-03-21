@@ -20,6 +20,7 @@
 from __future__ import print_function
 from conditional import conditional
 
+import os
 import sys
 
 import pytest
@@ -192,11 +193,26 @@ def test_output_results_with_accuracy(launch_benchmark, mock_system_platform, mo
 
 def test_launch_benchmark_validate_model(launch_benchmark, mock_popen):
     """
-    Verifies that a valid model name passes validation and starts a docker
-    container.
+    Verifies that a valid model name passes validation and starts a docker container.
     """
     launch_benchmark.main()
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
     assert "docker" == args[0][0]
     assert "run" == args[0][1]
+
+
+def test_bare_metal(launch_benchmark, mock_popen):
+    """ Tests the bare metal launch script function """
+    test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
+    launch_benchmark.run_bare_metal("/foo", "/bar", test_env_vars)
+    assert mock_popen.called
+    args, kwargs = mock_popen.call_args
+
+    # make sure that the start script is run
+    assert "bash" == args[0][0]
+    assert "start.sh" in args[0][1]
+
+    # ensure env vars are set
+    assert os.environ["TEST_ENV_VAR_1"] == test_env_vars["TEST_ENV_VAR_1"]
+    assert os.environ["TEST_ENV_VAR_2"] == test_env_vars["TEST_ENV_VAR_2"]

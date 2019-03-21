@@ -80,7 +80,7 @@ class ModelInitializer(BaseModelInitializer):
                             "num_inter_threads", "num_intra_threads",
                             "warmup_steps", "steps"]
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + benchmark_script
+            self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 
@@ -92,7 +92,7 @@ class ModelInitializer(BaseModelInitializer):
                             "output_layer", "num_inter_threads",
                             "num_intra_threads"]
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + accuracy_script
+            self.python_exe + " " + accuracy_script
 
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
@@ -105,7 +105,7 @@ class ModelInitializer(BaseModelInitializer):
             "batch_size",
             "num_inter_threads", "num_intra_threads"]
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + calibration_script
+            self.python_exe + " " + calibration_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 

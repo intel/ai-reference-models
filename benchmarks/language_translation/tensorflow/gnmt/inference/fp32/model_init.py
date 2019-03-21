@@ -35,7 +35,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.socket_id != -1 and self.args.num_cores != -1:
             self.cmd += "--physcpubind=0-" + \
                         (str(self.args.num_cores - 1)) + " "
-        self.cmd += "python "
+        self.cmd += "{} ".format(self.python_exe)
 
         # Set the KMP env vars
         self.set_kmp_vars(kmp_affinity="granularity=fine,compact,1,0")
