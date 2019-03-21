@@ -43,7 +43,7 @@ class ModelInitializer(BaseModelInitializer):
         benchmark_script = os.path.join(
             self.args.intelai_models, "coco.py")
         self.benchmark_command = self.get_numactl_command(args.socket_id) + \
-            "python3 " + benchmark_script + " evaluate "
+            self.python_exe + " " + benchmark_script + " evaluate "
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 

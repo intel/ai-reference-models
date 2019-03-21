@@ -43,7 +43,7 @@ class ModelInitializer(BaseModelInitializer):
 
         # add numactl prefix to the command
         self.command_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + script_path
+            self.python_exe + " " + script_path
 
         # add additional args to the command
         self.command_prefix += \

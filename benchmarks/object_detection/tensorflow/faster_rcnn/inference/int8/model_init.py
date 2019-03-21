@@ -83,7 +83,7 @@ class ModelInitializer(BaseModelInitializer):
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         self.parse_args()
         command = self.get_numactl_command(self.args.socket_id)
-        command += " python " + self.perf_script_path
+        command += " {} ".format(self.python_exe) + self.perf_script_path
         command += " -g " + self.args.input_graph
         if self.custom_args:
             command += " -n " + str(self.args.number_of_steps)

@@ -69,7 +69,7 @@ class InceptionV4ModelInitializer(BaseModelInitializer):
 
     def add_command_prefix(self, script_path):
         """ Uses the specified script path and adds on the command prefix """
-        return self.get_numactl_command(self.args.socket_id) + "python " + \
+        return self.get_numactl_command(self.args.socket_id) + self.python_exe + " " + \
             script_path
 
     def run_benchmark(self):

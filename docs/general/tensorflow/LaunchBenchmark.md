@@ -10,7 +10,8 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 ## How it Works
 
 1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container. 
-   [Here](#launch_benchmarkpy-flags) is the full list of available flags.
+   [Here](#launch_benchmarkpy-flags) is the full list of available flags. To run benchmarking without a docker container,
+   see the [bare metal instructions](#alpha-feature-running-on-bare-metal).
 2. The container's entrypoint script [`start.sh`](/benchmarks/common/tensorflow/start.sh) installs required dependencies, e.g. python packages and `numactl`, and sets the PYTHONPATH environment variable to point to the required dependencies. 
    [Here](#startsh-flags) is the full list of available flags.
 3. The [`run_tf_benchmark.py`](/benchmarks/common/tensorflow/run_tf_benchmark.py) script calls the model's initialization routine, called `model_init.py` (see [here](#model-scripts-for-tensorflow-fp32-inference)).
@@ -103,4 +104,72 @@ optional arguments:
   -g INPUT_GRAPH, --in-graph INPUT_GRAPH
                         Full path to the input graph
   --debug               Launches debug mode which doesn't execute start.sh
+```
+
+## Alpha feature: Running on bare metal
+
+We recommend using [Docker](https://www.docker.com) to run the
+benchmarking scripts, as that provides a consistent environment where
+the script can install all the necessary dependencies to run the models
+in this repo. For this reason, the tutorials and model README files
+provide instructions on how to run the model in a Docker container.
+However, if you need to run without Docker, the instructions below
+describe how that can be done using the `launch_benchmark.py` script.
+
+### Prerequisites for running on bare metal
+
+Since the `launch_benchmark.py` is intended to run in an Ubuntu-based
+Docker container, running on bare metal also will only work when running
+on Ubuntu.
+
+Before running benchmarking, you must also install all the dependencies
+that are required to run the model.
+
+Basic requirements for running all models include:
+ * python (If the model's README file specifies to use a python3 TensorFlow docker image, then use python 3 on bare metal, otherwise use python 2.7)
+ * [intel-tensorflow](https://github.com/tensorflow/tensorflow/blob/master/README.md#community-supported-builds)
+ * python-tk
+ * numactl
+ * libsm6
+ * libxext6
+ * requests
+
+Individual models may have additional dependencies that need to be
+installed. The easiest way is to find this out find the model's function in
+the [start.sh](/benchmarks/common/tensorflow/start.sh) script and check
+if any additional dependencies are being installed. For example, many of
+the Object Detection models require the python
+[cocoapi](https://github.com/cocodataset/cocoapi) and dependencies
+from a [requirements.txt file](/benchmarks/object_detection/tensorflow/ssd-mobilenet/requirements.txt)
+to be installed.
+
+### Running the launch script on bare metal
+
+Once you have installed all of the requirements necessary to run the
+model, you can follow the [tutorials](/docs/README.md) or model
+[README](/benchmarks/README.md) files for instructions on getting the
+required code repositories, dataset, and pretrained model. Once you get
+to the step for running the `launch_benchmark.py` script, omit the
+`--docker-image` arg to run without a Docker container. If you have
+installed the model dependencies in a virtual environment be sure that
+you are calling the proper python executable, which includes the
+dependencies that you installed in the previous step.
+
+Also, note that if you are using the same clone of the Model Zoo, which
+you previously used with docker, you may need to change the owner
+on your log directory, or run with `sudo` in order for the `tee`
+commands writing to the log file to work properly.
+
+For example, in order to run ResNet50 FP32 benchmarking on bare metal,
+the following command can be used:
+
+```
+ /home/<user>/venv/bin/python launch_benchmark.py \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+    --model-name resnet50 \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --batch-size=1 \
+    --socket-id 0
 ```

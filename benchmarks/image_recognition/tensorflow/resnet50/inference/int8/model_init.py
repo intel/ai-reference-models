@@ -80,7 +80,7 @@ class ModelInitializer(BaseModelInitializer):
             "warmup_steps", "steps"]
 
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + benchmark_script
+            self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         # add num_cores
         num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
@@ -100,7 +100,7 @@ class ModelInitializer(BaseModelInitializer):
             "num_inter_threads", "num_intra_threads", "calibrate"]
 
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + accuracy_script
+            self.python_exe + " " + accuracy_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 
@@ -113,7 +113,7 @@ class ModelInitializer(BaseModelInitializer):
             "batch_size",
             "num_inter_threads", "num_intra_threads"]
         cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + calibration_script
+            self.python_exe + " " + calibration_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 

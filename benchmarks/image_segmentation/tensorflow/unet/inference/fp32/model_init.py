@@ -51,7 +51,7 @@ class ModelInitializer(BaseModelInitializer):
 
         # Create the command prefix using numactl
         self.command_prefix = self.get_numactl_command(self.args.socket_id) +\
-            "python {}".format(script_path)
+            "{} {}".format(self.python_exe, script_path)
 
         # Add batch size arg
         if self.args.batch_size != -1:

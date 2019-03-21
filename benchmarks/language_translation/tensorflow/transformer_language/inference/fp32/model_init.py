@@ -51,7 +51,7 @@ class ModelInitializer(BaseModelInitializer):
             if self.args.num_cores != -1:
                 self.cmd += "--physcpubind=0-" + \
                             (str(self.args.num_cores - 1)) + " "
-        self.cmd += "python "
+        self.cmd += "{} ".format(self.python_exe)
 
         run_script = os.path.join(self.args.model_source_dir,
                                   "tensor2tensor/bin/t2t_decoder.py")
