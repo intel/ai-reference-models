@@ -3,7 +3,7 @@
 
 ## Goal
 
-This tutorial will introduce you to the CPU performance considerations for object detection deep learning models and how to use Intel’s optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPU. 
+This tutorial will introduce you to the CPU performance considerations for object detection in deep learning models and how to use [Intel® Optimizations for TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
 This tutorial uses a pre-trained Region-based Fully Convolutional Network (R-FCN) model for object detection and provides sample code that you can use to get your optimized TensorFlow model server and REST client up and running quickly. In this tutorial using R-FCN, you will measure inference performance in two situations:
 * **Real-Time**, where batch_size=1. In this case, lower latency means better runtime performance.
 * **Throughput**, where batch_size>1. In this case, higher throughput means better runtime performance.
