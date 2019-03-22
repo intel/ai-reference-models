@@ -45,7 +45,7 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ export TF_SERVING_ROOT=$(pwd)/serving
 	$ echo "export TF_SERVING_ROOT=$(pwd)/serving" >> ~/.bashrc
 	```
-* Using `Dockerfile.devel.mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
+* Using `Dockerfile.devel-mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
 	```
 	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
 	$ docker build -f Dockerfile.devel-mkl -t tensorflow/serving:latest-devel-mkl .
