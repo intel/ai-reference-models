@@ -1,15 +1,13 @@
 # Image Segmentation with 3D U-Net
 
 ## Goal
-Learn CPU performance optimizations for image segmentation with [3D U-Net](https://arxiv.org/pdf/1606.06650.pdf) by optimizing TensorFlow to run faster on CPU.
+Learn CPU performance optimizations for image segmentation with [3D U-Net](https://arxiv.org/pdf/1606.06650.pdf) by optimizing TensorFlow to run faster on CPUs.
 
 ## Abstract  
-You can leverage [Intel®-optimized TensorFlow](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to improve inference performance of 3D U-Net (volumetric segmentation in medical imaging) on Intel CPUs. 
+You can leverage [Intel® Optimizations for TensorFlow](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to improve inference performance of 3D U-Net (volumetric segmentation in medical imaging) on Intel® CPUs. 
 
-Intel®’s primitives library is called Intel® Math Kernel Library for Deep Neural Networks (MKL-DNN) and includes convolution, normalization, activation and inner product, and other primitives. 
+Intel’s primitives library is called Intel® Math Kernel Library for Deep Neural Networks (MKL-DNN) and includes convolution, normalization, activation and inner product, and other primitives. 
 These steps are highly relevant as recent academic articles predict the development of non-static neural networks that increase memory and computational requirements, especially where accuracy minimization is paramount.
-
-KEYWORDS. Convolutional Neural Networks, Biomedical Volumetric Image Segmentation, TensorFlow Optimization.
 
 ## Background
 [Image Segmentation](https://en.wikipedia.org/wiki/Image_segmentation) groups similar pixels of an image into different categories. 
@@ -99,8 +97,9 @@ For steps 1-3, refer to the Intel Model Zoo [3D U-Net FP32 benchmarks README](/b
    ```
 3. Run the Python script `launch_benchmark.py` with the pretrained model and BraTS dataset. 
    The `launch_benchmark.py` script can be treated as an entry point to conveniently perform out-of-box high performance inference on pretrained models trained of popular topologies. 
-   The script will automatically set the recommended run-time options for supported topologies, but if you choose to set your own options, refer to full of available flags and a detailed explanation on `launch_benchmark.py` script here. 
-   This step will automatically launch a new container on every run and terminate. Go to the Step 4 to interactively run the script on the container.
+   The script will automatically set the recommended run-time options for supported topologies, 
+   but if you choose to set your own options, refer to full of available flags and a detailed explanation on `launch_benchmark.py` script [here](/docs/general/tensorflow/LaunchBenchmark.md). 
+   This step will automatically launch a new container on every run and terminate.
 
    **Real-time Inference** and **Maximum Throughput Inference** (batch_size=1 for both)
    
@@ -120,9 +119,9 @@ For steps 1-3, refer to the Intel Model Zoo [3D U-Net FP32 benchmarks README](/b
 
 ## Conclusion
 The optimization of TensorFlow allows for deep learning models built for this common framework to run faster on Intel® processors to increase scaling and analytical flexibility. 
-The Xeon® processor is designed to scale effectively to reduce training time of machine learning models. 
-The collaboration between Intel® and Google engineers to optimize TensorFlow for higher performance on CPUs is part of ongoing efforts to increase the flexibility of AI applications by running on multiple running on multiple hardware platforms. 
-Intel® believes the expansion of this accessibility is critical in the development of the next generation of AI models. 
+Intel® Xeon® processors are designed to scale effectively to reduce training time of machine learning models. 
+The collaboration between Intel and Google engineers to optimize TensorFlow for higher performance on CPUs is part of ongoing joint efforts to increase the flexibility of AI applications by running on multiple hardware platforms. 
+Intel believes the expansion of this accessibility is critical in the development of the next generation of AI models. 
 
 
 
