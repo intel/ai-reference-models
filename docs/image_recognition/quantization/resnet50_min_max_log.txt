@@ -1,0 +1,727 @@
+2019-02-24 03:51:33.625180: I tensorflow/core/platform/cpu_feature_guard.cc:145] This TensorFlow binary is optimized with Intel(R) MKL-DNN to use the following CPU instructions in performance critical operations:  AVX512F
+To enable them in non-MKL-DNN operations, rebuild TensorFlow with the appropriate compiler flags.
+
+User settings:
+
+   KMP_AFFINITY=granularity=fine,verbose,compact,1,0
+   KMP_BLOCKTIME=0
+   KMP_SETTINGS=1
+   OMP_NUM_THREADS=28
+
+Effective settings:
+
+   KMP_ABORT_DELAY=0
+   KMP_ADAPTIVE_LOCK_PROPS='1,1024'
+   KMP_ALIGN_ALLOC=64
+   KMP_ALL_THREADPRIVATE=448
+   KMP_ATOMIC_MODE=2
+   KMP_BLOCKTIME=0
+   KMP_CPUINFO_FILE: value is not defined
+   KMP_DETERMINISTIC_REDUCTION=false
+   KMP_DEVICE_THREAD_LIMIT=2147483647
+   KMP_DISP_HAND_THREAD=false
+   KMP_DISP_NUM_BUFFERS=7
+   KMP_DUPLICATE_LIB_OK=false
+   KMP_FORCE_REDUCTION: value is not defined
+   KMP_FOREIGN_THREADS_THREADPRIVATE=true
+   KMP_FORKJOIN_BARRIER='2,2'
+   KMP_FORKJOIN_BARRIER_PATTERN='hyper,hyper'
+   KMP_FORKJOIN_FRAMES=true
+   KMP_FORKJOIN_FRAMES_MODE=3
+   KMP_GTID_MODE=3
+   KMP_HANDLE_SIGNALS=false
+   KMP_HOT_TEAMS_MAX_LEVEL=1
+   KMP_HOT_TEAMS_MODE=0
+   KMP_INIT_AT_FORK=true
+   KMP_INIT_WAIT=2048
+   KMP_ITT_PREPARE_DELAY=0
+   KMP_LIBRARY=throughput
+   KMP_LOCK_KIND=queuing
+   KMP_MALLOC_POOL_INCR=1M
+   KMP_NEXT_WAIT=1024
+   KMP_NUM_LOCKS_IN_BLOCK=1
+   KMP_PLAIN_BARRIER='2,2'
+   KMP_PLAIN_BARRIER_PATTERN='hyper,hyper'
+   KMP_REDUCTION_BARRIER='1,1'
+   KMP_REDUCTION_BARRIER_PATTERN='hyper,hyper'
+   KMP_SCHEDULE='static,balanced;guided,iterative'
+   KMP_SETTINGS=true
+   KMP_SPIN_BACKOFF_PARAMS='4096,100'
+   KMP_STACKOFFSET=64
+   KMP_STACKPAD=0
+   KMP_STACKSIZE=4M
+   KMP_STORAGE_MAP=false
+   KMP_TASKING=2
+   KMP_TASKLOOP_MIN_TASKS=0
+   KMP_TASK_STEALING_CONSTRAINT=1
+   KMP_TEAMS_THREAD_LIMIT=112
+   KMP_TOPOLOGY_METHOD=all
+   KMP_USER_LEVEL_MWAIT=false
+   KMP_VERSION=false
+   KMP_WARNINGS=true
+   OMP_AFFINITY_FORMAT='OMP: pid %P tid %T thread %n bound to OS proc set {%a}'
+   OMP_ALLOCATOR=omp_default_mem_alloc
+   OMP_CANCELLATION=false
+   OMP_DEFAULT_DEVICE=0
+   OMP_DISPLAY_AFFINITY=false
+   OMP_DISPLAY_ENV=false
+   OMP_DYNAMIC=false
+   OMP_MAX_ACTIVE_LEVELS=2147483647
+   OMP_MAX_TASK_PRIORITY=0
+   OMP_NESTED=false
+   OMP_NUM_THREADS='28'
+   OMP_PLACES: value is not defined
+   OMP_PROC_BIND='intel'
+   OMP_SCHEDULE='static'
+   OMP_STACKSIZE=4M
+   OMP_TARGET_OFFLOAD=DEFAULT
+   OMP_THREAD_LIMIT=2147483647
+   OMP_TOOL=enabled
+   OMP_TOOL_LIBRARIES: value is not defined
+   OMP_WAIT_POLICY=PASSIVE
+   KMP_AFFINITY='verbose,warnings,respect,granularity=fine,compact,1,0'
+
+2019-02-24 03:51:33.698482: I tensorflow/core/platform/profile_utils/cpu_utils.cc:94] CPU Frequency: 2500000000 Hz
+2019-02-24 03:51:33.703226: I tensorflow/compiler/xla/service/service.cc:162] XLA service 0x46e8cb0 executing computations on platform Host. Devices:
+2019-02-24 03:51:33.703289: I tensorflow/compiler/xla/service/service.cc:169]   StreamExecutor device (0): <undefined>, <undefined>
+OMP: Info #212: KMP_AFFINITY: decoding x2APIC ids.
+OMP: Info #210: KMP_AFFINITY: Affinity capable, using global cpuid leaf 11 info
+OMP: Info #154: KMP_AFFINITY: Initial OS proc set respected: 0-27,56-83
+OMP: Info #156: KMP_AFFINITY: 56 available OS procs
+OMP: Info #157: KMP_AFFINITY: Uniform topology
+OMP: Info #179: KMP_AFFINITY: 1 packages x 28 cores/pkg x 2 threads/core (28 total cores)
+OMP: Info #214: KMP_AFFINITY: OS proc to physical thread map:
+OMP: Info #171: KMP_AFFINITY: OS proc 0 maps to package 0 core 0 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 56 maps to package 0 core 0 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 1 maps to package 0 core 1 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 57 maps to package 0 core 1 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 2 maps to package 0 core 2 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 58 maps to package 0 core 2 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 3 maps to package 0 core 3 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 59 maps to package 0 core 3 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 4 maps to package 0 core 4 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 60 maps to package 0 core 4 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 5 maps to package 0 core 5 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 61 maps to package 0 core 5 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 6 maps to package 0 core 6 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 62 maps to package 0 core 6 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 7 maps to package 0 core 8 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 63 maps to package 0 core 8 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 8 maps to package 0 core 9 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 64 maps to package 0 core 9 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 9 maps to package 0 core 10 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 65 maps to package 0 core 10 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 10 maps to package 0 core 11 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 66 maps to package 0 core 11 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 11 maps to package 0 core 12 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 67 maps to package 0 core 12 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 12 maps to package 0 core 13 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 68 maps to package 0 core 13 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 13 maps to package 0 core 14 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 69 maps to package 0 core 14 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 14 maps to package 0 core 16 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 70 maps to package 0 core 16 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 15 maps to package 0 core 17 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 71 maps to package 0 core 17 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 16 maps to package 0 core 18 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 72 maps to package 0 core 18 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 17 maps to package 0 core 19 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 73 maps to package 0 core 19 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 18 maps to package 0 core 20 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 74 maps to package 0 core 20 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 19 maps to package 0 core 21 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 75 maps to package 0 core 21 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 20 maps to package 0 core 22 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 76 maps to package 0 core 22 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 21 maps to package 0 core 24 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 77 maps to package 0 core 24 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 22 maps to package 0 core 25 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 78 maps to package 0 core 25 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 23 maps to package 0 core 26 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 79 maps to package 0 core 26 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 24 maps to package 0 core 27 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 80 maps to package 0 core 27 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 25 maps to package 0 core 28 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 81 maps to package 0 core 28 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 26 maps to package 0 core 29 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 82 maps to package 0 core 29 thread 1 
+OMP: Info #171: KMP_AFFINITY: OS proc 27 maps to package 0 core 30 thread 0 
+OMP: Info #171: KMP_AFFINITY: OS proc 83 maps to package 0 core 30 thread 1 
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 856867 thread 0 bound to OS proc set 0
+2019-02-24 03:51:33.708913: I tensorflow/core/common_runtime/process_util.cc:92] Creating new thread pool with default inter op setting: 2. Tune using inter_op_parallelism_threads for best performance.
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857055 thread 1 bound to OS proc set 1
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857054 thread 2 bound to OS proc set 2
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857130 thread 3 bound to OS proc set 3
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857131 thread 4 bound to OS proc set 4
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857132 thread 5 bound to OS proc set 5
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857133 thread 6 bound to OS proc set 6
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857134 thread 7 bound to OS proc set 7
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857136 thread 9 bound to OS proc set 9
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857135 thread 8 bound to OS proc set 8
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857137 thread 10 bound to OS proc set 10
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857138 thread 11 bound to OS proc set 11
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857139 thread 12 bound to OS proc set 12
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857140 thread 13 bound to OS proc set 13
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857141 thread 14 bound to OS proc set 14
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857142 thread 15 bound to OS proc set 15
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857144 thread 17 bound to OS proc set 17
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857143 thread 16 bound to OS proc set 16
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857145 thread 18 bound to OS proc set 18
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857146 thread 19 bound to OS proc set 19
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857147 thread 20 bound to OS proc set 20
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857148 thread 21 bound to OS proc set 21
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857149 thread 22 bound to OS proc set 22
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857150 thread 23 bound to OS proc set 23
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857151 thread 24 bound to OS proc set 24
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857152 thread 25 bound to OS proc set 25
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857153 thread 26 bound to OS proc set 26
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857154 thread 27 bound to OS proc set 27
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857155 thread 28 bound to OS proc set 56
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857156 thread 29 bound to OS proc set 57
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857157 thread 30 bound to OS proc set 58
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857158 thread 31 bound to OS proc set 59
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857159 thread 32 bound to OS proc set 60
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857160 thread 33 bound to OS proc set 61
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857161 thread 34 bound to OS proc set 62
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857162 thread 35 bound to OS proc set 63
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857163 thread 36 bound to OS proc set 64
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857164 thread 37 bound to OS proc set 65
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857165 thread 38 bound to OS proc set 66
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857166 thread 39 bound to OS proc set 67
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857167 thread 40 bound to OS proc set 68
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857168 thread 41 bound to OS proc set 69
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857170 thread 43 bound to OS proc set 71
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857169 thread 42 bound to OS proc set 70
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857171 thread 44 bound to OS proc set 72
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857172 thread 45 bound to OS proc set 73
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857173 thread 46 bound to OS proc set 74
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857174 thread 47 bound to OS proc set 75
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857176 thread 49 bound to OS proc set 77
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857175 thread 48 bound to OS proc set 76
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857178 thread 51 bound to OS proc set 79
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857177 thread 50 bound to OS proc set 78
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857180 thread 53 bound to OS proc set 81
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857179 thread 52 bound to OS proc set 80
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857182 thread 55 bound to OS proc set 83
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857181 thread 54 bound to OS proc set 82
+OMP: Info #250: KMP_AFFINITY: pid 856867 tid 857183 thread 56 bound to OS proc set 0
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.75943518][3.43590856]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.63552189][5.20797968]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.44367445][1.50843954]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.09641588][0.620731175]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.58065629][1.9690367]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10732758][1.07088137]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.720322669][0.584654391]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.82983959][1.59795547]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.07721686][2.7219286]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.824896395][1.17806804]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.68710172][2.05018425]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.08479333][2.34671474]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.74582064][1.47217679]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.767614484][0.768975317]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.38195038][1.04463243]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.22890556][1.38218594]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.755090952][0.555853]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.44007051][1.30686033]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.76842725][1.49112535]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.685404897][0.691328943]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.46722758][1.60906434]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.91237974][1.34849739]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.91459769][0.710091949]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.00188637][1.0281744]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40868723][1.92530346]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.26170683][1.07963037]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.563055336][0.386614472]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.931854308][1.63107157]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.05295455][0.906698883]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.486810505][0.379112273]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12151337][1.10355508]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.884071469][0.802521229]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.369527668][0.456924617]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.951665819][1.00867164]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.37289476][1.27979386]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.47585988][0.539690733]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.925006092][1.01132202]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.43408775][1.61128783]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.420987248][0.446346313]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.870877624][1.22235119]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.75652683][1.3355633]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.638834357][0.69960618]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.50880206][1.30513251]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.863726854][1.03802192]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04755533][1.08165133]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.519336462][0.521550357]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.938252091][0.961293697]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.35280454][1.66555119]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.601236701][0.479966611]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10111856][1.53641939]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.73484385][1.27774036]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.346945226][1.05037677]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.58576441][3.77917576]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.03489828][5.53160858]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.12922645][1.61958063]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.39951527][0.666388]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.97404814][1.70148897]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.5419085][0.995642364]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.642435133][0.490712851]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.81167531][1.83374763]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.6374867][2.12278914]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.771982789][1.0978564]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.59927905][1.97339714]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.97971308][2.23172021]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.68665683][1.60510576]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.77672565][0.91534096]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.37646627][1.16208231]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.27117527][1.28882182]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.722269714][0.608139575]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33475959][1.37341464]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.92478073][1.5073787]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.654854][1.12937808]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40110707][1.84397352]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.35186696][2.30587268]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.31773663][1.0363518]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.01125431][1.04744375]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.49349618][1.78900957]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.32378852][1.34338892]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.575021803][0.390675694]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.886818886][1.808025]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.20522571][1.17789519]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.634451568][0.473963261]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.14735711][1.10365224]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.0946238][0.882442653]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.418271244][0.419754267]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.09480166][1.16525459]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40698469][1.22870779]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.499442399][0.715690732]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12793684][1.02507889]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.979544044][1.38436377]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.42539981][0.501355529]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04130507][1.72741926]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.93083799][1.35715735]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.802216351][0.668622494]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12197351][1.28832662]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04652143][1.11900795]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.24288583][1.27491951]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.576737046][0.490032971]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.08394134][0.971928]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.23888671][1.57955968]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.706261039][0.519110858]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.45806885][1.42268085]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.47865725][1.45635724]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.34142977][0.834839702]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.44281054][2.50282359]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.94945526][4.56847954]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.18642533][1.10852134]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.93572408][0.571474433]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.37062109][1.41979241]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.866130292][1.23526812]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.8143332][0.74882412]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.58574653][1.27776086]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.52691936][1.51249671]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.664629281][0.902260542]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.50967228][1.55636787]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.66126466][1.75100172]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.51077735][1.28412569]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.7247262][0.641063273]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.21975708][1.00493956]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.983035684][1.33646619]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.22569096][1.11639142]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.26527238][1.18347418]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.68618488][1.52540779]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.725297928][1.18673348]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.27979636][1.90331686]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.29123545][2.43409657]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.36530149][1.1908114]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.981600404][1.3581053]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.72068107][1.63887501]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04709578][1.11724222]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.462388873][0.494641274]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.848142147][1.57988036]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33802378][0.974486411]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.470014185][0.412943095]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.00776887][1.16103256]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.51883101][1.24759769]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.515327][0.44173035]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.846155643][1.0066117]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.2057718][1.0990268]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.485455602][0.529824674]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.907775819][1.10239029]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.18720603][1.75495398]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.485440284][0.509888887]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.929531217][1.96240103]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.80158246][1.40802681]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.848680556][0.855534613]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.16548431][1.24748588]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.892552435][1.02439654]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.38158929][1.2278198]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.427276015][0.443516642]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.841789424][1.05298924]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.41122878][1.442662]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.489688694][0.519702196]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.34052479][1.40631223]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.4758395][1.44152474]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.304487377][1.30448401]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.11060238][2.87369084]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.77514219][5.30395937]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33106434][1.196293]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.935548902][0.602392614]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.56946409][1.75627887]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.981468558][0.841647923]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.506155074][0.460454524]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.75538158][1.70256782]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.55484796][1.6938436]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.736209273][0.940517]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.42796779][1.78947353]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.6399796][1.79320168]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40930331][1.3039366]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.651814][0.67419225]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.29022264][1.00639808]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.20030749][1.25252628]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.587718][0.626583576]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.16951191][1.26530957]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.6214][1.45352149]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.715503633][0.939441204]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.24784][1.87065661]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.62459707][2.91558313]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.48560166][0.896476805]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.00902295][1.57955325]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.52751434][1.99196827]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.29865563][1.19726241]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.54102844][0.420932889]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.882282495][1.61646938]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.25666988][1.24988043]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.679191291][0.334688604]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.09293962][1.06818759]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.957719207][0.685736477]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.372783929][0.393118203]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.8560763][1.04347813]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.51699603][1.46748197]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.488790929][0.529162884]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.975488544][1.20069242]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.1219362][1.1878525]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.378106654][0.651139081]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.06345284][1.39578056]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.36450183][1.21595871]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.720568597][0.681373358]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.03546441][1.62791181]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.963418424][1.20513487]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.16171658][1.22034895]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.471699][0.520357192]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.02577865][0.807502389]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.17442703][1.49876273]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.49850288][0.400045037]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.23175037][1.28971672]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.20616078][1.0266583]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.289144844][0.756919324]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.88568449][3.22792768]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.59095097][5.72576809]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.62914944][1.11597562]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.14344835][0.596615672]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.54603457][2.27800369]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.09427476][1.25711322]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.664334536][0.516881943]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.82790422][1.51486099]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.6113627][1.9622463]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.774277031][1.07640123]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.57606637][1.97948325]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.95328641][2.52416539]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40229452][1.41875923]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.742325783][0.805856645]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.26482785][1.09492409]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.11287153][1.19268537]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.59677732][0.719728887]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.24360132][1.08732188]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.58129394][1.62534511]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.66589427][0.758983314]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.3936758][2.01517344]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.69839215][1.7762785]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.823517382][0.723294318]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.9658764][1.06713283]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.30694115][2.09633899]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.35698402][1.33498824]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.520135403][0.440737754]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.885253][2.05588365]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.70881641][1.14186382]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.710008323][0.420312673]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.23497605][1.24185574]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.30509567][0.909225106]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.476253152][0.424572229]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.874041796][0.954642355]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.48129535][0.97538203]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.447237849][0.57939589]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.893094659][1.02162695]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.14698362][1.16969097]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.402298927][0.459685713]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04608262][1.56823051]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.70552957][1.48831975]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.699458778][0.661363959]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.13192344][1.16559303]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.931751311][1.25302839]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.17141557][1.20505726]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.456391305][0.443486601]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.828044891][1.22565579]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.11665368][1.46994638]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.497601181][0.522098184]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.30524313][1.91761816]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.88635671][1.92693794]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.356743425][1.05536437]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.61416][3.11280107]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.18323421][5.95803833]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.66973853][1.34627759]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.16336179][0.666640639]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.20986414][1.65369797]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.998955905][1.2186538]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.778871715][0.679018378]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.74122608][1.44462812]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.44279385][1.89457905]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.965224147][1.02991188]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.52419889][1.92583573]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.00354695][2.4411087]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.4945358][1.52526283]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.882729709][0.839008093]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40108418][1.03312254]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.13628161][3.31805038]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.26526785][3.93192625]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.85986233][1.9111433]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.9572562][7.1141448]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.60210943][5.29091692]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.33857393][4.43425417]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.02181888][7.49538612]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-6.97133684][5.78117466]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.2639432][5.3414464]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.95319223][2.29997]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.00888634][5.20611858]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.69472456][2.2488997]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.55093372][5.18658257]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.29742503][3.41687059]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.82021403][1.90366125]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.62868261][4.47339869]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.32918191][4.84198332]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.35049391][2.75453949]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.74342][5.60196781]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.38739312][5.82117224]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.47332168][1.83790684]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.98121464][6.33186579]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.39565516][4.16202068]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.99362326][1.94654655]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.80085516][5.00398254]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.81045282][5.44377804]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.52229047][2.14948368]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.17810464][1.10764074]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.933679283][1.26655352]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.28328717][1.48404419]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.450555533][0.452631205]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10988784][1.07834661]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.4684329][1.50729132]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.501977503][0.408521205]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.934378445][1.37620819]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.30085874][1.26284444]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.398190498][0.893309116]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.90090656][3.66339827]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.90466189][5.18431473]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.68160319][1.17002857]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.106148][0.620109379]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.74902368][1.57100797]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.803579092][0.722664237]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.574244082][0.486224622]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.82494473][1.54078221]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40112126][1.94129252]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.677609086][0.902351797]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.52799273][2.02943611]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.82513714][1.82887888]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.05910158][1.3719157]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.624048114][0.715833127]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.21174705][1.12130916]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.11129761][1.2323221]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.57105875][1.43649042]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.29588354][1.30428636]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.89407218][1.5131489]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10530233][1.05870843]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.30870032][1.93537426]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.38844347][2.00554633]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.02810574][0.791944]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.993314624][1.07680011]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33883202][1.82820857]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10397863][1.35471499]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.603086591][0.511982262]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.800626934][1.68927562]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.27554882][1.08101308]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.668885052][0.453903407]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33282125][1.39549875]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12386763][0.649615526]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.425400287][0.321278334]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.927556634][1.11679173]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.29108381][1.03515482]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.480029732][0.542360902]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.954746306][0.984010041]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.29352224][1.31652212]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.462044179][0.387033463]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.853172839][1.61093104]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.8041122][1.20438528]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.716440916][0.756617546]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.925331056][1.13324261]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.906496525][1.44400156]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.22445571][1.23552155]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.425581753][0.412563354]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.975463629][1.00844491]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.26098871][1.60355067]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.58918345][0.4894678]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.06941962][1.37577426]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.3333025][1.49486125]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.305293679][0.769064903]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.75725317][3.01207042]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.21370029][5.17486668]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.94377756][1.71933043]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.03485513][0.654445052]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.22178507][1.86535048]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.63824773][1.31444776]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.666594744][0.585671246]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.8172003][1.55111682]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.71566653][1.95697534]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.721360385][1.13738668]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.63624716][1.90127349]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.98574793][2.18644071]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.51347816][1.5947597]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.657982][0.750054419]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.27283764][1.0472188]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12362254][1.67250967]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.15209436][1.9745084]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33703196][1.3116194]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.76092041][2.36821651]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.85271668][1.7615068]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.37395227][2.32514763]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.93566513][2.6953373]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.69007027][1.39085388]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.00678873][1.13436401]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.38781929][1.90962505]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.2412442][1.22290671]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.663186729][0.433356702]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.95832026][2.15463829]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.58990884][1.33241582]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.594862223][0.5173195]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.17232859][1.24870813]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.30059433][0.852134883]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.560698509][0.358376324]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.949972451][1.09847796]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.2506305][1.19866836]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.48800683][0.578629911]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.879816][1.22891736]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04758978][1.25133026]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.421158344][0.682906389]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04316366][2.19171953]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.03447962][1.50098]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.645033419][0.780501902]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.13911474][1.17989135]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.04487693][1.16453469]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.43325555][1.4169997]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.496590227][0.436709017]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.892589331][1.08696377]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40052092][1.42885625]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.642720699][0.468676984]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.35432708][1.37172294]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.33128023][1.16624808]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.325628638][1.03345191]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.79372025][3.2666955]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.07322264][4.93434048]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.64135015][1.42532492]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.13530314][0.60038358]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.48166907][1.80129182]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.24496746][0.884974122]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.648400366][0.53816247]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.81274545][1.39919615]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.67847419][1.65659547]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.708594501][1.04415751]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.64675367][2.0561235]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.91494429][1.92832673]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.98749602][1.40850019]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.653677762][0.808636487]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.55690169][0.984876454]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.07066429][1.22749114]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.607724965][0.612767339]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.3138684][1.26634896]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.73019886][1.41890061]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.657149255][0.757130742]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.42808521][2.05491757]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.82730973][1.57526231]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.911267221][0.769645]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.00837851][1.18119514]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.31879735][1.65257013]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.08541226][1.111305]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.533977747][0.492067635]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.813677311][1.52405667]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.19907117][1.05136299]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.536006689][0.416334569]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.27603114][1.42808652]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.08407402][0.963464141]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.40220508][0.638989389]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.845989823][1.14943433]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.37689281][1.13927412]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.475551605][0.519900084]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10892475][0.974682]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.41514647][1.43834281]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.398008972][0.590463638]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.873371542][1.32158434]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.44471264][1.14847386]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.739494443][0.624114394]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.15658557][1.25570917]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.888308883][1.03205156]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12025487][1.2330718]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.448830247][0.503454506]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.08839881][0.987764776]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.12537217][1.35726976]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.521582305][0.509963751]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.2228663][1.34219229]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.56795228][2.64074159]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.336564869][1.54051161]
+;v0/resnet_v10/conv2/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.96055079][4.22171402]
+;v0/resnet_v10/conv1/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.76893067][5.81977367]
+;v0/resnet_v10/conv3/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.343189][2.05322623]
+;v0/resnet_v10/conv4/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.43724322][0.70678246]
+;v0/resnet_v11/conv5/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.20922565][2.65648413]
+;v0/resnet_v11/conv6/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.975474119][1.2302084]
+;v0/resnet_v11/conv7/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.7435413][0.569358587]
+;v0/resnet_v12/conv8/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.09674501][1.88101411]
+;v0/resnet_v12/conv9/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.88447452][2.03233242]
+;v0/resnet_v12/conv10/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.2320497][1.06085789]
+;v0/resnet_v13/conv12/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.75268817][2.2860086]
+;v0/resnet_v13/conv11/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.11649656][2.6228497]
+;v0/resnet_v13/conv13/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.68657625][1.42877555]
+;v0/resnet_v13/conv14/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.920021236][0.907022953]
+;v0/resnet_v14/conv15/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.40140581][1.03680682]
+;v0/resnet_v14/conv16/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.07193506][3.73468208]
+;v0/resnet_v14/conv17/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.80103254][4.43050241]
+;v0/resnet_v15/conv18/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.07251525][1.98044181]
+;v0/resnet_v15/conv19/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.79900193][8.57474422]
+;v0/resnet_v15/conv20/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-6.75664377][6.38790607]
+;v0/resnet_v16/conv21/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.78325057][4.79216]
+;v0/resnet_v16/conv22/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.92663217][10.3216963]
+;v0/resnet_v16/conv23/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-9.56002522][7.92618179]
+;v0/resnet_v17/conv25/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.23777366][7.37546301]
+;v0/resnet_v17/conv24/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.77396703][3.04502892]
+;v0/resnet_v17/conv26/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.19724178][9.33259583]
+;v0/resnet_v17/conv27/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-6.44685364][4.02765942]
+;v0/resnet_v18/conv28/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.72022939][8.90416241]
+;v0/resnet_v18/conv29/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.58583724][6.84438562]
+;v0/resnet_v18/conv30/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.68286705][3.89168477]
+;v0/resnet_v19/conv31/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-3.01607227][8.166008]
+;v0/resnet_v19/conv32/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.5950278][10.0043745]
+;v0/resnet_v19/conv33/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.95501041][5.68928432]
+;v0/resnet_v110/conv34/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.96661019][10.209343]
+;v0/resnet_v110/conv35/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.93904316][12.093955]
+;v0/resnet_v110/conv36/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.16923][3.8723011]
+;v0/resnet_v111/conv37/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.05513048][11.8921309]
+;v0/resnet_v111/conv38/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.58725524][8.86899948]
+;v0/resnet_v111/conv39/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-4.22780132][4.16967058]
+;v0/resnet_v112/conv40/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-7.46910858][9.56942749]
+;v0/resnet_v112/conv41/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-2.24646974][11.5950613]
+;v0/resnet_v112/conv42/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-5.39486551][4.64164352]
+;v0/resnet_v113/conv44/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.41026187][1.28409362]
+;v0/resnet_v113/conv43/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.01562774][1.24366593]
+;v0/resnet_v113/conv45/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.19231975][1.3584007]
+;v0/resnet_v113/conv46/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.591259658][0.517282248]
+;v0/resnet_v114/conv47/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.10568106][0.967194498]
+;v0/resnet_v114/conv48/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.21551704][1.37404895]
+;v0/resnet_v114/conv49/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.521544099][0.441248208]
+;v0/resnet_v115/conv50/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.24544978][1.42927349]
+;v0/resnet_v115/conv51/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-1.45858741][1.28942311]
+;v0/resnet_v115/conv52/conv2d/Conv2D_eightbit_requant_range__print__;__requant_min_max:[-0.427192688][1.1711427]
