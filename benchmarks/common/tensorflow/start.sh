@@ -557,6 +557,23 @@ function ssd_mobilenet() {
   fi
 }
 
+# SSD-ResNet34 model
+function ssd-resnet34() {
+    if [ ${PRECISION} == "fp32" ]; then
+      if [ ${NOINSTALL} != "True" ]; then
+        for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+        do 
+          pip install $line
+        done
+      fi
+
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
+
 # UNet model
 function unet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -737,6 +754,8 @@ elif [ ${MODEL_NAME} == "squeezenet" ]; then
   squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
+elif [ ${MODEL_NAME} == "ssd-resnet34" ]; then
+  ssd-resnet34
 elif [ ${MODEL_NAME} == "unet" ]; then
   unet
 elif [ ${MODEL_NAME} == "transformer_language" ]; then
