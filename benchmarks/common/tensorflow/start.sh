@@ -428,6 +428,27 @@ function mobilenet_v1() {
   fi
 }
 
+# MTCC model
+function mtcc() {
+  if [ ${PRECISION} == "fp32" ]; then
+    if [ ! -d "${DATASET_LOCATION}" ]; then
+      echo "No Data location specified, please follow MTCC README instaructions to download the dataset."
+      exit 1
+    fi
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+        pip install opencv-python
+        pip install easydict
+    fi
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/Detection:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32/Detection
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # NCF model
 function ncf() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -742,6 +763,8 @@ elif [ ${MODEL_NAME} == "maskrcnn" ]; then
   maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
+elif [ ${MODEL_NAME} == "mtcc" ]; then
+  mtcc
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then
