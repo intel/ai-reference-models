@@ -17,6 +17,7 @@ dependencies to be installed:
 | -----------------------| --------------| ------------------- | --------- |------------------------------|
 | Adversarial Networks   | TensorFlow    | [DCGAN](https://arxiv.org/pdf/1511.06434.pdf)               | Inference | [FP32](adversarial_networks/tensorflow/dcgan/README.md#fp32-inference-instructions) |
 | Content Creation       | TensorFlow    | [DRAW](https://arxiv.org/pdf/1502.04623.pdf)               | Inference | [FP32](content_creation/tensorflow/draw/README.md#fp32-inference-instructions) |
+| Face Detection and Alignment | TensorFlow    | [MTCC](https://arxiv.org/pdf/1604.02878.pdf)               | Inference | [FP32](face_detection_and_alignment/tensorflow/mtcc/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | [Inception ResNet V2](https://arxiv.org/pdf/1602.07261.pdf) | Inference | [FP32](image_recognition/tensorflow/inception_resnet_v2/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf)        | Inference | [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
 | Image Recognition      | TensorFlow    | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf)        | Inference | [Int8](image_recognition/tensorflow/inceptionv4/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv4/README.md#fp32-inference-instructions) |
