@@ -111,14 +111,13 @@ The Intel MKL-DNN (Math Kernel Library for Deep Neural Networks) offers signific
    (rfcn_venv)$ num_sockets=`lscpu | grep "Socket(s)" | cut -d':' -f2 | xargs`
    (rfcn_venv)$ num_physical_cores=$((cores_per_socket * num_sockets))
    (rfcn_venv)$ echo $num_physical_cores
-   (rfcn_venv)$ tf_session_parallelism=$((num_physical_cores / 4))
-   (rfcn_venv)$ echo $tf_session_parallelism
    ```
 
 5. **Start the server**: Now let's start up the TensorFlow model server. With `&` at the end of the cmd, runs the container as a background process. Press enter after executing the following cmd. 
 To optimize overall performance, use the following recommended settings from the [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md):
    * OMP_NUM_THREADS=*num_physical_cores*
-   * TENSORFLOW_SESSION_PARALLELISM=*num_physical_cores*/4
+   * TENSORFLOW_INTER_OP_PARALLELISM=2
+   * TENSORFLOW_INTRA_OP_PARALLELISM=*num_physical_cores*
  
    ```
    (rfcn_venv)$ cd ~
@@ -128,11 +127,12 @@ To optimize overall performance, use the following recommended settings from the
         -v "$(pwd)/rfcn:/models/rfcn" \
         -e MODEL_NAME=rfcn \
         -e OMP_NUM_THREADS=$num_physical_cores \
-        -e TENSORFLOW_SESSION_PARALLELISM=$tf_session_parallelism \
+        -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
+        -e TENSORFLOW_INTRA_OP_PARALLELISM=$num_physical_cores \
         tensorflow/serving:mkl &
    ```
    **Note**: For some models, playing around with these settings values can improve performance even further. 
-   We are exploring approaches to fine-tuning the parameters and will present our findings in a future version of this document. We recommend that you experiment with your own hardware and model if you have strict performance requirements.
+   We recommend that you experiment with your own hardware and model if you have strict performance requirements.
 
 6. **Benchmark Real-Time and Throughput performance**: Clone the Intel Model Zoo into a directory called `intel-models` and run `rfcn-benchmark.py` [python script](/docs/object_detection/tensorflow_serving/rfcn-benchmark.py), which will benchmark both Real-Time and Throughput performance. 
       ```
@@ -156,7 +156,8 @@ For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ss
    * `--cpuset-cpus="0"`
    * `--cpus="1"`
    * `OMP_NUM_THREADS=1`
-   * `TENSORFLOW_SESSION_PARALLELISM=1`
+   * `TENSORFLOW_INTER_OP_PARALLELISM=1`
+   * `TENSORFLOW_INTRA_OP_PARALLELISM=1`
    
    ```
    (rfcn_venv)$ docker run \
@@ -167,7 +168,8 @@ For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ss
         -v "$(pwd)/rfcn:/models/rfcn" \
         -e MODEL_NAME=rfcn \
         -e OMP_NUM_THREADS=1 \
-        -e TENSORFLOW_SESSION_PARALLELISM=1 \
+        -e TENSORFLOW_INTER_OP_PARALLELISM=1 \
+        -e TENSORFLOW_INTRA_OP_PARALLELISM=1 \
         tensorflow/serving:mkl &
    ```
 
