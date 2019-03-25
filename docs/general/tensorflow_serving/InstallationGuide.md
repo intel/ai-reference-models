@@ -33,7 +33,7 @@ This tutorial will guide you through step-by-step instructions for
 
 ## Installation
 We will break down the installation into 2 steps: 
-* Step 1: Build Intel Optimized TensorFlow Serving Docker image
+* Step 1: Build the Intel Optimized TensorFlow Serving Docker image
 * Step 2: Verify the Docker image by serving a simple model - half_plus_two
 
 ### Step 1: Build TensorFlow Serving Docker image
@@ -45,18 +45,28 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ export TF_SERVING_ROOT=$(pwd)/serving
 	$ echo "export TF_SERVING_ROOT=$(pwd)/serving" >> ~/.bashrc
 	```
+	
 * Using `Dockerfile.devel-mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
+  
+    **NOTE**: It is recommended that you build an official release version using `--build-arg TF_SERVING_VERSION_GIT_BRANCH="<release_number>"`, but if you wish to build the (unstable) head of master, omit the build argument and master will be used by default.
+	
 	```
 	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
-	$ docker build -f Dockerfile.devel-mkl -t tensorflow/serving:latest-devel-mkl .
+	$ docker build \
+	    -f Dockerfile.devel-mkl \
+	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.13.0" \
+	    -t tensorflow/serving:latest-devel-mkl .
 	```
 * Next, using `Dockerfile.mkl`, build a serving image which is a light-weight image without any development tools in it. `Dockerfile.mkl` will build a serving image by copying Intel optimized libraries and ModelServer from the development image built in the previous step - `tensorflow/serving:latest-devel-mkl `
 	```
 	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
-	$ docker build -f Dockerfile.mkl -t tensorflow/serving:mkl .
+	$ docker build \
+	    -f Dockerfile.mkl \
+	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.13.0" \
+	    -t tensorflow/serving:mkl .
 	```
 
-	**NOTE 1**: Docker build command require a `.` path argument at the end; see [docker examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
+	**NOTE 1**: Docker build commands require a `.` path argument at the end; see [docker examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
 		
 	**NOTE 2**: If your machine is behind a proxy, you will need to pass proxy arguments to both build commands. For example:
 	```
