@@ -72,33 +72,35 @@ class ModelInitializer(BaseModelInitializer):
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
 
-    def run_benchmark(self):
-        benchmark_script = os.path.join(self.args.intelai_models,
-                                        self.args.precision, "benchmark.py")
-        script_args_list = ["input_graph", "input_height", "input_width",
-                            "batch_size", "input_layer", "output_layer",
-                            "num_inter_threads", "num_intra_threads",
-                            "warmup_steps", "steps"]
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            self.python_exe + " " + benchmark_script
-        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
-        self.run_command(cmd)
+    def run_benchmark_or_accuracy(self):
+        cmd = os.path.join(
+            self.args.intelai_models, self.args.mode,
+            "eval_image_classifier_inference.py")
 
-    def run_accuracy(self):
-        accuracy_script = os.path.join(self.args.intelai_models,
-                                       self.args.precision, "accuracy.py")
-        script_args_list = ["input_graph", "data_location", "input_height",
-                            "input_width", "batch_size", "input_layer",
-                            "output_layer", "num_inter_threads",
-                            "num_intra_threads"]
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
-            self.python_exe + " " + accuracy_script
+        cmd = self.get_numactl_command(self.args.socket_id) + self.python_exe + " " + cmd
 
-        cmd = self.add_args_to_command(cmd_prefix, script_args_list)
+        cmd += " --input-graph=" + self.args.input_graph + \
+               " --num-inter-threads=" + str(self.args.num_inter_threads) + \
+               " --num-intra-threads=" + str(self.args.num_intra_threads) + \
+               " --batch-size=" + str(self.args.batch_size) + \
+               " --warmup-steps=" + str(self.args.warmup_steps) + \
+               " --steps=" + str(self.args.steps)
+
+        if self.args.data_num_inter_threads:
+            cmd += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)
+        if self.args.data_num_intra_threads:
+            cmd += " --data-num-intra-threads=" + str(self.args.data_num_intra_threads)
+
+        # if the data location directory is not empty, then include the arg
+        if self.args.data_location and os.listdir(self.args.data_location):
+            cmd += " --data-location=" + self.args.data_location
+        if self.args.accuracy_only:
+            cmd += " --accuracy-only"
+
         self.run_command(cmd)
 
     def run_calibration(self):
-        calibration_script = os.path.join(self.args.intelai_models,
+        calibration_script = os.path.join(self.args.intelai_models, self.args.mode,
                                           self.args.precision, "calibration.py")
         script_args_list = [
             "input_graph", "data_location",
@@ -112,10 +114,7 @@ class ModelInitializer(BaseModelInitializer):
     def run(self):
         # Parse custom arguments and append to self.args
         self.parse_args()
-        if self.args.benchmark_only:
-            self.run_benchmark()
-        if self.args.accuracy_only:
-            if not self.args.calibration_only:
-                self.run_accuracy()
-            else:
-                self.run_calibration()
+        if self.args.accuracy_only and self.args.calibration_only:
+            self.run_calibration()
+        else:
+            self.run_benchmark_or_accuracy()
