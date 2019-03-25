@@ -16,16 +16,18 @@ Typically for maximum throughput, optimal performance is achieved by exercising 
 * **Latency** (also called real-time inference) is a measurement of the time it takes to process a single input tensor, i.e. a batch of size one.
 In a real-time inference scenario, optimal latency is achieved by minimizing thread launching and orchestration between concurrent processes.
 This guide will help you set your TensorFlow model server options for good balanced performance over both metrics.
-However, if you want to prioritize one metric over the other or further tune TensorFlow Serving for your specific model, see the tutorials.
+However, if you want to prioritize one metric over the other or further tune TensorFlow Serving for your specific model, see the [tutorials](/docs#tutorials-by-use-case).
 
 ## TensorFlow Serving Configuration Settings
 
-There are two parameters you need to set when running the TensorFlow Serving with Intel MKL-DNN docker container.
+There are four parameters you can set when running the TensorFlow Serving with Intel MKL-DNN docker container.
 * ***OMP_NUM_THREADS*** is the maximum number of threads available. A good guideline is to set it equal to the number of physical cores.
-* ***TENSORFLOW_SESSION_PARALLELISM*** is the number of threads to use for a TensorFlow session.
-A good guideline we have found by experimenting is to set it equal to one-quarter the number of physical cores
-(you may want to start with this suggestion but then try other values, as well).
+* ***TENSORFLOW_INTER_OP_PARALLELISM*** is the number of thread pools to use for a TensorFlow session. A good guideline we have found empirically is to set this to 2 (you may want to start with this suggestion but then try other values, as well).
+* ***TENSORFLOW_INTRA_OP_PARALLELISM*** is the number of threads in each thread pool to use for a TensorFlow session. A good guideline is to set it equal to the number of physical cores. 
 The number of physical cores (referred to from now on as *num_physical_cores*) may be different from the number of logical cores or CPUs and can be found in Linux with the `lscpu` command.
+* ***(DEPRECATED) TENSORFLOW_SESSION_PARALLELISM*** is the number of threads to use for a TensorFlow 1.12 session. This controls both intra-op and inter-op parallelism and has been replaced by the separate parameters in TensorFlow Serving 1.13.
+There is backward compatibility for ***TENSORFLOW_SESSION_PARALLELISM*** for all versions, but if you use it, both inter- and intra-op parallelism will be set to the same value, which is usually not optimal. See this [feature description](https://github.com/tensorflow/serving/pull/1253) for the full logic. 
+If you are using version 1.12, a good guideline is to set this parameter equal to one-quarter the number of physical cores, but for 1.13 and above, we recommend omitting it and using ***TENSORFLOW_INTRA_OP_PARALLELISM*** and ***TENSORFLOW_INTER_OP_PARALLELISM*** instead.
 
 ### Example
 
@@ -58,12 +60,25 @@ L3 cache:              56320K
 NUMA node0 CPU(s):     0-31
 Flags:                 fpu vme de pse tsc ...
 ```
-Next, compute ***OMP_NUM_THREADS*** = *num_physical_cores* = 16 and ***TENSORFLOW_SESSION_PARALLELISM*** = *num_physical_cores*/4 = 4
-and start the model server container from the TensorFlow Serving docker image with a command that sets the environment variables to these values
+Next, compute ***OMP_NUM_THREADS***, ***TENSORFLOW_INTER_OP_PARALLELISM***, and ***TENSORFLOW_INTRA_OP_PARALLELISM***:
+  * ***OMP_NUM_THREADS*** = *num_physical_cores* = 16
+  * ***TENSORFLOW_INTER_OP_PARALLELISM*** = 2
+  * ***TENSORFLOW_INTRA_OP_PARALLELISM*** = num_physical_cores = 16
+  
+Then start the model server container from the TensorFlow Serving docker image with a command that sets the environment variables to these values
 (this assumes some familiarity with docker and the `docker run` command):
 ```
-docker run --name=tfserving_mkl --rm -d -p 8500:8500 -v "/home/<user>/<saved_model_directory>:/models/<model_name>"
--e MODEL_NAME=my_model -e OMP_NUM_THREADS=16 -e TENSORFLOW_SESSION_PARALLELISM=4 tensorflow/serving:mkl
+docker run \
+    --name=tfserving_mkl \
+    --rm \
+    -d \
+    -p 8500:8500 \
+    -v "/home/<user>/<saved_model_directory>:/models/<model_name>" \
+    -e MODEL_NAME=<model_name> \
+    -e OMP_NUM_THREADS=16 \
+    -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
+    -e TENSORFLOW_INTRA_OP_PARALLELISM=16 \
+    tensorflow/serving:mkl
 ```
 
 ## Data Format
@@ -83,6 +98,7 @@ Figure 1. NCHW format
 1. Find *num_physical_cores* by using the `lscpu` command and multiplying `Core(s) per socket` by `Socket(s)`
 2. Run the TensorFlow model server docker container with:
     - ***OMP_NUM_THREADS*** = *num_physical_cores*
-    - ***TENSORFLOW_SESSION_PARALLELISM*** = *num_physical_cores*/4
+    - ***TENSORFLOW_INTER_OP_PARALLELISM*** = 2
+    - ***TENSORFLOW_INTRA_OP_PARALLELISM*** = *num_physical_cores*
 3. Use NCHW data format for images
 4. See one of the hands-on [tutorials](/docs/README.md) for an advanced walkthrough of your use case
