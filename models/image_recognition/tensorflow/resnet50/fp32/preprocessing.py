@@ -51,7 +51,9 @@ def parse_example_proto(example_serialized):
     'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
                                         default_value=''),
     'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
-                                            default_value=-1)
+                                            default_value=-1),
+    'image/filename': tf.FixedLenFeature([], dtype=tf.string,
+                                         default_value="")
   }
   sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
   # Sparse features in Example proto.
@@ -63,8 +65,9 @@ def parse_example_proto(example_serialized):
 
   features = tf.parse_single_example(example_serialized, feature_map)
   label = tf.cast(features['image/class/label'], dtype=tf.int32)
+  filename = tf.cast(features['image/filename'], dtype=tf.string)
 
-  return features['image/encoded'], label
+  return features['image/encoded'], label, filename
 
 
 def eval_image(image, height, width, resize_method,
@@ -123,13 +126,13 @@ class RecordInputImagePreprocessor(object):
 
   def parse_and_preprocess(self, value):
     # parse
-    image_buffer, label_index = parse_example_proto(value)
+    image_buffer, label_index, filename = parse_example_proto(value)
     # preprocess
     image = tf.image.decode_jpeg(
       image_buffer, channels=3, fancy_upscaling=False, dct_method='INTEGER_FAST')
     image = eval_image(image, self.height, self.width, self.resize_method)
 
-    return (image, label_index)
+    return (image, label_index, filename)
 
   def minibatch(self, dataset, subset, cache_data=False):
 
@@ -166,8 +169,9 @@ class RecordInputImagePreprocessor(object):
       ds = ds.prefetch(buffer_size=tf.contrib.data.AUTOTUNE)
 
       ds_iterator = ds.make_one_shot_iterator()
-      images, labels = ds_iterator.get_next()
+      images, labels, filename = ds_iterator.get_next()
       # reshape
       labels = tf.reshape(labels, [self.batch_size])
+      filename = tf.reshape(filename, [self.batch_size])
 
-      return images, labels
+      return images, labels, filename

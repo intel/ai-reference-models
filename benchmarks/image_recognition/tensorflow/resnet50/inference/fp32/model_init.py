@@ -108,3 +108,6 @@ class ModelInitializer(BaseModelInitializer):
     def run(self):
         if self.benchmark_command:
             self.run_command(self.benchmark_command)
+
+            if self.args.output_results:
+                print("Inference results file in the output directory: {}".format(self.results_filename))

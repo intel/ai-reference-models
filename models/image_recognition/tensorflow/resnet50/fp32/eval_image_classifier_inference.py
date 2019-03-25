@@ -25,6 +25,7 @@ import tensorflow as tf
 import tensorflow.tools.graph_transforms as graph_transforms
 
 import datasets
+import numpy as np
 
 INPUTS = 'input'
 OUTPUTS = 'predict'
@@ -72,7 +73,9 @@ class eval_classifier_optimized_graph:
     arg_parser.add_argument('-r', "--accuracy-only",
                             help='For accuracy measurement only.',
                             dest='accuracy_only', action='store_true')
-
+    arg_parser.add_argument("--results-file-path",
+                            help="File path for the inference results",
+                            dest="results_file_path", default=None)
     arg_parser.add_argument("--warmup-steps", type=int, default=10,
                             help="number of warmup steps")
     arg_parser.add_argument("--steps", type=int, default=50,
@@ -94,6 +97,14 @@ class eval_classifier_optimized_graph:
     self.args = arg_parser.parse_args()
     # validate the arguements
     self.validate_args()
+
+  def write_results_output(self, predictions, filenames, labels):
+    # If a results_file_path is provided, write the predictions to the file
+    if self.args.results_file_path:
+      top_predictions = np.argmax(predictions, 1)
+      with open(self.args.results_file_path, "a") as fp:
+        for filename, expected_label, top_prediction in zip(filenames, labels, top_predictions):
+          fp.write("{},{},{}\n".format(filename, expected_label, top_prediction))
 
   def run(self):
     """run benchmark with optimized graph"""
@@ -119,7 +130,12 @@ class eval_classifier_optimized_graph:
             RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, self.args.batch_size,
             num_cores=self.args.num_cores,
             resize_method='crop')
-        images, labels = preprocessor.minibatch(dataset, subset='validation')
+        images, labels, filenames = preprocessor.minibatch(dataset, subset='validation')
+
+        # If a results file path is provided, then start the prediction output file
+        if self.args.results_file_path:
+          with open(self.args.results_file_path, "w+") as fp:
+            fp.write("filename,actual,prediction\n")
       else:
         print("Inference with dummy data.")
         input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
@@ -154,17 +170,25 @@ class eval_classifier_optimized_graph:
 
       while num_remaining_images >= self.args.batch_size and iteration < total_run:
         iteration += 1
-
+        tf_filenames = None
+        np_labels = None
         data_load_start = time.time()
-        image_np = data_sess.run(images)
+        if self.args.results_file_path:
+          image_np, np_labels, tf_filenames = data_sess.run([images, labels, filenames])
+        else:
+          image_np = data_sess.run(images)
+
         data_load_time = time.time() - data_load_start
 
         num_processed_images += self.args.batch_size
         num_remaining_images -= self.args.batch_size
 
         start_time = time.time()
-        infer_sess.run([output_tensor], feed_dict={input_tensor: image_np})
+        predictions = infer_sess.run(output_tensor, feed_dict={input_tensor: image_np})
         time_consume = time.time() - start_time
+
+        # Write out the file name, expected label, and top prediction
+        self.write_results_output(predictions, tf_filenames, np_labels)
 
         # only add data loading time for real data, not for dummy data
         if self.args.data_location:
@@ -188,13 +212,20 @@ class eval_classifier_optimized_graph:
 
       while num_remaining_images >= self.args.batch_size:
         # Reads and preprocess data
-        np_images, np_labels = data_sess.run([images, labels])
+        tf_filenames = None
+        if self.args.results_file_path:
+          np_images, np_labels, tf_filenames = data_sess.run([images, labels, filenames])
+        else:
+          np_images, np_labels = data_sess.run([images, labels])
         num_processed_images += self.args.batch_size
         num_remaining_images -= self.args.batch_size
 
         # Compute inference on the preprocessed data
         predictions = infer_sess.run(output_tensor,
                                {input_tensor: np_images})
+
+        # Write out the file name, expected label, and top prediction
+        self.write_results_output(predictions, tf_filenames, np_labels)
 
         with tf.Graph().as_default() as accu_graph:
           accuracy1 = tf.reduce_sum(
