@@ -148,6 +148,9 @@ if __name__ == "__main__":
   infer_sess = tf.Session(graph=infer_graph, config=infer_config)
 
   print("[Running warmup steps...]")
+  step_total_time = 0
+  step_total_images = 0
+
   for t in range(warmup_steps):
     data_start_time = time.time()
     image_data = data_sess.run(images)
@@ -161,13 +164,21 @@ if __name__ == "__main__":
     if args.data_location:
       elapsed_time += data_load_time
 
+    step_total_time += elapsed_time
+    step_total_images += batch_size
+
     if ((t + 1) % 10 == 0):
       print("steps = {0}, {1} images/sec"
-            "".format(t + 1, batch_size / elapsed_time))
+            "".format(t + 1, step_total_images / step_total_time))
+      step_total_time = 0
+      step_total_images = 0
 
   print("[Running benchmark steps...]")
   total_time = 0
   total_images = 0
+
+  step_total_time = 0
+  step_total_images = 0
 
   for t in range(steps):
     try:
@@ -185,9 +196,16 @@ if __name__ == "__main__":
 
       total_time += elapsed_time
       total_images += batch_size
+
+      step_total_time += elapsed_time
+      step_total_images += batch_size
+
       if ((t + 1) % 10 == 0):
         print("steps = {0}, {1} images/sec"
-              "".format(t + 1, batch_size / elapsed_time))
+              "".format(t + 1, step_total_images / step_total_time))
+        step_total_time = 0
+        step_total_images = 0
+
     except tf.errors.OutOfRangeError:
       print("Running out of images from dataset.")
       break
