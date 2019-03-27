@@ -35,7 +35,11 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
     * 3D U-Net: [init](/benchmarks/image_segmentation/tensorflow/3d_unet/inference/fp32/model_init.py) | 
                 [inference](/models/image_segmentation/tensorflow/3d_unet/inference/fp32/brats/predict.py) | 
                 [preprocessing](/models/image_segmentation/tensorflow/3d_unet/inference/fp32/unet3d) 
-    
+* Recommendation Systems
+    * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
+                [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
+                [preprocessing](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py) 
+     
 ## ```launch_benchmark.py``` flags   
 
 ```
