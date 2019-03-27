@@ -654,6 +654,44 @@ function transformer_language() {
   fi
 }
 
+# transformer language model from official tensorflow models
+function transformer_lt_official() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    if [[ -z "${file}" ]]; then
+        echo "transformer-language requires -- file arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${file_out}" ]]; then
+        echo "transformer-language requires -- file_out arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${reference}" ]]; then
+        echo "transformer-language requires -- reference arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${vocab_file}" ]]; then
+        echo "transformer-language requires -- vocab_file arg to be defined"
+        exit 1
+    fi
+
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
+        ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/transformer/infer_ab.py
+
+    CMD="${CMD} 
+    --in_graph=${IN_GRAPH} \
+    --vocab_file=${DATASET_LOCATION}/${vocab_file} \
+    --file=${DATASET_LOCATION}/${file} \
+    --file_out=${OUTPUT_DIR}/${file_out} \
+    --reference=${DATASET_LOCATION}/${reference}"
+    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -783,6 +821,8 @@ elif [ ${MODEL_NAME} == "unet" ]; then
   unet
 elif [ ${MODEL_NAME} == "transformer_language" ]; then
   transformer_language
+elif [ ${MODEL_NAME} == "transformer_lt_official" ]; then
+  transformer_lt_official
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
