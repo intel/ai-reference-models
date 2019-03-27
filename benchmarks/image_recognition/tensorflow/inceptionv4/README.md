@@ -17,7 +17,10 @@ other precisions are coming later.
    ```
    This repository includes launch scripts for running benchmarks.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv4_int8_pretrained_model.pb
+   ```
 
 3. If you would like to run Inception V4 inference and test for
    accuracy, you will need the ImageNet dataset. Benchmarking for latency
@@ -151,7 +154,10 @@ other precisions are coming later.
    ```
    This repository includes launch scripts for running benchmarks.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv4_fp32_pretrained_model.pb
+   ```
 
 3. If you would like to run Inception V4 inference and test for
    accuracy, you will need the ImageNet dataset. Benchmarking for latency
