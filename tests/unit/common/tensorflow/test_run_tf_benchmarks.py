@@ -72,12 +72,13 @@ test_arg_values = parse_model_args_file()
 @patch("os.path.exists")
 @patch("os.stat")
 @patch("os.chdir")
+@patch("os.remove")
 @patch("common.platform_util.os")
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("common.base_model_init.BaseModelInitializer.run_command")
 def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform,
-                       mock_os, mock_chdir, mock_stat, mock_path_exists, mock_is_file, mock_is_dir,
+                       mock_os, mock_remove, mock_chdir, mock_stat, mock_path_exists, mock_is_file, mock_is_dir,
                        mock_listdir, mock_rmtree, mock_mkdir, test_args, expected_cmd):
     """
     Runs through executing the specified run_tf_benchmarks.py command from the
