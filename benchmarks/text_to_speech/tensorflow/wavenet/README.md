@@ -50,7 +50,11 @@ $ git clone https://github.com/IntelAI/models.git
 $ cd models/benchmarks
 ```
 
-3. A link to download the pre-trained model is coming soon.
+3. Download and extract the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wavenet_fp32_pretrained_model.tar.gz
+   $ tar -xvf wavenet_fp32_pretrained_model.tar.gz
+   ```
 
 4. Start benchmarking by executing the launch script and passing args
 specifying that we are running wavenet fp32 inference using TensorFlow,
@@ -73,7 +77,7 @@ python launch_benchmark.py \
     -- checkpoint_name=model.ckpt-99 sample=8510
 ```
 
-4.  The logs are displayed in the console output as well as saved to a
+5.  The logs are displayed in the console output as well as saved to a
 file in the value of `--output-dir`.
 
 The tail of the log should look something like this:

@@ -20,7 +20,11 @@ modes/precisions:
    The mnist directory will be passed as the dataset location when we
    run the benchmarking script in step 4.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download and extract the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/draw_fp32_pretrained_model.tar.gz
+   $ tar -xvf draw_fp32_pretrained_model.tar.gz
+   ```
 
 3. Clone this [intelai/models](https://github.com/IntelAI/models) repo,
    which contains the scripts that we will be using to run benchmarking
@@ -66,7 +70,7 @@ modes/precisions:
       Note that the `--verbose` or `--output-dir` flag can be added to any of the above
       commands to get additional debug output or change the default output location.
 
-4. The log files for each benchmarking run are saved at the value of `--output-dir`.
+5. The log files for each benchmarking run are saved at the value of `--output-dir`.
 
    * Below is a sample log file tail when benchmarking latency:
      ```
