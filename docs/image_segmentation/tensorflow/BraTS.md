@@ -41,12 +41,12 @@ It is our hope that this can save some time and frustration, but if there is any
     $ pip install nibabel tables nilearn SimpleITK nipype
    ```
    
-   To check that the TensorFlow installation has MKL-DNN enabled:
+   To check that the TensorFlow installation has the Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) enabled:
    ```
    $ python -c "import tensorflow; print(tensorflow.pywrap_tensorflow.IsMklEnabled())"
    ```
 
-   This should return `True`, confirming that TensorFlow was built with MKL-DNN.
+   This should return `True`, confirming that TensorFlow was built with Intel MKL-DNN.
 
 5. **Get [ANTs Version 2.1.0](https://github.com/ANTsX/ANTs/releases/tag/v2.1.0) (1.5GB required)**: For Linux, download the Debian_jessie_x64 archive, extract it, and add its binaries to the PATH environment variable.
    ```
@@ -68,6 +68,7 @@ It is our hope that this can save some time and frustration, but if there is any
    $ mkdir brats/data/original
    $ unzip ~/MICCAI_BraTS_2018_Data_Training.zip -d brats/data/original
    ```
+
 8. **Run the Preprocessing Script**:
    ```
    $ cd brats
@@ -92,4 +93,5 @@ It is our hope that this can save some time and frustration, but if there is any
     ```
 
 ## Conclusion
+
 Now you are ready to run the benchmarking script with the `--data-location` flag set to `/home/<user>/3DUnetCNN/brats`.

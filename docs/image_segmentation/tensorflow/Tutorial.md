@@ -10,6 +10,7 @@ Intel’s primitives library is called Intel® Math Kernel Library for Deep Neur
 These steps are highly relevant as recent academic articles predict the development of non-static neural networks that increase memory and computational requirements, especially where accuracy minimization is paramount.
 
 ## Background
+
 [Image Segmentation](https://en.wikipedia.org/wiki/Image_segmentation) groups similar pixels of an image into different categories. 
 It is often used to detect objects within an image and determine their boundaries. 
 For example, image segmentation can be found in models that detect buildings in [satellite imagery](https://arxiv.org/pdf/1805.06561.pdf), pedestrians on [city streets](https://www.cityscapes-dataset.com/), and tumors in [medical images](https://arxiv.org/pdf/1705.03820.pdf). 
@@ -26,7 +27,7 @@ For more background information:
 
 The optimizations offered by Intel MKL-DNN allow TensorFlow to take advantage of the [advanced vector instruction sets](https://www.intel.ai/tensorflow-optimizations-intel-xeon-scalable-processor/) on modern Intel CPUs.
 Additionally, there are several runtime settings which can also improvement inference speed.
-Tuning these options to optimize CPU workloads is vital to enable max performance out of Intel-optimized TensorFlow. 
+Tuning these options to optimize CPU workloads is vital to enable max performance out of Intel Optimizations for TensorFlow. 
 Below are the set of run-time options tested empirically on 3D U-Net and recommended by Intel.
 
 | Run-time options  | Recommendations|

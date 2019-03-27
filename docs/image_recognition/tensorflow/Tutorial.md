@@ -349,16 +349,16 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--docker-image intelaipg/intel-optimized-tensorflow:latest
 		
 
-<u>Console Output</u>
+<u>Example Output</u>
 
 	[Running warmup steps...]
-	steps = 10, 460.862674539 images/sec
+	steps = 10, ... images/sec
 	[Running benchmark steps...]
-	steps = 10, 461.002369109 images/sec
-	steps = 20, 460.082656541 images/sec
-	steps = 30, 464.707827579 images/sec
-	steps = 40, 463.187506632 images/sec
-	steps = 50, 462.725212176 images/sec
+	steps = 10, ... images/sec
+	steps = 20, ... images/sec
+	steps = 30, ... images/sec
+	steps = 40, ... images/sec
+	steps = 50, ... images/sec
 	lscpu_path_cmd = command -v lscpu
 	lscpu located here: /usr/bin/lscpu
 	Ran inference with batch size 128
@@ -383,7 +383,7 @@ you can implement the same strategy on different use cases demoed in Step 3.
 			--docker-image intelaipg/intel-optimized-tensorflow:latest \
 			--debug 				
 	
-<u>Console output</u>
+<u>Example Output</u>
 	
 	lscpu_path_cmd = command -v lscpu
 	lscpu located here: b'/usr/bin/lscpu'
@@ -399,7 +399,7 @@ and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL``
 	
 All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](google.com) to get the full list of flags. 
 	
-<u>Console output</u>	
+<u>Example Output</u>	
 	
     USE_CASE: image_recognition
     FRAMEWORK: tensorflow
@@ -428,7 +428,7 @@ All other flags will be defaulted to values passed in the first ```launch_benchm
 	.
 	.
 	Batch size = 128
-	Throughput: 115.107 images/sec
+	Throughput: ... images/sec
 	lscpu_path_cmd = command -v lscpu
 	lscpu located here: /usr/bin/lscpu
 	Ran inference with batch size 128
