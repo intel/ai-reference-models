@@ -20,7 +20,9 @@ an optimized version of the Inception ResNet V2 model code.
 
 For accuracy:
 
-A link to download the pre-trained model is coming soon.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inception_resnet_v2_fp32_pretrained_model.pb
+```
 
 For throughput and latency:
 
