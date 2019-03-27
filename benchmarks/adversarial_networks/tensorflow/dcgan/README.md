@@ -22,7 +22,11 @@ converting the CIFAR-10 dataset to the TF records format.
 [instructions](https://github.com/tensorflow/models/blob/master/research/slim/datasets/download_and_convert_cifar10.py)
 to download and convert the CIFAR-10 dataset.
 
-3. A link to download the pre-trained model is coming soon.
+3. Download and extract the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dcgan_fp32_unconditional_cifar10_pretrained_model.tar.gz
+   $ tar -xvf dcgan_fp32_unconditional_cifar10_pretrained_model.tar.gz
+   ```
 
 4. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
