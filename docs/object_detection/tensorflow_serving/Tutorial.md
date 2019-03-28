@@ -23,7 +23,7 @@ This tutorial assumes you have already:
   
 ## Background
 
-The Intel MKL-DNN (Math Kernel Library for Deep Neural Networks) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations for object detection, using efficient vectorization and multi-threading. Tuning TensorFlow Serving to take full advantage of your hardware for object detection deep learning inference involves:
+[Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN)](https://github.com/intel/mkl-dnn) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations for object detection, using efficient vectorization and multi-threading. Tuning TensorFlow Serving to take full advantage of your hardware for object detection deep learning inference involves:
 1. Running a TensorFlow Serving docker container configured for performance given your hardware resources
 2. Running a REST client notebook to verify object detection and measure latency and throughput
 3. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case
