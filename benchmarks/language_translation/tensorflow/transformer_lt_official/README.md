@@ -1,4 +1,4 @@
-# Transformer Language Transation (LT) Official
+# Transformer Language Translation (LT) Official
 
 This document has instructions for how to run Transformer Language official benchmark from TensorFlow models
 for the following modes/platforms:
@@ -22,12 +22,16 @@ $ git checkout 8367cf6dabe11adf7628541706b660821f397dce
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/transformer_lt_official_fp32_pretrained_model.tar.gz
 $ tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
-$ ls -l transformer_lt_official_fp32_pretrained_model
-total 243568
--rw-r--r--. 1 user group    359898 Feb 20 16:05 newstest2014.en
--rw-r--r--. 1 user group    399406 Feb 20 16:05 newstest2014.de
+$ ls -l transformer_lt_official_fp32_pretrained_model/*
+transformer_lt_official_fp32_pretrained_model/graph:
+total 241540
 -rwx------. 1 user group 247333269 Mar 15 17:29 fp32_graphdef.pb
--rw-r--r--. 1 user group    324025 Mar 15 17:31 vocab.txt
+
+transformer_lt_official_fp32_pretrained_model/data:
+total 1064
+-rw-r--r--. 1 user group 359898 Feb 20 16:05 newstest2014.en
+-rw-r--r--. 1 user group 399406 Feb 20 16:05 newstest2014.de
+-rw-r--r--. 1 user group 324025 Mar 15 17:31 vocab.txt
 ```
 
 3. Clone this [intelai/models](https://github.com/IntelAI/models)
@@ -56,19 +60,20 @@ For latency (using `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
-    --model-name transformer_language \
+    --model-name transformer_lt_official \
     --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --model-source-dir /home/<user>/tensorflow-models/ \
-    -- in-graph=fp32_graphdef.pb \
-    vocab_file=vocab.txt \
-    file=newstest2014.en \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest \
+    --model-source-dir /home/<user>/tensorflow-models/models \
+    --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
+    --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
+    -- file=newstest2014.en \
     file_out=translate.txt \
-    reference=newstest2014.de
+    reference=newstest2014.de \
+    vocab_file=vocab.txt
 ```
 
 For throughput (using `--socket-id 0` and `--batch-size 64`):
@@ -81,19 +86,21 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 64 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --model-source-dir /home/<user>/tensorflow-models/ \
-    -- in-graph=fp32_graphdef.pb \
-    vocab_file=vocab.txt \
-    file=newstest2014.en \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest \
+    --model-source-dir /home/<user>/tensorflow-models/models \
+    --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
+    --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
+    -- file=newstest2014.en \
     file_out=translate.txt \
-    reference=newstest2014.de
+    reference=newstest2014.de \
+    vocab_file=vocab.txt
 
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
 to get additional debug output.
+The num-inter-threads and num-intra-threads could be set different numbers depends on 
+the CPU in the system to achieve the best performance.
 
-5.  The log file is saved to the
-`models/benchmarks/common/tensorflow/logs` directory.
+5.  The log file and default translated results is saved to the `models/benchmarks/common/tensorflow/logs` directory.
 
