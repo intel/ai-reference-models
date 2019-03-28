@@ -4,7 +4,7 @@ This repository contains **links to pre-trained models, benchmarking scripts, be
 
 ## Purpose of the Model Zoo
 
-  - Demonstrate the AI workloads and deep learning models Intel has optimized and validated to run fast on Intel hardware
+  - Demonstrate the AI workloads and deep learning models Intel has optimized and validated to run on Intel hardware
   - Show how to efficiently execute, train, and deploy Intel-optimized models
   - Make it easy to benchmark model performance on Intel hardware
   - Make it easy to get started running Intel-optimized models on Intel hardware in the cloud or on bare metal
@@ -29,6 +29,4 @@ We hope this structure is intuitive and helps you find what you are looking for;
 
 ![Repo Structure](repo_structure.png)
 
-## How to Contribute
-
-Coming soon
+*Note: For model quantization and optimization tools, see [https://github.com/IntelAI/tools](https://github.com/IntelAI/tools)*.

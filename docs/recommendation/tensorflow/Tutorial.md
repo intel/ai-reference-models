@@ -27,8 +27,8 @@ Unlike image recognition models such as ResNet50 or ResNet101, the "wide" compon
 does not provide opportunities to exploit parallelism within each node, while, the "deep" component of this topology demands more parallelism within each node.
  
 The wide or linear component of this topology depends on the data features, i.e. on the dataset width. 
-Max performance can be enabled by setting intra_op_threads and num_parallel_batches based on the number of features, 
-hence reducing the memory bound. For a dataset with high number of features, it is always recommended to set higher inter_op_threads and num_parallel_batches. 
+Max performance can be enabled by setting intra_op_threads and num_parallel_batches based on the number of features. 
+For a dataset with high number of features, it is always recommended to set higher inter_op_threads and num_parallel_batches. 
 The deep component depends on the number of hidden units in the graph where threading can be enabled within the operations, 
 hence exhibiting a direct relation to compute power. This setback can be eliminated by setting the right number of intra_op_threads and OMP_NUM_THREADS. 
 The best choice for all these parameters depends on the "feature" columns in your dataset and "hidden units" in the deep model. 
