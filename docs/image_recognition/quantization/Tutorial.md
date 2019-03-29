@@ -56,7 +56,7 @@ We also assume that you are in the TensorFlow root directory (`/workspace/tensor
 2. Freeze the graph where the checkpoint values are converted into constants in the graph:
     * The `--input_graph` is the model topology graph_def, and the checkpoint file are required.
     * The `--output_node_names` are obtained from step 1.
-    * Please note that the `--input_graph` can be in either binary `pb` or text `pbtxt` format,
+      >Note: `--input_graph` can be in either binary `pb` or text `pbtxt` format,
     and the `--input_binary` flag will be enabled or disabled accordingly.
     ```
         $ python tensorflow/python/tools/freeze_graph.py \
@@ -130,9 +130,12 @@ calibration):
 
     * Generate calibration data:
         * **Generate a data subset of the ImageNet dataset for calibration**, follow [instructions](/benchmarks/image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions)
-          and run inference for accuracy (using `--accuracy-only`, `--in-graph=/home/<user>/optimized_resnet50_fp32_graph.pb` (from step 3), and `-- calibration_only=True`).
+          and run inference for accuracy (using `--accuracy-only`, `--in-graph=/home/<user>/optimized_resnet50_fp32_graph.pb` (from step 3),
+            `--docker-image=intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl` and `-- calibration_only=True`).
           
-          **Please note that the `-- calibration_only=True` is a custom argument to be added as formatted at the end of the inference command.**
+          > Note: 
+          > - `-- calibration_only=True` is a custom argument to be added at the end of the inference command as formatted (with a white space after `--`).
+          > - This step works only with `--docker-image=intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`, or an image generated using [TensorFlow](https://github.com/tensorflow/tensorflow) commit `7878f58d38915ba895670d3a550571bebd8c787c` or older.
           
           We run inference while generating calibration data to be able to pick images that are correctly classified with high confidence for calibration.
           The `optimized_resnet50_fp32_graph.pb` is used as the ResNet50 trained model at this step.
@@ -158,7 +161,9 @@ calibration):
         * **Generate the `resnet50_min_max_log.txt` file**, follow [instructions](/benchmarks/image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions)
             to run inference (using `--batch_size=10`, `--data-location=/home/<user>/dataset`, `--in-graph=/home/<user>/logged_int8_resnet50.pb`,
             `--accuracy-only`, and `-- calibrate=True`), and **store the output log in `resnet50_min_max_log.txt` file**.
-            **Please note that the `-- calibrate=True` is a custom argument to be added as formatted at the end of the inference command.**
+            
+            >Note:  
+            `-- calibrate=True` is a custom argument to be added at the end of the inference command as formatted (with a white space after `--`).
 
         * The `resnet50_min_max_log.txt` file is used in the following step. We suggest that you store the `resnet50_min_max_log.txt` in the same location specified in
           the [start quantization process](https://github.com/IntelAI/tools/tree/master/tensorflow-quantization) section,
