@@ -66,7 +66,7 @@ class ModelInitializer(BaseModelInitializer):
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.precision,
+            self.args.intelai_models, self.args.mode,
             "eval_image_classifier_inference.py")
 
         self.benchmark_command = self.get_numactl_command(args.socket_id) + \
