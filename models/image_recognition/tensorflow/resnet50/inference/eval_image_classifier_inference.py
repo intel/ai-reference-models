@@ -73,6 +73,10 @@ class eval_classifier_optimized_graph:
     arg_parser.add_argument('-r', "--accuracy-only",
                             help='For accuracy measurement only.',
                             dest='accuracy_only', action='store_true')
+    arg_parser.add_argument('--calibrate', dest='calibrate',
+                            help='Run accuracy with calibration data,'
+                                 'to generate min_max ranges, calibrate=[True/False]',
+                            type=bool, default=False)
     arg_parser.add_argument("--results-file-path",
                             help="File path for the inference results",
                             dest="results_file_path", default=None)
@@ -125,12 +129,17 @@ class eval_classifier_optimized_graph:
     with data_graph.as_default():
       if (self.args.data_location):
         print("Inference with real data.")
+        if self.args.calibrate:
+            subset = 'calibration'
+        else:
+            subset = 'validation'
         dataset = datasets.ImagenetData(self.args.data_location)
         preprocessor = dataset.get_image_preprocessor()(
             RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, self.args.batch_size,
             num_cores=self.args.num_cores,
             resize_method='crop')
-        images, labels, filenames = preprocessor.minibatch(dataset, subset='validation')
+
+        images, labels, filenames = preprocessor.minibatch(dataset, subset=subset)
 
         # If a results file path is provided, then start the prediction output file
         if self.args.results_file_path:
@@ -160,7 +169,7 @@ class eval_classifier_optimized_graph:
     infer_sess = tf.Session(graph=infer_graph, config=infer_config)
 
     num_processed_images = 0
-    num_remaining_images = datasets.IMAGENET_NUM_VAL_IMAGES
+    num_remaining_images = dataset.num_examples_per_epoch(subset=subset) - num_processed_images
 
     if (not self.args.accuracy_only):
       iteration = 0
