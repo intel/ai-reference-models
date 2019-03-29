@@ -87,6 +87,8 @@ class ImagenetData(Dataset):
       return IMAGENET_NUM_TRAIN_IMAGES
     elif subset == 'validation':
       return IMAGENET_NUM_VAL_IMAGES
+    elif subset == 'calibrate' or subset == 'calibration':
+      return 100
     else:
       raise ValueError('Invalid data subset "%s"' % subset)
 
