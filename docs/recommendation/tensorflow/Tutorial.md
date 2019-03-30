@@ -83,6 +83,9 @@ config.inter_op_parallelism_threads = <1 to # of physical cores>
 tf.Session(config=config)
 ```
 
+num_parallel_batches from the table refers to arguments in TensorFlow methods such as `parallel_iterations` in `tf.while_loop()` or
+`num_parallel_calls` in  `tf.data.TFRecordDataset.map()` where execution can be parallelized whether in data transformation stage or in control flow operations.  
+
 To control the execution to one NUMA node or socket id, run the python script with the command:
 
 ```
@@ -124,48 +127,29 @@ Follow the instructions below to download and prepare the dataset.
     mkdir ~/wide_deep_files/real_dataset
     cd ~/wide_deep_files/real_dataset
     ```
-    
-  - Download the `test` dataset:
-    
-    Go to this [page](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) on the Criteo website.
-    Agree to the terms of use, enter your name, and submit the form. Then copy the download link for the 4.3GB tar file called `dac.tar.gz` and use it in the `wget` command in the code block below.
-    Untar the file to create three files:
-    1. readme.txt
-    2. train.txt (11GB) - you will not be using this, so delete it to save space
-    3. test.txt (1.4GB) - transform this into .csv
-
-    ```
-    wget <download_link> # replace <download_link> with link you got from Criteo website
-    tar -xvf dac.tar.gz
-    rm train.txt
-    tr '\t' ',' < test.txt > test.csv
-    ```
+	
   - Download the eval set: 
   
     ```wget https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/eval.csv```
   
-  - Move the downloaded datasets to `~/models/models` and start a Docker container for preprocessing:
+  - Move the downloaded dataset to `~/models/models` and start a Docker container for preprocessing:
     ```
-    mv test.csv eval.csv ~/models/models
+    mv eval.csv ~/models/models
     cd ~/models/models
     docker run -it --privileged -u root:root \
             -w /models \
             --volume $PWD:/models \
             docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
-           /bin/bash
+            /bin/bash
     ```
-  - Preprocess both eval and test datasets, converting them to TFRecord format. We will use a script in the Intel Model Zoo repository.
+  - Preprocess and convert eval dataset to TFRecord format. We will use a script in the Intel Model Zoo repository.
     This step may take a while to complete.
     ```
     python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
         --csv-datafile eval.csv \
         --outputfile-name preprocessed
-
-    python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
-        --csv-datafile test.csv \
-        --outputfile-name preprocessed
     ```
-  - Exit the docker container and find the processed datasets `eval_preprocessed.tfrecords` and `test_preprocessed.tfrecords` in the location `~/models/models`.
+  - Exit the docker container and find the processed dataset `eval_preprocessed.tfrecords` in the location `~/models/models`.
 
 ### Run inference
 
@@ -186,7 +170,7 @@ but if you choose to set your own options, refer to the full list of available f
 explanation of the ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to [Step 4](#step_4) to interactively run the script in the container.
 
-3.1. <b> *Real Time Inference*</b> (batch_size=1 for latency)
+&nbsp;&nbsp;&nbsp;&nbsp;3.1. <b> *Real Time Inference*</b> (batch_size=1 for latency)
 
 Note: As per the recommended settings `socket-id` is set to -1 to run on all sockets.
 Set this parameter to a socket id to run the workload on a single socket.
@@ -204,8 +188,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
 
-
-3.2. <b>*Max Throughput Inference*</b> (batch_size=512 for throughput)
+&nbsp;&nbsp;&nbsp;&nbsp;3.2. <b>*Max Throughput Inference*</b> (batch_size=512 for throughput)
 
 Note: As per the recommended settings `socket-id` is set to -1 to run on all sockets.
 Set this parameter to a socket id to run the workload on a single socket.
@@ -222,7 +205,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
 
-<u>Example Output:</u>
+&nbsp;&nbsp;&nbsp;&nbsp;<u>Example Output:</u>
 
 	--------------------------------------------------
 	Total test records           :  2000000
@@ -246,9 +229,36 @@ Set this parameter to a socket id to run the workload on a single socket.
 	Ran inference with batch size 512
 	Log location outside container: /home/<user>/models/benchmarks/common/tensorflow/logs/benchmark_wide_deep_large_ds_inference_fp32_20190316_164924.log
 
-
 The logs are captured in a directory outside of the container.<br> 
 
+&nbsp;&nbsp;&nbsp;&nbsp;3.3. <b> *Compute accuracy on eval dataset*</b>
+
+	python launch_benchmark.py \
+        --batch-size 512 \
+        --model-name wide_deep_large_ds \
+        --precision fp32 \
+        --mode inference \
+        --framework tensorflow \
+        --accuracy-only \
+        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
+        --data-location ~/models/models/eval_preprocessed.tfrecords \
+        --verbose		
+		
+   &nbsp;&nbsp;&nbsp;&nbsp;<u>Example Output:</u>	
+   
+With `accuracy-only` flag, you can find an additional metric on accuracy as shown in the output below 
+
+	--------------------------------------------------
+	Total test records           :  2000000
+	Batch size is                :  512
+	Number of batches            :  3907
+	Classification accuracy (%)  :  77.5223
+	No of correct predictions    :  ...
+	Inference duration (seconds) :  ...
+	Average Latency (ms/batch)   :  ...
+	Throughput is (records/sec)  :  ...
+	--------------------------------------------------
 
 4. <a name="step_4"></a>If you want to run the benchmarking script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker_image```,
 perform necessary installs, run the ```launch_benchmark.py``` script, and does not terminate the container process. 
@@ -265,7 +275,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 			--data-location ~/models/models/eval_preprocessed.tfrecords \
 			--debug				
 	
-<u>Example Output:</u>
+&nbsp;&nbsp;<u>Example Output:</u>
 	
 	lscpu_path_cmd = command -v lscpu
 	lscpu located here: b'/usr/bin/lscpu'
@@ -280,8 +290,60 @@ and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL``
 	
 All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](/docs/general/tensorflow/LaunchBenchmark.md) to get the full list of flags. 
 	
+5. <b> Inference benchmarking on a large dataset (optional) </b>
 
+To run inference benchmarking on a large dataset, download the test dataset in `~/wide_deep_files/real_dataset`. Note that this dataset supports only `benchmark-only` flag.
+
+```    
+cd ~/wide_deep_files/real_dataset
+```	    
+ - Go to this [page](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) on the Criteo website.
+Agree to the terms of use, enter your name, and submit the form. Then copy the download link for the 4.3GB tar file called `dac.tar.gz` and use it in the `wget` command in the code block below.
+Untar the file to create three files:
+    1. readme.txt
+    2. train.txt (11GB) - you will not be using this, so delete it to save space
+    3. test.txt (1.4GB) - transform this into .csv
+
+    ```
+    wget <download_link> # replace <download_link> with link you got from Criteo website
+    tar -xvf dac.tar.gz
+    rm train.txt
+    tr '\t' ',' < test.txt > test.csv
+    ```	
 	
-	
+  - Move the downloaded dataset to `~/models/models` and start a Docker container for preprocessing. This step is similar to `eval` dataset preprocessing:
+    ```
+    mv test.csv ~/models/models
+    cd ~/models/models
+    docker run -it --privileged -u root:root \
+            -w /models \
+            --volume $PWD:/models \
+            docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            /bin/bash
+    ```
+  - Preprocess and convert test dataset to TFRecord format. We will use a script in the Intel Model Zoo repository.
+    This step may take a while to complete
+	```
+    python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
+        --csv-datafile test.csv \
+        --outputfile-name preprocessed
+    ```
+  - Exit the docker container and find the processed dataset `test_preprocessed.tfrecords` in the location `~/models/models`.
 
+&nbsp;&nbsp;&nbsp;&nbsp;5.1. <b>*Max Throughput or Real-Time Inference*</b>
 
+	cd ~/models/benchmarks
+
+	python launch_benchmark.py \
+			--batch-size 512 \
+			--model-name wide_deep_large_ds \
+			--precision fp32 \
+			--mode inference \
+			--framework tensorflow \
+			--benchmark-only \
+			--docker-image intelaipg/intel-optimized-tensorflow:latest \
+			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
+			--data-location ~/models/models/test_preprocessed.tfrecords \
+			--verbose
+
+Set batch_size to 1 to run for real-time inference
