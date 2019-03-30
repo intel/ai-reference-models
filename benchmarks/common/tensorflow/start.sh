@@ -374,7 +374,7 @@ function inception_resnet_v2() {
     exit 1
   fi
 
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp32" ]; then
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
