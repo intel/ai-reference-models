@@ -538,30 +538,35 @@ function squeezenet() {
 function ssd_mobilenet() {
   if [ ${PRECISION} == "fp32" ]; then
     if [ ${BATCH_SIZE} != "-1" ]; then
-      echo "Warning: SSD-MobileNet inference script does not use the batch_size arg"
+      echo "Warning: SSD-MobileNet FP32 inference script does not use the batch_size arg"
     fi
+  elif [ ${PRECISION} != "int8" ]; then
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
 
-    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
+  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
 
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
+  if [ ${NOINSTALL} != "True" ]; then
+    # install dependencies for both fp32 and int8
+    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
 
-      # install protoc, if necessary, then compile protoc files
+    # get the python cocoapi
+    get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+
+    if [ ${PRECISION} == "int8" ]; then
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+    elif [ ${PRECISION} == "fp32" ]; then
+      # install protoc v3.0.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
-
-      # install cocoapi
-      get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
     fi
 
     chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
     sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
-
-    CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
   fi
+
+  PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
 # SSD-ResNet34 model
