@@ -288,6 +288,21 @@ function draw() {
   fi
 }
 
+# FaceNet model
+function facenet() {
+  if [ ${PRECISION} == "fp32" ]; then
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${PRECISION}/validate_on_lfw.py \
+        ${MOUNT_EXTERNAL_MODELS_SOURCE}/src/validate_on_lfw.py
+
+    CMD="${CMD} $(add_arg "--lfw_pairs" ${lfw_pairs})"
+    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit
+  fi
+}
+
 # Faster R-CNN (ResNet50) model
 function faster_rcnn() {
     export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
@@ -574,7 +589,7 @@ function ssd-resnet34() {
     if [ ${PRECISION} == "fp32" ]; then
       if [ ${NOINSTALL} != "True" ]; then
         for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-        do 
+        do
           pip install $line
         done
       fi
@@ -669,7 +684,7 @@ function transformer_lt_official() {
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
         ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/transformer/infer_ab.py
 
-    CMD="${CMD} 
+    CMD="${CMD}
     --in_graph=${IN_GRAPH} \
     --vocab_file=${DATASET_LOCATION}/${vocab_file} \
     --file=${DATASET_LOCATION}/${file} \
@@ -776,6 +791,8 @@ if [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
+elif [ ${MODEL_NAME} == "facenet" ]; then
+  facenet
 elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
 elif [ ${MODEL_NAME} == "gnmt" ]; then
