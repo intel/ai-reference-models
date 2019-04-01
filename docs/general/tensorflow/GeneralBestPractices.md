@@ -33,7 +33,7 @@ These are the parameters you need to set when running TensorFlow with Intel MKL-
 
 * ***OMP_NUM_THREADS*** is the maximum number of threads available for the OpenMP runtime. A good guideline is to set it equal to the number of physical cores.
 * ***KMP_BLOCKTIME*** This environment variable sets the time, in milliseconds, that a thread should wait, after completing the execution of a parallel region, before sleeping. The default value is 200ms. A small KMP_BLOCKTIME value may offer better overall performance if application contains non-OpenMP threaded code. A larger KMP_BLOCKTIME value may be more appropriate if threads are to be reserved solely for use for OpenMP execution. It is suggested to be set to 0 for CNN based models. KMP_BLOCKTIME=1 is a goood place to start for non-CNN topologies. 
-* ***KMP_AFFINITY*** controls how threads are distributed and ultimately bound to specific processing units. *KMP_AFFINITY=granularity=fine,verbose,compact,1,0* is recommended.
+* ***KMP_AFFINITY*** controls how threads are distributed and ultimately bound to specific processing units. *KMP_AFFINITY=granularity=fine,verbose,compact,1,0* is recommended when hyperthreading is enabled, and *KMP_AFFINITY=granularity=fine,verbose,compact* is recommended when hyperthreading is disabled.
 
 ### NUMA Runtime
 
