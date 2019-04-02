@@ -26,7 +26,7 @@ and the `checkpoint files` are required to start this tutorial.
 
 ## Install and Build TensorFlow Tools
 
-* Clone the TensorFlow tools repository, and follow the [instructions](https://github.com/IntelAI/tools/tree/master/tensorflow-quantization)
+* Clone the TensorFlow tools repository, and follow the [instructions](https://github.com/IntelAI/tools/tree/master/tensorflow_quantization)
 for how to build the TensorFlow tools using Docker.
 ```
 $ git clone https://github.com/IntelAI/tools.git
@@ -166,7 +166,7 @@ calibration):
             `-- calibrate=True` is a custom argument to be added at the end of the inference command as formatted (with a white space after `--`).
 
         * The `resnet50_min_max_log.txt` file is used in the following step. We suggest that you store the `resnet50_min_max_log.txt` in the same location specified in
-          the [start quantization process](https://github.com/IntelAI/tools/tree/master/tensorflow-quantization) section,
+          the [start quantization process](https://github.com/IntelAI/tools/tree/master/tensorflow_quantization) section,
           which will be mounted inside the container to `/workspace/quantization`.
     
     * Run the calibration data replace the
