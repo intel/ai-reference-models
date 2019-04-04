@@ -106,6 +106,101 @@ optional arguments:
   --debug               Launches debug mode which doesn't execute start.sh
 ```
 
+## Debugging
+
+The `--debug` flag in the `launch_benchmarks.py` script gives you a
+shell into the docker container with the volumes mounted for any
+dataset, pretrained model, model source code, etc that has been
+provided by the other flags. It does not execute the `start.sh` script,
+and is intended as a way to setup an environment for quicker iteration
+when debugging and doing development. From the shell, you can manually
+execute the `start.sh` script and select to not re-install dependencies
+each time that you re-run, so that the script takes less time to run.
+
+Below is an example showing how to use the `--debug` flag:
+
+1. Run the model using your model's `launch_benchmark.py` command, but
+   add on the `--debug` flag, which will take you to a shell. If you
+   list the files in the directory at that prompt, you will see the
+   `start.sh` file:
+
+   ```
+   $ python launch_benchmark.py \
+        --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+        --model-name resnet50 \
+        --framework tensorflow \
+        --precision fp32 \
+        --mode inference \
+        --batch-size=1 \
+        --socket-id 0 \
+        --data-location /home/<user>/Imagenet_Validation \
+        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --debug
+
+   # ls
+   __init__.py  logs  run_tf_benchmark.py  start.sh
+   ```
+
+2. Flags that were passed to the launch script are set as environment
+   variables in the container:
+
+   ```
+   # env
+   EXTERNAL_MODELS_SOURCE_DIRECTORY=None
+   IN_GRAPH=/in_graph/resnet50_fp32_pretrained_model.pb
+   WORKSPACE=/workspace/benchmarks/common/tensorflow
+   MODEL_NAME=resnet50
+   PRECISION=fp32
+   BATCH_SIZE=1
+   MOUNT_EXTERNAL_MODELS_SOURCE=/workspace/models
+   DATASET_LOCATION=/dataset
+   BENCHMARK_ONLY=True
+   ACCURACY_ONLY=False
+   ...
+   ```
+3. Run the `start.sh` script, which will setup the `PYTHONPATH`, install
+   dependencies, and then run the model:
+   ```
+   # bash start.sh
+   ...
+   Iteration 48: 0.011513 sec
+   Iteration 49: 0.011664 sec
+   Iteration 50: 0.011802 sec
+   Average time: 0.011650 sec
+   Batch size = 1
+   Latency: 11.650 ms
+   Throughput: 85.833 images/sec
+   Ran inference with batch size 1
+   Log location outside container: <output directory>/benchmark_resnet50_inference_fp32_20190403_212048.log
+   ```
+
+4. Code changes that are made locally will also be made in the container
+   (and vice versa), since the directories are mounted in the docker
+   container. Once code changes are made, you can rerun the start
+   script, except set the `NOINSTALL` variable, since dependencies were
+   already installed in the previous run. You can also change the
+   environment variable values for other settings, like the batch size.
+
+   ```
+   # NOINSTALL=True
+   # BATCH_SIZE=128
+   # bash start.sh
+   ...
+   Iteration 48: 0.631819 sec
+   Iteration 49: 0.625606 sec
+   Iteration 50: 0.618813 sec
+   Average time: 0.625285 sec
+   Batch size = 128
+   Throughput: 204.707 images/sec
+   Ran inference with batch size 128
+   Log location outside container: <output directory>/benchmark_resnet50_inference_fp32_20190403_212310.log
+   ```
+
+5. Once you are done with the session, exit out of the docker container:
+   ```
+   # exit
+   ```
+
 ## Alpha feature: Running on bare metal
 
 We recommend using [Docker](https://www.docker.com) to run the
