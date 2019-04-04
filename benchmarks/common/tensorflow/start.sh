@@ -397,6 +397,18 @@ function inception_resnet_v2() {
   fi
 }
 
+# language modeling lm-1b 
+function lm-1b() {
+  if [ ${PRECISION} == "fp32" ]; then
+    CMD="${CMD} $(add_steps_args)"
+    
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Mask R-CNN model
 function maskrcnn() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -803,6 +815,8 @@ elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
   inception_resnet_v2
+elif [ ${MODEL_NAME} == "lm-1b" ]; then
+  lm-1b
 elif [ ${MODEL_NAME} == "maskrcnn" ]; then
   maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
