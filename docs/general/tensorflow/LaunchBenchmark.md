@@ -268,3 +268,11 @@ the following command can be used:
     --batch-size=1 \
     --socket-id 0
 ```
+
+> When running on bare metal, be aware of environment variables that you
+have set on your system. The model zoo scripts intentionally do not
+overwrite environment variables that have already been set, such as
+`OMP_NUM_THREADS`. The same is true when running in a docker container,
+but since a new docker container instance is started with each run, you
+won't have previously set environment variables, like you may have on
+bare metal.
