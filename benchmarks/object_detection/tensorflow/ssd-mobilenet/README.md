@@ -123,8 +123,8 @@ python launch_benchmark.py \
     --batch-size 1
 ```
 
-Or for accuracy where the `--data-location` is the path the directory
-where your `coco_val.record` file is located:
+Or for accuracy where the `--data-location` is the path to
+the tf record file that you generated in step 2:
 ```
 python launch_benchmark.py \
     --model-name ssd-mobilenet \
@@ -134,7 +134,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
     --model-source-dir /home/<user>/tensorflow/models \
-    --data-location /home/<user>/coco/output \
+    --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
     --batch-size 1

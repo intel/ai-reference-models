@@ -64,7 +64,7 @@ class ModelInitializer(BaseModelInitializer):
             accuracy_script = os.path.join(
                 self.args.intelai_models, self.args.mode, self.args.precision,
                 "coco_int8.sh")
-            self.command_prefix = "sh {} {} {}/coco_val.record".format(
+            self.command_prefix = "sh {} {} {}".format(
                 accuracy_script, self.args.input_graph,
                 self.args.data_location)
 
