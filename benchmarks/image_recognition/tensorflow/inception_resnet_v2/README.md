@@ -252,7 +252,7 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
+    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
