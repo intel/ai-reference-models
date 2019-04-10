@@ -23,11 +23,11 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 
 * Image Recognition
     * ResNet50: [init](/benchmarks/image_recognition/tensorflow/resnet50/inference/fp32/model_init.py) | 
-                [inference](/models/image_recognition/tensorflow/resnet50/fp32/eval_image_classifier_inference.py) | 
-                [preprocessing](/models/image_recognition/tensorflow/resnet50/fp32/preprocessing.py) 
+                [inference](/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py) | 
+                [preprocessing](/models/image_recognition/tensorflow/resnet50/inference/preprocessing.py) 
     * ResNet101: [init](/benchmarks/image_recognition/tensorflow/resnet101/inference/fp32/model_init.py) | 
-                 [inference](/models/image_recognition/tensorflow/resnet101/fp32/benchmark.py) | 
-                 [preprocessing](/models/image_recognition/tensorflow/resnet101/fp32/preprocessing.py) 
+                 [inference](/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py) | 
+                 [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py) 
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
                    [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) |
                    [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py)
