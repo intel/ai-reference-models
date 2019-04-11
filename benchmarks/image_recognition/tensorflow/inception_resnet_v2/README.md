@@ -178,19 +178,10 @@ $ git clone git@github.com:IntelAI/models.git
 This repository includes launch scripts for running benchmarks and the
 an optimized version of the Inception ResNet V2 model code.
 
-2. Download the pre-trained Inception ResNet V2 model files:
-
-For accuracy:
+2. Download the pre-trained Inception ResNet V2 model:
 
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inception_resnet_v2_fp32_pretrained_model.pb
-```
-
-For throughput and latency:
-
-```
-$ wget http://download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz
-$ mkdir -p checkpoints && tar -C ./checkpoints/ -zxf inception_resnet_v2_2016_08_30.tar.gz
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
@@ -234,7 +225,7 @@ precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 3.
 
 Substitute in your own `--data-location` (from step 3, for accuracy
-only), `--checkpoint` pre-trained model checkpoint file path (from step 2).
+only), `--in-graph` frozen graph file path (from step 2).
 
 Inception ResNet V2 can be run for accuracy, latency benchmarking, or throughput
 benchmarking. Use one of the following examples below, depending on
@@ -267,9 +258,8 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --checkpoint /home/<user>/checkpoints \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -283,9 +273,8 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --checkpoint /home/<user>/checkpoints \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
@@ -302,36 +291,31 @@ Example log tail when running for accuracy:
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.8036, 0.9526)
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.8036, 0.9525)
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.8037, 0.9525)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190109_081637.log
 ```
 
 Example log tail when benchmarking for latency:
 ```
-eval/Accuracy[0]
-eval/Recall_5[0.01]
-INFO:tensorflow:Finished evaluation at 2019-01-08-01:51:28
-self._total_images_per_sec = 69.7
-self._displayed_steps = 10
-Total images/sec = 7.0
-Latency ms/step = 143.4
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Iteration 38: 0.052 sec
+Iteration 39: 0.051 sec
+Iteration 40: 0.051 sec
+Average time: 0.050 sec
+Batch size = 1
+Latency: 50.094 ms
+Throughput: 19.963 images/sec
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015057.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190410_205213.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
-eval/Accuracy[0.00078125]
-eval/Recall_5[0.00375]
-INFO:tensorflow:Finished evaluation at 2019-01-08-01:59:37
-self._total_images_per_sec = 457.0
-self._displayed_steps = 10
-Total images/sec = 45.7
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Iteration 38: 1.848 sec
+Iteration 39: 1.799 sec
+Iteration 40: 1.850 sec
+Average time: 1.818 sec
+Batch size = 128
+Throughput: 70.402 images/sec
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015440.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190410_205628.log
+```
