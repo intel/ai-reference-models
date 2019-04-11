@@ -128,7 +128,9 @@ class BaseBenchmarkUtil(object):
             help="Specify the location of trained model checkpoint directory. "
                  "If mode=training model/weights will be written to this "
                  "location. If mode=inference assumes that the location points"
-                 " to a model that has already been trained.",
+                 " to a model that has already been trained. Note that using "
+                 "checkpoint files for inference is being deprecated, in favor "
+                 "of using frozen graphs.",
             dest="checkpoint", default=None, type=check_valid_folder)
 
         self._common_arg_parser.add_argument(

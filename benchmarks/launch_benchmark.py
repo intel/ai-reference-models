@@ -86,6 +86,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if not self.args.benchmark_only and not self.args.accuracy_only:
             self.args.benchmark_only = True
 
+        if self.args.mode == "inference" and self.args.checkpoint:
+            print("Warning: The --checkpoint argument is being deprecated in favor of using frozen graphs.")
+
     def get_model_use_case(self, benchmark_scripts):
         """
         Infers the use case based on the directory structure for the specified model.
