@@ -13,12 +13,11 @@ node() {
             #!/bin/bash -x
             set -e
             # don't know OS, so trying both apt-get and yum install
-            sudo apt-get install -y python3-dev || true
-            sudo yum install -y python36-devel.x86_64 || true
+            sudo apt-get install -y python3-dev || sudo yum install -y python36-devel.x86_64
 
             # virtualenv 16.3.0 is broken do not use it
-            sudo python2 -m pip install --upgrade pip virtualenv!=16.3.0 tox
-            sudo python3 -m pip install --upgrade pip virtualenv!=16.3.0 tox
+            python2 -m pip install --force-reinstall --user --upgrade pip virtualenv!=16.3.0 tox
+            python3 -m pip install --force-reinstall --user --upgrade pip virtualenv!=16.3.0 tox
             """
         }
         stage('Style tests') {
@@ -27,7 +26,7 @@ node() {
             set -e
 
             cd intel-models
-            tox -e py2.7-flake8 -e py3-flake8
+            ~/.local/bin/tox -e py2.7-flake8 -e py3-flake8
             """
         }
         stage('Unit tests') {
@@ -36,7 +35,7 @@ node() {
             set -e
 
             cd intel-models
-            tox -e py2.7-py.test -e py3-py.test
+            ~/.local/bin/tox -e py2.7-py.test -e py3-py.test
             """
         }
         // put benchmarks here later

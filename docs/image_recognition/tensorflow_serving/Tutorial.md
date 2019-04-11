@@ -4,8 +4,7 @@ Models: ResNet50, InceptionV3
 
 ## Goal
 
-This tutorial will introduce you to the CPU performance considerations for image recognition deep learning models and
-how to use Intel’s optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPU. 
+This tutorial will introduce you to the CPU performance considerations for image recognition deep learning models and how to use Intel® Optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
 It also provides sample code that you can use to get your optimized TensorFlow model server and GRPC client up and running quickly.
 
 ## Prerequisites
@@ -21,7 +20,7 @@ This tutorial assumes you have already:
 ## Background
 
 Convolutional neural networks (CNNs) for image recognition are computationally expensive. 
-The Intel MKL-DNN (Math Kernel Library for Deep Neural Networks) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations via efficient vectorization and multi-threading.
+The Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations via efficient vectorization and multi-threading.
 Tuning TensorFlow Serving to take full advantage of your hardware for image recognition deep learning inference involves:
 1. Working through this tutorial to set up servable versions of the well-known [ResNet50](https://arxiv.org/pdf/1512.03385.pdf) and [InceptionV3](https://arxiv.org/pdf/1512.00567v1.pdf) CNN models
 2. Running a TensorFlow Serving docker container configured for performance given your hardware resources
@@ -86,10 +85,11 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
 
 7. **Start the server**: Now let's start up the TensorFlow model server. To optimize overall performance, use the following recommended settings from the
    [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md):
-   * OMP_NUM_THREADS = *num_physical_cores*
-   * TENSORFLOW_SESSION_PARALLELISM = *num_physical_cores*/4
+   * OMP_NUM_THREADS=*num_physical_cores*
+   * TENSORFLOW_INTER_OP_PARALLELISM=2
+   * TENSORFLOW_INTRA_OP_PARALLELISM=*num_physical_cores*
    
-   For our example with 56 physical cores, these values are 56 and 14:
+   For our example with 56 physical cores:
    ```
    (venv)$ docker run \
            --name=tfserving \
@@ -99,11 +99,11 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
            -v "/tmp:/models/inceptionv3" \
            -e MODEL_NAME=inceptionv3 \
            -e OMP_NUM_THREADS=56 \
-           -e TENSORFLOW_SESSION_PARALLELISM=14 \
+           -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
+           -e TENSORFLOW_INTRA_OP_PARALLELISM=56 \
            tensorflow/serving:mkl
    ```
    Note: For some models, playing around with these settings values can improve performance even further. 
-   We are exploring approaches to fine-tuning the parameters and will present our findings in a future version of this document. 
    We recommend that you experiment with your own hardware and model if you have strict performance requirements.
 
 8. **Run a Test**: Now we can run a test client that downloads a cat picture and sends it for recognition.
@@ -131,10 +131,11 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    Docker has many runtime flags that allow you to control the container's access to the host system's CPUs, memory, and other resources.
    See the [Docker document on this topic](https://docs.docker.com/config/containers/resource_constraints/#cpu) for all the options and their definitions.
    For example, to run the container so that a single CPU is used, you can use these settings:
-   * --cpuset-cpus = "0"
-   * --cpus = "1"
-   * OMP_NUM_THREADS = 1
-   * TENSORFLOW_SESSION_PARALLELISM = 1
+   * `--cpuset-cpus="0"`
+   * `--cpus="1"`
+   * `OMP_NUM_THREADS=1`
+   * `TENSORFLOW_INTER_OP_PARALLELISM=1`
+   * `TENSORFLOW_INTRA_OP_PARALLELISM=1`
    ```
    (venv)$ docker run \
            --name=tfserving \
@@ -146,7 +147,8 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
            -v "/tmp:/models/inceptionv3" \
            -e MODEL_NAME=inceptionv3 \
            -e OMP_NUM_THREADS=1 \
-           -e TENSORFLOW_SESSION_PARALLELISM=1 \
+           -e TENSORFLOW_INTER_OP_PARALLELISM=1 \
+           -e TENSORFLOW_INTRA_OP_PARALLELISM=1 \
            tensorflow/serving:mkl
    ```
 

@@ -201,8 +201,9 @@ def main(argv):
     model = build_estimator(flags.model_dir, flags.model_type)
 
     train_file = os.path.join(flags.data_dir, 'adult.data')
-    # test_file = os.path.join(flags.data_dir, 'adult.test')
     test_file = os.path.join(flags.data_dir, 'adult.test')
+
+    num_records = sum(1 for line in open(test_file))
 
     # Train and evaluate the model every `flags.epochs_between_evals` epochs.
     def train_input_fn():
@@ -232,8 +233,11 @@ def main(argv):
     print ('End-to-End duration is %s', E2Eduration)
     evaluate_duration = main_end - inference_start
     print ('Evaluation duration is %s', evaluate_duration)
-    # print ('Throughput is: %s', 16281/duration)
-    print ('Throughput is: %s', 9800861/evaluate_duration)
+
+    if flags.batch_size == 1:
+        print('Latency is: %s', E2Eduration / num_records)
+    else:
+        print('Throughput is: %s', num_records / evaluate_duration)
 
 
 class WideDeepArgParser(argparse.ArgumentParser):

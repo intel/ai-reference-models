@@ -45,17 +45,12 @@ class ModelInitializer(BaseModelInitializer):
             if args.verbose:
                 print("Running Wide_Deep model Inference in Throughput mode")
 
-        # Select script based on batch size
-        if args.batch_size == 1:
-            executable = os.path.join(args.mode, args.precision,
-                                      "wide_deep_inference_bs1_latency.py")
-        else:
-            executable = os.path.join(args.mode, args.precision,
-                                      "wide_deep_inference.py")
+        executable = os.path.join(args.mode, args.precision,
+                                  "wide_deep_inference.py")
 
         self.run_cmd = " OMP_NUM_THREADS=1" + \
                        " numactl --cpunodebind=0 --membind=0 " + \
-                       " python " + executable + \
+                       self.python_exe + " " + executable + \
                        " --data_dir=" + self.args.data_location + \
                        " --model_dir=" + self.args.checkpoint + \
                        " --batch_size=" + str(self.args.batch_size)

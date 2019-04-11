@@ -13,7 +13,11 @@ modes/precisions:
    ```
    This repository includes launch scripts for running benchmarks.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download and extract the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/unet_fp32_pretrained_model.tar.gz
+   $ tar -xvf unet_fp32_pretrained_model.tar.gz
+   ```
 
 3. Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository,
    and then get [PR #202](https://github.com/jakeret/tf_unet/pull/202)
@@ -54,15 +58,15 @@ modes/precisions:
        --batch-size 1 \
        --socket-id 0 \
        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-       --checkpoint /home/myuser/unet_trained \
-       --model-source-dir /home/myuser/tf_unet \
+       --checkpoint /home/<user>/unet_trained \
+       --model-source-dir /home/<user>/tf_unet \
        -- checkpoint_name=model.cpkt
    ```
 
    Note that the `--verbose` or `--output-dir` flag can be added to the above
    command to get additional debug output or change the default output location.
 
-6. The log file is saved to the value of `--output-dir`.
+5. The log file is saved to the value of `--output-dir`.
 
    Below is an example of what the log file tail:
 

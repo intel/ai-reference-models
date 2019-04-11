@@ -64,11 +64,11 @@ later.
          --mode inference \
          --framework tensorflow \
          --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-         --model-source-dir /home/myuser/tensorflow/models  \
+         --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
-         --checkpoint /home/myuser/mobilenet_v1_fp32_pretrained_model
+         --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
      ```
     * Run benchmarking for throughput (with `--batch-size 100` and `--checkpoint` with a path to the checkpoint file directory):
       ```
@@ -78,11 +78,11 @@ later.
          --mode inference \
          --framework tensorflow \
          --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-         --model-source-dir /home/myuser/tensorflow/models  \
+         --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
-         --checkpoint /home/myuser/mobilenet_v1_fp32_pretrained_model
+         --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
       ```
     * Run benchmarking for accuracy (with `--batch-size 100`, `--accuracy-only` and `--in-graph` with a path to the frozen graph .pb file):
       ```
@@ -92,11 +92,11 @@ later.
          --mode inference \
          --framework tensorflow \
          --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-         --model-source-dir /home/myuser/tensorflow/models  \
+         --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \
          --data-location /dataset/Imagenet_Validation \
-         --in-graph /home/myuser/mobilenet_v1_fp32_pretrained_model/mobilenet_v1_1.0_224_frozen.pb
+         --in-graph /home/<user>/mobilenet_v1_fp32_pretrained_model/mobilenet_v1_1.0_224_frozen.pb
       ```
       Note that the `--verbose` or `--output-dir` flag can be added to any of the above
       commands to get additional debug output or change the default output location.

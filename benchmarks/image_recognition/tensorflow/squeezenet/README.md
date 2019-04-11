@@ -33,7 +33,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/myuser/datasets/ImageNet_TFRecords
+$ ll /home/<user>/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -48,14 +48,17 @@ $ ll /home/myuser/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
 ```
 
-4. A link to download the pre-trained model is coming soon.
+4. Download and extract the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/squeezenet_fp32_pretrained_model.tar.gz
+   $ tar -xvf squeezenet_fp32_pretrained_model.tar.gz
+   ```
 
 5. Next, navigate to the `benchmarks` directory in your local clone of
-the [intelai/models](https://github.com/IntelAI/models) repo from step
-1.
+the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 ```
 
 The `launch_benchmark.py` script in the `benchmarks` directory is used
@@ -77,8 +80,8 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 64 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --checkpoint /home/myuser/squeezenet_checkpoints \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords
+    --checkpoint /home/<user>/squeezenet_checkpoints \
+    --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
 Or for latency (using `--batch-size 1`):
@@ -92,14 +95,14 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 1 \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --checkpoint /home/myuser/squeezenet_checkpoints \
-    --data-location /home/myuser/datasets/ImageNet_TFRecords
+    --checkpoint /home/<user>/squeezenet_checkpoints \
+    --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
-to get additional debug output or change the default output location..
+to get additional debug output or change the default output location.
 
-5.  The log file is saved to the value of `--output-dir`.
+6. The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the benchmarking completes should look
 something like this, when running for throughput with `--batch-size 64`:

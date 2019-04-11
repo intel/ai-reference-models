@@ -19,6 +19,7 @@
 #
 
 import pytest
+from mock import MagicMock
 
 from benchmarks.common.platform_util import PlatformUtil
 from test_utils import platform_config
@@ -54,12 +55,12 @@ def test_platform_util_lscpu_parsing(platform_mock, subprocess_mock, os_mock):
     os_mock.return_value = True
     subprocess_mock.side_effect = [platform_config.LSCPU_PATH,
                                    platform_config.LSCPU_OUTPUT]
-    platform_util = PlatformUtil()
-    assert platform_util.num_cpu_sockets() == 2
-    assert platform_util.num_cores_per_socket() == 28
-    assert platform_util.num_threads_per_core() == 2
-    assert platform_util.num_logical_cpus() == 112
-    assert platform_util.num_numa_nodes() == 2
+    platform_util = PlatformUtil(MagicMock(verbose=True))
+    assert platform_util.num_cpu_sockets == 2
+    assert platform_util.num_cores_per_socket == 28
+    assert platform_util.num_threads_per_core == 2
+    assert platform_util.num_logical_cpus == 112
+    assert platform_util.num_numa_nodes == 2
 
 
 def test_platform_util_unsupported_os(platform_mock, subprocess_mock, os_mock):
@@ -73,10 +74,10 @@ def test_platform_util_unsupported_os(platform_mock, subprocess_mock, os_mock):
     # Mac is not supported yet
     platform_mock.return_value = "Mac"
     with pytest.raises(NotImplementedError) as e:
-        PlatformUtil()
+        PlatformUtil(MagicMock(verbose=True))
     assert "Mac Support not yet implemented" in str(e)
     # Windows is not supported yet
     platform_mock.return_value = "Windows"
     with pytest.raises(NotImplementedError) as e:
-        PlatformUtil()
+        PlatformUtil(MagicMock(verbose=False))
     assert "Windows Support not yet implemented" in str(e)

@@ -39,37 +39,35 @@ class PlatformUtil:
     This module implements a platform utility that exposes functions that
     detects platform information.
     '''
-    cpu_sockets_ = 0
-    cores_per_socket_ = 0
-    threads_per_core_ = 0
-    logical_cpus_ = 0
-    numa_nodes_ = 0
 
-    def num_cpu_sockets(self):
-        return self.cpu_sockets_
+    def __init__(self, args):
+        self.args = args
+        self.num_cpu_sockets = 0
+        self.num_cores_per_socket = 0
+        self.num_threads_per_core = 0
+        self.num_logical_cpus = 0
+        self.num_numa_nodes = 0
 
-    def num_cores_per_socket(self):
-        return self.cores_per_socket_
-
-    def num_threads_per_core(self):
-        return self.threads_per_core_
-
-    def num_logical_cpus(self):
-        return self.logical_cpus_
-
-    def num_numa_nodes(self):
-        return self.numa_nodes_
+        os_type = system_platform.system()
+        if "Windows" == os_type:
+            self.windows_init()
+        elif "Mac" == os_type or "Darwin" == os_type:
+            self.mac_init()
+        elif "Linux" == os_type:
+            self.linux_init()
+        else:
+            raise ValueError("Unable to determine Operating system type.")
 
     def linux_init(self):
         # check to see if the lscpu command is present
         lscpu_path = ''
         lscpu_path_cmd = "command -v lscpu"
         try:
-            print("lscpu_path_cmd = {}".format(lscpu_path_cmd))
             lscpu_path = subprocess.check_output(lscpu_path_cmd, shell=True,
                                                  stderr=subprocess.STDOUT).\
                 strip()
-            print("lscpu located here: {}".format(lscpu_path))
+            if self.args.verbose:
+                print("lscpu_path_cmd = {}\nlscpu located here: {}".format(lscpu_path_cmd, lscpu_path))
             if not os.access(lscpu_path, os.F_OK | os.X_OK):
                 raise ValueError("{} does not exist or is not executable.".
                                  format(lscpu_path))
@@ -90,35 +88,22 @@ class PlatformUtil:
         for line in cpu_info:
             #      NUMA_NODES_STR_       = "NUMA node(s)"
             if line.find(NUMA_NODES_STR_) == 0:
-                self.numa_nodes_ = int(line.split(":")[1].strip())
+                self.num_numa_nodes = int(line.split(":")[1].strip())
             #      CPU_SOCKETS_STR_      = "Socket(s)"
             elif line.find(CPU_SOCKETS_STR_) == 0:
-                self.cpu_sockets_ = int(line.split(":")[1].strip())
+                self.num_cpu_sockets = int(line.split(":")[1].strip())
             #      CORES_PER_SOCKET_STR_ = "Core(s) per socket"
             elif line.find(CORES_PER_SOCKET_STR_) == 0:
-                self.cores_per_socket_ = int(line.split(":")[1].strip())
+                self.num_cores_per_socket = int(line.split(":")[1].strip())
             #      THREADS_PER_CORE_STR_ = "Thread(s) per core"
             elif line.find(THREADS_PER_CORE_STR_) == 0:
-                self.threads_per_core_ = int(line.split(":")[1].strip())
+                self.num_threads_per_core = int(line.split(":")[1].strip())
             #      LOGICAL_CPUS_STR_     = "CPU(s)"
             elif line.find(LOGICAL_CPUS_STR_) == 0:
-                self.logical_cpus_ = int(line.split(":")[1].strip())
+                self.num_logical_cpus = int(line.split(":")[1].strip())
 
     def windows_init(self):
         raise NotImplementedError("Windows Support not yet implemented")
 
     def mac_init(self):
         raise NotImplementedError("Mac Support not yet implemented")
-
-    def __init__(self):
-        os_type = system_platform.system()
-        if not os_type:
-            raise ValueError("Unable to determine Operating system type.")
-        elif "Windows" == os_type:
-            self.windows_init()
-        elif "Mac" == os_type or "Darwin" == os_type:
-            self.mac_init()
-        elif "Linux" == os_type:
-            self.linux_init()
-        else:
-            raise ValueError("Unable to determine Operating system type.")

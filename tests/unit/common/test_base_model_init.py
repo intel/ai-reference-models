@@ -24,8 +24,6 @@ from mock import MagicMock, patch
 
 from benchmarks.common.base_model_init import BaseModelInitializer
 from benchmarks.common.base_model_init import set_env_var
-from benchmarks.launch_benchmark import LaunchBenchmark
-from test_utils import platform_config
 
 
 # Example args and output strings for testing mocks
@@ -41,30 +39,20 @@ example_req_args = ["--model-name", test_model_name,
                     "--docker-image", test_docker_image]
 
 
-def setup_mock_values(mock_platform, mock_os, mock_subprocess):
-    platform_config.set_mock_system_type(mock_platform)
-    platform_config.set_mock_os_access(mock_os)
-    platform_config.set_mock_lscpu_subprocess_values(mock_subprocess)
-
-
 @patch("common.platform_util.os")
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("os.system")
 def test_base_model_initializer(
         mock_system, mock_subprocess, mock_platform, mock_os):
-    setup_mock_values(mock_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    test_run_command = "python foo.py"
-    platform_util = MagicMock()
-
     # Setup base model init with test settings
-    args.verbose = True
-    args.model_name = test_model_name
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    os.environ["PYTHON_EXE"] = "python"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
     # call run_command and then check the output
+    test_run_command = "python foo.py"
     base_model_init.run_command(test_run_command)
     mock_system.assert_called_with(test_run_command)
 

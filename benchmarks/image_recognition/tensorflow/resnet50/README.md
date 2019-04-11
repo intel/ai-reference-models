@@ -27,31 +27,32 @@ to download, process and convert the ImageNet dataset to the TF records format.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_int8_pretrained_model.pb
 ```
 
-3. Build a docker image using master of the official
-[TensorFlow](https://github.com/tensorflow/tensorflow) repository with
-`--config=mkl`. More instructions on
-[how to build from source](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide#inpage-nav-5).
-
-4. Clone the 
+3. Clone the 
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-5. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
+4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
 
+    The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
+    used in the commands above were built using
+    [TensorFlow](git@github.com:tensorflow/tensorflow.git) master
+    ([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
+    [PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
+
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
-2, the docker image (from step 3) and the `--accuracy-only` flag.
+2), and the `--accuracy-only` flag.
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/myuser/dataset/FullImageNetData_directory
-    --in-graph /home/myuser/resnet50_int8_pretrained_model.pb \
+    --data-location /home/<user>/dataset/FullImageNetData_directory
+    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
@@ -76,19 +77,20 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_212224.log
 ```
 
-* Evaluate the model performance: The ImageNet dataset is not needed in this case:
+* Evaluate the model performance: If just evaluate performance for dummy data, the `--data-location` is not needed.
+Otherwise `--data-location` argument needs to be specified:
 Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
-2, the docker image (from step 3) and the `--benchmark-only` flag. It is
+2), and the `--benchmark-only` flag. It is
 optional to specify the number of `warmup_steps` and `steps` as extra
 args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_int8_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
@@ -111,12 +113,6 @@ lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
 ```
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -146,14 +142,15 @@ to download, process, and convert the ImageNet dataset to the TF records format.
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
-As benchmarking uses dummy data for inference, `--data-location` flag is not required.
+If benchmarking uses dummy data for inference, `--data-location` flag is not required. Otherwise,
+`--data-location` needs to point to point to ImageNet dataset location.
 
 * To measure the model latency, set `--batch-size=1` and run the benchmark script as shown:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -187,10 +184,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure the model Throughput, set `--batch-size=128` and run the benchmark script as shown:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -225,10 +222,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -236,7 +233,7 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --data-location /home/<user>/dataset/ImageNetData_directory \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
@@ -252,16 +249,18 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
 
-* The `--output-results` flag can be used along with above accuracy test
-settings in order to also output a file with the inference results
-(file name, actual label, and the predicted label). The command for this
-is the same as the accuracy command above, with the `--output-results`
-flag added:
+* The `--output-results` flag can be used along with above benchmarking
+or accuracy test, in order to also output a file with the inference
+results (file name, actual label, and the predicted label). The results
+output can only be used with real data.
+
+For example, the command below is the same as the accuracy test above,
+except with the `--output-results` flag added:
 ```
-$ cd /home/myuser/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/myuser/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -270,7 +269,7 @@ $ python launch_benchmark.py \
     --output-results \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/myuser/dataset/ImageNetData_directory \
+    --data-location /home/<user>/dataset/ImageNetData_directory \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 The results file will be written to the

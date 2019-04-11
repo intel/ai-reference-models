@@ -1,12 +1,11 @@
-# General Best Practices for Intel® Optimized TensorFlow
+# General Best Practices for Intel® Optimization for TensorFlow
 
 ## Introduction
 
-To get the highest possible performance on Intel Architecture (IA) and thus yield high performance, TensorFlow can be powered by Intel® with highly optimized math routines for deep learning tasks. This primitives library is called Intel Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN). Intel® MKL-DNN includes convolution, normalization, activation, inner product and other primitives. 
-Please see the [install guide](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) for how to setup Intel® Optimization of Tensorflow on your system. 
-The Bottom Line: The user gets accelerated CPU TF execution with no code changes.  
-
-
+[TensorFlow*](https://www.tensorflow.org/) is one of the most popular deep learning frameworks for large-scale machine learning (ML) and deep learning (DL). 
+Since 2016, Intel and Google engineers have been working together to [optimize TensorFlow performance](https://software.intel.com/en-us/ai-academy/frameworks/tensorflow) for deep learning training and inference on Intel® Xeon® processors using the [Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN)](https://github.com/intel/mkl-dnn). 
+The Intel MKL-DNN primitives library includes convolution, normalization, activation, and other primitives. 
+Please see the [install guide](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) for how to set up Intel® Optimization for TensorFlow on your system for accelerated TensorFlow execution on CPU platforms with no code changes.
 
 ## Performance Metrics
 
@@ -20,7 +19,7 @@ However, if you want to prioritize one metric over the other or further tune Ten
 
 ## TensorFlow Configuration Settings
 
-These are the parameters you need to set when running TensorFlow with MKL-DNN. A more complete description of these settings can be found in the [performance considerations article](https://software.intel.com/en-us/articles/maximize-TensorFlow-performance-on-cpu-considerations-and-recommendations-for-inference).  
+These are the parameters you need to set when running TensorFlow with Intel MKL-DNN. A more complete description of these settings can be found in the [performance considerations article](https://software.intel.com/en-us/articles/maximize-TensorFlow-performance-on-cpu-considerations-and-recommendations-for-inference).  
 
 ### TensorFlow Runtime Settings
 
@@ -34,7 +33,7 @@ These are the parameters you need to set when running TensorFlow with MKL-DNN. A
 
 * ***OMP_NUM_THREADS*** is the maximum number of threads available for the OpenMP runtime. A good guideline is to set it equal to the number of physical cores.
 * ***KMP_BLOCKTIME*** This environment variable sets the time, in milliseconds, that a thread should wait, after completing the execution of a parallel region, before sleeping. The default value is 200ms. A small KMP_BLOCKTIME value may offer better overall performance if application contains non-OpenMP threaded code. A larger KMP_BLOCKTIME value may be more appropriate if threads are to be reserved solely for use for OpenMP execution. It is suggested to be set to 0 for CNN based models. KMP_BLOCKTIME=1 is a goood place to start for non-CNN topologies. 
-* ***KMP_AFFINITY*** controls how threads are distributed and ultimately bound to specific processing units. *KMP_AFFINITY=granularity=fine,verbose,compact,1,0* is recommended.
+* ***KMP_AFFINITY*** controls how threads are distributed and ultimately bound to specific processing units. *KMP_AFFINITY=granularity=fine,verbose,compact,1,0* is recommended when hyperthreading is enabled, and *KMP_AFFINITY=granularity=fine,verbose,compact* is recommended when hyperthreading is disabled.
 
 ### NUMA Runtime
 
@@ -76,5 +75,4 @@ Flags:                 fpu vme de pse tsc ...
 
 To get number of physical cores, simple multiply `Core(s) per socket` by `Socket(s)`.
 
-For usage specifics and command line examples, see one of the hands-on tutorials for an advanced walkthrough of your use case:
-   * Coming Soon, See [README](/docs/README.md) for details.
+For usage specifics and command line examples, see one of the hands-on [tutorials](/docs/README.md) for an advanced walkthrough of your use case.

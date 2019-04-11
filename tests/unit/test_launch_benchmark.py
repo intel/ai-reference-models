@@ -17,16 +17,16 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-
 from __future__ import print_function
+from conditional import conditional
 
 import os
+import sys
+
 import pytest
-import tempfile
-from mock import patch
+from mock import MagicMock, patch as mock_patch
 
 from launch_benchmark import LaunchBenchmark
-from test_utils import platform_config
 
 
 # Example args and output strings for testing mocks
@@ -37,467 +37,182 @@ test_precision = "fp32"
 test_docker_image = "foo"
 test_batch_size = "100"
 test_num_cores = "1"
-example_req_args = ["--model-name", test_model_name,
-                    "--framework", test_framework,
-                    "--mode", test_mode,
-                    "--precision", test_precision,
-                    "--docker-image", test_docker_image,
-                    "--batch-size", test_batch_size,
-                    "--num-cores", test_num_cores]
 
 
 @pytest.fixture
 def mock_platform_util(patch):
-    return patch("base_benchmark_util.platform_util.PlatformUtil")
+    return patch("common.base_benchmark_util.platform_util.PlatformUtil",
+                 MagicMock(num_cpu_sockets=1, num_cores_per_socket=1, num_threads_per_core=1, num_local_cpus=1,
+                           num_numa_nodes=1))
 
 
 @pytest.fixture
 def mock_os(patch):
-    return patch("base_benchmark_util.platform_util.os")
+    return patch("common.base_benchmark_util.platform_util.os")
 
 
 @pytest.fixture
 def mock_subprocess(patch):
-    return patch("base_benchmark_util.platform_util.subprocess")
+    return patch("common.base_benchmark_util.platform_util.subprocess")
+
+
+@pytest.fixture
+def mock_popen(patch):
+    return patch("subprocess.Popen")
 
 
 @pytest.fixture
 def mock_system_platform(patch):
-    return patch("base_benchmark_util.platform_util.system_platform")
+    return patch("common.base_benchmark_util.platform_util.system_platform")
 
 
-def setup_mock_values(platform_mock, os_mock, subprocess_mock):
-    platform_config.set_mock_system_type(platform_mock)
-    platform_config.set_mock_os_access(os_mock)
-    platform_config.set_mock_lscpu_subprocess_values(subprocess_mock)
+@pytest.fixture(autouse=True)
+def launch_benchmark(mock_platform_util, request):
+    """sets up launch_benchmark obj for every test case and handles catching errors if we wanna test that
+       To catch errors called when running launch_benchmark, use something like:
+           ['catch_error', SystemExit, [{args}], {error_message}] in parametrize
+       where args are args to pass to the benchmark creation and error_message is an optional error message to check for
+       otherwise just pass in the req args you'd like to run with via []
+       catch_error_override_all_params will not use any example_req_args when creating benchmark
+
+       Sample request.params:
+       ['catch_error', SystemExit, []]
+       ['catch_error_override_all_params', SystemExit, []]
+       ['catch_error', SystemExit, ['--framework', 'foo'], "The specified framework is not supported"]]
+       """
+    catch_error = False
+    error = None
+    error_message = ''
+
+    # deleting from this sometimes so need to redeclare it, probably can do that differently...
+    example_req_args = ["--model-name", test_model_name,
+                        "--framework", test_framework,
+                        "--mode", test_mode,
+                        "--precision", test_precision,
+                        "--docker-image", test_docker_image,
+                        "--batch-size", test_batch_size,
+                        "--num-cores", test_num_cores]
+
+    if hasattr(request, 'param'):
+        if 'catch_error' in request.param[0]:
+            catch_error = True
+            error = request.param[1]
+            if request.param[0] != 'catch_error_override_all_params':
+                # TODO: make more efficient! Want to get rid of any example_req_args that exist in request.param[2]
+                # using safe deletion from the back
+                for idx in range(len(example_req_args) - 1, -1, -1):
+                    arg = example_req_args[idx]
+                    if not arg.startswith('--'):
+                        continue
+                    if arg in request.param[2]:
+                        # flags are always followed by their value in example_req_args, so delete both arg and its value
+                        del example_req_args[idx]
+                        del example_req_args[idx]
+                req_args = request.param[2] + example_req_args
+            else:
+                req_args = request.param[2]
+            error_message = request.param[3] if len(request.param) == 4 else ''
+        else:
+            req_args = request.param + example_req_args
+    else:
+        req_args = example_req_args
+
+    with mock_patch.object(sys, "argv", ['run_tf_benchmark.py'] + req_args):
+        with conditional(catch_error, pytest.raises(error)) as e:
+            obj = LaunchBenchmark(mock_platform_util)
+            if error_message:
+                assert error_message in str(e.value)
+            return obj
 
 
-def test_launch_benchmark_parse_args(mock_platform_util):
+def test_launch_benchmark_parse_args(launch_benchmark):
     """
     Verifies that that arg parsing gives us the expected results.
     """
-    launch_benchmark = LaunchBenchmark()
-    args, unknown_args = launch_benchmark.parse_args(example_req_args)
-    assert args.model_name == test_model_name
-    assert args.framework == test_framework
-    assert args.mode == test_mode
-    assert args.precision == test_precision
-    assert args.docker_image == test_docker_image
-    assert unknown_args == []
+    assert launch_benchmark.args.model_name == test_model_name
+    assert launch_benchmark.args.framework == test_framework
+    assert launch_benchmark.args.mode == test_mode
+    assert launch_benchmark.args.precision == test_precision
+    assert launch_benchmark.args.docker_image == test_docker_image
+    assert launch_benchmark.unknown_args == []
 
 
-def test_launch_benchmark_parse_unknown_args(mock_platform_util):
+@pytest.mark.parametrize('launch_benchmark', [["--test", "foo"]], indirect=True)
+def test_launch_benchmark_parse_unknown_args(launch_benchmark):
     """
     Checks parsing of unknown args
     """
-    launch_benchmark = LaunchBenchmark()
-    test_args = example_req_args + ["--test", "foo"]
-    args, unknown_args = launch_benchmark.parse_args(test_args)
-    assert unknown_args == ["--test"]
+    assert launch_benchmark.unknown_args == ["--test"]
 
 
-def test_launch_benchmark_parse_bad_args(mock_platform_util):
+@pytest.mark.parametrize('launch_benchmark', [['catch_error_override_all_params', SystemExit, []],
+                                              ['catch_error', SystemExit, ['--framework', 'foo'],
+                                                  "The specified framework is not supported"],
+                                              ['catch_error', SystemExit, ['--docker-image', 'test '],
+                                                  "docker image string should not have whitespace(s)"],
+                                              ['catch_error', ValueError, ["--model-name", test_model_name,
+                                                                           "--framework", test_framework,
+                                                                           "--mode", "training",
+                                                                           "--precision", test_precision,
+                                                                           "--docker-image", test_docker_image,
+                                                                           "--benchmark-only",
+                                                                           "--output-results"],
+                                                  "--output-results can only be used when running "
+                                                  "inference with a dataset"],
+                                              ['catch_error', ValueError, ["--model-name", test_model_name,
+                                                                           "--framework", test_framework,
+                                                                           "--mode", "training",
+                                                                           "--precision", test_precision,
+                                                                           "--docker-image", test_docker_image,
+                                                                           "--accuracy-only",
+                                                                           "--output-results"],
+                                                  "--output-results can only be used when running "
+                                                  "inference with a dataset"]
+                                              ], indirect=True)
+def test_launch_benchmark_parse_bad_args(launch_benchmark):
     """
-    Checks for a failure when no args are passed.
+    Checks for failures with no args or bad args
     """
-    launch_benchmark = LaunchBenchmark()
-    # arg parse should fail when no args are passed
-    with pytest.raises(SystemExit):
-        launch_benchmark.parse_args([])
+    pass
 
 
-def test_launch_benchmark_validate_args(
-        mock_system_platform, mock_os, mock_subprocess):
+@pytest.mark.parametrize('launch_benchmark', [["--model-name", test_model_name,
+                                               "--framework", test_framework,
+                                               "--mode", "training",
+                                               "--precision", test_precision,
+                                               "--docker-image", test_docker_image,
+                                               "--data-location", ".",
+                                               "--benchmark-only",
+                                               "--output-results"]])
+def test_output_results_with_accuracy(launch_benchmark, mock_system_platform, mock_os, mock_subprocess):
     """
-    Tests that valid args pass arg validation without any errors.
+    Tests that the launch script validation passes when running accuracy with output
     """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    launch_benchmark.validate_args(args)
+    pass
 
 
-def test_launch_benchmark_validate_bad_framework(
-        mock_system_platform, mock_os, mock_subprocess):
+def test_launch_benchmark_validate_model(launch_benchmark, mock_popen):
     """
-    Verifies that an unsupported framework name errors.
+    Verifies that a valid model name passes validation and starts a docker container.
     """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    args.framework = "foo"
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert "The specified framework is not supported" in str(e)
-
-
-def test_launch_benchmark_validate_bad_checkpoint_dir(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that an invalid checkpoint path fails.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    bad_path = "/path/does/not_exist"
-    args.checkpoint = bad_path
-    with pytest.raises(IOError) as e:
-        launch_benchmark.validate_args(args)
-    assert "The checkpoint location {} does not exist".format(bad_path) \
-        in str(e)
-
-    # test with a file
-    with tempfile.NamedTemporaryFile() as temp_file:
-        args.checkpoint = temp_file.name
-        with pytest.raises(IOError) as e:
-            launch_benchmark.validate_args(args)
-        assert "The checkpoint location {} is not a directory".format(
-            temp_file.name) in str(e)
-
-
-def test_launch_benchmark_validate_checkpoint_dir(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that a valid checkpoint path passes.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    temp_dir = tempfile.mkdtemp()
-    args.checkpoint = temp_dir
-    try:
-        launch_benchmark.validate_args(args)
-    finally:
-        os.rmdir(temp_dir)
-
-
-def test_launch_benchmark_validate_model_source_dir(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that a valid model source path passes.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    temp_dir = tempfile.mkdtemp()
-    args.model_source_dir = temp_dir
-    try:
-        launch_benchmark.validate_args(args)
-    finally:
-        os.rmdir(temp_dir)
-
-
-def test_launch_benchmark_validate_bad_in_graph(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that an invalid input graph path fails.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-
-    # test with path that does not exist
-    bad_path = "/path/does/not_exist"
-    args.input_graph = bad_path
-    with pytest.raises(IOError) as e:
-        launch_benchmark.validate_args(args)
-    assert "The input graph {} does not exist".format(bad_path) \
-        in str(e)
-
-    # test with path that is a directory
-    temp_dir = tempfile.mkdtemp()
-    args.input_graph = temp_dir
-    try:
-        with pytest.raises(IOError) as e:
-            launch_benchmark.validate_args(args)
-        assert "The input graph {} must be a file".format(temp_dir) \
-            in str(e)
-    finally:
-        os.rmdir(temp_dir)
-
-
-def test_launch_benchmark_validate_in_graph(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that a valid input graph path passes.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    with tempfile.NamedTemporaryFile() as temp_file:
-        args.input_graph = temp_file.name
-        launch_benchmark.validate_args(args)
-
-
-def test_launch_benchmark_validate_bad_batch_size(mock_platform_util):
-    """
-    Verifies that a bad batch size fails
-    """
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    args.batch_size = 0
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert "The batch size 0 is not valid." in str(e)
-
-    args.batch_size = -100
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert "The batch size -100 is not valid." in str(e)
-
-
-def test_launch_benchmark_validate_num_cores(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that a bad num cores fails
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    args.num_cores = 0
-    expected_error = ("Core number must be greater than 0 or -1. The default "
-                      "value is -1 which means using all the cores in the "
-                      "sockets")
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert expected_error in str(e)
-
-    args.num_cores = -100
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert expected_error in str(e)
-
-
-@patch("subprocess.Popen")
-def test_launch_benchmark_validate_model(
-        mock_popen, mock_platform_util):
-    """
-    Verifies that a valid model name passes validation and starts a docker
-    container.
-    """
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    args.model_name = "resnet50"
-    launch_benchmark.run_docker_container(args)
+    launch_benchmark.main()
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
     assert "docker" == args[0][0]
     assert "run" == args[0][1]
 
 
-def test_launch_benchmark_validate_bad_model(mock_platform_util):
-    """
-    Verifies that a bad model name fails
-    """
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    args.model_name = "foo"
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.run_docker_container(args)
-    assert "No model was found for" in str(e)
+def test_bare_metal(launch_benchmark, mock_popen):
+    """ Tests the bare metal launch script function """
+    test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
+    launch_benchmark.run_bare_metal("/foo", "/bar", test_env_vars)
+    assert mock_popen.called
+    args, kwargs = mock_popen.call_args
 
+    # make sure that the start script is run
+    assert "bash" == args[0][0]
+    assert "start.sh" in args[0][1]
 
-def test_launch_benchmark_validate_bad_docker_image(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that an invalid docker image fails.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-
-    args.docker_image = "test "
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-
-    assert "docker image string should " \
-           "not have whitespace(s)" in str(e)
-
-
-def test_launch_benchmark_validate_bad_intra_threads(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that an invalid num intra threads fails.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-
-    args.num_intra_threads = -1
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-
-    assert "Number of intra threads " \
-           "value should be greater than 0" in str(e)
-
-
-def test_launch_benchmark_validate_bad_inter_threads(
-        mock_system_platform, mock_os, mock_subprocess):
-    """
-    Verifies that an invalid num inter threads fails.
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-
-    args.num_inter_threads = -1
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-
-    assert "Number of inter threads " \
-           "value should be greater than 0" in str(e)
-
-
-def test_launch_benchmark_validate_empty_model(mock_platform_util):
-    """
-    Verifies that giving no model name fails
-    """
-    launch_benchmark = LaunchBenchmark()
-    args, _ = launch_benchmark.parse_args(example_req_args)
-    args.model_name = ""
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert "The model name is not valid" in str(e)
-
-
-@pytest.mark.parametrize("arg_name",
-                         ["input_graph"])
-def test_link_file_input_validation(
-        mock_system_platform, mock_os, mock_subprocess,
-        arg_name):
-    """
-    Tests args that take a file path to ensure that sym links and hard links
-    are not allowed. Creates a symlink and hard link of a temporary file and
-    verifies that the launch script fails with an appropriate error message.
-    """
-
-    with tempfile.NamedTemporaryFile() as temp_file:
-        # directory where the temp file is located
-        parent_dir = os.path.dirname(temp_file.name)
-
-        # create sym link to the temp file
-        symlink_file = os.path.join(parent_dir, "temp_symlink_file")
-        if os.path.exists(symlink_file):
-            os.remove(symlink_file)
-        os.symlink(temp_file.name, symlink_file)
-
-        # create hard link to the temp file
-        hardlink_file = os.path.join(parent_dir, "temp_hardlink_file")
-        if os.path.exists(hardlink_file):
-            os.remove(hardlink_file)
-        os.link(temp_file.name, hardlink_file)
-
-        try:
-            setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-            launch_benchmark = LaunchBenchmark()
-            args, _ = launch_benchmark.parse_args(example_req_args)
-            args_dict = vars(args)
-
-            # Test that hard link errors
-            args_dict[arg_name] = hardlink_file
-            print(args_dict)
-            with pytest.raises(ValueError) as e:
-                launch_benchmark.validate_args(args)
-            assert "cannot be a link" in str(e)
-
-            # Test that sym link errors
-            args_dict[arg_name] = symlink_file
-            with pytest.raises(ValueError) as e:
-                launch_benchmark.validate_args(args)
-            assert "cannot be a link" in str(e)
-        finally:
-            if os.path.exists(symlink_file):
-                os.remove(symlink_file)
-            if os.path.exists(hardlink_file):
-                os.remove(hardlink_file)
-
-
-@pytest.mark.parametrize("arg_name",
-                         ["model_source_dir", "checkpoint", "data_location"])
-def test_symlink_directory_input_validation(mock_system_platform, mock_os,
-                                            mock_subprocess, arg_name):
-    """
-    Tests args that take a directory path to ensure that symlinks are not
-    allowed. Creates a symlink of a temporary directory and verifies that the
-    launch script fails with an appropriate error message.
-    """
-    # create temp directory
-    temp_dir = tempfile.mkdtemp()
-    parent_dir = os.path.dirname(temp_dir)
-
-    # create sym link to the temp directory
-    symlink_dir = os.path.join(parent_dir, "temp_symlink_dir")
-    if os.path.exists(symlink_dir):
-        os.remove(symlink_dir)
-    os.symlink(temp_dir, symlink_dir)
-
-    try:
-        setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-        launch_benchmark = LaunchBenchmark()
-        args, _ = launch_benchmark.parse_args(example_req_args)
-        args_dict = vars(args)
-        args_dict[arg_name] = symlink_dir
-        with pytest.raises(ValueError) as e:
-            launch_benchmark.validate_args(args)
-        assert "cannot be a link" in str(e)
-    finally:
-        if os.path.exists(symlink_dir):
-            os.remove(symlink_dir)
-        os.rmdir(temp_dir)
-
-
-def test_output_results_with_benchmarking(mock_system_platform, mock_os, mock_subprocess):
-    """
-    Tests that the launch script fails when trying to get inference results when benchmarking
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    test_args = ["--model-name", test_model_name,
-                 "--framework", test_framework,
-                 "--mode", "training",
-                 "--precision", test_precision,
-                 "--docker-image", test_docker_image,
-                 "--benchmark-only",
-                 "--output-results"]
-    args, _ = launch_benchmark.parse_args(test_args)
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert "--output-results can only be used when running " \
-           "with --mode=inference and --accuracy-only" in str(e)
-
-
-def test_output_results_with_training(mock_system_platform, mock_os, mock_subprocess):
-    """
-    Tests that the launch script fails when trying to get inference results when training
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    test_args = ["--model-name", test_model_name,
-                 "--framework", test_framework,
-                 "--mode", "training",
-                 "--precision", test_precision,
-                 "--docker-image", test_docker_image,
-                 "--accuracy-only",
-                 "--output-results"]
-    args, _ = launch_benchmark.parse_args(test_args)
-    with pytest.raises(ValueError) as e:
-        launch_benchmark.validate_args(args)
-    assert "--output-results can only be used when running " \
-           "with --mode=inference and --accuracy-only" in str(e)
-
-
-def test_output_results_with_accuracy(mock_system_platform, mock_os, mock_subprocess):
-    """
-    Tests that the launch script validation passes when running accuracy with output
-    """
-    setup_mock_values(mock_system_platform, mock_os, mock_subprocess)
-    launch_benchmark = LaunchBenchmark()
-    test_args = ["--model-name", test_model_name,
-                 "--framework", test_framework,
-                 "--mode", test_mode,
-                 "--precision", test_precision,
-                 "--docker-image", test_docker_image,
-                 "--accuracy-only",
-                 "--output-results"]
-    args, _ = launch_benchmark.parse_args(test_args)
-    launch_benchmark.validate_args(args)
+    # ensure env vars are set
+    assert os.environ["TEST_ENV_VAR_1"] == test_env_vars["TEST_ENV_VAR_1"]
+    assert os.environ["TEST_ENV_VAR_2"] == test_env_vars["TEST_ENV_VAR_2"]

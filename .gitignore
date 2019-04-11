@@ -7,3 +7,4 @@
 .venv*
 .coverage
 .tox
+test_data/

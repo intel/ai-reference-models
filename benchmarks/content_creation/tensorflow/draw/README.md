@@ -20,7 +20,11 @@ modes/precisions:
    The mnist directory will be passed as the dataset location when we
    run the benchmarking script in step 4.
 
-2. A link to download the pre-trained model is coming soon.
+2. Download and extract the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/draw_fp32_pretrained_model.tar.gz
+   $ tar -xvf draw_fp32_pretrained_model.tar.gz
+   ```
 
 3. Clone this [intelai/models](https://github.com/IntelAI/models) repo,
    which contains the scripts that we will be using to run benchmarking
@@ -45,8 +49,8 @@ modes/precisions:
             --mode inference \
             --framework tensorflow \
             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
-            --checkpoint /home/myuser/draw_fp32_pretrained_model \
-            --data-location /home/myuser/mnist \
+            --checkpoint /home/<user>/draw_fp32_pretrained_model \
+            --data-location /home/<user>/mnist \
             --batch-size 1 \
             --socket-id 0
      ```
@@ -58,15 +62,15 @@ modes/precisions:
             --mode inference \
             --framework tensorflow \
             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
-            --checkpoint /home/myuser/draw_fp32_pretrained_model \
-            --data-location /home/myuser/mnist \
+            --checkpoint /home/<user>/draw_fp32_pretrained_model \
+            --data-location /home/<user>/mnist \
             --batch-size 100 \
             --socket-id 0
       ```
       Note that the `--verbose` or `--output-dir` flag can be added to any of the above
       commands to get additional debug output or change the default output location.
 
-4. The log files for each benchmarking run are saved at the value of `--output-dir`.
+5. The log files for each benchmarking run are saved at the value of `--output-dir`.
 
    * Below is a sample log file tail when benchmarking latency:
      ```
@@ -77,7 +81,7 @@ modes/precisions:
      Batchsize: 1
      Time spent per BATCH: 6.6667 ms
      Total samples/sec: 149.9996 samples/s
-     Outputs saved in file: /home/myuser/mnist/draw_data.npy
+     Outputs saved in file: /home/<user>/mnist/draw_data.npy
      lscpu_path_cmd = command -v lscpu
      lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 1
@@ -92,7 +96,7 @@ modes/precisions:
      Batchsize: 100
      Time spent per BATCH: 28.1952 ms
      Total samples/sec: 3546.7006 samples/s
-     Outputs saved in file: /home/myuser/mnist/draw_data.npy
+     Outputs saved in file: /home/<user>/mnist/draw_data.npy
      lscpu_path_cmd = command -v lscpu
      lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 100

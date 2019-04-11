@@ -42,6 +42,9 @@ class BaseModelInitializer(object):
         self.custom_args = custom_args
         self.platform_util = platform_util
 
+        # Ensure that we are using the proper version of python to run the benchmarking script
+        self.python_exe = os.environ["PYTHON_EXE"]
+
         if not platform_util:
             raise ValueError("Did not find any platform info.")
 
@@ -115,16 +118,16 @@ class BaseModelInitializer(object):
                 self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
                 self.args.num_intra_threads = \
-                    self.platform_util.num_cores_per_socket() \
+                    self.platform_util.num_cores_per_socket \
                     if self.args.num_cores == -1 else self.args.num_cores
         else:
             if not self.args.num_inter_threads:
-                self.args.num_inter_threads = self.platform_util.num_cpu_sockets()
+                self.args.num_inter_threads = self.platform_util.num_cpu_sockets
             if not self.args.num_intra_threads:
                 if self.args.num_cores == -1:
                     self.args.num_intra_threads = \
-                        int(self.platform_util.num_cores_per_socket() *
-                            self.platform_util.num_cpu_sockets())
+                        int(self.platform_util.num_cores_per_socket *
+                            self.platform_util.num_cpu_sockets)
                 else:
                     self.args.num_intra_threads = self.args.num_cores
 

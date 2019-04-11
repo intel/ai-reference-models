@@ -55,7 +55,7 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_benchmark(self):
         command_prefix = self.get_numactl_command(self.args.socket_id) + \
-            "python " + self.benchmark_script
+            self.python_exe + " " + self.benchmark_script
 
         # set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()

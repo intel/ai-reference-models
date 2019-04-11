@@ -18,56 +18,60 @@ other precisions are coming later.
     $ git checkout 6ff0a53f81439d807a78f8ba828deaea3aaaf269 
     ```
     
-2. Download census income dataset from following link: 
-https://archive.ics.uci.edu/ml/datasets/Census+Income
-   
-   Click on Download link and download `adult.data` and `adult.test` files
-
-3. Download and extract the pre-trained model.
-```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
-$ tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
-```
+2. Download and extract the pre-trained model.
+    ```
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
+    $ tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
+    ```
  
-4. Clone the [intelai/models](https://github.com/intelai/models) repo.
+3. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking, which we will
 use in the next step.
 
     ```
     $ git clone https://github.com/IntelAI/models.git
     ```
-    
+4. Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running 
+   following python script, which is a standalone version of [census_dataset.py](https://github.com/tensorflow/models/blob/master/official/wide_deep/census_dataset.py). 
+   Please note that below program requires `requests` module to be installed. You can install is using `pip install requests`. 
+   Dataset will be downloaded in directory provided using `--data_dir`. If you are behind proxy then you can proxy urls 
+   using `--http_proxy` and `--https_proxy` arguments.
+   ```
+   $ cd models
+   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
+   ```
+
 5. How to run benchmarks
 
    * Running benchmarks in latency mode, set `--batch-size` = `1`
        ``` 
-       $ cd /home/myuser/models/benchmarks
+       $ cd /home/<user>/models/benchmarks
     
        $ python launch_benchmark.py \ 
              --framework tensorflow \ 
-             --model-source-dir /home/myuser/path/to/tensorflow-models \
+             --model-source-dir /home/<user>/path/to/tensorflow-models \
              --precision fp32 \
              --mode inference \
              --model-name wide_deep \
              --batch-size 1 \
-             --data-location /home/myuser/path/to/dataset \
-             --checkpoint /home/myuser/path/to/wide_deep_fp32_pretrained_model \
+             --data-location /home/<user>/widedeep_dataset \
+             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
    * Running benchmarks in throughput mode, set `--batch-size` = `1024`
        ``` 
-       $ cd /home/myuser/models/benchmarks
+       $ cd /home/<user>/models/benchmarks
     
        $ python launch_benchmark.py \ 
              --framework tensorflow \ 
-             --model-source-dir /home/myuser/path/to/tensorflow-models \
+             --model-source-dir /home/<user>/path/to/tensorflow-models \
              --precision fp32 \
              --mode inference \
              --model-name wide_deep \
              --batch-size 1024 \
-             --data-location /home/myuser/path/to/dataset \
-             --checkpoint /home/myuser/path/to/wide_deep_fp32_pretrained_model \
+             --data-location /home/<user>/path/to/dataset \
+             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
