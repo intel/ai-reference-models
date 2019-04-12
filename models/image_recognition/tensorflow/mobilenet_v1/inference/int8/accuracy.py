@@ -77,6 +77,8 @@ if __name__ == "__main__":
     model_file = args.input_graph
   else:
     sys.exit("Please provide a graph file.")
+  input_height = args.input_height
+  input_width = args.input_width
   batch_size = args.batch_size
   input_layer = args.input_layer
   output_layer = args.output_layer
