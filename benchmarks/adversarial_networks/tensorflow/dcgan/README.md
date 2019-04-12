@@ -72,8 +72,6 @@ Batch size: 100
 Batches number: 500
 Time spent per BATCH: 35.8268 ms
 Total samples/sec: 2791.2030 samples/s
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_dcgan_inference_fp32_20190117_220342.log
 ```

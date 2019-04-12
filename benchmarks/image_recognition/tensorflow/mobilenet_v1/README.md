@@ -261,8 +261,6 @@ later.
      self._displayed_steps = 10
      Total images/sec = 81.0
      Latency ms/step = 12.4
-     lscpu_path_cmd = command -v lscpu
-     lscpu located here: /usr/bin/lscpu
      Ran inference with batch size 1
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190104_200218.log
      ```
@@ -278,8 +276,6 @@ later.
      self._total_images_per_sec = 1810.2
      self._displayed_steps = 10
      Total images/sec = 181.0
-     lscpu_path_cmd = command -v lscpu
-     lscpu located here: /usr/bin/lscpu
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190104_200512.log
      ```
@@ -288,8 +284,6 @@ later.
      Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7104, 0.8999)
      Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7103, 0.8999)
      Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7102, 0.8999)
-     lscpu_path_cmd = command -v lscpu
-     lscpu located here: /usr/bin/lscpu
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190110_211648.log
      ```

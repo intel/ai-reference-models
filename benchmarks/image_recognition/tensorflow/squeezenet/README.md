@@ -114,8 +114,6 @@ SqueezeNet Inference Summary:
             throughput[med] = 837.1 image/sec
             latency[median] = 1.195 ms
 
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 64
 Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220051.log
 ```
@@ -129,8 +127,6 @@ SqueezeNet Inference Summary:
             throughput[med] = 115.3 image/sec
             latency[median] = 8.67 ms
 
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220712.log
 ```

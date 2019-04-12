@@ -99,8 +99,6 @@ Sample: 8500
 Average Throughput of whole run: Samples / sec: 289.351783
 Average Latency of whole run: msec / sample: 3.456001
 Finished generating. The result can be viewed in TensorBoard.
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_wavenet_inference_fp32_20190105_015022.log
 ```

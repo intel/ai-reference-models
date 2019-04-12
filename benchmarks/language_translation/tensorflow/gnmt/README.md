@@ -118,8 +118,6 @@ Example log tail when benchmarking for latency:
   done, num sentences 2169, num translations per input 1, time 1108s, Wed Feb  6 01:36:13 2019.
   The latency of the model is 511.2466 ms/sentences
   bleu: 29.2
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_gnmt_inference_fp32_20190206_011740.log
 ```
@@ -134,8 +132,6 @@ Example log tail when benchmarking for throughput:
   done, num sentences 2169, num translations per input 1, time 302s, Wed Feb  6 01:48:30 2019.
   The throughput of the model is 7.1780 sentences/s
   bleu: 29.2
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 32
 Log location outside container: {--output-dir value}/benchmark_gnmt_inference_fp32_20190206_014324.log
 ```

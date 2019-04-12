@@ -159,8 +159,6 @@ Step 4980: 0.0429329872131 seconds
 Step 4990: 0.0358219146729 seconds
 Avg. Duration per Step:0.0364457404137
 Avg. Duration per Step:0.0365921088491
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20181203_232524.log
 ```
@@ -185,8 +183,6 @@ DONE (t=1.10s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.212
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20181204_185432.log
 ```
@@ -382,8 +378,6 @@ Below is a sample log file tail when running benchmarking:
 INFO:tensorflow:Processed 5001 images... moving average latency 37 ms
 INFO:tensorflow:Finished processing records
 Latency: min = 33.8, max = 6635.9, mean= 38.4, median = 37.2
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_ssd-mobilenet_inference_fp32_20190130_225108.log
 ```
@@ -403,8 +397,6 @@ Below is a sample log file tail when testing accuracy:
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.264
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_ssd-mobilenet_inference_fp32_20190123_225145.log
 ```

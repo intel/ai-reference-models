@@ -189,8 +189,6 @@ Example log tail when running for accuracy:
 
 ```
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7666, 0.9333)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Executing command: python /workspace/intelai_models/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --data_location=/dataset
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_013246.log
@@ -203,8 +201,6 @@ steps = 470, 53.7256017113 images/sec
 steps = 480, 52.5430812016 images/sec
 steps = 490, 52.9076139058 images/sec
 steps = 500, 53.5021876395 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194002.log
 ```
@@ -216,8 +212,6 @@ steps = 470, 370.435654276 images/sec
 steps = 480, 369.710160177 images/sec
 steps = 490, 369.083388904 images/sec
 steps = 500, 370.287978128 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194314.log
 ```
@@ -283,8 +277,6 @@ Average time: 0.014 sec
 Batch size = 1
 Latency: 14.442 ms
 Throughput: 69.243 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_025220.log
 ```
@@ -315,8 +307,6 @@ Iteration 40: 0.757 sec
 Average time: 0.760 sec
 Batch size = 128
 Throughput: 168.431 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_024842.log
 ```
@@ -341,8 +331,6 @@ Example log tail when benchmarking for accuracy:
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7673, 0.9341)
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9341)
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9342)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_023816.log
 ```

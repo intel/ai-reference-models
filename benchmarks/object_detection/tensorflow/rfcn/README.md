@@ -182,8 +182,6 @@ Step 470: 0.202737092972 seconds
 Step 480: 0.117042064667 seconds
 Step 490: 0.103501081467 seconds
 Avg. Duration per Step:0.169812122345
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190227_191959.log
 ```
@@ -205,8 +203,6 @@ DONE (t=1.03s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190227_194752.log
 ```
@@ -364,8 +360,6 @@ and latency:
 
 ```
 Average time per step: 0.262 sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32, socket_id=0, use_case='object_detection', verbose=True)
 Received these custom args: ['--config_file=rfcn_pipeline.config']
 Run model here.
@@ -392,8 +386,7 @@ DONE (t=1.19s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.400
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.400
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
-Ran inference with batch size 1
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_rfcn_inference_fp32_20181221_211905.log
 ```

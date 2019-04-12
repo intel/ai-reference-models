@@ -79,8 +79,6 @@ Total samples/sec: 33.1608 samples/s
 2019-03-28 21:00:02.725722: W tensorflow/core/kernels/queue_base.cc:277] _1_batch_join/fifo_queue: Skipping cancelled enqueue attempt with queue not closed
 2019-03-28 21:00:02.725746: W tensorflow/core/kernels/queue_base.cc:277] _1_batch_join/fifo_queue: Skipping cancelled enqueue attempt with queue not closed
 2019-03-28 21:00:02.725776: W tensorflow/core/kernels/queue_base.cc:277] _1_batch_join/fifo_queue: Skipping cancelled enqueue attempt with queue not closed
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_facenet_inference_fp32_20190328_205911.log
 ```
@@ -112,8 +110,6 @@ Accuracy: 0.98833+-0.00489
 Validation rate: 0.96200+-0.01968 @ FAR=0.00100
 Area Under Curve (AUC): 0.999
 Equal Error Rate (EER): 0.011
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_facenet_inference_fp32_20190329_002623.log
 ```
@@ -146,8 +142,6 @@ Accuracy: 0.98833+-0.00489
 Validation rate: 0.96200+-0.01968 @ FAR=0.00100
 Area Under Curve (AUC): 0.999
 Equal Error Rate (EER): 0.011
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_facenet_inference_fp32_20190328_214145.log
 ```

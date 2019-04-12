@@ -71,8 +71,6 @@ Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_212224.log
 ```
@@ -108,8 +106,6 @@ steps = 470, 460.113806562 images/sec
 steps = 480, 460.073982602 images/sec
 steps = 490, 463.289831148 images/sec
 steps = 500, 463.521427264 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
 ```
@@ -176,8 +172,6 @@ Average time: 0.011 sec
 Batch size = 1
 Latency: 10.924 ms
 Throughput: 91.541 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215326.log
 ```
@@ -213,8 +207,6 @@ Iteration 40: 0.652 sec
 Average time: 0.653 sec
 Batch size = 128
 Throughput: 196.065 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215655.log
 ```
@@ -243,8 +235,6 @@ something like this:
 ```
 ...
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7430, 0.9188)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```

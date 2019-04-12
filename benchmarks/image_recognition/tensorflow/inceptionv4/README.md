@@ -106,8 +106,6 @@ other precisions are coming later.
    Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7983, 0.9504)
    Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7984, 0.9504)
    Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7984, 0.9504)
-   lscpu_path_cmd = command -v lscpu
-   lscpu located here: /usr/bin/lscpu
    Ran inference with batch size 100
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_221608.log
    ```
@@ -122,8 +120,6 @@ other precisions are coming later.
    steps = 30, 184.620504126 images/sec
    steps = 40, 183.900309054 images/sec
    steps = 50, 184.110358713 images/sec
-   lscpu_path_cmd = command -v lscpu
-   lscpu located here: /usr/bin/lscpu
    Ran inference with batch size 240
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_215858.log
    ```
@@ -139,8 +135,6 @@ other precisions are coming later.
    steps = 40, 31.9682931663 images/sec
    steps = 50, 31.6665962009 images/sec
    Latency: 31.936 ms
-   lscpu_path_cmd = command -v lscpu
-   lscpu located here: /usr/bin/lscpu
    Ran inference with batch size 1
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_215702.log
    ```
