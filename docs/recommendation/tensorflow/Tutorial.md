@@ -215,8 +215,6 @@ Set this parameter to a socket id to run the workload on a single socket.
 	Average Latency (ms/batch)   :  ...
 	Throughput is (records/sec)  :  ...
 	--------------------------------------------------
-	lscpu_path_cmd = command -v lscpu
-	lscpu located here: /usr/bin/lscpu
 	num_inter_threads: 28
 	num_intra_threads: 1
 	Received these standard args: Namespace(accuracy_only=False, batch_size=512, benchmark_dir='/workspace/benchmarks', benchmark_only=True, checkpoint=None, data_location='/dataset', data_num_inter_threads=None, data_num_intra_threads=None, framework='tensorflow', input_graph='/in_graph/wide_deep_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='wide_deep_large_ds', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=28, num_intra_threads=1, num_parallel_batches=28, output_dir='/workspace/benchmarks/common/tensorflow/logs', output_results=False, precision='fp32', socket_id=-1, use_case='recommendation', verbose=True)
@@ -276,9 +274,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 			--debug				
 	
 &nbsp;&nbsp;<u>Example Output:</u>
-	
-	lscpu_path_cmd = command -v lscpu
-	lscpu located here: b'/usr/bin/lscpu'
+
 	root@a78677f56d69:/workspace/benchmarks/common/tensorflow#
 	
 To rerun the benchmarking script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For example, to rerun with the best max throughput (batch size=512) settings, run with ```BATCH_SIZE``` 

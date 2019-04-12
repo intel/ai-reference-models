@@ -179,8 +179,6 @@ and latency:
 ```
 Time spent : 167.353 seconds.
 Time spent per BATCH: 0.167 seconds.
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='faster_rcnn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32', socket_id=0, use_case='object_detection', verbose=True)
 Received these custom args: ['--config_file=pipeline.config']
 Run model here.
@@ -208,8 +206,6 @@ DONE (t=1.35s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.383
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_fp32_20190114_205714.log
 ```
@@ -295,8 +291,6 @@ Step 4970: 0.070191860199 seconds
 Step 4980: 0.0755469799042 seconds
 Step 4990: 0.0742928981781 seconds
 Avg. Duration per Step:0.0760930150986
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_int8_20190117_232539.log
 ```
@@ -317,8 +311,6 @@ DONE (t=1.34s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.375
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_int8_20190117_231937.log
 ```
