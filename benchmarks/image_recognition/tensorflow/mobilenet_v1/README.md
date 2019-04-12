@@ -35,11 +35,7 @@ later.
     -rw-r--r--. 1 user  52508270 Jun 20 15:09 validation-00126-of-00128
     -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
     ```
-2. Download the pretrained model:
-
-    ```
-    $ wget https://storage.cloud.google.com/intel-optimized-tensorflow/models/mobilenetv1_int8_pretrained_model.pb
-    ```
+2. A link to download the pre-trained model is coming soon.
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
     and then run the benchmarking scripts for either benchmarking throughput,
