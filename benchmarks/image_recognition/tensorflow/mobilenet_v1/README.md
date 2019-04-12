@@ -104,7 +104,7 @@ later.
     ```
 
     Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
-    to get additional debug output or change the default output location..
+    to get additional debug output or change the default output location.
 
 4. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory,
     or the directory specified by the `--output-dir` arg. Below are examples of
