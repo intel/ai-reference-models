@@ -167,7 +167,13 @@ def test_launch_benchmark_parse_unknown_args(launch_benchmark):
                                                                            "--accuracy-only",
                                                                            "--output-results"],
                                                   "--output-results can only be used when running "
-                                                  "inference with a dataset"]
+                                                  "inference with a dataset"],
+                                              ['catch_error', SystemExit, ["--model-name", test_model_name,
+                                                                           "--framework", test_framework,
+                                                                           "--mode", test_mode,
+                                                                           "--precision", test_precision,
+                                                                           "--volume", "~:test"],
+                                                  "Volume mounts can only be used when running in a docker container"],
                                               ], indirect=True)
 def test_launch_benchmark_parse_bad_args(launch_benchmark):
     """
@@ -216,3 +222,18 @@ def test_bare_metal(launch_benchmark, mock_popen):
     # ensure env vars are set
     assert os.environ["TEST_ENV_VAR_1"] == test_env_vars["TEST_ENV_VAR_1"]
     assert os.environ["TEST_ENV_VAR_2"] == test_env_vars["TEST_ENV_VAR_2"]
+
+
+def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen):
+    """
+    Verifies the docker run command includes custom volumes
+    """
+    custom_volumes = ["~:/foo1", "~:/foo2"]
+    launch_benchmark.args.custom_volumes = custom_volumes
+    launch_benchmark.main()
+    assert mock_popen.called
+    args, _ = mock_popen.call_args
+    # convert the run command args to a string and then check for the custom volume mounts
+    docker_run_cmd = " ".join(args[0])
+    for custom_volume in custom_volumes:
+        assert "--volume {}".format(custom_volume) in docker_run_cmd
