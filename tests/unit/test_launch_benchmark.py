@@ -224,6 +224,27 @@ def test_bare_metal(launch_benchmark, mock_popen):
     assert os.environ["TEST_ENV_VAR_2"] == test_env_vars["TEST_ENV_VAR_2"]
 
 
+def test_help(mock_platform_util, capsys):
+    """ Tests `launch_benchmark.py --help` output and ensures there is no error """
+    with mock_patch.object(sys, 'argv', ["launch_benchmark.py", "--help"]):
+        with pytest.raises(SystemExit) as e:
+            LaunchBenchmark(mock_platform_util)
+        assert e.value.code == 0
+
+        # get the stdout and check the output
+        captured = capsys.readouterr()
+        assert "usage: launch_benchmark.py [-h] " in captured.out
+
+        # check for an arg that is only in launch_benchmark.py
+        assert "--docker-image DOCKER_IMAGE" in captured.out
+
+        # check for an arg that's in base_benchmark_util.py
+        assert "-f FRAMEWORK, --framework FRAMEWORK" in captured.out
+
+        # make sure there were no errors printed
+        assert "error" not in captured.out.lower()
+
+
 def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen):
     """
     Verifies the docker run command includes custom volumes

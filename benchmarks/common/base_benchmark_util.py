@@ -23,6 +23,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import sys
 
 from argparse import ArgumentParser
 from common import platform_util
@@ -47,6 +48,9 @@ class BaseBenchmarkUtil(object):
         """define args for the benchmark interface shared by FP32 and int8
         models"""
 
+        # only require the arg, if we aren't just printing out --help
+        required_arg = "--help" not in sys.argv
+
         self._common_arg_parser = ArgumentParser(
             add_help=False, description="Parse args for base benchmark "
                                         "interface")
@@ -54,7 +58,7 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-f", "--framework",
             help="Specify the name of the deep learning framework to use.",
-            dest="framework", default=None, required=True)
+            dest="framework", default=None, required=required_arg)
 
         self._common_arg_parser.add_argument(
             "-r", "--model-source-dir",
@@ -64,15 +68,15 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-p", "--precision",
             help="Specify the model precision to use: fp32, int8, or bfloat16",
-            required=True, choices=["fp32", "int8", "bfloat16"],
+            required=required_arg, choices=["fp32", "int8", "bfloat16"],
             dest="precision")
 
         self._common_arg_parser.add_argument(
             "-mo", "--mode", help="Specify the type training or inference ",
-            required=True, choices=["training", "inference"], dest="mode")
+            required=required_arg, choices=["training", "inference"], dest="mode")
 
         self._common_arg_parser.add_argument(
-            "-m", "--model-name", required=True,
+            "-m", "--model-name", required=required_arg,
             help="model name to run benchmarks for", dest="model_name")
 
         self._common_arg_parser.add_argument(
