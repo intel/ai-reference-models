@@ -103,14 +103,61 @@ optional arguments:
                         Folder to dump output into.
   -g INPUT_GRAPH, --in-graph INPUT_GRAPH
                         Full path to the input graph
+  --volume CUSTOM_VOLUMES
+                        Specify a custom volume to mount in the container,
+                        which follows the same format as the docker --volume
+                        flag (https://docs.docker.com/storage/volumes/). This
+                        argument can only be used in conjunction with a
+                        --docker-image.
   --debug               Launches debug mode which doesn't execute start.sh
 ```
+
+## Volume mounts
+
+When running the launch script using a docker image, volumes will
+automatically get mounted in the container for the following
+directories:
+
+| Directory | Mount location in the container |
+|-----------|---------------------------------|
+| Model zoo `/benchmarks` code | `/workspace/benchmarks` |
+| Model zoo `/models` code | `/workspace/intelai_models` |
+| `--model-source-dir` code | `/workspace/models` |
+| `--checkpoints` directory | `/checkpoints` |
+| `--in-graph` file | `/in_graph` |
+| `--dataset-location` | `/dataset` |
+
+If you would like additional directories mounted in the docker
+container, you can specify them by using the `--volume` flag using the
+same `:` separated field format [as docker](https://docs.docker.com/storage/volumes/).
+For example, the following command will mount `/home/<user>/custom_folder_1`
+in the container at `custom_folder_1` and `/home/<user>/custom_folder_2`
+in the container at `custom_folder_2`:
+
+```
+$ python launch_benchmark.py \
+        --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+        --model-name resnet50 \
+        --framework tensorflow \
+        --precision fp32 \
+        --mode inference \
+        --batch-size 1 \
+        --socket-id 0 \
+        --data-location /home/<user>/Imagenet_Validation \
+        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --volume /home/<user>/custom_folder_1:/custom_folder_1 \
+        --volume /home/<user>/custom_folder_2:/custom_folder_2
+```
+
+Note that volume mounting only applies when running in a docker
+container. When running on [bare metal](#alpha-feature-running-on-bare-metal),
+files are accessed in their original location.
 
 ## Debugging
 
 The `--debug` flag in the `launch_benchmarks.py` script gives you a
-shell into the docker container with the volumes mounted for any
-dataset, pretrained model, model source code, etc that has been
+shell into the docker container with the [volumes mounted](#volume-mounts)
+for any dataset, pretrained model, model source code, etc that has been
 provided by the other flags. It does not execute the `start.sh` script,
 and is intended as a way to setup an environment for quicker iteration
 when debugging and doing development. From the shell, you can manually

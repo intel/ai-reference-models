@@ -29,7 +29,7 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from common import base_benchmark_util
-from common.utils.validators import check_no_spaces
+from common.utils.validators import check_no_spaces, check_volume_mount
 
 
 class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
@@ -68,6 +68,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             dest="docker_image", default=None, type=check_no_spaces)
 
         arg_parser.add_argument(
+            "--volume",
+            help="Specify a custom volume to mount in the container, which follows the same format as the "
+                 "docker --volume flag (https://docs.docker.com/storage/volumes/). "
+                 "This argument can only be used in conjunction with a --docker-image.",
+            action="append", dest="custom_volumes", type=check_volume_mount)
+
+        arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
                             "start.sh when running in a docker container.", action="store_true")
 
@@ -85,6 +92,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # benchmark_only as the default
         if not self.args.benchmark_only and not self.args.accuracy_only:
             self.args.benchmark_only = True
+
+        if self.args.custom_volumes and not self.args.docker_image:
+            raise ValueError("Volume mounts can only be used when running in a docker container "
+                             "(a --docker-image must be specified when using --volume).")
 
         if self.args.mode == "inference" and self.args.checkpoint:
             print("Warning: The --checkpoint argument is being deprecated in favor of using frozen graphs.")
@@ -309,6 +320,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if in_graph_dir:
             volume_mounts.extend([
                 "--volume", "{}:{}".format(in_graph_dir, "/in_graph")])
+
+        if args.custom_volumes:
+            for custom_volume in args.custom_volumes:
+                volume_mounts.extend(["--volume", custom_volume])
 
         docker_run_cmd = ["docker", "run"]
 
