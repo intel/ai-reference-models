@@ -42,7 +42,11 @@ class ModelInitializer(BaseModelInitializer):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
-        self.set_kmp_vars()
+
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
+
         self.set_num_inter_intra_threads()
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)

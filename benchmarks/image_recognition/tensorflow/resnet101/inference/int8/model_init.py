@@ -41,8 +41,9 @@ class ModelInitializer(BaseModelInitializer):
         set_env_var("OMP_NUM_THREADS",
                     platform_util.num_cores_per_socket if args.num_cores == -1 else args.num_cores)
 
-        # Set KMP env vars, but override default KMP_BLOCKTIME value
-        self.set_kmp_vars(kmp_blocktime="0")
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
     def parse_args(self):
         parser = argparse.ArgumentParser()

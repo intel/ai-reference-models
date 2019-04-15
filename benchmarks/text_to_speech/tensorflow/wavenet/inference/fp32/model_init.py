@@ -32,8 +32,9 @@ class ModelInitializer(BaseModelInitializer):
         self.command = ""
         command_prefix = "{} generate.py".format(self.python_exe)
 
-        # Set default KMP env vars, except for KMP_SETTINGS
-        self.set_kmp_vars(kmp_settings=None)
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         self.parse_custom_args()
         # Set the num_inter_threads and num_intra_threads (override inter threads to 1)

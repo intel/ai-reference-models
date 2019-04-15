@@ -37,8 +37,9 @@ class ModelInitializer(BaseModelInitializer):
                         (str(self.args.num_cores - 1)) + " "
         self.cmd += "{} ".format(self.python_exe)
 
-        # Set the KMP env vars
-        self.set_kmp_vars(kmp_affinity="granularity=fine,compact,1,0")
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # use default batch size if -1
         if self.args.batch_size == -1:
