@@ -57,7 +57,6 @@ class ModelInitializer(BaseModelInitializer):
             self.command_prefix = ("{prefix} "
                                    "--dataset_name imagenet "
                                    "--checkpoint_path {checkpoint} "
-                                   "--dataset_dir {dataset} "
                                    "--dataset_split_name=validation "
                                    "--clone_on_cpu=True "
                                    "--model_name {model} "
@@ -65,9 +64,11 @@ class ModelInitializer(BaseModelInitializer):
                                    "--intra_op_parallelism_threads {intra} "
                                    "--batch_size {bz}").format(
                 prefix=self.command_prefix, checkpoint=self.args.checkpoint,
-                dataset=self.args.data_location, model=self.args.model_name,
-                inter=self.args.num_inter_threads,
+                model=self.args.model_name, inter=self.args.num_inter_threads,
                 intra=self.args.num_intra_threads, bz=self.args.batch_size)
+
+            if self.args.data_location:
+                self.command_prefix += " --dataset_dir {}".format(self.args.data_location)
         else:
             # add args for the accuracy script
             script_args_list = [

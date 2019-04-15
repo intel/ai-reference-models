@@ -151,7 +151,11 @@ later.
 
 ## FP32 Inference Instructions
 
-1. Download the ImageNet dataset and convert it to the TF records format
+1. The ImageNet dataset is required for testing accuracy and can also be
+   used when running benchmarking. If no datset is provided when running
+   benchmarking, synthetic data will be used.
+
+   Download the ImageNet dataset and convert it to the TF records format
    using the instructions
    [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
 
@@ -198,7 +202,9 @@ later.
    [tensorflow/models](https://github.com/tensorflow/models) repo that
    was cloned in step 3.
 
-   * Run benchmarking for latency (with `--batch-size 1` and `--checkpoint` with a path to the checkpoint file directory):
+   * Run benchmarking for latency (with `--batch-size 1`, `--checkpoint`
+     with a path to the checkpoint file directory, and the `--data-location`
+     is optional):
      ```
      python launch_benchmark.py \
          --precision fp32 \
@@ -212,7 +218,9 @@ later.
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
      ```
-    * Run benchmarking for throughput (with `--batch-size 100` and `--checkpoint` with a path to the checkpoint file directory):
+    * Run benchmarking for throughput (with `--batch-size 100`,
+      `--checkpoint` with a path to the checkpoint file directory, and
+      the `--data-location` is optional):
       ```
       python launch_benchmark.py \
          --precision fp32 \
