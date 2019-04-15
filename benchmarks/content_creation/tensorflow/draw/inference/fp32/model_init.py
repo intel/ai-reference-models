@@ -22,7 +22,6 @@
 import os
 import sys
 from common.base_model_init import BaseModelInitializer
-from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -32,8 +31,8 @@ class ModelInitializer(BaseModelInitializer):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
-        set_env_var("KMP_HW_SUBSET", "1T")
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         if self.args.accuracy_only:
             print("Accuracy testing for DRAW inference is not supported yet.")

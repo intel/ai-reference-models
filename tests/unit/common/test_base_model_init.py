@@ -17,13 +17,43 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-
+from contextlib import contextmanager
 import os
+import pytest
+import sys
+import tempfile
+
+try:
+    # python 2
+    from cStringIO import StringIO
+except ImportError:
+    # python 3
+    # only supports unicode so can't be used in python 2 for sys.stdout
+    # because (from `print` documentation)
+    # "All non-keyword arguments are converted to strings like str() does"
+    from io import StringIO
+
 
 from mock import MagicMock, patch
 
 from benchmarks.common.base_model_init import BaseModelInitializer
 from benchmarks.common.base_model_init import set_env_var
+
+
+@contextmanager
+def catch_stdout():
+    _stdout = sys.stdout
+    sys.stdout = caught_output = StringIO()
+    try:
+        yield caught_output
+    finally:
+        sys.stdout = _stdout
+        caught_output.close()
+
+
+@pytest.fixture
+def mock_json(patch):
+    return patch('json')
 
 
 # Example args and output strings for testing mocks
@@ -109,3 +139,34 @@ def test_env_var_not_already_set():
     finally:
         if os.environ.get(env_var):
             del os.environ[env_var]
+
+
+def test_set_kmp_vars_config_json_does_not_exists():
+    """Test config.json does not exist"""
+    # Setup base model init with test settings
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    os.environ["PYTHON_EXE"] = "python"
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+
+    config_file_path = '/test/foo/config.json'
+
+    with catch_stdout() as caught_output:
+        base_model_init.set_kmp_vars(config_file_path)
+        output = caught_output.getvalue()
+
+    assert "Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(config_file_path) == output.strip()
+
+
+def test_set_kmp_vars_config_json_exists(mock_json):
+    """Test config.json when exists"""
+    # Setup base model init with test settings
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    os.environ["PYTHON_EXE"] = "python"
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+
+    file_descriptor, config_file_path = tempfile.mkstemp(suffix=".json")
+
+    base_model_init.set_kmp_vars(config_file_path)

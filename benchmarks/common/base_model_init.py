@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+import json
 import os
 
 
@@ -135,14 +136,28 @@ class BaseModelInitializer(object):
             print("num_inter_threads: {}\nnum_intra_threads: {}".format(
                 self.args.num_inter_threads, self.args.num_intra_threads))
 
-    def set_kmp_vars(self, kmp_settings="1", kmp_blocktime="1", kmp_affinity="granularity=fine,verbose,compact,1,0"):
+    def set_kmp_vars(self, config_file_path, kmp_settings=None, kmp_blocktime=None, kmp_affinity=None):
         """
         Sets KMP_* environment variables to the specified value, if the environment variable has not already been set.
-        The default values for this function's args are the most common values that we have seen in the model zoo.
+        The default values in the json file are the best known settings for the model.
         """
+        if os.path.exists(config_file_path):
+            with open(config_file_path, 'r') as config:
+                config_object = json.load(config)
+
+            # First sets default from config file
+            for param in config_object.keys():
+                for env in config_object[param].keys():
+                    set_env_var(env, config_object[param][env])
+
+        else:
+            print("Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(config_file_path))
+
+        # Override user provided envs
         if kmp_settings:
-            set_env_var("KMP_SETTINGS", kmp_settings)
+            set_env_var("KMP_SETTINGS", kmp_settings, overwrite_existing=True)
         if kmp_blocktime:
-            set_env_var("KMP_BLOCKTIME", kmp_blocktime)
+            set_env_var("KMP_BLOCKTIME", kmp_blocktime, overwrite_existing=True)
         if kmp_affinity:
-            set_env_var("KMP_AFFINITY", kmp_affinity)
+            set_env_var("KMP_AFFINITY", kmp_affinity, overwrite_existing=True)

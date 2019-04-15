@@ -17,11 +17,25 @@ required:
    ![Benchmarks Directory Structure](benchmarks_directory_structure.png)
 
 2. Next, in the leaf folder that was created in the previous step, you
-   will need to create a `model_init.py` file:
+   will need to create `config.json` and `model_init.py` files:
 
-   ![Add model init](add_model_init.png)
+   ![Add model init](add_model_init_and_config.png)
 
-   This file is used to initialize the best known configuration for the
+    The `config.json` file contains the best known KMP environment variable
+    settings to get optimal performance for the model. Below default settings are recommended for most of
+    the models in Model Zoo.
+
+    ```
+    {
+        "optimization_parameters": {
+            "KMP_AFFINITY": "granularity=fine,verbose,compact,1,0",
+            "KMP_BLOCKTIME": 1,
+            "KMP_SETTINGS": 1
+        }
+    }
+    ```
+
+   The `model_init.py` file is used to initialize the best known configuration for the
    model, and then start executing inference or training. When the
    [launch script](/docs/general/tensorflow/LaunchBenchmark.md) is run,
    it will look for the appropriate `model_init.py` file to use
@@ -33,7 +47,7 @@ required:
    [base model init class](/benchmarks/common/base_model_init.py) that
    includes functions for doing common tasks such as setting up the best
    known environment variables (like `KMP_BLOCKTIME`, `KMP_SETTINGS`,
-   `KMP_AFFINITY`, and `OMP_NUM_THREADS`), num intra threads, and num
+   `KMP_AFFINITY` by loading **config.json** and `OMP_NUM_THREADS`), num intra threads, and num
    inter threads. The `model_init.py` file also sets up the string that
    will ultimately be used to run inference or model training, which
    normally includes the use of `numactl` and sending all of the
@@ -93,7 +107,7 @@ Optional step:
   the original repository, then it can be added to the
   [models](/models) directory in the zoo repo. As with the first step
   in the previous section, the directory structure should be setup like:
-  `/models/<use case>/<framework>/<model name>/<mode>/<precision>`:
+  `/models/<use case>/<framework>/<model name>/<mode>/<precision>`.
 
   ![Models Directory Structure](models_directory_structure.png)
 

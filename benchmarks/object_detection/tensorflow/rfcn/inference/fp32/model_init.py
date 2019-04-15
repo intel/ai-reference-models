@@ -45,8 +45,9 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode,
             self.args.precision, "eval.py")
 
-        # Set KMP env vars, except override the default KMP_BLOCKTIME and KMP_AFFINITY values
-        self.set_kmp_vars(kmp_blocktime="0", kmp_affinity=None)
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.parse_custom_args()

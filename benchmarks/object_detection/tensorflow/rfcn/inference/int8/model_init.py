@@ -54,8 +54,9 @@ class ModelInitializer(BaseModelInitializer):
 
         self.parse_args()
 
-        # Set KMP env vars with defaults, except for KMP_BLOCKTIME
-        self.set_kmp_vars(kmp_blocktime=0)
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # Set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()

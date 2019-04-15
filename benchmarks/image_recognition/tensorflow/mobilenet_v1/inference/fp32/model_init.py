@@ -33,8 +33,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        # Set KMP env vars (except KMP_SETTINGS is not set)
-        self.set_kmp_vars(kmp_settings=None)
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # set num_inter_threads and num_intra_threads (override inter threads to 2)
         self.set_num_inter_intra_threads(num_inter_threads=2)

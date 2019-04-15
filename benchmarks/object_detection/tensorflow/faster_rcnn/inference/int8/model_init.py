@@ -41,8 +41,9 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode, self.args.precision,
             self.RFCN_ACCURACY_SCRIPT)
 
-        # Set KMP env vars, except override the default KMP_BLOCKTIME value
-        self.set_kmp_vars(kmp_blocktime="0")
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         self.validate_args()
 

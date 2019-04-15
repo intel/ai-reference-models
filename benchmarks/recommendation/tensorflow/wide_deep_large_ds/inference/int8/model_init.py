@@ -36,9 +36,10 @@ class ModelInitializer(BaseModelInitializer):
         # Set the num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_cores_per_socket,
                                          num_intra_threads=1)
-        # Use default KMP AFFINITY values, override KMP_BLOCKTIME & enable KMP SETTINGS
-        self.set_kmp_vars(kmp_settings="1", kmp_blocktime="0",
-                          kmp_affinity="noverbose,warnings,respect,granularity=core,none")
+
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # Set env vars, if they haven't already been set
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)

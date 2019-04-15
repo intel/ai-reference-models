@@ -41,7 +41,8 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads()
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars(kmp_affinity="granularity=fine, compact")
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # Get path to the inference script
         script_path = os.path.join(
