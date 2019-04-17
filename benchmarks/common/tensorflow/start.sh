@@ -278,6 +278,19 @@ function dcgan() {
   fi
 }
 
+# DenseNet 169 model
+function densenet169() {
+  if [ ${PRECISION} == "fp32" ]; then
+      CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
+      $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) $(add_arg "--input_layer" ${input_layer}) \
+      $(add_arg "--output_layer" ${output_layer})"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # DRAW model
 function draw() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -806,6 +819,8 @@ echo "Log output location: ${LOGFILE}"
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
+elif [ ${MODEL_NAME} == "densenet169" ]; then
+  densenet169
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
 elif [ ${MODEL_NAME} == "facenet" ]; then
