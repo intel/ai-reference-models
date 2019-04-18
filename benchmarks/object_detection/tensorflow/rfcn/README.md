@@ -174,16 +174,16 @@ to get additional debug output or change the default output location.
 Below is a sample log file tail when running benchmarking for throughput
 and latency:
 ```
-Step 0: 10.6923000813 seconds
-Step 10: 0.168856859207 seconds
+Step 0: 11.4450089931 seconds
+Step 10: 0.25656080246 seconds
 ...
-Step 460: 0.181148052216 seconds
-Step 470: 0.202737092972 seconds
-Step 480: 0.117042064667 seconds
-Step 490: 0.103501081467 seconds
-Avg. Duration per Step:0.169812122345
+Step 460: 0.256786823273 seconds
+Step 470: 0.267828941345 seconds
+Step 480: 0.141321897507 seconds
+Step 490: 0.127830982208 seconds
+Avg. Duration per Step:0.195356227875
 Ran inference with batch size -1
-Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190227_191959.log
+Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190416_182445.log
 ```
 
 And here is a sample log file tail when running for accuracy:

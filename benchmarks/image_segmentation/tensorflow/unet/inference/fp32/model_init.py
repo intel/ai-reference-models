@@ -51,7 +51,7 @@ class ModelInitializer(BaseModelInitializer):
             "unet_infer.py")
 
         # Create the command prefix using numactl
-        self.command_prefix = self.get_numactl_command(self.args.socket_id) +\
+        self.command_prefix = self.get_command_prefix(self.args.socket_id) +\
             "{} {}".format(self.python_exe, script_path)
 
         # Add batch size arg

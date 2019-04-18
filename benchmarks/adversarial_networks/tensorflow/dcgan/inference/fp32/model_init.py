@@ -43,7 +43,7 @@ class ModelInitializer(BaseModelInitializer):
         benchmark_script = os.path.join(
             self.args.intelai_models, args.mode, args.precision,
             "inference_bench.py")
-        self.benchmark_command = self.get_numactl_command(args.socket_id) + \
+        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)

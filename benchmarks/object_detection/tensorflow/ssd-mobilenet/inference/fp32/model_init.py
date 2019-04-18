@@ -68,7 +68,7 @@ class ModelInitializer(BaseModelInitializer):
                 self.args.precision, "infer_detections.py")
 
             # get command with numactl
-            self.run_cmd = self.get_numactl_command(
+            self.run_cmd = self.get_command_prefix(
                 self.args.socket_id) + "{} {}".format(self.python_exe, benchmark_script)
 
             output_tf_record_path = os.path.join(os.path.dirname(

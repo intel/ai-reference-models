@@ -175,6 +175,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "BENCHMARK_ONLY": args.benchmark_only,
             "ACCURACY_ONLY": args.accuracy_only,
             "OUTPUT_RESULTS": args.output_results,
+            "DISABLE_TCMALLOC": args.disable_tcmalloc,
+            "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "DOCKER": str(args.docker_image is not None),
             "PYTHON_EXE": sys.executable if not args.docker_image else "python"
         }

@@ -42,7 +42,7 @@ class ModelInitializer (BaseModelInitializer):
             self.args.intelai_models, self.args.mode, self.args.precision,
             "one_image_test.py")
         self.command_prefix = \
-            self.get_numactl_command(self.args.socket_id) + \
+            self.get_command_prefix(self.args.socket_id) + \
             "{} ".format(self.python_exe) + benchmark_script
 
         self.run_cmd = \

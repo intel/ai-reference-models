@@ -72,7 +72,7 @@ Benchmarking instructions and scripts for model training coming later.
         ```
         cd /home/<user>/models/benchmarks
 
-        python launch_benchmark.py
+        python launch_benchmark.py \
             --model-name wide_deep_large_ds \
             --precision int8 \
             --mode inference \
@@ -92,7 +92,7 @@ Benchmarking instructions and scripts for model training coming later.
        ``` 
        cd /home/<user>/models/benchmarks
 
-       python launch_benchmark.py
+       python launch_benchmark.py \
             --model-name wide_deep_large_ds \
             --precision int8 \
             --mode inference \
@@ -109,7 +109,7 @@ Benchmarking instructions and scripts for model training coming later.
        ``` 
         cd /home/<user>/models/benchmarks
     
-        python launch_benchmark.py
+        python launch_benchmark.py \
             --model-name wide_deep_large_ds \
             --precision int8 \
             --mode inference \

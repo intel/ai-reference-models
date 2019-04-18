@@ -102,12 +102,15 @@ The tail of the log output when the benchmarking completes should look
 something like this:
 ```
 ...
-steps = 470, 460.113806562 images/sec
-steps = 480, 460.073982602 images/sec
-steps = 490, 463.289831148 images/sec
-steps = 500, 463.521427264 images/sec
+Iteration 497: 0.253495 sec
+Iteration 498: 0.253033 sec
+Iteration 499: 0.258083 sec
+Iteration 500: 0.254541 sec
+Average time: 0.254572 sec
+Batch size = 128
+Throughput: 502.805 images/sec
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190416_172735.log
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands

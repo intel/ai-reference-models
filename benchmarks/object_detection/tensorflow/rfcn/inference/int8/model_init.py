@@ -54,6 +54,9 @@ class ModelInitializer(BaseModelInitializer):
 
         self.parse_args()
 
+        # Get the command previx, but numactl is added later in run_perf_command()
+        self.command.append(self.get_command_prefix(self.args.socket_id, numactl=False))
+
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
@@ -158,7 +161,8 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_accuracy_command(self):
         # already validated by parent
-        self.command = "FROZEN_GRAPH=" + self.args.input_graph
+        self.command = self.get_command_prefix(self.args.socket_id, numactl=False)
+        self.command += "FROZEN_GRAPH=" + self.args.input_graph
 
         if self.args.data_location and os.path.exists(
                 self.args.data_location):

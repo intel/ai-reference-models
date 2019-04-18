@@ -31,7 +31,7 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
-        self.cmd = self.get_numactl_command(self.args.socket_id)
+        self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
 
         self.set_num_inter_intra_threads()

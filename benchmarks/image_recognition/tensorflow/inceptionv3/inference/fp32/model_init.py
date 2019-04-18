@@ -70,7 +70,7 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.precision,
             "eval_image_classifier_inference.py")
 
-        self.benchmark_command = self.get_numactl_command(args.socket_id) + \
+        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
         num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \

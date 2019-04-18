@@ -36,7 +36,7 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        self.cmd = self.get_numactl_command(self.args.socket_id) + "{} ".format(self.python_exe)
+        self.cmd = self.get_command_prefix(self.args.socket_id) + "{} ".format(self.python_exe)
 
         # use default batch size if -1
         if self.args.batch_size == -1:

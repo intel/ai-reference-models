@@ -101,6 +101,16 @@ optional arguments:
                         conjunction with --accuracy-only and --mode=inference.
   --output-dir OUTPUT_DIR
                         Folder to dump output into.
+  --disable-tcmalloc    Disables the use of TCMalloc for int8 benchmarking.
+                        TCMalloc is currently not used for FP32 benchmarking,
+                        so using this flag with FP32 models will have no
+                        effect.
+  --tcmalloc-large-alloc-report-threshold TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD
+                        Sets the TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD
+                        environment variable to the specified value. The
+                        environment variable sets the threshold (in bytes) for
+                        when large memory allocation messages will be
+                        displayed.
   -g INPUT_GRAPH, --in-graph INPUT_GRAPH
                         Full path to the input graph
   --volume CUSTOM_VOLUMES

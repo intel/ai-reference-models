@@ -162,6 +162,22 @@ class BaseBenchmarkUtil(object):
             dest="output_results", action="store_true")
 
         self._common_arg_parser.add_argument(
+            "--disable-tcmalloc",
+            help="Disables the use of TCMalloc for int8 benchmarking. TCMalloc is "
+                 "currently not used for FP32 benchmarking, so using this flag with "
+                 "FP32 models will have no effect.",
+            dest="disable_tcmalloc", action="store_true"
+        )
+
+        self._common_arg_parser.add_argument(
+            "--tcmalloc-large-alloc-report-threshold",
+            help="Sets the TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD environment variable to "
+                 "the specified value. The environment variable sets the threshold (in bytes) "
+                 "for when large memory allocation messages will be displayed.",
+            dest="tcmalloc_large_alloc_report_threshold", default=2147483648, type=int
+        )
+
+        self._common_arg_parser.add_argument(
             "-v", "--verbose", help="Print verbose information.",
             dest="verbose", action="store_true")
 

@@ -57,7 +57,7 @@ class ModelInitializer(BaseModelInitializer):
         benchmark_script = os.path.join(self.model_dir, "infer_detections.py")
 
         # get command with numactl
-        self.run_cmd = self.get_numactl_command(self.args.socket_id)
+        self.run_cmd = self.get_command_prefix(self.args.socket_id)
         self.run_cmd += "{0} {1}".format(self.python_exe, benchmark_script)
         self.run_cmd += " --input-graph {0}".format(self.args.input_graph)
         self.run_cmd += " --batch-size {0}".format(args.batch_size)

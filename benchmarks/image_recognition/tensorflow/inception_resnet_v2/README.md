@@ -139,30 +139,30 @@ Log location outside container: <output directory>/benchmark_inception_resnet_v2
 Example log tail when benchmarking for latency:
 ```
 ...
-Iteration 37: 0.046 sec
-Iteration 38: 0.046 sec
-Iteration 39: 0.046 sec
-Iteration 40: 0.046 sec
-Average time: 0.045 sec
+Iteration 37: 0.043 sec
+Iteration 38: 0.042 sec
+Iteration 39: 0.043 sec
+Iteration 40: 0.043 sec
+Average time: 0.043 sec
 Batch size = 1
-Latency: 45.441 ms
-Throughput: 22.007 images/sec
+Latency: 42.793 ms
+Throughput: 23.368 images/sec
 Ran inference with batch size 1
-Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012557.log
+Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190415_231020.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
 ...
-Iteration 37: 0.975 sec
-Iteration 38: 0.975 sec
-Iteration 39: 0.987 sec
-Iteration 40: 0.974 sec
-Average time: 0.976 sec
+Iteration 37: 0.932 sec
+Iteration 38: 0.928 sec
+Iteration 39: 0.927 sec
+Iteration 40: 0.928 sec
+Average time: 0.928 sec
 Batch size = 128
-Throughput: 131.178 images/sec
+Throughput: 137.978 images/sec
 Ran inference with batch size 128
-Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012719.log
+Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190415_225215.log
 ```
 
 

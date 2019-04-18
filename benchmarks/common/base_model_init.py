@@ -18,6 +18,7 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+import glob
 import json
 import os
 
@@ -62,15 +63,32 @@ class BaseModelInitializer(object):
 
         os.system(cmd)
 
-    def get_numactl_command(self, socket_id):
+    def get_command_prefix(self, socket_id, numactl=True):
         """
-        Returns the numactl command with --cpunodebind and --membind set to the
-        specified socket_id.  If socket_id is set to -1 (undefined) then an
-        empty string is returned.
+        Returns the command prefix with:
+         - LD_PRELOAD for int8 models (if tcmalloc is not disabled)
+         - The numactl command with --cpunodebind and --membind set to the specified socket_id (if numactl=True)
         """
-        return "" if socket_id == -1 else \
-            "numactl --cpunodebind={0} --membind={0} ".format(
-                str(socket_id))
+        command = ""
+
+        if not self.args.disable_tcmalloc:
+            # Try to find the TCMalloc library file
+            matches = glob.glob("/usr/lib/libtcmalloc.so*")
+
+            if len(matches) == 0:
+                matches = glob.glob("/usr/lib64/libtcmalloc.so*")
+
+            if len(matches) > 0:
+                command += "LD_PRELOAD={} ".format(matches[0])
+            else:
+                # Unable to find the TCMalloc library file
+                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
+                      "so the LD_PRELOAD environment variable will not be set.")
+
+        if socket_id != -1 and numactl:
+            command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
+
+        return command
 
     def add_args_to_command(self, command, arg_list):
         """

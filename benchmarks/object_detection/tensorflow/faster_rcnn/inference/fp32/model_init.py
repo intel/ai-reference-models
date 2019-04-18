@@ -65,7 +65,7 @@ class ModelInitializer (BaseModelInitializer):
                 self.args.intelai_models, self.args.mode, self.args.precision,
                 "eval.py")
             self.command_prefix = \
-                self.get_numactl_command(self.args.socket_id) + self.python_exe + " " + \
+                self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + \
                 benchmark_script
 
             config_file_path = os.path.join(self.args.checkpoint,
