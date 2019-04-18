@@ -197,23 +197,25 @@ Log location outside container: {--output-dir value}/benchmark_inceptionv3_infer
 Example log tail when benchmarking for latency:
 ```
 ...
-steps = 470, 53.7256017113 images/sec
-steps = 480, 52.5430812016 images/sec
-steps = 490, 52.9076139058 images/sec
-steps = 500, 53.5021876395 images/sec
+steps = 470, 134.912798739 images/sec
+steps = 480, 132.379245045 images/sec
+steps = 490, 133.977640069 images/sec
+steps = 500, 132.083262478 images/sec
+Average throughput for batch size 1: 133.440858806 images/sec
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194002.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190415_220455.log
 ```
 
 Example log tail when benchmarking for throughput:
 ```
 ...
-steps = 470, 370.435654276 images/sec
-steps = 480, 369.710160177 images/sec
-steps = 490, 369.083388904 images/sec
-steps = 500, 370.287978128 images/sec
+steps = 470, 369.151656047 images/sec
+steps = 480, 373.174541014 images/sec
+steps = 490, 372.402638382 images/sec
+steps = 500, 371.836748659 images/sec
+Average throughput for batch size 128: 371.269087408 images/sec
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194314.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190416_162155.log
 ```
 
 ## FP32 Inference Instructions

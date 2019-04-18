@@ -44,7 +44,7 @@ class ModelInitializer(BaseModelInitializer):
         # Create the command prefix with numactl and executing the script
         script_path = os.path.join(self.args.intelai_models, self.args.mode,
                                    self.args.precision, "draw_inf.py")
-        self.command_prefix = self.get_numactl_command(args.socket_id) + \
+        self.command_prefix = self.get_command_prefix(args.socket_id) + \
             " {} {} ".format(self.python_exe, script_path)
 
         # Add additional args to the command

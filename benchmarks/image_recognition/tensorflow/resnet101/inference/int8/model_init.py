@@ -78,7 +78,7 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode,
             "eval_image_classifier_inference.py")
 
-        cmd = self.get_numactl_command(self.args.socket_id) + self.python_exe + " " + cmd
+        cmd = self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + cmd
 
         cmd += " --input-graph=" + self.args.input_graph + \
                " --num-inter-threads=" + str(self.args.num_inter_threads) + \
@@ -107,7 +107,7 @@ class ModelInitializer(BaseModelInitializer):
             "input_graph", "data_location",
             "batch_size",
             "num_inter_threads", "num_intra_threads"]
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
             self.python_exe + " " + calibration_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)

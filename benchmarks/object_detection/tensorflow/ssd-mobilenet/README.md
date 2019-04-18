@@ -154,13 +154,13 @@ Below is a sample log file tail when running benchmarking for throughput
 and latency:
 
 ```
-Step 4970: 0.0340421199799 seconds
-Step 4980: 0.0429329872131 seconds
-Step 4990: 0.0358219146729 seconds
-Avg. Duration per Step:0.0364457404137
-Avg. Duration per Step:0.0365921088491
+Step 4970: 0.0305020809174 seconds
+Step 4980: 0.0294089317322 seconds
+Step 4990: 0.0301029682159 seconds
+Avg. Duration per Step:0.0300041775227
+Avg. Duration per Step:0.0301246762276
 Ran inference with batch size 1
-Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20181203_232524.log
+Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20190417_175418.log
 ```
 
 And here is a sample log file tail when running for accuracy:

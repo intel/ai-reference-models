@@ -45,6 +45,8 @@ echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 echo "    OUTPUT_RESULTS: ${OUTPUT_RESULTS}"
+echo "    DISABLE_TCMALLOC: ${DISABLE_TCMALLOC}"
+echo "    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD: ${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
@@ -62,6 +64,11 @@ if [[ ${NOINSTALL} != "True" ]]; then
   apt install -y libsm6 libxext6
   pip install --upgrade pip
   pip install requests
+
+  # install google-perftools for tcmalloc
+  if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
+    apt-get install google-perftools -y
+  fi
 fi
 
 verbose_arg=""
@@ -168,6 +175,10 @@ fi
 
 if [ ${DATA_NUM_INTRA_THREADS} != "None" ]; then
   CMD="${CMD} --data-num-intra-threads=${DATA_NUM_INTRA_THREADS}"
+fi
+
+if [ ${DISABLE_TCMALLOC} == "True" ]; then
+  CMD="${CMD} --disable-tcmalloc"
 fi
 
 function install_protoc() {

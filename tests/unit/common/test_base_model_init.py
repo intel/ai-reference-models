@@ -56,6 +56,11 @@ def mock_json(patch):
     return patch('json')
 
 
+@pytest.fixture
+def mock_glob(patch):
+    return patch('glob.glob')
+
+
 # Example args and output strings for testing mocks
 test_model_name = "resnet50"
 test_framework = "tensorflow"
@@ -170,3 +175,36 @@ def test_set_kmp_vars_config_json_exists(mock_json):
     file_descriptor, config_file_path = tempfile.mkstemp(suffix=".json")
 
     base_model_init.set_kmp_vars(config_file_path)
+
+
+@pytest.mark.parametrize('precision', ['int8', 'fp32'])
+def test_command_prefix_tcmalloc(precision, mock_glob):
+    """ Models should include LD_PRELOAD in the command prefix, as long as tcmalloc is not disabled"""
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
+    mock_glob.return_value = [test_tcmalloc_lib]
+    os.environ["PYTHON_EXE"] = "python"
+    args.socket_id = 0
+    args.precision = precision
+
+    # If tcmalloc is not disabled, we should have LD_PRELOAD in the prefix
+    args.disable_tcmalloc = False
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) in command_prefix
+    assert "numactl --cpunodebind=0 --membind=0" in command_prefix
+
+    # If tcmalloc is disabled, LD_PRELOAD shouild not be in the prefix
+    args.disable_tcmalloc = True
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) not in command_prefix
+    assert "numactl --cpunodebind=0 --membind=0" in command_prefix
+
+    # If numactl is set to false, we should not have numactl in the prefix
+    args.disable_tcmalloc = False
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id, numactl=False)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) in command_prefix
+    assert "numactl" not in command_prefix

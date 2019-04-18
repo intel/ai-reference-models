@@ -165,12 +165,12 @@ class eval_classifier_optimized_graph:
     input_tensor = infer_graph.get_tensor_by_name('input:0')
     output_tensor = infer_graph.get_tensor_by_name('predict:0')
 
-    data_sess  = tf.Session(graph=data_graph,  config=data_config)
+    data_sess = tf.Session(graph=data_graph,  config=data_config)
     infer_sess = tf.Session(graph=infer_graph, config=infer_config)
 
     num_processed_images = 0
     num_remaining_images = dataset.num_examples_per_epoch(subset=subset) - num_processed_images \
-        if self.args.data_location else datasets.IMAGENET_NUM_VAL_IMAGES
+        if self.args.data_location else (self.args.batch_size * self.args.steps)
 
     if (not self.args.accuracy_only):
       iteration = 0

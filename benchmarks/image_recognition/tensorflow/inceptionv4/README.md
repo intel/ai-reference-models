@@ -112,31 +112,31 @@ other precisions are coming later.
 
    Example log tail when benchmarking for throughput:
    ```
-   [Running warmup steps...]
-   steps = 10, 185.108768528 images/sec
-   [Running benchmark steps...]
-   steps = 10, 184.482999017 images/sec
-   steps = 20, 184.561572444 images/sec
-   steps = 30, 184.620504126 images/sec
-   steps = 40, 183.900309054 images/sec
-   steps = 50, 184.110358713 images/sec
-   Ran inference with batch size 240
-   Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_215858.log
+    [Running warmup steps...]
+    steps = 10, 184.497605972 images/sec
+    [Running benchmark steps...]
+    steps = 10, 184.664702184 images/sec
+    steps = 20, 184.938455688 images/sec
+    steps = 30, 184.454197634 images/sec
+    steps = 40, 184.491891402 images/sec
+    steps = 50, 184.390001575 images/sec
+    Ran inference with batch size 240
+    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190415_233517.log
    ```
 
    Example log tail when benchmarking for latency:
    ```
-   [Running warmup steps...]
-   steps = 10, 30.8738415788 images/sec
-   [Running benchmark steps...]
-   steps = 10, 31.8633787623 images/sec
-   steps = 20, 31.1129375635 images/sec
-   steps = 30, 31.2716048462 images/sec
-   steps = 40, 31.9682931663 images/sec
-   steps = 50, 31.6665962009 images/sec
-   Latency: 31.936 ms
-   Ran inference with batch size 1
-   Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_215702.log
+    [Running warmup steps...]
+    steps = 10, 32.6095380262 images/sec
+    [Running benchmark steps...]
+    steps = 10, 32.9024373024 images/sec
+    steps = 20, 32.5328989723 images/sec
+    steps = 30, 32.5988932413 images/sec
+    steps = 40, 31.3991914957 images/sec
+    steps = 50, 32.7053998207 images/sec
+    Latency: 30.598 ms
+    Ran inference with batch size 1
+    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190415_232441.log
    ```
 
 ## FP32 Inference Instructions

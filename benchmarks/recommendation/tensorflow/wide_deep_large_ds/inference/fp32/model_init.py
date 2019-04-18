@@ -62,7 +62,7 @@ class ModelInitializer(BaseModelInitializer):
         script_args_list = ["input_graph", "num_parallel_batches", "batch_size",
                             "num_inter_threads", "num_intra_threads", "accuracy_only", "data_location"]
 
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
             self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
