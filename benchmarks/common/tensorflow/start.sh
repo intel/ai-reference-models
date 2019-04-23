@@ -642,6 +642,32 @@ function ssd-resnet34() {
     fi
 }
 
+# SSD-VGG16 model
+function ssd_vgg16() {
+
+    if [ ${NOINSTALL} != "True" ]; then
+        pip install opencv-python Cython
+
+        if [ ${ACCURACY_ONLY} == "True" ]; then
+            # get the python cocoapi
+            get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_INTELAI_MODELS_SOURCE}/inference
+        fi
+    fi
+
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/dataset
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/preprocessing
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/utility
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    if [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp32" ]; then
+       CMD="${CMD} $(add_steps_args)"
+       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+        exit 1
+    fi
+}
+
 # UNet model
 function unet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -868,6 +894,8 @@ elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "ssd-resnet34" ]; then
   ssd-resnet34
+elif [ ${MODEL_NAME} == "ssd_vgg16" ]; then
+  ssd_vgg16
 elif [ ${MODEL_NAME} == "unet" ]; then
   unet
 elif [ ${MODEL_NAME} == "transformer_language" ]; then
