@@ -44,6 +44,13 @@ class BaseModelInitializer(object):
         self.custom_args = custom_args
         self.platform_util = platform_util
 
+        # Set default values for TCMalloc and convert string value to a boolean
+        if self.args.disable_tcmalloc is None:
+            # Set to False for int8 and True for other precisions
+            self.args.disable_tcmalloc = self.args.precision != "int8"
+        elif isinstance(self.args.disable_tcmalloc, str):
+            self.args.disable_tcmalloc = self.args.disable_tcmalloc == "True"
+
         # Ensure that we are using the proper version of python to run the benchmarking script
         self.python_exe = os.environ["PYTHON_EXE"]
 
