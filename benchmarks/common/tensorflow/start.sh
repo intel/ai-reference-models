@@ -177,8 +177,8 @@ if [ ${DATA_NUM_INTRA_THREADS} != "None" ]; then
   CMD="${CMD} --data-num-intra-threads=${DATA_NUM_INTRA_THREADS}"
 fi
 
-if [ ${DISABLE_TCMALLOC} == "True" ]; then
-  CMD="${CMD} --disable-tcmalloc"
+if [ ${DISABLE_TCMALLOC} != "None" ]; then
+  CMD="${CMD} --disable-tcmalloc=${DISABLE_TCMALLOC}"
 fi
 
 function install_protoc() {

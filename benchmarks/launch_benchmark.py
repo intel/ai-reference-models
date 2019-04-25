@@ -93,6 +93,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if not self.args.benchmark_only and not self.args.accuracy_only:
             self.args.benchmark_only = True
 
+        # default disable_tcmalloc=False for int8 and disable_tcmalloc=True for other precisions
+        if not self.args.disable_tcmalloc:
+            self.args.disable_tcmalloc = str(self.args.precision != "int8")
+
         if self.args.custom_volumes and not self.args.docker_image:
             raise ValueError("Volume mounts can only be used when running in a docker container "
                              "(a --docker-image must be specified when using --volume).")

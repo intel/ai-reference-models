@@ -258,3 +258,15 @@ def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen):
     docker_run_cmd = " ".join(args[0])
     for custom_volume in custom_volumes:
         assert "--volume {}".format(custom_volume) in docker_run_cmd
+
+
+@pytest.mark.parametrize("precision,expected_disable_tcmalloc", [["int8", "False"],
+                                                                 ["fp32", "True"]])
+def test_disable_tcmalloc(launch_benchmark, mock_popen, precision, expected_disable_tcmalloc):
+    launch_benchmark.args.precision = precision
+    launch_benchmark.main()
+    assert mock_popen.called
+    args, _ = mock_popen.call_args
+    # convert the run command args to a string and then check for the custom volume mounts
+    docker_run_cmd = " ".join(args[0])
+    assert "--env DISABLE_TCMALLOC=".format(expected_disable_tcmalloc) in docker_run_cmd

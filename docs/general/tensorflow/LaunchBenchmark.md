@@ -101,10 +101,17 @@ optional arguments:
                         conjunction with --accuracy-only and --mode=inference.
   --output-dir OUTPUT_DIR
                         Folder to dump output into.
-  --disable-tcmalloc    Disables the use of TCMalloc for int8 benchmarking.
-                        TCMalloc is currently not used for FP32 benchmarking,
-                        so using this flag with FP32 models will have no
-                        effect.
+  --disable-tcmalloc {True,False}
+                        When TCMalloc is enabled, the google-perftools are
+                        installed (if running using docker) and the LD_PRELOAD
+                        environment variable is set to point to the TCMalloc
+                        library file. The TCMalloc memory allocator produces
+                        better performance results with smaller batch sizes.
+                        This flag disables the use of TCMalloc when set to
+                        True. For int8 benchmarking, TCMalloc is enabled by
+                        default (--disable-tcmalloc=False). For other
+                        precisions, the flag is --disable-tcmalloc=True by
+                        default.
   --tcmalloc-large-alloc-report-threshold TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD
                         Sets the TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD
                         environment variable to the specified value. The

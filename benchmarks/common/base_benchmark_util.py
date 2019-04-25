@@ -161,12 +161,20 @@ class BaseBenchmarkUtil(object):
                  "with --accuracy-only and --mode=inference.",
             dest="output_results", action="store_true")
 
+        # Note this can't be a normal boolean flag, because we need to know when the user
+        # does not explicitly set the arg value so that we can apply the appropriate
+        # default value, depending on the the precision.
         self._common_arg_parser.add_argument(
             "--disable-tcmalloc",
-            help="Disables the use of TCMalloc for int8 benchmarking. TCMalloc is "
-                 "currently not used for FP32 benchmarking, so using this flag with "
-                 "FP32 models will have no effect.",
-            dest="disable_tcmalloc", action="store_true"
+            help="When TCMalloc is enabled, the google-perftools are installed (if running "
+                 "using docker) and the LD_PRELOAD environment variable is set to point to "
+                 "the TCMalloc library file. The TCMalloc memory allocator produces better "
+                 "performance results with smaller batch sizes. This flag disables the use of "
+                 "TCMalloc when set to True. For int8 benchmarking, TCMalloc is enabled by "
+                 "default (--disable-tcmalloc=False). For other precisions, the flag is "
+                 "--disable-tcmalloc=True by default.",
+            dest="disable_tcmalloc", choices=["True", "False"],
+            default=None
         )
 
         self._common_arg_parser.add_argument(
