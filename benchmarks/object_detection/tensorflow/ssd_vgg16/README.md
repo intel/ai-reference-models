@@ -24,6 +24,7 @@ or the throughput and latency benchmark with real data.
 
 The [TensorFlow models](https://github.com/tensorflow/models) repo will be used for
 converting the coco dataset to the TF records format.
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 ```
 $ mkdir val
 $ cd val
@@ -65,6 +66,7 @@ located after the script has completed.
 
 ```
 # We are going to use an older version of the conversion script to checkout the git commit
+$ git clone https://github.com/tensorflow/models.git
 $ cd models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
@@ -203,6 +205,7 @@ or the throughput and latency benchmark with real data.
 
 The [TensorFlow models](https://github.com/tensorflow/models) repo will be used for
 converting the coco dataset to the TF records format.
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 ```
 $ mkdir val
 $ cd val
@@ -244,6 +247,7 @@ located after the script has completed.
 
 ```
 # We are going to use an older version of the conversion script to checkout the git commit
+$ git clone https://github.com/tensorflow/models.git
 $ cd models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
