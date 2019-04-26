@@ -44,7 +44,7 @@ sed -i.bak 95s/input_config/input_config[0]/ offline_eval_map_corloc.py
 
 ```
 
-2.  Download the 2017 validation
+2. Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
@@ -78,6 +78,7 @@ TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
 script to the raw COCO dataset files that you have downloaded in step 2.
 The `--output_dir` is the location where the TF record files will be
@@ -222,7 +223,7 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
-2.  Download the 2017 validation
+2. Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
@@ -256,6 +257,7 @@ TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
 script to the raw COCO dataset files that you have downloaded in step 2.
 The `--output_dir` is the location where the TF record files will be

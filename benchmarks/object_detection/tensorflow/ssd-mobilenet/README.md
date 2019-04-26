@@ -61,6 +61,7 @@ TF records format in order to use it with the inference script. We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
 script to the raw COCO dataset files that you have downloaded in step 2.
 The `--output_dir` is the location where the TF record files will be
@@ -241,6 +242,7 @@ TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
 script to the raw COCO dataset files that you have downloaded in step 2.
 The `--output_dir` is the location where the TF record files will be
