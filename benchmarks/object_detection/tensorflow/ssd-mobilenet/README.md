@@ -10,6 +10,11 @@ other precisions are coming later.
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone the [tensorflow/models](https://github.com/tensorflow/models)
 repository at the specified SHA and clone the
 [cocoapi repo](git clone https://github.com/cocodataset/cocoapi.git) in

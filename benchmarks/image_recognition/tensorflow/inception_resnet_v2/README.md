@@ -7,6 +7,11 @@ following modes/precisions:
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
@@ -69,7 +74,7 @@ are required to run Inception ResNet V2 Int8.
 
 Inception ResNet V2 can be run for accuracy, latency benchmarking, or throughput
 benchmarking. Use one of the following examples below, depending on
-your use case.
+your use case. 
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
 `--batch-size 100`):

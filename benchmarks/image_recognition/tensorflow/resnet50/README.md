@@ -10,6 +10,11 @@ precisions.
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Download the full ImageNet dataset and convert to the TF records format.
 
 * Clone the tensorflow/models repository:

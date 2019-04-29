@@ -7,6 +7,11 @@ following modes/precisions:
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 

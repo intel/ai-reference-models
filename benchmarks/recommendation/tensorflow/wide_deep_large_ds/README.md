@@ -55,6 +55,11 @@ Benchmarking instructions and scripts for model training coming later.
 
 ## INT8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Download and extract the pre-trained model.
     ```
     wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_int8_pretrained_model.pb
