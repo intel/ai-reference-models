@@ -393,7 +393,7 @@ and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL``
 	
 	NOINSTALL=True BATCH_SIZE=128 ./start.sh
 	
-All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](google.com) to get the full list of flags. 
+All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](/docs/general/tensorflow/LaunchBenchmark.md) to get the full list of flags. 
 	
 <u>Example Output</u>	
 	

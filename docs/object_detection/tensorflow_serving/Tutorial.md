@@ -105,7 +105,7 @@ This tutorial assumes you have already:
    (rfcn_venv)$ cp rfcn_resnet101_fp32_coco/saved_model/saved_model.pb rfcn/1
    ```
    
-4. **Discover the number of physical cores**: Compute *num_physical_cores* by executing the `lscpu` command and multiplying `Core(s) per socket` by `Socket(s)`. For example, for a machine with `Core(s) per socket: 28` and `Socket(s): 2`, `num_physical_cores = 28 * 2 = 56`. To compute *num_physical_cores* and *tf_session_parallelism* with bash commands:
+4. **Discover the number of physical cores**: Compute *num_physical_cores* by executing the `lscpu` command and multiplying `Core(s) per socket` by `Socket(s)`. For example, for a machine with `Core(s) per socket: 28` and `Socket(s): 2`, `num_physical_cores = 28 * 2 = 56`. To compute *num_physical_cores* with bash commands:
    ```
    (rfcn_venv)$ cores_per_socket=`lscpu | grep "Core(s) per socket" | cut -d':' -f2 | xargs`
    (rfcn_venv)$ num_sockets=`lscpu | grep "Socket(s)" | cut -d':' -f2 | xargs`
