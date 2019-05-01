@@ -12,7 +12,8 @@
 ## Tutorials by Use Case
 
 * Inference with Intel® Optimization of Tensorflow:
-	* [Image Recognition](/docs/image_recognition/tensorflow/Tutorial.md) (ResNet50, ResNet101, and InceptionV3)
+    * [Image Recognition](/docs/image_recognition/tensorflow/Tutorial.md) (ResNet50, ResNet101, and InceptionV3)
+    * [Language Translation](/docs/language_translation/tensorflow/Tutorial.md) (Transformer-LT)
     * [Recommendation Systems](/docs/recommendation/tensorflow/Tutorial.md) (Wide and Deep)
 * Inference with Intel® Optimization of Tensorflow Serving:
     * [Image Recognition](/docs/image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
