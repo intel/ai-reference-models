@@ -29,8 +29,11 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
                  [inference](/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py) | 
                  [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py) 
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
-                   [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) |
-                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py)
+                   [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) | 
+                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py) 
+* Language Translation
+    * Transformer-LT: [init](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/model_init.py) | 
+                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)    
 * Recommendation Systems
     * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
                 [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
