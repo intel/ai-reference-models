@@ -22,93 +22,80 @@ $ cd SSD.TensorFlow
 $ git checkout 2d8b0cb9b2e70281bf9dce438ff17ffa5e59075c
 ```
 
-2. Download the 2017 validation
+2. Clone the [intelai/models](https://github.com/intelai/models) repository.
+It will be used to run the SSD-VGG16 model accuracy and benchmark tests.
+
+3. Download the 2017 validation images file:
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 This is required if you would like to run the accuracy test,
 or the throughput and latency benchmark with real data.
 
-The [TensorFlow models](https://github.com/tensorflow/models) repo will be used for
-converting the coco dataset to the TF records format.
-Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 ```
-$ mkdir val
-$ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
-$ cd ..
 ```
 
-Continue the instructions below to generate the
-TF record file.
+Download the validation annotations file:
 ```
-$ mkdir annotations
-$ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
-$ cd ..
 ```
 
-Since we are only using the validation dataset in this example, we will
-create an empty directory and empty annotations json file to pass as the
-train and test directories in the next step.
-```
-$ mkdir empty_dir
+4. Convert the COCO dataset to TF records format:
 
-$ cd annotations
-$ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd ..
-```
+We provide a script `generate_coco_records.py` to convert the raw dataset to the TF records required pattern.
+* Some dependencies are required to be installed to run the script such as `python3`, `Tensorflow` and `tqdm`, also, the `SSD.TensorFlow/dataset` from the original model directory (from step 1).
 
-3. Now that you have the raw COCO dataset, we need to convert it to the
-TF records format in order to use it with the inference script. We will
-do this by running the `create_coco_tf_record.py` file in the TensorFlow
-models repo.
+Follow the steps below get the COCO TF records:
 
-Follow the steps below to navigate to the proper directory and point the
-script to the raw COCO dataset files that you have downloaded in step 2.
-The `--output_dir` is the location where the TF record files will be
-located after the script has completed. 
+* Copy the `generate_coco_records.py` script from `models/object_detection/tensorflow/ssd_vgg16/inference/generate_coco_records.py` 
+from the `models` directory (step 2) to `SSD.TensorFlow/dataset` in the original model directory (step 1).
 
 ```
-# We are going to use an older version of the conversion script to checkout the git commit
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
-$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
-
-$ cd research/object_detection/dataset_tools/
-$ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/<user>/coco/empty_dir" \
-      --val_image_dir="/home/<user>/coco/val/val2017" \
-      --test_image_dir="/home/<user>/coco/empty_dir" \
-      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --output_dir="/home/<user>/coco/output"
-
-$ ll /home/myuser/coco/output
-total 1598276
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
+$ cp /home/<user>/models/models/object_detection/tensorflow/ssd_vgg16/inference/generate_coco_records.py /home/<user>/SSD.TensorFlow/dataset
 ```
 
-4. Download the pretrained model:
+* Create directory for the output TF records:
+```
+$ mkdir tf_records
+``` 
+
+* Run the script to generate the TF records with the required prefix `val`, COCO raw dataset and annotation file (step 3):
+```
+$ cd /home/<user>/SSD.TensorFlow/dataset
+$ python generate_coco_records.py \
+--image_path /home/<user>/val2017/ \
+--annotations_file /home/<user>/annotations/instances_val2017.json \
+--output_prefix val \
+--output_path /home/<user>/tf_records/
+```
+
+Now, you can use the `/home/<user>/tf_records/` as the dataset location to run inference with real data, and test the model accuracy.
+```
+$ ls -l /home/<user>/tf_records
+total 792084
+-rw-r--r--. 1 <user> <group> 170038836 Mar 17 21:35 val-00000-of-00005
+-rw-r--r--. 1 <user> <group> 167260232 Mar 17 21:35 val-00001-of-00005
+-rw-r--r--. 1 <user> <group> 167326957 Mar 17 21:35 val-00002-of-00005
+-rw-r--r--. 1 <user> <group> 166289231 Mar 17 21:35 val-00003-of-00005
+-rw-r--r--. 1 <user> <group> 140168531 Mar 17 21:35 val-00004-of-00005
+```
+
+5. Download the pretrained model:
 
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_int8_pretrained_model.pb
 ```
 
-5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the benchmarking scripts for either benchmarking throughput
+6. Navigate to the `benchmarks` directory (step 2), and run the benchmarking scripts for either benchmarking throughput
 and latency or accuracy.
 ```
-$ git clone git@github.com:IntelAI/models.git
-$ cd benchmarks
+$ cd models/benchmarks
 ```
 
 * Run benchmarking for throughput and latency where the `--model-source-dir` is the model source directory from step 1,
-and the `--in-graph` is the pretrained model graph from step 4,
-if you specify the `--data-location` which is the path to the tf record file that you generated in step 3,
+and the `--in-graph` is the pretrained model graph from step 5,
+if you specify the `--data-location` which is the path to the tf record file that you generated in step 4,
 the benchmark will run with real data, otherwise dummy data will be used:
 ```
 python launch_benchmark.py \
@@ -118,7 +105,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --docker-image intelaipg/intel-optimized-tensorflow:nightly-master-devel-mkl-py3 \
     --model-source-dir /home/<user>/SSD.TensorFlow \
-    --data-location /home/<user>/coco/output \
+    --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_int8_pretrained_model.pb \
     --batch-size 1 \
     --socket-id 0 \
@@ -137,7 +124,7 @@ the model directory `SSD.TensorFlow` from step 1.
     $ git clone https://github.com/waleedka/coco.git
 
     ```
-    * The `--data-location` is required, which is the path to the tf record file that you generated in step 3.
+    * The `--data-location` is required, which is the path to the tf record file that you generated in step 4.
     * Copy the annotation file `instances_val2017.json` (from step 3) to the dataset directory `/home/<user>/coco/output`.
     * Use the `--accuracy-only` flag:
 ```
@@ -148,7 +135,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --docker-image intelaipg/intel-optimized-tensorflow:nightly-master-devel-mkl-py3 \
     --model-source-dir /home/<user>/SSD.TensorFlow \
-    --data-location /home/<user>/coco/output \
+    --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_int8_pretrained_model.pb \
     --accuracy-only \
     --batch-size 1
@@ -195,106 +182,28 @@ And here is a sample log file tail when running for accuracy:
 
 ## FP32 Inference Instructions
 
-1. Clone the [original model](https://github.com/HiKapok/SSD.TensorFlow) repository:
-```
-$ git clone https://github.com/HiKapok/SSD.TensorFlow.git
-$ cd SSD.TensorFlow
-$ git checkout 2d8b0cb9b2e70281bf9dce438ff17ffa5e59075c
-```
+Use the steps 1, 2,3 and 4 as above.
 
-2. Download the 2017 validation
-[COCO dataset](http://cocodataset.org/#home) and annotations:
-
-This is required if you would like to run the accuracy test,
-or the throughput and latency benchmark with real data.
-
-The [TensorFlow models](https://github.com/tensorflow/models) repo will be used for
-converting the coco dataset to the TF records format.
-Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
-```
-$ mkdir val
-$ cd val
-$ wget http://images.cocodataset.org/zips/val2017.zip
-$ unzip val2017.zip
-$ cd ..
-```
-
-Continue the instructions below to generate the
-TF record file.
-```
-$ mkdir annotations
-$ cd annotations
-$ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
-$ unzip annotations_trainval2017.zip
-$ cd ..
-```
-
-Since we are only using the validation dataset in this example, we will
-create an empty directory and empty annotations json file to pass as the
-train and test directories in the next step.
-```
-$ mkdir empty_dir
-
-$ cd annotations
-$ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd ..
-```
-
-3. Now that you have the raw COCO dataset, we need to convert it to the
-TF records format in order to use it with the inference script. We will
-do this by running the `create_coco_tf_record.py` file in the TensorFlow
-models repo.
-
-Follow the steps below to navigate to the proper directory and point the
-script to the raw COCO dataset files that you have downloaded in step 2.
-The `--output_dir` is the location where the TF record files will be
-located after the script has completed. 
-
-```
-# We are going to use an older version of the conversion script to checkout the git commit
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
-$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
-
-$ cd research/object_detection/dataset_tools/
-$ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/<user>/coco/empty_dir" \
-      --val_image_dir="/home/<user>/coco/val/val2017" \
-      --test_image_dir="/home/<user>/coco/empty_dir" \
-      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --output_dir="/home/<user>/coco/output"
-
-$ ll /home/myuser/coco/output
-total 1598276
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
-```
-
-4. Download the pretrained model:
+5. Download the pretrained model:
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_fp32_pretrained_model.pb
 ```
 
-5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the benchmarking scripts for either benchmarking throughput
+6. Navigate to the `benchmarks` directory (step 2), and run the benchmarking scripts for either benchmarking throughput
 and latency or accuracy.
 ```
-$ git clone git@github.com:IntelAI/models.git
-$ cd benchmarks
+$ cd models/benchmarks
 ```
 
 * Run benchmarking for throughput and latency where the `--model-source-dir` is the model source directory from step 1,
-and the `--in-graph` is the pretrained model graph from step 4,
-if you specify the `--data-location` which is the path to the tf record file that you generated in step 3,
+and the `--in-graph` is the pretrained model graph from step 5,
+if you specify the `--data-location` which is the path to the tf record file that you generated in step 4,
 the benchmark will run with real data, otherwise dummy data will be used:
 ```
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/<user>/coco/output \
+    --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_fp32_pretrained_model.pb \
     --model-source-dir /home/<user>/SSD.TensorFlow \
     --model-name ssd_vgg16 \
@@ -330,7 +239,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --docker-image intelaipg/intel-optimized-tensorflow:nightly-master-devel-mkl-py3 \
     --model-source-dir /home/<user>/SSD.TensorFlow \
-    --data-location /home/<user>/coco/output \
+    --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_fp32_pretrained_model.pb \
     --accuracy-only \
     --batch-size 1
