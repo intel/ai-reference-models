@@ -28,19 +28,19 @@ from mock import MagicMock, patch
 
 from benchmarks.common.tensorflow.run_tf_benchmark import ModelBenchmarkUtil
 from test_utils import platform_config
-from test_utils.io import parse_csv_file
+from test_utils.io import parse_json_files
 
 
 def parse_model_args_file():
     """
-    Gets test args from the tf_model_args.txt file to use as parameters
+    Gets test args from the models files in the specified directory to use as parameters
     for testing model benchmarking scripts.  The file has a
     run_tf_benchmarks.py command with args with the corresponding run command
     that should get called from model_init.py
     """
     current_dir = os.path.dirname(os.path.realpath(__file__))
-    csv_file_path = os.path.join(current_dir, "tf_model_args.txt")
-    return parse_csv_file(csv_file_path, 2)
+    models_args_path = os.path.join(current_dir, "tf_model_args")
+    return parse_json_files(models_args_path)
 
 
 def delete_env_var(env_var):
@@ -63,7 +63,7 @@ def clear_kmp_env_vars():
 test_arg_values = parse_model_args_file()
 
 
-@pytest.mark.parametrize("test_args,expected_cmd", test_arg_values)
+@pytest.mark.parametrize("test_args,expected_cmd,comment", test_arg_values)
 @patch("os.mkdir")
 @patch("shutil.rmtree")
 @patch("os.listdir")
@@ -81,12 +81,13 @@ test_arg_values = parse_model_args_file()
 def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os,
                        mock_glob, mock_remove, mock_chdir, mock_stat, mock_path_exists,
                        mock_is_file, mock_is_dir, mock_listdir, mock_rmtree, mock_mkdir,
-                       test_args, expected_cmd):
+                       test_args, expected_cmd, comment):
     """
     Runs through executing the specified run_tf_benchmarks.py command from the
     test_args and verifying that the model_init file calls run_command with
     the expected_cmd string.
     """
+    print("****** Running The {} test ******".format(comment))
     os.environ["PYTHON_EXE"] = "python"
     mock_path_exists.return_value = True
     mock_is_dir.return_value = True

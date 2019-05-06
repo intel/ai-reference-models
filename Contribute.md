@@ -177,10 +177,11 @@ developing new scripts:
      arguments.
 
      To add a new parameterized instance of the test for your
-     new model, update the [tf_models_args.txt](/tests/unit/common/tensorflow/tf_model_args.txt)
-     file. This file has comma-separated values where each row has two
-     items: (1) the `run_tf_benchmarks.py` command with the appropriate
-     flags to run the model (2) the expected inference or training
+     new model, add a new JSON file `tf_<model_name>_args.json` to the [tf_models_args](/tests/unit/common/tensorflow/tf_model_args)
+     directory. Each file has a list of dictionaries, a dictionary has three
+     items: (1) `_comment` a comment describes the command,
+     (2) `input` the `run_tf_benchmarks.py` command with the appropriate
+     flags to run the model (3) `output` the expected inference or training
      command that should get run by the `model_init.py` file.
    * If any launch script or base class files were changed, then
      additional unit tests should be added.

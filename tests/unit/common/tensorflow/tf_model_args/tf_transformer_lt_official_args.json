@@ -1,0 +1,9 @@
+[
+  { "_comment": "FP32 latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=transformer_lt_official --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --benchmark-only --verbose --file=/dataset/newstest2014.en --reference=/dataset/newstest2014.de --vocab_file=/dataset/vocab.txt --in_graph=/in_graph/fp32_graphdef.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/models/official/transformer/infer_ab.py --param_set=big --in_graph=/in_graph/fp32_graphdef.pb --batch_size=1 --file=/dataset/newstest2014.en --file_out=/models/benchmarks/common/tensorflow/logs/translate.txt --vocab_file=/dataset/vocab.txt"},
+
+  { "_comment": "FP32 throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=transformer_lt_official --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=64 --socket-id=0 --benchmark-only --verbose --file=/dataset/newstest2014.en --reference=/dataset/newstest2014.de --vocab_file=/dataset/vocab.txt --in_graph=/in_graph/fp32_graphdef.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/models/official/transformer/infer_ab.py --param_set=big --in_graph=/in_graph/fp32_graphdef.pb --batch_size=64 --file=/dataset/newstest2014.en --file_out=/models/benchmarks/common/tensorflow/logs/translate.txt --vocab_file=/dataset/vocab.txt"}
+]

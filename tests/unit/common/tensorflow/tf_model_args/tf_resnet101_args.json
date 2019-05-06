@@ -1,0 +1,17 @@
+[
+  { "_comment": "FP32 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --accuracy-only  --verbose --in-graph=/in_graph/resnet101_fp32_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/inference/eval_image_classifier_inference.py --batch-size=128 --num-inter-threads=2 --input-graph=/in_graph/resnet101_fp32_model.pb --num-intra-threads=56 --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only"},
+
+  { "_comment": "FP32 command for throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id 0  --benchmark-only --verbose --in-graph=/in_graph/resnet101_fp32_model.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --batch-size=128 --num-inter-threads=1 --input-graph=/in_graph/resnet101_fp32_model.pb --num-intra-threads=28 --warmup-steps=10 --steps=50"},
+
+  { "_comment": "Int8 latency benchmark command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id 0  --benchmark-only --verbose --in-graph=/in_graph/resnet101_int8_model.pb",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --batch-size=1 --num-intra-threads=28 --num-inter-threads=1 --input-graph=/in_graph/resnet101_int8_model.pb --warmup-steps=40 --steps=100"},
+
+  { "_comment": "FP32 command for latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet101 --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id 0  --benchmark-only --verbose --in-graph=/in_graph/resnet101_fp32_model.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --batch-size=1 --num-inter-threads=1 --input-graph=/in_graph/resnet101_fp32_model.pb --num-intra-threads=28 --warmup-steps=10 --steps=50"}
+]
