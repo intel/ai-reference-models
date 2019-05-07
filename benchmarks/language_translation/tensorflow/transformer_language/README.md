@@ -81,7 +81,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
     --data-location /home/<user>/t2t_data \
     --model-source-dir /home/<user>/tensor2tensor/ \
@@ -98,7 +98,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 32 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
     --data-location /home/<user>/t2t_data \
     --model-source-dir /home/<user>/tensor2tensor/ \

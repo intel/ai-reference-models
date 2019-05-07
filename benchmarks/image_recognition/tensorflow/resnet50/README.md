@@ -43,12 +43,6 @@ $ git clone https://github.com/IntelAI/models.git
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
 
-    The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-    used in the commands above were built using
-    [TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-    ([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-    [PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
-
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2), and the `--accuracy-only` flag.
@@ -64,7 +58,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -100,7 +94,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
@@ -161,7 +155,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -196,7 +190,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -234,7 +228,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -268,7 +262,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another

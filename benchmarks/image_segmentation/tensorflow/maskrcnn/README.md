@@ -62,7 +62,7 @@ $ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location /home/<user>/COCO2014 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3
 ```
 
 5. Log files are located at the value of `--output-dir`.

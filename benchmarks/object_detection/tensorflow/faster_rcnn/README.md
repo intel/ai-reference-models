@@ -152,7 +152,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --checkpoint /home/<user>/faster_rcnn_resnet50_fp32_coco \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     -- config_file=pipeline.config
 ```
 
@@ -165,7 +165,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output \
     --in-graph /home/<user>/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
@@ -257,7 +257,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --benchmark-only \
     -- number_of_steps=5000
 ```
@@ -272,18 +272,12 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco_dataset/coco_val.record \
     --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb  \
     --accuracy-only
 ```
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 5. The log file is saved to the value of `--output-dir`.
 

@@ -82,7 +82,7 @@ python launch_benchmark.py \
 --socket-id 0 \
 --checkpoint /home/<user>/gnmt_checkpoints \
 --data-location /home/<user>/wmt16 \
---docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+--docker-image intelaipg/intel-optimized-tensorflow:1.14 \
 -- infer_mode=beam_search
 ```
 
@@ -99,7 +99,7 @@ python launch_benchmark.py \
 --socket-id 0 \
 --checkpoint /home/<user>/gnmt_checkpoints \
 --data-location /home/<user>/wmt16 \
---docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+--docker-image intelaipg/intel-optimized-tensorflow:1.14 \
 -- infer_mode=beam_search
 ```
 

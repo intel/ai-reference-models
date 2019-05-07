@@ -61,7 +61,7 @@ python launch_benchmark.py \
     --checkpoint /home/<user>/checkpoints \
     --data-location  /home/<user>/dataset \
     --model-source-dir /home/<user>/facenet/ \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 Example log tail when benchmarking for latency:
 ```
@@ -96,7 +96,7 @@ python launch_benchmark.py \
     --checkpoint /home/<user>/checkpoints \
     --data-location  /home/<user>/dataset \
     --model-source-dir /home/<user>/facenet/ \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 Example log tail when benchmarking for throughput:
 ```
@@ -128,7 +128,7 @@ python launch_benchmark.py \
     --checkpoint /home/<user>/checkpoints \
     --data-location  /home/<user>/dataset \
     --model-source-dir /home/<user>/facenet/ \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 Example log tail when benchmarking for accuracy:
 ```
