@@ -65,7 +65,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --batch-size 240  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -81,7 +81,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --batch-size 1  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -98,7 +98,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --batch-size 100  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          --data-location /home/<user>/imagenet_validation_dataset \
          -- input_height=224 input_width=224 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
@@ -216,7 +216,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
@@ -232,7 +232,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
@@ -246,7 +246,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \

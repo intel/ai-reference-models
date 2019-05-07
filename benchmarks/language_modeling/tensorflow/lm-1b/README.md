@@ -54,7 +54,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir <path_to_mlperf>/inference/cloud/language_modeling
 
 ```
@@ -69,7 +69,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1024 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir <path_to_mlperf>/inference/cloud/language_modeling \
     -- steps=4 \
 ```

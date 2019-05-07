@@ -61,7 +61,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --checkpoint /home/<user>/dcgan_fp32_unconditional_cifar10_pretrained_model \
     --data-location /home/<user>/cifar10 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 5. Log files are located at the value of `--output-dir`.

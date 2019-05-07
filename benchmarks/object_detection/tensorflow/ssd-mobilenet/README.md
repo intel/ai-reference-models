@@ -121,7 +121,7 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
@@ -138,18 +138,13 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
     --batch-size 1
 ```
-
-Note that it is required to use the docker image specified in the
-commands above (`intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7`)
-to run SSD-MobileNet Int8, as it includes PRs that are required to run
-this model.
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
@@ -354,7 +349,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.12.0-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --benchmark-only
 ```
 
@@ -373,7 +368,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.12.0-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --accuracy-only
 ```
 

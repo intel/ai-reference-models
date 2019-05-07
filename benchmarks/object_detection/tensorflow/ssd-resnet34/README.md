@@ -131,7 +131,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.13.1-devel-mkl-py3 \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
     --benchmark-only
 ```
 
@@ -151,7 +151,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.13.1-devel-mkl-py3 \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
     --accuracy-only
 ```
 

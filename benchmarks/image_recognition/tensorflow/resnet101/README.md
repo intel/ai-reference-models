@@ -85,7 +85,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb
 ```
@@ -106,7 +106,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -123,7 +123,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -139,7 +139,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -156,17 +156,10 @@ python launch_benchmark.py \
     --batch-size 128 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
-
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -257,7 +250,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
         --mode inference \
         --model-name resnet101 \
         --batch-size 128 \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
         --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
         --socket-id 0
     ```
@@ -284,7 +277,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
         --mode inference \
         --model-name resnet101 \
         --batch-size 100 \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
         --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
         --data-location /home/<user>/imagenet_validation_dataset \
         --accuracy-only \

@@ -57,7 +57,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl  \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb \
        --data-location /home/<user>/ImageNet_TFRecords
    ```
@@ -72,7 +72,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -86,15 +86,9 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
-
-   The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-   used in the commands above were built using
-   [TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-   ([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-   [PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
    Note that the `--verbose` flag can be added to any of the above commands
    to get additional debug output.
@@ -188,7 +182,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb \
        --data-location /home/<user>/ImageNet_TFRecords
    ```
@@ -203,7 +197,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
@@ -217,7 +211,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 

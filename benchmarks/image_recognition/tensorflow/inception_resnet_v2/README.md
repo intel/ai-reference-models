@@ -87,7 +87,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -103,7 +103,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
@@ -118,7 +118,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
@@ -247,7 +247,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -264,7 +264,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -279,7 +279,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands

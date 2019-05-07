@@ -53,7 +53,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The tail of Throughput log, looks as below.
@@ -83,7 +83,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The tail of Latency log, looks as below.
@@ -115,7 +115,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The tail of accuracy log, looks as below.
