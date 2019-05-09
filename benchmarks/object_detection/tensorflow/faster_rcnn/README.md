@@ -44,8 +44,8 @@ sed -i.bak 95s/input_config/input_config[0]/ offline_eval_map_corloc.py
 
 ```
 
-2.  Download the 2017 validation
-[COCO dataset](http://cocodataset.org/#home) and annotations:
+2.  Download and unzip the 2017 validation
+[COCO dataset](http://cocodataset.org/#home) images:
 
 ```
 $ mkdir val
@@ -53,7 +53,10 @@ $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
 $ cd ..
+```
 
+3. Download and unzip the coco dataset annotations file:
+```
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
@@ -73,14 +76,15 @@ $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
 $ cd ..
 ```
 
-3. Now that you have the raw COCO dataset, we need to convert it to the
+4. Now that you have the raw COCO dataset and annotations files, we need to convert it to the
 TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
 Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
-script to the raw COCO dataset files that you have downloaded in step 2.
+script to the raw COCO dataset files that you have downloaded in step 2
+and the annotations files that you downloaded and created in step 3.
 The `--output_dir` is the location where the TF record files will be
 located after the script has completed.
 
@@ -113,13 +117,13 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. Download and extract the pre-trained model.
+5. Download and extract the pre-trained model.
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
 $ tar -xzvf faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
 ```
 
-5. Clone the [intelai/models](https://github.com/intelai/models) repo.
+6. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running benchmarking.
 
 ```
@@ -133,10 +137,10 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-6. Run the `launch_benchmark.py` script from the intelai/models repo
+7. Run the `launch_benchmark.py` script from the intelai/models repo
 , with the appropriate parameters including: the
-`coco_val.record` data location (from step 3), the pre-trained model
-`pipeline.config` file and the checkpoint location (from step 4, and the
+`coco_val.record` data location (from step 4), the pre-trained model
+`pipeline.config` file and the checkpoint location (from step 5), and the
 location of your `tensorflow/models` clone (from step 1).
 
 Run benchmarking for throughput and latency:
@@ -158,7 +162,7 @@ $ python launch_benchmark.py \
 
 Or for accuracy where the `--data-location` is the path the directory
 where your `coco_val.record` file is located and the `--in-graph` is
-the pre-trained graph located in the pre-trained model directory (from step 4):
+the pre-trained graph located in the pre-trained model directory (from step 5):
 ```
 python launch_benchmark.py \
     --model-name faster_rcnn \
@@ -172,7 +176,7 @@ python launch_benchmark.py \
     --accuracy-only
 ```
 
-7. The log file is saved to the value of `--output-dir`.
+8. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running benchmarking for throughput
 and latency:
@@ -218,7 +222,13 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Please follow step 1, 2 and 3 of Faster R-CNN FP32 instructions written above.
+1. Please follow the steps from the
+[Faster R-CNN FP32 instructions](#fp32-inference-instructions) written
+above for cloning dependecy repositories and getting the coco dataset:
+* Performance bechmarking uses the raw coco dataset images. Follow steps
+1 and 2 from the FP32 instructions.
+* Accuracy testing requires the coco daataset to be in the TF records
+format. Follow steps 1, 2, 3, and 4 from the FP32 instructions.
 
 2. Download the pre-trained model.
 ```
@@ -244,12 +254,14 @@ with the appropriate parameters. To run on single socket use `--socket_id` switc
 by default it will be using all available sockets. Optional parameter `number_of_steps`
 (default value = 5000) can be added at the end of command after `--` as shown below:
 
-Run benchmarking for throughput and latency:
+Run benchmarking for throughput and latency using the following command.
+The `--data-location` is the path to the directory that contains the
+raw coco dataset validation images which you downloaded and unzipped:
 ```
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/<user>/coco/output/ \
+    --data-location /home/<user>/val2017 \
     --model-source-dir /home/<user>/tensorflow/models \
     --model-name faster_rcnn \
     --framework tensorflow \
@@ -274,7 +286,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
     --model-source-dir /home/<user>/tensorflow/models \
-    --data-location /home/<user>/coco_dataset/coco_val.record \
+    --data-location /home/<user>/output/coco_val.record \
     --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb  \
     --accuracy-only
 ```
