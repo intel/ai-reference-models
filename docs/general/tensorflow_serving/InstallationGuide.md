@@ -54,7 +54,6 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
 	$ docker build \
 	    -f Dockerfile.devel-mkl \
-	    --build-arg TF_SERVING_BAZEL_OPTIONS="--incompatible_disallow_data_transition=false --incompatible_disallow_filetype=false" \
 	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.13.0" \
 	    -t tensorflow/serving:latest-devel-mkl .
 	```
