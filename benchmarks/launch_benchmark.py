@@ -29,7 +29,9 @@ import subprocess
 import sys
 from argparse import ArgumentParser
 from common import base_benchmark_util
+from common import platform_util
 from common.utils.validators import check_no_spaces, check_volume_mount
+from common.base_model_init import BaseModelInitializer
 
 
 class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
@@ -213,13 +215,66 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # setup volume directories to be the local system directories, since we aren't
         # mounting volumes when running bare metal, but start.sh expects these args
         args = self.args
-        mount_benchmark = benchmark_scripts
-        mount_external_models_source = args.model_source_dir
-        mount_intelai_models = intelai_models
         workspace = os.path.join(benchmark_scripts, "common", args.framework)
+        mount_benchmark = benchmark_scripts
         in_graph_path = args.input_graph
-        dataset_path = args.data_location
         checkpoint_path = args.checkpoint
+        dataset_path = args.data_location
+
+        # To Launch Tensorflow Serving benchmark we need only --in-graph arg.
+        # It does not support checkpoint files.
+        if args.framework == "tensorflow_serving":
+            if args.docker_image:
+                raise ValueError("--docker-image arg is not supported with tensorflow serving benchmarking, "
+                                 "as script automatically builds image and supplies it.")
+
+            if checkpoint_path:
+                raise ValueError("--checkpoint-path arg is not supported with tensorflow serving benchmarking")
+
+            if args.mode != "inference":
+                raise ValueError("--mode arg should be set to inference")
+
+            if in_graph_path:
+                env_var_dict["IN_GRAPH"] = in_graph_path
+            else:
+                raise ValueError("--in-graph arg is required to run tensorflow serving benchmarking")
+
+            for env_var_name in env_var_dict:
+                os.environ[env_var_name] = str(env_var_dict[env_var_name])
+
+            # We need this env to be set for the platform util
+            os.environ["PYTHON_EXE"] = str(sys.executable if not args.docker_image else "python")
+
+            # Get Platformutil
+            platform_util_obj = None or platform_util.PlatformUtil(self.args)
+
+            # Configure num_inter_threads and num_intra_threads
+            base_obj = BaseModelInitializer(args=self.args, custom_args=[], platform_util=platform_util_obj)
+            base_obj.set_num_inter_intra_threads()
+
+            # Update num_inter_threads and num_intra_threads in env dictionary
+            env_var_dict["NUM_INTER_THREADS"] = self.args.num_inter_threads
+            env_var_dict["NUM_INTRA_THREADS"] = self.args.num_intra_threads
+
+            # Set OMP_NUM_THREADS
+            env_var_dict["OMP_NUM_THREADS"] = self.args.num_intra_threads
+
+        else:
+            mount_external_models_source = args.model_source_dir
+            mount_intelai_models = intelai_models
+
+            # Add env vars with bare metal settings
+            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
+            env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
+
+            if in_graph_path:
+                env_var_dict["IN_GRAPH"] = in_graph_path
+
+            if checkpoint_path:
+                env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
+
+        if dataset_path:
+            env_var_dict["DATASET_LOCATION"] = dataset_path
 
         # if using the default output directory, get the full path
         if args.output_dir == "/models/benchmarks/common/tensorflow/logs":
@@ -228,18 +283,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # Add env vars with bare metal settings
         env_var_dict["WORKSPACE"] = workspace
         env_var_dict["MOUNT_BENCHMARK"] = mount_benchmark
-        env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
-        env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
         env_var_dict["OUTPUT_DIR"] = args.output_dir
-
-        if in_graph_path:
-            env_var_dict["IN_GRAPH"] = in_graph_path
-
-        if checkpoint_path:
-            env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
-
-        if dataset_path:
-            env_var_dict["DATASET_LOCATION"] = dataset_path
 
         # Set env vars for bare metal
         for env_var_name in env_var_dict:

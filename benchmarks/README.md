@@ -11,7 +11,7 @@ dependencies to be installed:
 * [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * `wget` for downloading pre-trained models
 
-## Use Cases
+## TensorFlow Use Cases
 
 | Use Case               | Framework     | Model               | Mode      | Benchmarking Instructions    |
 | -----------------------| --------------| ------------------- | --------- |------------------------------|
@@ -42,3 +42,12 @@ dependencies to be installed:
 | Recommendation         | TensorFlow    | [Wide & Deep Large Dataset](https://arxiv.org/pdf/1606.07792.pdf)	| Inference | [Int8](recommendation/tensorflow/wide_deep_large_ds/README.md#int8-inference-instructions) [FP32](recommendation/tensorflow/wide_deep_large_ds/README.md#fp32-inference-instructions) |
 | Recommendation         | TensorFlow    | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf)         | Inference | [FP32](recommendation/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Text-to-Speech         | TensorFlow    | [WaveNet](https://arxiv.org/pdf/1609.03499.pdf)             | Inference | [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions) |
+
+
+## TensorFlow Serving Use Cases
+
+
+| Use Case               | Framework     | Model               | Mode      | Benchmarking Instructions    |
+| -----------------------| --------------| ------------------- | --------- |------------------------------|
+| Image Recognition      | TensorFlow Serving   | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf)        | Inference | [FP32](image_recognition/tensorflow_serving/inceptionv3/README.md#fp32-inference-instructions) |
+
