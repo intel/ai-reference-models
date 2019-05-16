@@ -1,6 +1,6 @@
 # Image Recognition with TensorFlow Serving on CPU
 ### Real-time and Max Throughput Inference
-Models: ResNet50, InceptionV3
+Model: InceptionV3 and ResNet50
 
 ## Goal
 
@@ -27,21 +27,23 @@ Tuning TensorFlow Serving to take full advantage of your hardware for image reco
 3. Running a client script to measure latency and throughput
 4. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case
 
-## Hands-on Tutorial - ResNet50 or InceptionV3
+## Hands-on Tutorial - InceptionV3 and Resnet50
 
 For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
-* [ResNet50 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
 * [InceptionV3 README](/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
+* [ResNet50 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
 
-1. **Download the Model**: Download and extract the ResNet50 or InceptionV3 pre-trained model (FP32), using the instructions in one of the READMEs above.
+NOTE: The below example shows InceptionV3. The same code snippets will work for ResNet50 by replacing the model name to `resnet50`.
+
+1. **Download the Model**: Download and extract the InceptionV3 pre-trained model (FP32), using the instructions in above README.
 
 2. **(Optional) Download Data**: If you are interested only in testing latency and throughput, not accuracy, you can skip this step and use synthetic data.
-   If you want to verify prediction accuracy by testing on real data, follow the instructions in one of the READMEs above to download the ImageNet dataset.
+   If you want to verify prediction accuracy by testing on real data, follow the instructions in the above README to download the ImageNet dataset.
 
-3. **Clone this repository**: Clone the [intelai/models](https://github.com/intelai/models) repository and `cd` into the `docs/image_recognition/tensorflow_serving/src` directory.
+3. **Clone this repository**: Clone the [intelai/models](https://github.com/intelai/models) repository and `cd` into the `models/benchmarks/image_recognition/tensorflow_serving/inceptionv3/inference/fp32` directory.
    ```
    $ git clone https://github.com/IntelAI/models.git
-   $ cd models/docs/image_recognition/tensorflow_serving/src
+   $ cd models/benchmarks/image_recognition/tensorflow_serving/inceptionv3/inference/fp32
    ```
 
 4. **Set up your environment**: In this tutorial, we use a virtual environment to install a few required Python packages. 
@@ -60,6 +62,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    (venv)$ pip install tensorflow-serving-api
    ```
 5. **Create a SavedModel**: Using the conversion script `model_graph_to_saved_model.py`, convert the pre-trained model graph to a SavedModel.
+   (For ResNet50, substitute the name of the ResNet50 FP32 pre-trained model.)
    
    Example:
    ```
@@ -118,13 +121,13 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    To see average inference latency (in ms), run the benchmark script `image_recognition_benchmark.py` using batch_size 1:
    ```
    (venv)$ python image_recognition_benchmark.py --batch_size 1 --model inceptionv3
-   Iteration 1: 0.017 sec
+   Iteration 1: ... sec
    ...
-   Iteration 40: 0.016 sec
-   Average time: 0.016 sec
+   Iteration 40: ... sec
+   Average time: ... sec
    Batch size = 1
-   Latency: 16.496 ms
-   Throughput: 60.619 images/sec
+   Latency: ... ms
+   Throughput: ... images/sec
    ```
    
    In some cases, it is desirable to constrain the inference server to a single core or socket. 
@@ -156,12 +159,12 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
     To see average throughput (in images/sec), run the benchmark script `image_recognition_benchmark.py` using batch_size 128:
     ```
     (venv)$ python image_recognition_benchmark.py --batch_size 128 --model inceptionv3
-    Iteration 1: 1.706 sec
+    Iteration 1: ... sec
     ...
-    Iteration 40: 0.707 sec
-    Average time: 0.693 sec
+    Iteration 40: ... sec
+    Average time: ... sec
     Batch size = 128
-    Throughput: 184.669 images/sec
+    Throughput: ... images/sec
     ```
 
 11. **Clean up**: 

@@ -25,9 +25,7 @@ Usage: model_graph_to_saved_model.py [--model_version=y] import_path export_dir
 
 from __future__ import print_function
 
-import os
 import sys
-
 import tensorflow as tf
 import tensorflow.tools.graph_transforms as graph_transforms
 
