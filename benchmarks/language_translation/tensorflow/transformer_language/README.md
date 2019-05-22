@@ -69,7 +69,8 @@ Substitute the `--model-source-dir` for the location where you cloned the
 
 Transformer Language can run for latency or throughput
 benchmarking. Use one of the following examples below, depending on
-your use case.
+your use case. Note that if no `reference` file is provided in the
+launch script parameters, then the BLEU score cannot be calculated.
 
 For latency (using `--socket-id 0` and `--batch-size 1`):
 
