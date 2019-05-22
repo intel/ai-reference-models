@@ -696,10 +696,6 @@ function transformer_language() {
         echo "transformer-language requires -- decode_from_file arg to be defined"
         exit 1
     fi
-    if [[ -z "${reference}" ]]; then
-        echo "transformer-language requires -- reference arg to be defined"
-        exit 1
-    fi
     if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
         echo "transformer-language requires --checkpoint arg to be defined"
         exit 1
@@ -717,8 +713,11 @@ function transformer_language() {
 
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/decoding.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/tensor2tensor/utils/decoding.py
 
-    CMD="${CMD} --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file} \
-    --reference=${CHECKPOINT_DIRECTORY}/${reference}"
+    CMD="${CMD} --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file}"
+
+    if [[ -n "${reference}" ]]; then
+      CMD="${CMD} --reference=${CHECKPOINT_DIRECTORY}/${reference}"
+    fi
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
