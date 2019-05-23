@@ -891,6 +891,8 @@ elif [ ${MODEL_NAME} == "resnet101" ]; then
   resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "resnet50" ]; then
   resnet50_101_inceptionv3
+elif [ ${MODEL_NAME} == "resnet50v1_5" ]; then
+  resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "rfcn" ]; then
   rfcn
 elif [ ${MODEL_NAME} == "squeezenet" ]; then
