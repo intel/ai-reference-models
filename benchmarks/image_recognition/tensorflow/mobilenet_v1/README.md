@@ -40,7 +40,10 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     -rw-r--r--. 1 user  52508270 Jun 20 15:09 validation-00126-of-00128
     -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
     ```
-2. A link to download the pre-trained model is coming soon.
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilenetv1_int8_pretrained_model.pb
+```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
     and then run the benchmarking scripts for either benchmarking throughput,
@@ -113,45 +116,39 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
     Example log tail when benchmarking for throughput:
     ```
-    OMP: Info #250: KMP_AFFINITY: pid 682 tid 885 thread 55 bound to OS proc set 83
-    OMP: Info #250: KMP_AFFINITY: pid 682 tid 886 thread 56 bound to OS proc set 0
-    OMP: Info #250: KMP_AFFINITY: pid 682 tid 884 thread 54 bound to OS proc set 82
     [Running warmup steps...]
-    steps = 10, 1830.24507317 images/sec
+    steps = 10, 1865.30956528 images/sec
     [Running benchmark steps...]
-    steps = 10, 1841.47811007 images/sec
-    steps = 20, 1848.84108679 images/sec
-    steps = 30, 1847.84668478 images/sec
-    steps = 40, 1849.15354305 images/sec
-    steps = 50, 1840.95611001 images/sec
+    steps = 10, 1872.92398031 images/sec
+    steps = 20, 1862.64499512 images/sec
+    steps = 30, 1857.97283454 images/sec
+    steps = 40, 1864.70142784 images/sec
+    steps = 50, 1854.23896906 images/sec
     Ran inference with batch size 240
-    Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190409_222536.log
+    Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190523_164626.log
     ```
 
     Example log tail when benchmarking for latency:
     ```
-    OMP: Info #250: KMP_AFFINITY: pid 681 tid 882 thread 53 bound to OS proc set 81
-    OMP: Info #250: KMP_AFFINITY: pid 681 tid 884 thread 55 bound to OS proc set 83
-    OMP: Info #250: KMP_AFFINITY: pid 681 tid 885 thread 56 bound to OS proc set 0
     [Running warmup steps...]
-    steps = 10, 139.81945463 images/sec
+    steps = 10, 197.082229114 images/sec
     [Running benchmark steps...]
-    steps = 10, 140.212074614 images/sec
-    steps = 20, 135.230332731 images/sec
-    steps = 30, 133.508530685 images/sec
-    steps = 40, 135.724816361 images/sec
-    steps = 50, 132.714339957 images/sec
+    steps = 10, 195.201936054 images/sec
+    steps = 20, 195.693743293 images/sec
+    steps = 30, 198.999098543 images/sec
+    steps = 40, 189.256565292 images/sec
+    steps = 50, 201.252531069 images/sec
     Ran inference with batch size 1
-    Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190409_223122.log
+    Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190523_164348.log
     ```
 
     Example log tail when running for accuracy:
     ```
-    Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7009, 0.8933)
-    Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7011, 0.8933)
-    Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7013, 0.8933)
+    Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7014, 0.8935)
+    Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7014, 0.8934)
+    Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7014, 0.8934)
     Ran inference with batch size 100
-    Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190409_223621.log
+    Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190523_164955.log
     ```
 
 ## FP32 Inference Instructions
