@@ -627,12 +627,18 @@ function ssd_mobilenet() {
 
 # SSD-ResNet34 model
 function ssd-resnet34() {
-    if [ ${PRECISION} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
       if [ ${NOINSTALL} != "True" ]; then
         for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
         do
           pip install $line
         done
+        old_dir=${PWD}
+        cd /tmp
+        git clone --single-branch https://github.com/tensorflow/benchmarks.git
+        cd benchmarks
+        git checkout 1e7d788042dfc6d5e5cd87410c57d5eccee5c664
+        cd ${old_dir}
       fi
 
       CMD=${CMD} run_model
