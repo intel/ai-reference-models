@@ -31,7 +31,10 @@ following modes/precisions:
     -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
     ```
 
-2. A link to download the pre-trained model is coming soon.
+2. Download the pretrained model:
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/densenet169_fp32_pretrained_model.pb
+   ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
     and then run the benchmarking scripts for either benchmarking throughput,
