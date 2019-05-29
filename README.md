@@ -6,8 +6,9 @@ This repository contains **links to pre-trained models, sample scripts, best pra
 
   - Demonstrate the AI workloads and deep learning models Intel has optimized and validated to run on Intel hardware
   - Show how to efficiently execute, train, and deploy Intel-optimized models
-  - Make it easy to evaluate model performance on Intel hardware
   - Make it easy to get started running Intel-optimized models on Intel hardware in the cloud or on bare metal
+
+***The scripts are not intended for benchmarking Intel platforms. Please see [https://www.intel.ai/blog](https://www.intel.ai/blog) for any information on performance and/or benchmarking information on specific Intel platforms.***
 
 ## How to Use the Model Zoo
 
