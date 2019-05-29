@@ -1,10 +1,10 @@
-# Benchmark scripts
+# Model Zoo Scripts
 
 Training and inference scripts with Intel-optimized MKL
 
 ## Prerequisites
 
-The benchmarking scripts can be run on Linux and require the following
+The model scripts can be run on Linux and require the following
 dependencies to be installed:
 * [Docker](https://docs.docker.com/install/)
 * [Python](https://www.python.org/downloads/) 2.7 or later
@@ -13,7 +13,7 @@ dependencies to be installed:
 
 ## Use Cases
 
-| Use Case               | Framework     | Model               | Mode      | Benchmarking Instructions    |
+| Use Case               | Framework     | Model               | Mode      | Instructions    |
 | -----------------------| --------------| ------------------- | --------- |------------------------------|
 | Adversarial Networks   | TensorFlow    | [DCGAN](https://arxiv.org/pdf/1511.06434.pdf)               | Inference | [FP32](adversarial_networks/tensorflow/dcgan/README.md#fp32-inference-instructions) |
 | Content Creation       | TensorFlow    | [DRAW](https://arxiv.org/pdf/1502.04623.pdf)               | Inference | [FP32](content_creation/tensorflow/draw/README.md#fp32-inference-instructions) |

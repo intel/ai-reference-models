@@ -368,7 +368,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 The logs are captured in a directory outside of the container.<br> 
 
 
-4. <a name="step_4"></a>If you want to run the benchmarking script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker_image```,
+4. <a name="step_4"></a>If you want to run the model script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker_image```,
 performs necessary installs, runs the ```launch_benchmark.py``` script and does not terminate the container process. As an example, this step will demonstrate ResNet50 Real Time inference on Synthetic Data use case, 
 you can implement the same strategy on different use cases demoed in Step 3.
 		

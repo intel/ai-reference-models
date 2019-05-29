@@ -4,8 +4,7 @@ This document has instructions for how to run MTCC for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for the MTCC model training and inference
-other precisions are coming later.
+Instructions for MTCC model training and inference for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -33,7 +32,7 @@ other precisions are coming later.
 ```
 
 4. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking.
+This repo has the launch script for running models.
 
 ```
     $ git clone https://github.com/IntelAI/models.git
@@ -43,7 +42,7 @@ This repo has the launch script for running benchmarking.
 5. Run the `launch_benchmark.py` script from the intelai/models repo with the appropriate parameters including: the `--model-source-dir` from step 1, `--data-location` from step 2,
 and the `--checkpoint` from step 3.
 
-Run benchmarking:
+Run:
 ```
     $ cd /home/<user>/models/benchmarks
     
@@ -61,7 +60,7 @@ Run benchmarking:
 
 6. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking for throughput,latency and accuracy:
+Below is a sample log file tail when running for model throughput, latency, and accuracy:
 
 ```
 time cost 0.459  pnet 0.166  rnet 0.144  onet 0.149

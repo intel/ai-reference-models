@@ -5,8 +5,8 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for the R-FCN ResNet101 model training and inference
-other precisions are coming later.
+Instructions and scripts for the R-FCN ResNet101 model training and inference
+for other precisions are coming later.
 
 ## Int8 Inference Instructions
 
@@ -118,7 +118,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_res
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the benchmarking scripts for either benchmarking throughput
+and then run the scripts for either throughput
 and latency or accuracy.
 
 ```
@@ -126,7 +126,7 @@ $ git clone https://github.com/IntelAI/models.git
 $ cd models/benchmarks
 ```
 
-Run benchmarking for throughput and latency where the `--data-location`
+Run for throughput and latency where the `--data-location`
 is the path to the directory with the raw coco validation images:
 ```
 python launch_benchmark.py \
@@ -171,7 +171,7 @@ to get additional debug output or change the default output location.
 7. Log files are located at the value of `--output-dir` (or
 `models/benchmarks/common/tensorflow/logs` if no path has been specified):
 
-Below is a sample log file tail when running benchmarking for throughput
+Below is a sample log file tail when running for throughput
 and latency:
 ```
 Step 0: 10.6923000813 seconds
@@ -302,7 +302,7 @@ $ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking.
+This repo has the launch script for running the model.
 
 ```
 $ git clone https://github.com/IntelAI/models.git
@@ -322,7 +322,7 @@ Resolving deltas: 100% (3/3), done.
 `pipeline.config` file and the checkpoint location (from step 4), and the
 location of your `tensorflow/models` clone (from step 1).
 
-Run benchmarking for throughput and latency:
+Run for throughput and latency:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -359,7 +359,7 @@ python launch_benchmark.py \
 7. Log files are located at the value of `--output-dir` (or
 `models/benchmarks/common/tensorflow/logs` if no path has been specified):
 
-Below is a sample log file tail when running benchmarking for throughput
+Below is a sample log file tail when running for throughput
 and latency:
 
 ```

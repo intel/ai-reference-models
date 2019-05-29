@@ -1,10 +1,10 @@
-## Benchmark Neural Collaborative Filtering (NCF) ##
+## Neural Collaborative Filtering (NCF) ##
 
 This document has instructions for how to run NCF for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference.
+Instructions and scripts for model training and inference.
 
 ## FP32 Inference Instructions
 

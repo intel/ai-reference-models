@@ -13,7 +13,7 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-This repository includes launch scripts for running benchmarks and the
+This repository includes launch scripts for running 
 an optimized version of the GNMT model code.
 
 2. Download the pre-trained model.
@@ -58,7 +58,7 @@ newstest2010.tok.bpe.32000.en  newstest2012.tok.de            newstest2014.tok.e
 4. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 platform, and docker image to use, along with your path to the dataset
 that you generated in step 3.
@@ -66,7 +66,7 @@ that you generated in step 3.
 Substitute in your own `--data-location` (from step 3), `--checkpoint` pre-trained
 model file path (from step 2), and the name/tag for your docker image.
 
-GNMT can be run for latency benchmarking and throughput benchmarking. Use one of
+GNMT can be run for latency and throughput. Use one of
 the following examples below, depending on your use case.
 
 For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
@@ -108,7 +108,7 @@ python launch_benchmark.py \
 examples of what the tail of your log file should look like for the
 different configs.
 
-Example log tail when benchmarking for latency:
+Example log tail when running for latency:
 ```
   dynamic_seq2seq/decoder/multi_rnn_cell/cell_3/basic_lstm_cell/bias:0, (4096,), /device:CPU:0
   dynamic_seq2seq/decoder/output_projection/kernel:0, (1024, 36548),
@@ -124,7 +124,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_gnmt_inference_fp32_20190206_011740.log
 ```
 
-Example log tail when benchmarking for throughput:
+Example log tail when running for throughput:
 ```
   dynamic_seq2seq/decoder/multi_rnn_cell/cell_3/basic_lstm_cell/bias:0, (4096,), /device:CPU:0
   dynamic_seq2seq/decoder/output_projection/kernel:0, (1024, 36548),

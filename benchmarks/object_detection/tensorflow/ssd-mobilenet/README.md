@@ -5,8 +5,8 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Instructions and scripts for model training and inference
+for other precisions are coming later.
 
 ## Int8 Inference Instructions
 
@@ -33,7 +33,7 @@ $ unzip val2017.zip
 $ cd ..
 ```
 
-If you would like to run benchmarks for throughput and latency, the
+If you would like to run the model for throughput and latency, the
 validation dataset is all that you will need. If you would like to get
 accuracy metrics, then continue the instructions below to generate the
 TF record file as well.
@@ -99,14 +99,14 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobil
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the benchmarking scripts for either benchmarking throughput
+and then run the scripts for either throughput
 and latency or accuracy.
 ```
 $ git clone git@github.com:IntelAI/models.git
 $ cd benchmarks
 ```
 
-Run benchmarking for throughput and latency where the `--data-location`
+Run for throughput and latency where the `--data-location`
 is the path to the directory with the unzipped coco validation images:
 ```
 python launch_benchmark.py \
@@ -150,7 +150,7 @@ to get additional debug output or change the default output location.
 
 6. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking for throughput
+Below is a sample log file tail when running for throughput
 and latency:
 
 ```
@@ -313,7 +313,7 @@ drwxr-sr-x. 3 <user> <group>     4096 Feb  1  2018 saved_model
 ```
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking, which we will
+This repo has the launch script for running the model, which we will
 use in the next step.
 
 ```
@@ -329,11 +329,11 @@ Resolving deltas: 100% (3/3), done.
 
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
-cloned in the previous step. SSD-MobileNet can be run for benchmarking
+cloned in the previous step. SSD-MobileNet can be run for testing
 throughput and latency, or testing accuracy. Note that we are running
 SSD-MobileNet with a TensorFlow 1.12 docker image.
 
-To benchmarking for throughput and latency, use the following command,
+To run for throughput and latency, use the following command,
 but replace in your path to the unzipped coco dataset images from step 3
 for the `--dataset-location`, the path to the frozen graph that you
 downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`
@@ -376,7 +376,7 @@ $ python launch_benchmark.py \
 
 8. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking:
+Below is a sample log file tail when running for performance:
 
 ```
 INFO:tensorflow:Processed 5001 images... moving average latency 37 ms

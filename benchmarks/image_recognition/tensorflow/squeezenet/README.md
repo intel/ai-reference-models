@@ -4,7 +4,7 @@ This document has instructions for how to run SqueezeNet for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
+Instructions and scripts for model training and inference for
 other precisions are coming later.
 
 ## FP32 Inference Instructions
@@ -16,7 +16,7 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-This repository includes launch scripts for running benchmarks,
+This repository includes launch scripts for running SqueezeNet,
 checkpoint files for restoring a pre-trained SqueezeNet model, and
 CPU optimized SqueezeNet model scripts.
 
@@ -62,7 +62,7 @@ $ cd /home/<user>/models/benchmarks
 ```
 
 The `launch_benchmark.py` script in the `benchmarks` directory is used
-for starting a benchmarking run in a TensorFlow docker container. It has
+for starting a model run in a TensorFlow docker container. It has
 arguments to specify which model, framework, mode, precision, and docker
 image to use, along with your path to the ImageNet TF Records that you
 generated in step 3 and the checkpoint files that you downloaded in
@@ -104,7 +104,7 @@ to get additional debug output or change the default output location.
 
 6. The log file is saved to the value of `--output-dir`.
 
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this, when running for throughput with `--batch-size 64`:
 
 ```

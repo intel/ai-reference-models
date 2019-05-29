@@ -4,8 +4,8 @@ This document has instructions for how to run SSD-ResNet34 for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Instructions and scripts for model training and inference
+for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -98,7 +98,7 @@ The `coco_val.record` file is what we will use in this inference example.
 5. A link to download the pre-trained model is coming soon.
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking, which we will
+This repo has the launch script for running the model, which we will
 use in the next step.
 
 ```
@@ -107,11 +107,11 @@ $ git clone https://github.com/IntelAI/models.git
 
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
-cloned in the previous step. SSD-ResNet34 can be run for benchmarking
-throughput and latency, or testing accuracy. Note that we are running
+cloned in the previous step. SSD-ResNet34 can be run for 
+throughput and latency, or accuracy. Note that we are running
 SSD-ResNet34 with a TensorFlow 1.13 docker image.
 
-To benchmarking for throughput and latency, use the following command,
+To run for throughput and latency, use the following command,
 but replace in your path to the unzipped coco dataset images from step 3
 for the `--dataset-location`, the path to the frozen graph that you
 downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`
@@ -156,7 +156,7 @@ $ python launch_benchmark.py \
 
 8. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking:
+Below is a sample log file tail when running for performance:
 
 ```
 Batchsize: 1

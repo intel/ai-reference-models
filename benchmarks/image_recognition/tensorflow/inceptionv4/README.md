@@ -5,7 +5,7 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
+Instructions and scripts for model training and inference for
 other precisions are coming later.
 
 ## Int8 Inference Instructions
@@ -15,7 +15,7 @@ other precisions are coming later.
    ```
    $ git clone https://github.com/IntelAI/models.git
    ```
-   This repository includes launch scripts for running benchmarks.
+   This repository includes launch scripts for running the model.
 
 2. Download the pretrained model:
    ```
@@ -23,7 +23,7 @@ other precisions are coming later.
    ```
 
 3. If you would like to run Inception V4 inference and test for
-   accuracy, you will need the ImageNet dataset. Benchmarking for latency
+   accuracy, you will need the ImageNet dataset. Running for latency
    and throughput do not require the ImageNet dataset.  Instructions for
    downloading the ImageNet dataset and converting it to the TF Records
    format and be found
@@ -32,12 +32,12 @@ other precisions are coming later.
 4. Next, navigate to the `benchmarks` directory in your local clone of
    the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
    The `launch_benchmark.py` script in the `benchmarks` directory is
-   used for starting a benchmarking run in a optimized TensorFlow docker
+   used for starting a model run in a optimized TensorFlow docker
    container. It has arguments to specify which model, framework, mode,
    precision, and docker image to use, along with your path to the ImageNet
    TF Records that you generated in step 3.
 
-   Inception V4 can be run to test accuracy or benchmarking throughput or
+   Inception V4 can be run to test accuracy, throughput, or
    latency. Use one of the following examples below, depending on your use
    case.
 
@@ -57,7 +57,7 @@ other precisions are coming later.
        --data-location /home/<user>/ImageNet_TFRecords
    ```
 
-   For throughput benchmarking (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
+   For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
    ```
    python launch_benchmark.py \
        --model-name inceptionv4 \
@@ -112,7 +112,7 @@ other precisions are coming later.
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_221608.log
    ```
 
-   Example log tail when benchmarking for throughput:
+   Example log tail when running for throughput:
    ```
    [Running warmup steps...]
    steps = 10, 185.108768528 images/sec
@@ -128,7 +128,7 @@ other precisions are coming later.
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_215858.log
    ```
 
-   Example log tail when benchmarking for latency:
+   Example log tail when running for latency:
    ```
    [Running warmup steps...]
    steps = 10, 30.8738415788 images/sec
@@ -152,7 +152,7 @@ other precisions are coming later.
    ```
    $ git clone https://github.com/IntelAI/models.git
    ```
-   This repository includes launch scripts for running benchmarks.
+   This repository includes launch scripts for running the model.
 
 2. Download the pretrained model:
    ```
@@ -160,7 +160,7 @@ other precisions are coming later.
    ```
 
 3. If you would like to run Inception V4 inference and test for
-   accuracy, you will need the ImageNet dataset. Benchmarking for latency
+   accuracy, you will need the ImageNet dataset. Running for latency
    and throughput do not require the ImageNet dataset.  Instructions for
    downloading the ImageNet dataset and converting it to the TF Records
    format and be found
@@ -169,12 +169,12 @@ other precisions are coming later.
 4. Next, navigate to the `benchmarks` directory in your local clone of
    the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
    The `launch_benchmark.py` script in the `benchmarks` directory is
-   used for starting a benchmarking run in a optimized TensorFlow docker
+   used for starting a model run in a optimized TensorFlow docker
    container. It has arguments to specify which model, framework, mode,
    precision, and docker image to use, along with your path to the ImageNet
    TF Records that you generated in step 3.
 
-   Inception V4 can be run to test accuracy or benchmarking throughput or
+   Inception V4 can be run to test accuracy, throughput, or
    latency. Use one of the following examples below, depending on your use
    case.
 
@@ -194,7 +194,7 @@ other precisions are coming later.
        --data-location /home/<user>/ImageNet_TFRecords
    ```
 
-   For throughput benchmarking (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
+   For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
    ```
    python launch_benchmark.py \
        --model-name inceptionv4 \
@@ -242,7 +242,7 @@ other precisions are coming later.
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_fp32_20190308_182729.log
    ```
 
-   Example log tail when benchmarking for throughput:
+   Example log tail when running for throughput:
    ```
    [Running warmup steps...]
    steps = 10, 91.4372832625 images/sec
@@ -256,7 +256,7 @@ other precisions are coming later.
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_fp32_20190308_184431.log
    ```
 
-   Example log tail when benchmarking for latency:
+   Example log tail when running for latency:
    ```
    [Running warmup steps...]
    steps = 10, 15.6993019295 images/sec

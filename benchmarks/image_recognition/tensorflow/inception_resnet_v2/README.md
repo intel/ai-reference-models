@@ -14,8 +14,7 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-This repository includes launch scripts for running benchmarks and the
-an optimized version of the Inception ResNet V2 model code.
+This repository includes launch scripts for running an optimized version of the Inception ResNet V2 model code.
 
 2. Download the pretrained model:
 ```
@@ -23,7 +22,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptio
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
-accuracy, you will need the full ImageNet dataset. Benchmarking for latency
+accuracy, you will need the full ImageNet dataset. Running for latency
 and throughput do not require the ImageNet dataset.
 
 Register and download the
@@ -57,7 +56,7 @@ $ ll /home/<user>/datasets/ImageNet_TFRecords
 4. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 3.
@@ -67,9 +66,8 @@ only) and `--in-graph` pre-trained model file path (from step 2). Note
 that the docker image in the commands below is built using MKL PRs that
 are required to run Inception ResNet V2 Int8.
 
-Inception ResNet V2 can be run for accuracy, latency benchmarking, or throughput
-benchmarking. Use one of the following examples below, depending on
-your use case.
+Inception ResNet V2 can be run for accuracy, latency, or throughput. 
+Use one of the following examples below, depending on your use case. 
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
 `--batch-size 100`):
@@ -136,7 +134,7 @@ Ran inference with batch size 100
 Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012925.log
 ```
 
-Example log tail when benchmarking for latency:
+Example log tail when running for latency:
 ```
 ...
 Iteration 37: 0.046 sec
@@ -151,7 +149,7 @@ Ran inference with batch size 1
 Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012557.log
 ```
 
-Example log tail when benchmarking for throughput:
+Example log tail when running for throughput:
 ```
 ...
 Iteration 37: 0.975 sec
@@ -175,8 +173,7 @@ repository:
 $ git clone git@github.com:IntelAI/models.git
 ```
 
-This repository includes launch scripts for running benchmarks and the
-an optimized version of the Inception ResNet V2 model code.
+This repository includes launch scripts for running an optimized version of the Inception ResNet V2 model code.
 
 2. Download the pre-trained Inception ResNet V2 model files:
 
@@ -194,7 +191,7 @@ $ mkdir -p checkpoints && tar -C ./checkpoints/ -zxf inception_resnet_v2_2016_08
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
-accuracy, you will need the full ImageNet dataset. Benchmarking for latency
+accuracy, you will need the full ImageNet dataset. Running for latency
 and throughput do not require the ImageNet dataset.
 
 Register and download the
@@ -228,7 +225,7 @@ $ ll /home/<user>/datasets/ImageNet_TFRecords
 4. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 3.
@@ -236,9 +233,8 @@ TF Records that you generated in step 3.
 Substitute in your own `--data-location` (from step 3, for accuracy
 only), `--checkpoint` pre-trained model checkpoint file path (from step 2).
 
-Inception ResNet V2 can be run for accuracy, latency benchmarking, or throughput
-benchmarking. Use one of the following examples below, depending on
-your use case.
+Inception ResNet V2 can be run for accuracy, latency, or throughput. 
+Use one of the following examples below, depending on your use case.
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
 `--batch-size 100`):
@@ -308,7 +304,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190109_081637.log
 ```
 
-Example log tail when benchmarking for latency:
+Example log tail when running for latency:
 ```
 eval/Accuracy[0]
 eval/Recall_5[0.01]
@@ -323,7 +319,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015057.log
 ```
 
-Example log tail when benchmarking for throughput:
+Example log tail when running for throughput:
 ```
 eval/Accuracy[0.00078125]
 eval/Recall_5[0.00375]
