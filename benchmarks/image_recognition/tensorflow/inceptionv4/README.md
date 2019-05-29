@@ -23,7 +23,7 @@ other precisions are coming later.
    ```
 
 3. If you would like to run Inception V4 inference and test for
-   accuracy, you will need the ImageNet dataset. Running for online and batch inference do not require the ImageNet dataset.  Instructions for
+   accuracy, you will need the ImageNet dataset.  It is not necessary for batch or online inference, you have the option of using synthetic data instead.  Instructions for
    downloading the ImageNet dataset and converting it to the TF Records
    format and be found
    [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
