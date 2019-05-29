@@ -79,7 +79,7 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * Evaluate the model performance: If just evaluate performance for dummy data, the `--data-location` is not needed.
 Otherwise `--data-location` argument needs to be specified:
-Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
+Calculate the model batch inference `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
 2), and the `--benchmark-only` flag. It is
 optional to specify the number of `warmup_steps` and `steps` as extra
@@ -132,7 +132,7 @@ $ git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be
-required (if running for throughput/latency, then dummy
+required (if running for batch or online inference performance, then dummy
 data will be used).
 
 The TensorFlow models repo provides
@@ -145,7 +145,7 @@ located at `models/models/image_recognition/tensorflow/resnet50/`.
 If using dummy data for inference, `--data-location` flag is not required. Otherwise,
 `--data-location` needs to point to point to ImageNet dataset location.
 
-* To measure the model latency, set `--batch-size=1` and run the script as shown:
+* To measure online inference, set `--batch-size=1` and run the script as shown:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -182,7 +182,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215326.log
 ```
 
-* To measure the model Throughput, set `--batch-size=128` and run the launch script as shown:
+* To measure batch inference, set `--batch-size=128` and run the launch script as shown:
 ```
 $ cd /home/<user>/models/benchmarks
 

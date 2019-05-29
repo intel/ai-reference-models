@@ -52,10 +52,10 @@ Substitute the `--model-source-dir` for the location where you cloned the
 [tensorflow/models](https://github.com/tensorflow/models.git) repo
 (from step 1).
 
-Transformer LT official can run for latency or throughput. Use one of the following examples below, depending on
+Transformer LT official can run for online or batch inference. Use one of the following examples below, depending on
 your use case.
 
-For latency (using `--socket-id 0` and `--batch-size 1`):
+For online inference (using `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -75,7 +75,7 @@ python launch_benchmark.py \
     vocab_file=vocab.txt
 ```
 
-For throughput (using `--socket-id 0` and `--batch-size 64`):
+For batch inference (using `--socket-id 0` and `--batch-size 64`):
 
 ```
 python launch_benchmark.py \

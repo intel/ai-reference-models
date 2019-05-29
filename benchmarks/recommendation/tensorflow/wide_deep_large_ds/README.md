@@ -87,7 +87,7 @@ Instructions and scripts for model training coming later.
 
 4. Run Performance test
 
-   * Running in latency mode, set `--batch-size 1`
+   * Running in online inference mode, set `--batch-size 1`
 
        ``` 
        cd /home/<user>/models/benchmarks
@@ -105,7 +105,7 @@ Instructions and scripts for model training coming later.
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords \
             -- num_parallel_batches=1
        ```
-   * Running in throughput mode, set `--batch-size 512`
+   * Running in batch inference mode, set `--batch-size 512`
        ``` 
         cd /home/<user>/models/benchmarks
     
@@ -173,7 +173,7 @@ Instructions and scripts for model training coming later.
 
 4. Run Performance test
 
-    * Running in latency mode, set `--batch-size 1`
+    * Running in online inference mode, set `--batch-size 1`
 
         ```
         cd /home/<user>/models/benchmarks
@@ -191,7 +191,7 @@ Instructions and scripts for model training coming later.
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords \
             -- num_parallel_batches=1
         ```
-    * Running in throughput mode, set `--batch-size 512`
+    * Running in batch inference mode, set `--batch-size 512`
         ```
         cd /home/<user>/models/benchmarks
 

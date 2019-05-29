@@ -69,7 +69,7 @@ generated in step 3 and the checkpoint files that you downloaded in
 step 4.
 
 Substitute in your own `--data-location` and follow the steps in the
-following example for throughput (using `--batch-size 64`):
+following example for batch inference (using `--batch-size 64`):
 
 ```
 $ python launch_benchmark.py \
@@ -84,7 +84,7 @@ $ python launch_benchmark.py \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
-Or for latency (using `--batch-size 1`):
+Or for online inference (using `--batch-size 1`):
 
 ```
 $ python launch_benchmark.py \
@@ -105,7 +105,7 @@ to get additional debug output or change the default output location.
 6. The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the script completes should look
-something like this, when running for throughput with `--batch-size 64`:
+something like this, when running for batch inference with `--batch-size 64`:
 
 ```
 SqueezeNet Inference Summary:
@@ -120,7 +120,7 @@ Ran inference with batch size 64
 Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220051.log
 ```
 
-Or for latency (with `--batch-size 1`):
+Or for online inference (with `--batch-size 1`):
 
 ```
 SqueezeNet Inference Summary:

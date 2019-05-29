@@ -43,10 +43,10 @@ precision, and docker image.
 Substitute in your own `--checkpoint` pretrained model file path (from step 3),
 and `--data-location` (from step 4).
 
-FaceNet can be run for testing latency, throughput, or accuracy. 
+FaceNet can be run for testing online inference, batch inference, or accuracy. 
 Use one of the following examples below, depending on your use case.
 
-* For latency (using `--batch-size 1`):
+* For online inference (using `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -61,7 +61,7 @@ python launch_benchmark.py \
     --model-source-dir /home/<user>/facenet/ \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
-Example log tail for latency:
+Example log tail for online inference:
 ```
 Batch 979 elapsed Time 0.0297989845276
 Batch 989 elapsed Time 0.029657125473
@@ -83,7 +83,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_facenet_inference_fp32_20190328_205911.log
 ```
 
-* For throughput (using `--batch-size 100`):
+* For batch inference (using `--batch-size 100`):
 
 ```
 python launch_benchmark.py \
@@ -98,7 +98,7 @@ python launch_benchmark.py \
     --model-source-dir /home/<user>/facenet/ \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
-Example log tail for throughput:
+Example log tail for batch inference:
 ```
 Batch 219 elapsed Time 0.446497917175
 Batch 229 elapsed Time 0.422048091888

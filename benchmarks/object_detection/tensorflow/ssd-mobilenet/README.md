@@ -33,7 +33,7 @@ $ unzip val2017.zip
 $ cd ..
 ```
 
-If you would like to run the model for throughput and latency, the
+If you would like to run the model for batch and online inference, the
 validation dataset is all that you will need. If you would like to get
 accuracy metrics, then continue the instructions below to generate the
 TF record file as well.
@@ -99,14 +99,14 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobil
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the scripts for either throughput
-and latency or accuracy.
+and then run the scripts for either batch/online inference performance
+or accuracy.
 ```
 $ git clone git@github.com:IntelAI/models.git
 $ cd benchmarks
 ```
 
-Run for throughput and latency where the `--data-location`
+Run for batch and online inference where the `--data-location`
 is the path to the directory with the unzipped coco validation images:
 ```
 python launch_benchmark.py \
@@ -150,8 +150,8 @@ to get additional debug output or change the default output location.
 
 6. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running for throughput
-and latency:
+Below is a sample log file tail when running for batch
+and online inference:
 
 ```
 Step 4970: 0.0340421199799 seconds
@@ -330,10 +330,10 @@ Resolving deltas: 100% (3/3), done.
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-MobileNet can be run for testing
-throughput and latency, or testing accuracy. Note that we are running
+batch and online inference, or testing accuracy. Note that we are running
 SSD-MobileNet with a TensorFlow 1.12 docker image.
 
-To run for throughput and latency, use the following command,
+To run for batch and online inference, use the following command,
 but replace in your path to the unzipped coco dataset images from step 3
 for the `--dataset-location`, the path to the frozen graph that you
 downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`

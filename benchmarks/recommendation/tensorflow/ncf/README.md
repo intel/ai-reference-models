@@ -41,7 +41,7 @@ $ tar -xzvf ncf_fp32_pretrained_model.tar.gz
 * `--checkpoint` - Path to checkpoint directory for the Pre-trained model from step4
 
 
-For Throughput, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
+For batch inference, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
 
 ```
 $ python launch_benchmark.py \
@@ -56,7 +56,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-The tail of Throughput log, looks as below.
+The tail of batch inference log, looks as below.
 ```
 ...
 2018-11-12 19:42:44.851050: step 22900, 931259.2 recommendations/sec, 0.27490 msec/batch
@@ -71,7 +71,7 @@ Average recommendations/sec across 23594 steps: 903932.8 (0.28381 msec/batch)
 ...
 ```
 
-For Latency, `--batch-size 1`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
+For online inference, `--batch-size 1`, `--socket-id 0`, `--checkpoint` path from step5, `--model-source-dir` path from step2
 
 ```
 $ python launch_benchmark.py \
@@ -86,7 +86,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
 ```
 
-The tail of Latency log, looks as below.
+The tail of online inference log, looks as below.
 ```
 ...
 2018-11-12 20:24:24.986641: step 6039100, 4629.5 recommendations/sec, 0.21601 msec/batch

@@ -45,7 +45,7 @@ modes/precisions:
    that were downloaded in step 2 and the path to the UNet model
    repository that you cloned in step 3.
 
-   UNet can be run to test throughput and latency using the
+   UNet can be run to test batch and online inference using the
    following command with your checkpoint and model-source-dir paths:
 
    ```

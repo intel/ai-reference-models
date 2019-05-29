@@ -48,7 +48,7 @@ precision, and docker image to use, along with your path to the external model d
 for `--model-source-dir` (from step 2) and `--data-location` (from step 1).
 
 
-Run for throughput and latency with `--batch-size=1` :
+Run for batch and online inference with `--batch-size=1` :
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -66,8 +66,8 @@ $ python launch_benchmark.py \
 
 5. Log files are located at the value of `--output-dir`.
 
-Below is a sample log file tail when running for throughput
-and latency:
+Below is a sample log file tail when running for batch
+and online inference:
 ```
 Running per image evaluation...
 Evaluate annotation type *bbox*

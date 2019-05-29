@@ -66,10 +66,10 @@ that you generated in step 3.
 Substitute in your own `--data-location` (from step 3), `--checkpoint` pre-trained
 model file path (from step 2), and the name/tag for your docker image.
 
-GNMT can be run for latency and throughput. Use one of
+GNMT can be run for online and batch inference. Use one of
 the following examples below, depending on your use case.
 
-For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -86,7 +86,7 @@ python launch_benchmark.py \
 -- infer_mode=beam_search
 ```
 
-For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 32`):
+For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 32`):
 
 ```
 python launch_benchmark.py \
@@ -108,7 +108,7 @@ python launch_benchmark.py \
 examples of what the tail of your log file should look like for the
 different configs.
 
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
   dynamic_seq2seq/decoder/multi_rnn_cell/cell_3/basic_lstm_cell/bias:0, (4096,), /device:CPU:0
   dynamic_seq2seq/decoder/output_projection/kernel:0, (1024, 36548),
@@ -124,7 +124,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_gnmt_inference_fp32_20190206_011740.log
 ```
 
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
   dynamic_seq2seq/decoder/multi_rnn_cell/cell_3/basic_lstm_cell/bias:0, (4096,), /device:CPU:0
   dynamic_seq2seq/decoder/output_projection/kernel:0, (1024, 36548),

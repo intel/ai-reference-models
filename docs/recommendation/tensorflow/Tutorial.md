@@ -5,7 +5,7 @@
 This tutorial will introduce CPU performance considerations for the popular [Wide and Deep](https://arxiv.org/abs/1606.07792) model to solve recommendation system problems
 and how to tune run-time parameters to maximize performance using Intel® Optimizations for TensorFlow. 
 This tutorial also includes a hands-on demo on Intel Model Zoo's Wide and Deep pretrained model built using a dataset from [Kaggle's Display Advertising Challenge](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) 
-to run real-time and max throughput inference.
+to run online (real-time) and batch inference.
 
 ## Background
 Google's latest innovation  to solve some of the shortcomings in traditional recommendation systems is the
@@ -170,7 +170,7 @@ but if you choose to set your own options, refer to the full list of available f
 explanation of the ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to [Step 4](#step_4) to interactively run the script in the container.
 
-&nbsp;&nbsp;&nbsp;&nbsp;3.1. <b> *Real Time Inference*</b> (batch_size=1 for latency)
+&nbsp;&nbsp;&nbsp;&nbsp;3.1. <b> *Online Inference*</b> (also called real-time inference, batch_size=1)
 
 Note: As per the recommended settings `socket-id` is set to -1 to run on all sockets.
 Set this parameter to a socket id to run the workload on a single socket.
@@ -188,7 +188,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
 
-&nbsp;&nbsp;&nbsp;&nbsp;3.2. <b>*Max Throughput Inference*</b> (batch_size=512 for throughput)
+&nbsp;&nbsp;&nbsp;&nbsp;3.2. <b>*Batch Inference*</b> (batch_size=512)
 
 Note: As per the recommended settings `socket-id` is set to -1 to run on all sockets.
 Set this parameter to a socket id to run the workload on a single socket.
@@ -281,7 +281,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 	lscpu located here: b'/usr/bin/lscpu'
 	root@a78677f56d69:/workspace/benchmarks/common/tensorflow#
 	
-To rerun the model script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For example, to rerun with the best max throughput (batch size=512) settings, run with ```BATCH_SIZE``` 
+To rerun the model script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For example, to rerun with the best batch inference (batch size=512) settings, run with ```BATCH_SIZE``` 
 and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL```. 
 	
 	chmod +x ./start.sh	
@@ -330,7 +330,7 @@ Untar the file to create three files:
     ```
   - Exit the docker container and find the processed dataset `test_preprocessed.tfrecords` in the location `~/models/models`.
 
-&nbsp;&nbsp;&nbsp;&nbsp;5.1. <b>*Max Throughput or Real-Time Inference*</b>
+&nbsp;&nbsp;&nbsp;&nbsp;5.1. <b>*Batch or Online Inference*</b>
 
 	cd ~/models/benchmarks
 
@@ -346,4 +346,4 @@ Untar the file to create three files:
 			--data-location ~/models/models/test_preprocessed.tfrecords \
 			--verbose
 
-Set batch_size to 1 to run for real-time inference
+Set batch_size to 1 to run for online (real-time) inference

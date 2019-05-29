@@ -11,8 +11,8 @@ Content:
 ## Goal
 Post-training model quantization and optimization objective is to:
 * Reduce the model size, 
-* Run faster inference (less latency), 
-* Maintain the model performance (throughput and accuracy).
+* Run faster online inference (batch size = 1), 
+* Maintain the model performance (larger batch inference and accuracy).
 
 This is highly recommended in the case of mobile applications and systems of constrained memory and processing power.
 Usually, there will be some loss in performance, but it has to be within the [acceptable range](#performance-evaluation). 

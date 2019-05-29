@@ -60,7 +60,7 @@ Run:
 
 6. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running for model throughput, latency, and accuracy:
+Below is a sample log file tail when running for batch inference, online inference, and accuracy:
 
 ```
 time cost 0.459  pnet 0.166  rnet 0.144  onet 0.149

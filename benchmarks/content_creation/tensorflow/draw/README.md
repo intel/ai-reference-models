@@ -36,12 +36,12 @@ modes/precisions:
    $ cd models/benchmarks
    ```
 
-4. Run the model for either throughput or latency using the commands
+4. Run the model for either batch or online inference using the commands
    below. Replace in the path to the `--data-location` with your `mnist`
    dataset directory from step 1 and the `--checkpoint` files that you
    downloaded and extracted in step 2.
 
-   * Run DRAW for latency (with `--batch-size 1`):
+   * Run DRAW for online inference (with `--batch-size 1`):
      ```
         python launch_benchmark.py \
 	        --precision fp32 \
@@ -54,7 +54,7 @@ modes/precisions:
             --batch-size 1 \
             --socket-id 0
      ```
-    * Run DRAW for throughput (with `--batch-size 100`):
+    * Run DRAW for batch inference (with `--batch-size 100`):
       ```
         python launch_benchmark.py \
 	        --precision fp32 \
@@ -72,7 +72,7 @@ modes/precisions:
 
 5. The log files for each run are saved at the value of `--output-dir`.
 
-   * Below is a sample log file tail when testing latency:
+   * Below is a sample log file tail when testing online inference:
      ```
      ...
      Elapsed Time 0.006622
@@ -88,7 +88,7 @@ modes/precisions:
      Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_012947.log
      ```
 
-   * Below is a sample log file tail when testing throughput:
+   * Below is a sample log file tail when testing batch inference:
      ```
      Elapsed Time 0.028355
      Elapsed Time 0.028221
