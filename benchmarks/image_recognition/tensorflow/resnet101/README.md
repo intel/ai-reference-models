@@ -90,7 +90,7 @@ number of `warmup_steps` and `steps` as extra args, as shown in the
 commands below. If these values are not specified, the script will
 default to use `warmup_steps=40` and `steps=100`.
 
-For latency with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For online inference with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -106,7 +106,7 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For latency with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For online inference with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -123,7 +123,7 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For throughput with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+For batch inference with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -139,7 +139,7 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For throughput with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+For batch inference with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -182,7 +182,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190104_205838.log
 ```
 
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
 ...
 steps = 470, 48.3195530058 images/sec
@@ -195,7 +195,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_191406.log
 ```
 
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
 ...
 steps = 470, 328.906266308 images/sec
@@ -224,7 +224,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
 
 3. Download ImageNet dataset.
 
-    This step is only required for running accuracy, for running latency and throughput we do not need to provide dataset.
+    This step is only required for running accuracy, for running online and batch inference we do not need to provide dataset.
 
     Register and download the ImageNet dataset. Once you have the raw ImageNet dataset downloaded, we need to convert
     it to the TFRecord format. The TensorFlow models repo provides
@@ -248,7 +248,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
     ```
 4. Run the script.
 
-    For latency measurements with dummy data set `--batch-size 1` and for throughput set `--batch-size 128`
+    For online inference measurements with dummy data set `--batch-size 1` and for batch inference set `--batch-size 128`
 
     ```
     $ cd /home/<user>/models/benchmarks

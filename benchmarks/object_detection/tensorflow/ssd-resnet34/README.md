@@ -108,10 +108,10 @@ $ git clone https://github.com/IntelAI/models.git
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
-throughput and latency, or accuracy. Note that we are running
+batch and online inference, or accuracy. Note that we are running
 SSD-ResNet34 with a TensorFlow 1.13 docker image.
 
-To run for throughput and latency, use the following command,
+To run for batch and online inference, use the following command,
 but replace in your path to the unzipped coco dataset images from step 3
 for the `--dataset-location`, the path to the frozen graph that you
 downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`

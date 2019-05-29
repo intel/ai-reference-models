@@ -78,7 +78,7 @@ only), `--in-graph` pretrained model file path (from step 3) and
 [tensorflow/models](https://github.com/tensorflow/models) repo
 (from step 2).
 
-Inception V3 can be run for accuracy, latency, or throughput. 
+Inception V3 can be run for accuracy, online inference, or batch inference. 
 Use one of the following examples below, depending on your use case.
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
@@ -102,7 +102,7 @@ number of `warmup_steps` and `steps` as extra args, as shown in the
 commands below. If these values are not specified, the script will
 default to use `warmup_steps=10` and `steps=50`.
 
-For latency with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For online inference with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -119,7 +119,7 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For latency with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`), remove `--data-location` argument:
+For online inference with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`), remove `--data-location` argument:
 
 ```
 python launch_benchmark.py \
@@ -135,7 +135,7 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For throughput with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+For batch inference with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -152,7 +152,7 @@ python launch_benchmark.py \
     -- warmup_steps=50 steps=500
 ```
 
-For throughput with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`), remove `--data-location` argument::
+For batch inference with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`), remove `--data-location` argument::
 
 ```
 python launch_benchmark.py \
@@ -193,7 +193,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_013246.log
 ```
 
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
 ...
 steps = 470, 53.7256017113 images/sec
@@ -206,7 +206,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194002.log
 ```
 
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
 ...
 steps = 470, 370.435654276 images/sec
@@ -234,8 +234,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptio
 ```
 
 3. If you would like to run Inception V3 FP32 inference and test for
-accuracy, you will need the ImageNet dataset. Running for latency
-and throughput do not require the ImageNet dataset. Instructions for
+accuracy, you will need the ImageNet dataset. Running for online
+and batch inference do not require the ImageNet dataset. Instructions for
 downloading the dataset and converting it to the TF Records format can
 be found in the TensorFlow documentation
 [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
@@ -249,10 +249,10 @@ precision, and docker image.
 
 Substitute in your own `--in-graph` pretrained model file path (from step 2).
 
-Inception V3 can be run for latency, throughput, or accuracy. Use one of the following examples below,
+Inception V3 can be run for online inference, batch inference, or accuracy. Use one of the following examples below,
 depending on your use case.
 
-* For latency with dummy data (using `--batch-size 1`):
+* For online inference with dummy data (using `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -265,7 +265,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
 Inference with dummy data.
 Iteration 1: 1.075 sec
@@ -285,7 +285,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_025220.log
 ```
 
-* For throughput with dummy data (using `--batch-size 128`):
+* For batch inference with dummy data (using `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -298,7 +298,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
 Inference with dummy data.
 Iteration 1: 2.024 sec

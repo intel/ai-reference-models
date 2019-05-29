@@ -43,7 +43,7 @@ use in the next step.
 
 5. How to run
 
-   * Running the model in latency mode, set `--batch-size` = `1`
+   * Running the model in online inference mode, set `--batch-size` = `1`
        ``` 
        $ cd /home/<user>/models/benchmarks
     
@@ -59,7 +59,7 @@ use in the next step.
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
-   * Running the model in throughput mode, set `--batch-size` = `1024`
+   * Running the model in batch inference mode, set `--batch-size` = `1024`
        ``` 
        $ cd /home/<user>/models/benchmarks
     

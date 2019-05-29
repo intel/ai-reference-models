@@ -138,7 +138,7 @@ Resolving deltas: 100% (3/3), done.
 `pipeline.config` file and the checkpoint location (from step 4, and the
 location of your `tensorflow/models` clone (from step 1).
 
-Run for throughput and latency:
+Run for batch and online inference:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -173,8 +173,8 @@ python launch_benchmark.py \
 
 7. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running for throughput
-and latency:
+Below is a sample log file tail when running for batch
+and online inference:
 
 ```
 Time spent : 167.353 seconds.
@@ -242,7 +242,7 @@ with the appropriate parameters. To run on single socket use `--socket_id` switc
 by default it will be using all available sockets. Optional parameter `number_of_steps`
 (default value = 5000) can be added at the end of command after `--` as shown below:
 
-Run for throughput and latency:
+Run for batch and online inference:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -285,8 +285,8 @@ used in the commands above were built using
 
 5. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running for throughput
-and latency:
+Below is a sample log file tail when running for batch
+and online inference:
 
 ```
 Step 4950: 0.0722849369049 seconds

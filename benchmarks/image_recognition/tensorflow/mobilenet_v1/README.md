@@ -48,7 +48,7 @@ later.
    $ cd models/benchmarks
    ```
 
-   MobileNet V1 can be run for either latency or throughput using the
+   MobileNet V1 can be run for either online or batch inference using the
    commands below.  The `--data-location` should be the path to the
    ImageNet validation data from step 1, the `--checkpoint` arg should
    be the path to the checkpoint files from step 2, and the
@@ -56,7 +56,7 @@ later.
    [tensorflow/models](https://github.com/tensorflow/models) repo that
    was cloned in step 3.
 
-   * Run for latency (with `--batch-size 1` and `--checkpoint` with a path to the checkpoint file directory):
+   * Run for online inference (with `--batch-size 1` and `--checkpoint` with a path to the checkpoint file directory):
      ```
      python launch_benchmark.py \
          --precision fp32 \
@@ -70,7 +70,7 @@ later.
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
      ```
-    * Run for throughput (with `--batch-size 100` and `--checkpoint` with a path to the checkpoint file directory):
+    * Run for batch inference (with `--batch-size 100` and `--checkpoint` with a path to the checkpoint file directory):
       ```
       python launch_benchmark.py \
          --precision fp32 \
@@ -103,7 +103,7 @@ later.
 
 5. The log files for each run are saved at the value of `--output-dir`.
 
-   * Below is a sample log file snippet when testing latency:
+   * Below is a sample log file snippet when testing online inference:
      ```
      2019-01-04 20:02:23.855441: step 80, 78.3 images/sec
      2019-01-04 20:02:23.974862: step 90, 83.7 images/sec
@@ -121,7 +121,7 @@ later.
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190104_200218.log
      ```
 
-   * Below is a sample log file snippet when testing throughput:
+   * Below is a sample log file snippet when testing batch inference:
      ```
      2019-01-04 20:06:01.151312: step 80, 184.0 images/sec
      2019-01-04 20:06:06.719081: step 90, 180.5 images/sec

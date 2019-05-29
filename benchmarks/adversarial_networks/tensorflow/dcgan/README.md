@@ -46,7 +46,7 @@ precision, and docker image to use, along with your path to the external model d
 for `--model-source-dir` (from step 1) `--data-location` (from step 2), and `--checkpoint` (from step 3).
 
 
-Run the model script for throughput and latency with `--batch-size=100` :
+Run the model script for batch and online inference with `--batch-size=100` :
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -65,7 +65,7 @@ $ python launch_benchmark.py \
 
 5. Log files are located at the value of `--output-dir`.
 
-Below is a sample log file tail when running for throughput:
+Below is a sample log file tail when running for batch inference:
 ```
 Batch size: 100 
 Batches number: 500

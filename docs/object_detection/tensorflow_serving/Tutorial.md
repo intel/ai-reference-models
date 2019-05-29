@@ -5,10 +5,10 @@
 
 This tutorial will introduce you to the CPU performance considerations for object detection in deep learning models and how to use [Intel® Optimizations for TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
 This tutorial uses a pre-trained Region-based Fully Convolutional Network (R-FCN) model for object detection and provides sample code that you can use to get your optimized TensorFlow model server and REST client up and running quickly. In this tutorial using R-FCN, you will measure inference performance in two situations:
-* **Real-Time**, where batch_size=1. In this case, lower latency means better runtime performance.
-* **Throughput**, where batch_size>1. In this case, higher throughput means better runtime performance.
+* **Online inference**, where batch_size=1. In this case, lower time to result means better runtime performance.
+* **Batch inference**, where batch_size>1. In this case, a higher number means better runtime performance.
 
-**NOTE about REST vs. GRPC**: This tutorial is focused on optimizing the model server, not the client that sends requests. For optimal client-side serialization and de-serialization, you may want to use TensorFlow Serving's GRPC option instead of the REST API, especially if you are optimizing for maximum throughput (here is one [article](https://medium.com/@avidaneran/tensorflow-serving-rest-vs-grpc-e8cef9d4ff62) with a relevant analysis). 
+**NOTE about REST vs. GRPC**: This tutorial is focused on optimizing the model server, not the client that sends requests. For optimal client-side serialization and de-serialization, you may want to use TensorFlow Serving's GRPC option instead of the REST API, especially if you are optimizing for batch inference (here is one [article](https://medium.com/@avidaneran/tensorflow-serving-rest-vs-grpc-e8cef9d4ff62) with a relevant analysis). 
 We use REST in this tutorial for illustration, not as a best practice, and offer another [tutorial](/docs/image_recognition/tensorflow_serving/Tutorial.md) that illustrates the use of GRPC with TensorFlow Serving. 
 
 ## Prerequisites
@@ -25,7 +25,7 @@ This tutorial assumes you have already:
 
 [Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN)](https://github.com/intel/mkl-dnn) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations for object detection, using efficient vectorization and multi-threading. Tuning TensorFlow Serving to take full advantage of your hardware for object detection deep learning inference involves:
 1. Running a TensorFlow Serving docker container configured for performance given your hardware resources
-2. Running a REST client notebook to verify object detection and measure latency and throughput
+2. Running a REST client notebook to verify object detection and measure online and batch inference performance
 3. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case
 
 ## Hands-on Tutorial with pre-trained R-FCN model
@@ -134,7 +134,7 @@ To optimize overall performance, use the following recommended settings from the
    **Note**: For some models, playing around with these settings values can improve performance even further. 
    We recommend that you experiment with your own hardware and model if you have strict performance requirements.
 
-6. *Measure Real-Time and Throughput performance**: Clone the Intel Model Zoo into a directory called `intel-models` and run `rfcn-benchmark.py` [python script](/docs/object_detection/tensorflow_serving/rfcn-benchmark.py), which will test both Real-Time and Throughput performance. 
+6. *Measure Online and Batch inference performance**: Clone the Intel Model Zoo into a directory called `intel-models` and run `rfcn-benchmark.py` [python script](/docs/object_detection/tensorflow_serving/rfcn-benchmark.py), which will test both Online and Batch performance. 
       ```
    (rfcn_venv)$ git clone https://github.com/IntelAI/models.git intel-models
    (rfcn_venv)$ python intel-models/docs/object_detection/tensorflow_serving/rfcn-benchmark.py \
@@ -186,7 +186,7 @@ For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ss
 You have now seen an end-to-end example of serving an object detection model for inference using TensorFlow Serving, and learned:
 1. How to choose good values for the performance-related runtime parameters exposed by the `docker run` command
 2. How to verify that the served model can correctly detect objects in an image using a sample Jupyter notebook
-3. How to measure latency and throughput metrics using a REST client
+3. How to measure online and batch inference metrics using a REST client
 
 With this knowledge and the example code provided, you should be able to get started serving your own custom object detection model with good performance. 
 If desired, you should also be able to investigate a variety of different settings combinations to see if further performance improvement are possible.

@@ -67,10 +67,10 @@ Substitute the `--model-source-dir` for the location where you cloned the
 [tensorflow/tensor2tensor](https://github.com/tensorflow/tensor2tensor) repo
 (from step 1).
 
-Transformer Language can run for latency or throughput. Use one of the following examples below, depending on
+Transformer Language can run for online or batch inference. Use one of the following examples below, depending on
 your use case.
 
-For latency (using `--socket-id 0` and `--batch-size 1`):
+For online inference (using `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -87,7 +87,7 @@ python launch_benchmark.py \
     -- decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 
-For throughput (using `--socket-id 0` and `--batch-size 32`):
+For batch inference (using `--socket-id 0` and `--batch-size 32`):
 
 ```
 python launch_benchmark.py \
@@ -112,7 +112,7 @@ to get additional debug output.
 examples of what the tail of your log file should look like for the
 different configs.
 
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
 INFO:tensorflow:Decoding batch 2167
 INFO:tensorflow:Inference results INPUT: Move!
@@ -130,7 +130,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_transformer_language_inference_fp32_20190210_050451.log
 ```
 
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
 INFO:tensorflow:Inference results INPUT: Move!
 INFO:tensorflow:Inference results OUTPUT: Move!

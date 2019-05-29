@@ -22,8 +22,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptio
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
-accuracy, you will need the full ImageNet dataset. Running for latency
-and throughput do not require the ImageNet dataset.
+accuracy, you will need the full ImageNet dataset. Running for online and batch inference performance do not require the ImageNet dataset.
 
 Register and download the
 [ImageNet dataset](http://image-net.org/download-images).
@@ -66,7 +65,7 @@ only) and `--in-graph` pre-trained model file path (from step 2). Note
 that the docker image in the commands below is built using MKL PRs that
 are required to run Inception ResNet V2 Int8.
 
-Inception ResNet V2 can be run for accuracy, latency, or throughput. 
+Inception ResNet V2 can be run for accuracy, online inference, or batch inference. 
 Use one of the following examples below, depending on your use case. 
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
@@ -85,7 +84,7 @@ python launch_benchmark.py \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
-For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -100,7 +99,7 @@ python launch_benchmark.py \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
-For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -134,7 +133,7 @@ Ran inference with batch size 100
 Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012925.log
 ```
 
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
 ...
 Iteration 37: 0.046 sec
@@ -149,7 +148,7 @@ Ran inference with batch size 1
 Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012557.log
 ```
 
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
 ...
 Iteration 37: 0.975 sec
@@ -183,7 +182,7 @@ For accuracy:
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inception_resnet_v2_fp32_pretrained_model.pb
 ```
 
-For throughput and latency:
+For batch and online inference:
 
 ```
 $ wget http://download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz
@@ -191,8 +190,8 @@ $ mkdir -p checkpoints && tar -C ./checkpoints/ -zxf inception_resnet_v2_2016_08
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
-accuracy, you will need the full ImageNet dataset. Running for latency
-and throughput do not require the ImageNet dataset.
+accuracy, you will need the full ImageNet dataset. Running for online
+and batch inference do not require the ImageNet dataset.
 
 Register and download the
 [ImageNet dataset](http://image-net.org/download-images).
@@ -233,7 +232,7 @@ TF Records that you generated in step 3.
 Substitute in your own `--data-location` (from step 3, for accuracy
 only), `--checkpoint` pre-trained model checkpoint file path (from step 2).
 
-Inception ResNet V2 can be run for accuracy, latency, or throughput. 
+Inception ResNet V2 can be run for accuracy, online inference, or batch inference. 
 Use one of the following examples below, depending on your use case.
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
@@ -252,7 +251,7 @@ python launch_benchmark.py \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
-For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -268,7 +267,7 @@ python launch_benchmark.py \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
-For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
+For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -304,7 +303,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190109_081637.log
 ```
 
-Example log tail when running for latency:
+Example log tail when running for online inference:
 ```
 eval/Accuracy[0]
 eval/Recall_5[0.01]
@@ -319,7 +318,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015057.log
 ```
 
-Example log tail when running for throughput:
+Example log tail when running for batch inference:
 ```
 eval/Accuracy[0.00078125]
 eval/Recall_5[0.00375]

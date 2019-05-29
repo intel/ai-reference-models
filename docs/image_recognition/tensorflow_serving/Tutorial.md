@@ -1,5 +1,5 @@
 # Image Recognition with TensorFlow Serving on CPU
-### Real-time and Max Throughput Inference
+### Online and Batch Inference
 Models: ResNet50, InceptionV3
 
 ## Goal
@@ -24,7 +24,7 @@ The Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) offer
 Tuning TensorFlow Serving to take full advantage of your hardware for image recognition deep learning inference involves:
 1. Working through this tutorial to set up servable versions of the well-known [ResNet50](https://arxiv.org/pdf/1512.03385.pdf) and [InceptionV3](https://arxiv.org/pdf/1512.00567v1.pdf) CNN models
 2. Running a TensorFlow Serving docker container configured for performance given your hardware resources
-3. Running a client script to measure latency and throughput
+3. Running a client script to measure online and batch inference performance
 4. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case
 
 ## Hands-on Tutorial - ResNet50 or InceptionV3
@@ -35,7 +35,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 READMEs:
 
 1. **Download the Model**: Download and extract the ResNet50 or InceptionV3 pre-trained model (FP32), using the instructions in one of the READMEs above.
 
-2. **(Optional) Download Data**: If you are interested only in testing latency and throughput, not accuracy, you can skip this step and use synthetic data.
+2. **(Optional) Download Data**: If you are interested only in testing performance, not accuracy, you can skip this step and use synthetic data.
    If you want to verify prediction accuracy by testing on real data, follow the instructions in one of the READMEs above to download the ImageNet dataset.
 
 3. **Clone this repository**: Clone the [intelai/models](https://github.com/intelai/models) repository and `cd` into the `docs/image_recognition/tensorflow_serving/src` directory.
@@ -114,8 +114,8 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 READMEs:
    ```
    The output should be a tensor of class probabilities and `Predicted class:  286`.
 
-9. **Real-time inference**: Real-time inference is measured by latency and is usually defined as batch size 1.
-   To see average inference latency (in ms), run the script `image_recognition_benchmark.py` using batch_size 1:
+9. **Online inference**: Online (or real-time) inference is usually defined as the time it takes to return a prediction for batch size 1.
+   To see average online inference performance (in ms), run the script `image_recognition_benchmark.py` using batch_size 1:
    ```
    (venv)$ python image_recognition_benchmark.py --batch_size 1 --model inceptionv3
    Iteration 1: 0.017 sec
@@ -152,8 +152,8 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 READMEs:
            tensorflow/serving:mkl
    ```
 
-10. **Maximum throughput**: Regardless of hardware, the best batch size for throughput is 128. 
-    To see average throughput (in images/sec), run the script `image_recognition_benchmark.py` using batch_size 128:
+10. **Batch inference**: Regardless of hardware, the best batch size is 128. 
+    To see average batch inference performance (in images/sec), run the script `image_recognition_benchmark.py` using batch_size 128:
     ```
     (venv)$ python image_recognition_benchmark.py --batch_size 128 --model inceptionv3
     Iteration 1: 1.706 sec
@@ -175,7 +175,7 @@ You have now seen two end-to-end examples of serving an image recognition model 
 1. How to create a SavedModel from a TensorFlow model graph
 2. How to choose good values for the performance-related runtime parameters exposed by the `docker run` command
 3. How to verify that the served model can correctly classify an image using a GRPC client
-4. How to measure latency and throughput metrics using a GRPC client
+4. How to measure online and batch inference metrics using a GRPC client
 
 With this knowledge and the example code provided, 
 you should be able to get started serving your own custom image recognition model with good performance. 
