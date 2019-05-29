@@ -18,7 +18,7 @@ modes/precisions:
    ```
 
    The mnist directory will be passed as the dataset location when we
-   run the script in step 4.
+   run the model script in step 4.
 
 2. Download and extract the pretrained model:
    ```
@@ -27,7 +27,7 @@ modes/precisions:
    ```
 
 3. Clone this [intelai/models](https://github.com/IntelAI/models) repo,
-   which contains the scripts that we will be using to run DRAW. 
+   which contains the DRAW model scripts. 
    After the clone has completed, navigate to the `benchmarks`
    directory in the repository.
 
