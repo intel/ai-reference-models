@@ -134,7 +134,7 @@ To optimize overall performance, use the following recommended settings from the
    **Note**: For some models, playing around with these settings values can improve performance even further. 
    We recommend that you experiment with your own hardware and model if you have strict performance requirements.
 
-6. **Benchmark Real-Time and Throughput performance**: Clone the Intel Model Zoo into a directory called `intel-models` and run `rfcn-benchmark.py` [python script](/docs/object_detection/tensorflow_serving/rfcn-benchmark.py), which will benchmark both Real-Time and Throughput performance. 
+6. *Measure Real-Time and Throughput performance**: Clone the Intel Model Zoo into a directory called `intel-models` and run `rfcn-benchmark.py` [python script](/docs/object_detection/tensorflow_serving/rfcn-benchmark.py), which will test both Real-Time and Throughput performance. 
       ```
    (rfcn_venv)$ git clone https://github.com/IntelAI/models.git intel-models
    (rfcn_venv)$ python intel-models/docs/object_detection/tensorflow_serving/rfcn-benchmark.py \
@@ -186,7 +186,7 @@ For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ss
 You have now seen an end-to-end example of serving an object detection model for inference using TensorFlow Serving, and learned:
 1. How to choose good values for the performance-related runtime parameters exposed by the `docker run` command
 2. How to verify that the served model can correctly detect objects in an image using a sample Jupyter notebook
-3. How to benchmark latency and throughput metrics using a REST client
+3. How to measure latency and throughput metrics using a REST client
 
 With this knowledge and the example code provided, you should be able to get started serving your own custom object detection model with good performance. 
 If desired, you should also be able to investigate a variety of different settings combinations to see if further performance improvement are possible.

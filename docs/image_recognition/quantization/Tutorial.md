@@ -210,18 +210,18 @@ Validating the model performance is required after each step to verify if the ou
 * The quantized `Int8` graph accuracy should not drop more than ~0.5-1%.
 
 
-This section explains how to run ResNet50 inference and calculate the model accuracy using [Intel Model Zoo Benchmarks](https://github.com/IntelAI/models).
+This section explains how to run ResNet50 inference and calculate the model accuracy using the [Intel Model Zoo](https://github.com/IntelAI/models).
 
 Clone the [IntelAI/models](https://github.com/IntelAI/models) repository, 
 and follow the [documented steps](/benchmarks/image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions)
-to benchmark `ResNet50` inference performance for both FP32 and Int8 cases.
+to run `ResNet50` inference performance for both FP32 and Int8 cases.
 
-**Note that the benchmarking script should be run outside of the quantization docker container
-and that some inputs to the benchmarking script are slightly different for `FP32` and `Int8` models (i.e. `--precision` and `--docker-image`).**
+**Note that the script should be run outside of the quantization docker container
+and that some inputs to the script are slightly different for `FP32` and `Int8` models (i.e. `--precision` and `--docker-image`).**
 
 
 ### Accuracy for FP32 Optimized Graph
-Clone the [IntelAI/models](https://github.com/IntelAI/models) repository and follow the steps to run the FP32 benchmark
+Clone the [IntelAI/models](https://github.com/IntelAI/models) repository and follow the steps to run the FP32 
 script to calculate `accuracy` and use the optimized FP32 graph in `--in-graph`.
    ```
         $ git clone https://github.com/IntelAI/models.git
@@ -251,7 +251,7 @@ The tail of the log output when the accuracy run completes should look something
 
 ### Accuracy for Int8 Optimized Graph
 
-Clone the [IntelAI/models](https://github.com/IntelAI/models) repository and follow the steps to run the Int8 benchmark
+Clone the [IntelAI/models](https://github.com/IntelAI/models) repository and follow the steps to run the Int8 
 script to calculate `accuracy` and use the Int8 graph in `--in-graph`.
    ```
         $ git clone https://github.com/IntelAI/models.git

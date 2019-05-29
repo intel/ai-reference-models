@@ -1,10 +1,10 @@
 # Transformer Language Translation (LT) Official
 
-This document has instructions for how to run Transformer Language official benchmark from TensorFlow models
+This document has instructions for how to run Transformer Language official from TensorFlow models
 for the following modes/platforms:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model inference for other platforms are coming later.
+Instructions and scripts for model inference for other platforms are coming later.
 
 ## FP32 Inference Instructions
 1. Clone an older commit from the [tensorflow/models](https://github.com/tensorflow/models.git) repository:
@@ -44,7 +44,7 @@ $ git clone https://github.com/IntelAI/models.git
 4. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo (from step 3).
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the dataset location (from step 2).
 
@@ -52,8 +52,7 @@ Substitute the `--model-source-dir` for the location where you cloned the
 [tensorflow/models](https://github.com/tensorflow/models.git) repo
 (from step 1).
 
-Transformer LT official can run for latency or throughput
-benchmarking. Use one of the following examples below, depending on
+Transformer LT official can run for latency or throughput. Use one of the following examples below, depending on
 your use case.
 
 For latency (using `--socket-id 0` and `--batch-size 1`):

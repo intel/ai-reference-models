@@ -5,8 +5,7 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Instructions for model training and inference for other precisions are coming later.
 
 ## Int8 Inference Instructions
 
@@ -17,8 +16,7 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-This repository includes launch scripts for running benchmarks and the
-an optimized version of the inceptionv3 model code.
+This repository includes launch scripts for running an optimized version of the Inception V3 model code.
 
 2. Clone the [tensorflow/models](https://github.com/tensorflow/models)
 repository:
@@ -69,7 +67,7 @@ $ ll /home/<user>/datasets/ImageNet_TFRecords
 5. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 4.
@@ -80,9 +78,8 @@ only), `--in-graph` pretrained model file path (from step 3) and
 [tensorflow/models](https://github.com/tensorflow/models) repo
 (from step 2).
 
-Inception V3 can be run for accuracy, latency benchmarking, or throughput
-benchmarking. Use one of the following examples below, depending on
-your use case.
+Inception V3 can be run for accuracy, latency, or throughput. 
+Use one of the following examples below, depending on your use case.
 
 For accuracy (using your `--data-location`, `--accuracy-only` and
 `--batch-size 100`):
@@ -100,7 +97,7 @@ python launch_benchmark.py \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
-When running performance benchmarking, it is optional to specify the
+When testing performance, it is optional to specify the
 number of `warmup_steps` and `steps` as extra args, as shown in the
 commands below. If these values are not specified, the script will
 default to use `warmup_steps=10` and `steps=50`.
@@ -196,7 +193,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_013246.log
 ```
 
-Example log tail when benchmarking for latency:
+Example log tail when running for latency:
 ```
 ...
 steps = 470, 53.7256017113 images/sec
@@ -209,7 +206,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194002.log
 ```
 
-Example log tail when benchmarking for throughput:
+Example log tail when running for throughput:
 ```
 ...
 steps = 470, 370.435654276 images/sec
@@ -237,7 +234,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptio
 ```
 
 3. If you would like to run Inception V3 FP32 inference and test for
-accuracy, you will need the ImageNet dataset. Benchmarking for latency
+accuracy, you will need the ImageNet dataset. Running for latency
 and throughput do not require the ImageNet dataset. Instructions for
 downloading the dataset and converting it to the TF Records format can
 be found in the TensorFlow documentation
@@ -246,14 +243,13 @@ be found in the TensorFlow documentation
 4. Navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image.
 
 Substitute in your own `--in-graph` pretrained model file path (from step 2).
 
-Inception V3 can be run for latency benchmarking, throughput
-benchmarking, or accuracy. Use one of the following examples below,
+Inception V3 can be run for latency, throughput, or accuracy. Use one of the following examples below,
 depending on your use case.
 
 * For latency with dummy data (using `--batch-size 1`):
@@ -269,7 +265,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
-Example log tail when benchmarking for latency:
+Example log tail when running for latency:
 ```
 Inference with dummy data.
 Iteration 1: 1.075 sec
@@ -302,7 +298,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
-Example log tail when benchmarking for throughput:
+Example log tail when running for throughput:
 ```
 Inference with dummy data.
 Iteration 1: 2.024 sec
@@ -336,7 +332,7 @@ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
-Example log tail when benchmarking for accuracy:
+Example log tail when running for accuracy:
 ```
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7673, 0.9341)
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9341)

@@ -29,7 +29,7 @@ Tuning TensorFlow Serving to take full advantage of your hardware for image reco
 
 ## Hands-on Tutorial - ResNet50 or InceptionV3
 
-For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
+For steps 1 and 2, refer to the Intel Model Zoo FP32 READMEs:
 * [ResNet50 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
 * [InceptionV3 README](/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
 
@@ -115,7 +115,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    The output should be a tensor of class probabilities and `Predicted class:  286`.
 
 9. **Real-time inference**: Real-time inference is measured by latency and is usually defined as batch size 1.
-   To see average inference latency (in ms), run the benchmark script `image_recognition_benchmark.py` using batch_size 1:
+   To see average inference latency (in ms), run the script `image_recognition_benchmark.py` using batch_size 1:
    ```
    (venv)$ python image_recognition_benchmark.py --batch_size 1 --model inceptionv3
    Iteration 1: 0.017 sec
@@ -153,7 +153,7 @@ For steps 1 and 2, refer to the Intel Model Zoo FP32 benchmarks:
    ```
 
 10. **Maximum throughput**: Regardless of hardware, the best batch size for throughput is 128. 
-    To see average throughput (in images/sec), run the benchmark script `image_recognition_benchmark.py` using batch_size 128:
+    To see average throughput (in images/sec), run the script `image_recognition_benchmark.py` using batch_size 128:
     ```
     (venv)$ python image_recognition_benchmark.py --batch_size 128 --model inceptionv3
     Iteration 1: 1.706 sec
@@ -175,7 +175,7 @@ You have now seen two end-to-end examples of serving an image recognition model 
 1. How to create a SavedModel from a TensorFlow model graph
 2. How to choose good values for the performance-related runtime parameters exposed by the `docker run` command
 3. How to verify that the served model can correctly classify an image using a GRPC client
-4. How to benchmark latency and throughput metrics using a GRPC client
+4. How to measure latency and throughput metrics using a GRPC client
 
 With this knowledge and the example code provided, 
 you should be able to get started serving your own custom image recognition model with good performance. 

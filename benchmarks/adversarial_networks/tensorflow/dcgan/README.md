@@ -4,7 +4,7 @@ This document has instructions for how to run DCGAN for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference.
+Script instructions for model training and inference.
 
 ## FP32 Inference Instructions
 
@@ -35,19 +35,18 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-This repository includes launch scripts for running benchmarks and the
-an optimized version of the DCGAN model code.
+This repository includes launch scripts for running an optimized version of the DCGAN model code.
 
 5. Navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 4.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the external model directory
 for `--model-source-dir` (from step 1) `--data-location` (from step 2), and `--checkpoint` (from step 3).
 
 
-Run benchmarking for throughput and latency with `--batch-size=100` :
+Run the model for throughput and latency with `--batch-size=100` :
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -66,7 +65,7 @@ $ python launch_benchmark.py \
 
 5. Log files are located at the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking for throughput:
+Below is a sample log file tail when running for throughput:
 ```
 Batch size: 100 
 Batches number: 500

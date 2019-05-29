@@ -115,7 +115,7 @@ cd ~/wide_deep_files
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.pb
 
 ```
-Refer to the Wide and Deep benchmarks [README](/benchmarks/recommendation/tensorflow/wide_deep_large_ds) to get the latest location of the pretrained model.
+Refer to the Wide and Deep [README](/benchmarks/recommendation/tensorflow/wide_deep_large_ds) to get the latest location of the pretrained model.
 
 3. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs on a Docker container.
 
@@ -281,7 +281,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 	lscpu located here: b'/usr/bin/lscpu'
 	root@a78677f56d69:/workspace/benchmarks/common/tensorflow#
 	
-To rerun the benchmarking script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For example, to rerun with the best max throughput (batch size=512) settings, run with ```BATCH_SIZE``` 
+To rerun the model script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For example, to rerun with the best max throughput (batch size=512) settings, run with ```BATCH_SIZE``` 
 and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL```. 
 	
 	chmod +x ./start.sh	
@@ -290,9 +290,9 @@ and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL``
 	
 All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](/docs/general/tensorflow/LaunchBenchmark.md) to get the full list of flags. 
 	
-5. <b> Inference benchmarking on a large dataset (optional) </b>
+5. <b> Inference on a large dataset (optional) </b>
 
-To run inference benchmarking on a large dataset, download the test dataset in `~/wide_deep_files/real_dataset`. Note that this dataset supports only `benchmark-only` flag.
+To run inference on a large dataset, download the test dataset in `~/wide_deep_files/real_dataset`. Note that this dataset supports only `benchmark-only` flag.
 
 ```    
 cd ~/wide_deep_files/real_dataset
