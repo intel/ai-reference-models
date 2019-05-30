@@ -121,9 +121,11 @@ if __name__ == "__main__":
       #print(np_labels.shape)
       num_processed_images += batch_size
       num_remaining_images -= batch_size
+      start_time = time.time()
       # Compute inference on the preprocessed data
       predictions1 = sess_graph.run(output_tensor,
                              {input_tensor: np_images})
+      elapsed_time = time.time() - start_time
       if(batch_size !=1):
          predictions1 = sess.run(tf.squeeze(predictions1))
       else :
@@ -131,4 +133,5 @@ if __name__ == "__main__":
       predictions2 = tf.argmax(predictions1, axis=1)
       predictions = sess.run(predictions2)
       top1 += batch_size - (np.count_nonzero(predictions - np_labels))
+      print("Iteration time: %0.4f ms" % elapsed_time)
       print(top1/num_processed_images)

@@ -131,9 +131,13 @@ following modes/precisions:
 
     Example log tail when running for accuracy:
     ```
+    Iteration time: 581.6446 ms
     0.757505030181
+    Iteration time: 581.5755 ms
     0.757489959839
+    Iteration time: 581.5709 ms
     0.75749498998
+    Iteration time: 581.1705 ms
     0.75748
     Ran inference with batch size 100
     Log location outside container: {--output-dir value}/benchmark_densenet169_inference_fp32_20190412_021545.log

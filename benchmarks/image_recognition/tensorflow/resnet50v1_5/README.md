@@ -68,9 +68,13 @@ The log file is saved to the value of `--output-dir`.
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
+Iteration time: 239.899 ms
 Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7622, 0.9296)
+Iteration time: 239.110 ms
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7621, 0.9295)
+Iteration time: 239.512 ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7622, 0.9296)
+Iteration time: 239.989 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7623, 0.9296)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_{timestamp}.log
@@ -242,6 +246,7 @@ The tail of the log output when the accuracy run completes should look
 something like this:
 ```
 ...
+Iteration time: 514.427 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7651, 0.9307)
 lscpu_path_cmd = command -v lscpu
 lscpu located here: /usr/bin/lscpu

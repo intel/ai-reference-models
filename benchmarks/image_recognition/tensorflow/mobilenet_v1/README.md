@@ -144,8 +144,11 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
 
     Example log tail when running for accuracy:
     ```
+    Iteration time: 66.8541 ms
     Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7014, 0.8935)
+    Iteration time: 66.7909 ms
     Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7014, 0.8934)
+    Iteration time: 66.7001 ms
     Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7014, 0.8934)
     Ran inference with batch size 100
     Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190523_164955.log
@@ -287,8 +290,11 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
      ```
    * Below is a sample lof file snippet when testing accuracy:
      ```
+     Iteration time: 119.1134 ms
      Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7104, 0.8999)
+     Iteration time: 118.8375 ms
      Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7103, 0.8999)
+     Iteration time: 119.9311 ms
      Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7102, 0.8999)
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190110_211648.log

@@ -187,6 +187,7 @@ different configs.
 Example log tail when running for accuracy:
 
 ```
+Iteration time: 357.3781 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7666, 0.9333)
 Executing command: python /workspace/intelai_models/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --data_location=/dataset
 Ran inference with batch size 100
@@ -329,8 +330,11 @@ python launch_benchmark.py \
 ```
 Example log tail when benchmarking for accuracy:
 ```
+Iteration time: 756.7571 ms
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7673, 0.9341)
+Iteration time: 757.3781 ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9341)
+Iteration time: 760.3024 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9342)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_023816.log
