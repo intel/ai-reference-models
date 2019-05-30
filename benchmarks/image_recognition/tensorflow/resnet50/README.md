@@ -65,10 +65,15 @@ The log file is saved to the value of `--output-dir`.
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
+Iteration time: 233.495 ms
 Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Iteration time: 233.231 ms
 Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Iteration time: 234.541 ms
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
+Iteration time: 233.033 ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Iteration time: 233.013 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_212224.log
@@ -236,6 +241,7 @@ The tail of the log output when the accuracy run completes should look
 something like this:
 ```
 ...
+Iteration time: 649.252 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7430, 0.9188)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log

@@ -120,9 +120,11 @@ if __name__ == "__main__":
       np_images, np_labels = sess.run([images[0], labels[0]])
       num_processed_images += batch_size
       num_remaining_images -= batch_size
+      start_time = time.time()
       # Compute inference on the preprocessed data
       predictions = sess_graph.run(output_tensor,
                              {input_tensor: np_images})
+      elapsed_time = time.time() - start_time
       accuracy1 = tf.reduce_sum(
           tf.cast(tf.nn.in_top_k(tf.constant(predictions),
               tf.constant(np_labels), 1), tf.float32))
@@ -133,6 +135,7 @@ if __name__ == "__main__":
       np_accuracy1, np_accuracy5 =  sess.run([accuracy1, accuracy5])
       total_accuracy1 += np_accuracy1
       total_accuracy5 += np_accuracy5
+      print("Iteration time: %0.4f ms" % elapsed_time)
       print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
           % (num_processed_images, total_accuracy1/num_processed_images,
           total_accuracy5/num_processed_images))

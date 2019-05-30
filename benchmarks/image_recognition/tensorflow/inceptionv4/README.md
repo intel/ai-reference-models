@@ -101,9 +101,13 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
    Example log tail when running for accuracy:
    ```
    ...
+   Iteration time: 685.1976 ms
    Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7985, 0.9504)
+   Iteration time: 686.3845 ms
    Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7983, 0.9504)
+   Iteration time: 686.7021 ms
    Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7984, 0.9504)
+   Iteration time: 685.8914 ms
    Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7984, 0.9504)
    Ran inference with batch size 100
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190306_221608.log
@@ -226,10 +230,15 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
    Example log tail when running for accuracy:
    ```
    ...
+   Iteration time: 1337.8728 ms
    Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.8015, 0.9517)
+   Iteration time: 1331.8253 ms
    Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.8017, 0.9518)
+   Iteration time: 1339.1553 ms
    Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.8017, 0.9518)
+   Iteration time: 1334.5991 ms
    Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.8018, 0.9519)
+   Iteration time: 1336.1905 ms
    Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.8018, 0.9519)
    Ran inference with batch size 100
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_fp32_20190308_182729.log
