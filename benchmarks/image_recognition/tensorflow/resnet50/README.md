@@ -5,7 +5,7 @@ following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for ResNet50 model inference on `Int8` and `FP32`
+Instructions and scripts for ResNet50 model inference on `Int8` and `FP32`
 precisions.
 
 ## Int8 Inference Instructions
@@ -63,7 +63,7 @@ $ python launch_benchmark.py \
 ```
 The log file is saved to the value of `--output-dir`.
 
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this:
 ```
 Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
@@ -79,7 +79,7 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * Evaluate the model performance: If just evaluate performance for dummy data, the `--data-location` is not needed.
 Otherwise `--data-location` argument needs to be specified:
-Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
+Calculate the model batch inference `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50_int8_pretrained_model.pb` input graph file (from step
 2), and the `--benchmark-only` flag. It is
 optional to specify the number of `warmup_steps` and `steps` as extra
@@ -100,7 +100,7 @@ $ python launch_benchmark.py \
     --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
     -- warmup_steps=50 steps=500
 ```
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this:
 ```
 ...
@@ -132,7 +132,7 @@ $ git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be
-required (if running benchmarking for throughput/latency, then dummy
+required (if running for batch or online inference performance, then dummy
 data will be used).
 
 The TensorFlow models repo provides
@@ -142,10 +142,10 @@ to download, process, and convert the ImageNet dataset to the TF records format.
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
-If benchmarking uses dummy data for inference, `--data-location` flag is not required. Otherwise,
+If using dummy data for inference, `--data-location` flag is not required. Otherwise,
 `--data-location` needs to point to point to ImageNet dataset location.
 
-* To measure the model latency, set `--batch-size=1` and run the benchmark script as shown:
+* To measure online inference, set `--batch-size=1` and run the script as shown:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -162,7 +162,7 @@ $ python launch_benchmark.py \
 
 The log file is saved to the value of `--output-dir`.
 
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
@@ -182,7 +182,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215326.log
 ```
 
-* To measure the model Throughput, set `--batch-size=128` and run the benchmark script as shown:
+* To measure batch inference, set `--batch-size=128` and run the launch script as shown:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -199,7 +199,7 @@ $ python launch_benchmark.py \
 
 The log file is saved to the value of `--output-dir`.
 
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
@@ -249,8 +249,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
 
-* The `--output-results` flag can be used along with above benchmarking
-or accuracy test, in order to also output a file with the inference
+* The `--output-results` flag can be used to also output a file with the inference
 results (file name, actual label, and the predicted label). The results
 output can only be used with real data.
 
