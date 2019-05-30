@@ -5,8 +5,191 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Instructions and scripts for model training and inference
+for other precisions are coming later.
+
+## Int8 Inference Instructions
+
+1. Clone the [tensorflow/models](https://github.com/tensorflow/models)
+repository at the specified SHA and clone the
+[cocoapi repo](git clone https://github.com/cocodataset/cocoapi.git) in
+the models directory:
+```
+$ git clone https://github.com/tensorflow/models.git
+$ cd models
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
+$ git clone https://github.com/cocodataset/cocoapi.git
+```
+The TensorFlow models repo will be used for running inference as well as
+converting the coco dataset to the TF records format.
+
+2.  Download the 2017 validation
+[COCO dataset](http://cocodataset.org/#home) and annotations:
+```
+$ mkdir val
+$ cd val
+$ wget http://images.cocodataset.org/zips/val2017.zip
+$ unzip val2017.zip
+$ cd ..
+```
+
+If you would like to run the model for batch and online inference, the
+validation dataset is all that you will need. If you would like to get
+accuracy metrics, then continue the instructions below to generate the
+TF record file as well.
+```
+$ mkdir annotations
+$ cd annotations
+$ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+$ unzip annotations_trainval2017.zip
+$ cd ..
+```
+
+Since we are only using the validation dataset in this example, we will
+create an empty directory and empty annotations json file to pass as the
+train and test directories in the next step.
+```
+$ mkdir empty_dir
+
+$ cd annotations
+$ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
+$ cd ..
+```
+
+3. Now that you have the raw COCO dataset, we need to convert it to the
+TF records format in order to use it with the inference script. We will
+do this by running the `create_coco_tf_record.py` file in the TensorFlow
+models repo.
+
+Follow the steps below to navigate to the proper directory and point the
+script to the raw COCO dataset files that you have downloaded in step 2.
+The `--output_dir` is the location where the TF record files will be
+located after the script has completed.
+
+```
+# We are going to use an older version of the conversion script to checkout the git commit
+$ cd models
+$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
+
+$ cd research/object_detection/dataset_tools/
+$ python create_coco_tf_record.py --logtostderr \
+      --train_image_dir="/home/<user>/coco/empty_dir" \
+      --val_image_dir="/home/<user>/coco/val/val2017" \
+      --test_image_dir="/home/<user>/coco/empty_dir" \
+      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
+      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --output_dir="/home/<user>/coco/output"
+
+$ ll /home/myuser/coco/output
+total 1598276
+-rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
+-rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
+-rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
+
+# Go back to the main models directory and get the specified SHA that we are using for SSD-MobileNet
+$ cd /home/<user>/models
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
+```
+
+4. Download the pretrained model:
+
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model.pb
+```
+
+5. Clone the [intelai/models](https://github.com/intelai/models) repo
+and then run the scripts for either batch/online inference performance
+or accuracy.
+```
+$ git clone git@github.com:IntelAI/models.git
+$ cd benchmarks
+```
+
+Run for batch and online inference where the `--data-location`
+is the path to the directory with the unzipped coco validation images:
+```
+python launch_benchmark.py \
+    --model-name ssd-mobilenet \
+    --mode inference \
+    --precision int8 \
+    --framework tensorflow \
+    --socket-id 0 \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+    --model-source-dir /home/<user>/tensorflow/models \
+    --data-location /home/<user>/val/val2017 \
+    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
+    --benchmark-only \
+    --batch-size 1
+```
+
+Or for accuracy where the `--data-location` is the path the directory
+where your `coco_val.record` file is located:
+```
+python launch_benchmark.py \
+    --model-name ssd-mobilenet \
+    --mode inference \
+    --precision int8 \
+    --framework tensorflow \
+    --socket-id 0 \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-avx2-devel-mkl \
+    --model-source-dir /home/<user>/tensorflow/models \
+    --data-location /home/<user>/coco/output \
+    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
+    --accuracy-only \
+    --batch-size 1
+```
+
+Note that it is required to use the docker image specified in the
+commands above (`intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7`)
+to run SSD-MobileNet Int8, as it includes PRs that are required to run
+this model.
+
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location.
+
+6. The log file is saved to the value of `--output-dir`.
+
+Below is a sample log file tail when running for batch
+and online inference:
+
+```
+Step 4970: 0.0340421199799 seconds
+Step 4980: 0.0429329872131 seconds
+Step 4990: 0.0358219146729 seconds
+Avg. Duration per Step:0.0364457404137
+Avg. Duration per Step:0.0365921088491
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size 1
+Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20181203_232524.log
+```
+
+And here is a sample log file tail when running for accuracy:
+
+```
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=9.53s).
+Accumulating evaluation results...
+DONE (t=1.10s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.172
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.271
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.183
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.172
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.171
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.212
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size 1
+Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20181204_185432.log
+```
 
 ## Int8 Inference Instructions
 
@@ -313,7 +496,7 @@ drwxr-sr-x. 3 <user> <group>     4096 Feb  1  2018 saved_model
 ```
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking, which we will
+This repo has the launch script for running the model, which we will
 use in the next step.
 
 ```
@@ -329,11 +512,11 @@ Resolving deltas: 100% (3/3), done.
 
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
-cloned in the previous step. SSD-MobileNet can be run for benchmarking
-throughput and latency, or testing accuracy. Note that we are running
+cloned in the previous step. SSD-MobileNet can be run for testing
+batch and online inference, or testing accuracy. Note that we are running
 SSD-MobileNet with a TensorFlow 1.12 docker image.
 
-To benchmarking for throughput and latency, use the following command,
+To run for batch and online inference, use the following command,
 but replace in your path to the unzipped coco dataset images from step 3
 for the `--dataset-location`, the path to the frozen graph that you
 downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`
@@ -376,7 +559,7 @@ $ python launch_benchmark.py \
 
 8. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking:
+Below is a sample log file tail when running for performance:
 
 ```
 INFO:tensorflow:Processed 5001 images... moving average latency 37 ms
