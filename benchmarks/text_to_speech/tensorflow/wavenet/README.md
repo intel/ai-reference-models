@@ -4,15 +4,15 @@ This document has instructions for how to run WaveNet for the following
 modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Instructions and scripts for model training and inference
+for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
 1. Clone the [tensorflow-wavenet](https://github.com/ibab/tensorflow-wavenet)
 repo and get pull request #352 for the CPU optimizations.  The path to
 the cloned repo will be passed as the model source directory when
-running the benchmarking script.
+running the launch script.
 
 ```
 $ git clone https://github.com/ibab/tensorflow-wavenet.git
@@ -39,7 +39,7 @@ $ pwd
 ```
 
 2. Clone this [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking, as well as
+This repo has the launch script for running the model, as well as
 checkpoint files for a pre-trained model.  After cloning the repo,
 navigate to the benchmarks directory, which is where the launch script
 is located.
@@ -56,7 +56,7 @@ $ cd models/benchmarks
    $ tar -xvf wavenet_fp32_pretrained_model.tar.gz
    ```
 
-4. Start benchmarking by executing the launch script and passing args
+4. Start a model run by executing the launch script and passing args
 specifying that we are running wavenet fp32 inference using TensorFlow,
 along with a dockerfile that includes Intel Optimizations for TensorFlow
 and the path to the model source dir (from step 1) and the checkpoint

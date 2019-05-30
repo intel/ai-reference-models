@@ -5,8 +5,8 @@ following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 * [Int8 inference](#int8-inference-instructions)
 
-Benchmarking instructions and scripts for the Faster R-CNN ResNet50 model training and inference
-other precisions are coming later.
+Instructions and scripts for the Faster R-CNN ResNet50 model training and inference
+for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -119,7 +119,7 @@ $ tar -xzvf faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking.
+This repo has the launch script for running the model.
 
 ```
 $ git clone https://github.com/IntelAI/models.git
@@ -138,7 +138,7 @@ Resolving deltas: 100% (3/3), done.
 `pipeline.config` file and the checkpoint location (from step 4, and the
 location of your `tensorflow/models` clone (from step 1).
 
-Run benchmarking for throughput and latency:
+Run for batch and online inference:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -173,8 +173,8 @@ python launch_benchmark.py \
 
 7. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking for throughput
-and latency:
+Below is a sample log file tail when running for batch
+and online inference:
 
 ```
 Time spent : 167.353 seconds.
@@ -224,7 +224,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_r
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking.
+This repo has the launch script for running the model.
 
 ```
 $ git clone https://github.com/IntelAI/models.git
@@ -242,7 +242,7 @@ with the appropriate parameters. To run on single socket use `--socket_id` switc
 by default it will be using all available sockets. Optional parameter `number_of_steps`
 (default value = 5000) can be added at the end of command after `--` as shown below:
 
-Run benchmarking for throughput and latency:
+Run for batch and online inference:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -285,8 +285,8 @@ used in the commands above were built using
 
 5. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking for throughput
-and latency:
+Below is a sample log file tail when running for batch
+and online inference:
 
 ```
 Step 4950: 0.0722849369049 seconds
