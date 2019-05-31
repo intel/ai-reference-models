@@ -162,7 +162,7 @@ but if you choose to set your own options, refer to the full list of available f
 explanation of the ```launch_benchmark.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
 This step will automatically launch a new container on every run and terminate. Go to the [Step 4](#step_4) to interactively run the script on the container.
 
-3.1. <b> *Real Time inference*</b>(batch_size=1 for latency)
+3.1. <b> *Online inference*</b>(or real-time inference, batch_size=1)
 
 3.1.1 <b>ResNet50</b>
 
@@ -255,7 +255,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--socket-id 0 \
 		--docker-image intelaipg/intel-optimized-tensorflow:latest
 
-3.2. <b>*Best Throughput inference*</b>(batch_size=128 for throughput)
+3.2. <b>*Best Batch inference*</b>(batch_size=128)
 
 3.2.1 <b>ResNet50</b>
 
@@ -366,7 +366,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 The logs are captured in a directory outside of the container.<br> 
 
 
-4. <a name="step_4"></a>If you want to run the benchmarking script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker_image```,
+4. <a name="step_4"></a>If you want to run the model script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker_image```,
 performs necessary installs, runs the ```launch_benchmark.py``` script and does not terminate the container process. As an example, this step will demonstrate ResNet50 Real Time inference on Synthetic Data use case, 
 you can implement the same strategy on different use cases demoed in Step 3.
 		
@@ -385,7 +385,7 @@ you can implement the same strategy on different use cases demoed in Step 3.
 
 	root@a78677f56d69:/workspace/benchmarks/common/tensorflow#
 	
-To rerun the bechmarking script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For e.g  to rerun with the best max throughput (batch size=128) settings run with ```BATCH_SIZE``` 
+To rerun the bechmarking script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For e.g  to rerun with the best batch inference (batch size=128) settings run with ```BATCH_SIZE``` 
 and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL```. 
 	
 	chmod +x ./start.sh
