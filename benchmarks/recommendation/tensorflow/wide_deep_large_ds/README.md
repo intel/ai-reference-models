@@ -1,13 +1,13 @@
 # Wide & Deep
 
-This document has instructions for how to run Wide & Deep benchmark for the
+This document has instructions for how to run Wide & Deep for the
 following modes/precisions:
 
 * [Prepare dataset](#Prepare-dataset)
 * [INT8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training coming later.
+Instructions and scripts for model training coming later.
 
 ## Prepare dataset
 
@@ -66,7 +66,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
 2. Clone the [intelai/models](https://github.com/intelai/models) repo.
 
-   This repo has the launch script for running benchmarks, which we will
+   This repo has the launch script for running the model, which we will
    use in the next step.
    ```
    git clone https://github.com/IntelAI/models.git
@@ -92,7 +92,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 4. Run Performance test
 
-   * Running benchmarks in latency mode, set `--batch-size 1`
+   * Running in online inference mode, set `--batch-size 1`
 
        ``` 
        cd /home/<user>/models/benchmarks
@@ -110,7 +110,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords \
             -- num_parallel_batches=1
        ```
-   * Running benchmarks in throughput mode, set `--batch-size 512`
+   * Running in batch inference mode, set `--batch-size 512`
        ``` 
         cd /home/<user>/models/benchmarks
     
@@ -126,7 +126,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --in-graph /root/user/wide_deep_files/wide_deep_int8_pretrained_model.pb \
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords
        ```
-   * The log file is saved to the value of `--output-dir`. The tail of the log output when the benchmarking completes 
+   * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
      should look something like this:
         ```
         --------------------------------------------------
@@ -151,7 +151,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
 2. Clone the [intelai/models](https://github.com/intelai/models) repo.
 
-   This repo has the launch script for running benchmarks, which we will
+   This repo has the launch script for running the model, which we will
    use in the next step.
 
     ```
@@ -178,7 +178,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 4. Run Performance test
 
-    * Running benchmarks in latency mode, set `--batch-size 1`
+    * Running in online inference mode, set `--batch-size 1`
 
         ```
         cd /home/<user>/models/benchmarks
@@ -196,7 +196,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords \
             -- num_parallel_batches=1
         ```
-    * Running benchmarks in throughput mode, set `--batch-size 512`
+    * Running in batch inference mode, set `--batch-size 512`
         ```
         cd /home/<user>/models/benchmarks
 
@@ -212,7 +212,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --in-graph /root/user/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords
         ```
-    * The log file is saved to the value of `--output-dir`. The tail of the log output when the benchmarking completes 
+    * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
         should look something like this:
         ```
         --------------------------------------------------

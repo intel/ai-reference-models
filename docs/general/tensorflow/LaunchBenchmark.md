@@ -10,7 +10,7 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 ## How it Works
 
 1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container. 
-   [Here](#launch_benchmarkpy-flags) is the full list of available flags. To run benchmarking without a docker container,
+   [Here](#launch_benchmarkpy-flags) is the full list of available flags. To run a model without a docker container,
    see the [bare metal instructions](#alpha-feature-running-on-bare-metal).
 2. The container's entrypoint script [`start.sh`](/benchmarks/common/tensorflow/start.sh) installs required dependencies, e.g. python packages and `numactl`, and sets the PYTHONPATH environment variable to point to the required dependencies. 
    [Here](#startsh-flags) is the full list of available flags.
@@ -60,14 +60,14 @@ optional arguments:
   -mo {training,inference}, --mode {training,inference}
                         Specify the type training or inference
   -m MODEL_NAME, --model-name MODEL_NAME
-                        model name to run benchmarks for
+                        model name to run
   -b BATCH_SIZE, --batch-size BATCH_SIZE
                         Specify the batch size. If this parameter is not
                         specified or is -1, the largest ideal batch size for
                         the model will be used
   -d DATA_LOCATION, --data-location DATA_LOCATION
                         Specify the location of the data. If this parameter is
-                        not specified, the benchmark will use random/dummy
+                        not specified, the script will use random/dummy
                         data.
   -i SOCKET_ID, --socket-id SOCKET_ID
                         Specify which socket to use. Only one socket will be
@@ -94,12 +94,12 @@ optional arguments:
                         written to this location. If mode=inference assumes
                         that the location points to a model that has already
                         been trained.
-  -k, --benchmark-only  For benchmark measurement only. If neither
+  -k, --benchmark-only  For performance measurement only. If neither
                         --benchmark-only or --accuracy-only are specified, it
-                        will default to run benchmarking.
+                        will default to run for performance.
   --accuracy-only       For accuracy measurement only. If neither --benchmark-
                         only or --accuracy-only are specified, it will default
-                        to run benchmarking.
+                        to run for performance.
   --output-results      Writes inference output to a file, when used in
                         conjunction with --accuracy-only and --mode=inference.
   --output-dir OUTPUT_DIR
@@ -271,7 +271,7 @@ Below is an example showing how to use the `--debug` flag:
 ## Alpha feature: Running on bare metal
 
 We recommend using [Docker](https://www.docker.com) to run the
-benchmarking scripts, as that provides a consistent environment where
+model scripts, as that provides a consistent environment where
 the script can install all the necessary dependencies to run the models
 in this repo. For this reason, the tutorials and model README files
 provide instructions on how to run the model in a Docker container.
@@ -284,8 +284,8 @@ Since the `launch_benchmark.py` is intended to run in an Ubuntu-based
 Docker container, running on bare metal also will only work when running
 on Ubuntu.
 
-Before running benchmarking, you must also install all the dependencies
-that are required to run the model.
+Before running a model, you must also install all the dependencies
+that are required to run that model.
 
 Basic requirements for running all models include:
  * python (If the model's README file specifies to use a python3 TensorFlow docker image, then use python 3 on bare metal, otherwise use python 2.7)
@@ -322,7 +322,7 @@ you previously used with docker, you may need to change the owner
 on your log directory, or run with `sudo` in order for the `tee`
 commands writing to the log file to work properly.
 
-For example, in order to run ResNet50 FP32 benchmarking on bare metal,
+For example, in order to run ResNet50 FP32 on bare metal,
 the following command can be used:
 
 ```

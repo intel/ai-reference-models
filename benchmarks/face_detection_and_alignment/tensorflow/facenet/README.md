@@ -4,8 +4,7 @@ This document has instructions for how to run FaceNet for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Script instructions for model training and inference for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -37,18 +36,17 @@ Instructions for downloading the dataset and converting it can be found in the d
 5. Navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 2.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image.
 
 Substitute in your own `--checkpoint` pretrained model file path (from step 3),
 and `--data-location` (from step 4).
 
-FaceNet can be run for latency benchmarking, throughput
-benchmarking, or accuracy. Use one of the following examples below,
-depending on your use case.
+FaceNet can be run for testing online inference, batch inference, or accuracy. 
+Use one of the following examples below, depending on your use case.
 
-* For latency (using `--batch-size 1`):
+* For online inference (using `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -63,7 +61,7 @@ python launch_benchmark.py \
     --model-source-dir /home/<user>/facenet/ \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
-Example log tail when benchmarking for latency:
+Example log tail for online inference:
 ```
 Batch 979 elapsed Time 0.0297989845276
 Batch 989 elapsed Time 0.029657125473
@@ -83,7 +81,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_facenet_inference_fp32_20190328_205911.log
 ```
 
-* For throughput (using `--batch-size 100`):
+* For batch inference (using `--batch-size 100`):
 
 ```
 python launch_benchmark.py \
@@ -98,7 +96,7 @@ python launch_benchmark.py \
     --model-source-dir /home/<user>/facenet/ \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
-Example log tail when benchmarking for throughput:
+Example log tail for batch inference:
 ```
 Batch 219 elapsed Time 0.446497917175
 Batch 229 elapsed Time 0.422048091888
@@ -130,7 +128,7 @@ python launch_benchmark.py \
     --model-source-dir /home/<user>/facenet/ \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
-Example log tail when benchmarking for accuracy:
+Example log tail for accuracy:
 ```
 Batch 219 elapsed Time 0.398629188538
 Batch 229 elapsed Time 0.354953050613
