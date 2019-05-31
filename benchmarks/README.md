@@ -1,10 +1,10 @@
-# Benchmark scripts
+# Model Zoo Scripts
 
 Training and inference scripts with Intel-optimized MKL
 
 ## Prerequisites
 
-The benchmarking scripts can be run on Linux and require the following
+The model scripts can be run on Linux and require the following
 dependencies to be installed:
 * [Docker](https://docs.docker.com/install/)
 * [Python](https://www.python.org/downloads/) 2.7 or later
@@ -13,7 +13,7 @@ dependencies to be installed:
 
 ## TensorFlow Use Cases
 
-| Use Case               | Framework     | Model               | Mode      | Benchmarking Instructions    |
+| Use Case               | Framework     | Model               | Mode      | Instructions    |
 | -----------------------| --------------| ------------------- | --------- |------------------------------|
 | Adversarial Networks   | TensorFlow    | [DCGAN](https://arxiv.org/pdf/1511.06434.pdf)               | Inference | [FP32](adversarial_networks/tensorflow/dcgan/README.md#fp32-inference-instructions) |
 | Content Creation       | TensorFlow    | [DRAW](https://arxiv.org/pdf/1502.04623.pdf)               | Inference | [FP32](content_creation/tensorflow/draw/README.md#fp32-inference-instructions) |
@@ -34,7 +34,7 @@ dependencies to be installed:
 | Language Translation   | TensorFlow    | [GNMT](https://arxiv.org/pdf/1609.08144.pdf)                | Inference | [FP32](language_translation/tensorflow/gnmt/README.md#fp32-inference-instructions) |
 | Language Translation   | TensorFlow    | [Transformer Language](https://arxiv.org/pdf/1706.03762.pdf)| Inference | [FP32](language_translation/tensorflow/transformer_language/README.md#fp32-inference-instructions) |
 | Language Translation   | TensorFlow    | [Transformer_LT_Official ](https://arxiv.org/pdf/1706.03762.pdf)| Inference | [FP32](language_translation/tensorflow/transformer_lt_official/README.md#fp32-inference-instructions) |
-| Object Detection       | TensorFlow    | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf)               | Inference | [Int8](object_detection/tensorflow/rfcn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |
+| Object Detection       | TensorFlow    | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf)               | Inference | [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | [Faster R-CNN](https://arxiv.org/pdf/1506.01497.pdf)        | Inference | [Int8](object_detection/tensorflow/faster_rcnn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/faster_rcnn/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)       | Inference | [Int8](object_detection/tensorflow/ssd-mobilenet/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | [SSD-ResNet34](https://arxiv.org/pdf/1512.02325.pdf)        | Inference | [Int8](object_detection/tensorflow/ssd-resnet34/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/ssd-resnet34/README.md#fp32-inference-instructions) |

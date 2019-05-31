@@ -5,7 +5,7 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training is coming
+Instructions and scripts for model training are coming
 later.
 
 
@@ -189,7 +189,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
     ```
 
     The [tensorflow/models](https://github.com/tensorflow/models) files
-    are used for dependencies when running benchmarking.
+    are used for dependencies when running the model.
 
 4. Clone the [intelai/models](https://github.com/IntelAI/models) repo
    and then navigate to the benchmarks directory:
@@ -199,7 +199,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
    $ cd models/benchmarks
    ```
 
-   Benchmarking can be run for either latency or throughput using the
+   MobileNet V1 can be run for either online or batch inference using the
    commands below.  The `--data-location` should be the path to the
    ImageNet validation data from step 1, the `--checkpoint` arg should
    be the path to the checkpoint files from step 2, and the
@@ -207,9 +207,10 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
    [tensorflow/models](https://github.com/tensorflow/models) repo that
    was cloned in step 3.
 
-   * Run benchmarking for latency (with `--batch-size 1`, `--checkpoint`
+   * Run for online inference (with `--batch-size 1`, `--checkpoint`
      with a path to the checkpoint file directory, and the `--data-location`
      is optional):
+     
      ```
      python launch_benchmark.py \
          --precision fp32 \
@@ -223,9 +224,11 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
      ```
-    * Run benchmarking for throughput (with `--batch-size 100`,
+     
+    * Run for batch inference (with `--batch-size 100`,
       `--checkpoint` with a path to the checkpoint file directory, and
       the `--data-location` is optional):
+
       ```
       python launch_benchmark.py \
          --precision fp32 \
@@ -239,7 +242,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --data-location /dataset/Imagenet_Validation \
          --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
       ```
-    * Run benchmarking for accuracy (with `--batch-size 100`, `--accuracy-only` and `--in-graph` with a path to the frozen graph .pb file):
+    * Run for accuracy (with `--batch-size 100`, `--accuracy-only` and `--in-graph` with a path to the frozen graph .pb file):
       ```
       python launch_benchmark.py \
          --precision fp32 \
@@ -256,9 +259,9 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
       Note that the `--verbose` or `--output-dir` flag can be added to any of the above
       commands to get additional debug output or change the default output location.
 
-5. The log files for each benchmarking run are saved at the value of `--output-dir`.
+5. The log files for each run are saved at the value of `--output-dir`.
 
-   * Below is a sample log file snippet when benchmarking latency:
+   * Below is a sample log file snippet when testing online inference:
      ```
      2019-01-04 20:02:23.855441: step 80, 78.3 images/sec
      2019-01-04 20:02:23.974862: step 90, 83.7 images/sec
@@ -274,7 +277,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190104_200218.log
      ```
 
-   * Below is a sample log file snippet when benchmarking throughput:
+   * Below is a sample log file snippet when testing batch inference:
      ```
      2019-01-04 20:06:01.151312: step 80, 184.0 images/sec
      2019-01-04 20:06:06.719081: step 90, 180.5 images/sec
