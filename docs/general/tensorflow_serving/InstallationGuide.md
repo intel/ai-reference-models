@@ -223,7 +223,7 @@ $ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmo
 	```
 	Prediction class: 286, avg latency: 34.7315 ms
 	```
-  **Note:** The real avg latency you see will depend on your hardware, environment, and whether or not you have configured the server parameters optimally. See the [General Best Practices](GeneralBestPractices.md) for more information.
+  **Note:** The real performance you see will depend on your hardware, environment, and whether or not you have configured the server parameters optimally. See the [General Best Practices](GeneralBestPractices.md) for more information.
   
 * After you are fininshed with querying, you can stop the container which is running in the background. To restart the container with the same name, you need to stop and remove the container from the registry. To view your running containers run `docker ps`. 
 	```

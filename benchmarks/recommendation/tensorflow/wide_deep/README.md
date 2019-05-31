@@ -1,11 +1,11 @@
 # Wide & Deep
 
-This document has instructions for how to run Wide & Deep benchmark for the
+This document has instructions for how to run Wide & Deep for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
-other precisions are coming later.
+Instructions and scripts for model training and inference
+for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
@@ -25,7 +25,7 @@ other precisions are coming later.
     ```
  
 3. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking, which we will
+This repo has the launch script for running the model, which we will
 use in the next step.
 
     ```
@@ -41,9 +41,9 @@ use in the next step.
    $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
    ```
 
-5. How to run benchmarks
+5. How to run
 
-   * Running benchmarks in latency mode, set `--batch-size` = `1`
+   * Running the model in online inference mode, set `--batch-size` = `1`
        ``` 
        $ cd /home/<user>/models/benchmarks
     
@@ -59,7 +59,7 @@ use in the next step.
              --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
              --verbose
        ```
-   * Running benchmarks in throughput mode, set `--batch-size` = `1024`
+   * Running the model in batch inference mode, set `--batch-size` = `1024`
        ``` 
        $ cd /home/<user>/models/benchmarks
     
@@ -77,7 +77,7 @@ use in the next step.
        ```
 6. The log file is saved to the value of `--output-dir`.
 
-   The tail of the log output when the benchmarking completes should look
+   The tail of the log output when the script completes should look
    something like this:
 
     ```
