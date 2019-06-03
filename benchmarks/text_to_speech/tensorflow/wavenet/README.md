@@ -41,7 +41,7 @@ $ pwd
 2. Clone this [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, as well as
 checkpoint files for a pre-trained model.  After cloning the repo,
-navigate to the benchmarks directory, which is where the launch script
+navigate to the `benchmarks` directory, which is where the launch script
 is located.
 
 ```

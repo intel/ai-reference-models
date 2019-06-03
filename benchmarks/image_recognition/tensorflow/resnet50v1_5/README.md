@@ -6,7 +6,7 @@ following precisions:
 * [FP32 inference](#fp32-inference-instructions)
 
 Original ResNet model has multiple versions which have shown better accuracy
-and/or throughput performance. As mentioned in TensorFlow's [official ResNet
+and/or batch inference performance. As mentioned in TensorFlow's [official ResNet
 model page](https://github.com/tensorflow/models/tree/master/official/resnet), 3 different
 versions of the original ResNet model exists - ResNet50v1, ResNet50v1.5, and ResNet50v2.
 As a side note, ResNet50v1.5 is also in MLPerf's [cloud inference benchmark for
@@ -82,7 +82,7 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * Evaluate the model performance: If just evaluate performance for dummy data, the `--data-location` is not needed.
 Otherwise `--data-location` argument needs to be specified:
-Calculate the model throughput `images/sec`, the required parameters to run the inference script would include:
+Calculate the batch inference performance `images/sec`, the required parameters to run the inference script would include:
 the pre-trained `resnet50v1_5_int8_pretrained_model.pb` input graph file (from step
 2), and the `--benchmark-only` flag. It is
 optional to specify the number of `warmup_steps` and `steps` as extra
@@ -134,7 +134,7 @@ $ git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be
-required (if running benchmarking for throughput/latency, then dummy
+required (if running the model for batch or online inference, then dummy
 data will be used).
 
 The TensorFlow models repo provides
@@ -147,7 +147,7 @@ located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 If benchmarking uses dummy data for inference, `--data-location` flag is not required. Otherwise,
 `--data-location` needs to point to point to ImageNet dataset location.
 
-* To measure the model latency, set `--batch-size=1` and run the benchmark script as shown:
+* To measure online inference, set `--batch-size=1` and run the model script as shown:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -164,7 +164,7 @@ $ python launch_benchmark.py \
 
 The log file is saved to the value of `--output-dir`.
 
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
@@ -185,7 +185,7 @@ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_{timestamp}.log
 ```
 
-* To measure the model Throughput, set `--batch-size=128` and run the benchmark script as shown:
+* To measure batch inference, set `--batch-size=128` and run the model script as shown:
 ```
 $ cd /home/<user>/models/benchmarks
 
@@ -202,7 +202,7 @@ $ python launch_benchmark.py \
 
 The log file is saved to the value of `--output-dir`.
 
-The tail of the log output when the benchmarking completes should look
+The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
@@ -254,7 +254,7 @@ Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_{timestamp}.log
 ```
 
-* The `--output-results` flag can be used along with above benchmarking
+* The `--output-results` flag can be used along with above performance
 or accuracy test, in order to also output a file with the inference
 results (file name, actual label, and the predicted label). The results
 output can only be used with real data.

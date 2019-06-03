@@ -46,10 +46,9 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
-    and then run the benchmarking scripts for either benchmarking throughput,
-    latency or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
-    Each benchmark run has user configurable arguments separated from regular arguments by '--' at the end of the command.
-    Unless configured, these arguments will run with default values. Below are the example codes for each benchmark case:
+    and then run the model scripts for either online or batch inference or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
+    Each model run has user configurable arguments separated from regular arguments by '--' at the end of the command.
+    Unless configured, these arguments will run with default values. Below are the example codes for each use case:
 
     ```
     $ git clone https://github.com/IntelAI/models.git
@@ -57,7 +56,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
     $ cd benchmarks
     ```
 
-    For throughput (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
+    For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
     ```
     python launch_benchmark.py  \
          --model-name mobilenet_v1 \
@@ -73,7 +72,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
 
-    For latency (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`)
+    For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`)
     ```
     python launch_benchmark.py  \
          --model-name mobilenet_v1 \
@@ -114,7 +113,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
     or the directory specified by the `--output-dir` arg. Below are examples of
     what the tail of your log file should look like for the different configs.
 
-    Example log tail when benchmarking for throughput:
+    Example log tail when running for batch inference:
     ```
     [Running warmup steps...]
     steps = 10, 1865.30956528 images/sec
@@ -128,7 +127,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
     Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190523_164626.log
     ```
 
-    Example log tail when benchmarking for latency:
+    Example log tail when running for online inference:
     ```
     [Running warmup steps...]
     steps = 10, 197.082229114 images/sec
@@ -157,8 +156,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
 ## FP32 Inference Instructions
 
 1. The ImageNet dataset is required for testing accuracy and can also be
-   used when running benchmarking. If no datset is provided when running
-   benchmarking, synthetic data will be used.
+   used when running online or batch inference. If no dataset is provided when running
+   online or batch inference, synthetic data will be used.
 
    Download the ImageNet dataset and convert it to the TF records format
    using the instructions

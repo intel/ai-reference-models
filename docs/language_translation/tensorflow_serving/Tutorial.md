@@ -37,7 +37,7 @@ Thus, the attention mechanism was introduced to differentiate contributions of e
 This matrix contains weights of each element in the source sequence when producing elements in the destination sequence. 
 
 [Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN)](https://github.com/intel/mkl-dnn) offers significant performance improvements for many neural network operations. 
-Tuning TensorFlow Serving to take full advantage of your hardware for recommendation systems inference involves:
+Tuning TensorFlow Serving to take full advantage of your hardware for language translation inference involves:
 1. Running a TensorFlow Serving docker container configured for performance given your hardware resources
 2. Running a GRPC client to verify prediction accuracy and measure online and batch inference performance
 3. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case

@@ -281,7 +281,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resn
 ```
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running benchmarking, which we will
+This repo has the launch script for running the model, which we will
 use in the next step.
 
 ```
@@ -290,11 +290,10 @@ $ git clone https://github.com/IntelAI/models.git
 
 7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
-cloned in the previous step. SSD-ResNet34 can be run for benchmarking
-throughput and latency, or testing accuracy. Note that we are running
+cloned in the previous step. SSD-ResNet34 can be run for testing batch or online inference, or testing accuracy. Note that we are running
 SSD-ResNet34 with a TensorFlow 1.14 docker image.
 
-To benchmarking for throughput and latency, use the following command,
+To run for batch and online inference, use the following command,
 the path to the frozen graph that you downloaded in step 5 as
 the `--in-graph`, and use the `--benchmark-only`
 flag:
@@ -337,7 +336,7 @@ $ python launch_benchmark.py \
 
 8. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking:
+Below is a sample log file tail when testing performance:
 
 ```
 Batchsize: 1

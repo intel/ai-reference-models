@@ -1,10 +1,10 @@
 # LM-1B 
 
-This document has instructions for how to run LM-1B benchmark for the
+This document has instructions for how to run LM-1B for the
 following modes/platforms:
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference for
+Instructions and scripts for model training and inference for
 other platforms are coming later.
 
 ## FP32 Inference Instructions
@@ -32,19 +32,18 @@ git clone https://github.com/IntelAI/models.git
 3. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo (from step 2).
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a benchmarking run in a optimized TensorFlow docker
+used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, and the checkpoint directory.
 
 Substitute the `--model-source-dir` to `<path_to_mlperf>/inference/cloud/language_modeling`.
-Before benchmarking, ensure that you have run the script to prepare checkpoint files and the dataset
+Before running, ensure that you have run the script to prepare checkpoint files and the dataset
 from Step 1.
 
-LM-1B can run for latency or throughput
-benchmarking. Use one of the following examples below, depending on
+LM-1B can run for online or batch inference. Use one of the following examples below, depending on
 your use case.
 
-For latency (using `--socket-id 0` and `--batch-size 1`):
+For online inference (using `--socket-id 0` and `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -59,7 +58,7 @@ python launch_benchmark.py \
 
 ```
 
-For throughput (using `--socket-id 0` and `--batch-size 1024`):
+For batch inference (using `--socket-id 0` and `--batch-size 1024`):
 
 ```
 python launch_benchmark.py \
@@ -81,7 +80,7 @@ to get additional debug output.
 `models/benchmarks/common/tensorflow/logs` directory. The user can specify a 
 different directory using `--output-dir`.
 
-Example log tail when benchmarking for latency or throughput:
+Example log tail when running for online or batch inference:
 ```
 Running warmup...
 Running benchmark...

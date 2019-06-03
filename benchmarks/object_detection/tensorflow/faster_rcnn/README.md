@@ -254,13 +254,10 @@ with the appropriate parameters. To run on single socket use `--socket_id` switc
 by default it will be using all available sockets. Optional parameter `number_of_steps`
 (default value = 5000) can be added at the end of command after `--` as shown below:
 
-<<<<<<< HEAD
-Run benchmarking for throughput and latency using the following command.
-The `--data-location` is the path to the directory that contains the
-raw coco dataset validation images which you downloaded and unzipped:
-=======
-Run for batch and online inference:
->>>>>>> 869ed7aa20949bb5346e10887d92933dff7bc894
+Run batch and online inference using the following command. 
+The `--data-location` is the path to the directory that contains the raw coco dataset 
+validation images which you downloaded and unzipped:
+
 ```
 $ cd /home/<user>/models/benchmarks
 
