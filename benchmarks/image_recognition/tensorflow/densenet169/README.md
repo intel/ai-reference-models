@@ -8,7 +8,7 @@ following modes/precisions:
 
 1. Download ImageNet dataset.
 
-    This step is required only for running accuracy, for running benchmark we do not need to provide dataset.
+    This step is required only for running accuracy, for running the model for performance we do not need to provide dataset.
 
     Register and download the ImageNet dataset. Once you have the raw ImageNet dataset downloaded, we need to convert
     it to the TFRecord format. The TensorFlow models repo provides
@@ -37,10 +37,9 @@ following modes/precisions:
    ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
-    and then run the benchmarking scripts for either benchmarking throughput,
-    latency or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
-    Each benchmark run has user configurable arguments separated from regular arguments by '--' at the end of the command.
-    Unless configured, these arguments will run with default values. Below are the example codes for each benchmark case:
+    and then run the model scripts for either online or batch inference or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
+    Each model run has user configurable arguments separated from regular arguments by '--' at the end of the command.
+    Unless configured, these arguments will run with default values. Below are the example codes for each use case:
 
     ```
     $ git clone https://github.com/IntelAI/models.git
@@ -105,7 +104,7 @@ following modes/precisions:
     or the directory specified by the `--output-dir` arg. Below are examples of
     what the tail of your log file should look like for the different configs.
 
-    Example log tail when benchmarking for throughput:
+    Example log tail when running for batch inference:
     ```
     steps = 80, 159.83471377 images/sec
            Latency: 625.646317005 ms
@@ -117,7 +116,7 @@ following modes/precisions:
     Log location outside container: {--output-dir value}/benchmark_densenet169_inference_fp32_20190412_023940.log
     ```
 
-    Example log tail when benchmarking for latency:
+    Example log tail when running for online inference:
     ```
     steps = 80, 34.9948442873 images/sec
            Latency: 28.5756379366 ms

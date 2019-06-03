@@ -21,17 +21,16 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptio
 3. Navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 The `launch_benchmark.py` script in the `benchmarks` directory is
-used for starting a tensorflow serving benchmarking using optimized TensorFlow Serving docker
+used for starting a tensorflow serving run using optimized TensorFlow Serving docker
 container. It has arguments to specify which model, framework, mode,
 precision, and input graph.
 
 Substitute in your own `--in-graph` pretrained model file path (from step 2).
 
-4. Inception V3 can be run for `latency` benchmarking and `throughput`
-benchmarking. Use one of the following examples below,
+4. Inception V3 can be run for measuring batch or online inference performance. Use one of the following examples below,
 depending on your use case.
 
-* For latency with dummy data (using `--batch-size 1`):
+* For online inference with dummy data (using `--batch-size 1`):
 
 ```
 python launch_benchmark.py \
@@ -43,7 +42,7 @@ python launch_benchmark.py \
     --batch-size=1 \
     --benchmark-only
 ```
-Example log tail when benchmarking for latency:
+Example log tail when running for online inference:
 ```
 Iteration 35: 0.019 sec
 Iteration 36: 0.020 sec
@@ -59,7 +58,7 @@ tfserving_3784
 Log output location: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190516_103531.log
 ```
 
-* For throughput with dummy data (using `--batch-size 128`):
+* For batch inference with dummy data (using `--batch-size 128`):
 
 ```
 python launch_benchmark.py \
@@ -71,7 +70,7 @@ python launch_benchmark.py \
     --batch-size=128 \
     --benchmark-only
 ```
-Example log tail when benchmarking for throughput:
+Example log tail when running for batch inference:
 ```
 Iteration 34: 0.779 sec
 Iteration 35: 0.916 sec

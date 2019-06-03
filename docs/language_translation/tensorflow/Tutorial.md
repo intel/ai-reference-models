@@ -158,7 +158,7 @@ Substitute the `--model-source-dir` for the location where you cloned the
 ```
 ~/tensorflow-models/models
 ``` 
-3.1. <b> *Real Time inference*</b> (using `--socket-id 0` and `--batch-size 1` for latency)
+3.1. <b> *Online inference*</b> (using `--socket-id 0` and `--batch-size 1`)
 
 If you wish to calculate the [BLEU](https://en.wikipedia.org/wiki/BLEU) metric to find out the machine-translation quality, pass the file as `reference` flag.
 `newstest2014.en` file must have only one sentence per line
@@ -185,7 +185,7 @@ python launch_benchmark.py \
 
 The translated German text will be in the file `translation.txt` located at `~/models/benchmarks/common/tensorflow/logs`   
    
-3.2. <b>*Max Throughput inference*</b> (using `--socket-id 0` and `--batch-size 64` for throughput)
+3.2. <b>*Batch inference*</b> (using `--socket-id 0` and `--batch-size 64`)
 
 ```bash
 python launch_benchmark.py \
@@ -222,7 +222,7 @@ Log location outside container: /~/models/benchmarks/common/tensorflow/logs/benc
 The logs are captured in a directory outside of the container.<br> 
 
 4. <a name="step_4"></a>If you want to run the ```launch_benchmark.py``` interactively from within the docker container, add flag ```--debug```. This will launch a docker container based on the ```--docker_image```,
-performs necessary installs, runs the ```launch_benchmark.py``` script and does not terminate the container process. As an example, this step will demonstrate real-time inference (--batch-size 1), but you can implement the same strategy for max throughput (--batch-size 64)."
+performs necessary installs, runs the ```launch_benchmark.py``` script and does not terminate the container process. As an example, this step will demonstrate online inference (--batch-size 1), but you can implement the same strategy for batch inference (--batch-size 64)."
 
 console in:		
 ```bash

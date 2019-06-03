@@ -5,7 +5,7 @@ following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Benchmarking instructions and scripts for model training and inference
+Instructions and scripts for model training and inference
 other precisions are coming later.
 
 ## Int8 Inference Instructions
@@ -23,12 +23,12 @@ $ git checkout 2d8b0cb9b2e70281bf9dce438ff17ffa5e59075c
 ```
 
 2. Clone the [intelai/models](https://github.com/intelai/models) repository.
-It will be used to run the SSD-VGG16 model accuracy and benchmark tests.
+It will be used to run the SSD-VGG16 model accuracy and inference performance tests.
 
 3. Download the 2017 validation images file:
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 This is required if you would like to run the accuracy test,
-or the throughput and latency benchmark with real data.
+or batch/online inference with real data.
 
 ```
 $ wget http://images.cocodataset.org/zips/val2017.zip
@@ -87,16 +87,16 @@ total 792084
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_int8_pretrained_model.pb
 ```
 
-6. Navigate to the `benchmarks` directory (step 2), and run the benchmarking scripts for either benchmarking throughput
-and latency or accuracy.
+6. Navigate to the `benchmarks` directory (step 2), and run the model scripts for either batch or online
+inference or accuracy.
 ```
 $ cd models/benchmarks
 ```
 
-* Run benchmarking for throughput and latency where the `--model-source-dir` is the model source directory from step 1,
-and the `--in-graph` is the pretrained model graph from step 5,
-if you specify the `--data-location` which is the path to the tf record file that you generated in step 4,
-the benchmark will run with real data, otherwise dummy data will be used:
+* Run the model for batch or online inference where the `--model-source-dir` is the model source directory from step 1,
+and the `--in-graph` is the pretrained model graph from step 5.
+If you specify the `--data-location` which is the path to the tf record file that you generated in step 4,
+the model will run with real data, otherwise dummy data will be used:
 ```
 python launch_benchmark.py \
     --model-name ssd_vgg16 \
@@ -142,7 +142,7 @@ python launch_benchmark.py \
 ```
 
 >Notes: 
->* For the throughput and latency benchmark, we recommend the provided values for the arguments: `--num-inter-threads=11`, `--num-intra-threads=21`, `--data-num-inter-threads=21`,
+>* For batch and online inference, we recommend the provided values for the arguments: `--num-inter-threads=11`, `--num-intra-threads=21`, `--data-num-inter-threads=21`,
  `--data-num-intra-threads=28` for optimized performance on `28-cores Cascade Lake (CLX)` machine.
  
 >* SSD-VGG16 model accuracy test works only with the `Python3` based docker images.
@@ -152,8 +152,8 @@ to get additional debug output or change the default output location.
 
 6. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running benchmarking for throughput
-and latency, the following results are based on CLX 28-cores with hyper-threading enabled:
+Below is a sample log file tail when running the model for batch
+and online inference, the following results are based on CLX 28-cores with hyper-threading enabled:
 
 ```
 Batch size = 1
@@ -189,13 +189,13 @@ Use the steps 1, 2,3 and 4 as above.
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_fp32_pretrained_model.pb
 ```
 
-6. Navigate to the `benchmarks` directory (step 2), and run the benchmarking scripts for either benchmarking throughput
-and latency or accuracy.
+6. Navigate to the `benchmarks` directory (step 2), and run the model scripts for either batch
+and online inference or accuracy.
 ```
 $ cd models/benchmarks
 ```
 
-* Run benchmarking for throughput and latency where the `--model-source-dir` is the model source directory from step 1,
+* Run the model for batch and online inference where the `--model-source-dir` is the model source directory from step 1,
 and the `--in-graph` is the pretrained model graph from step 5,
 if you specify the `--data-location` which is the path to the tf record file that you generated in step 4,
 the benchmark will run with real data, otherwise dummy data will be used:
@@ -246,7 +246,7 @@ python launch_benchmark.py \
 ```
 
 >Notes: 
->* For the throughput and latency benchmark, we recommend the provided values for the arguments: `--num-inter-threads=11`, `--num-intra-threads=21`, `--data-num-inter-threads=21`,
+>* For batch and online inference, we recommend the provided values for the arguments: `--num-inter-threads=11`, `--num-intra-threads=21`, `--data-num-inter-threads=21`,
  `--data-num-intra-threads=28` for optimized performance on `28-cores Cascade Lake (CLX)` machine.
  
 >* SSD-VGG16 model accuracy test works only with the `Python3` based docker images.
@@ -256,7 +256,7 @@ to get additional debug output or change the default output location.
 
 6. The log file is saved to the value of `--output-dir`.
 
-Below is a sample log file tail when running throughput and latency benchmarking,
+Below is a sample log file tail when running batch and online inference,
 the following results are based on CLX 28-cores with hyper-threading enabled:
 
 ```

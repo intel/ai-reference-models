@@ -1,6 +1,6 @@
 # Contributing to the Model Zoo for Intel® Architecture
 
-## Adding benchmarking scripts for a new TensorFlow model
+## Adding scripts for a new TensorFlow model
 
 ### Code updates
 
@@ -14,7 +14,7 @@ required:
    Note that you will need to add `__init__.py` files in each new
    directory that you add, in order for python to find the code.
 
-   ![Benchmarks Directory Structure](benchmarks_directory_structure.png)
+   ![Directory Structure](benchmarks_directory_structure.png)
 
 2. Next, in the leaf folder that was created in the previous step, you
    will need to create `config.json` and `model_init.py` files:
@@ -149,16 +149,16 @@ developing new scripts:
    This README file should describe all of the steps necessary to run
    the model, including downloading and preprocessing the dataset,
    downloading the pretrained model, cloning repositories, and running
-   the benchmarking script with the appropriate arguments. Most models
-   have best known settings for throughput and latency performance
+   the model script with the appropriate arguments. Most models
+   have best known settings for batch and online inference performance
    testing as well as testing accuracy. The README file should specify
    how to set these configs using the `launch_benchmark.py` script.
 
-2. Update the table in the [benchmarks README](/benchmarks/README.md)
+2. Update the table in the [main `benchmarks` README](/benchmarks/README.md)
    with a link to the model that you are adding. Note that the models
    in this table are ordered alphabetically by use case, framework, and
    model name. The model name should link to the original paper for the
-   model. The benchmarking instructions column should link to the README
+   model. The instructions column should link to the README
    file that you created in the previous step.
 
 ### Testing
