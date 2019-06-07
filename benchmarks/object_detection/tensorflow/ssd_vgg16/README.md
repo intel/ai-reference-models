@@ -125,7 +125,7 @@ the model directory `SSD.TensorFlow` from step 1.
 
     ```
     * The `--data-location` is required, which is the path to the tf record file that you generated in step 4.
-    * Copy the annotation file `instances_val2017.json` (from step 3) to the dataset directory `/home/<user>/coco/output`.
+    * Copy the annotation file `instances_val2017.json` (from step 3) to the dataset directory `/home/<user>/tf_records/`.
     * Use the `--accuracy-only` flag:
 ```
 python launch_benchmark.py \
@@ -150,7 +150,7 @@ python launch_benchmark.py \
 >* The `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
 
-6. The log file is saved to the value of `--output-dir`.
+7. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running the model for batch
 and online inference, the following results are based on CLX 28-cores with hyper-threading enabled:
@@ -229,7 +229,7 @@ the model directory `SSD.TensorFlow` from step 1.
 
     ```
     * The `--data-location` is required, which is the path to the tf record file that you generated in step 3.
-    * Copy the annotation file `instances_val2017.json` (from step 3) to the dataset directory `/home/<user>/coco/output`.
+    * Copy the annotation file `instances_val2017.json` (from step 3) to the dataset directory `/home/<user>/tf_records/`.
     * Use the `--accuracy-only` flag:
 ```
 python launch_benchmark.py \
@@ -254,7 +254,7 @@ python launch_benchmark.py \
 >* The `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
 
-6. The log file is saved to the value of `--output-dir`.
+7. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running batch and online inference,
 the following results are based on CLX 28-cores with hyper-threading enabled:
