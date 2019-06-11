@@ -1,10 +1,12 @@
 # Image Recognition with TensorFlow Serving on CPU
+
 ### Online and Batch Inference
-Model: InceptionV3 and ResNet50
+Model and Precision: InceptionV3 FP32, ResNet50 FP32, and ResNet50 Int8
 
 ## Goal
 
-This tutorial will introduce you to the CPU performance considerations for image recognition deep learning models and how to use Intel® Optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
+This tutorial will introduce you to the CPU performance considerations for image recognition deep learning models with different precisions and
+how to use Intel® Optimizations for [TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
 It also provides sample code that you can use to get your optimized TensorFlow model server and GRPC client up and running quickly.
 
 ## Prerequisites
@@ -22,20 +24,28 @@ This tutorial assumes you have already:
 Convolutional neural networks (CNNs) for image recognition are computationally expensive. 
 The Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations via efficient vectorization and multi-threading.
 Tuning TensorFlow Serving to take full advantage of your hardware for image recognition deep learning inference involves:
-1. Working through this tutorial to set up servable versions of the well-known [ResNet50](https://arxiv.org/pdf/1512.03385.pdf) and [InceptionV3](https://arxiv.org/pdf/1512.00567v1.pdf) CNN models
+1. Working through this tutorial to set up servable versions of the well-known [ResNet50](https://arxiv.org/pdf/1512.03385.pdf) and [InceptionV3](https://arxiv.org/pdf/1512.00567v1.pdf) CNN models with different precisions.
 2. Running a TensorFlow Serving docker container configured for performance given your hardware resources
 3. Running a client script to measure online and batch inference performance
 4. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case
 
 ## Hands-on Tutorial - InceptionV3 and Resnet50
 
-For steps 1 and 2, refer to the Intel Model Zoo FP32 READMEs:
-* [InceptionV3 README](/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions)
-* [ResNet50 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
+This section shows a step-by-step example for how to serve one of the following Image Recognition models
+`(ResNet50 FP32, ResNet50 Int8, and InceptionV3 FP32)` using TensorFlow Serving.
+It also explains the possible ways to manage the available CPU resources and tune it for the optimal performance.
 
-NOTE: The below example shows InceptionV3. The same code snippets will work for ResNet50 by replacing the model name to `resnet50`.
+For steps 1 and 2, refer to the Intel Model Zoo READMEs:
+*  **FP32 precision:** use the Intel Model Zoo `FP32` README sections,
+    * [InceptionV3 FP32 README](/benchmarks/image_recognition/tensorflow/inceptionv3#fp32-inference-instructions), and 
+    * [ResNet50 FP32 README](/benchmarks/image_recognition/tensorflow/resnet50#fp32-inference-instructions)
 
-1. **Download the Model**: Download and extract the InceptionV3 pre-trained model (FP32), using the instructions in above README.
+*  **Int8 precision:** use the Intel Model Zoo `Int8` README sections,
+    * [ResNet50 Int8 README](/benchmarks/image_recognition/tensorflow/resnet50#int8-inference-instructions)
+
+>NOTE: The below example shows InceptionV3 (FP32). The same code snippets will work for ResNet50 (FP32 and Int8) by replacing the model name to `resnet50`.
+
+1. **Download the Model**: Download and extract the InceptionV3 pre-trained model, using the instructions in above README.
 
 2. **(Optional) Download Data**: If you are interested only in testing performance, not accuracy, you can skip this step and use synthetic data.
    If you want to verify prediction accuracy by testing on real data, follow the instructions in one of the READMEs above to download the ImageNet dataset.
@@ -62,7 +72,7 @@ NOTE: The below example shows InceptionV3. The same code snippets will work for 
    (venv)$ pip install tensorflow-serving-api
    ```
 5. **Create a SavedModel**: Using the conversion script `model_graph_to_saved_model.py`, convert the pre-trained model graph to a SavedModel.
-   (For ResNet50, substitute the name of the ResNet50 FP32 pre-trained model.)
+   (For ResNet50, substitute the name of the ResNet50 FP32 or the ResNet50 Int8 pre-trained model.)
    
    Example:
    ```
@@ -174,7 +184,7 @@ NOTE: The below example shows InceptionV3. The same code snippets will work for 
     
 ## Conclusion
 
-You have now seen two end-to-end examples of serving an image recognition model for inference using TensorFlow Serving, and learned:
+You have now seen three end-to-end examples of serving an image recognition model for inference using TensorFlow Serving, and learned:
 1. How to create a SavedModel from a TensorFlow model graph
 2. How to choose good values for the performance-related runtime parameters exposed by the `docker run` command
 3. How to verify that the served model can correctly classify an image using a GRPC client
