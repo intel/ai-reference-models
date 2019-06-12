@@ -60,6 +60,8 @@ if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
   apt update
   apt full-upgrade -y
+  # Set env var before installs so that user interaction is not required
+  export DEBIAN_FRONTEND=noninteractive
   apt-get install python-tk numactl -y
   apt install -y libsm6 libxext6
   pip install --upgrade pip
