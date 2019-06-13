@@ -14,7 +14,7 @@
 #
 
 ####### USAGE #########
-# python rfcn-benchmark.py -i <path-to-COCO-validation-images>
+# python object_detection_benchmark.py -i <path-to-COCO-validation-images> -m <model> -p <protocol>
 
 
 from __future__ import print_function
@@ -25,8 +25,6 @@ import random
 import requests
 import numpy as np
 from PIL import Image
-import tensorflow as tf
-from object_detection.utils.visualization_utils import visualize_boxes_and_labels_on_image_array
 
 
 def check_for_link(value):
@@ -40,12 +38,26 @@ def check_for_link(value):
         raise argparse.ArgumentTypeError("{} cannot be a link.".format(value))
 
 def check_valid_folder(value):
-    """verifies filename exists and isn't a link"""
+    """Verifies filename exists and isn't a link"""
     if value is not None:
         if not os.path.isdir(value):
             raise argparse.ArgumentTypeError("{} does not exist or is not a directory.".
                                     format(value))
         check_for_link(value)
+    return value
+
+def check_valid_model(value):
+    """Verifies model name is supported"""
+    if value not in ('rfcn', 'ssdmobilenet'):
+        raise argparse.ArgumentError("Model name {} does not match 'rfcn' or 'ssdmobilenet'.".
+                                    format(value))
+    return value
+
+def check_valid_protocol(value):
+    """Verifies protocol is supported"""
+    if value not in ('rest', 'grpc'):
+        raise argparse.ArgumentError("Protocol name {} does not match 'rest' or 'grpc'.".
+                                    format(value))
     return value
 
 def get_random_image(image_dir):
@@ -55,15 +67,38 @@ def get_random_image(image_dir):
     
     return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
 
+def make_request(batch_size):
+    if PROTOCOL == 'rest':
+        np_images = np.repeat(np.expand_dims(get_random_image(IMAGES_PATH), 0).tolist(), batch_size, axis=0).tolist()
+        return '{"instances" : %s}' % np_images
+    elif PROTOCOL == 'grpc':
+        import grpc
+        import tensorflow as tf
+        from tensorflow_serving.apis import predict_pb2
+        from tensorflow_serving.apis import prediction_service_pb2_grpc
+        np_images = np.repeat(np.expand_dims(get_random_image(IMAGES_PATH), 0), batch_size, axis=0)
+        channel = grpc.insecure_channel(SERVER_URL)
+        stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
+        request = predict_pb2.PredictRequest()
+        request.model_spec.name = MODEL
+        request.model_spec.signature_name = 'serving_default'
+        request.inputs['inputs'].CopyFrom(tf.contrib.util.make_tensor_proto(np_images))
+        return (stub, request)
+
+def send_request(predict_request):
+    if PROTOCOL == 'rest':
+        requests.post(SERVER_URL, data=predict_request)
+    elif PROTOCOL == 'grpc':
+        predict_request[0].Predict(predict_request[1])
+
 def benchmark(batch_size=1, num_iteration=20, warm_up_iteration=10):
     i = 0
     total_time = 0
     for _ in range(num_iteration):
         i += 1
-        np_images = np.repeat(np.expand_dims(get_random_image(IMAGES_PATH), 0).tolist(), batch_size, axis=0).tolist()
-        predict_request = '{"instances" : %s}' % np_images
+        predict_request = make_request(batch_size)
         start_time = time.time()
-        requests.post(SERVER_URL, data=predict_request)
+        send_request(predict_request)
         time_consume = time.time() - start_time
         print('Iteration %d: %.3f sec' % (i, time_consume))
         if i > warm_up_iteration:
@@ -81,15 +116,26 @@ if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-i", "--images_path", type=check_valid_folder, required=True, 
                     help="Path to COCO validation directory")
+    ap.add_argument("-m", "--model", type=check_valid_model, required=True,
+                    help="Name of model (rfcn or ssdmobilenet)")
+    ap.add_argument("-p", "--protocol", type=check_valid_protocol, required=True,
+                    help="Name of protocol (rest or grpc)")
     args = vars(ap.parse_args())
-    
-    SERVER_URL = 'http://localhost:8501/v1/models/rfcn:predict'
+
     IMAGES_PATH = args['images_path']
+    MODEL = args['model']
+    PROTOCOL = args['protocol']
+    if PROTOCOL == 'rest':
+        SERVER_URL = 'http://localhost:8501/v1/models/{}:predict'.format(MODEL)
+    elif PROTOCOL == 'grpc':
+        SERVER_URL = 'localhost:8500'
 
     print('\n SERVER_URL: {} \n IMAGES_PATH: {}'.format(SERVER_URL, IMAGES_PATH))
     
-    print('\nStarting R-FCN model benchmarking for Latency with batch_size=1, num_iteration=20, warm_up_iteration=10')
+    print('\nStarting {} model benchmarking for latency on {}:'.format(MODEL.upper(), PROTOCOL.upper()))
+    print('batch_size=1, num_iteration=20, warm_up_iteration=10\n')
     benchmark(batch_size=1, num_iteration=20, warm_up_iteration=10)
     
-    print('\nStarting R-FCN model benchmarking for Throughput with batch_size=128, num_iteration=10, warm_up_iteration=2')
+    print('\nStarting {} model benchmarking for throughput on {}:'.format(MODEL.upper(), PROTOCOL.upper()))
+    print('batch_size=128, num_iteration=10, warm_up_iteration=2\n')
     benchmark(batch_size=128, num_iteration=10, warm_up_iteration=2)
