@@ -92,7 +92,9 @@ class ModelInitializer(BaseModelInitializer):
                     if self.args.batch_size != -1 else "1") + \
                    " --file=" + self.args.decode_from_file + \
                    " --file_out=" + translate_file + \
-                   " --vocab_file=" + self.args.vocab_file
+                   " --vocab_file=" + self.args.vocab_file +\
+                   " --num_inter=" + str(self.args.num_inter_threads) +\
+                   " --num_intra=" + str(self.args.num_intra_threads)
 
         self.bleu_params += " --translation=" + translate_file + \
                             " --reference=" + self.args.reference
