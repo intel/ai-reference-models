@@ -443,6 +443,7 @@ function maskrcnn() {
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      pip3 install --force-reinstall scipy==1.2.1
 
       # install cocoapi
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
