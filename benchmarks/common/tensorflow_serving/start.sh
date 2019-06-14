@@ -103,8 +103,7 @@ function resnet50_or_inceptionv3(){
     virtualenv venv
 
     source venv/bin/activate
-    pip install grpc \
-        requests \
+    pip install requests \
         intel-tensorflow \
         tensorflow-serving-api
 

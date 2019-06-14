@@ -260,7 +260,7 @@ $ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmo
 	$ cd ~
 	$ virtualenv tfserving_venv
 	$ source tfserving_venv/bin/activate
-	(tfserving_venv)$ pip install grpc requests tensorflow tensorflow-serving-api
+	(tfserving_venv)$ pip install requests tensorflow tensorflow-serving-api
 	```
 * Run the example `resnet_client_grpc.py` script from the TensorFlow Serving repository, which you cloned earlier.
 	```

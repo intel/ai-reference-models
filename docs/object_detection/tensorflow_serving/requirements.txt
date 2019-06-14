@@ -2,7 +2,6 @@
 requests
 
 # grpc
-grpc
 intel-tensorflow
 tensorflow-serving-api
 
