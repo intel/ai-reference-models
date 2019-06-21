@@ -103,10 +103,12 @@ function resnet50_or_inceptionv3(){
     virtualenv venv
 
     source venv/bin/activate
-    pip install requests \
-        intel-tensorflow \
-        tensorflow-serving-api
-
+    # Make sure intel-tensorflow is after tensorflow-serving-api, so that
+    # tensorflow from intel-tensorflow get installed effectively.
+    pip install grpc \
+        requests \
+        tensorflow-serving-api \
+        intel-tensorflow
     # cd to image recognition tfserving scripts
     cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
 
