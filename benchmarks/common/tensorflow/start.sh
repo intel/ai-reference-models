@@ -67,9 +67,15 @@ if [[ ${NOINSTALL} != "True" ]]; then
   pip install --upgrade pip
   pip install requests
 
-  # install google-perftools for tcmalloc
+  # install libgoogle-perftools-dev for tcmalloc
   if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-    apt-get install google-perftools -y
+    apt-get install --no-install-recommends --fix-missing google-perftools -y
+    if [ ! -f /usr/lib/libtcmalloc.so ]; then
+      apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
+      if [ ! -f /usr/lib/libtcmalloc.so ]; then
+        ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
+      fi
+    fi
   fi
 fi
 
@@ -827,7 +833,13 @@ function wide_deep_large_ds() {
     if [[ -z "${LIBTCMALLOC}" ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
-      apt-get install google-perftools --fix-missing -y
+      apt-get install --no-install-recommends --fix-missing google-perftools -y
+      if [ ! -f /usr/lib/libtcmalloc.so ]; then
+        apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
+        if [ ! -f /usr/lib/libtcmalloc.so ]; then
+          ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
+        fi
+      fi
     fi
 
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
