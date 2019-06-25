@@ -196,7 +196,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget
+    apt-get -y install wget unzip
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -642,6 +642,7 @@ function ssd-resnet34() {
         do
           pip install $line
         done
+        apt install -y git-all
         old_dir=${PWD}
         cd /tmp
         git clone --single-branch https://github.com/tensorflow/benchmarks.git
@@ -760,6 +761,10 @@ function transformer_lt_official() {
     if [[ -z "${vocab_file}" ]]; then
         echo "transformer-language requires -- vocab_file arg to be defined"
         exit 1
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install pandas
     fi
 
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
