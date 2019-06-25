@@ -57,7 +57,7 @@ modes/precisions:
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
        --checkpoint /home/<user>/unet_trained \
        --model-source-dir /home/<user>/tf_unet \
        -- checkpoint_name=model.cpkt

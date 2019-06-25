@@ -71,7 +71,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --num-cores 1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
     --model-source-dir /home/<user>/wavenet/tensorflow-wavenet \
     --checkpoint /home/<user>/wavenet_checkpoints \
     -- checkpoint_name=model.ckpt-99 sample=8510

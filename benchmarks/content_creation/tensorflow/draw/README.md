@@ -48,7 +48,7 @@ modes/precisions:
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
+            --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
             --checkpoint /home/<user>/draw_fp32_pretrained_model \
             --data-location /home/<user>/mnist \
             --batch-size 1 \
@@ -61,7 +61,7 @@ modes/precisions:
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
+            --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
             --checkpoint /home/<user>/draw_fp32_pretrained_model \
             --data-location /home/<user>/mnist \
             --batch-size 100 \

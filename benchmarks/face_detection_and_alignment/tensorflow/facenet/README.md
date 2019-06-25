@@ -59,7 +59,7 @@ python launch_benchmark.py \
     --checkpoint /home/<user>/checkpoints \
     --data-location  /home/<user>/dataset \
     --model-source-dir /home/<user>/facenet/ \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
 ```
 Example log tail for online inference:
 ```
@@ -94,7 +94,7 @@ python launch_benchmark.py \
     --checkpoint /home/<user>/checkpoints \
     --data-location  /home/<user>/dataset \
     --model-source-dir /home/<user>/facenet/ \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
 ```
 Example log tail for batch inference:
 ```
@@ -126,7 +126,7 @@ python launch_benchmark.py \
     --checkpoint /home/<user>/checkpoints \
     --data-location  /home/<user>/dataset \
     --model-source-dir /home/<user>/facenet/ \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
 ```
 Example log tail for accuracy:
 ```
