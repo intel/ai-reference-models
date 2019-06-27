@@ -9,17 +9,26 @@ other platforms are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone [mlperf/inference](https://github.com/mlperf/inference.git) and 
-checkout `setInter` branch.
+1. Clone [mlperf/inference](https://github.com/mlperf/inference.git)
+with the current SHA from master of the repo on 6/26/2019:
 ```
 git clone https://github.com/mlperf/inference.git
-cd mlperf
-git checkout setInter
+cd inference
+git checkout 41eb3e489233e83e544cd25148aca177b95d7bea
 ```
 
-To prepare the checkpoint and dataset, run:
+To prepare the checkpoint and dataset, run the `benchmark.py` script
+from the mlperf inference repo. Since this requires python3 and
+TensorFlow to be installed, the following instructions show how to run
+a docker container with your cloned mlperf inference repo mounted as a
+volume:
 ```
-python inference/cloud/language_modeling/benchmark.py 
+docker run --volume /home/<user>/inference:/inference -it intelaipg/intel-optimized-tensorflow:1.14.0-py3 /bin/bash
+```
+In the docker container, run:
+```
+cd /inference/others/cloud/language_modeling/
+python3 benchmark.py
 ```
 
 2. Clone this [intelai/models](https://github.com/IntelAI/models)
@@ -54,7 +63,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
-    --model-source-dir <path_to_mlperf>/inference/cloud/language_modeling
+    --model-source-dir <path_to_mlperf>/inference/others/cloud/language_modeling
 
 ```
 
@@ -69,7 +78,7 @@ python launch_benchmark.py \
     --batch-size 1024 \
     --socket-id 0 \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
-    --model-source-dir <path_to_mlperf>/inference/cloud/language_modeling \
+    --model-source-dir <path_to_mlperf>/inference/others/cloud/language_modeling \
     -- steps=4 \
 ```
 
