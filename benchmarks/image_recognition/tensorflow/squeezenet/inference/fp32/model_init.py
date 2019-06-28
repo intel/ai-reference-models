@@ -47,14 +47,13 @@ class ModelInitializer (BaseModelInitializer):
         self.command = ("taskset -c {:.0f}-{:.0f} {} {} "
                         "--data_location {} --batch_size {:.0f} "
                         "--num_inter_threads {:.0f} --num_intra_threads {:.0f}"
-                        " --model_dir {} --inference-only").format(
+                        " --model_dir {} --inference-only {}").format(
             self.args.socket_id * cores_per_socket,
             ncores - 1 + self.args.socket_id * cores_per_socket, self.python_exe,
             script_path, self.args.data_location, self.args.batch_size,
             self.args.num_inter_threads, self.args.num_intra_threads,
-            self.args.checkpoint)
-
-        self.command += (' '.join(custom_args)).replace('\t', ' ')
+            self.args.checkpoint,
+            (' '.join(custom_args)).replace('\t', ' '))
 
     def run(self):
         if self.args.verbose:
