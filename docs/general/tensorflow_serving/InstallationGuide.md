@@ -36,6 +36,8 @@ We will break down the installation into 2 steps:
 * Step 1: Build the Intel Optimized TensorFlow Serving Docker image
 * Step 2: Verify the Docker image by serving a simple model - half_plus_two
 
+You can build the docker images using [this](/benchmarks/common/tensorflow_serving/build_tfserving_image.sh) script or continue with the steps below.
+
 ### Step 1: Build TensorFlow Serving Docker image.
 The recommended way to use TensorFlow Serving is with Docker images. Let’s build a docker image with TensorFlow Serving optimized for Intel® Processors. 
 
@@ -46,7 +48,6 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ echo "export TF_SERVING_ROOT=$(pwd)/serving" >> ~/.bashrc
 	```
 
-* You can also build image using [this](/benchmarks/common/tensorflow_serving/build_tfserving_image.sh) script, run as per comments mentioned. Or Continue manual steps as below.
 
 * Using `Dockerfile.devel-mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
   
