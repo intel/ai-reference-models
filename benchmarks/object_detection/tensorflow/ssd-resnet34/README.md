@@ -134,7 +134,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --benchmark-only
 ```
 
@@ -154,7 +154,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --accuracy-only
 ```
 
@@ -310,7 +310,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --benchmark-only
 ```
 
@@ -330,7 +330,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --accuracy-only
 ```
 

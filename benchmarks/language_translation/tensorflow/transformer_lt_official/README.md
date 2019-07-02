@@ -65,7 +65,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow-models/models \
     --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
     --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
@@ -85,7 +85,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 64 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow-models/models \
     --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
     --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \

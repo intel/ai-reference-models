@@ -23,7 +23,7 @@ TensorFlow to be installed, the following instructions show how to run
 a docker container with your cloned mlperf inference repo mounted as a
 volume:
 ```
-docker run --volume /home/<user>/inference:/inference -it intelaipg/intel-optimized-tensorflow:1.14.0-py3 /bin/bash
+docker run --volume /home/<user>/inference:/inference -it gcr.io/deeplearning-platform-release/tf-cpu.1-14 /bin/bash
 ```
 In the docker container, run:
 ```
@@ -62,7 +62,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir <path_to_mlperf>/inference/others/cloud/language_modeling
 
 ```
@@ -77,7 +77,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1024 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir <path_to_mlperf>/inference/others/cloud/language_modeling \
     -- steps=4 \
 ```

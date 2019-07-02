@@ -103,7 +103,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/SSD.TensorFlow \
     --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_int8_pretrained_model.pb \
@@ -133,7 +133,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/SSD.TensorFlow \
     --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_int8_pretrained_model.pb \
@@ -210,7 +210,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --batch-size 1 \
     --socket-id 0 \
     --num-inter-threads 11 \
@@ -237,7 +237,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/SSD.TensorFlow \
     --data-location /home/<user>/tf_records \
     --in-graph /home/<user>/ssdvgg16_fp32_pretrained_model.pb \
