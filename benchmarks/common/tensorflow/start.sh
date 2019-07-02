@@ -449,7 +449,7 @@ function maskrcnn() {
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-      pip3 install --force-reinstall scipy==1.2.1
+      pip3 install --force-reinstall scipy==1.2.1 Pillow==5.3.0
 
       # install cocoapi
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
@@ -551,6 +551,7 @@ function rfcn() {
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies
     pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+
     original_dir=$(pwd)
 
     cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
@@ -560,6 +561,10 @@ function rfcn() {
     # install cocoapi
     get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
+
+  # Fix the object_detection_evaluation.py file to change unicode() to str() so that it works in py3
+  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
+  sed -i.bak "s/unicode(/str(/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
 
   split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
