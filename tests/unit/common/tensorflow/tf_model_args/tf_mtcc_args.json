@@ -1,0 +1,5 @@
+[
+  { "_comment": "FP32 benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=face_detection_and_alignment --model-name=mtcc --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --checkpoint=/checkpoints     --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/one_image_test.py --num_inter_threads 1 --num_intra_threads 28 -ckpt /checkpoints -dl /dataset"}
+]

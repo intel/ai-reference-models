@@ -67,8 +67,10 @@ Substitute the `--model-source-dir` for the location where you cloned the
 [tensorflow/tensor2tensor](https://github.com/tensorflow/tensor2tensor) repo
 (from step 1).
 
-Transformer Language can run for online or batch inference. Use one of the following examples below, depending on
-your use case.
+Transformer Language can run for online or batch 
+inference. Use one of the following examples below, depending on
+your use case. Note that if no `reference` file is provided in the
+launch script parameters, then the BLEU score cannot be calculated.
 
 For online inference (using `--socket-id 0` and `--batch-size 1`):
 
@@ -80,7 +82,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
     --data-location /home/<user>/t2t_data \
     --model-source-dir /home/<user>/tensor2tensor/ \
@@ -97,7 +99,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 32 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
     --data-location /home/<user>/t2t_data \
     --model-source-dir /home/<user>/tensor2tensor/ \
@@ -124,8 +126,6 @@ INFO:tensorflow:Writing decodes into /workspace/models/out_dir/output_infer
   Inference time 6094.9205, Latency = 2810.0141 ms/setences
 BLEU_uncased =  22.63
 BLEU_cased =  22.20
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_transformer_language_inference_fp32_20190210_050451.log
 ```
@@ -140,8 +140,6 @@ INFO:tensorflow:Writing decodes into /workspace/models/out_dir/output_infer
   Inference time 1174.0522, Throughput = 1.8474 sentences/second
 BLEU_uncased =  22.63
 BLEU_cased =  22.20
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 32
 Log location outside container: {--output-dir value}/benchmark_transformer_language_inference_fp32_20190210_072635.log
 ```

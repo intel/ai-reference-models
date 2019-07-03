@@ -33,8 +33,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 128
 
-        # Set KMP env vars (except KMP_SETTINGS is not set)
-        self.set_kmp_vars(kmp_settings=None)
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # set num_inter_threads and num_intra_threads (override inter threads to 2)
         self.set_num_inter_intra_threads(num_inter_threads=2)
@@ -56,7 +57,6 @@ class ModelInitializer(BaseModelInitializer):
             self.command_prefix = ("{prefix} "
                                    "--dataset_name imagenet "
                                    "--checkpoint_path {checkpoint} "
-                                   "--dataset_dir {dataset} "
                                    "--dataset_split_name=validation "
                                    "--clone_on_cpu=True "
                                    "--model_name {model} "
@@ -64,9 +64,11 @@ class ModelInitializer(BaseModelInitializer):
                                    "--intra_op_parallelism_threads {intra} "
                                    "--batch_size {bz}").format(
                 prefix=self.command_prefix, checkpoint=self.args.checkpoint,
-                dataset=self.args.data_location, model=self.args.model_name,
-                inter=self.args.num_inter_threads,
+                model=self.args.model_name, inter=self.args.num_inter_threads,
                 intra=self.args.num_intra_threads, bz=self.args.batch_size)
+
+            if self.args.data_location:
+                self.command_prefix += " --dataset_dir {}".format(self.args.data_location)
         else:
             # add args for the accuracy script
             script_args_list = [

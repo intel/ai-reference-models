@@ -79,7 +79,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --batch-size 64 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --checkpoint /home/<user>/squeezenet_checkpoints \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -94,7 +94,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --checkpoint /home/<user>/squeezenet_checkpoints \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -114,8 +114,6 @@ SqueezeNet Inference Summary:
             throughput[med] = 837.1 image/sec
             latency[median] = 1.195 ms
 
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 64
 Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220051.log
 ```
@@ -129,8 +127,6 @@ SqueezeNet Inference Summary:
             throughput[med] = 115.3 image/sec
             latency[median] = 8.67 ms
 
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220712.log
 ```

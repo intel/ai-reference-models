@@ -1,0 +1,27 @@
+[
+  { "_comment": "Int8 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=-1 --accuracy-only --verbose --in-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/eval_image_classifier_accuracy.py --input_graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data_location=/dataset --input_height=299 --input_width=299 --num_inter_threads=2 --num_intra_threads=56 --output_layer=InceptionResnetV2/Logits/Predictions --batch_size=100"},
+
+  { "_comment": "Int8 command for latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --benchmark-only --verbose --in-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/eval_image_classifier_benchmark.py --input-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=1"},
+
+  { "_comment": "Int8 command for throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=0 --benchmark-only --verbose --in-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/eval_image_classifier_benchmark.py --input-graph=/in_graph/inception_resnet_v2_int8_pretrained_model.pb --inter-op-parallelism-threads=1 --intra-op-parallelism-threads=28 --batch-size=128"},
+
+  { "_comment": "Fp32 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=-1 --accuracy-only --verbose --in-graph=/in_graph/inception_resnet_v2_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/eval_image_classifier_accuracy.py --input_graph=/in_graph/inception_resnet_v2_fp32_pretrained_model.pb --data_location=/dataset --input_height=299 --input_width=299 --num_inter_threads=2 --num_intra_threads=56 --output_layer=InceptionResnetV2/Logits/Predictions --batch_size=100"},
+
+  { "_comment": "FP32 command for latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/inception_resnet_v2_fp32_pretrained_model.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/eval_image_classifier_benchmark.py --input-graph=/in_graph/inception_resnet_v2_fp32_pretrained_model.pb --inter-op-parallelism-threads=2 --intra-op-parallelism-threads=28 --batch-size=1"},
+
+  { "_comment": "FP32 command for throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inception_resnet_v2 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/inception_resnet_v2_fp32_pretrained_model.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/eval_image_classifier_benchmark.py --input-graph=/in_graph/inception_resnet_v2_fp32_pretrained_model.pb --inter-op-parallelism-threads=2 --intra-op-parallelism-threads=28 --batch-size=128"}
+]
+
+

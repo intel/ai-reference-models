@@ -1,0 +1,40 @@
+[
+  { "_comment": "FP32 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size 100 --socket-id 0 --accuracy-only  --verbose --in-graph=/in_graph/freezed_resnet50.pb --accuracy-only --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/freezed_resnet50.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=100 --data-location=/dataset --accuracy-only --num-cores=28 --warmup-steps=10 --steps=50"},
+
+  { "_comment": "FP32 command for latency benchmark with default --num-inter-threads, --num-intra-threads.",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name resnet50 --batch-size 128 --in-graph /freezed_resnet50.pb --intelai-models . --socket-id 0 --verbose",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./inference/eval_image_classifier_inference.py --input-graph=/freezed_resnet50.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=128 --warmup-steps=10 --steps=50 --num-cores=28"},
+
+  { "_comment": "FP32 command for latency benchmark with --num-inter-threads 4 --num-intra-threads 16",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name resnet50 --batch-size 1 --in-graph /freezed_resnet50.pb --intelai-models . --socket-id 0 --verbose --num-inter-threads 4 --num-intra-threads 16",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./inference/eval_image_classifier_inference.py --input-graph=/freezed_resnet50.pb --num-inter-threads=4 --num-intra-threads=16 --batch-size=1 --warmup-steps=10 --steps=50 --num-cores=28"},
+
+  { "_comment": "FP32 command for throughput benchmark with --num-inter-threads=1 --num-intra-threads=28",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name resnet50 --batch-size 128 --in-graph /freezed_resnet50.pb --intelai-models . --socket-id 0 --verbose",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./inference/eval_image_classifier_inference.py --input-graph=/freezed_resnet50.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=128 --warmup-steps=10 --steps=50 --num-cores=28"},
+
+  { "_comment": "Int8 command for throughput benchmark with --output-dir enabled.",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only --verbose --in-graph=/in_graph/resnet50_int8_pretrained_model.pb --steps=200 --warmup-steps=20",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50_int8_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=128 --warmup-steps=20 --steps=200"},
+
+  { "_comment": "Int8 command for data calibration with --calibration-only",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only   --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/resnet50_int8_pretrained_model.pb --data-location=/dataset --calibration-only",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/int8/generate_calibration_data.py --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/in_graph/resnet50_int8_pretrained_model.pb --data_location=/dataset"},
+
+  { "_comment": "Fp32 command for throughput benchmark with --output-results enabled.",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only --output-results --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/resnet50_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50_fp32_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=28 --num-cores=28 --batch-size=100 --warmup-steps=10 --steps=50 --data-location=/dataset --results-file-path /workspace/benchmarks/common/tensorflow/logs/resnet50_fp32_inference_results*.txt"},
+
+  { "_comment": "Int8 accuracy command",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name resnet50 --batch-size 100 --data-location /dataset --in-graph /final_int8_resnet50.pb --intelai-models . --accuracy-only --verbose",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python ./inference/eval_image_classifier_inference.py --input-graph=/final_int8_resnet50.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=100 --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only"},
+
+  { "_comment": "Int8 command for throughput benchmark with --steps=200 --warmup-steps=20",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50 --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only --verbose --in-graph=/in_graph/resnet50_int8_pretrained_model.pb --steps=200 --warmup-steps=20",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50_int8_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=128 --warmup-steps=20 --steps=200"
+  }
+]
+
+

@@ -9,6 +9,11 @@ Instructions for model training and inference for other precisions are coming la
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
@@ -92,7 +97,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -113,7 +118,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -130,7 +135,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -146,7 +151,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -163,16 +168,10 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -185,9 +184,8 @@ different configs.
 Example log tail when running for accuracy:
 
 ```
+Iteration time: 357.3781 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7666, 0.9333)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Executing command: python /workspace/intelai_models/int8/accuracy.py --input_height=299 --input_width=299 --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/in_graph/inceptionv3_int8_pretrained_model.pb --data_location=/dataset
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190104_013246.log
@@ -196,27 +194,25 @@ Log location outside container: {--output-dir value}/benchmark_inceptionv3_infer
 Example log tail when running for online inference:
 ```
 ...
-steps = 470, 53.7256017113 images/sec
-steps = 480, 52.5430812016 images/sec
-steps = 490, 52.9076139058 images/sec
-steps = 500, 53.5021876395 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+steps = 470, 134.912798739 images/sec
+steps = 480, 132.379245045 images/sec
+steps = 490, 133.977640069 images/sec
+steps = 500, 132.083262478 images/sec
+Average throughput for batch size 1: 133.440858806 images/sec
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194002.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190415_220455.log
 ```
 
 Example log tail when running for batch inference:
 ```
 ...
-steps = 470, 370.435654276 images/sec
-steps = 480, 369.710160177 images/sec
-steps = 490, 369.083388904 images/sec
-steps = 500, 370.287978128 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+steps = 470, 369.151656047 images/sec
+steps = 480, 373.174541014 images/sec
+steps = 490, 372.402638382 images/sec
+steps = 500, 371.836748659 images/sec
+Average throughput for batch size 128: 371.269087408 images/sec
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190223_194314.log
+Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_int8_20190416_162155.log
 ```
 
 ## FP32 Inference Instructions
@@ -262,7 +258,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for online inference:
@@ -279,8 +275,6 @@ Average time: 0.014 sec
 Batch size = 1
 Latency: 14.442 ms
 Throughput: 69.243 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_025220.log
 ```
@@ -295,7 +289,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for batch inference:
@@ -311,8 +305,6 @@ Iteration 40: 0.757 sec
 Average time: 0.760 sec
 Batch size = 128
 Throughput: 168.431 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_024842.log
 ```
@@ -329,16 +321,17 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --data-location /dataset/Imagenet_Validation \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for accuracy:
 ```
+Iteration time: 756.7571 ms
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7673, 0.9341)
+Iteration time: 757.3781 ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9341)
+Iteration time: 760.3024 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7675, 0.9342)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inceptionv3_inference_fp32_20190104_023816.log
 ```

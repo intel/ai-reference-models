@@ -57,7 +57,7 @@ modes/precisions:
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
        --checkpoint /home/<user>/unet_trained \
        --model-source-dir /home/<user>/tf_unet \
        -- checkpoint_name=model.cpkt
@@ -73,8 +73,6 @@ modes/precisions:
    ```
    Time spent per BATCH: 1.1043 ms
    Total samples/sec: 905.5344 samples/s
-   lscpu_path_cmd = command -v lscpu
-   lscpu located here: /usr/bin/lscpu
    Ran inference with batch size 1
    Log location outside container: {--output-dir value}/benchmark_unet_inference_fp32_20190201_205601.log
    ```

@@ -18,6 +18,8 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
+import glob
+import json
 import os
 
 
@@ -42,6 +44,13 @@ class BaseModelInitializer(object):
         self.custom_args = custom_args
         self.platform_util = platform_util
 
+        # Set default values for TCMalloc and convert string value to a boolean
+        if self.args.disable_tcmalloc is None:
+            # Set to False for int8 and True for other precisions
+            self.args.disable_tcmalloc = self.args.precision != "int8"
+        elif isinstance(self.args.disable_tcmalloc, str):
+            self.args.disable_tcmalloc = self.args.disable_tcmalloc == "True"
+
         # Ensure that we are using the proper version of python to run the benchmarking script
         self.python_exe = os.environ["PYTHON_EXE"]
 
@@ -61,15 +70,32 @@ class BaseModelInitializer(object):
 
         os.system(cmd)
 
-    def get_numactl_command(self, socket_id):
+    def get_command_prefix(self, socket_id, numactl=True):
         """
-        Returns the numactl command with --cpunodebind and --membind set to the
-        specified socket_id.  If socket_id is set to -1 (undefined) then an
-        empty string is returned.
+        Returns the command prefix with:
+         - LD_PRELOAD for int8 models (if tcmalloc is not disabled)
+         - The numactl command with --cpunodebind and --membind set to the specified socket_id (if numactl=True)
         """
-        return "" if socket_id == -1 else \
-            "numactl --cpunodebind={0} --membind={0} ".format(
-                str(socket_id))
+        command = ""
+
+        if not self.args.disable_tcmalloc:
+            # Try to find the TCMalloc library file
+            matches = glob.glob("/usr/lib/libtcmalloc.so*")
+
+            if len(matches) == 0:
+                matches = glob.glob("/usr/lib64/libtcmalloc.so*")
+
+            if len(matches) > 0:
+                command += "LD_PRELOAD={} ".format(matches[0])
+            else:
+                # Unable to find the TCMalloc library file
+                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
+                      "so the LD_PRELOAD environment variable will not be set.")
+
+        if socket_id != -1 and numactl:
+            command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
+
+        return command
 
     def add_args_to_command(self, command, arg_list):
         """
@@ -135,14 +161,28 @@ class BaseModelInitializer(object):
             print("num_inter_threads: {}\nnum_intra_threads: {}".format(
                 self.args.num_inter_threads, self.args.num_intra_threads))
 
-    def set_kmp_vars(self, kmp_settings="1", kmp_blocktime="1", kmp_affinity="granularity=fine,verbose,compact,1,0"):
+    def set_kmp_vars(self, config_file_path, kmp_settings=None, kmp_blocktime=None, kmp_affinity=None):
         """
         Sets KMP_* environment variables to the specified value, if the environment variable has not already been set.
-        The default values for this function's args are the most common values that we have seen in the model zoo.
+        The default values in the json file are the best known settings for the model.
         """
+        if os.path.exists(config_file_path):
+            with open(config_file_path, 'r') as config:
+                config_object = json.load(config)
+
+            # First sets default from config file
+            for param in config_object.keys():
+                for env in config_object[param].keys():
+                    set_env_var(env, config_object[param][env])
+
+        else:
+            print("Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(config_file_path))
+
+        # Override user provided envs
         if kmp_settings:
-            set_env_var("KMP_SETTINGS", kmp_settings)
+            set_env_var("KMP_SETTINGS", kmp_settings, overwrite_existing=True)
         if kmp_blocktime:
-            set_env_var("KMP_BLOCKTIME", kmp_blocktime)
+            set_env_var("KMP_BLOCKTIME", kmp_blocktime, overwrite_existing=True)
         if kmp_affinity:
-            set_env_var("KMP_AFFINITY", kmp_affinity)
+            set_env_var("KMP_AFFINITY", kmp_affinity, overwrite_existing=True)

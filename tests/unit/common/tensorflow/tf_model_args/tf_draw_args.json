@@ -1,0 +1,15 @@
+[
+  { "_comment": "FP32 latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=content_creation --model-name=draw --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0  --benchmark-only --verbose --checkpoint=/checkpoints --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0  python /workspace/intelai_models/inference/fp32/draw_inf.py --cp /checkpoints --num_inter_threads 1 --num_intra_threads 28 --bs 1 --dl /dataset --nw 100 --nb 200"},
+
+  { "_comment": "FP32 throughput benchmark with --num-inter-threads 4 --num-intra-threads 16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=content_creation --model-name=draw --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=0  --benchmark-only --verbose --checkpoint=/checkpoints --data-location=/dataset --num-inter-threads 4 --num-intra-threads 16",
+    "output": "numactl --cpunodebind=0 --membind=0  python /workspace/intelai_models/inference/fp32/draw_inf.py --cp /checkpoints --num_inter_threads 4 --num_intra_threads 16 --bs 100 --dl /dataset --nw 100 --nb 200"},
+
+  { "_comment": "FP32 Throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=content_creation --model-name=draw --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=0  --benchmark-only --verbose --checkpoint=/checkpoints --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0  python /workspace/intelai_models/inference/fp32/draw_inf.py --cp /checkpoints --num_inter_threads 1 --num_intra_threads 28 --bs 100 --dl /dataset --nw 100 --nb 200"}
+]
+
+

@@ -33,7 +33,8 @@ class ModelInitializer (BaseModelInitializer):
         self.set_num_inter_intra_threads()
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
@@ -41,7 +42,7 @@ class ModelInitializer (BaseModelInitializer):
             self.args.intelai_models, self.args.mode, self.args.precision,
             "one_image_test.py")
         self.command_prefix = \
-            self.get_numactl_command(self.args.socket_id) + \
+            self.get_command_prefix(self.args.socket_id) + \
             "{} ".format(self.python_exe) + benchmark_script
 
         self.run_cmd = \

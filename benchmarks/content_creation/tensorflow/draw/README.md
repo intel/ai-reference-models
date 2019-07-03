@@ -48,7 +48,7 @@ modes/precisions:
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
             --checkpoint /home/<user>/draw_fp32_pretrained_model \
             --data-location /home/<user>/mnist \
             --batch-size 1 \
@@ -61,7 +61,7 @@ modes/precisions:
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
             --checkpoint /home/<user>/draw_fp32_pretrained_model \
             --data-location /home/<user>/mnist \
             --batch-size 100 \
@@ -82,8 +82,6 @@ modes/precisions:
      Time spent per BATCH: 6.6667 ms
      Total samples/sec: 149.9996 samples/s
      Outputs saved in file: /home/<user>/mnist/draw_data.npy
-     lscpu_path_cmd = command -v lscpu
-     lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 1
      Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_012947.log
      ```
@@ -97,8 +95,6 @@ modes/precisions:
      Time spent per BATCH: 28.1952 ms
      Total samples/sec: 3546.7006 samples/s
      Outputs saved in file: /home/<user>/mnist/draw_data.npy
-     lscpu_path_cmd = command -v lscpu
-     lscpu located here: b'/usr/bin/lscpu'
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_013432.log
      ```

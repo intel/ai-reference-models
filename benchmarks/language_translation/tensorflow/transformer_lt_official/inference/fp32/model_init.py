@@ -31,13 +31,14 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
-        self.cmd = self.get_numactl_command(self.args.socket_id)
+        self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
 
         self.set_num_inter_intra_threads()
 
-        # Set the KMP env vars
-        self.set_kmp_vars(kmp_blocktime="0", kmp_affinity="granularity=fine,compact,1,0")
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         MODEL_EXEC_DIR = str(self.args.model_source_dir) + "/official/transformer/"
 
@@ -91,7 +92,9 @@ class ModelInitializer(BaseModelInitializer):
                     if self.args.batch_size != -1 else "1") + \
                    " --file=" + self.args.decode_from_file + \
                    " --file_out=" + translate_file + \
-                   " --vocab_file=" + self.args.vocab_file
+                   " --vocab_file=" + self.args.vocab_file +\
+                   " --num_inter=" + str(self.args.num_inter_threads) +\
+                   " --num_intra=" + str(self.args.num_intra_threads)
 
         self.bleu_params += " --translation=" + translate_file + \
                             " --reference=" + self.args.reference
