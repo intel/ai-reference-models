@@ -164,7 +164,7 @@ $ python launch_benchmark.py \
         --batch-size 1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
         --volume /home/<user>/custom_folder_1:/custom_folder_1 \
         --volume /home/<user>/custom_folder_2:/custom_folder_2
 ```
@@ -201,7 +201,7 @@ Below is an example showing how to use the `--debug` flag:
         --batch-size=1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
         --debug
 
    # ls
