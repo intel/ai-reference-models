@@ -23,14 +23,17 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 
 * Image Recognition
     * ResNet50: [init](/benchmarks/image_recognition/tensorflow/resnet50/inference/fp32/model_init.py) | 
-                [inference](/models/image_recognition/tensorflow/resnet50/fp32/eval_image_classifier_inference.py) | 
-                [preprocessing](/models/image_recognition/tensorflow/resnet50/fp32/preprocessing.py) 
+                [inference](/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py) | 
+                [preprocessing](/models/image_recognition/tensorflow/resnet50/inference/preprocessing.py) 
     * ResNet101: [init](/benchmarks/image_recognition/tensorflow/resnet101/inference/fp32/model_init.py) | 
-                 [inference](/models/image_recognition/tensorflow/resnet101/fp32/benchmark.py) | 
-                 [preprocessing](/models/image_recognition/tensorflow/resnet101/fp32/preprocessing.py) 
+                 [inference](/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py) | 
+                 [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py) 
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
-                   [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) |
-                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py)
+                   [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) | 
+                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py) 
+* Language Translation
+    * Transformer-LT: [init](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/model_init.py) | 
+                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)    
 * Recommendation Systems
     * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
                 [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
@@ -101,10 +104,169 @@ optional arguments:
                         conjunction with --accuracy-only and --mode=inference.
   --output-dir OUTPUT_DIR
                         Folder to dump output into.
+  --disable-tcmalloc {True,False}
+                        When TCMalloc is enabled, the google-perftools are
+                        installed (if running using docker) and the LD_PRELOAD
+                        environment variable is set to point to the TCMalloc
+                        library file. The TCMalloc memory allocator produces
+                        better performance results with smaller batch sizes.
+                        This flag disables the use of TCMalloc when set to
+                        True. For int8 benchmarking, TCMalloc is enabled by
+                        default (--disable-tcmalloc=False). For other
+                        precisions, the flag is --disable-tcmalloc=True by
+                        default.
+  --tcmalloc-large-alloc-report-threshold TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD
+                        Sets the TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD
+                        environment variable to the specified value. The
+                        environment variable sets the threshold (in bytes) for
+                        when large memory allocation messages will be
+                        displayed.
   -g INPUT_GRAPH, --in-graph INPUT_GRAPH
                         Full path to the input graph
+  --volume CUSTOM_VOLUMES
+                        Specify a custom volume to mount in the container,
+                        which follows the same format as the docker --volume
+                        flag (https://docs.docker.com/storage/volumes/). This
+                        argument can only be used in conjunction with a
+                        --docker-image.
   --debug               Launches debug mode which doesn't execute start.sh
 ```
+
+## Volume mounts
+
+When running the launch script using a docker image, volumes will
+automatically get mounted in the container for the following
+directories:
+
+| Directory | Mount location in the container |
+|-----------|---------------------------------|
+| Model zoo `/benchmarks` code | `/workspace/benchmarks` |
+| Model zoo `/models` code | `/workspace/intelai_models` |
+| `--model-source-dir` code | `/workspace/models` |
+| `--checkpoints` directory | `/checkpoints` |
+| `--in-graph` file | `/in_graph` |
+| `--dataset-location` | `/dataset` |
+
+If you would like additional directories mounted in the docker
+container, you can specify them by using the `--volume` flag using the
+same `:` separated field format [as docker](https://docs.docker.com/storage/volumes/).
+For example, the following command will mount `/home/<user>/custom_folder_1`
+in the container at `custom_folder_1` and `/home/<user>/custom_folder_2`
+in the container at `custom_folder_2`:
+
+```
+$ python launch_benchmark.py \
+        --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+        --model-name resnet50 \
+        --framework tensorflow \
+        --precision fp32 \
+        --mode inference \
+        --batch-size 1 \
+        --socket-id 0 \
+        --data-location /home/<user>/Imagenet_Validation \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --volume /home/<user>/custom_folder_1:/custom_folder_1 \
+        --volume /home/<user>/custom_folder_2:/custom_folder_2
+```
+
+Note that volume mounting only applies when running in a docker
+container. When running on [bare metal](#alpha-feature-running-on-bare-metal),
+files are accessed in their original location.
+
+## Debugging
+
+The `--debug` flag in the `launch_benchmarks.py` script gives you a
+shell into the docker container with the [volumes mounted](#volume-mounts)
+for any dataset, pretrained model, model source code, etc that has been
+provided by the other flags. It does not execute the `start.sh` script,
+and is intended as a way to setup an environment for quicker iteration
+when debugging and doing development. From the shell, you can manually
+execute the `start.sh` script and select to not re-install dependencies
+each time that you re-run, so that the script takes less time to run.
+
+Below is an example showing how to use the `--debug` flag:
+
+1. Run the model using your model's `launch_benchmark.py` command, but
+   add on the `--debug` flag, which will take you to a shell. If you
+   list the files in the directory at that prompt, you will see the
+   `start.sh` file:
+
+   ```
+   $ python launch_benchmark.py \
+        --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+        --model-name resnet50 \
+        --framework tensorflow \
+        --precision fp32 \
+        --mode inference \
+        --batch-size=1 \
+        --socket-id 0 \
+        --data-location /home/<user>/Imagenet_Validation \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --debug
+
+   # ls
+   __init__.py  logs  run_tf_benchmark.py  start.sh
+   ```
+
+2. Flags that were passed to the launch script are set as environment
+   variables in the container:
+
+   ```
+   # env
+   EXTERNAL_MODELS_SOURCE_DIRECTORY=None
+   IN_GRAPH=/in_graph/resnet50_fp32_pretrained_model.pb
+   WORKSPACE=/workspace/benchmarks/common/tensorflow
+   MODEL_NAME=resnet50
+   PRECISION=fp32
+   BATCH_SIZE=1
+   MOUNT_EXTERNAL_MODELS_SOURCE=/workspace/models
+   DATASET_LOCATION=/dataset
+   BENCHMARK_ONLY=True
+   ACCURACY_ONLY=False
+   ...
+   ```
+3. Run the `start.sh` script, which will setup the `PYTHONPATH`, install
+   dependencies, and then run the model:
+   ```
+   # bash start.sh
+   ...
+   Iteration 48: 0.011513 sec
+   Iteration 49: 0.011664 sec
+   Iteration 50: 0.011802 sec
+   Average time: 0.011650 sec
+   Batch size = 1
+   Latency: 11.650 ms
+   Throughput: 85.833 images/sec
+   Ran inference with batch size 1
+   Log location outside container: <output directory>/benchmark_resnet50_inference_fp32_20190403_212048.log
+   ```
+
+4. Code changes that are made locally will also be made in the container
+   (and vice versa), since the directories are mounted in the docker
+   container. Once code changes are made, you can rerun the start
+   script, except set the `NOINSTALL` variable, since dependencies were
+   already installed in the previous run. You can also change the
+   environment variable values for other settings, like the batch size.
+
+   ```
+   # NOINSTALL=True
+   # BATCH_SIZE=128
+   # bash start.sh
+   ...
+   Iteration 48: 0.631819 sec
+   Iteration 49: 0.625606 sec
+   Iteration 50: 0.618813 sec
+   Average time: 0.625285 sec
+   Batch size = 128
+   Throughput: 204.707 images/sec
+   Ran inference with batch size 128
+   Log location outside container: <output directory>/benchmark_resnet50_inference_fp32_20190403_212310.log
+   ```
+
+5. Once you are done with the session, exit out of the docker container:
+   ```
+   # exit
+   ```
 
 ## Alpha feature: Running on bare metal
 
@@ -173,3 +335,11 @@ the following command can be used:
     --batch-size=1 \
     --socket-id 0
 ```
+
+> When running on bare metal, be aware of environment variables that you
+have set on your system. The model zoo scripts intentionally do not
+overwrite environment variables that have already been set, such as
+`OMP_NUM_THREADS`. The same is true when running in a docker container,
+but since a new docker container instance is started with each run, you
+won't have previously set environment variables, like you may have on
+bare metal.

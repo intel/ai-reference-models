@@ -41,8 +41,9 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode, self.args.precision,
             self.RFCN_ACCURACY_SCRIPT)
 
-        # Set KMP env vars, except override the default KMP_BLOCKTIME value
-        self.set_kmp_vars(kmp_blocktime="0")
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         self.validate_args()
 
@@ -82,7 +83,7 @@ class ModelInitializer(BaseModelInitializer):
     def run_perf_command(self):
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         self.parse_args()
-        command = self.get_numactl_command(self.args.socket_id)
+        command = self.get_command_prefix(self.args.socket_id)
         command += " {} ".format(self.python_exe) + self.perf_script_path
         command += " -g " + self.args.input_graph
         if self.custom_args:

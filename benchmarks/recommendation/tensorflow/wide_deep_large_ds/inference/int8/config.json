@@ -1,0 +1,7 @@
+{
+    "optimization_parameters": {
+        "KMP_AFFINITY": "noverbose,warnings,respect,granularity=core,none",
+        "KMP_BLOCKTIME": 0,
+        "KMP_SETTINGS": 1
+    }
+}

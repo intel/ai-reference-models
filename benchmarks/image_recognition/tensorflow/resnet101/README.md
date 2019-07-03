@@ -7,6 +7,11 @@ following modes/precisions:
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
@@ -80,7 +85,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb
 ```
@@ -101,7 +106,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -118,7 +123,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -134,7 +139,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -151,17 +156,10 @@ python launch_benchmark.py \
     --batch-size 128 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
-
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
@@ -176,8 +174,6 @@ Example log tail when running for accuracy:
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7690, 0.9304)
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7691, 0.9305)
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7691, 0.9305)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190104_205838.log
 ```
@@ -189,8 +185,6 @@ steps = 470, 48.3195530058 images/sec
 steps = 480, 47.2792312364 images/sec
 steps = 490, 46.3175214744 images/sec
 steps = 500, 45.4044245083 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_191406.log
 ```
@@ -202,8 +196,6 @@ steps = 470, 328.906266308 images/sec
 steps = 480, 322.0451309 images/sec
 steps = 490, 315.455582114 images/sec
 steps = 500, 309.142758646 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_192438.log
 ```
@@ -258,7 +250,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
         --mode inference \
         --model-name resnet101 \
         --batch-size 128 \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
         --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
         --socket-id 0
     ```
@@ -272,8 +264,6 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
     steps = 80, 169.258177508 images/sec
     steps = 90, 150.457869027 images/sec
     steps = 100, 135.433960175 images/sec
-    lscpu_path_cmd = command -v lscpu
-    lscpu located here: /usr/bin/lscpu
     Ran inference with batch size 128
     Log location outside container: {--output-dir value}/benchmark_resnet101_inference_fp32_20190104_204615.log
     ```
@@ -287,7 +277,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
         --mode inference \
         --model-name resnet101 \
         --batch-size 100 \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
         --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
         --data-location /home/<user>/imagenet_validation_dataset \
         --accuracy-only \
@@ -304,8 +294,6 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
     Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7639, 0.9289)
     Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7641, 0.9289)
     Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7640, 0.9289)
-    lscpu_path_cmd = command -v lscpu
-    lscpu located here: /usr/bin/lscpu
     Ran inference with batch size 100
     Log location outside container: {--output-dir value}/benchmark_resnet101_inference_fp32_20190104_201506.log
     ```

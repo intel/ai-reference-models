@@ -18,19 +18,21 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-import csv
+import os
+import json
 
 
-def parse_csv_file(file_path, expected_num_columns):
+def parse_json_files(json_dir_path):
     """
-    Reads the specified csv file.  Checks for a value number of columns in
-    each row.  Returns the csv file values as a list of tuples.
+    Reads the JSON files in the specified directory.  Checks for a value number of columns in
+    each row. Returns the JSON files values as a list of tuples.
     """
     values = []
-    with open(file_path) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',',
-                                skipinitialspace=True)
-        for row in csv_reader:
-            assert len(row) == expected_num_columns
-            values.append(tuple(row))
+    for model_file in os.listdir(json_dir_path):
+        file_path = os.path.join(json_dir_path, model_file)
+        with open(file_path) as f:
+            data = json.load(f)
+            for x in data:
+                values.append(
+                    tuple((x['input'], x['output'], model_file + " :: " + x['_comment'])))
     return values

@@ -17,13 +17,48 @@
 #
 # SPDX-License-Identifier: EPL-2.0
 #
-
+from contextlib import contextmanager
 import os
+import pytest
+import sys
+import tempfile
+
+try:
+    # python 2
+    from cStringIO import StringIO
+except ImportError:
+    # python 3
+    # only supports unicode so can't be used in python 2 for sys.stdout
+    # because (from `print` documentation)
+    # "All non-keyword arguments are converted to strings like str() does"
+    from io import StringIO
+
 
 from mock import MagicMock, patch
 
 from benchmarks.common.base_model_init import BaseModelInitializer
 from benchmarks.common.base_model_init import set_env_var
+
+
+@contextmanager
+def catch_stdout():
+    _stdout = sys.stdout
+    sys.stdout = caught_output = StringIO()
+    try:
+        yield caught_output
+    finally:
+        sys.stdout = _stdout
+        caught_output.close()
+
+
+@pytest.fixture
+def mock_json(patch):
+    return patch('json')
+
+
+@pytest.fixture
+def mock_glob(patch):
+    return patch('glob.glob')
 
 
 # Example args and output strings for testing mocks
@@ -109,3 +144,101 @@ def test_env_var_not_already_set():
     finally:
         if os.environ.get(env_var):
             del os.environ[env_var]
+
+
+def test_set_kmp_vars_config_json_does_not_exists():
+    """Test config.json does not exist"""
+    # Setup base model init with test settings
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    os.environ["PYTHON_EXE"] = "python"
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+
+    config_file_path = '/test/foo/config.json'
+
+    with catch_stdout() as caught_output:
+        base_model_init.set_kmp_vars(config_file_path)
+        output = caught_output.getvalue()
+
+    assert "Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(config_file_path) == output.strip()
+
+
+def test_set_kmp_vars_config_json_exists(mock_json):
+    """Test config.json when exists"""
+    # Setup base model init with test settings
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    os.environ["PYTHON_EXE"] = "python"
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+
+    file_descriptor, config_file_path = tempfile.mkstemp(suffix=".json")
+
+    base_model_init.set_kmp_vars(config_file_path)
+
+
+@pytest.mark.parametrize('precision', ['int8'])
+def test_command_prefix_tcmalloc_int8(precision, mock_glob):
+    """ For Int8 models, TCMalloc should be enabled by default and models should include
+     LD_PRELOAD in the command prefix, unless disable_tcmalloc=True is set """
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
+    mock_glob.return_value = [test_tcmalloc_lib]
+    os.environ["PYTHON_EXE"] = "python"
+    args.socket_id = 0
+    args.precision = precision
+
+    # If tcmalloc is not disabled, we should have LD_PRELOAD in the prefix
+    args.disable_tcmalloc = False
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) in command_prefix
+    assert "numactl --cpunodebind=0 --membind=0" in command_prefix
+
+    # If tcmalloc is disabled, LD_PRELOAD shouild not be in the prefix
+    args.disable_tcmalloc = True
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) not in command_prefix
+    assert "numactl --cpunodebind=0 --membind=0" in command_prefix
+
+    # If numactl is set to false, we should not have numactl in the prefix
+    args.disable_tcmalloc = False
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id, numactl=False)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) in command_prefix
+    assert "numactl" not in command_prefix
+
+
+@pytest.mark.parametrize('precision', ['fp32'])
+def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
+    """ FP32 models should have TC Malloc disabled by default, but models should
+    include LD_PRELOAD in the command prefix if disable_tcmalloc=False is explicitly set. """
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
+    mock_glob.return_value = [test_tcmalloc_lib]
+    os.environ["PYTHON_EXE"] = "python"
+    args.socket_id = 0
+    args.precision = precision
+
+    # By default, TCMalloc should not be used
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) not in command_prefix
+    assert "numactl --cpunodebind=0 --membind=0" in command_prefix
+
+    # If tcmalloc is disabled, LD_PRELOAD shouild not be in the prefix
+    args.disable_tcmalloc = False
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) in command_prefix
+    assert "numactl --cpunodebind=0 --membind=0" in command_prefix
+
+    # If numactl is set to false, we should not have numactl in the prefix
+    args.disable_tcmalloc = True
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id, numactl=False)
+    assert "LD_PRELOAD={}".format(test_tcmalloc_lib) not in command_prefix
+    assert "numactl" not in command_prefix

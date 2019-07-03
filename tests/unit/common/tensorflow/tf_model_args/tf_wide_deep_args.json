@@ -1,0 +1,5 @@
+[
+  { "_comment": "FP32 benchmark",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name wide_deep --batch-size 1024 --data-location /dataset --checkpoint /checkpoints --intelai-models . --verbose",
+    "output": "OMP_NUM_THREADS=1 numactl --cpunodebind=0 --membind=0  python inference/fp32/wide_deep_inference.py --data_dir=/dataset --model_dir=/checkpoints --batch_size=1024"}
+]

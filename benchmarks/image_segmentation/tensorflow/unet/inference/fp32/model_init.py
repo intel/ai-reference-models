@@ -41,7 +41,8 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads()
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars(kmp_affinity="granularity=fine, compact")
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # Get path to the inference script
         script_path = os.path.join(
@@ -50,7 +51,7 @@ class ModelInitializer(BaseModelInitializer):
             "unet_infer.py")
 
         # Create the command prefix using numactl
-        self.command_prefix = self.get_numactl_command(self.args.socket_id) +\
+        self.command_prefix = self.get_command_prefix(self.args.socket_id) +\
             "{} {}".format(self.python_exe, script_path)
 
         # Add batch size arg

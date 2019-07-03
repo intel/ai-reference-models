@@ -54,8 +54,9 @@ class ModelInitializer(BaseModelInitializer):
 
         self.parse_args()
 
-        # Set KMP env vars with defaults, except for KMP_BLOCKTIME
-        self.set_kmp_vars(kmp_blocktime=0)
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # Set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
@@ -110,6 +111,8 @@ class ModelInitializer(BaseModelInitializer):
                              format(self.args.model_source_dir))
 
     def run_perf_command(self):
+        # Get the command previx, but numactl is added later in run_perf_command()
+        self.command.append(self.get_command_prefix(self.args.socket_id, numactl=False))
         num_cores = str(self.platform_util.num_cores_per_socket)
         if self.args.num_cores != -1:
             num_cores = str(self.args.num_cores)
@@ -157,7 +160,8 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_accuracy_command(self):
         # already validated by parent
-        self.command = "FROZEN_GRAPH=" + self.args.input_graph
+        self.command = self.get_command_prefix(self.args.socket_id, numactl=False)
+        self.command += "FROZEN_GRAPH=" + self.args.input_graph
 
         if self.args.data_location and os.path.exists(
                 self.args.data_location):
