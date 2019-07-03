@@ -79,7 +79,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --batch-size 64 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --checkpoint /home/<user>/squeezenet_checkpoints \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -94,7 +94,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --checkpoint /home/<user>/squeezenet_checkpoints \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```

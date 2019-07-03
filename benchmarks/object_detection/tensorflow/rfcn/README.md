@@ -139,7 +139,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -156,7 +156,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record-00000-of-00001 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -331,7 +331,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --checkpoint /home/<user>/rfcn_resnet101_fp32_coco \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     -- config_file=rfcn_pipeline.config
 ```
 
@@ -344,7 +344,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco/frozen_inference_graph.pb  \
