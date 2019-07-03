@@ -23,6 +23,7 @@ from __future__ import division
 from __future__ import print_function
 
 import os
+import sys
 
 from argparse import ArgumentParser
 from common import platform_util
@@ -47,6 +48,9 @@ class BaseBenchmarkUtil(object):
         """define args for the benchmark interface shared by FP32 and int8
         models"""
 
+        # only require the arg, if we aren't just printing out --help
+        required_arg = "--help" not in sys.argv
+
         self._common_arg_parser = ArgumentParser(
             add_help=False, description="Parse args for base benchmark "
                                         "interface")
@@ -54,7 +58,7 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-f", "--framework",
             help="Specify the name of the deep learning framework to use.",
-            dest="framework", default=None, required=True)
+            dest="framework", default=None, required=required_arg)
 
         self._common_arg_parser.add_argument(
             "-r", "--model-source-dir",
@@ -64,15 +68,15 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-p", "--precision",
             help="Specify the model precision to use: fp32, int8, or bfloat16",
-            required=True, choices=["fp32", "int8", "bfloat16"],
+            required=required_arg, choices=["fp32", "int8", "bfloat16"],
             dest="precision")
 
         self._common_arg_parser.add_argument(
             "-mo", "--mode", help="Specify the type training or inference ",
-            required=True, choices=["training", "inference"], dest="mode")
+            required=required_arg, choices=["training", "inference"], dest="mode")
 
         self._common_arg_parser.add_argument(
-            "-m", "--model-name", required=True,
+            "-m", "--model-name", required=required_arg,
             help="model name to run benchmarks for", dest="model_name")
 
         self._common_arg_parser.add_argument(
@@ -128,7 +132,9 @@ class BaseBenchmarkUtil(object):
             help="Specify the location of trained model checkpoint directory. "
                  "If mode=training model/weights will be written to this "
                  "location. If mode=inference assumes that the location points"
-                 " to a model that has already been trained.",
+                 " to a model that has already been trained. Note that using "
+                 "checkpoint files for inference is being deprecated, in favor "
+                 "of using frozen graphs.",
             dest="checkpoint", default=None, type=check_valid_folder)
 
         self._common_arg_parser.add_argument(
@@ -154,6 +160,30 @@ class BaseBenchmarkUtil(object):
             help="Writes inference output to a file, when used in conjunction "
                  "with --accuracy-only and --mode=inference.",
             dest="output_results", action="store_true")
+
+        # Note this can't be a normal boolean flag, because we need to know when the user
+        # does not explicitly set the arg value so that we can apply the appropriate
+        # default value, depending on the the precision.
+        self._common_arg_parser.add_argument(
+            "--disable-tcmalloc",
+            help="When TCMalloc is enabled, the google-perftools are installed (if running "
+                 "using docker) and the LD_PRELOAD environment variable is set to point to "
+                 "the TCMalloc library file. The TCMalloc memory allocator produces better "
+                 "performance results with smaller batch sizes. This flag disables the use of "
+                 "TCMalloc when set to True. For int8 benchmarking, TCMalloc is enabled by "
+                 "default (--disable-tcmalloc=False). For other precisions, the flag is "
+                 "--disable-tcmalloc=True by default.",
+            dest="disable_tcmalloc", choices=["True", "False"],
+            default=None
+        )
+
+        self._common_arg_parser.add_argument(
+            "--tcmalloc-large-alloc-report-threshold",
+            help="Sets the TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD environment variable to "
+                 "the specified value. The environment variable sets the threshold (in bytes) "
+                 "for when large memory allocation messages will be displayed.",
+            dest="tcmalloc_large_alloc_report_threshold", default=2147483648, type=int
+        )
 
         self._common_arg_parser.add_argument(
             "-v", "--verbose", help="Print verbose information.",
@@ -198,7 +228,8 @@ class BaseBenchmarkUtil(object):
             raise ValueError("Number of cores exceeds system core number: {}".
                              format(system_num_cores))
 
-        if args.output_results and (args.model_name != "resnet50" or args.precision != "fp32"):
+        if args.output_results and ((args.model_name != "resnet50" and
+                                    args.model_name != "resnet50v1_5") or args.precision != "fp32"):
             raise ValueError("--output-results is currently only supported for resnet50 FP32 inference.")
         elif args.output_results and (args.mode != "inference" or not args.data_location):
             raise ValueError("--output-results can only be used when running inference with a dataset.")

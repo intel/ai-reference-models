@@ -10,6 +10,11 @@ for other precisions are coming later.
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone the [tensorflow/models](https://github.com/tensorflow/models) and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
 
 ```
@@ -44,7 +49,7 @@ sed -i.bak 95s/input_config/input_config[0]/ offline_eval_map_corloc.py
 
 ```
 
-2.  Download the 2017 validation
+2. Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
@@ -78,6 +83,7 @@ TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
 script to the raw COCO dataset files that you have downloaded in step 2.
 The `--output_dir` is the location where the TF record files will be
@@ -133,7 +139,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -150,19 +156,13 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record-00000-of-00001 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
     --accuracy-only \
     -- split="accuracy_message"
 ```
-
-The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-used in the commands above were built using
-[TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-[PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
@@ -173,18 +173,16 @@ to get additional debug output or change the default output location.
 Below is a sample log file tail when running for batch
 and online inference:
 ```
-Step 0: 10.6923000813 seconds
-Step 10: 0.168856859207 seconds
+Step 0: 11.4450089931 seconds
+Step 10: 0.25656080246 seconds
 ...
-Step 460: 0.181148052216 seconds
-Step 470: 0.202737092972 seconds
-Step 480: 0.117042064667 seconds
-Step 490: 0.103501081467 seconds
-Avg. Duration per Step:0.169812122345
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Step 460: 0.256786823273 seconds
+Step 470: 0.267828941345 seconds
+Step 480: 0.141321897507 seconds
+Step 490: 0.127830982208 seconds
+Avg. Duration per Step:0.195356227875
 Ran inference with batch size -1
-Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190227_191959.log
+Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190416_182445.log
 ```
 
 And here is a sample log file tail when running for accuracy:
@@ -204,8 +202,6 @@ DONE (t=1.03s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190227_194752.log
 ```
@@ -225,7 +221,7 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
-2.  Download the 2017 validation
+2. Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
@@ -259,6 +255,7 @@ TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
+Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
 script to the raw COCO dataset files that you have downloaded in step 2.
 The `--output_dir` is the location where the TF record files will be
@@ -334,7 +331,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --checkpoint /home/<user>/rfcn_resnet101_fp32_coco \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     -- config_file=rfcn_pipeline.config
 ```
 
@@ -347,7 +344,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco/frozen_inference_graph.pb  \
@@ -363,8 +360,6 @@ online inference:
 
 ```
 Average time per step: 0.262 sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32, socket_id=0, use_case='object_detection', verbose=True)
 Received these custom args: ['--config_file=rfcn_pipeline.config']
 Run model here.
@@ -391,8 +386,7 @@ DONE (t=1.19s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.400
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.400
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
-Ran inference with batch size 1
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_rfcn_inference_fp32_20181221_211905.log
 ```

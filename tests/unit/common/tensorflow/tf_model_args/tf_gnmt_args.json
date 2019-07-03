@@ -1,0 +1,11 @@
+[
+  { "_comment": "FP32 latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=gnmt --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --checkpoint=/checkpoints --data-location=/dataset --infer_mode=beam_search",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/nmt.py --src=de --tgt=en --hparams_path=/workspace/intelai_models/fp32/standard_hparams/wmt16_gnmt_4_layer_internal.json --out_dir=/workspace/benchmarks/common/tensorflow/logs --vocab_prefix=/dataset/vocab.bpe.32000 --ckpt=/checkpoints/translate.ckpt --infer_batch_size=1 --inference_input_file=/dataset/newstest2015.tok.bpe.32000.de --inference_output_file=/workspace/benchmarks/common/tensorflow/logs/output_infer --inference_ref_file=/dataset/newstest2015.tok.bpe.32000.en --num_inter_threads=1 --num_intra_threads=28 --infer_mode=beam_search"},
+
+  { "_comment": "FP32 Throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=gnmt --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=32 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --checkpoint=/checkpoints --data-location=/dataset --infer_mode=beam_search",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/fp32/nmt.py --src=de --tgt=en --hparams_path=/workspace/intelai_models/fp32/standard_hparams/wmt16_gnmt_4_layer_internal.json --out_dir=/workspace/benchmarks/common/tensorflow/logs --vocab_prefix=/dataset/vocab.bpe.32000 --ckpt=/checkpoints/translate.ckpt --infer_batch_size=32 --inference_input_file=/dataset/newstest2015.tok.bpe.32000.de --inference_output_file=/workspace/benchmarks/common/tensorflow/logs/output_infer --inference_ref_file=/dataset/newstest2015.tok.bpe.32000.en --num_inter_threads=1 --num_intra_threads=28 --infer_mode=beam_search"}
+]
+
+

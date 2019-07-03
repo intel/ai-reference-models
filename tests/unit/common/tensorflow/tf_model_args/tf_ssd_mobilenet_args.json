@@ -1,0 +1,17 @@
+[
+  { "_comment": "FP32 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-mobilenet --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --socket-id=0 --accuracy-only  --verbose --in-graph=/in_graph/frozen_inference_graph.pb --benchmark-dir=/workspace/benchmarks --data-location=/dataset",
+    "output": "sh /workspace/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/ssdmobilenet_accuracy.sh /in_graph/frozen_inference_graph.pb /dataset"},
+
+  { "_comment": "FP32 benchmark command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-mobilenet --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --socket-id=0  --benchmark-only --verbose --in-graph=/in_graph/frozen_inference_graph.pb  --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/fp32/infer_detections.py --input_tfrecord_paths=/dataset --output_tfrecord_path=/SSD-mobilenet-out.tfrecord --inference_graph=/in_graph/frozen_inference_graph.pb --discard_image_pixels=True --num_inter_threads=2 --num_intra_threads=28"},
+
+  { "_comment": "Int8 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-mobilenet --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssdmobilenet_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "sh /workspace/intelai_models/inference/int8/coco_int8.sh /in_graph/ssdmobilenet_int8_pretrained_model.pb /dataset"},
+
+  { "_comment": "Int8 benchmark command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-mobilenet --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size=1 --socket-id 0 --data-location=/dataset --verbose --in-graph=/in_graph/ssdmobilenet_int8_pretrained_model.pb --benchmark-only --in-graph=/in_graph/ssdmobilenet_int8_pretrained_model.pb",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0  python /workspace/intelai_models/inference/int8/run_frozen_graph_ssdmob.py -g /in_graph/ssdmobilenet_int8_pretrained_model.pb -n 5000 -d /dataset -x --num-inter-threads 2 --num-intra-threads 28"}
+]

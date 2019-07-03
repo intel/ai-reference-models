@@ -40,7 +40,8 @@ class ModelInitializer(BaseModelInitializer):
             self.args.batch_size = 256
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
@@ -49,7 +50,7 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode, self.args.precision,
             "ncf_main.py")
 
-        self.benchmark_command = self.get_numactl_command(args.socket_id) + \
+        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)

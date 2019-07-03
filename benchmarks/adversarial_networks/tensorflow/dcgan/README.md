@@ -60,7 +60,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --checkpoint /home/<user>/dcgan_fp32_unconditional_cifar10_pretrained_model \
     --data-location /home/<user>/cifar10 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 5. Log files are located at the value of `--output-dir`.
@@ -71,8 +71,6 @@ Batch size: 100
 Batches number: 500
 Time spent per BATCH: 35.8268 ms
 Total samples/sec: 2791.2030 samples/s
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_dcgan_inference_fp32_20190117_220342.log
 ```

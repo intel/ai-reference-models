@@ -60,8 +60,9 @@ class ModelInitializer(BaseModelInitializer):
 
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
-        # Use default KMP variable values, but override the default KMP_BLOCKTIME value
-        self.set_kmp_vars(kmp_blocktime=str(self.args.kmp_blocktime))
+        # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
@@ -73,7 +74,7 @@ class ModelInitializer(BaseModelInitializer):
             "data_num_inter_threads", "data_num_intra_threads",
             "warmup_steps", "steps"]
 
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
             self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         # add num_cores
@@ -93,7 +94,7 @@ class ModelInitializer(BaseModelInitializer):
             "batch_size",
             "num_inter_threads", "num_intra_threads"]
 
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
             self.python_exe + " " + accuracy_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
@@ -105,7 +106,7 @@ class ModelInitializer(BaseModelInitializer):
             "input_graph", "data_location",
             "batch_size",
             "num_inter_threads", "num_intra_threads"]
-        cmd_prefix = self.get_numactl_command(self.args.socket_id) + \
+        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
             self.python_exe + " " + calibration_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)

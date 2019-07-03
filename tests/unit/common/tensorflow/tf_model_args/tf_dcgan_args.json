@@ -1,0 +1,5 @@
+[
+  { "_comment": "FP32 benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=adversarial_networks --model-name=dcgan --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=0  --benchmark-only --verbose --checkpoint=/checkpoints --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/inference_bench.py -ckpt /checkpoints -dl /dataset --num_inter_threads 1 --num_intra_threads 28 -nw 100 -nb 500 --bs 100 --kmp_blocktime 1 --kmp_settings 1"}
+]
