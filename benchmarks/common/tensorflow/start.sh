@@ -45,6 +45,8 @@ echo "    NUM_CORES: ${NUM_CORES}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 echo "    OUTPUT_RESULTS: ${OUTPUT_RESULTS}"
+echo "    DISABLE_TCMALLOC: ${DISABLE_TCMALLOC}"
+echo "    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD: ${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
@@ -58,10 +60,23 @@ if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
   apt update
   apt full-upgrade -y
+  # Set env var before installs so that user interaction is not required
+  export DEBIAN_FRONTEND=noninteractive
   apt-get install python-tk numactl -y
   apt install -y libsm6 libxext6
   pip install --upgrade pip
   pip install requests
+
+  # install libgoogle-perftools-dev for tcmalloc
+  if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
+    apt-get install --no-install-recommends --fix-missing google-perftools -y
+    if [ ! -f /usr/lib/libtcmalloc.so ]; then
+      apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
+      if [ ! -f /usr/lib/libtcmalloc.so ]; then
+        ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
+      fi
+    fi
+  fi
 fi
 
 verbose_arg=""
@@ -170,6 +185,10 @@ if [ ${DATA_NUM_INTRA_THREADS} != "None" ]; then
   CMD="${CMD} --data-num-intra-threads=${DATA_NUM_INTRA_THREADS}"
 fi
 
+if [ ${DISABLE_TCMALLOC} != "None" ]; then
+  CMD="${CMD} --disable-tcmalloc=${DISABLE_TCMALLOC}"
+fi
+
 function install_protoc() {
   pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
 
@@ -177,7 +196,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget
+    apt-get -y install wget unzip
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -272,6 +291,19 @@ function dcgan() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/gan/cifar
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# DenseNet 169 model
+function densenet169() {
+  if [ ${PRECISION} == "fp32" ]; then
+      CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
+      $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) $(add_arg "--input_layer" ${input_layer}) \
+      $(add_arg "--output_layer" ${output_layer})"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
@@ -397,6 +429,18 @@ function inception_resnet_v2() {
   fi
 }
 
+# language modeling lm-1b
+function lm-1b() {
+  if [ ${PRECISION} == "fp32" ]; then
+    CMD="${CMD} $(add_steps_args)"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # Mask R-CNN model
 function maskrcnn() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -405,6 +449,7 @@ function maskrcnn() {
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      pip3 install --force-reinstall scipy==1.2.1 Pillow==5.3.0
 
       # install cocoapi
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
@@ -423,6 +468,11 @@ function mobilenet_v1() {
   if [ ${PRECISION} == "fp32" ]; then
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  elif [ ${PRECISION} == "int8" ]; then
+      CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
+      $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) $(add_arg "--input_layer" ${input_layer}) \
+      $(add_arg "--output_layer" ${output_layer})"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
@@ -501,6 +551,7 @@ function rfcn() {
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies
     pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+
     original_dir=$(pwd)
 
     cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
@@ -510,6 +561,10 @@ function rfcn() {
     # install cocoapi
     get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
+
+  # Fix the object_detection_evaluation.py file to change unicode() to str() so that it works in py3
+  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
+  sed -i.bak "s/unicode(/str(/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
 
   split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
@@ -586,18 +641,51 @@ function ssd_mobilenet() {
 
 # SSD-ResNet34 model
 function ssd-resnet34() {
-    if [ ${PRECISION} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
       if [ ${NOINSTALL} != "True" ]; then
         for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
         do
           pip install $line
         done
+        apt install -y git-all
+        old_dir=${PWD}
+        cd /tmp
+        git clone --single-branch https://github.com/tensorflow/benchmarks.git
+        cd benchmarks
+        git checkout 1e7d788042dfc6d5e5cd87410c57d5eccee5c664
+        cd ${old_dir}
       fi
 
       CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
       exit 1
+    fi
+}
+
+# SSD-VGG16 model
+function ssd_vgg16() {
+
+    if [ ${NOINSTALL} != "True" ]; then
+        pip install opencv-python Cython
+
+        if [ ${ACCURACY_ONLY} == "True" ]; then
+            # get the python cocoapi
+            get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_INTELAI_MODELS_SOURCE}/inference
+        fi
+    fi
+
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/dataset
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/preprocessing
+    cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/utility
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    if [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp32" ]; then
+       CMD="${CMD} $(add_steps_args)"
+       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+        exit 1
     fi
 }
 
@@ -629,10 +717,6 @@ function transformer_language() {
         echo "transformer-language requires -- decode_from_file arg to be defined"
         exit 1
     fi
-    if [[ -z "${reference}" ]]; then
-        echo "transformer-language requires -- reference arg to be defined"
-        exit 1
-    fi
     if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
         echo "transformer-language requires --checkpoint arg to be defined"
         exit 1
@@ -650,8 +734,11 @@ function transformer_language() {
 
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/decoding.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/tensor2tensor/utils/decoding.py
 
-    CMD="${CMD} --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file} \
-    --reference=${CHECKPOINT_DIRECTORY}/${reference}"
+    CMD="${CMD} --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file}"
+
+    if [[ -n "${reference}" ]]; then
+      CMD="${CMD} --reference=${CHECKPOINT_DIRECTORY}/${reference}"
+    fi
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -679,6 +766,10 @@ function transformer_lt_official() {
     if [[ -z "${vocab_file}" ]]; then
         echo "transformer-language requires -- vocab_file arg to be defined"
         exit 1
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install pandas
     fi
 
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
@@ -752,7 +843,13 @@ function wide_deep_large_ds() {
     if [[ -z "${LIBTCMALLOC}" ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
-      apt-get install google-perftools --fix-missing -y
+      apt-get install --no-install-recommends --fix-missing google-perftools -y
+      if [ ! -f /usr/lib/libtcmalloc.so ]; then
+        apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
+        if [ ! -f /usr/lib/libtcmalloc.so ]; then
+          ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
+        fi
+      fi
     fi
 
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
@@ -789,6 +886,8 @@ echo "Log output location: ${LOGFILE}"
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
+elif [ ${MODEL_NAME} == "densenet169" ]; then
+  densenet169
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
 elif [ ${MODEL_NAME} == "facenet" ]; then
@@ -803,6 +902,8 @@ elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
   inception_resnet_v2
+elif [ ${MODEL_NAME} == "lm-1b" ]; then
+  lm-1b
 elif [ ${MODEL_NAME} == "maskrcnn" ]; then
   maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
@@ -815,6 +916,8 @@ elif [ ${MODEL_NAME} == "resnet101" ]; then
   resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "resnet50" ]; then
   resnet50_101_inceptionv3
+elif [ ${MODEL_NAME} == "resnet50v1_5" ]; then
+  resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "rfcn" ]; then
   rfcn
 elif [ ${MODEL_NAME} == "squeezenet" ]; then
@@ -823,6 +926,8 @@ elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "ssd-resnet34" ]; then
   ssd-resnet34
+elif [ ${MODEL_NAME} == "ssd_vgg16" ]; then
+  ssd_vgg16
 elif [ ${MODEL_NAME} == "unet" ]; then
   unet
 elif [ ${MODEL_NAME} == "transformer_language" ]; then

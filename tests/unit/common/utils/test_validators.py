@@ -26,7 +26,7 @@ from mock import MagicMock
 
 from common.utils.validators import (check_for_link, check_no_spaces, check_positive_number,
                                      check_positive_number_or_equal_to_negative_one, check_valid_filename,
-                                     check_valid_folder, check_valid_file_or_dir)
+                                     check_valid_folder, check_valid_file_or_dir, check_volume_mount)
 
 
 @pytest.fixture()
@@ -152,3 +152,28 @@ def test_check_valid_file_or_dir(mock_link, mock_exists):
 def test_check_valid_file_or_dir_bad():
     with pytest.raises(ArgumentTypeError):
         check_valid_file_or_dir('3245jlnsdfnsfd234ofds')
+
+
+@pytest.mark.parametrize("volume_mount_str",
+                         ["foo",
+                          "foo:foo:foo:foo",
+                          "foo,foo"])
+def test_bad_volume_mount_strings(volume_mount_str):
+    with pytest.raises(ArgumentTypeError):
+        check_volume_mount(volume_mount_str)
+
+
+def test_valid_volume_mount():
+    # create temp directory
+    temp_dir = tempfile.mkdtemp()
+
+    try:
+        # test string that mounts local directory with mount path
+        volume_mount = temp_dir + ":/mount_path"
+        check_volume_mount(volume_mount)
+
+        # test string that mounts local directory with mount path and specifies read only
+        volume_mount = temp_dir + ":/mount_path:ro"
+        check_volume_mount(volume_mount)
+    finally:
+        os.rmdir(temp_dir)

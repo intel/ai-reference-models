@@ -41,7 +41,7 @@ $ pwd
 2. Clone this [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, as well as
 checkpoint files for a pre-trained model.  After cloning the repo,
-navigate to the benchmarks directory, which is where the launch script
+navigate to the `benchmarks` directory, which is where the launch script
 is located.
 
 ```
@@ -71,7 +71,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --socket-id 0 \
     --num-cores 1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --model-source-dir /home/<user>/wavenet/tensorflow-wavenet \
     --checkpoint /home/<user>/wavenet_checkpoints \
     -- checkpoint_name=model.ckpt-99 sample=8510
@@ -99,8 +99,6 @@ Sample: 8500
 Average Throughput of whole run: Samples / sec: 289.351783
 Average Latency of whole run: msec / sample: 3.456001
 Finished generating. The result can be viewed in TensorBoard.
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_wavenet_inference_fp32_20190105_015022.log
 ```

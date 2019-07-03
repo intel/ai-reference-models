@@ -1,15 +1,17 @@
 
-# Object Detection with TensorFlow Serving on CPU using R-FCN model
+# Object Detection with TensorFlow Serving on CPU
+Models: R-FCN and SSD-MobileNet
 
 ## Goal
 
 This tutorial will introduce you to the CPU performance considerations for object detection in deep learning models and how to use [Intel® Optimizations for TensorFlow Serving](https://www.tensorflow.org/serving/) to improve inference time on CPUs. 
-This tutorial uses a pre-trained Region-based Fully Convolutional Network (R-FCN) model for object detection and provides sample code that you can use to get your optimized TensorFlow model server and REST client up and running quickly. In this tutorial using R-FCN, you will measure inference performance in two situations:
-* **Online inference**, where batch_size=1. In this case, lower time to result means better runtime performance.
+This tutorial uses two pre-trained models - a [Region-based Fully Convolutional Network (R-FCN)](https://arxiv.org/pdf/1605.06409.pdf) and a [Single-Shot MultiBox Detector MobileNet (SSD-MobileNet)](https://arxiv.org/pdf/1704.04861.pdf) - for object detection and provides sample code that you can use to get your optimized TensorFlow model server and client up and running quickly.
+In this tutorial you will choose between R-FCN and SSD-MobileNet, and between the REST client and GRPC client, and then measure inference performance in two situations:
+* **Online inference**, where batch_size=1. In this case, a lower number means better runtime performance.
 * **Batch inference**, where batch_size>1. In this case, a higher number means better runtime performance.
 
 **NOTE about REST vs. GRPC**: This tutorial is focused on optimizing the model server, not the client that sends requests. For optimal client-side serialization and de-serialization, you may want to use TensorFlow Serving's GRPC option instead of the REST API, especially if you are optimizing for batch inference (here is one [article](https://medium.com/@avidaneran/tensorflow-serving-rest-vs-grpc-e8cef9d4ff62) with a relevant analysis). 
-We use REST in this tutorial for illustration, not as a best practice, and offer another [tutorial](/docs/image_recognition/tensorflow_serving/Tutorial.md) that illustrates the use of GRPC with TensorFlow Serving. 
+We show both GRPC and REST in this tutorial for illustration, not as a best practice. Feel free to compare and choose the protocol that works best for you.
 
 ## Prerequisites
 
@@ -19,140 +21,178 @@ This tutorial assumes you have already:
   especially these sections:
    * [Performance Metrics](/docs/general/tensorflow_serving/GeneralBestPractices.md#performance-metrics)
    * [TensorFlow Serving Configuration Settings](/docs/general/tensorflow_serving/GeneralBestPractices.md#tensorflow-serving-configuration-settings)
-* Ran an example end-to-end using a REST client, such as the one in the [Installation Guide](/docs/general/tensorflow_serving/InstallationGuide.md)
+* Ran an example end-to-end using a REST or GRPC client, such as the one in the [Installation Guide](/docs/general/tensorflow_serving/InstallationGuide.md)
   
 ## Background
 
-[Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN)](https://github.com/intel/mkl-dnn) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations for object detection, using efficient vectorization and multi-threading. Tuning TensorFlow Serving to take full advantage of your hardware for object detection deep learning inference involves:
+[Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN)](https://github.com/intel/mkl-dnn) offers significant performance improvements for convolution, pooling, normalization, activation, and other operations for object detection, using efficient vectorization and multi-threading.
+Tuning TensorFlow Serving to take full advantage of your hardware for object detection deep learning inference involves:
 1. Running a TensorFlow Serving docker container configured for performance given your hardware resources
-2. Running a REST client notebook to verify object detection and measure online and batch inference performance
+2. Running a REST or GRPC client to verify object detection and measure online and batch inference
 3. Experimenting with the TensorFlow Serving settings on your own to further optimize for your model and use case
 
-## Hands-on Tutorial with pre-trained R-FCN model
+## Hands-on Tutorial
 
-1. **Set up your environment**: We need to setup two things for this tutorial
-	#### 1.1 Install the [requests](http://docs.python-requests.org) package for making REST HTTP requests. 
-	We will use a virtual environment to install the required packages. If you do not have pip or virtualenv, you will need to get them first:
-	```
-	$ sudo apt-get install -y python python-pip
-	$ pip install virtualenv
-	```
+1. **Download the data and clone the Model Zoo**: 
+
+   1.1 Download the 2017 validation COCO dataset (~780MB) (**note**: do not convert the COCO dataset to TF records format):
+   
+   ```
+   cd ~
+   mkdir -p coco/val
+   wget http://images.cocodataset.org/zips/val2017.zip
+   unzip val2017.zip -d coco/val
+   export COCO_VAL_DATA=$(pwd)/coco/val/val2017
+   echo "export COCO_VAL_DATA=$(pwd)/coco/val/val2017" >> ~/.bashrc
+   ```
+   
+   1.2 Clone the Intel Model Zoo into your home directory:
+   
+   ```
+   cd ~
+   git clone https://github.com/IntelAI/models.git
+   ```
+  
+2. **Choose your model and download the pre-trained SavedModel**: Select either R-FCN or SSD-MobileNet. 
+   Then download and extract the pre-trained model and copy the `saved_model.pb` to `~/obj_detection/1` (the `1` subdirectory is important - don't skip it!).
+   This is the file we will serve from TensorFlow Serving. Finally, define a variable for your chosen model to use in later steps.
+   Refer to the [TensorFlow documentation](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/python/saved_model) for more information about SavedModels, and refer to the FP32 model READMEs for [R-FCN](/benchmarks/object_detection/tensorflow/rfcn/README.md#download_fp32_pretrained_model) and [SSD-MobileNet](/benchmarks/object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions) to get the latest location of the pre-trained models.
+   
+   Highlight and copy one of the following download links:
+     * R-FCN: `https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz`
+     * SSD-MobileNet: `http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz`
+   
+   Then execute the following bash commands after customizing them for the model you have chosen:
+   
+   ```
+   cd ~
+   wget <paste the download link here>
+   tar -xzvf <paste the downloaded file name here>
+   mkdir -p obj_detection/1
+   cp <paste the model folder name here>/saved_model/saved_model.pb obj_detection/1
+   model_name=<choose rfcn or ssdmobilenet>
+   ```
+
+3. **Set up your virtual environment**: We will use a virtual environment to install the required packages.
+
+   3.1 If you do not have pip or virtualenv, you will need to get them first:
+   ```
+   sudo apt-get install -y python python-pip virtualenv
+   ```
 		
-	Create and activate the python virtual envirnoment in your home directory and install the [`requests`](http://docs.python-requests.org) package.
+   3.2 Create and activate the python virtual environment in your home directory:
    ```
-   $ cd ~
-   $ virtualenv rfcn_venv
-   $ source rfcn_venv/bin/activate
-   (rfcn_venv)$ pip install requests
-   ```
-   
-	#### 1.2 Install [Tensorflow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection)
-	 For detailed instructions, [click here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md). Following are the instructions for Ubuntu 16.04.
-	
-	
-	1.2.1 Install Tensorflow Object Detection API dependencies
-	```
-	(rfcn_venv)$ sudo apt-get install -y protobuf-compiler python-pil python-lxml python-tk
-	(rfcn_venv)$ pip install tensorflow Cython contextlib2 jupyter matplotlib pillow lxml
-	```
-
-	1.2.2 Clone the tensorflow models repo into your home directory.
-	```
-	(rfcn_venv)$ cd ~
-	(rfcn_venv)$ git clone https://github.com/tensorflow/models
-	(rfcn_venv)$ export TF_MODELS_ROOT=$(pwd)/models
-	(rfcn_venv)$ echo "export TF_MODELS_ROOT=$(pwd)/models" >> ~/.bashrc
-	```
-
-	1.2.3 Install COCO API
-	```
-	(rfcn_venv)$ cd ~
-	(rfcn_venv)$ git clone https://github.com/cocodataset/cocoapi.git
-	(rfcn_venv)$ cd cocoapi/PythonAPI
-	(rfcn_venv)$ make
-	(rfcn_venv)$ cp -r pycocotools $TF_MODELS_ROOT/research/
-	```
-
-	1.2.4 Manually install the protobuf-compiler v3.0.0, run the compilation process, add Libraries to PYTHONPATH and to your `.bashrc` and test the installation of Tensorflow Object Detection API
-	```
-	(rfcn_venv)$ cd $TF_MODELS_ROOT/research/
-	(rfcn_venv)$ wget -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
-	(rfcn_venv)$ unzip protobuf.zip
-	(rfcn_venv)$ ./bin/protoc object_detection/protos/*.proto --python_out=.
-	(rfcn_venv)$ export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim
-	(rfcn_venv)$ echo "export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim" >> ~/.bashrc
-	(rfcn_venv)$ python object_detection/builders/model_builder_test.py
-	```
-	     
-2. **Download the Data**: Download the 2017 validation COCO dataset (~780MB) (**note**: do not convert the COCO dataset to TF records format):
-   
-   ```
-   (rfcn_venv)$ cd ~
-   (rfcn_venv)$ mkdir -p coco/val
-   (rfcn_venv)$ wget http://images.cocodataset.org/zips/val2017.zip
-   (rfcn_venv)$ unzip val2017.zip -d coco/val
-   (rfcn_venv)$ export COCO_VAL_DATA=$(pwd)/coco/val/val2017
-   (rfcn_venv)$ echo "export COCO_VAL_DATA=$(pwd)/coco/val/val2017" >> ~/.bashrc
+   cd ~
+   virtualenv od_venv
+   source od_venv/bin/activate
    ```
    
-3. **Download and Prepare the pre-trained SavedModel**: Download and extract the pre-trained model and copy the `rfcn_resnet101_fp32_coco/saved_model/saved_model.pb` to `rfcn/1` (the `1` subdirectory is important - don't skip it!). This is the file we will serve from TensorFlow Serving.
-   Refer to the [TensorFlow documentation](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/python/saved_model) for more information about SavedModels, and refer to this [README file](/benchmarks/object_detection/tensorflow/rfcn/README.md#download_fp32_pretrained_model) to get the latest location of the pre-trained model.
+   3.3 Install the required packages using `requirements.txt`:
    ```
-   (rfcn_venv)$ cd ~/
-   (rfcn_venv)$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
-   (rfcn_venv)$ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
-   (rfcn_venv)$ mkdir -p rfcn/1
-   (rfcn_venv)$ cp rfcn_resnet101_fp32_coco/saved_model/saved_model.pb rfcn/1
+   pip install -r models/docs/object_detection/tensorflow_serving/requirements.txt
    ```
    
-4. **Discover the number of physical cores**: Compute *num_physical_cores* by executing the `lscpu` command and multiplying `Core(s) per socket` by `Socket(s)`. For example, for a machine with `Core(s) per socket: 28` and `Socket(s): 2`, `num_physical_cores = 28 * 2 = 56`. To compute *num_physical_cores* and *tf_session_parallelism* with bash commands:
+   3.3 Choose between the REST example or the GRPC example (the environment dependencies are different depending on the protocol you use, 
+   and GRPC is usually faster, especially when using larger batch sizes). Define a variable for your desired protocol.
+   
+     **REST**:
+     ```
+     protocol_name=rest
+     ```
+     
+     **GRPC**:
+     ```
+     protocol_name=grpc
+     ```
+     
+4. **Install [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection)**:
+   For detailed instructions, [click here](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md). 
+   We have already installed the required python packages for the API. Following are the rest of the instructions for Ubuntu 16.04.
+
+   4.1 Clone the tensorflow models repo into a new folder in your home directory.
    ```
-   (rfcn_venv)$ cores_per_socket=`lscpu | grep "Core(s) per socket" | cut -d':' -f2 | xargs`
-   (rfcn_venv)$ num_sockets=`lscpu | grep "Socket(s)" | cut -d':' -f2 | xargs`
-   (rfcn_venv)$ num_physical_cores=$((cores_per_socket * num_sockets))
-   (rfcn_venv)$ echo $num_physical_cores
+   cd ~
+   git clone https://github.com/tensorflow/models tensorflow-models
+   export TF_MODELS_ROOT=$(pwd)/tensorflow-models
+   echo "export TF_MODELS_ROOT=$(pwd)/tensorflow-models" >> ~/.bashrc
    ```
 
-5. **Start the server**: Now let's start up the TensorFlow model server. With `&` at the end of the cmd, runs the container as a background process. Press enter after executing the following cmd. 
-To optimize overall performance, use the following recommended settings from the [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md):
-   * OMP_NUM_THREADS=*num_physical_cores*
-   * TENSORFLOW_INTER_OP_PARALLELISM=2
-   * TENSORFLOW_INTRA_OP_PARALLELISM=*num_physical_cores*
+   4.2 Manually install the protobuf-compiler v3.0.0, run the compilation process, add libraries to PYTHONPATH and to your `.bashrc` and test the installation of Tensorflow Object Detection API.
+   ```
+   cd $TF_MODELS_ROOT/research/
+   wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
+   unzip protobuf.zip
+   ./bin/protoc object_detection/protos/*.proto --python_out=.
+   export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim
+   echo "export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim" >> ~/.bashrc
+   python object_detection/builders/model_builder_test.py
+   ```
+ 
+5. **Discover the number of physical cores**: Compute *num_physical_cores* by executing the `lscpu` command and multiplying `Core(s) per socket` by `Socket(s)`. 
+   For example, for a machine with `Core(s) per socket: 28` and `Socket(s): 2`, `num_physical_cores = 28 * 2 = 56`. 
+   To compute *num_physical_cores* with bash commands:
+   ```
+   cores_per_socket=`lscpu | grep "Core(s) per socket" | cut -d':' -f2 | xargs`
+   num_sockets=`lscpu | grep "Socket(s)" | cut -d':' -f2 | xargs`
+   num_physical_cores=$((cores_per_socket * num_sockets))
+   echo $num_physical_cores
+   ```
+
+6. **Start the server**: Now start up the TensorFlow model server. Using `-d` (for "detached") runs the container as a background process. 
+   We will publish the ports for both REST (`-p 8501:8501`) and GRPC (`-p 8500:8500`).
+   To optimize overall performance, use the following recommended settings from the [General Best Practices](/docs/general/tensorflow_serving/GeneralBestPractices.md):
+     * OMP_NUM_THREADS=*num_physical_cores*
+     * TENSORFLOW_INTER_OP_PARALLELISM=2
+     * TENSORFLOW_INTRA_OP_PARALLELISM=*num_physical_cores*
  
    ```
-   (rfcn_venv)$ cd ~
-   (rfcn_venv)$ docker run \
-        --name=tfserving_rfcn \
-        -p 8501:8501 \
-        -v "$(pwd)/rfcn:/models/rfcn" \
-        -e MODEL_NAME=rfcn \
-        -e OMP_NUM_THREADS=$num_physical_cores \
-        -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
-        -e TENSORFLOW_INTRA_OP_PARALLELISM=$num_physical_cores \
-        tensorflow/serving:mkl &
+   cd ~
+   docker run \
+       --name=tfserving \
+       -d \
+       -p 8500:8500 \
+       -p 8501:8501 \
+       -v "$(pwd)/obj_detection:/models/$model_name" \
+       -e MODEL_NAME=$model_name \
+       -e OMP_NUM_THREADS=$num_physical_cores \
+       -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
+       -e TENSORFLOW_INTRA_OP_PARALLELISM=$num_physical_cores \
+       tensorflow/serving:mkl
    ```
-   **Note**: For some models, playing around with these settings values can improve performance even further. 
+   
+   **Note**: For some models, playing around with the parallelism settings can improve performance even further. 
    We recommend that you experiment with your own hardware and model if you have strict performance requirements.
 
-6. *Measure Online and Batch inference performance**: Clone the Intel Model Zoo into a directory called `intel-models` and run `rfcn-benchmark.py` [python script](/docs/object_detection/tensorflow_serving/rfcn-benchmark.py), which will test both Online and Batch performance. 
-      ```
-   (rfcn_venv)$ git clone https://github.com/IntelAI/models.git intel-models
-   (rfcn_venv)$ python intel-models/docs/object_detection/tensorflow_serving/rfcn-benchmark.py \
-     -i $COCO_VAL_DATA
+7. **Measure online and batch inference performance**: Run the `object_detection_benchmark.py` [python script](/docs/object_detection/tensorflow_serving/object_detection_benchmark.py), which will test both online and batch inference performance. 
+   
+   ```
+   cd ~
+   python models/docs/object_detection/tensorflow_serving/object_detection_benchmark.py \
+       -i $COCO_VAL_DATA \
+       -m $model_name \
+       -p $protocol_name
    ```
 
-
-7. **Visualize Object Detection Output**: To visually see the output of object detection results, we will use Jupyter notebook via web browser. If you are using a system that does not have a browser,  such as a VM on GCP or AWS, a workaround is to use local port forwarding of port 8888 to relay the jupyter service to your localhost. You will need to quit your SSH session and log back in with port forwarding configured. 
-For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ssh command. Once you are connected again with port forwarding, reactivate the virtual environment, navigate to the tutorial directory, and start jupyter notebook. Continue with the next instruction.
-      ```
-   $ cd ~
-   $ source rfcn_venv/bin/activate
-   (rfcn_venv)$ cd intel-models/docs/object_detection/tensorflow_serving
-   (rfcn_venv)$ jupyter notebook
+8. **Visualize object detection output**: To visually see the results of object detection, we will use a Jupyter notebook via web browser. 
+   If you are using a system that does not have a browser,  such as a VM on GCP or AWS, a workaround is to use local port forwarding of port 8888 to relay the jupyter service to your localhost.
+   You will need to quit your SSH session and log back in with port forwarding configured. For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ssh command. 
+   Once you are connected again with port forwarding, reactivate the virtual environment, navigate to the tutorial directory, and start the jupyter notebook service.
+   
    ```
-	After running `jupyter notebook` , paste the generated link into your browser and open the `RFCN.ipynb` file. You will need to edit the code in one place - in the second cell, insert the path to your downloaded COCO validation data set. Then, execute the cells in order. The output of the "Test Object Detection" section should be an image with objects correctly detected by the R-FCN model.
+   cd ~
+   source od_venv/bin/activate
+   cd models/docs/object_detection/tensorflow_serving
+   jupyter notebook
+   ```
+   
+   After running `jupyter notebook`, paste the generated link into your browser and open the `ObjectDetection.ipynb` file. 
+   You will need to edit the code in one cell - in the second cell, insert the path to your downloaded COCO validation data set and name of your chosen model and protocol.
+   Then, execute the cells in order. The output of the "Test Object Detection" section should be an image with objects detected by the served model.
 
-8. (Optional) **Using a single core**: In some cases, it is desirable to constrain the inference server to a single core or socket. Docker has many runtime flags that allow you to control the container's access to the host system's CPUs, memory, and other resources. See the [Docker document on this topic](https://docs.docker.com/config/containers/resource_constraints/#cpu) for all the options and their definitions. For example, to run the container so that a single CPU is used, you can use these settings:
+9. (Optional) **Using a single core**: In some cases, it is desirable to constrain the inference server to a single core or socket. 
+   Docker has many runtime flags that allow you to control the container's access to the host system's CPUs, memory, and other resources. 
+   See the [Docker document on this topic](https://docs.docker.com/config/containers/resource_constraints/#cpu) for all the options and their definitions. 
+   For example, to run the container so that a single CPU is used, you can use these settings:
    * `--cpuset-cpus="0"`
    * `--cpus="1"`
    * `OMP_NUM_THREADS=1`
@@ -160,33 +200,39 @@ For example, with a GCP VM, add `--ssh-flag="-L 8888:localhost:8888"` to your ss
    * `TENSORFLOW_INTRA_OP_PARALLELISM=1`
    
    ```
-   (rfcn_venv)$ docker run \
-        --name=tfserving_rfcn_1 \
-        -p 8500:8500 \
-        --cpuset-cpus="0" \
-        --cpus="1" \
-        -v "$(pwd)/rfcn:/models/rfcn" \
-        -e MODEL_NAME=rfcn \
-        -e OMP_NUM_THREADS=1 \
-        -e TENSORFLOW_INTER_OP_PARALLELISM=1 \
-        -e TENSORFLOW_INTRA_OP_PARALLELISM=1 \
-        tensorflow/serving:mkl &
+   cd ~
+   docker run \
+       --name=tfserving_1core \
+       -d \
+       -p 8500:8500 \
+       -p 8501:8501 \
+       --cpuset-cpus="0" \
+       --cpus="1" \
+       -v "$(pwd)/obj_detection:/models/$model_name" \
+       -e MODEL_NAME=$model_name \
+       -e OMP_NUM_THREADS=1 \
+       -e TENSORFLOW_INTER_OP_PARALLELISM=1 \
+       -e TENSORFLOW_INTRA_OP_PARALLELISM=1 \
+       tensorflow/serving:mkl
    ```
-
+   
 10. **Clean up**: 
     * After saving any changes you made to the Jupyter notebook, close the file and stop the Jupyter server by clicking `Quit` from the main file browser. 
-    * After you are fininshed with querying, you can stop the container which is running in the background. To restart the container with the same name, you need to stop and remove the container from the registry. To view your running containers run `docker ps`.
-		```
-		 (rfcn_venv)$ docker rm -f tfserving_rfcn
-		```
+    * After you are finished with querying, you can stop the container which is running in the background. 
+    To restart the container with the same name, you need to stop and remove the container from the registry. 
+    To view your running containers run `docker ps`.
+    
+	```
+	docker rm -f tfserving
+	```
+    
     * Deactivate your virtual environment with `deactivate`.
     
-
 ## Conclusion
 You have now seen an end-to-end example of serving an object detection model for inference using TensorFlow Serving, and learned:
 1. How to choose good values for the performance-related runtime parameters exposed by the `docker run` command
-2. How to verify that the served model can correctly detect objects in an image using a sample Jupyter notebook
-3. How to measure online and batch inference metrics using a REST client
+2. How to test online and batch inference metrics using a REST or GRPC client
+3. How to verify that the served model can correctly detect objects in an image using a sample Jupyter notebook
 
 With this knowledge and the example code provided, you should be able to get started serving your own custom object detection model with good performance. 
 If desired, you should also be able to investigate a variety of different settings combinations to see if further performance improvement are possible.

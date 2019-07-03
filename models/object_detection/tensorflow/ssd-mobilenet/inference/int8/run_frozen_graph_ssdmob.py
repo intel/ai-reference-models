@@ -36,10 +36,6 @@ import time
 import argparse
 from tensorflow.python.client import timeline
 
-os.environ["KMP_BLOCKTIME"] = "0"
-os.environ["KMP_SETTINGS"] = "1"
-os.environ["KMP_AFFINITY"] = "granularity=fine,verbose,compact,1,0"
-
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--graph', help='Path to input graph to run', type=str, required=True)
 parser.add_argument('-d', '--dataset', help='Full Path to input dataset to run', type=str, required=True)

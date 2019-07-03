@@ -30,11 +30,12 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-        self.cmd = self.get_numactl_command(self.args.socket_id) + \
+        self.cmd = self.get_command_prefix(self.args.socket_id) + \
             self.python_exe + " "
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         pairs_file = os.path.join(self.args.model_source_dir,
                                   "data/pairs.txt")

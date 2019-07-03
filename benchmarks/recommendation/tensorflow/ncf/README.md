@@ -14,13 +14,13 @@ This model uses official tensorflow models repo, where [ncf](https://github.com/
 model automatically downloads movielens ml-1m dataset as default if the `--data-location` flag is not set.
 If you want to download movielens 1M dataset and provide that path to `--data-location`, check this [reference](https://grouplens.org/datasets/movielens/1m/)
 
-2. Clone the official `tensorflow/models` repository with  tag `v1.11`
+2. Clone the official `tensorflow/models` repository with  tag `v1.11` and make a small change to `data_async_generation.py`, commenting out a line that causes a crash in the model script.
 
 ```
 $ git clone https://github.com/tensorflow/models.git
 $ cd models
 $ git checkout v1.11
-$ pwd
+$ sed -i.bak 's/atexit.register/# atexit.register/g' official/recommendation/data_async_generation.py
 ```
 
 3. Now clone `IntelAI/models` repository and then navigate to the `benchmarks` folder:
@@ -53,7 +53,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 The tail of batch inference log, looks as below.
@@ -83,7 +83,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 The tail of online inference log, looks as below.
@@ -115,7 +115,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 The tail of accuracy log, looks as below.
