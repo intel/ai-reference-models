@@ -259,7 +259,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -274,7 +274,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
