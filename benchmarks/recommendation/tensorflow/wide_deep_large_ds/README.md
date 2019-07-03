@@ -163,7 +163,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
         ```
         cd /home/<user>/models/benchmarks
 
-        python launch_benchmark.py
+        python launch_benchmark.py \
             --model-name wide_deep_large_ds \
             --precision fp32 \
             --mode inference \
@@ -171,7 +171,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
             --in-graph /root/user/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
             --data-location /root/user/wide_deep_files/dataset_preprocessed_eval.tfrecords
        ```
@@ -183,7 +183,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
         ```
         cd /home/<user>/models/benchmarks
 
-        python launch_benchmark.py
+        python launch_benchmark.py \
             --model-name wide_deep_large_ds \
             --precision fp32 \
             --mode inference \
@@ -191,7 +191,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --benchmark-only \
             --batch-size 1 \
             --socket-id 0 \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
             --in-graph /root/user/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords \
             -- num_parallel_batches=1
@@ -200,7 +200,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
         ```
         cd /home/<user>/models/benchmarks
 
-        python launch_benchmark.py
+        python launch_benchmark.py \
             --model-name wide_deep_large_ds \
             --precision fp32 \
             --mode inference \
@@ -208,7 +208,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --benchmark-only \
             --batch-size 512 \
             --socket-id 0 \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
             --in-graph /root/user/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
             --data-location /root/user/wide_deep_files/dataset_preprocessed_test.tfrecords
         ```

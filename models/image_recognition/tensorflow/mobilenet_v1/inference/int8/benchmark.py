@@ -113,17 +113,18 @@ if __name__ == "__main__":
         name='synthetic_images')
 
   image_data = None
-  with tf.Session() as sess:
-    image_data = sess.run(images)
-
-  graph = load_graph(model_file)
-
-  input_tensor = graph.get_tensor_by_name(input_layer + ":0");
-  output_tensor = graph.get_tensor_by_name(output_layer + ":0");
 
   config = tf.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
   config.intra_op_parallelism_threads = num_intra_threads
+  config.use_per_session_threads = True
+  
+  with tf.Session() as sess:
+    image_data = sess.run(images)
+  graph = load_graph(model_file)
+
+  input_tensor = graph.get_tensor_by_name(input_layer + ":0");
+  output_tensor = graph.get_tensor_by_name(output_layer + ":0");
 
   with tf.Session(graph=graph, config=config) as sess:
     sys.stdout.flush()
@@ -134,7 +135,7 @@ if __name__ == "__main__":
       elapsed_time = time.time() - start_time
       if((t+1) % 10 == 0):
         print("steps = {0}, {1} images/sec"
-              "".format(t+1, batch_size/elapsed_time))
+              "".format(t+1, batch_size/elapsed_time), flush=True)
 
     print("[Running benchmark steps...]")
     total_time   = 0;
@@ -145,4 +146,4 @@ if __name__ == "__main__":
       elapsed_time = time.time() - start_time
       if((t+1) % 10 == 0):
         print("steps = {0}, {1} images/sec"
-              "".format(t+1, batch_size/elapsed_time));
+              "".format(t+1, batch_size/elapsed_time), flush=True);

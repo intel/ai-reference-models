@@ -135,16 +135,36 @@ def get_record(filename, buffer, width, height, bboxes, labels, label_names, dif
 	return tf.train.Example(features = tf.train.Features(feature = features))
 
 
+def check_for_link(value):
+    """
+    Throws an error if the specified path is a link. os.islink returns
+    True for sym links.  For files, we also look at the number of links in
+    os.stat() to determine if it's a hard link.
+    """
+    if os.path.islink(value) or \
+            (os.path.isfile(value) and os.stat(value).st_nlink > 1):
+        raise argparse.ArgumentTypeError("{} cannot be a link.".format(value))
+
+def check_valid_file_or_folder(value):
+    """verifies filename exists and isn't a link"""
+    if value is not None:
+        if not os.path.isfile(value) and not os.path.isdir(value):
+            raise argparse.ArgumentTypeError("{} does not exist or is not a file/folder.".
+                                    format(value))
+        check_for_link(value)
+    return value
+
+
 def main():
 
 	RECORDS_PER_FILE = 1024
 	RECORD_FILENAME_FORMAT = '%s-%.5d-of-%.5d'
 
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--image_path', type = str, required = True, help = 'path to the input validation image files')
-	parser.add_argument('--annotations_file', type = str, required = True, help = 'name of the input validation annotations file')
-	parser.add_argument('--output_prefix', type = str, required = True, help = 'prefix of the output TensorFlow record files')
-	parser.add_argument('--output_path', type = str, required = True, help = 'path to the output TensorFlow record files')
+	parser.add_argument('--image_path', type=check_valid_file_or_folder, required=True, help='path to the input validation image files')
+	parser.add_argument('--annotations_file', type=check_valid_file_or_folder, required=True, help='name of the input validation annotations file')
+	parser.add_argument('--output_prefix', type=str, required=True, help='prefix of the output TensorFlow record files')
+	parser.add_argument('--output_path', type=check_valid_file_or_folder, required=True, help='path to the output TensorFlow record files')
 
 	args = parser.parse_args()
 

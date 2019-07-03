@@ -76,13 +76,13 @@ Tuning TensorFlow Serving to take full advantage of your hardware for language t
 	 sudo apt-get install -y python python-pip virtualenv
 	 ```
 		
-   - Create and activate the python virtual environment in your home directory and install the `grpc`, `tensorflow`, `pandas`, and `tensorflow-serving-api` packages.
+   - Create and activate the python virtual environment in your home directory and install the `tensorflow`, `pandas`, and `tensorflow-serving-api` packages.
    
      ```
      cd ~
      virtualenv lt_venv
      source lt_venv/bin/activate
-     pip install grpc intel-tensorflow pandas tensorflow-serving-api
+     pip install intel-tensorflow pandas tensorflow-serving-api
      ```
    
 4. **Download the pre-trained model and test data**: Download and extract the packaged pre-trained model and dataset ```transformer_lt_official_fp32_pretrained_model.tar.gz```

@@ -67,9 +67,15 @@ if [[ ${NOINSTALL} != "True" ]]; then
   pip install --upgrade pip
   pip install requests
 
-  # install google-perftools for tcmalloc
+  # install libgoogle-perftools-dev for tcmalloc
   if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-    apt-get install google-perftools -y
+    apt-get install --no-install-recommends --fix-missing google-perftools -y
+    if [ ! -f /usr/lib/libtcmalloc.so ]; then
+      apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
+      if [ ! -f /usr/lib/libtcmalloc.so ]; then
+        ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
+      fi
+    fi
   fi
 fi
 
@@ -190,7 +196,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget
+    apt-get -y install wget unzip
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -443,6 +449,7 @@ function maskrcnn() {
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      pip3 install --force-reinstall scipy==1.2.1 Pillow==5.3.0
 
       # install cocoapi
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
@@ -544,6 +551,7 @@ function rfcn() {
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies
     pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+
     original_dir=$(pwd)
 
     cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
@@ -553,6 +561,10 @@ function rfcn() {
     # install cocoapi
     get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
+
+  # Fix the object_detection_evaluation.py file to change unicode() to str() so that it works in py3
+  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
+  sed -i.bak "s/unicode(/str(/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
 
   split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
@@ -635,6 +647,7 @@ function ssd-resnet34() {
         do
           pip install $line
         done
+        apt install -y git-all
         old_dir=${PWD}
         cd /tmp
         git clone --single-branch https://github.com/tensorflow/benchmarks.git
@@ -755,6 +768,10 @@ function transformer_lt_official() {
         exit 1
     fi
 
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install pandas
+    fi
+
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
         ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/transformer/infer_ab.py
 
@@ -826,7 +843,13 @@ function wide_deep_large_ds() {
     if [[ -z "${LIBTCMALLOC}" ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
-      apt-get install google-perftools --fix-missing -y
+      apt-get install --no-install-recommends --fix-missing google-perftools -y
+      if [ ! -f /usr/lib/libtcmalloc.so ]; then
+        apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
+        if [ ! -f /usr/lib/libtcmalloc.so ]; then
+          ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
+        fi
+      fi
     fi
 
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
