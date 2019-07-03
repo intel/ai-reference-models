@@ -38,7 +38,11 @@ class InceptionV4ModelInitializer(BaseModelInitializer):
         # Environment variables
         set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket
                     if self.args.num_cores == -1 else self.args.num_cores)
-        self.set_kmp_vars(kmp_blocktime="0")
+
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
+
         self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_threads_per_core,
                                          num_intra_threads=platform_util.num_cores_per_socket)
 
@@ -69,7 +73,7 @@ class InceptionV4ModelInitializer(BaseModelInitializer):
 
     def add_command_prefix(self, script_path):
         """ Uses the specified script path and adds on the command prefix """
-        return self.get_numactl_command(self.args.socket_id) + self.python_exe + " " + \
+        return self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + \
             script_path
 
     def run_benchmark(self):

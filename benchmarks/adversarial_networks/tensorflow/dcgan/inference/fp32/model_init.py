@@ -37,13 +37,13 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads()
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
-        set_env_var("KMP_HW_SUBSET", "1T")
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         benchmark_script = os.path.join(
             self.args.intelai_models, args.mode, args.precision,
             "inference_bench.py")
-        self.benchmark_command = self.get_numactl_command(args.socket_id) + \
+        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)

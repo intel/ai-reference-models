@@ -29,10 +29,11 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-        self.cmd = self.get_numactl_command(self.args.socket_id) + self.python_exe + " "
+        self.cmd = self.get_command_prefix(self.args.socket_id) + self.python_exe + " "
 
         # Set KMP env vars, if they haven't already been set
-        self.set_kmp_vars()
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         # use default batch size if -1
         if self.args.batch_size == -1:
@@ -45,20 +46,14 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.benchmark_only:
             run_script = os.path.join(self.args.intelai_models,
-                                      "eval_image_classifier.py")
+                                      "eval_image_classifier_benchmark.py")
 
-            cmd_args = " --dataset_name=imagenet" + \
-                " --checkpoint_path=" + self.args.checkpoint + \
-                " --eval_dir=" + self.args.checkpoint + \
-                " --dataset_dir=" + self.args.data_location + \
-                " --dataset_split_name=validation" + \
-                " --clone_on_cpu=True" + \
-                " --model_name=" + str(self.args.model_name) + \
-                " --inter_op_parallelism_threads=" + \
-                str(self.args.num_inter_threads) + \
-                " --intra_op_parallelism_threads=" + \
-                str(self.args.num_intra_threads) + \
-                " --batch_size=" + str(self.args.batch_size)
+            cmd_args = " --input-graph=" + self.args.input_graph + \
+                       " --inter-op-parallelism-threads=" + \
+                       str(self.args.num_inter_threads) + \
+                       " --intra-op-parallelism-threads=" + \
+                       str(self.args.num_intra_threads) + \
+                       " --batch-size=" + str(self.args.batch_size)
         elif self.args.accuracy_only:
             run_script = os.path.join(self.args.intelai_models,
                                       "eval_image_classifier_accuracy.py")

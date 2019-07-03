@@ -10,6 +10,11 @@ precisions.
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Download the full ImageNet dataset and convert to the TF records format.
 
 * Clone the tensorflow/models repository:
@@ -38,12 +43,6 @@ $ git clone https://github.com/IntelAI/models.git
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50/`.
 
-    The docker image (`intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl`)
-    used in the commands above were built using
-    [TensorFlow](git@github.com:tensorflow/tensorflow.git) master
-    ([e889ea1](https://github.com/tensorflow/tensorflow/commit/e889ea1dd965c31c391106aa3518fc23d2689954)) and
-    [PR #25765](https://github.com/tensorflow/tensorflow/pull/25765).
-
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2), and the `--accuracy-only` flag.
@@ -59,20 +58,23 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 The log file is saved to the value of `--output-dir`.
 
 The tail of the log output when the script completes should look
 something like this:
 ```
+Iteration time: 233.495 ms
 Processed 49600 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Iteration time: 233.231 ms
 Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Iteration time: 234.541 ms
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
+Iteration time: 233.033 ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7361, 0.9155)
+Iteration time: 233.013 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7360, 0.9154)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190104_212224.log
 ```
@@ -97,21 +99,22 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image intelaipg/intel-optimized-tensorflow:PR25765-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the script completes should look
 something like this:
 ```
 ...
-steps = 470, 460.113806562 images/sec
-steps = 480, 460.073982602 images/sec
-steps = 490, 463.289831148 images/sec
-steps = 500, 463.521427264 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Iteration 497: 0.253495 sec
+Iteration 498: 0.253033 sec
+Iteration 499: 0.258083 sec
+Iteration 500: 0.254541 sec
+Average time: 0.254572 sec
+Batch size = 128
+Throughput: 502.805 images/sec
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190223_180546.log
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_20190416_172735.log
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
@@ -157,7 +160,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -176,8 +179,6 @@ Average time: 0.011 sec
 Batch size = 1
 Latency: 10.924 ms
 Throughput: 91.541 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215326.log
 ```
@@ -194,7 +195,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -213,8 +214,6 @@ Iteration 40: 0.652 sec
 Average time: 0.653 sec
 Batch size = 128
 Throughput: 196.065 images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_215655.log
 ```
@@ -234,7 +233,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -242,9 +241,8 @@ The tail of the log output when the accuracy run completes should look
 something like this:
 ```
 ...
+Iteration time: 649.252 ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7430, 0.9188)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190104_213452.log
 ```
@@ -269,7 +267,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
