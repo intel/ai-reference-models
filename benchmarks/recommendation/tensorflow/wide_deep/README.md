@@ -56,7 +56,7 @@ use in the next step.
              --batch-size 1 \
              --data-location /home/<user>/widedeep_dataset \
              --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+             --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
              --verbose
        ```
    * Running the model in batch inference mode, set `--batch-size` = `1024`
@@ -72,7 +72,7 @@ use in the next step.
              --batch-size 1024 \
              --data-location /home/<user>/path/to/dataset \
              --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
+             --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
              --verbose
        ```
 6. The log file is saved to the value of `--output-dir`.
@@ -94,8 +94,6 @@ use in the next step.
     recall: 0.0
     End-to-End duration is %s 36.5971579552
     Latency is: %s 0.00224784460139
-    lscpu_path_cmd = command -v lscpu
-    lscpu located here: /usr/bin/lscpu
     current path: /workspace/benchmarks
     search path: /workspace/benchmarks/*/tensorflow/wide_deep/inference/fp32/model_init.py
     Using model init: /workspace/benchmarks/classification/tensorflow/wide_deep/inference/fp32/model_init.py

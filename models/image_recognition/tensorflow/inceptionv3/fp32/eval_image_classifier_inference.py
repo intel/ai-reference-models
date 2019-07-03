@@ -189,9 +189,11 @@ class eval_classifier_optimized_graph:
         num_processed_images += self.args.batch_size
         num_remaining_images -= self.args.batch_size
 
+        start_time = time.time()
         # Compute inference on the preprocessed data
         predictions = infer_sess.run(output_tensor,
                                      {input_tensor: np_images})
+        elapsed_time = time.time() - start_time
 
         with tf.Graph().as_default() as accu_graph:
           accuracy1 = tf.reduce_sum(
@@ -207,6 +209,7 @@ class eval_classifier_optimized_graph:
           total_accuracy1 += np_accuracy1
           total_accuracy5 += np_accuracy5
 
+        print("Iteration time: %0.4f ms" % elapsed_time)
         print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
               % (num_processed_images, total_accuracy1 / num_processed_images,
                  total_accuracy5 / num_processed_images))

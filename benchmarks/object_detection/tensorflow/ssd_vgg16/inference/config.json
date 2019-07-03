@@ -1,0 +1,6 @@
+{
+    "optimization_parameters": {
+        "KMP_SETTINGS": 1,
+        "TF_ENABLE_WINOGRAD_NONFUSED": 1
+    }
+}

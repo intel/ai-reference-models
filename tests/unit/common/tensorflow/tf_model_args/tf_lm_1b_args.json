@@ -1,0 +1,7 @@
+[
+  { "_comment": "FP32 benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=lm-1b --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/models/benchmark.py -b=1 -I=100 --inter=1 --intra=28"}
+]
+
+

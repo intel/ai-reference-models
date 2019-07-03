@@ -36,7 +36,7 @@ We will break down the installation into 2 steps:
 * Step 1: Build the Intel Optimized TensorFlow Serving Docker image
 * Step 2: Verify the Docker image by serving a simple model - half_plus_two
 
-### Step 1: Build TensorFlow Serving Docker image
+### Step 1: Build TensorFlow Serving Docker image.
 The recommended way to use TensorFlow Serving is with Docker images. Let’s build a docker image with TensorFlow Serving optimized for Intel® Processors. 
 
 * Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 
@@ -45,7 +45,9 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ export TF_SERVING_ROOT=$(pwd)/serving
 	$ echo "export TF_SERVING_ROOT=$(pwd)/serving" >> ~/.bashrc
 	```
-	
+
+* You can also build image using [this](/benchmarks/common/tensorflow_serving/build_tfserving_image.sh) script, run as per comments mentioned. Or Continue manual steps as below.
+
 * Using `Dockerfile.devel-mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
   
     **NOTE**: It is recommended that you build an official release version using `--build-arg TF_SERVING_VERSION_GIT_BRANCH="<release_number>"`, but if you wish to build the (unstable) head of master, omit the build argument and master will be used by default.
@@ -54,6 +56,7 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
 	$ docker build \
 	    -f Dockerfile.devel-mkl \
+	    --build-arg TF_SERVING_BAZEL_OPTIONS="--incompatible_disallow_data_transition=false --incompatible_disallow_filetype=false" \
 	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.13.0" \
 	    -t tensorflow/serving:latest-devel-mkl .
 	```
@@ -257,7 +260,7 @@ $ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmo
 	$ cd ~
 	$ virtualenv tfserving_venv
 	$ source tfserving_venv/bin/activate
-	(tfserving_venv)$ pip install grpc requests tensorflow tensorflow-serving-api
+	(tfserving_venv)$ pip install requests tensorflow tensorflow-serving-api
 	```
 * Run the example `resnet_client_grpc.py` script from the TensorFlow Serving repository, which you cloned earlier.
 	```

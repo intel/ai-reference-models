@@ -359,8 +359,6 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 	steps = 30, ... images/sec
 	steps = 40, ... images/sec
 	steps = 50, ... images/sec
-	lscpu_path_cmd = command -v lscpu
-	lscpu located here: /usr/bin/lscpu
 	Ran inference with batch size 128
 	Log location outside container: {--output-dir value}/benchmark_resnet50
 	
@@ -384,9 +382,7 @@ you can implement the same strategy on different use cases demoed in Step 3.
 			--debug 				
 	
 <u>Example Output</u>
-	
-	lscpu_path_cmd = command -v lscpu
-	lscpu located here: b'/usr/bin/lscpu'
+
 	root@a78677f56d69:/workspace/benchmarks/common/tensorflow#
 	
 To rerun the bechmarking script, execute the ```start.sh``` bash script from your existing directory with additional or modified flags. For e.g  to rerun with the best batch inference (batch size=128) settings run with ```BATCH_SIZE``` 
@@ -397,7 +393,7 @@ and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL``
 	
 	NOINSTALL=True BATCH_SIZE=128 ./start.sh
 	
-All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](google.com) to get the full list of flags. 
+All other flags will be defaulted to values passed in the first ```launch_benchmark.py``` that starts the container. [See here](/docs/general/tensorflow/LaunchBenchmark.md) to get the full list of flags. 
 	
 <u>Example Output</u>	
 	
@@ -429,8 +425,6 @@ All other flags will be defaulted to values passed in the first ```launch_benchm
 	.
 	Batch size = 128
 	Throughput: ... images/sec
-	lscpu_path_cmd = command -v lscpu
-	lscpu located here: /usr/bin/lscpu
 	Ran inference with batch size 128
 	Log location outside container: {--output-dir value}/benchmark_resnet50_inference_fp32_20190205_201632.log
 	

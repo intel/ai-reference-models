@@ -61,7 +61,7 @@ $ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location /home/<user>/COCO2014 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl-py3
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 5. Log files are located at the value of `--output-dir`.
@@ -90,7 +90,5 @@ Batch size: 1
 Time spent per BATCH: 609.6943 ms
 Total samples/sec: 1.6402 samples/s
 Total time:  35.407243490219116
-lscpu_path_cmd = command -v lscpu
-lscpu located here: b'/usr/bin/lscpu'
 Log location outside container: {--output-dir value}/benchmark_maskrcnn_inference_fp32_20190111_205935.log
 ```
