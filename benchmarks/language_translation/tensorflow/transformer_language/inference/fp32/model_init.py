@@ -32,13 +32,14 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
-        self.cmd = self.get_numactl_command(self.args.socket_id)
+        self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
 
         self.set_num_inter_intra_threads()
 
-        # Set the KMP env vars
-        self.set_kmp_vars(kmp_blocktime="0", kmp_affinity="granularity=fine,compact,1,0")
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         TEMP_DIR = str(self.args.model_source_dir) + "/out_dir"
         if os.path.exists(TEMP_DIR):
@@ -97,14 +98,15 @@ class ModelInitializer(BaseModelInitializer):
                    " --output_dir=" + self.args.checkpoint + \
                    " --decode_from_file=" + self.args.decode_from_file + \
                    " --decode_to_file=" + self.args.decode_to_file + \
-                   " --reference=" + self.args.reference + \
                    " --inter_op_parallelism_threads=" + \
                    str(self.args.num_inter_threads) + \
                    " --intra_op_parallelism_threads=" + \
                    str(self.args.num_intra_threads)
 
-        self.bleu_params += " --translation=" + self.args.decode_to_file + \
-                            " --reference=" + self.args.reference
+        # If a reference file was provided, also calculate the bleu file
+        if self.args.reference:
+            self.bleu_params += " --translation=" + self.args.decode_to_file + \
+                                " --reference=" + self.args.reference
 
         self.cmd = self.cmd + run_script + cmd_args
 
@@ -113,10 +115,12 @@ class ModelInitializer(BaseModelInitializer):
         os.chdir(self.args.model_source_dir)
         self.run_command(self.cmd)
 
-        # calculate the bleu number after inference is done
-        bleucmd = "python " + \
-                  os.path.join(self.args.model_source_dir,
-                               "tensor2tensor/bin/t2t_bleu.py") + \
-                  self.bleu_params
-        os.system(bleucmd)
+        # calculate the bleu number after inference is done (this is skipped if no reference file is provided)
+        if self.bleu_params:
+            bleucmd = "python " + \
+                      os.path.join(self.args.model_source_dir,
+                                   "tensor2tensor/bin/t2t_bleu.py") + \
+                      self.bleu_params
+            os.system(bleucmd)
+
         os.chdir(original_dir)

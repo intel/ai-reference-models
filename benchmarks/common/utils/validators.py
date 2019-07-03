@@ -88,3 +88,23 @@ def check_valid_file_or_dir(value):
             raise ArgumentTypeError("{} does not exist.".format(value))
         check_for_link(value)
     return value
+
+
+def check_volume_mount(value):
+    """
+    Verifies that the value is a valid docker volume mount, where there should be
+    at least two fields separated by a : (for the local directory to mount and the
+    path to the where the directory will be mounted in the container. The third
+    optional field is for extra options like read only.
+    """
+    if value:
+        # Check that we have at least 2 fields and at most 3 fields
+        if not 3 > value.count(":") > 0:
+            raise ArgumentTypeError(
+                "{} is not a valid volume mount string where ':' is used to separate the fields. "
+                "See https://docs.docker.com/storage/volumes for information on formatting the volume "
+                "mount string".format(value))
+
+        # Check that the local directory specified is a valid folder and not a link
+        check_valid_folder(value.split(':')[0])
+    return value

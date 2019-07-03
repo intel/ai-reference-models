@@ -1,0 +1,17 @@
+[
+  { "_comment": "FP32 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd_vgg16 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only   --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssdvgg16_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/inference/eval_ssd.py --input-graph=/in_graph/ssdvgg16_fp32_pretrained_model.pb  --num-inter-threads=2 --num-intra-threads=56  --data-location=/dataset --accuracy-only"},
+
+  { "_comment": "FP32 benchmark command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd_vgg16 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb --data-location=/dataset --num-inter-threads=11 --num-intra-threads=21 --data-num-inter-threads=21 --data-num-intra-threads=28 --steps=500 --warmup-steps=100",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_ssd.py --input-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb  --num-inter-threads=11 --num-intra-threads=21  --data-num-inter-threads=21  --data-num-intra-threads=28  --warmup-steps=100 --steps=500  --data-location=/dataset"},
+
+  { "_comment": "Int8 accuracy command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd_vgg16 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only   --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/eval_ssd.py --input-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb  --num-inter-threads=2 --num-intra-threads=56  --data-location=/dataset --accuracy-only"},
+
+  { "_comment": "Int8 benchmark command",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd_vgg16 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb --data-location=/dataset --num-inter-threads=11 --num-intra-threads=21 --data-num-inter-threads=21 --data-num-intra-threads=28 --steps=500 --warmup-steps=100",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/eval_ssd.py --input-graph=/in_graph/ssdvgg16_int8_pretrained_model.pb  --num-inter-threads=11 --num-intra-threads=21  --data-num-inter-threads=21  --data-num-intra-threads=28  --warmup-steps=100 --steps=500  --data-location=/dataset"}
+]

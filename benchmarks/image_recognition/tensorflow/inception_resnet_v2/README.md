@@ -7,6 +7,11 @@ following modes/precisions:
 
 ## Int8 Inference Instructions
 
+These instructions use the TCMalloc memory allocator, which produces 
+better performance results for Int8 precision models with smaller batch sizes. 
+If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
+when calling `launch_benchmark.py` and the script will run without TCMalloc.
+
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
@@ -79,7 +84,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -95,7 +100,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
@@ -110,7 +115,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
@@ -136,30 +141,30 @@ Log location outside container: <output directory>/benchmark_inception_resnet_v2
 Example log tail when running for online inference:
 ```
 ...
-Iteration 37: 0.046 sec
-Iteration 38: 0.046 sec
-Iteration 39: 0.046 sec
-Iteration 40: 0.046 sec
-Average time: 0.045 sec
+Iteration 37: 0.043 sec
+Iteration 38: 0.042 sec
+Iteration 39: 0.043 sec
+Iteration 40: 0.043 sec
+Average time: 0.043 sec
 Batch size = 1
-Latency: 45.441 ms
-Throughput: 22.007 images/sec
+Latency: 42.793 ms
+Throughput: 23.368 images/sec
 Ran inference with batch size 1
-Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012557.log
+Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190415_231020.log
 ```
 
 Example log tail when running for batch inference:
 ```
 ...
-Iteration 37: 0.975 sec
-Iteration 38: 0.975 sec
-Iteration 39: 0.987 sec
-Iteration 40: 0.974 sec
-Average time: 0.976 sec
+Iteration 37: 0.932 sec
+Iteration 38: 0.928 sec
+Iteration 39: 0.927 sec
+Iteration 40: 0.928 sec
+Average time: 0.928 sec
 Batch size = 128
-Throughput: 131.178 images/sec
+Throughput: 137.978 images/sec
 Ran inference with batch size 128
-Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190330_012719.log
+Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190415_225215.log
 ```
 
 
@@ -174,19 +179,10 @@ $ git clone git@github.com:IntelAI/models.git
 
 This repository includes launch scripts for running an optimized version of the Inception ResNet V2 model code.
 
-2. Download the pre-trained Inception ResNet V2 model files:
-
-For accuracy:
+2. Download the pre-trained Inception ResNet V2 model:
 
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inception_resnet_v2_fp32_pretrained_model.pb
-```
-
-For batch and online inference:
-
-```
-$ wget http://download.tensorflow.org/models/inception_resnet_v2_2016_08_30.tar.gz
-$ mkdir -p checkpoints && tar -C ./checkpoints/ -zxf inception_resnet_v2_2016_08_30.tar.gz
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
@@ -230,7 +226,7 @@ precision, and docker image to use, along with your path to the ImageNet
 TF Records that you generated in step 3.
 
 Substitute in your own `--data-location` (from step 3, for accuracy
-only), `--checkpoint` pre-trained model checkpoint file path (from step 2).
+only), `--in-graph` frozen graph file path (from step 2).
 
 Inception ResNet V2 can be run for accuracy, online inference, or batch inference. 
 Use one of the following examples below, depending on your use case.
@@ -246,8 +242,8 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
 
@@ -262,9 +258,8 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --checkpoint /home/<user>/checkpoints \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
 ```
 
 For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -278,9 +273,8 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --checkpoint /home/<user>/checkpoints \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-devel-mkl \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
@@ -297,36 +291,31 @@ Example log tail when running for accuracy:
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.8036, 0.9526)
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.8036, 0.9525)
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.8037, 0.9525)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190109_081637.log
 ```
 
 Example log tail when running for online inference:
 ```
-eval/Accuracy[0]
-eval/Recall_5[0.01]
-INFO:tensorflow:Finished evaluation at 2019-01-08-01:51:28
-self._total_images_per_sec = 69.7
-self._displayed_steps = 10
-Total images/sec = 7.0
-Latency ms/step = 143.4
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Iteration 38: 0.052 sec
+Iteration 39: 0.051 sec
+Iteration 40: 0.051 sec
+Average time: 0.050 sec
+Batch size = 1
+Latency: 50.094 ms
+Throughput: 19.963 images/sec
 Ran inference with batch size 1
-Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015057.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190410_205213.log
 ```
 
 Example log tail when running for batch inference:
 ```
-eval/Accuracy[0.00078125]
-eval/Recall_5[0.00375]
-INFO:tensorflow:Finished evaluation at 2019-01-08-01:59:37
-self._total_images_per_sec = 457.0
-self._displayed_steps = 10
-Total images/sec = 45.7
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Iteration 38: 1.848 sec
+Iteration 39: 1.799 sec
+Iteration 40: 1.850 sec
+Average time: 1.818 sec
+Batch size = 128
+Throughput: 70.402 images/sec
 Ran inference with batch size 128
-Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190108_015440.log
+Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190410_205628.log
+```

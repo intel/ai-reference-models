@@ -55,7 +55,7 @@ Run:
         --mode inference \
         --socket-id 0 \
         --checkpoint /home/<user>/MTCNN_model \
-        --docker-image intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw
+        --docker-image intelaipg/intel-optimized-tensorflow:1.14.0
 ```
 
 6. The log file is saved to the value of `--output-dir`.

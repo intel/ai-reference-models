@@ -146,56 +146,66 @@ class _LoggerHook(tf.train.SessionRunHook):
       print('Latency ms/step = %.1f' % (latency))
 
 def main(_):
-  if not FLAGS.dataset_dir:
-    raise ValueError('You must supply the dataset directory with --dataset_dir')
-
   tf.logging.set_verbosity(tf.logging.INFO)
-  #os.environ["OMP_NUM_THREADS"] = "54"
+
   with tf.Graph().as_default():
     tf_global_step = slim.get_or_create_global_step()
 
     ######################
     # Select the dataset #
     ######################
-    dataset = dataset_factory.get_dataset(
-        FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+    if FLAGS.dataset_dir:
+        print("Inference using real data")
+        dataset = dataset_factory.get_dataset(
+            FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+        num_classes = dataset.num_classes - FLAGS.labels_offset
+    else:
+        print("Inference using synthetic data")
+        num_classes = 1000
 
     ####################
     # Select the model #
     ####################
     network_fn = nets_factory.get_network_fn(
         FLAGS.model_name,
-        num_classes=(dataset.num_classes - FLAGS.labels_offset),
-        is_training=False)
-
-    ##############################################################
-    # Create a dataset provider that loads data from the dataset #
-    ##############################################################
-    provider = slim.dataset_data_provider.DatasetDataProvider(
-        dataset,
-        shuffle=False,
-        common_queue_capacity=2 * FLAGS.batch_size,
-        common_queue_min=FLAGS.batch_size)
-    [image, label] = provider.get(['image', 'label'])
-    label -= FLAGS.labels_offset
-
-    #####################################
-    # Select the preprocessing function #
-    #####################################
-    preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
-    image_preprocessing_fn = preprocessing_factory.get_preprocessing(
-        preprocessing_name,
+        num_classes=num_classes,
         is_training=False)
 
     eval_image_size = FLAGS.eval_image_size or network_fn.default_image_size
 
-    image = image_preprocessing_fn(image, eval_image_size, eval_image_size)
+    if FLAGS.dataset_dir:
+        ##############################################################
+        # Create a dataset provider that loads data from the dataset #
+        ##############################################################
+        provider = slim.dataset_data_provider.DatasetDataProvider(
+            dataset,
+            shuffle=False,
+            common_queue_capacity=2 * FLAGS.batch_size,
+            common_queue_min=FLAGS.batch_size)
+        [image, label] = provider.get(['image', 'label'])
+        label -= FLAGS.labels_offset
 
-    images, labels = tf.train.batch(
-        [image, label],
-        batch_size=FLAGS.batch_size,
-        num_threads=FLAGS.num_preprocessing_threads,
-        capacity=5 * FLAGS.batch_size)
+        #####################################
+        # Select the preprocessing function #
+        #####################################
+        preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
+        image_preprocessing_fn = preprocessing_factory.get_preprocessing(
+            preprocessing_name,
+            is_training=False)
+
+        image = image_preprocessing_fn(image, eval_image_size, eval_image_size)
+
+        images, labels = tf.train.batch(
+            [image, label],
+            batch_size=FLAGS.batch_size,
+            num_threads=FLAGS.num_preprocessing_threads,
+            capacity=5 * FLAGS.batch_size)
+    else:
+        # Generate random images and labels with constant 0 when no dataset is used
+        input_shape = [FLAGS.batch_size, eval_image_size, eval_image_size, 3]
+        label_shape = [FLAGS.batch_size]
+        images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
+        labels = tf.constant(0, shape=label_shape, dtype=tf.int64)
 
     ####################
     # Define the model #

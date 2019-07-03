@@ -1,0 +1,15 @@
+[
+  { "_comment": "FP32 latency benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=densenet169 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/densenet169_fp32_pretrained_model.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/benchmark.py --num_intra_threads=28 --num_inter_threads=1 --batch_size=1 --input_graph=/in_graph/densenet169_fp32_pretrained_model.pb"},
+
+  { "_comment": "Fp32 accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=densenet169 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/densenet169_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/accuracy.py --num_intra_threads=28 --num_inter_threads=1 --batch_size=100 --input_graph=/in_graph/densenet169_fp32_pretrained_model.pb --data_location=/dataset"},
+
+  { "_comment": "FP32 Throughput benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=densenet169 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=100 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/densenet169_fp32_pretrained_model.pb",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/benchmark.py --num_intra_threads=28 --num_inter_threads=1 --batch_size=100 --input_graph=/in_graph/densenet169_fp32_pretrained_model.pb"}
+]
+
+

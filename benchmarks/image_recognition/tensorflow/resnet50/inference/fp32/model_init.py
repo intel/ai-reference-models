@@ -61,15 +61,17 @@ class ModelInitializer(BaseModelInitializer):
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
-        # Use default KMP variable values, but override the default KMP_BLOCKTIME value
-        self.set_kmp_vars(kmp_blocktime=str(self.args.kmp_blocktime))
+        # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
+
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode,
             "eval_image_classifier_inference.py")
 
-        self.benchmark_command = self.get_numactl_command(args.socket_id) + \
+        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
         num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
