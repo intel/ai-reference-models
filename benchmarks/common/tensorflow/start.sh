@@ -696,6 +696,10 @@ function unet() {
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
     fi
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip3 install --force-reinstall Pillow==5.3.0
+    fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
       exit 1
