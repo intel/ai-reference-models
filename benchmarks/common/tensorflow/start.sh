@@ -696,6 +696,10 @@ function unet() {
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
     fi
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip3 install --force-reinstall Pillow==5.3.0
+    fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
       exit 1
@@ -795,6 +799,12 @@ function wavenet() {
     if [[ -z "${checkpoint_name}" ]]; then
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      apt-get clean && apt-get update -y && \
+      apt-get install --no-install-recommends --fix-missing libsndfile1 -y
     fi
 
     if [[ -z "${sample}" ]]; then

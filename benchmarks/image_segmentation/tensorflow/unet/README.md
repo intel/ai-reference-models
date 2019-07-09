@@ -20,7 +20,7 @@ modes/precisions:
    ```
 
 3. Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository,
-   and then get [PR #202](https://github.com/jakeret/tf_unet/pull/202)
+   and then get [PR #276](https://github.com/jakeret/tf_unet/pull/276)
    to get cpu optimizations:
 
    ```
@@ -28,9 +28,9 @@ modes/precisions:
 
    $ cd tf_unet/
 
-   $ git fetch origin pull/202/head:cpu_optimized
+   $ git fetch origin pull/276/head:cpu_optimized
    From github.com:jakeret/tf_unet
-    * [new ref]         refs/pull/202/head -> cpu_optimized
+    * [new ref]         refs/pull/276/head -> cpu_optimized
 
    $ git checkout cpu_optimized
    Switched to branch 'cpu_optimized'
@@ -60,7 +60,7 @@ modes/precisions:
        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
        --checkpoint /home/<user>/unet_trained \
        --model-source-dir /home/<user>/tf_unet \
-       -- checkpoint_name=model.cpkt
+       -- checkpoint_name=model.ckpt
    ```
 
    Note that the `--verbose` or `--output-dir` flag can be added to the above
