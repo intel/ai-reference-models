@@ -801,6 +801,12 @@ function wavenet() {
       exit 1
     fi
 
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      apt-get clean && apt-get update -y && \
+      apt-get install --no-install-recommends --fix-missing libsndfile1 -y
+    fi
+
     if [[ -z "${sample}" ]]; then
       echo "wavenet requires -- sample arg to be defined"
       exit 1
