@@ -57,7 +57,7 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ docker build \
 	    -f Dockerfile.devel-mkl \
 	    --build-arg TF_SERVING_BAZEL_OPTIONS="--incompatible_disallow_data_transition=false --incompatible_disallow_filetype=false" \
-	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.13.0" \
+	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.14.0" \
 	    -t tensorflow/serving:latest-devel-mkl .
 	```
 * Next, using `Dockerfile.mkl`, build a serving image which is a light-weight image without any development tools in it. `Dockerfile.mkl` will build a serving image by copying Intel optimized libraries and ModelServer from the development image built in the previous step - `tensorflow/serving:latest-devel-mkl `
@@ -65,7 +65,7 @@ The recommended way to use TensorFlow Serving is with Docker images. Let’s bui
 	$ cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
 	$ docker build \
 	    -f Dockerfile.mkl \
-	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.13.0" \
+	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="1.14.0" \
 	    -t tensorflow/serving:mkl .
 	```
 

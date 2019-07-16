@@ -63,10 +63,10 @@ For steps 1 and 2, refer to the Intel Model Zoo READMEs:
    $ pip install virtualenv
    $ virtualenv venv
    ```
-   Then activate the virtual environment and install `requests`, `tensorflow`, and `tensorflow-serving-api`:
+   Then activate the virtual environment and install `requests` and `tensorflow-serving-api`:
    ```
    $ source venv/bin/activate
-   (venv)$ pip install requests intel-tensorflow tensorflow-serving-api
+   (venv)$ pip install requests tensorflow-serving-api
    ```
 5. **Create a SavedModel**: Using the conversion script `model_graph_to_saved_model.py`, convert the pre-trained model graph to a SavedModel.
    (For ResNet50, substitute the name of the ResNet50 FP32 or the ResNet50 Int8 pre-trained model.)
