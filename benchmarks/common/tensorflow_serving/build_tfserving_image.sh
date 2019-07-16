@@ -20,7 +20,7 @@
 # Setup proxy on your terminal before running the script.
 
 # To build image separately
-# TF_SERVING_VERSION=1.13.0 MKL_IMAGE_TAG=tensorflow/serving:mkl bash build_tfserving_image.sh
+# TF_SERVING_VERSION=1.14.0 MKL_IMAGE_TAG=tensorflow/serving:mkl bash build_tfserving_image.sh
 
 #!/usr/bin/env bash
 set -e
@@ -38,7 +38,7 @@ mkdir -p ${WORKDIR}
 cd ${WORKDIR}
 
 # Build Tensorflow Serving image
-TF_SERVING_VERSION=${TF_SERVING_VERSION:-"1.13.0"}
+TF_SERVING_VERSION=${TF_SERVING_VERSION:-"1.14.0"}
 MKL_IMAGE_TAG=${MKL_IMAGE_TAG:-"tensorflow/serving:mkl"}
 
 echo "Using TF_SERVING_VERSION=${TF_SERVING_VERSION} to build docker image"

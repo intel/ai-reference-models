@@ -2,7 +2,6 @@
 requests
 
 # grpc
-intel-tensorflow
 tensorflow-serving-api
 
 # object detection api
