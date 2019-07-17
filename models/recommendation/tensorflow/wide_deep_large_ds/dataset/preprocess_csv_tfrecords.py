@@ -89,20 +89,21 @@ CATEGORICAL_COLUMNS1.sort()
 NUMERIC_COLUMNS1.sort()
 no_of_rows = 0
 with open(csv_file, 'r') as f:
-        nums=[line.strip('\n\r').split(',') for line in f.readlines()]
-        numpy_arr = np.array(nums)
-        numpy_arr[numpy_arr=='']='0'
-        min_list,max_list,range_list = [],[],[]
-        for i in range(len(DATA_COLUMNS)):
-          if DATA_COLUMNS[i] in NUMERIC_COLUMNS1:
-            col_min = numpy_arr[:,i].astype(np.float32).min()
-            col_max = numpy_arr[:,i].astype(np.float32).max()
-            min_list.append(col_min)
-            max_list.append(col_max)
-            range_list.append(col_max-col_min)
-        print('min list',min_list)
-        print('max list',max_list)
-        print('range list',range_list)
+    print('*****Reading input file******')
+    nums=[line.strip('\n\r').split(',') for line in f.readlines()]
+    numpy_arr = np.array(nums)
+    numpy_arr[numpy_arr=='']='0'
+    min_list,max_list,range_list = [],[],[]
+    for i in range(len(DATA_COLUMNS)):
+      if DATA_COLUMNS[i] in NUMERIC_COLUMNS1:
+        col_min = numpy_arr[:,i].astype(np.float32).min()
+        col_max = numpy_arr[:,i].astype(np.float32).max()
+        min_list.append(col_min)
+        max_list.append(col_max)
+        range_list.append(col_max-col_min)
+    print('min list',min_list)
+    print('max list',max_list)
+    print('range list',range_list)
 
 
 with tf.python_io.TFRecordWriter(output_file) as writer:
