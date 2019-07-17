@@ -30,7 +30,7 @@ import sys
 from argparse import ArgumentParser
 from common import base_benchmark_util
 from common import platform_util
-from common.utils.validators import check_no_spaces, check_volume_mount
+from common.utils.validators import check_no_spaces, check_volume_mount, check_shm_size
 from common.base_model_init import BaseModelInitializer
 
 
@@ -75,6 +75,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                  "docker --volume flag (https://docs.docker.com/storage/volumes/). "
                  "This argument can only be used in conjunction with a --docker-image.",
             action="append", dest="custom_volumes", type=check_volume_mount)
+
+        arg_parser.add_argument(
+            "--shm-size",
+            help="Specify the size of docker /dev/shm. The format is <number><unit>. "
+                 "number must be greater than 0. Unit is optional and can be b (bytes), k (kilobytes), "
+                 "m (megabytes), or g (gigabytes).",
+            dest="shm_size", default="64m", type=check_shm_size)
 
         arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
@@ -381,8 +388,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.debug:
             docker_run_cmd.append("-it")
 
+        docker_shm_size = "--shm-size={}".format(args.shm_size)
         docker_run_cmd = docker_run_cmd + env_vars + volume_mounts + [
-            "--privileged", "-u", "root:root", "-w",
+            docker_shm_size, "--privileged", "-u", "root:root", "-w",
             workspace, args.docker_image, "/bin/bash"]
 
         if not args.debug:

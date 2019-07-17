@@ -26,7 +26,8 @@ from mock import MagicMock
 
 from common.utils.validators import (check_for_link, check_no_spaces, check_positive_number,
                                      check_positive_number_or_equal_to_negative_one, check_valid_filename,
-                                     check_valid_folder, check_valid_file_or_dir, check_volume_mount)
+                                     check_valid_folder, check_valid_file_or_dir, check_volume_mount,
+                                     check_shm_size)
 
 
 @pytest.fixture()
@@ -152,6 +153,17 @@ def test_check_valid_file_or_dir(mock_link, mock_exists):
 def test_check_valid_file_or_dir_bad():
     with pytest.raises(ArgumentTypeError):
         check_valid_file_or_dir('3245jlnsdfnsfd234ofds')
+
+
+def test_check_invalid_shm_size():
+    with pytest.raises(ArgumentTypeError):
+        check_shm_size('-g123ff')
+
+
+def test_check_valid_shm_size():
+    assert check_shm_size('500g') == '500g'
+    assert check_shm_size('64m') == '64m'
+    assert check_shm_size('1024k') == '1024k'
 
 
 @pytest.mark.parametrize("volume_mount_str",
