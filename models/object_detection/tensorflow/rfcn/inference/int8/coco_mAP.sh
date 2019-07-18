@@ -41,7 +41,7 @@ python -m object_detection/inference/infer_detections \
   --input_tfrecord_paths=$TF_RECORD_FILE \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
   --inference_graph=$FROZEN_GRAPH \
-  --discard_image_pixels=True
+  --discard_image_pixels
 
 
 mkdir -p ${SPLIT}_eval_metrics
