@@ -32,7 +32,7 @@ NUM_TEST_IMAGES = 50000
 
 def load_graph(model_file):
   graph = tf.Graph()
-  graph_def = tf.GraphDef()
+  graph_def = tf.compat.v1.GraphDef()
 
   import os
   file_ext = os.path.splitext(model_file)[1]
@@ -105,7 +105,7 @@ if __name__ == "__main__":
   input_tensor = graph.get_tensor_by_name(input_layer + ":0")
   output_tensor = graph.get_tensor_by_name(output_layer + ":0")
   
-  config = tf.ConfigProto()
+  config = tf.compat.v1.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
   config.intra_op_parallelism_threads = num_intra_threads
 
@@ -113,8 +113,8 @@ if __name__ == "__main__":
   num_processed_images = 0
   num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
                             - num_processed_images
-  with tf.Session() as sess:
-    sess_graph = tf.Session(graph=graph, config=config)
+  with tf.compat.v1.Session() as sess:
+    sess_graph = tf.compat.v1.Session(graph=graph, config=config)
     while num_remaining_images >= batch_size:
       # Reads and preprocess data
       np_images, np_labels = sess.run([images[0], labels[0]])
@@ -126,12 +126,12 @@ if __name__ == "__main__":
                              {input_tensor: np_images})
       elapsed_time = time.time() - start_time
       accuracy1 = tf.reduce_sum(
-          tf.cast(tf.nn.in_top_k(tf.constant(predictions),
-              tf.constant(np_labels), 1), tf.float32))
+          input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
+              targets=tf.constant(np_labels), k=1), tf.float32))
 
       accuracy5 = tf.reduce_sum(
-          tf.cast(tf.nn.in_top_k(tf.constant(predictions),
-              tf.constant(np_labels), 5), tf.float32))
+          input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
+              targets=tf.constant(np_labels), k=5), tf.float32))
       np_accuracy1, np_accuracy5 =  sess.run([accuracy1, accuracy5])
       total_accuracy1 += np_accuracy1
       total_accuracy5 += np_accuracy5
