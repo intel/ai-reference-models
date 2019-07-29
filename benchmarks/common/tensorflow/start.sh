@@ -640,11 +640,21 @@ function ssd-resnet34() {
         do
           pip install $line
         done
+        
         old_dir=${PWD}
+        
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/inference
+        benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
         cd /tmp
         git clone --single-branch https://github.com/tensorflow/benchmarks.git
         cd benchmarks
-        git checkout 1e7d788042dfc6d5e5cd87410c57d5eccee5c664
+        git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+        git apply ${benchmarks_patch_path}
+        
+        model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+        cd /workspace/models
+        git apply ${model_patch_path}
+        
         cd ${old_dir}
       fi
 
