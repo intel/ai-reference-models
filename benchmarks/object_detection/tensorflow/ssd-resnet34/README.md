@@ -90,12 +90,15 @@ total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
-# Go back to the main models directory and checkout the SHA that we are using for SSD-ResMet34
+# Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
 $ cd /home/<user>/models
 $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
+```
+$ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validation-00000-of-00001
+```
 
 5. Download the pretrained model:
 
@@ -134,7 +137,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
     --benchmark-only
 ```
 
@@ -154,7 +157,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
     --accuracy-only
 ```
 
@@ -267,12 +270,15 @@ total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
-# Go back to the main models directory and checkout the SHA that we are using for SSD-ResMet34
+# Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
 $ cd /home/<user>/models
 $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
+```
+$ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validation-00000-of-00001
+```
 
 5. Download the pretrained model:
 
@@ -310,7 +316,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
     --benchmark-only
 ```
 
@@ -330,7 +336,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image intelaipg/intel-optimized-tensorflow:latest-prs-b5d67b7-devel-mkl-py3 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
     --accuracy-only
 ```
 
