@@ -121,7 +121,7 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
@@ -138,7 +138,7 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
     --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
@@ -349,7 +349,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
     --benchmark-only
 ```
 
@@ -368,7 +368,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
     --accuracy-only
 ```
 
