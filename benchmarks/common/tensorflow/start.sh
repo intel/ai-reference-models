@@ -603,14 +603,19 @@ function ssd_mobilenet() {
     exit 1
   fi
 
-  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
+  export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_BENCHMARK}
+
+  cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+  git apply --ignore-space-change --ignore-whitespace ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/google_models_tf2.0.patch
 
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies for both fp32 and int8
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
-
-    # get the python cocoapi
-    get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+    apt-get update && apt-get install -y git
+    # install one by one to solve dependency problems
+    for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt)
+    do
+      pip install $line
+    done
 
     if [ ${PRECISION} == "int8" ]; then
       # install protoc v3.3.0, if necessary, then compile protoc files

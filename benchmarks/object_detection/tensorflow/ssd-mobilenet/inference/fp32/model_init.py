@@ -54,18 +54,14 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.accuracy_only:
             # get accuracy test command
-            script_path = os.path.join(
-                self.args.benchmark_dir, self.args.use_case,
-                self.args.framework, self.args.model_name, self.args.mode,
-                "ssdmobilenet_accuracy.sh")
+            script_path = os.path.join(self.args.intelai_models, self.args.mode,
+                                       self.args.precision, "ssdmobilenet_accuracy.sh")
             self.run_cmd = "sh {} {} {}".format(
                 script_path, self.args.input_graph, self.args.data_location)
         elif self.args.benchmark_only:
             # get benchmark command
-            benchmark_script = os.path.join(
-                self.args.benchmark_dir, self.args.use_case,
-                self.args.framework, self.args.model_name, self.args.mode,
-                self.args.precision, "infer_detections.py")
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
+                                            self.args.precision, "infer_detections.py")
 
             # get command with numactl
             self.run_cmd = self.get_command_prefix(

@@ -58,62 +58,63 @@ import tensorflow as tf
 from object_detection.inference import detection_inference
 import numpy as np
 import time
+import argparse
 
 
-tf.flags.DEFINE_string('input_tfrecord_paths', None,
-                       'A comma separated list of paths to input TFRecords.')
-tf.flags.DEFINE_string('output_tfrecord_path', None,
-                       'Path to the output TFRecord.')
-tf.flags.DEFINE_string('inference_graph', None,
-                       'Path to the inference graph with embedded weights.')
-tf.flags.DEFINE_boolean('discard_image_pixels', False,
-                        'Discards the images in the output TFExamples. This'
-                        ' significantly reduces the output size and is useful'
-                        ' if the subsequent tools don\'t need access to the'
-                        ' images (e.g. when computing evaluation measures).')
-tf.flags.DEFINE_integer('num_inter_threads', None,
-                        'Number of inter op threads')
-tf.flags.DEFINE_integer('num_intra_threads', None,
-                        'Number of intra op threads')
+parser = argparse.ArgumentParser()
+parser.add_argument('--input_tfrecord_paths', type=str, default=None,
+                    help='A comma separated list of paths to input TFRecords.')
+parser.add_argument('--output_tfrecord_path', type=str, default=None,
+                    help='Path to the output TFRecord.')
+parser.add_argument('--inference_graph', type=str, default=None,
+                    help='Path to the inference graph with embedded weights.')
+parser.add_argument('--discard_image_pixels', type=bool, default=False,
+                    help='Discards the images in the output TFExamples. This significantly reduces the output size '
+                         'and is useful if the subsequent tools don\'t need access to the images '
+                         '(e.g. when computing evaluation measures).')
+parser.add_argument('--num_inter_threads', type=int, default=None,
+                    help='Number of inter op threads')
+parser.add_argument('--num_intra_threads', type=int, default=None,
+                    help='Number of intra op threads')
 
-FLAGS = tf.flags.FLAGS
+args = parser.parse_args()
 
 
 def main(_):
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
     required_flags = ['input_tfrecord_paths', 'output_tfrecord_path',
                       'inference_graph', 'num_inter_threads',
                       'num_intra_threads']
     for flag_name in required_flags:
-        if not getattr(FLAGS, flag_name):
+        if not getattr(args, flag_name):
             raise ValueError('Flag --{} is required'.format(flag_name))
 
-    with tf.Session(config=tf.ConfigProto(
-            inter_op_parallelism_threads=FLAGS.num_inter_threads,
-            intra_op_parallelism_threads=FLAGS.num_intra_threads)) as sess:
+    with tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(
+            inter_op_parallelism_threads=args.num_inter_threads,
+            intra_op_parallelism_threads=args.num_intra_threads)) as sess:
         input_tfrecord_paths = [
-            v for v in FLAGS.input_tfrecord_paths.split(',') if v]
-        tf.logging.info('Reading input from %d files', len(input_tfrecord_paths))
+            v for v in args.input_tfrecord_paths.split(',') if v]
+        tf.compat.v1.logging.info('Reading input from %d files', len(input_tfrecord_paths))
         serialized_example_tensor, image_tensor = detection_inference.build_input(
             input_tfrecord_paths)
-        tf.logging.info('Reading graph and building model...')
+        tf.compat.v1.logging.info('Reading graph and building model...')
         (detected_boxes_tensor, detected_scores_tensor,
          detected_labels_tensor) = detection_inference.build_inference_graph(
-            image_tensor, FLAGS.inference_graph)
+            image_tensor, args.inference_graph)
 
-        tf.logging.info('Running inference and writing output to {}'.format(
-            FLAGS.output_tfrecord_path))
-        sess.run(tf.local_variables_initializer())
-        tf.train.start_queue_runners()
+        tf.compat.v1.logging.info('Running inference and writing output to {}'.format(
+            args.output_tfrecord_path))
+        sess.run(tf.compat.v1.local_variables_initializer())
+        tf.compat.v1.train.start_queue_runners()
 
         latency = []
-        with tf.python_io.TFRecordWriter(
-                FLAGS.output_tfrecord_path) as tf_record_writer:
+        with tf.io.TFRecordWriter(
+                args.output_tfrecord_path) as tf_record_writer:
             try:
                 for counter in itertools.count():
-                    tf.logging.log_every_n(
-                        tf.logging.INFO,
+                    tf.compat.v1.logging.log_every_n(
+                        tf.compat.v1.logging.INFO,
                         'Processed %d images... moving average latency %d ms',
                         200, counter + 1, np.mean(latency[-200:]))
                     start = time.time()
@@ -121,12 +122,12 @@ def main(_):
                         infer_detections_and_add_to_example(
                             serialized_example_tensor, detected_boxes_tensor,
                             detected_scores_tensor, detected_labels_tensor,
-                            FLAGS.discard_image_pixels)
+                            args.discard_image_pixels)
                     duration = time.time() - start
                     latency.append(duration * 1000)
                     tf_record_writer.write(tf_example.SerializeToString())
             except tf.errors.OutOfRangeError:
-                tf.logging.info('Finished processing records')
+                tf.compat.v1.logging.info('Finished processing records')
         latency = np.array(latency)
         print("Latency: min = {:.1f}, max = {:.1f}, mean= {:.1f}, median "
               "= {:.1f}".format(latency.min(), latency.max(), latency.mean(),
@@ -134,4 +135,4 @@ def main(_):
 
 
 if __name__ == '__main__':
-    tf.app.run()
+    tf.compat.v1.app.run()

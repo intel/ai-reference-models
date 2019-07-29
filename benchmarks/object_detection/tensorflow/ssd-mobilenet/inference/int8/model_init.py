@@ -49,9 +49,8 @@ class ModelInitializer(BaseModelInitializer):
             platform_util.num_threads_per_core
 
         if self.args.benchmark_only:
-            benchmark_script = os.path.join(
-                self.args.intelai_models, self.args.mode, self.args.precision,
-                "run_frozen_graph_ssdmob.py")
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
+                                            self.args.precision, "run_frozen_graph_ssdmob.py")
             self.command_prefix = self.get_command_prefix(self.args.socket_id) + \
                 "{} {}".format(self.python_exe, benchmark_script)
             set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
@@ -64,9 +63,8 @@ class ModelInitializer(BaseModelInitializer):
                 self.command_prefix += " -x"
         else:
             set_env_var("OMP_NUM_THREADS", threads_per_socket)
-            accuracy_script = os.path.join(
-                self.args.intelai_models, self.args.mode, self.args.precision,
-                "coco_int8.sh")
+            accuracy_script = os.path.join(self.args.intelai_models, self.args.mode,
+                                           self.args.precision, "coco_int8.sh")
             self.command_prefix = "sh {} {} {}".format(
                 accuracy_script, self.args.input_graph,
                 self.args.data_location)
