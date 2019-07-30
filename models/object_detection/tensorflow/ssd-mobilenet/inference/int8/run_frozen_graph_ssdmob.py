@@ -183,7 +183,7 @@ def run_inference_for_single_image(graph):
 
         if (args.evaluate_tensor is not None):
           for tensor in output_dict[args.evaluate_tensor]:
-            print tensor.shape
+            print(tensor.shape)
           return None, None
 
         # all outputs are float32 numpy arrays, so convert types as appropriate
