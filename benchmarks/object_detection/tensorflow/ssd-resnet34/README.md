@@ -69,12 +69,8 @@ The `--output_dir` is the location where the TF record files will be
 located after the script has completed.
 
 ```
-
-# We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
-$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
-
-$ cd research/object_detection/dataset_tools/
+# start the data format convert
+$ cd models/research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
       --train_image_dir="/home/<user>/coco/empty_dir" \
       --val_image_dir="/home/<user>/coco/val/val2017" \
@@ -83,19 +79,21 @@ $ python create_coco_tf_record.py --logtostderr \
       --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
       --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
       --output_dir="/home/<user>/coco/output"
+      
+# It will generate several tfrecord files in the directory "/home/<user>/coco/output", such as:
+coco_testdev.record-000[00-99]-of-00100
+coco_train.record-000[00-99]-of-00100
+coco_val.record-0000[0-9]-of-00010
 
-$ ll /home/<user>/coco/output
-total 1598276
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
+# Rename the validation datasets from coco_val.record-0000[0-9]-of-00010 to validation-0000[0-9]-of-00010
 
-# Go back to the main models directory and checkout the SHA that we are using for SSD-ResMet34
-$ cd /home/<user>/models
-$ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
+# Copy the annotations directory into the "/home/<user>/coco/output"
+$ ll /home/<user>/coco/output/annotations
+captions_train2017.json  instances_train2017.json  person_keypoints_train2017.json
+captions_val2017.json    instances_val2017.json    person_keypoints_val2017.json
 ```
 
-The `coco_val.record` file is what we will use in this inference example.
+The `validation-0000[0-9]-of-00010` file is what we will use in this inference example.
 
 5. Download the pretrained model:
 
@@ -246,12 +244,8 @@ The `--output_dir` is the location where the TF record files will be
 located after the script has completed.
 
 ```
-
-# We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
-$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
-
-$ cd research/object_detection/dataset_tools/
+# start the data format convert
+$ cd models/research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
       --train_image_dir="/home/<user>/coco/empty_dir" \
       --val_image_dir="/home/<user>/coco/val/val2017" \
@@ -260,19 +254,21 @@ $ python create_coco_tf_record.py --logtostderr \
       --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
       --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
       --output_dir="/home/<user>/coco/output"
+      
+# It will generate several tfrecord files in the directory "/home/<user>/coco/output", such as:
+coco_testdev.record-000[00-99]-of-00100
+coco_train.record-000[00-99]-of-00100
+coco_val.record-0000[0-9]-of-00010
 
-$ ll /home/<user>/coco/output
-total 1598276
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
+# Rename the validation datasets from coco_val.record-0000[0-9]-of-00010 to validation-0000[0-9]-of-00010
 
-# Go back to the main models directory and checkout the SHA that we are using for SSD-ResMet34
-$ cd /home/<user>/models
-$ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
+# Copy the annotations directory into the "/home/<user>/coco/output"
+$ ll /home/<user>/coco/output/annotations
+captions_train2017.json  instances_train2017.json  person_keypoints_train2017.json
+captions_val2017.json    instances_val2017.json    person_keypoints_val2017.json
 ```
 
-The `coco_val.record` file is what we will use in this inference example.
+The `validation-0000[0-9]-of-00010` file is what we will use in this inference example.
 
 5. Download the pretrained model:
 
