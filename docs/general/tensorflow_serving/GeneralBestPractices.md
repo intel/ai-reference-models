@@ -20,14 +20,17 @@ However, if you want to prioritize one metric over the other or further tune Ten
 
 ## TensorFlow Serving Configuration Settings
 
-There are four parameters you can set when running the TensorFlow Serving with Intel MKL-DNN docker container.
+There are six parameters you can set when running the TensorFlow Serving with Intel MKL-DNN docker container.
 * ***OMP_NUM_THREADS*** is the maximum number of threads available. A good guideline is to set it equal to the number of physical cores.
 * ***TENSORFLOW_INTER_OP_PARALLELISM*** is the number of thread pools to use for a TensorFlow session. A good guideline we have found empirically is to set this to 2 (you may want to start with this suggestion but then try other values, as well).
 * ***TENSORFLOW_INTRA_OP_PARALLELISM*** is the number of threads in each thread pool to use for a TensorFlow session. A good guideline is to set it equal to the number of physical cores. 
 The number of physical cores (referred to from now on as *num_physical_cores*) may be different from the number of logical cores or CPUs and can be found in Linux with the `lscpu` command.
-* ***(DEPRECATED) TENSORFLOW_SESSION_PARALLELISM*** is the number of threads to use for a TensorFlow 1.12 session. This controls both intra-op and inter-op parallelism and has been replaced by the separate parameters in TensorFlow Serving 1.13.
-There is backward compatibility for ***TENSORFLOW_SESSION_PARALLELISM*** for all versions, but if you use it, both inter- and intra-op parallelism will be set to the same value, which is usually not optimal. See this [feature description](https://github.com/tensorflow/serving/pull/1253) for the full logic. 
-If you are using version 1.12, a good guideline is to set this parameter equal to one-quarter the number of physical cores, but for 1.13 and above, we recommend omitting it and using ***TENSORFLOW_INTRA_OP_PARALLELISM*** and ***TENSORFLOW_INTER_OP_PARALLELISM*** instead.
+* ***KMP_BLOCKTIME*** is the time, in milliseconds, that a thread should wait after completing the execution of a parallel region, before sleeping.
+A small value may offer better overall performance if the application contains non-OpenMP threaded code. A larger value may be more appropriate if threads are to be reserved solely for use for OpenMP execution. 
+As a starting point, it is suggested to set this to 0 for CNN models and 1 for non-CNN topologies. The default is 1. 
+* ***KMP_AFFINITY*** controls how threads are distributed and ultimately bound to specific processing units. 
+A value of `granularity=fine,verbose,compact,1,0` is recommended when hyperthreading is enabled (this is the default), and `granularity=fine,verbose,compact` is recommended when hyperthreading is disabled.
+* ***KMP_SETTINGS*** enables or disables the printing of OpenMP run-time library environment variables during program execution. The default is 1. 
 
 ### Example
 
@@ -80,6 +83,11 @@ docker run \
     -e TENSORFLOW_INTRA_OP_PARALLELISM=16 \
     tensorflow/serving:mkl
 ```
+
+To customize other settings, just use the relevant environment variables when running the TensorFlow Serving container: 
+* `-e KMP_BLOCKTIME=0`
+* `-e KMP_AFFINITY=granularity=fine,verbose,compact`
+* `-e KMP_SETTINGS=0`
 
 ## Data Format
 
