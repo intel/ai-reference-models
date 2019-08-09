@@ -9,12 +9,15 @@ for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone `tensorflow/models` 
+1. Store path to current directory and then clone `tensorflow/models`
        
     ```
-    # We going to use older version of the tensorflow model repo.
-    $ git clone https://github.com/tensorflow/models.git
-    $ cd models
+    # We are going to use an older version of the tensorflow model repo.
+    $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+    $ pushd $MODEL_WORK_DIR
+
+    $ git clone https://github.com/tensorflow/models.git tf_models
+    $ cd tf_models
     $ git checkout 6ff0a53f81439d807a78f8ba828deaea3aaaf269 
     ```
     
@@ -29,6 +32,7 @@ This repo has the launch script for running the model, which we will
 use in the next step.
 
     ```
+    $ cd $MODEL_WORK_DIR
     $ git clone https://github.com/IntelAI/models.git
     ```
 4. Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running 
@@ -38,42 +42,42 @@ use in the next step.
    using `--http_proxy` and `--https_proxy` arguments.
    ```
    $ cd models
-   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
+   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir $MODEL_WORK_DIR/widedeep_dataset
    ```
 
 5. How to run
 
    * Running the model in online inference mode, set `--batch-size` = `1`
        ``` 
-       $ cd /home/<user>/models/benchmarks
+       $ cd $MODEL_WORK_DIR/models/benchmarks
     
-       $ python launch_benchmark.py \ 
-             --framework tensorflow \ 
-             --model-source-dir /home/<user>/path/to/tensorflow-models \
-             --precision fp32 \
-             --mode inference \
-             --model-name wide_deep \
-             --batch-size 1 \
-             --data-location /home/<user>/widedeep_dataset \
-             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-             --verbose
+       $ python launch_benchmark.py \
+            --framework tensorflow \
+            --model-source-dir $MODEL_WORK_DIR/tf_models \
+            --precision fp32 \
+            --mode inference \
+            --model-name wide_deep \
+            --batch-size 1 \
+            --data-location $MODEL_WORK_DIR/widedeep_dataset \
+            --checkpoint $MODEL_WORK_DIR/tf_models/wide_deep_fp32_pretrained_model \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --verbose
        ```
    * Running the model in batch inference mode, set `--batch-size` = `1024`
        ``` 
-       $ cd /home/<user>/models/benchmarks
+       $ cd $MODEL_WORK_DIR/models/benchmarks
     
-       $ python launch_benchmark.py \ 
-             --framework tensorflow \ 
-             --model-source-dir /home/<user>/path/to/tensorflow-models \
-             --precision fp32 \
-             --mode inference \
-             --model-name wide_deep \
-             --batch-size 1024 \
-             --data-location /home/<user>/path/to/dataset \
-             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-             --verbose
+       $ python launch_benchmark.py \
+            --framework tensorflow \
+            --model-source-dir $MODEL_WORK_DIR/tf_models \
+            --precision fp32 \
+            --mode inference \
+            --model-name wide_deep \
+            --batch-size 1024 \
+            --data-location $MODEL_WORK_DIR/widedeep_dataset \
+            --checkpoint $MODEL_WORK_DIR/tf_models/wide_deep_fp32_pretrained_model \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --verbose
        ```
 6. The log file is saved to the value of `--output-dir`.
 
@@ -98,5 +102,10 @@ use in the next step.
     search path: /workspace/benchmarks/*/tensorflow/wide_deep/inference/fp32/model_init.py
     Using model init: /workspace/benchmarks/classification/tensorflow/wide_deep/inference/fp32/model_init.py
     PYTHONPATH: :/workspace/models
-    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --precision=fp32         --mode=inference         --model-source-dir=/workspace/models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
+    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --precision=fp32         --mode=inference         --model-source-dir=/workspace/tf_models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
     ```
+
+7. To return to where you started from:
+```
+$ popd
+```

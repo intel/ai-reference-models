@@ -9,10 +9,13 @@ other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/IntelAI/models.git
 ```
 
@@ -33,7 +36,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/<user>/datasets/ImageNet_TFRecords
+$ ll $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -48,17 +51,17 @@ $ ll /home/<user>/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
 ```
 
-4. Download and extract the pretrained model:
-   ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/squeezenet_fp32_pretrained_model.tar.gz
-   $ tar -xvf squeezenet_fp32_pretrained_model.tar.gz
-   ```
+4. Download and extract the pretrained model and then store the path to the current directory:
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/squeezenet_fp32_pretrained_model.tar.gz
+$ tar -xvf squeezenet_fp32_pretrained_model.tar.gz
+```
 
 5. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd $MODEL_WORK_DIR/models/benchmarks
 ```
 
 The `launch_benchmark.py` script in the `benchmarks` directory is used
@@ -80,8 +83,8 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 64 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --checkpoint /home/<user>/squeezenet_checkpoints \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --checkpoint $MODEL_WORK_DIR/squeezenet_checkpoints \
+    --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 ```
 
 Or for online inference (using `--batch-size 1`):
@@ -95,8 +98,8 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --checkpoint /home/<user>/squeezenet_checkpoints \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --checkpoint $MODEL_WORK_DIR/squeezenet_checkpoints \
+    --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
@@ -129,4 +132,9 @@ SqueezeNet Inference Summary:
 
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_squeezenet_inference_fp32_20190104_220712.log
+```
+
+7. To return to where you started from:
+```
+$ popd
 ```

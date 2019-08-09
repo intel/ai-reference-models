@@ -17,9 +17,12 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
-* Clone the tensorflow/models repository:
+* Store the path to the current directory and clone the tensorflow/models repository:
 ```
-$ git clone https://github.com/tensorflow/models.git
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
+$ git clone https://github.com/tensorflow/models.git tf_models
 ``` 
 The TensorFlow models repo provides
 [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
@@ -47,11 +50,11 @@ located at `models/models/image_recognition/tensorflow/resnet50/`.
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2), and the `--accuracy-only` flag.
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/<user>/dataset/FullImageNetData_directory
-    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
+    --data-location $MODEL_WORK_DIR/dataset/FullImageNetData_directory
+    --in-graph $MODEL_WORK_DIR/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
@@ -89,10 +92,10 @@ args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
+    --in-graph $MODEL_WORK_DIR/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
@@ -120,10 +123,18 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
 
+5. To return to where you started from:
+```
+$ popd
+```
+
 ## FP32 Inference Instructions
 
-1. Download the pre-trained model.
+1. Store the path to the current directory and download the pre-trained model.
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_fp32_pretrained_model.pb
 ```
 
@@ -150,10 +161,10 @@ If using dummy data for inference, `--data-location` flag is not required. Other
 
 * To measure online inference, set `--batch-size=1` and run the script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -185,10 +196,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure batch inference, set `--batch-size=128` and run the launch script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -221,10 +232,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
+    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -232,7 +243,7 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/<user>/dataset/ImageNetData_directory \
+    --data-location $MODEL_WORK_DIR/dataset/ImageNetData_directory \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
@@ -254,10 +265,10 @@ output can only be used with real data.
 For example, the command below is the same as the accuracy test above,
 except with the `--output-results` flag added:
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph /home/<user>/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
+    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb  \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -266,7 +277,7 @@ $ python launch_benchmark.py \
     --output-results \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/<user>/dataset/ImageNetData_directory \
+    --data-location $MODEL_WORK_DIR/dataset/ImageNetData_directory \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 The results file will be written to the
@@ -289,3 +300,8 @@ ILSVRC2012_val_00021512.JPEG,424,424
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
+
+5. To return to where you started from:
+```
+$ popd
+```

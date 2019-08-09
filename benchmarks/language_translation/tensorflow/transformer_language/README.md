@@ -9,9 +9,12 @@ other platforms are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone an older commit from the [tensorflow/tensor2tensor](https://github.com/tensorflow/tensor2tensor) repository:
+1. Store the path to the current directoy and clone an older commit from the [tensorflow/tensor2tensor](https://github.com/tensorflow/tensor2tensor) repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/tensorflow/tensor2tensor.git
 $ cd tensor2tensor
 $ git checkout 6cea4c460585ce835d8bfa87f7191e29dd4de9e2
@@ -25,8 +28,8 @@ We will get the training data of it as an example:
 $ PYTHONPATH=$PYTHONPATH:$RootDirOfTensor2tensor \
   ./tensor2tensor/bin/t2t-datagen \
     --problem=translate_ende_wmt32k \
-    --data_dir=/home/<user>/t2t_data \
-    --tmp_dir=~/home/<user>/t2t_data/tmp
+    --data_dir=$MODEL_WORK_DIR/t2t_data \
+    --tmp_dir=$MODEL_WORK_DIR/t2t_data/tmp
 ```
 
 3. Download and extract the pre-trained model.
@@ -75,7 +78,7 @@ launch script parameters, then the BLEU score cannot be calculated.
 For online inference (using `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ python launch_benchmark.py \
     --model-name transformer_language \
     --precision fp32 \
     --mode inference \
@@ -83,16 +86,16 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
-    --data-location /home/<user>/t2t_data \
-    --model-source-dir /home/<user>/tensor2tensor/ \
+    --checkpoint $MODEL_WORK_DIR/transformer_lt_fp32_pretrained_model \
+    --data-location $MODEL_WORK_DIR/t2t_data \
+    --model-source-dir $MODEL_WORK_DIR/tensor2tensor/ \
     -- decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 
 For batch inference (using `--socket-id 0` and `--batch-size 32`):
 
 ```
-python launch_benchmark.py \
+$ python launch_benchmark.py \
     --model-name transformer_language \
     --precision fp32 \
     --mode inference \
@@ -100,9 +103,9 @@ python launch_benchmark.py \
     --batch-size 32 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --checkpoint /home/<user>/transformer_lt_fp32_pretrained_model \
-    --data-location /home/<user>/t2t_data \
-    --model-source-dir /home/<user>/tensor2tensor/ \
+    --checkpoint $MODEL_WORK_DIR/transformer_lt_fp32_pretrained_model \
+    --data-location $MODEL_WORK_DIR/t2t_data \
+    --model-source-dir $MODEL_WORK_DIR/tensor2tensor/ \
     -- decode_from_file=newstest2015.en reference=newstest2015.de
 ```
 
@@ -142,4 +145,9 @@ BLEU_uncased =  22.63
 BLEU_cased =  22.20
 Ran inference with batch size 32
 Log location outside container: {--output-dir value}/benchmark_transformer_language_inference_fp32_20190210_072635.log
+```
+
+7. To return to where you started from:
+```
+$ popd
 ```
