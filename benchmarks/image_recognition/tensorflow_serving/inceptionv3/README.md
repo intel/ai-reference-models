@@ -6,10 +6,13 @@ following modes/precisions:
 
 ## FP32 Inference Instructions
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/IntelAI/models.git
 ```
 
@@ -24,6 +27,9 @@ The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a tensorflow serving run using optimized TensorFlow Serving docker
 container. It has arguments to specify which model, framework, mode,
 precision, and input graph.
+```
+$ cd models/benchmarks
+```
 
 Substitute in your own `--in-graph` pretrained model file path (from step 2).
 
@@ -33,8 +39,8 @@ depending on your use case.
 * For online inference with dummy data (using `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
-    --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb \
+$ python launch_benchmark.py \
+    --in-graph $MODEL_WORK_DIR/inceptionv3_fp32_pretrained_model.pb \
     --model-name inceptionv3 \
     --framework tensorflow_serving \
     --precision fp32 \
@@ -61,8 +67,8 @@ Log output location: {--output-dir value}/benchmark_inceptionv3_inference_fp32_2
 * For batch inference with dummy data (using `--batch-size 128`):
 
 ```
-python launch_benchmark.py \
-    --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb \
+$ python launch_benchmark.py \
+    --in-graph $MODEL_WORK_DIR/inceptionv3_fp32_pretrained_model.pb \
     --model-name inceptionv3 \
     --framework tensorflow_serving \
     --precision fp32 \
@@ -88,3 +94,8 @@ Log output location: {--output-dir value}/benchmark_inceptionv3_inference_fp32_2
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
+
+5. To return to where you started from:
+```
+$ popd
+```

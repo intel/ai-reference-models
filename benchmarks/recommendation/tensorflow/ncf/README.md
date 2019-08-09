@@ -14,18 +14,22 @@ This model uses official tensorflow models repo, where [ncf](https://github.com/
 model automatically downloads movielens ml-1m dataset as default if the `--data-location` flag is not set.
 If you want to download movielens 1M dataset and provide that path to `--data-location`, check this [reference](https://grouplens.org/datasets/movielens/1m/)
 
-2. Clone the official `tensorflow/models` repository with  tag `v1.11` and make a small change to `data_async_generation.py`, commenting out a line that causes a crash in the model script.
+2. Clone the official `tensorflow/models` repository with  tag `v1.11` and make a small change to `data_async_generation.py`, commenting out a line that causes a crash in the model script. Store the path to the current directory.
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
+$ git clone https://github.com/tensorflow/models.git tf_models
+$ cd tf_models
 $ git checkout v1.11
 $ sed -i.bak 's/atexit.register/# atexit.register/g' official/recommendation/data_async_generation.py
 ```
 
-3. Now clone `IntelAI/models` repository and then navigate to the `benchmarks` folder:
+3. Now clone `IntelAI/models` repository, then navigate to the `benchmarks` folder:
 
 ```
+$ cd $MODEL_WORK_DIR
 $ git clone https://github.com/IntelAI/models.git
 $ cd models/benchmarks
 ```
@@ -45,8 +49,8 @@ For batch inference, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path fr
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint /home/<user>/ncf_fp32_pretrained_model \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --checkpoint $MODEL_WORK_DIR/models/benchmarks/ncf_trained_movielens_1m \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
     --model-name ncf \
     --socket-id 0 \
     --batch-size 256 \
@@ -75,8 +79,8 @@ For online inference, `--batch-size 1`, `--socket-id 0`, `--checkpoint` path fro
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint /home/<user>/ncf_fp32_pretrained_model \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --checkpoint $MODEL_WORK_DIR/models/benchmarks/ncf_trained_movielens_1m \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
     --model-name ncf \
     --socket-id 0 \
     --batch-size 1 \
@@ -106,8 +110,8 @@ For Accuracy, `--batch-size 256`, `--socket-id 0`, `--checkpoint` path from step
 
 ```
 $ python launch_benchmark.py \
-    --checkpoint /home/<user>/ncf_fp32_pretrained_model \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --checkpoint $MODEL_WORK_DIR/models/benchmarks/ncf_trained_movielens_1m \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
     --model-name ncf \
     --socket-id 0 \
     --accuracy-only \
@@ -125,4 +129,9 @@ NDCG: Normalized Discounted Cumulative Gain
 ...
 E0104 20:03:50.940653 140470332344064 tf_logging.py:110] CRITICAL - Iteration 1: HR = 0.2290, NDCG = 0.1148
 ...
+```
+
+6. To return to where you started from:
+```
+$ popd
 ```

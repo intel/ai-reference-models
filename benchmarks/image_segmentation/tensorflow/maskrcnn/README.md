@@ -17,6 +17,9 @@ you can get the `MS COCO API` from the [MS COCO API fork with fixes for Python3]
 or from the original [MS COCO API repository](https://github.com/cocodataset/cocoapi)
 and use [this pull request for Python3 fixes](https://github.com/cocodataset/cocoapi/pull/50).
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/matterport/Mask_RCNN.git
 $ cd Mask_RCNN
 
@@ -50,17 +53,17 @@ for `--model-source-dir` (from step 2) and `--data-location` (from step 1).
 
 Run for batch and online inference with `--batch-size=1` :
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd models/benchmarks
 
 $ python launch_benchmark.py \
-    --model-source-dir /home/<user>/Mask_RCNN \
+    --model-source-dir $MODEL_WORK_DIR/Mask_RCNN \
     --model-name maskrcnn \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --batch-size 1 \
     --socket-id 0 \
-    --data-location /home/<user>/COCO2014 \
+    --data-location $MODEL_WORK_DIR/COCO2014 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
@@ -91,4 +94,9 @@ Time spent per BATCH: 609.6943 ms
 Total samples/sec: 1.6402 samples/s
 Total time:  35.407243490219116
 Log location outside container: {--output-dir value}/benchmark_maskrcnn_inference_fp32_20190111_205935.log
+```
+
+6. To return to where you started from:
+```
+$ popd
 ```

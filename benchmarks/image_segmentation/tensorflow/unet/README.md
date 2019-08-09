@@ -6,9 +6,12 @@ modes/precisions:
 
 ## FP32 Inference Instructions
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
    repository:
    ```
+   $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+   $ pushd $MODEL_WORK_DIR
+
    $ git clone git@github.com:IntelAI/models.git
    ```
    This repository includes launch scripts for running Unet.
@@ -19,7 +22,7 @@ modes/precisions:
    $ tar -xvf unet_fp32_pretrained_model.tar.gz
    ```
 
-3. Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository,
+3. Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository
    and then get [PR #276](https://github.com/jakeret/tf_unet/pull/276)
    to get cpu optimizations:
 
@@ -49,18 +52,20 @@ modes/precisions:
    following command with your checkpoint and model-source-dir paths:
 
    ```
-   python launch_benchmark.py \
-       --model-name unet \
-       --precision fp32 \
-       --mode inference \
-       --framework tensorflow \
-       --benchmark-only \
-       --batch-size 1 \
-       --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --checkpoint /home/<user>/unet_trained \
-       --model-source-dir /home/<user>/tf_unet \
-       -- checkpoint_name=model.ckpt
+   $ cd $MODEL_WORK_DIR/models/benchmarks
+   
+   $ python launch_benchmark.py \
+        --model-name unet \
+        --precision fp32 \
+        --mode inference \
+        --framework tensorflow \
+        --benchmark-only \
+        --batch-size 1 \
+        --socket-id 0 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --checkpoint $MODEL_WORK_DIR/unet_trained \
+        --model-source-dir $MODEL_WORK_DIR/tf_unet \
+        -- checkpoint_name=model.ckpt
    ```
 
    Note that the `--verbose` or `--output-dir` flag can be added to the above
@@ -76,3 +81,8 @@ modes/precisions:
    Ran inference with batch size 1
    Log location outside container: {--output-dir value}/benchmark_unet_inference_fp32_20190201_205601.log
    ```
+
+6. To return to where you started from:
+```
+$ popd
+```

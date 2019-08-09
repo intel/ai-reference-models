@@ -10,10 +10,11 @@ Instructions and scripts for model inference for other platforms are coming late
 1. Clone an older commit from the [tensorflow/models](https://github.com/tensorflow/models.git) repository:
 
 ```
-$ mkdir tensorflow-models
-$ cd tensorflow-models
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
+$ git clone https://github.com/tensorflow/models.git tf_models
+$ cd tf_models
 $ git checkout 8367cf6dabe11adf7628541706b660821f397dce
 ```
 
@@ -38,6 +39,7 @@ total 1064
 repository:
 
 ```
+$ cd $MODEL_WORK_DIR
 $ git clone https://github.com/IntelAI/models.git
 ```
 
@@ -58,7 +60,7 @@ your use case.
 For online inference (using `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ python launch_benchmark.py \
     --model-name transformer_lt_official \
     --precision fp32 \
     --mode inference \
@@ -66,9 +68,9 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow-models/models \
-    --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
-    --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
+    --model-source-dir $MODEL_WORK_DIR/tf_models/ \
+    --in-graph $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
+    --data-location $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \
     file_out=translate.txt \
     reference=newstest2014.de \
@@ -78,7 +80,7 @@ python launch_benchmark.py \
 For batch inference (using `--socket-id 0` and `--batch-size 64`):
 
 ```
-python launch_benchmark.py \
+$ python launch_benchmark.py \
     --model-name transformer_lt_official \
     --precision fp32 \
     --mode inference \
@@ -86,9 +88,9 @@ python launch_benchmark.py \
     --batch-size 64 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow-models/models \
-    --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
-    --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
+    --model-source-dir $MODEL_WORK_DIR/tf_models/ \
+    --in-graph $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
+    --data-location $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \
     file_out=translate.txt \
     reference=newstest2014.de \
@@ -103,3 +105,7 @@ the CPU in the system to achieve the best performance.
 
 5.  The log file and default translated results is saved to the `models/benchmarks/common/tensorflow/logs` directory.
 
+6. To return to where you started from:
+```
+$ popd
+```

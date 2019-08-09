@@ -6,10 +6,13 @@ following modes/platforms:
 
 ## FP32 Inference Instructions
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/IntelAI/models.git
 ```
 
@@ -25,21 +28,21 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/gnmt_4la
 download the dataset using the script provided on nmt github.
 
 ```
-$git clone https://github.com/tensorflow/nmt.git
+$ git clone https://github.com/tensorflow/nmt.git
 Cloning into 'nmt'...
 remote: Enumerating objects: 1247, done.
 remote: Total 1247 (delta 0), reused 0 (delta 0), pack-reused 1247
 Receiving objects: 100% (1247/1247), 1.23 MiB | 7.72 MiB/s, done.
 Resolving deltas: 100% (891/891), done.
 
-$nmt/scripts/wmt16_en_de.sh /home/<user>/wmt16
+$ nmt/scripts/wmt16_en_de.sh $MODEL_WORK_DIR/wmt16
 ```
 
 After the script has completed, you should have a directory with the
 dataset looks like:
 
 ```
-$ ls /home/<user>/wmt16/
+$ ls $MODEL_WORK_DIR/wmt16/
 bpe.32000                      newstest2010.tok.de            newstest2012.tok.en            newstest2015.de                train.de
 data                           newstest2010.tok.en            newstest2013.de                newstest2015.en                train.en
 mosesdecoder                   newstest2011.de                newstest2013.en                newstest2015.tok.bpe.32000.de  train.tok.bpe.32000.de
@@ -72,7 +75,9 @@ the following examples below, depending on your use case.
 For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
 --model-name gnmt \
 --precision fp32 \
 --mode inference \
@@ -80,8 +85,8 @@ python launch_benchmark.py \
 --benchmark-only \
 --batch-size 1 \
 --socket-id 0 \
---checkpoint /home/<user>/gnmt_checkpoints \
---data-location /home/<user>/wmt16 \
+--checkpoint $MODEL_WORK_DIR/gnmt_checkpoints \
+--data-location $MODEL_WORK_DIR/wmt16 \
 --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
 -- infer_mode=beam_search
 ```
@@ -89,7 +94,7 @@ python launch_benchmark.py \
 For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 32`):
 
 ```
-python launch_benchmark.py \
+$ python launch_benchmark.py \
 --model-name gnmt \
 --precision fp32 \
 --mode inference \
@@ -97,8 +102,8 @@ python launch_benchmark.py \
 --benchmark-only \
 --batch-size 32 \
 --socket-id 0 \
---checkpoint /home/<user>/gnmt_checkpoints \
---data-location /home/<user>/wmt16 \
+--checkpoint $MODEL_WORK_DIR/gnmt_checkpoints \
+--data-location $MODEL_WORK_DIR/wmt16 \
 --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
 -- infer_mode=beam_search
 ```
@@ -138,3 +143,8 @@ Log location outside container: {--output-dir value}/benchmark_gnmt_inference_fp
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
+
+7. To return to where you started from:
+```
+$ popd
+```

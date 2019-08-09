@@ -12,10 +12,13 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and then clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/IntelAI/models.git
 ```
 
@@ -42,7 +45,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/<user>/datasets/ImageNet_TFRecords
+$ ll $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -77,7 +80,9 @@ For accuracy (using your `--data-location`, `--accuracy-only` and
 `--batch-size 100`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name inception_resnet_v2 \
     --precision int8 \
     --mode inference \
@@ -85,14 +90,16 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --in-graph $MODEL_WORK_DIR/inception_resnet_v2_int8_pretrained_model.pb \
+    --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 ```
 
 For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name inception_resnet_v2 \
     --precision int8 \
     --mode inference \
@@ -101,13 +108,15 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
+    --in-graph $MODEL_WORK_DIR/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
 For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name inception_resnet_v2 \
     --precision int8 \
     --mode inference \
@@ -116,7 +125,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
+    --in-graph $MODEL_WORK_DIR/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
@@ -167,13 +176,21 @@ Ran inference with batch size 128
 Log location outside container: <output directory>/benchmark_inception_resnet_v2_inference_int8_20190415_225215.log
 ```
 
+6. To return to where you started from:
+```
+$ popd
+```
+
 
 ## FP32 Inference Instructions
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and then clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone git@github.com:IntelAI/models.git
 ```
 
@@ -202,7 +219,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/<user>/datasets/ImageNet_TFRecords
+$ ll $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -235,7 +252,9 @@ For accuracy (using your `--data-location`, `--accuracy-only` and
 `--batch-size 100`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name inception_resnet_v2 \
     --precision fp32 \
     --mode inference \
@@ -243,14 +262,16 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --data-location /home/<user>/datasets/ImageNet_TFRecords
+    --in-graph $MODEL_WORK_DIR/inception_resnet_v2_fp32_pretrained_model.pb \
+    --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 ```
 
 For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name inception_resnet_v2 \
     --precision fp32 \
     --mode inference \
@@ -258,14 +279,16 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
+    --in-graph $MODEL_WORK_DIR/inception_resnet_v2_fp32_pretrained_model.pb \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
 For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
-python launch_benchmark.py \
+$ cd models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name inception_resnet_v2 \
     --precision fp32 \
     --mode inference \
@@ -273,7 +296,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
+    --in-graph $MODEL_WORK_DIR/inception_resnet_v2_fp32_pretrained_model.pb \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
 ```
 
@@ -318,4 +341,9 @@ Batch size = 128
 Throughput: 70.402 images/sec
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_inception_resnet_v2_inference_fp32_20190410_205628.log
+```
+
+7. To return to where you started from:
+```
+$ popd
 ```

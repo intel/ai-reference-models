@@ -12,10 +12,13 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone this [intelai/models](https://github.com/IntelAI/models)
+1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+
 $ git clone https://github.com/IntelAI/models.git
 ```
 
@@ -43,7 +46,7 @@ After the script has completed, you should have a directory with the
 sharded dataset something like:
 
 ```
-$ ll /home/<user>/datasets/ImageNet_TFRecords
+$ ll $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
 -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
 -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -76,7 +79,7 @@ For accuracy (using your `--data-location`,`--in-graph`, `--accuracy-only` and
 `--batch-size 100`):
 
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd $MODEL_WORK_DIR/models/benchmarks
 
 $ python launch_benchmark.py \
     --model-name resnet101 \
@@ -86,8 +89,8 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --data-location /home/<user>/dataset/FullImageNetData_directory \
-    --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb
+    --data-location $MODEL_WORK_DIR/dataset/FullImageNetData_directory \
+    --in-graph=$MODEL_WORK_DIR/resnet101_int8_pretrained_model.pb
 ```
 
 When running for performance, it is optional to specify the
@@ -98,7 +101,9 @@ default to use `warmup_steps=40` and `steps=100`.
 For online inference with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name resnet101 \
     --precision int8 \
     --mode inference \
@@ -107,14 +112,16 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
+    --in-graph=$MODEL_WORK_DIR/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
 
 For online inference with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
 
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name resnet101 \
     --precision int8 \
     --mode inference \
@@ -122,16 +129,18 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --data-location /home/<user>/dataset/FullImageNetData_directory \
+    --data-location $MODEL_WORK_DIR/dataset/FullImageNetData_directory \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
+    --in-graph=$MODEL_WORK_DIR/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
 
 For batch inference with dummy data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name resnet101 \
     --precision int8 \
     --mode inference \
@@ -140,24 +149,26 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
+    --in-graph=$MODEL_WORK_DIR/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
 
 For batch inference with ImageNet data (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
 
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name resnet101 \
     --precision int8 \
     --mode inference \
     --framework tensorflow \
     --benchmark-only \
     --batch-size 128 \
-    --data-location /home/<user>/dataset/FullImageNetData_directory \
+    --data-location $MODEL_WORK_DIR/dataset/FullImageNetData_directory \
     --socket-id 0 \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
+    --in-graph=$MODEL_WORK_DIR/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
 
@@ -200,19 +211,27 @@ Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet101_inference_int8_20190223_192438.log
 ```
 
+7. To return to where you started from:
+```
+$ popd
+```
+
 ## FP32 Inference Instructions
 
-1. Clone the
+1. Store the path to the current directory and clone the
 [intelai/models](https://github.com/intelai/models)
 repository
     ```
+    $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+    $ pushd $MODEL_WORK_DIR
+
     $ git clone https://github.com/IntelAI/models.git
     ```
 
 2. Download the pre-trained model.
-```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_fp32_pretrained_model.pb
-```
+    ```
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_fp32_pretrained_model.pb
+    ```
 
 3. Download ImageNet dataset.
 
@@ -224,7 +243,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
     to download, process and convert the ImageNet dataset to the TF records format. After converting data, you should have a directory
     with the sharded dataset something like below, we only need `validation-*` files, discard `train-*` files:
     ```
-    $ ll /home/<user>/datasets/ImageNet_TFRecords
+    $ ll $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
     -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
     -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
     -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -243,7 +262,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
     For online inference measurements with dummy data set `--batch-size 1` and for batch inference set `--batch-size 128`
 
     ```
-    $ cd /home/<user>/models/benchmarks
+    $ cd $MODEL_WORK_DIR/models/benchmarks
+
     $ python launch_benchmark.py \
         --framework tensorflow \
         --precision fp32 \
@@ -251,7 +271,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
         --model-name resnet101 \
         --batch-size 128 \
         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-        --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
+        --in-graph $MODEL_WORK_DIR/trained_models/resnet101_fp32_pretrained_model.pb \
         --socket-id 0
     ```
 
@@ -270,7 +290,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
 
 5. Run for accuracy
     ```
-    $ cd /home/<user>/models/benchmarks
+    $ cd $MODEL_WORK_DIR/models/benchmarks
+
     $ python launch_benchmark.py \
         --framework tensorflow \
         --precision fp32 \
@@ -278,8 +299,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
         --model-name resnet101 \
         --batch-size 100 \
         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-        --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
-        --data-location /home/<user>/imagenet_validation_dataset \
+        --in-graph $MODEL_WORK_DIR/trained_models/resnet101_fp32_pretrained_model.pb \
+        --data-location $MODEL_WORK_DIR/imagenet_validation_dataset \
         --accuracy-only \
         --socket-id 0
     ```
@@ -300,3 +321,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet10
 
    Note that the `--verbose` or `--output-dir` flag can be added to any of the above
    commands to get additional debug output or change the default output location.
+
+6. To return to where you started from:
+    ```
+    $ popd
+    ```
