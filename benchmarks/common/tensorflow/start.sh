@@ -543,15 +543,18 @@ function rfcn() {
 
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+    for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt)
+    do
+      pip install $line
+    done
     original_dir=$(pwd)
+
+    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+    git apply --ignore-space-change --ignore-whitespace ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/tf-2.0.patch
 
     cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
     # install protoc v3.3.0, if necessary, then compile protoc files
     install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-
-    # install cocoapi
-    get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
   fi
 
   split_arg=""

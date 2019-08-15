@@ -4,3 +4,4 @@ pillow
 lxml
 jupyter
 matplotlib
+pycocotools

@@ -37,7 +37,7 @@ echo "TF_RECORD_FILE=${TF_RECORD_FILE}"
 echo "PYTHONPATH=${PYTHONPATH}"
 echo "TF_MODELS_ROOT=$TF_MODELS_ROOT"
 
-python -m object_detection/inference/infer_detections \
+python -m object_detection.inference.infer_detections \
   --input_tfrecord_paths=$TF_RECORD_FILE \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
   --inference_graph=$FROZEN_GRAPH \
@@ -56,7 +56,7 @@ metrics_set: 'coco_detection_metrics'
 " > ${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt
 
 
-python -m object_detection/metrics/offline_eval_map_corloc \
+python -m object_detection.metrics.offline_eval_map_corloc \
   --eval_dir=${SPLIT}_eval_metrics \
   --eval_config_path=${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt \
   --input_config_path=${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt

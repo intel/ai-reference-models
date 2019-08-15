@@ -122,7 +122,7 @@ index 51c29455..e3970e4f 100644
        groundtruth[input_data_fields.groundtruth_instance_masks] = tf.cast(
            masks, tf.uint8)
 diff --git a/research/object_detection/inference/detection_inference.py b/research/object_detection/inference/detection_inference.py
-index dc66686f..d21de5b3 100644
+index dc66686f..cbdf106b 100644
 --- a/research/object_detection/inference/detection_inference.py
 +++ b/research/object_detection/inference/detection_inference.py
 @@ -31,16 +31,16 @@ def build_input(tfrecord_paths):
@@ -152,7 +152,7 @@ index dc66686f..d21de5b3 100644
          shape=[num_detections]
    """
 -  with tf.gfile.Open(inference_graph_path, 'r') as graph_def_file:
-+  with tf.io.gfile.GFile(inference_graph_path, 'r') as graph_def_file:
++  with tf.io.gfile.GFile(inference_graph_path, 'rb') as graph_def_file:
      graph_content = graph_def_file.read()
 -  graph_def = tf.GraphDef()
 +  graph_def = tf.compat.v1.GraphDef()
@@ -404,6 +404,19 @@ index ff2efbaf..dbf6a82d 100644
  if __name__ == '__main__':
 -  tf.app.run(main)
 +  tf.compat.v1.app.run(main)
+diff --git a/research/object_detection/metrics/tf_example_parser.py b/research/object_detection/metrics/tf_example_parser.py
+index 9a5f130f..fa361bf5 100644
+--- a/research/object_detection/metrics/tf_example_parser.py
++++ b/research/object_detection/metrics/tf_example_parser.py
+@@ -44,7 +44,7 @@ class StringParser(data_parser.DataToNumpyParser):
+     self.field_name = field_name
+ 
+   def parse(self, tf_example):
+-    return "".join(tf_example.features.feature[self.field_name]
++    return b"".join(tf_example.features.feature[self.field_name]
+                    .bytes_list.value) if tf_example.features.feature[
+                        self.field_name].HasField("bytes_list") else None
+ 
 diff --git a/research/object_detection/queues.py b/research/object_detection/queues.py
 new file mode 100644
 index 00000000..1bc8d2c8
@@ -585,3 +598,20 @@ index aef46c1d..8ccad0cb 100644
      label_map_string = fid.read()
      label_map = string_int_label_map_pb2.StringIntLabelMap()
      try:
+diff --git a/research/object_detection/utils/object_detection_evaluation.py b/research/object_detection/utils/object_detection_evaluation.py
+index 8a38d8c2..99af2324 100644
+--- a/research/object_detection/utils/object_detection_evaluation.py
++++ b/research/object_detection/utils/object_detection_evaluation.py
+@@ -839,9 +839,9 @@ class ObjectDetectionEvaluation(object):
+       if self.use_weighted_mean_ap:
+         all_scores = np.append(all_scores, scores)
+         all_tp_fp_labels = np.append(all_tp_fp_labels, tp_fp_labels)
+-      print 'Scores and tpfp per class label: {}'.format(class_index)
+-      print tp_fp_labels
+-      print scores
++      print('Scores and tpfp per class label: {}'.format(class_index))
++      print(tp_fp_labels)
++      print(scores)
+       precision, recall = metrics.compute_precision_recall(
+           scores, tp_fp_labels, self.num_gt_instances_per_class[class_index])
+       self.precisions_per_class.append(precision)
