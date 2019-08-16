@@ -14,6 +14,7 @@ Instructions for MTCC model training and inference for other precisions are comi
     $ pushd $MODEL_WORK_DIR
     
     $ git clone https://github.com/AITTSMD/MTCNN-Tensorflow.git
+    $ git checkout 3b3934d38f8d34287cc933a581537a1acfd0bb60
 ```
 
 2. Download and extract the [dataset](http://mmlab.ie.cuhk.edu.hk/archive/CNN/data/train.zip), `lfw_5590` will be used. 
