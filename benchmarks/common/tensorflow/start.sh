@@ -50,8 +50,8 @@ echo "    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD: ${TCMALLOC_LARGE_ALLOC_REPORT_T
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 
-# Only inference is supported right now
-if [ ${MODE} != "inference" ]; then
+# Only inference and training are supported right now
+if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   echo "${MODE} mode is not supported"
   exit 1
 fi
@@ -148,6 +148,9 @@ CMD="${PYTHON_EXE} ${RUN_SCRIPT_PATH} \
 --batch-size=${BATCH_SIZE} \
 --socket-id=${SOCKET_ID} \
 --output-dir=${OUTPUT_DIR} \
+--num-processes=${NUM_PROCESSES} \
+--num-processes-per-node=${NUM_PROCESSES_PER_NODE} \
+--num-train-steps=${NUM_TRAIN_STEPS} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
@@ -376,19 +379,60 @@ function faster_rcnn() {
 
 # GNMT model
 function gnmt() {
-    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    if [ ${MODE} == "training" ]; then
+      if [ ${PRECISION} == "fp32" ]; then
+         # build the model source
+	 original_dir=$(pwd)
+         model_source_dir="${INTELAI_MODELS}/${MODE}/${PRECISION}"
 
-    if [ ${PRECISION} == "fp32" ]; then
-
-      CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
-      $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
-      $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
-      $(add_arg "--infer_mode" ${infer_mode})"
-      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
+         if [ ${NOINSTALL} != "True" ]; then
+           model_source_dir="${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}"
+           # install dependencies
+           apt-get update
+           apt-get install cpio
+           # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
+           cd /l_mpi
+           sh install.sh --silent silent.cfg
+           source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+           pip install -r "${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/requirements.txt"
+        fi
+        # Prepare the model source
+        cd ${model_source_dir}
+        export PYTHONPATH=${PYTHONPATH}:${model_source_dir}/nmt/nmt
+        rm nmt -rf
+        git clone https://github.com/tensorflow/nmt.git
+        cd nmt
+        git checkout b278487980832417ad8ac701c672b5c3dc7fa553
+        git apply ../multi_instances.patch
+        cd $original_dir
+        CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt})  \
+        $(add_arg "--vocab_prefix" ${vocab_prefix}) \
+        $(add_arg "--train_prefix" ${train_prefix}) \
+        $(add_arg "--dev_prefix" ${dev_prefix}) $(add_arg "--test_prefix" ${test_prefix}) \
+        $(add_arg "--num_units" ${num_units}) \
+        $(add_arg "--dropout" ${dropout})  \
+        $(add_arg "--hparams_path" ${hparams_path})"
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+        exit 1
+      fi
     fi
+
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ]; then
+
+        CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
+        $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
+        $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
+        $(add_arg "--infer_mode" ${infer_mode})"
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+        exit 1
+      fi
+   fi
 }
 
 # inceptionv4 model

@@ -50,7 +50,7 @@ class ModelInitializer(BaseModelInitializer):
 
         DATA_DIR = os.path.join(self.args.intelai_models,
                                 self.args.precision, "wmt16")
-        HPARAM_DIR = os.path.join(self.args.intelai_models,
+        HPARAM_DIR = os.path.join(self.args.intelai_models, self.args.mode,
                                   self.args.precision, "standard_hparams")
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
@@ -118,7 +118,7 @@ class ModelInitializer(BaseModelInitializer):
                    str(self.args.num_intra_threads) + \
                    " --infer_mode=" + self.args.infer_mode
 
-        run_script = os.path.join(self.args.intelai_models,
+        run_script = os.path.join(self.args.intelai_models, self.args.mode,
                                   self.args.precision, "nmt.py")
 
         self.cmd = self.cmd + run_script + cmd_args

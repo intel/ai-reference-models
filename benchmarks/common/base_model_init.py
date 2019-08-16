@@ -97,6 +97,36 @@ class BaseModelInitializer(object):
 
         return command
 
+    def get_multi_instance_train_prefix(self, option_list=None):
+        """
+        Returns the multi-instance train command prefix with:
+         - Define the number of processes.
+         - Define the processes per each node.
+         - Set the other parameters with the format of parameter list "option:value", such as environment variable
+           "-genv:I_MPI_ASYNC_PROGRESS=1".
+        """
+        command = "mpirun "
+        if self.args.num_processes:
+            if self.args.num_processes > 0:
+                command += "-n {} ".format(self.args.num_processes)
+            else:
+                print("Warning: {} is not a valid value.".format(self.args.num_processes))
+
+        if self.args.num_processes_per_node:
+            if self.args.num_processes_per_node > 0:
+                command += "-ppn {} ".format(self.args.num_processes_per_node)
+            else:
+                print("Warning: {} is not a valid value.".format(self.args.num_processes_per_node))
+
+        if option_list:
+            for item in option_list:
+                if item.count(':') != 1:
+                    print("Warning: {} does not follow the option_list definition.".format(item))
+                else:
+                    option, value = item.split(':')
+                    command += "{} {} ".format(option, value)
+        return command
+
     def add_args_to_command(self, command, arg_list):
         """
         Add args that are specified in the arg list to the command.  batch_size

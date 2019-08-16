@@ -32,6 +32,7 @@ dependencies to be installed:
 | Image Segmentation     | TensorFlow    | [UNet](https://arxiv.org/pdf/1505.04597.pdf)                | Inference | [FP32](image_segmentation/tensorflow/unet/README.md#fp32-inference-instructions) |
 | Language Modeling      | TensorFlow    | [LM-1B](https://arxiv.org/pdf/1602.02410.pdf)               | Inference | [FP32](language_modeling/tensorflow/lm-1b/README.md#fp32-inference-instructions) |
 | Language Translation   | TensorFlow    | [GNMT](https://arxiv.org/pdf/1609.08144.pdf)                | Inference | [FP32](language_translation/tensorflow/gnmt/README.md#fp32-inference-instructions) |
+| Language Translation   | TensorFlow    | [GNMT](https://arxiv.org/pdf/1609.08144.pdf)                | Training  | [FP32](language_translation/tensorflow/gnmt/README.md#fp32-training-instructions) |
 | Language Translation   | TensorFlow    | [Transformer Language](https://arxiv.org/pdf/1706.03762.pdf)| Inference | [FP32](language_translation/tensorflow/transformer_language/README.md#fp32-inference-instructions) |
 | Language Translation   | TensorFlow    | [Transformer_LT_Official ](https://arxiv.org/pdf/1706.03762.pdf)| Inference | [FP32](language_translation/tensorflow/transformer_lt_official/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf)               | Inference | [Int8](object_detection/tensorflow/rfcn/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) |

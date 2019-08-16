@@ -118,6 +118,23 @@ class BaseBenchmarkUtil(object):
             dest="num_inter_threads", default=None)
 
         self._common_arg_parser.add_argument(
+            "-np", "--num-processes", type=check_positive_number,
+            help="Specify the number of processes to run on as mpirun '-np' "
+                 "input for multi-instance execution. ",
+            dest="num_processes", default=None)
+
+        self._common_arg_parser.add_argument(
+            "-ppn", "--num-processes-per-node", type=check_positive_number,
+            help="Specify the number of processes per node as mpirun '-ppn' "
+                 "input for multi-instance execution. ",
+            dest="num_processes_per_node", default=None)
+
+        self._common_arg_parser.add_argument(
+            "-ts", "--num-train-steps", type=check_positive_number,
+            help="Specify the number of training steps ",
+            dest="num_train_steps", default=None)
+
+        self._common_arg_parser.add_argument(
             "--data-num-intra-threads", type=check_positive_number,
             help="The number intra op threads for the data layer config",
             dest="data_num_intra_threads", default=None)

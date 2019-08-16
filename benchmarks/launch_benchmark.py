@@ -184,6 +184,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "NUM_INTER_THREADS": args.num_inter_threads,
             "NUM_INTRA_THREADS": args.num_intra_threads,
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
+            "NUM_PROCESSES": args.num_processes,
+            "NUM_PROCESSES_PER_NODE": args.num_processes_per_node,
+            "NUM_TRAIN_STEPS": args.num_train_steps,
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "BENCHMARK_ONLY": args.benchmark_only,
             "ACCURACY_ONLY": args.accuracy_only,
@@ -195,13 +198,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         }
 
         # Add custom model args as env vars)
-        for custom_arg in args.model_args:
+        for custom_arg in args.model_args + self.unknown_args:
             if "=" not in custom_arg:
                 raise ValueError("Expected model args in the format "
                                  "`name=value` but received: {}".
                                  format(custom_arg))
             split_arg = custom_arg.split("=")
-            split_arg[0] = split_arg[0].replace("-", "_")
+            split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
 
         # Set the default value for NOINSTALL, if it's not explicitly set by the user
