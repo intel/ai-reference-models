@@ -15,6 +15,7 @@ $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
 $ pushd $MODEL_WORK_DIR
 
 $ git clone https://github.com/davidsandberg/facenet.git
+$ git checkout 096ed770f163957c1e56efa7feeb194773920f6e
 ```
 
 2. Clone this [intelai/models](https://github.com/IntelAI/models)
