@@ -52,4 +52,5 @@ dependencies to be installed:
 | Use Case               | Framework     | Model               | Mode      | Instructions    |
 | -----------------------| --------------| ------------------- | --------- |------------------------------|
 | Image Recognition      | TensorFlow Serving   | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf)        | Inference | [FP32](image_recognition/tensorflow_serving/inceptionv3/README.md#fp32-inference-instructions) |
+| Object Detection      | TensorFlow Serving   | [RFCN](https://arxiv.org/pdf/1512.00567.pdf) [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)       | Inference | [FP32](object_detection/tensorflow_serving/README.md#fp32-inference-instructions) |
 

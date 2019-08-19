@@ -270,11 +270,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             env_var_dict["OMP_NUM_THREADS"] = self.args.num_intra_threads
 
         else:
-            mount_external_models_source = args.model_source_dir
             mount_intelai_models = intelai_models
 
             # Add env vars with bare metal settings
-            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
             env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
 
             if in_graph_path:
@@ -282,6 +280,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
             if checkpoint_path:
                 env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
+
+        if args.model_source_dir:
+            mount_external_models_source = args.model_source_dir
+            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path

@@ -38,6 +38,7 @@ echo "    NUM_INTRA_THREADS: ${NUM_INTRA_THREADS}"
 echo "    NUM_INTER_THREADS: ${NUM_INTER_THREADS}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 echo "    TF_SERVING_VERSION: ${TF_SERVING_VERSION}"
+echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 
 
 if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -74,6 +75,26 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   mkdir ${OUTPUT_DIR}
 fi
 
+function install_protoc() {
+  pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+
+  # install protoc, if necessary, then compile protoc files
+  if [ ! -f "bin/protoc" ]; then
+    install_location=$1
+    echo "protoc not found, installing protoc from ${install_location}"
+    apt-get -y install wget unzip
+    wget -O protobuf.zip ${install_location}
+    unzip -o protobuf.zip
+    rm protobuf.zip
+  else
+    echo "protoc already found"
+  fi
+
+  echo "Compiling protoc files"
+  ./bin/protoc object_detection/protos/*.proto --python_out=.
+  popd
+}
+
 MKL_IMAGE_TAG=tensorflow/serving:latest-mkl
 
 # Build Tensorflow Serving docker image
@@ -88,8 +109,9 @@ function docker_run(){
         --rm \
         -d \
         -p 8500:8500 \
-        -v /tmp:/models/${MODEL_NAME} \
-        -e MODEL_NAME=${MODEL_NAME} \
+        -p 8501:8501 \
+        -v /tmp:/models/${model_name} \
+        -e MODEL_NAME=${model_name} \
         -e OMP_NUM_THREADS=${OMP_NUM_THREADS} \
         -e TENSORFLOW_INTER_OP_PARALLELISM=${NUM_INTER_THREADS} \
         -e TENSORFLOW_INTRA_OP_PARALLELISM=${NUM_INTRA_THREADS} \
@@ -119,7 +141,7 @@ function resnet50_or_inceptionv3(){
     fi
 
     CONTAINER_NAME=tfserving_${RANDOM}
-
+    model_name=${MODEL_NAME}
     # Run container
     MKL_IMAGE_TAG=${MKL_IMAGE_TAG} CONTAINER_NAME=${CONTAINER_NAME} docker_run
 
@@ -139,11 +161,66 @@ function resnet50_or_inceptionv3(){
     docker rm -f ${CONTAINER_NAME}
 }
 
+function rfcn_or_ssd_mobilenet(){
+    # Setup virtual env
+    pip install virtualenv
+    virtualenv venv
+    source venv/bin/activate
+
+    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+    # install protoc v3.3.0, if necessary, then compile protoc files
+    install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
+    export PYTHONPATH=$PYTHONPATH:$(pwd):$(pwd)/slim
+
+    # cd to object detection tfserving scripts
+    cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}
+
+    # install dependencies
+    pip install -r requirements.txt
+
+    saved_model_dir=/tmp/1
+
+    if [ -d ${saved_model_dir} ]; then
+        rm -rf ${saved_model_dir}
+    fi
+    mkdir -p ${saved_model_dir}
+
+    cp ${IN_GRAPH} ${saved_model_dir}
+
+    RUNNING=$(docker ps --filter="expose=8500/tcp" -q | xargs)
+    if [[ -n ${RUNNING} ]]; then
+        docker rm -f ${RUNNING}
+    fi
+
+    CONTAINER_NAME=tfserving_${RANDOM}
+
+    # use the defined protocol value in the env var PROTOCOL_NAME or GRPC as the default value
+    PROTOCOL_NAME=${PROTOCOL_NAME:-"grpc"}
+
+    if [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
+        model_name="ssdmobilenet"
+    else
+        model_name=${MODEL_NAME}
+    fi
+
+    # Run container
+    MKL_IMAGE_TAG=${MKL_IMAGE_TAG} CONTAINER_NAME=${CONTAINER_NAME} docker_run
+
+    # Test
+    python object_detection_benchmark.py -i ${DATASET_LOCATION} -m ${model_name} -p ${PROTOCOL_NAME}
+
+    # Clean up
+    docker rm -f ${CONTAINER_NAME}
+}
+
+
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "inceptionv3" ] || [ ${MODEL_NAME} == "resnet50" ] && [ ${PRECISION} == "fp32" ]; then
   resnet50_or_inceptionv3 | tee -a ${LOGFILE}
+elif [ ${MODEL_NAME} == "rfcn" ] || [ ${MODEL_NAME} == "ssd-mobilenet" ] && [ ${PRECISION} == "fp32" ]; then
+  rfcn_or_ssd_mobilenet | tee -a ${LOGFILE}
 else
   echo "Unsupported Model: ${MODEL_NAME} or Precision: ${PRECISION}"
   exit 1
