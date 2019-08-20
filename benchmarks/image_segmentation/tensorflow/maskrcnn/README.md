@@ -22,8 +22,11 @@ $ pushd $MODEL_WORK_DIR
 
 $ git clone https://github.com/matterport/Mask_RCNN.git
 $ cd Mask_RCNN
+$ git checkout 3deaec5d902d16e1daf56b62d5971d428dc920bc
 
 $ git clone https://github.com/waleedka/coco.git
+$ cd coco
+$ git checkout f83e9552d4ca57e15a16dca2efe3dcd80693358a
 ```
 
 3. Download pre-trained COCO weights `mask_rcnn_coco.h5)` from the
