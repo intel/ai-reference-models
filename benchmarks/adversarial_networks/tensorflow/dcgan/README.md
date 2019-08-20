@@ -15,6 +15,8 @@ $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
 $ pushd $MODEL_WORK_DIR
 
 $ git clone https://github.com/tensorflow/models.git tf_models
+$ cd tf_models/
+$ git checkout -b r1.11 remotes/origin/r1.11
 ```
 
 The TensorFlow models repo will be used for running inference as well as
