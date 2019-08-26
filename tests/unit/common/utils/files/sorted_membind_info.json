@@ -1,0 +1,342 @@
+[
+    [
+        {
+            "cpu_id": 0,
+            "ht_cpu_id": 56,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 1,
+            "ht_cpu_id": 57,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 2,
+            "ht_cpu_id": 58,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 3,
+            "ht_cpu_id": 59,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 4,
+            "ht_cpu_id": 60,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 5,
+            "ht_cpu_id": 61,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 6,
+            "ht_cpu_id": 62,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 7,
+            "ht_cpu_id": 63,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 8,
+            "ht_cpu_id": 64,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 9,
+            "ht_cpu_id": 65,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 10,
+            "ht_cpu_id": 66,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 11,
+            "ht_cpu_id": 67,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 12,
+            "ht_cpu_id": 68,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 13,
+            "ht_cpu_id": 69,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 14,
+            "ht_cpu_id": 70,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 15,
+            "ht_cpu_id": 71,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 16,
+            "ht_cpu_id": 72,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 17,
+            "ht_cpu_id": 73,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 18,
+            "ht_cpu_id": 74,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 19,
+            "ht_cpu_id": 75,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 20,
+            "ht_cpu_id": 76,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 21,
+            "ht_cpu_id": 77,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 22,
+            "ht_cpu_id": 78,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 23,
+            "ht_cpu_id": 79,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 24,
+            "ht_cpu_id": 80,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 25,
+            "ht_cpu_id": 81,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 26,
+            "ht_cpu_id": 82,
+            "node_id": 0,
+            "socket_id": 0
+        },
+        {
+            "cpu_id": 27,
+            "ht_cpu_id": 83,
+            "node_id": 0,
+            "socket_id": 0
+        }
+    ],
+    [
+        {
+            "cpu_id": 28,
+            "ht_cpu_id": 84,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 29,
+            "ht_cpu_id": 85,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 30,
+            "ht_cpu_id": 86,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 31,
+            "ht_cpu_id": 87,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 32,
+            "ht_cpu_id": 88,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 33,
+            "ht_cpu_id": 89,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 34,
+            "ht_cpu_id": 90,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 35,
+            "ht_cpu_id": 91,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 36,
+            "ht_cpu_id": 92,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 37,
+            "ht_cpu_id": 93,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 38,
+            "ht_cpu_id": 94,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 39,
+            "ht_cpu_id": 95,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 40,
+            "ht_cpu_id": 96,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 41,
+            "ht_cpu_id": 97,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 42,
+            "ht_cpu_id": 98,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 43,
+            "ht_cpu_id": 99,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 44,
+            "ht_cpu_id": 100,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 45,
+            "ht_cpu_id": 101,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 46,
+            "ht_cpu_id": 102,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 47,
+            "ht_cpu_id": 103,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 48,
+            "ht_cpu_id": 104,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 49,
+            "ht_cpu_id": 105,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 50,
+            "ht_cpu_id": 106,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 51,
+            "ht_cpu_id": 107,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 52,
+            "ht_cpu_id": 108,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 53,
+            "ht_cpu_id": 109,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 54,
+            "ht_cpu_id": 110,
+            "node_id": 1,
+            "socket_id": 1
+        },
+        {
+            "cpu_id": 55,
+            "ht_cpu_id": 111,
+            "node_id": 1,
+            "socket_id": 1
+        }
+    ]
+]

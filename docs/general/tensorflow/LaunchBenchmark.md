@@ -74,6 +74,8 @@ optional arguments:
                         used when this value is set. If used in conjunction
                         with --num-cores, all cores will be allocated on the
                         single socket.
+  --num-instances NUM_INSTANCES
+                        Specify the number of instances to run.
   -n NUM_CORES, --num-cores NUM_CORES
                         Specify the number of cores to use. If the parameter
                         is not specified or is -1, all cores will be used.
