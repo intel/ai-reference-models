@@ -75,8 +75,6 @@ class BaseModelInitializer(object):
         Returns the command prefix with:
          - LD_PRELOAD for int8 models (if tcmalloc is not disabled)
          - The numactl command with --cpunodebind and --membind set to the specified socket_id (if numactl=True)
-
-        Should be used only for single instance.
         """
         command = ""
 
