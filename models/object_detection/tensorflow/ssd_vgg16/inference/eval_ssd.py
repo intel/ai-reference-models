@@ -105,7 +105,6 @@ def input_fn(dataset_pattern='val-*', batch_size=1, data_location=None):
                                       anchor_encoder_fn,
                                       num_epochs=1,
                                       is_training=False)
-	print(image, filename, shape, loc_targets, cls_targets, match_scores)
     return image, filename, shape
 
 
@@ -181,7 +180,6 @@ class EvaluateSSDModel():
         with data_graph.as_default():
             if self.args.data_location:  # real data
                 image, filename, shape = \
-				  print("**************************will run inout_fn*********************")
                     input_fn(dataset_pattern='val-*', batch_size=self.args.batch_size, data_location=self.args.data_location)
             else:  # dummy data
                 input_shape = [self.args.batch_size, SSD_VGG16_IMAGE_SIZE, SSD_VGG16_IMAGE_SIZE, 3]
