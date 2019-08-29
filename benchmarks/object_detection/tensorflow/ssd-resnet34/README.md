@@ -4,6 +4,7 @@ This document has instructions for how to run SSD-ResNet34 for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 * [INT8 inference](#int8-inference-instructions)
+* [FP32 Training](#fp32-training-instructions)
 
 Instructions and scripts for model training and inference
 for other precisions are coming later.
@@ -385,3 +386,159 @@ Current AP: 0.20408
 ```
 $ popd
 ```
+
+## FP32 Training Instructions
+
+1. Store the path to the current directory:
+```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+```
+
+2. Clone the `tensorflow/models` repository with the specified SHA, since we are using an older version of the models repository for SSD-ResNet34.
+
+   ```bash
+   $ git clone https://github.com/tensorflow/models.git tf_models
+   $ cd tf_models
+   $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
+   ```
+
+   The TensorFlow models repository will be used for running training as well as converting the coco dataset to the TF records format.
+
+3. Follow the TensorFlow models object detection [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation) to get your environment setup with the required dependencies.
+
+4. Download the 2017 train [COCO dataset](http://cocodataset.org/#home):
+
+   ```bash
+   $ cd $MODEL_WORK_DIR
+   $ mkdir train
+   $ cd train
+   $ wget http://images.cocodataset.org/zips/train2017.zip
+   $ unzip train2017.zip
+   
+   $ cd $MODEL_WORK_DIR
+   $ mkdir val
+   $ cd val
+   $ wget http://images.cocodataset.org/zips/val2017.zip
+   $ unzip val2017.zip
+   
+   $ cd $MODEL_WORK_DIR
+   $ mkdir annotations
+   $ cd annotations
+   $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+   $ unzip annotations_trainval2017.zip
+   ```
+
+   Since we are only using the train and validation dataset in this example, we will create an empty directory and empty annotations json file to pass as the test directories in the next step.
+
+   ```
+   $ cd $MODEL_WORK_DIR
+   $ mkdir empty_dir
+   
+   $ cd annotations
+   $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
+   $ cd $MODEL_WORK_DIR
+   ```
+
+5. Now that you have the raw COCO dataset, we need to convert it to the TF records format in order to use it with the training script. We will do this by running the `create_coco_tf_record.py` file in the TensorFlow models repository.
+
+   ```bash
+   # We are going to use an older version of the conversion script to checkout the git commit
+   $ cd models
+   $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
+   
+   $ cd research/object_detection/dataset_tools/
+   $ python create_coco_tf_record.py --logtostderr \
+         --train_image_dir="$MODEL_WORK_DIR/train2017" \
+         --val_image_dir="$MODEL_WORK_DIR/val2017" \
+         --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
+         --train_annotations_file="$MODEL_WORK_DIR/annotations/instances_train2017.json" \
+         --val_annotations_file="$MODEL_WORK_DIR/annotations/instances_val2017.json" \
+         --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+         --output_dir="$MODEL_WORK_DIR/output"
+   
+   # Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
+   $ cd $MODEL_WORK_DIR/tf_models
+   $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
+   ```
+   
+   The `coco_train.record-*-of-*` files are what we will use in this training example.
+   
+6. Clone the [intelai/models](https://github.com/intelai/models) repository. This repository has the launch script for running the model, which we will use in the next step.
+
+   ```bash
+   $ cd $MODEL_WORK_DIR
+   $ git clone https://github.com/IntelAI/models.git
+   ```
+
+7. Download and install the [Intel(R) MPI Library for Linux](https://software.intel.com/en-us/mpi-library/choose-download/linux). Once you have the l_mpi_2019.3.199.tgz downloaded, unzip it into /home//l_mpi directory. Make sure to accpet the installation license and **change the value of "ACCEPT_EULA" to "accept" in /home//l_mpi/l_mpi_2019.3.199/silent.cfg**, before start the silent installation. 
+
+   The software is installed by default to "/opt/intel" location. If want to run the training in docker, please keep the default installation location.
+   
+   ```bash
+   $ tar -zxvf l_mpi_2019.3.199.tgz -C $MODEL_WORK_DIR/l_mpi
+   $ cd $MODEL_WORK_DIR/l_mpi/l_mpi_2019.3.199
+   # change the value of "ACCEPT_EULA" to "accept"
+   $ vim silent.cfg
+   ```
+   
+8. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step. Note that we are running SSD-ResNet34 with a TensorFlow 1.14-pre-rc0 docker image.
+
+   To run for training, use the following command, but replace in your path to the unzipped coco dataset images from step 3 for the `--data-location`, `--volume` Intel(R) MPI package path,`--num_processes` the number of MPI processes, `--processes_per_node` the number of processes to launch on each node.
+
+   ```bash
+   $ cd $MODEL_WORK_DIR/models/benchmarks/
+   
+   $ python launch_benchmark.py \
+       --data-location /lustre/dataset/tensorflow/coco \
+       --model-source-dir $MODEL_WORK_DIR/models \
+       --model-name ssd-resnet34 \
+       --framework tensorflow \
+       --precision fp32 \
+       --mode training \
+       --num-train-steps 500 \
+       --num-processes 2 \
+       --num-processes-per-node 1 \
+       --num-cores 27 \
+       --num-inter-threads 1 \
+       --num-intra-threads 27 \
+       --batch-size=32 \
+       --weight_decay=1e-4 \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14-pre-rc0-devel-mkl-py3 \
+       --volume $MODEL_WORK_DIR/l_mpi/l_mpi_2019.3.199:/l_mpi \
+       --shm-size 4g
+   ```
+
+9. The log file is saved to the value of `--output-dir`.
+
+   Below is a sample log file tail when running for training:
+
+   ```bash
+   TensorFlow:  1.14
+   Model:       ssd300
+   Dataset:     coco
+   Mode:        training
+   SingleSess:  False
+   Batch size:  64 global
+                32 per device
+   Num batches: 500
+   Num epochs:  0.27
+   Devices:     ['horovod/cpu:0', 'horovod/cpu:1']
+   NUMA bind:   False
+   Data format: NCHW
+   Optimizer:   sgd
+   Variables:   horovod
+   Horovod on:  cpu
+   
+   
+   Step    Img/sec                                 total_loss
+   1       images/sec: 21.6 +/- 0.0 (jitter = 0.0) 52.921
+   10      images/sec: 22.3 +/- 0.1 (jitter = 0.2) 44.674
+   20      images/sec: 22.3 +/- 0.1 (jitter = 0.2) 43.106
+   30      images/sec: 22.3 +/- 0.0 (jitter = 0.2) 34.703
+   40      images/sec: 22.3 +/- 0.0 (jitter = 0.2) 30.737
+   50      images/sec: 22.3 +/- 0.0 (jitter = 0.2) 28.466
+   
+   ```
+
+   

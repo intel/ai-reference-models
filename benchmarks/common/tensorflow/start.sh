@@ -685,26 +685,63 @@ function ssd_mobilenet() {
 
 # SSD-ResNet34 model
 function ssd-resnet34() {
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-        do
-          pip install $line
-        done
-        apt install -y git-all
-        old_dir=${PWD}
-        cd /tmp
-        git clone --single-branch https://github.com/tensorflow/benchmarks.git
-        cd benchmarks
-        git checkout 1e7d788042dfc6d5e5cd87410c57d5eccee5c664
-        cd ${old_dir}
-      fi
+      if [ ${MODE} == "inference" ]; then
+        if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
+          if [ ${NOINSTALL} != "True" ]; then
+            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            do
+              pip install $line
+            done
+          fi
 
-      CMD=${CMD} run_model
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
-    fi
+          old_dir=${PWD}
+          cd /tmp
+          git clone --single-branch https://github.com/tensorflow/benchmarks.git
+          cd benchmarks
+          git checkout 1e7d788042dfc6d5e5cd87410c57d5eccee5c664
+          cd ${old_dir}
+          
+          CMD=${CMD} run_model
+        else
+          echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+          exit 1
+        fi
+      elif [ ${MODE} == "training" ]; then
+        if [ ${PRECISION} == "fp32" ]; then
+          if [ ${NOINSTALL} != "True" ]; then
+            apt-get update && apt-get install -y cpio
+
+            # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
+            cd /l_mpi
+            sh install.sh --silent silent.cfg
+            source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+
+            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            do
+              pip install $line
+            done
+          fi
+
+          old_dir=${PWD}
+          cd /tmp
+          rm -rf benchmark_ssd-resnet34
+          git clone -b cnn_tf_v1.13_compatible https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
+          cd benchmark_ssd-resnet34
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark_v1.13.diff
+          cd ${old_dir}
+
+          CMD="${CMD} \
+          $(add_arg "--weight_decay" ${weight_decay}) \
+          $(add_arg "--num_warmup_batches" ${num_warmup_batches})"
+          local old_pythonpath=${PYTHONPATH}
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
+          CMD=${CMD} run_model
+          PYTHONPATH=${old_pythonpath}
+        else
+          echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+          exit 1
+        fi
+      fi
 }
 
 # SSD-VGG16 model
