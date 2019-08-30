@@ -50,9 +50,6 @@ from object_detection.utils import label_map_util
 from object_detection.utils import ops
 from object_detection.utils import visualization_utils as vis_utils
 
-slim = tf.contrib.slim
-
-
 def write_metrics(metrics, global_step, summary_dir):
   """Write metrics to a summary directory.
 
@@ -62,10 +59,10 @@ def write_metrics(metrics, global_step, summary_dir):
     summary_dir: Directory to write tensorflow summaries to.
   """
   logging.info('Writing metrics to tf summary.')
-  summary_writer = tf.summary.FileWriterCache.get(summary_dir)
+  summary_writer = tf.compat.v1.summary.FileWriterCache.get(summary_dir)
   for key in sorted(metrics):
-    summary = tf.Summary(value=[
-        tf.Summary.Value(tag=key, simple_value=metrics[key]),
+    summary = tf.compat.v1.Summary(value=[
+        tf.compat.v1.Summary.Value(tag=key, simple_value=metrics[key]),
     ])
     summary_writer.add_summary(summary, global_step)
     logging.info('%s: %f', key, metrics[key])
@@ -203,14 +200,14 @@ def visualize_detection_results(result_dict,
       export_path = os.path.join(export_dir, 'export-{}.png'.format(tag))
     vis_utils.save_image_array_as_png(image, export_path)
 
-  summary = tf.Summary(value=[
-      tf.Summary.Value(
+  summary = tf.compat.v1.Summary(value=[
+      tf.compat.v1.Summary.Value(
           tag=tag,
-          image=tf.Summary.Image(
+          image=tf.compat.v1.Summary.Image(
               encoded_image_string=vis_utils.encode_image_array_as_png_str(
                   image)))
   ])
-  summary_writer = tf.summary.FileWriterCache.get(summary_dir)
+  summary_writer = tf.compat.v1.summary.FileWriterCache.get(summary_dir)
   summary_writer.add_summary(summary, global_step)
 
   logging.info('Detection visualizations written to summary with tag %s.', tag)
@@ -282,31 +279,31 @@ def _run_checkpoint_once(tensor_dict,
   if save_graph and not save_graph_dir:
     raise ValueError('`save_graph_dir` must be defined.')
   if (inter_op > 0 or intra_op > 0):
-    config = tf.ConfigProto(inter_op_parallelism_threads=inter_op,
+    config = tf.compat.v1.ConfigProto(inter_op_parallelism_threads=inter_op,
                             intra_op_parallelism_threads=intra_op)
     logging.info('inter_op value= %d', inter_op)
     logging.info('intra_op value= %d', intra_op)
   else:
     config = None
-  sess = tf.Session(master, graph=tf.get_default_graph(), config=config)
-  sess.run(tf.global_variables_initializer())
-  sess.run(tf.local_variables_initializer())
-  sess.run(tf.tables_initializer())
+  sess = tf.compat.v1.Session(master, graph=tf.compat.v1.get_default_graph(), config=config)
+  sess.run(tf.compat.v1.global_variables_initializer())
+  sess.run(tf.compat.v1.local_variables_initializer())
+  sess.run(tf.compat.v1.tables_initializer())
   if restore_fn:
     restore_fn(sess)
   else:
     if not checkpoint_dirs:
       raise ValueError('`checkpoint_dirs` must have at least one entry.')
     checkpoint_file = tf.train.latest_checkpoint(checkpoint_dirs[0])
-    saver = tf.train.Saver(variables_to_restore)
+    saver = tf.compat.v1.train.Saver(variables_to_restore)
     saver.restore(sess, checkpoint_file)
 
   if save_graph:
-    tf.train.write_graph(sess.graph_def, save_graph_dir, 'eval.pbtxt')
+    tf.io.write_graph(sess.graph_def, save_graph_dir, 'eval.pbtxt')
 
   counters = {'skipped': 0, 'success': 0}
   aggregate_result_losses_dict = collections.defaultdict(list)
-  with tf.contrib.slim.queues.QueueRunners(sess):
+  with tf.compat.v1.train.QueueRunner(sess):
     try:
       loop_start_time = time.time()
       for batch in range(int(num_batches)):
@@ -360,7 +357,7 @@ def _run_checkpoint_once(tensor_dict,
         if any(key in all_evaluator_metrics for key in metrics):
           raise ValueError('Metric names between evaluators must not collide.')
         all_evaluator_metrics.update(metrics)
-      global_step = tf.train.global_step(sess, tf.train.get_global_step())
+      global_step = tf.compat.v1.train.global_step(sess, tf.compat.v1.train.get_global_step())
 
       for key, value in iter(aggregate_result_losses_dict.items()):
         all_evaluator_metrics['Losses/' + key] = np.mean(value)
@@ -544,17 +541,17 @@ def result_dict_for_single_example(image,
 
   detection_fields = fields.DetectionResultFields
   detection_boxes = detections[detection_fields.detection_boxes][0]
-  image_shape = tf.shape(image)
+  image_shape = tf.shape(input=image)
   detection_scores = detections[detection_fields.detection_scores][0]
 
   if class_agnostic:
     detection_classes = tf.ones_like(detection_scores, dtype=tf.int64)
   else:
     detection_classes = (
-        tf.to_int64(detections[detection_fields.detection_classes][0]) +
+        tf.cast(detections[detection_fields.detection_classes][0], dtype=tf.int64) +
         label_id_offset)
 
-  num_detections = tf.to_int32(detections[detection_fields.num_detections][0])
+  num_detections = tf.cast(detections[detection_fields.num_detections][0], dtype=tf.int32)
   detection_boxes = tf.slice(
       detection_boxes, begin=[0, 0], size=[num_detections, -1])
   detection_classes = tf.slice(

@@ -43,61 +43,79 @@ class ModelInitializer(BaseModelInitializer):
             self.accuracy_script)
         self.benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode,
-            self.args.precision, "eval.py")
+            self.args.precision, "run_rfcn_inference.py")
 
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
+
+        # Set num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads()
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.parse_custom_args()
         self.research_dir = os.path.join(self.args.model_source_dir,
                                          "research")
 
-    def run_benchmark(self):
-        command_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + self.benchmark_script
-
-        # set num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads()
-
-        if self.args.socket_id == -1:
-            if self.args.num_cores == 1:
-                command_prefix = "taskset -c 0 " + \
-                                 command_prefix
-                self.args.num_intra_threads = 1
-            else:
-                command_prefix = "taskset -c 0-" + \
-                                 str(self.args.num_cores - 1) + \
-                                 " " + command_prefix
-
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-        config_file_path = os.path.join(self.args.checkpoint,
-                                        self.args.config_file)
-
-        run_cmd = command_prefix + \
-            " --inter_op " + str(self.args.num_inter_threads) + \
-            " --intra_op " + str(self.args.num_intra_threads) + \
-            " --omp " + str(self.args.num_intra_threads) + \
-            " --pipeline_config_path " + config_file_path + \
-            " --checkpoint_dir " + str(self.args.checkpoint) + \
-            " --eval_dir " + self.research_dir + \
-            "/object_detection/models/rfcn/eval " + \
-            " --logtostderr " + \
-            " --blocktime=0 " + \
-            " --run_once=True"
-        self.run_command(run_cmd)
-
     def parse_custom_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
-            parser.add_argument("--config_file", default=None,
-                                dest="config_file", type=str)
+            mutex_group = parser.add_mutually_exclusive_group()
+            mutex_group.add_argument("-x", "--number_of_steps",
+                                     help="Run for n number of steps",
+                                     type=int, default=None)
+            mutex_group.add_argument(
+                "-v", "--visualize",
+                help="Whether to visualize the output image",
+                action="store_true")
             parser.add_argument("-q", "--split",
                                 help="Location of accuracy data",
                                 type=str, default=None)
-            self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
+            self.args = parser.parse_args(self.custom_args, namespace=self.args)
+        else:
+            raise ValueError("Custom parameters are missing...")
+
+    def run_perf_command(self):
+        # Get the command previx, but numactl is added later in run_perf_command()
+        command = []
+        num_cores = str(self.platform_util.num_cores_per_socket)
+        if self.args.num_cores != -1:
+            num_cores = str(self.args.num_cores)
+
+        set_env_var("OMP_NUM_THREADS", num_cores)
+
+        if self.args.socket_id != -1:
+            command.append("numactl")
+            if self.args.socket_id:
+                socket_id = self.args.socket_id
+            else:
+                socket_id = "0"
+
+            if self.args.num_cores != -1:
+                command.append("-C")
+                command.append("+0")
+                i = 1
+                while i < self.args.num_cores:
+                    command.append(",{}".format(i))
+                    i += i
+
+            command.append("-N")
+            command.append("{}".format(socket_id))
+            command.append("-m")
+            command.append("{}".format(socket_id))
+
+        command += (self.python_exe, self.benchmark_script)
+        command += ("-m", self.args.model_source_dir)
+        command += ("-g", self.args.input_graph)
+        command += ("--num-intra-threads", str(self.args.num_intra_threads))
+        command += ("--num-inter-threads", str(self.args.num_inter_threads))
+        if self.args.number_of_steps:
+            command += ("-x", "{}".format(self.args.number_of_steps))
+        if self.args.visualize:
+            command += ("-v")
+        if self.args.data_location:
+            command += ("-d", self.args.data_location)
+        self.run_command(" ".join(command))
 
     def run_accuracy_command(self):
         if not os.path.exists(self.accuracy_script_path):
@@ -130,5 +148,5 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.accuracy_only:
             self.run_accuracy_command()
         else:
-            self.run_benchmark()
+            self.run_perf_command()
         os.chdir(original_dir)

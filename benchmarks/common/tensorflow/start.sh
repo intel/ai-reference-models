@@ -550,7 +550,7 @@ function rfcn() {
     original_dir=$(pwd)
 
     cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
-    git apply --ignore-space-change --ignore-whitespace ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/tf-2.0.patch
+    git apply --ignore-space-change --ignore-whitespace ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf-2.0.patch
 
     cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
     # install protoc v3.3.0, if necessary, then compile protoc files
@@ -562,25 +562,12 @@ function rfcn() {
       split_arg="--split=${split}"
   fi
 
-  if [ ${PRECISION} == "int8" ]; then
-      number_of_steps_arg=""
-
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          number_of_steps_arg="--number_of_steps=${number_of_steps}"
-      fi
-
-      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
-
-  elif [ ${PRECISION} == "fp32" ]; then
-      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          echo "R-FCN requires -- config_file arg to be defined"
-          exit 1
-      fi
-
-      CMD="${CMD} --config_file=${config_file} ${split_arg}"
-   else
-      echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
+  number_of_steps_arg=""
+  if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+      number_of_steps_arg="--number_of_steps=${number_of_steps}"
   fi
+  CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
+
   cd $original_dir
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
