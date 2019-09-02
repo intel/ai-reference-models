@@ -91,19 +91,24 @@ if __name__ == "__main__":
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
   data_location = args.data_location
-  dataset = datasets.ImagenetData(data_location)
-  preprocessor = dataset.get_image_preprocessor()(
-      input_height, input_width, batch_size,
-      1, # device count
-      tf.float32, # data_type for input fed to the graph
-      train=False, # doing inference
-      resize_method='bilinear')
 
-  images, labels = preprocessor.minibatch(dataset, subset='validation',
-                    use_datasets=True, cache_data=False)
-  graph = load_graph(model_file)
-  input_tensor = graph.get_tensor_by_name(input_layer + ":0")
-  output_tensor = graph.get_tensor_by_name(output_layer + ":0")
+  data_graph = tf.Graph()
+  with data_graph.as_default():
+    dataset = datasets.ImagenetData(data_location)
+    preprocessor = dataset.get_image_preprocessor()(
+        input_height, input_width, batch_size,
+        1, # device count
+        tf.float32, # data_type for input fed to the graph
+        train=False, # doing inference
+        resize_method='bilinear')
+
+    images, labels = preprocessor.minibatch(dataset, subset='validation',
+                      use_datasets=True, cache_data=False)
+
+  infer_graph = load_graph(model_file)
+
+  input_tensor = infer_graph.get_tensor_by_name(input_layer + ":0")
+  output_tensor = infer_graph.get_tensor_by_name(output_layer + ":0")
   
   config = tf.compat.v1.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
@@ -113,8 +118,8 @@ if __name__ == "__main__":
   num_processed_images = 0
   num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
                             - num_processed_images
-  with tf.compat.v1.Session() as sess:
-    sess_graph = tf.compat.v1.Session(graph=graph, config=config)
+  with tf.compat.v1.Session(graph=data_graph) as sess:
+    sess_graph = tf.compat.v1.Session(graph=infer_graph, config=config)
     while num_remaining_images >= batch_size:
       # Reads and preprocess data
       np_images, np_labels = sess.run([images[0], labels[0]])

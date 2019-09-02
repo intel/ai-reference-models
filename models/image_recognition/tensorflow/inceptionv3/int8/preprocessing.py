@@ -41,9 +41,6 @@ import math
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.contrib.data.python.ops import batching
-from tensorflow.contrib.data.python.ops import interleave_ops
-from tensorflow.contrib.image.python.ops import distort_image_ops
 from tensorflow.python.layers import utils
 from tensorflow.python.ops import data_flow_ops
 from tensorflow.python.platform import gfile
@@ -583,7 +580,7 @@ class RecordInputImagePreprocessor(object):
                         .format(glob_pattern))
                 ds = tf.data.TFRecordDataset.list_files(file_names)
                 ds = ds.apply(
-                    interleave_ops.parallel_interleave(
+                    tf.data.experimental.parallel_interleave(
                         tf.data.TFRecordDataset, cycle_length=10))
                 if cache_data:
                     ds = ds.take(1).cache().repeat()
@@ -594,7 +591,7 @@ class RecordInputImagePreprocessor(object):
                 ds = ds.shuffle(buffer_size=10000)
                 ds = ds.repeat()
                 ds = ds.apply(
-                    batching.map_and_batch(
+                    tf.compat.v1.data.experimental.map_and_batch(
                         map_func=self.parse_and_preprocess,
                         batch_size=self.batch_size_per_split,
                         num_parallel_batches=self.num_splits))
