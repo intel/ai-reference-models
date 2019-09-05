@@ -536,6 +536,27 @@ function resnet50_101_inceptionv3() {
     fi
 }
 
+# MLPerf GNMT model
+function mlperf_gnmt() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # For accuracy, dataset location is required.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    if [ ${PRECISION} == "int8" ]; then
+      CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    elif [ ${PRECISION} == "fp32" ]; then
+      CMD="${CMD} $(add_steps_args)"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
 
 # R-FCN (ResNet101) model
 function rfcn() {
@@ -878,6 +899,8 @@ elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
 elif [ ${MODEL_NAME} == "gnmt" ]; then
   gnmt
+elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
+  mlperf_gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
