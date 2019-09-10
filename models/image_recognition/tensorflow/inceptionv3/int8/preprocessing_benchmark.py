@@ -37,8 +37,8 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow.data.experimental import parallel_interleave
-from tensorflow.data.experimental import map_and_batch
+from tensorflow.python.data.experimental import parallel_interleave
+from tensorflow.python.data.experimental import map_and_batch
 from tensorflow.python.platform import gfile
 
 
