@@ -540,6 +540,12 @@ function resnet50_101_inceptionv3() {
 function mlperf_gnmt() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
+    # install dependencies
+    for line in $(cat ${MOUNT_BENCHMARK}/language_translation/tensorflow/mlperf_gnmt/requirements.txt)
+    do
+      pip install $line
+    done
+
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
