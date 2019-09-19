@@ -4,7 +4,6 @@
 
 1. Prerequisites
 * [tensorflow] 2.0.0rc0 or newer
-* [tensorflow-addons] 0.5.0 or newer
 
 2. Download GNMT benchmarking data.
 ```
