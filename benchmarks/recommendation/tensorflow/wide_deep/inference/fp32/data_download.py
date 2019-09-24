@@ -41,6 +41,7 @@ parser.add_argument('--https_proxy', type=str, default=None)
 def download_and_clean_file(filename, url):
     """Downloads data from url, and makes changes to match the CSV format."""
     proxies = {}
+    print (filename)
     if ARGS.http_proxy:
         proxies['http'] = ARGS.http_proxy
     if ARGS.https_proxy:
@@ -48,15 +49,15 @@ def download_and_clean_file(filename, url):
     try:
         request = requests.get(url, stream=True, proxies=proxies)
         request.raise_for_status()
-        with open(filename, 'w') as eval_file:
+        with open(filename, 'wb') as eval_file:
             for line in request.iter_lines():
                 line = line.strip()
-                line = line.replace(', ', ',')
-                if not line or ',' not in line:
+                line = line.replace(b', ', b',')
+                if not line or b',' not in line:
                     continue
                 if line[-1] == '.':
                     line = line[:-1]
-                line += '\n'
+                line += b'\n'
                 eval_file.write(line)
     except requests.exceptions.HTTPError as err:
         print(err)
