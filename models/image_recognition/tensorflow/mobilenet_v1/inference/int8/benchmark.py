@@ -105,28 +105,24 @@ if __name__ == "__main__":
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
 
-  input_shape = [batch_size, input_height, input_width, 3]
-  images = tf.truncated_normal(
-        input_shape,
-        dtype=tf.float32,
-        stddev=10,
-        name='synthetic_images')
-
-  image_data = None
-
-  config = tf.ConfigProto()
-  config.inter_op_parallelism_threads = num_inter_threads
-  config.intra_op_parallelism_threads = num_intra_threads
-  config.use_per_session_threads = True
-  
-  with tf.Session() as sess:
-    image_data = sess.run(images)
   graph = load_graph(model_file)
 
   input_tensor = graph.get_tensor_by_name(input_layer + ":0");
   output_tensor = graph.get_tensor_by_name(output_layer + ":0");
 
+  config = tf.ConfigProto()
+  config.inter_op_parallelism_threads = num_inter_threads
+  config.intra_op_parallelism_threads = num_intra_threads
+
   with tf.Session(graph=graph, config=config) as sess:
+    input_shape = [batch_size, input_height, input_width, 3]
+    images = tf.truncated_normal(
+          input_shape,
+          dtype=tf.float32,
+          stddev=10,
+          name='synthetic_images')
+    image_data = sess.run(images)
+
     sys.stdout.flush()
     print("[Running warmup steps...]")
     for t in range(warmup_steps):
