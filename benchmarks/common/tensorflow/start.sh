@@ -541,10 +541,7 @@ function mlperf_gnmt() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
     # install dependencies
-    for line in $(cat ${MOUNT_BENCHMARK}/language_translation/tensorflow/mlperf_gnmt/requirements.txt)
-    do
-      pip install $line
-    done
+    pip install ${MOUNT_BENCHMARK}/tensorflow_addons*.whl --no-deps
 
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
