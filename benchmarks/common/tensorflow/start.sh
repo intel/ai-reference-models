@@ -955,15 +955,11 @@ function wide_deep_large_ds() {
       echo "Wide & Deep requires --data-location arg to be defined"
       exit 1
     fi
-
-    num_parallel_batches_arg=""
-
-    if [ -n "${num_parallel_batches}" ]; then
-      num_parallel_batches_arg="--num-parallel-batches=${num_parallel_batches}"
+    if [ "${num_omp_threads}" != None ]; then
+      CMD="${CMD} --num_omp_threads=${num_omp_threads}"
     fi
-
     if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
-        CMD="${CMD} ${num_parallel_batches_arg} "
+        CMD="${CMD}"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
         echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"

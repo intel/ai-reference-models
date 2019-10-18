@@ -72,11 +72,6 @@ parser.add_argument('--num_omp_threads', type=str,
                     required=False,
                     default=None,
                     dest='num_omp_threads')
-parser.add_argument('--num_parallel_batches', type=int,
-                    help='number of parallel batches',
-                    required=False,
-                    default=28,
-                    dest='num_parallel_batches')
 parser.add_argument('--kmp_blocktime', type=str,
                     help='KMP_BLOCKTIME value',
                     required=False,
@@ -94,10 +89,10 @@ os.environ["KMP_SETTINGS"] = "1"
 if args.num_omp_threads:
     os.environ["OMP_NUM_THREADS"] = args.num_omp_threads
 
-num_parallel_batches = args.num_parallel_batches
+
+
 output_probabilities_node = 'import/import/head/predictions/probabilities'
-while_probabilities_node = 'while/import/'+output_probabilities_node+':0'
-while_softmax_operation = 'while/import/'+output_probabilities_node
+probabilities_node = 'import/'+output_probabilities_node+':0'
 placeholder_name = 'import/new_numeric_placeholder'
 categorical_placeholder = 'import/new_categorical_placeholder'
 
@@ -115,7 +110,8 @@ with open(args.input_graph, "rb") as f:
         text_format.Merge(f.read(), graph_def)
     else:
         graph_def.ParseFromString(f.read())
-
+with graph.as_default():
+  tf.import_graph_def(graph_def)
 numeric_feature_names = ["numeric_1"]
 string_feature_names = ["string_1"]
 if args.compute_accuracy:
@@ -151,92 +147,61 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
         dataset = dataset.shuffle(buffer_size=20000)
     dataset = dataset.batch(batch_size)
     dataset = dataset.map(_parse_function, num_parallel_calls=28)
-    dataset = dataset.cache()
-    dataset = dataset.prefetch(1)
+    dataset = dataset.prefetch(batch_size*10)
     return dataset
 
 
 data_file = args.data_location
 no_of_test_samples = sum(1 for _ in tf.python_io.tf_record_iterator(data_file))
 no_of_batches = math.ceil(float(no_of_test_samples)/batch_size)
-with graph.as_default():
-    tf.import_graph_def(graph_def)
-    res_dataset = input_fn(data_file, 1, False, batch_size)
-    iterator = res_dataset.make_one_shot_iterator()
-    next_element = iterator.get_next()
-    iterator_names = [i.name.split(':')[1] for i in next_element]
-    placeholder_expandims = {}
-    full_nodes = []
-    old_graph_def = graph.as_graph_def()
-    for node in old_graph_def.node:
-        k = node.name
-        if k == "IteratorGetNext":
-            iterator_node = node
-        elif (node.op == "GatherNd" or node.op == 'ConcatV2') and (placeholder_name in node.input[1] or categorical_placeholder in node.input[1]):
-            if node.op == 'GatherNd' and node.name == 'import/gather_categorical_weights':
-                gather_categorical_node = node
-            elif node.op == 'GatherNd' and node.name == 'import/gather_embedding_weights':
-                gather_embedding_node = node
-            elif node.op == 'ConcatV2':
-                concat_node = node
-
-    gather_categorical_node.input[1] = iterator_node.name+":1"
-    gather_embedding_node.input[1] = iterator_node.name+":1"
-    concat_node.input[1] = iterator_node.name+":0"
-
-
-new_graph_def = tf.GraphDef()
-new_graph_def = tf.graph_util.extract_sub_graph(
-    old_graph_def,
-    [output_probabilities_node]
-)
-tf.reset_default_graph()
-graph = ops.Graph()
-
-with graph.as_default():
-    i = tf.constant(0)
-    arr = tf.TensorArray(dtype=tf.int32, size=2000, dynamic_size=True)
-    def _body(i, arr):
-        tf.import_graph_def(new_graph_def)
-        output_tensor = graph.get_tensor_by_name(while_probabilities_node)
-        if args.compute_accuracy:
-            labels_tensor = graph.get_tensor_by_name("while/import/IteratorGetNext:2")
-            predicted_labels = tf.argmax(output_tensor,1,output_type=tf.int64)
-            correctly_predicted_bool = tf.equal(predicted_labels, labels_tensor)
-            num_correct_predictions_batch = tf.reduce_sum(tf.cast(correctly_predicted_bool, tf.int32))
-        else:
-            predicted_labels = tf.argmax(output_tensor,1,output_type=tf.int32)
-            num_correct_predictions_batch = tf.reduce_sum(predicted_labels)
-        arr = arr.write(i, num_correct_predictions_batch)
-        i = tf.add(i, 1)
-        return i, arr
-    i, arr = tf.while_loop(cond=lambda i, x: i < int(no_of_batches), body=_body, loop_vars=[i, arr], parallel_iterations=num_parallel_batches)
-    array_gather = arr.gather(tf.range(0, int(no_of_batches), delta=1, dtype=None, name='range'))
-
+placeholder_list = ['import/new_numeric_placeholder:0','import/new_categorical_placeholder:0']
+input_tensor = [graph.get_tensor_by_name(name) for name in placeholder_list]
+output_name = "import/head/predictions/probabilities"
+output_tensor = graph.get_tensor_by_name("import/" + output_name + ":0" )
+correctly_predicted = 0
+total_infer_consume = 0.0
+warm_iter = 100
+features_list = []
 with tf.Session(config=config, graph=graph) as sess:
-    inference_start = time.time()
-    try:
-        num_correct_predictions_batch = sess.run(array_gather)
-    except Exception as e:
-        print('--------------------------------------------------')
-        print("The dataset doesn't contain labels. So, not feasible to determine classification accuracy")
-        print('--------------------------------------------------')
-        sys.exit()
-    total_num_correct_predictions = num_correct_predictions_batch.sum(axis=0)
-    inference_end = time.time()
-if args.compute_accuracy:
-    accuracy = (float(total_num_correct_predictions)/float(no_of_test_samples))
-evaluate_duration = inference_end - inference_start
-latency = (1000 * float(batch_size * num_parallel_batches) * float(evaluate_duration) / float(no_of_test_samples))
+  res_dataset = input_fn(data_file, 1, False, batch_size)
+  iterator = res_dataset.make_one_shot_iterator()
+  next_element = iterator.get_next()
+  for i in range(int(no_of_batches)):
+    batch=sess.run(next_element)
+    features=batch[0:3]
+    features_list.append(features)
 
-throughput = no_of_test_samples/evaluate_duration
+with tf.Session(config=config, graph=graph) as sess1:    
+  i=0
+  while True:
+    if i >= no_of_batches:
+        break
+    if i > warm_iter:
+        inference_start = time.time()
+    logistic = sess1.run(output_tensor, dict(zip(input_tensor, features_list[i][0:2])))
+    if i > warm_iter:
+        infer_time = time.time() - inference_start
+        total_infer_consume += infer_time
+    if args.compute_accuracy:
+        predicted_labels = np.argmax(logistic,1)
+        correctly_predicted=correctly_predicted+np.sum(features_list[i][2] == predicted_labels)
+    
+    i=i+1
+  inference_end = time.time()
+if args.compute_accuracy:
+    accuracy = (
+        float(correctly_predicted)/float(no_of_test_samples))
+evaluate_duration = total_infer_consume
+latency = (1000 * batch_size* float(evaluate_duration)/float(no_of_test_samples - warm_iter*batch_size))
+throughput = (no_of_test_samples - warm_iter * batch_size)/evaluate_duration
+
 print('--------------------------------------------------')
 print('Total test records           : ', no_of_test_samples)
 print('Batch size is                : ', batch_size)
 print('Number of batches            : ', int(no_of_batches))
 if args.compute_accuracy:
     print('Classification accuracy (%)  : ', round((accuracy * 100), 4))
-    print('No of correct predictions    : ', int(total_num_correct_predictions))
+    print('No of correct predictions    : ', int(correctly_predicted))
 print('Inference duration (seconds) : ', round(evaluate_duration, 4))
 print('Average Latency (ms/batch)   : ', round(latency,4))
 print('Throughput is (records/sec)  : ', round(throughput, 3))
