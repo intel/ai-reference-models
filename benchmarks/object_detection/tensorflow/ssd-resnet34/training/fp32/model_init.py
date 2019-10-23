@@ -77,7 +77,7 @@ class ModelInitializer(BaseModelInitializer):
         self.cmd = self.get_multi_instance_train_prefix(multi_instance_param_list)
         self.cmd += "{} ".format(self.python_exe)
 
-        self.training_script_dir = os.path.join('/tmp/benchmark_ssd-resnet34/scripts/tf_cnn_benchmarks')
+        self.training_script_dir = os.path.join('/home/yangshe1/benchmark_ssd-resnet34/scripts/tf_cnn_benchmarks')
         training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
 
         self.cmd = self.cmd + training_script + cmd_args
@@ -86,5 +86,6 @@ class ModelInitializer(BaseModelInitializer):
         original_dir = os.getcwd()
         os.chdir(self.training_script_dir)
         # Run benchmarking
+        print(self.cmd)
         self.run_command(self.cmd)
         os.chdir(original_dir)
