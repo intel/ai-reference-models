@@ -48,7 +48,7 @@ import tensorflow as tf
 
 def load_graph(model_file):
   graph = tf.Graph()
-  graph_def = tf.GraphDef()
+  graph_def = tf.compat.v1.GraphDef()
 
   import os
   file_ext = os.path.splitext(model_file)[1]
@@ -110,13 +110,13 @@ if __name__ == "__main__":
   input_tensor = graph.get_tensor_by_name(input_layer + ":0");
   output_tensor = graph.get_tensor_by_name(output_layer + ":0");
 
-  config = tf.ConfigProto()
+  config = tf.compat.v1.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
   config.intra_op_parallelism_threads = num_intra_threads
 
-  with tf.Session(graph=graph, config=config) as sess:
+  with tf.compat.v1.Session(graph=graph, config=config) as sess:
     input_shape = [batch_size, input_height, input_width, 3]
-    images = tf.truncated_normal(
+    images = tf.random.truncated_normal(
           input_shape,
           dtype=tf.float32,
           stddev=10,
