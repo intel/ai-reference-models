@@ -41,7 +41,7 @@ parser.add_argument('--https_proxy', type=str, default=None)
 def download_and_clean_file(filename, url):
     """Downloads data from url, and makes changes to match the CSV format."""
     proxies = {}
-    print (filename)
+    print(filename)
     if ARGS.http_proxy:
         proxies['http'] = ARGS.http_proxy
     if ARGS.https_proxy:
