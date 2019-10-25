@@ -6,8 +6,7 @@ following modes/precisions:
 * [Prepare dataset](#Prepare-dataset)
 * [INT8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
-
-Instructions and scripts for model training coming later.
+* [FP32 Training](#fp32-training-instructions)
 
 ## Prepare dataset
 
@@ -44,7 +43,7 @@ Instructions and scripts for model training coming later.
         ```
     * Process eval dataset
         ```
-        python models/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
+        python models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
                 --inputcsv-datafile eval.csv \
                 --calibrationcsv-datafile train.csv \
                 --outputfile-name preprocessed_eval
@@ -184,8 +183,8 @@ $ popd
             --socket-id 0 \
             --accuracy-only \
             --docker-image docker.io/intelaipg/intel-optimized-tensorflow:latest \
-            --in-graph $MODEL_WORK_DIR//wide_deep_fp32_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR//dataset_preprocessed_eval.tfrecords
+            --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
+            --data-location $MODEL_WORK_DIR/dataset_preprocessed_eval.tfrecords
        ```
 
 3. Run Performance test
@@ -248,3 +247,27 @@ $ popd
 ```
 $ popd
 ```
+## FP32 Training Instructions
+
+1. Download large Kaggle Display Advertising Challenge Dataset from
+   http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/
+
+   Download the large version of train dataset from https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/train.csv
+   
+   Download the large version of evaluation dataset from https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/eval.csv
+
+## Train Wide and Deep Model   
+
+2. Train the model by providing location of train.csv, eval.csv 
+
+    * Train the model (The model will be trained for 10 epochs if --num-train-steps is not specified)
+        ```
+        $ python launch_benchmark.py --model-name wide_deep_large_ds \
+           --precision fp32 \
+           --mode training  \
+           --framework tensorflow \
+           --batch-size 512 \
+           --data-location /root/dataset \
+           --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+        
+        ```

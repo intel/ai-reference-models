@@ -955,16 +955,27 @@ function wide_deep_large_ds() {
       echo "Wide & Deep requires --data-location arg to be defined"
       exit 1
     fi
-    if [ "${num_omp_threads}" != None ]; then
-      CMD="${CMD} --num_omp_threads=${num_omp_threads}"
-    fi
-    if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
+    if [ ${MODE} == "training" ]; then
+      if [ ${PRECISION} == "fp32" ]; then
         CMD="${CMD}"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    else
-        echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
         exit 1
+      fi
     fi
+    if [ ${MODE} == "inference" ]; then
+      if [ "${num_omp_threads}" != None ]; then
+        CMD="${CMD} --num_omp_threads=${num_omp_threads}"
+      fi
+      if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
+          CMD="${CMD}"
+          PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+      else
+          echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+          exit 1
+      fi
+    fi  
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
