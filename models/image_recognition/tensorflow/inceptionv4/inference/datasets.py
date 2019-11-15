@@ -96,7 +96,7 @@ class Dataset(object):
     return os.path.join(self.data_dir, '%s-*-of-*' % subset)
 
   def reader(self):
-    return tf.TFRecordReader()
+    return tf.compat.v1.TFRecordReader()
 
   @property
   def num_classes(self):
