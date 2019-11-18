@@ -278,6 +278,32 @@ function add_calibration_arg() {
   echo "${calibration_arg}"
 }
 
+#BERT model
+function bert() {
+   if [ ${PRECISION} == "fp32" ]; then
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    if [ ${NOINSTALL} != "True" ]; then
+      apt-get update && apt-get install -y git
+      pip install -r ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt
+    fi
+
+    CMD="${CMD} \
+    $(add_arg "--task_name" ${task_name}) \
+    $(add_arg "--max_seq_length" ${max_seq_length}) \
+    $(add_arg "--eval_batch_size" ${eval_batch_size}) \
+    $(add_arg "--learning_rate" ${learning_rate}) \
+    $(add_arg "--vocab_file" ${vocab_file}) \
+    $(add_arg "--bert_config_file" ${bert_config_file}) \
+    $(add_arg "--init_checkpoint" ${init_checkpoint})"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # DCGAN model
 function dcgan() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -876,7 +902,9 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "dcgan" ]; then
+if [ ${MODEL_NAME} == "bert" ]; then
+  bert
+elif [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
 elif [ ${MODEL_NAME} == "densenet169" ]; then
   densenet169
