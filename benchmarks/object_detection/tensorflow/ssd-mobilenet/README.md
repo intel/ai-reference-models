@@ -101,7 +101,7 @@ $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 4. Download the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model_tr.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model.pb
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -113,7 +113,7 @@ $ cd benchmarks
 ```
 
 Run for batch and online inference where the `--data-location`
-is the path to the tf record file that you generated in step 2:
+is the path to the directory with the unzipped coco validation images:
 ```
 python launch_benchmark.py \
     --model-name ssd-mobilenet \
@@ -121,10 +121,9 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --num-intra-threads 28 \
-    --num-inter-threads 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
-    --data-location /home/<user>/coco/output/coco_val.record \
+    --model-source-dir /home/<user>/tensorflow/models \
+    --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --benchmark-only \
     --batch-size 1
@@ -139,9 +138,8 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --num-intra-threads 28 \
-    --num-inter-threads 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
+    --model-source-dir /home/<user>/tensorflow/models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
@@ -345,13 +343,12 @@ $ cd /home/<user>/models/benchmarks
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --num-intra-threads 28 \
-    --num-inter-threads 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
     --benchmark-only
 ```
@@ -365,13 +362,12 @@ the path to the frozen graph that you downloaded in step 5 as the
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --num-intra-threads 28 \
-    --num-inter-threads 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
     --accuracy-only
 ```
