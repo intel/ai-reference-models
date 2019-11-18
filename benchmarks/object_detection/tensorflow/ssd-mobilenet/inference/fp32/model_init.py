@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2018 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,42 +21,65 @@
 import os
 import sys
 
-from common.base_model_init import BaseModelInitializer, set_env_var
+from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
-    # SSD-MobileNet Int8 inference model initialization
-    args = None
-    custom_args = []
+    def run_inference_sanity_checks(self, args, custom_args):
+        if not args.input_graph:
+            sys.exit("Please provide a path to the frozen graph directory"
+                     " via the '--in-graph' flag.")
+        if not args.data_location:
+            sys.exit("Please provide a path to the data directory via the "
+                     "'--data-location' flag.")
+        if args.socket_id == -1 and args.num_cores == -1:
+            print("***Warning***: Running inference on all cores could degrade"
+                  " performance. Pass a '--socket-id' to specify running on a"
+                  " single socket instead.\n")
 
-    def __init__(self, args, custom_args=[], platform_util=None):
+    def __init__(self, args, custom_args, platform_util):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
+        self.run_inference_sanity_checks(self.args, self.custom_args)
+        self.research_dir = os.path.join(args.model_source_dir, "research")
 
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
-                                        self.args.precision, "infer_detections.py")
-        self.command_prefix = self.get_command_prefix(self.args.socket_id) + \
-                "{} {}".format(self.python_exe, benchmark_script)                                        
+        # set num_inter_threads and num_intra_threads (override inter threads to 2)
+        self.set_num_inter_intra_threads(num_inter_threads=2)
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        self.command_prefix += " -g {0}".format(self.args.input_graph)
-        self.command_prefix += " -i 1000"
-        self.command_prefix += " -w 200"
-        self.command_prefix += " -a {0}".format(self.args.num_intra_threads)
-        self.command_prefix += " -e {0}".format(self.args.num_inter_threads)
-        if self.args.data_location:
-            self.command_prefix += " -d {0}".format(self.args.data_location)
-
         if self.args.accuracy_only:
-            self.command_prefix += " -r"
-            assert self.args.data_location, "accuracy must provide the data."
-        else:
-            # Did not support multi-batch accuracy check.
-            self.command_prefix += " -b {0}".format(self.args.batch_size)
+            # get accuracy test command
+            script_path = os.path.join(self.args.intelai_models, self.args.mode,
+                                       self.args.precision, "ssdmobilenet_accuracy.sh")
+            self.run_cmd = "sh {} {} {}".format(
+                script_path, self.args.input_graph, self.args.data_location)
+        elif self.args.benchmark_only:
+            # get benchmark command
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
+                                            self.args.precision, "infer_detections.py")
+
+            # get command with numactl
+            self.run_cmd = self.get_command_prefix(
+                self.args.socket_id) + "{} {}".format(self.python_exe, benchmark_script)
+
+            output_tf_record_path = os.path.join(os.path.dirname(
+                self.args.data_location), "SSD-mobilenet-out.tfrecord")
+
+            self.run_cmd += " --input_tfrecord_paths={} " \
+                            "--output_tfrecord_path={} --inference_graph={} " \
+                            "--discard_image_pixels=True " \
+                            "--num_inter_threads={} --num_intra_threads={}".\
+                format(self.args.data_location, output_tf_record_path,
+                       self.args.input_graph, self.args.num_inter_threads,
+                       self.args.num_intra_threads)
 
     def run(self):
-        # Run script from the tensorflow models research directory
-        self.run_command(self.command_prefix)
+        original_dir = os.getcwd()
+        os.chdir(self.research_dir)
+        self.run_command(self.run_cmd)
+        os.chdir(original_dir)
