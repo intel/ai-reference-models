@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -106,6 +106,11 @@ class BaseBenchmarkUtil(object):
             help="Specify the number of cores to use. If the parameter is not"
                  " specified or is -1, all cores will be used.",
             dest="num_cores", type=int, default=-1)
+
+        self._common_arg_parser.add_argument(
+            "--num-instances", type=check_positive_number,
+            help="Specify the number of instances to run.",
+            dest="num_instances", default=1)
 
         self._common_arg_parser.add_argument(
             "-a", "--num-intra-threads", type=check_positive_number,
