@@ -643,7 +643,10 @@ function ssd_mobilenet() {
     exit 1
   fi
 
-  export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}
+  export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_BENCHMARK}
+
+  cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+  git apply --ignore-space-change --ignore-whitespace ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/google_models_tf2.0.patch
 
   if [ ${NOINSTALL} != "True" ]; then
     # install dependencies for both fp32 and int8
@@ -653,6 +656,17 @@ function ssd_mobilenet() {
     do
       pip install $line
     done
+
+    if [ ${PRECISION} == "int8" ]; then
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+    elif [ ${PRECISION} == "fp32" ]; then
+      # install protoc v3.0.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
+    fi
+
+    chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
+    sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
   fi
 
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
