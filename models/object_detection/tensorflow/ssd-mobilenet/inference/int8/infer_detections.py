@@ -23,8 +23,6 @@ from __future__ import division
 import tensorflow as tf
 from tensorflow.python.data.experimental import parallel_interleave
 from tensorflow.python.data.experimental import map_and_batch
-from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
-from tensorflow.python.framework import dtypes
 import time
 
 from argparse import ArgumentParser
@@ -130,16 +128,15 @@ class model_infer:
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
     self.config.use_per_session_threads = 1
 
-    self.input_layer = 'image_tensor'
-    self.output_layers = ['num_detections', 'detection_boxes', 'detection_scores', 'detection_classes']
     self.load_graph()
 
     if self.args.batch_size == -1:
       self.args.batch_size = 1
 
-    
-    self.input_tensor = self.infer_graph.get_tensor_by_name(self.input_layer + ":0")
-    self.output_tensors = [self.infer_graph.get_tensor_by_name(x + ":0") for x in self.output_layers]
+    input_layer = 'Preprocessor/subpart2'
+    output_layers = ['num_detections', 'detection_boxes', 'detection_scores', 'detection_classes']
+    self.input_tensor = self.infer_graph.get_tensor_by_name(input_layer + ":0")
+    self.output_tensors = [self.infer_graph.get_tensor_by_name(x + ":0") for x in output_layers]
   
     self.category_map_reverse = {v : k for k, v in category_map.items()}
 
@@ -148,6 +145,21 @@ class model_infer:
     with data_graph.as_default():
       self.input_images, self.bbox, self.label, self.image_id = self.get_input()
     self.data_sess = tf.compat.v1.Session(graph=data_graph, config=self.config)
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    preprocess_graph = tf.Graph()
+    with preprocess_graph.as_default():
+      graph_def = tf.compat.v1.GraphDef()
+      with tf.compat.v1.gfile.FastGFile(os.path.join(os.path.dirname(dir_path), 'ssdmobilenet_preprocess.pb'), 'rb') as input_file:
+        input_graph_content = input_file.read()
+        graph_def.ParseFromString(input_graph_content)
+
+      tf.import_graph_def(graph_def, name='')
+    
+    self.pre_sess = tf.compat.v1.Session(graph=preprocess_graph, config=self.config)
+    self.pre_output = preprocess_graph.get_tensor_by_name("Preprocessor/sub:0")
+    self.pre_input = preprocess_graph.get_tensor_by_name("image_tensor:0")
+
 
   def load_graph(self):
     print('load graph from: ' + self.args.input_graph)
@@ -158,9 +170,8 @@ class model_infer:
       with tf.compat.v1.gfile.FastGFile(self.args.input_graph, 'rb') as input_file:
         input_graph_content = input_file.read()
         graph_def.ParseFromString(input_graph_content)
-      output_graph = optimize_for_inference(graph_def, [self.input_layer],
-                              self.output_layers, dtypes.uint8.as_datatype_enum, False)
-      tf.import_graph_def(output_graph, name='')
+
+      tf.import_graph_def(graph_def, name='')
 
   def run_benchmark(self):
     if self.args.data_location:
@@ -191,6 +202,7 @@ class model_infer:
         if self.args.data_location:
           input_images = self.data_sess.run([self.input_images])
           input_images = input_images[0]
+          input_images = self.pre_sess.run(self.pre_output, {self.pre_input: input_images})
         _ = sess.run(self.output_tensors, {self.input_tensor: input_images})
         end_time = time.time()
 
@@ -245,6 +257,7 @@ class model_infer:
         ground_truth['classes'] = np.asarray([self.category_map_reverse[x] for x in label])
         image_id = image_id[0] if type(image_id[0]) == 'str' else image_id[0].decode('utf-8')
         evaluator.add_single_ground_truth_image_info(image_id, ground_truth)
+        input_images = self.pre_sess.run(self.pre_output, {self.pre_input: input_images})
         num, boxes, scores, labels = sess.run(self.output_tensors, {self.input_tensor: input_images})
         detection = {}
         num = int(num[0])
