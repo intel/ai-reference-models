@@ -54,6 +54,7 @@
    
    $ cd intel-models/benchmarks
    $ python launch_benchmark.py \
+     --checkpoint $XNLI_DIR/chinese_L-12_H-768_A-12/ \
      --data-location $XNLI_DIR \
      --model-source-dir $MODEL_SOURCE \
      --model-name bert \
@@ -69,46 +70,9 @@
      -- \
      task-name=XNLI \
      max-seq-length=128 \
-     eval-batch-size=1 \
-     learning-rate=5e-5 \
-     vocab-file=$XNLI_DIR/chinese_L-12_H-768_A-12/vocab.txt \
-     bert-config-file=$XNLI_DIR/chinese_L-12_H-768_A-12/bert_config.json \
-     init-checkpoint=$XNLI_DIR/chinese_L-12_H-768_A-12/bert_model.ckpt
+     learning-rate=5e-5
    ```
-
-   Run with Intel optimized TensorFlow docker container:
-   ```bash
-   # Set dataset dir from step 2
-   $ export XNLI_DIR=/home/<user>/data/XNLI-1.0
-   # Set model source dir from step 4
-   $ export MODEL_SOURCE=/home/<user/bert/
-   # Set docker volumes for model customized parameters
-   $ export DOCKER_DIR=/dataset
-
-   $ cd intel-models/benchmarks
-   $ python launch_benchmark.py \
-     --data-location $XNLI_DIR \
-     --model-source-dir $MODEL_SOURCE \
-     --model-name bert \
-     --precision fp32 \
-     --mode inference \
-     --framework tensorflow \
-     --benchmark-only \
-     --batch-size 1 \
-     --num-cores 28 \
-     --num-inter-threads 1 \
-     --num-intra-threads 28 \
-     --socket-id 0 \
-     --docker-image aipg-tf/intel-optimized-tensorflow:2.0.0-mkl-py3 \
-     -- \
-     task-name=XNLI \
-     max-seq-length=128 \
-     eval-batch-size=1 \
-     learning-rate=5e-5 \
-     vocab-file=$DOCKER_DIR/chinese_L-12_H-768_A-12/vocab.txt \
-     bert-config-file=$DOCKER_DIR/chinese_L-12_H-768_A-12/bert_config.json \
-     init-checkpoint=$DOCKER_DIR/chinese_L-12_H-768_A-12/bert_model.ckpt
-   ```
+   Using `--docker-image aipg-tf/intel-optimized-tensorflow:2.0.0-mkl-py3` to run with Intel optimized TensorFlow docker container.
 
 
 6. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory. Below are examples of what the tail of your log file should look like for the different configs.
@@ -123,5 +87,16 @@
    I1107 16:55:06.701426 140653109442368 run_classifier.py:968]   loss = 0.6279106
    ```
 
+   Thoughput will be displayed below if batch size is greater than 1:
+   ```bash
+   I1121 17:46:37.230878 140398397560640 run_classifier.py:968] ***** Eval results *****
+   I1121 17:46:37.230945 140398397560640 run_classifier.py:970]   eval_accuracy = 0.33159164
+   I1121 17:46:37.231463 140398397560640 run_classifier.py:970]   eval_loss = 1.1610391
+   I1121 17:46:37.231530 140398397560640 run_classifier.py:970]   global_step = 311
+   I1121 17:46:37.231573 140398397560640 run_classifier.py:970]   latency_per_step = 0.168454788122
+   I1121 17:46:37.231612 140398397560640 run_classifier.py:970]   latency_total = 52.389439106
+   I1121 17:46:37.231652 140398397560640 run_classifier.py:970]   loss = 1.1610391
+   I1121 17:46:37.231692 140398397560640 run_classifier.py:970]   samples_per_sec = 47.4904874428
+   ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands to get additional debug output or change the default output location.
