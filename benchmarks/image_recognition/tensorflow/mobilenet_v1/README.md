@@ -49,7 +49,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
     and then run the model scripts for either online or batch inference or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
     Each model run has user configurable arguments separated from regular arguments by '--' at the end of the command.
     Unless configured, these arguments will run with default values. Below are the example codes for each use case:
-
+    
     ```
     $ git clone https://github.com/IntelAI/models.git
 
@@ -67,7 +67,6 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --batch-size 240  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -83,7 +82,6 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --batch-size 1  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -100,7 +98,6 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --batch-size 100  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
          --data-location /home/<user>/imagenet_validation_dataset \
          -- input_height=224 input_width=224 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
@@ -108,6 +105,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
 
     Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
     to get additional debug output or change the default output location.
+    
+    At present no relesed docker image support the latest MobileNet Int8 inference and accuracy.
 
 4. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory,
     or the directory specified by the `--output-dir` arg. Below are examples of
@@ -216,12 +215,14 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+         --docker-image intelaipg/intel-optimized-tensorflow:2.0.0-mkl-py3 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
-         --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
+         -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
+         input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
      ```
      
     * Run for batch inference (with `--batch-size 100`,
@@ -234,12 +235,14 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+         --docker-image intelaipg/intel-optimized-tensorflow:2.0.0-mkl-py3 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
-         --checkpoint /home/<user>/mobilenet_v1_fp32_pretrained_model
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
+         -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
+         input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
       ```
     * Run for accuracy (with `--batch-size 100`, `--accuracy-only` and `--in-graph` with a path to the frozen graph .pb file):
       ```
@@ -248,12 +251,12 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+         --docker-image intelaipg/intel-optimized-tensorflow:2.0.0-mkl-py3 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \
          --data-location /dataset/Imagenet_Validation \
-         --in-graph /home/<user>/mobilenet_v1_fp32_pretrained_model/mobilenet_v1_1.0_224_frozen.pb
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
       ```
       Note that the `--verbose` or `--output-dir` flag can be added to any of the above
       commands to get additional debug output or change the default output location.
