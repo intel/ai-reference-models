@@ -493,7 +493,7 @@ function maskrcnn() {
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-      pip3 install --force-reinstall scipy==1.2.1 Pillow==5.3.0
+      pip3 install --force-reinstall scipy==1.2.1 Pillow
 
       # install cocoapi
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
@@ -779,7 +779,7 @@ function unet() {
     fi
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip3 install --force-reinstall Pillow==5.3.0
+      pip3 install --force-reinstall Pillow
     fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
