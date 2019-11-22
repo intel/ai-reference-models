@@ -50,6 +50,7 @@ import preprocessing
 
 IMAGENET_NUM_TRAIN_IMAGES = 1281167
 IMAGENET_NUM_VAL_IMAGES = 50000
+IMAGENET_NUM_CALIB_IMAGES = 500
 
 
 def create_dataset(data_dir, data_name):
@@ -135,6 +136,8 @@ class ImagenetData(Dataset):
       return IMAGENET_NUM_TRAIN_IMAGES
     elif subset == 'validation':
       return IMAGENET_NUM_VAL_IMAGES
+    elif subset == 'calibration':
+      return IMAGENET_NUM_CALIB_IMAGES
     else:
       raise ValueError('Invalid data subset "%s"' % subset)
 

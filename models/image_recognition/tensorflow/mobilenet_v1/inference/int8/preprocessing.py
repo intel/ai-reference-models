@@ -537,6 +537,18 @@ class RecordInputImagePreprocessor(object):
     self.batch_size_per_split = self.batch_size // self.num_splits
     self.summary_verbosity = summary_verbosity
 
+  def center_crop(self, img, init_h, init_w):
+    height, width, _ = img.shape
+
+    left = int((width - init_w) // 2)
+    right = int((width + init_w) // 2)
+    top = int((height - init_h) // 2)
+    bottom = int((height + init_h) // 2)
+
+    img = img[top: bottom, left: right]
+
+    return img
+
   def image_preprocess(self, image_buffer, bbox, batch_position):
     """Preprocessing image_buffer as a function of its batch position."""
     if self.train:
@@ -547,7 +559,20 @@ class RecordInputImagePreprocessor(object):
     else:
       image = tf.image.decode_jpeg(
           image_buffer, channels=3, dct_method='INTEGER_FAST')
-      image = preprocess_for_eval(image, self.height, self.width)
+
+      new_height = int(100. * self.height / 87.5)
+      new_width = int(100. * self.width / 87.5)
+
+      if(self.height > self.width):
+        w = new_width
+        h = int(new_height * self.height / self.width)
+      else:
+        h = new_height
+        w = int(new_width * self.width / self.height)
+
+      image = preprocess_for_eval(image, h, w)
+      image = self.center_crop(image, self.height, self.width)
+
     return image
 
   def parse_and_preprocess(self, value, batch_position):
@@ -569,7 +594,7 @@ class RecordInputImagePreprocessor(object):
         if not file_names:
           raise ValueError('Found no files in --data_dir matching: {}'
                            .format(glob_pattern))
-        ds = tf.data.TFRecordDataset.list_files(file_names)
+        ds = tf.data.TFRecordDataset.list_files(file_names, shuffle=False)
         ds = ds.apply(
             interleave_ops.parallel_interleave(
                 tf.data.TFRecordDataset, cycle_length=10))
@@ -579,7 +604,6 @@ class RecordInputImagePreprocessor(object):
         counter = counter.repeat()
         ds = tf.data.Dataset.zip((ds, counter))
         ds = ds.prefetch(buffer_size=self.batch_size)
-        ds = ds.shuffle(buffer_size=10000)
         ds = ds.repeat()
         ds = ds.apply(
             batching.map_and_batch(
