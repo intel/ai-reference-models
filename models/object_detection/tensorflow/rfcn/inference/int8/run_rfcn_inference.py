@@ -261,7 +261,7 @@ class RFCNRunner:
 
           if self.args.evaluate_tensor:
             for tensor in output_dict[self.args.evaluate_tensor]:
-              print tensor.shape
+              print(tensor.shape)
             return None, None
 
           # all outputs are float32 numpy arrays, so convert types as appropriate
