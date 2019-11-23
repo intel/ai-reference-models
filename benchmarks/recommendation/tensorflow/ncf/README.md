@@ -36,7 +36,7 @@ $ cd models/benchmarks
 
 4. Download and extract the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ncf_fp32_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ncf_fp32_pretrained_model.tar.gz
 $ tar -xzvf ncf_fp32_pretrained_model.tar.gz
 ```
 
@@ -57,7 +57,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 The tail of batch inference log, looks as below.
@@ -87,7 +87,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 The tail of online inference log, looks as below.
@@ -119,7 +119,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 The tail of accuracy log, looks as below.

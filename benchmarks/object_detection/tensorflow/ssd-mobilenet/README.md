@@ -107,7 +107,7 @@ $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 
 ```
 $ cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssdmobilenet_int8_pretrained_model.pb
 ```
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -127,7 +127,7 @@ $ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/tf_models \
     --data-location $MODEL_WORK_DIR/val/val2017 \
     --in-graph $MODEL_WORK_DIR/ssdmobilenet_int8_pretrained_model.pb \
@@ -144,7 +144,7 @@ $ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/tf_models \
     --data-location $MODEL_WORK_DIR/output/coco_val.record \
     --in-graph $MODEL_WORK_DIR/ssdmobilenet_int8_pretrained_model.pb \
@@ -368,7 +368,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --benchmark-only
 ```
 
@@ -387,7 +387,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --accuracy-only
 ```
 

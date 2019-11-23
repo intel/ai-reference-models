@@ -143,7 +143,7 @@ git pull
 
 ```
 cd ~/object_detection/ssd_vgg16
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssdvgg16_fp32_pretrained_model.pb
 ```
 4. Skip to step 5 if you already have a dataset with annotations in TFRecords format or follow the below instructions to download and convert COCO dataset with annotations to TFRecords.
 Note that to compute accuracy, the TFRecord's filename pattern must start with `"val-*"`
@@ -207,7 +207,7 @@ val-00000-of-00005  val-00001-of-00005  val-00002-of-00005  val-00003-of-00005  
 
 1. Pull the relevant Intel-optimized TensorFlow Docker image.
 ```bash
-docker pull gcr.io/deeplearning-platform-release/tf-cpu.1-14
+docker pull gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 2. cd to the inference script directory in local IntelAI models repo.
 ```bash        
@@ -230,7 +230,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir ~/object_detection/ssd_vgg16/SSD.TensorFlow \
     --data-location ~/object_detection/ssd_vgg16/data_tfrecords \
     --in-graph ~/object_detection/ssd_vgg16/ssdvgg16_fp32_pretrained_model.pb \
@@ -256,7 +256,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir ~/object_detection/ssd_vgg16/SSD.TensorFlow \
     --data-location ~/object_detection/ssd_vgg16/data_tfrecords \
     --in-graph ~/object_detection/ssd_vgg16/ssdvgg16_fp32_pretrained_model.pb \

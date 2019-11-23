@@ -26,7 +26,7 @@ TensorFlow to be installed, the following instructions show how to run
 a docker container with your cloned mlperf inference repo mounted as a
 volume:
 ```
-$ docker run --volume $MODEL_WORK_DIR/inference:/inference -it gcr.io/deeplearning-platform-release/tf-cpu.1-14 /bin/bash
+$ docker run --volume $MODEL_WORK_DIR/inference:/inference -it gcr.io/deeplearning-platform-release/tf-cpu.1-15 /bin/bash
 ```
 In the docker container, run:
 ```
@@ -65,7 +65,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/inference/others/cloud/language_modeling
 
 ```
@@ -80,7 +80,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1024 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/inference/others/cloud/language_modeling \
     -- steps=4 \
 ```

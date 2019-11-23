@@ -126,7 +126,7 @@ The `coco_val.record` file is what we will use in this inference example.
 6. Download and extract the pre-trained model.
 ```
 $ cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
 $ tar -xzvf faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
 ```
 
@@ -163,7 +163,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --checkpoint $MODEL_WORK_DIR/faster_rcnn_resnet50_fp32_coco \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     -- config_file=pipeline.config
 ```
 
@@ -176,7 +176,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/tf_models \
     --data-location $MODEL_WORK_DIR/output/ \
     --in-graph $MODEL_WORK_DIR/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \

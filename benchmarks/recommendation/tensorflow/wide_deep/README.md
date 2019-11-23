@@ -23,7 +23,7 @@ for other precisions are coming later.
     
 2. Download and extract the pre-trained model.
     ```
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_fp32_pretrained_model.tar.gz
     $ tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
     ```
  
@@ -60,7 +60,7 @@ use in the next step.
             --batch-size 1 \
             --data-location $MODEL_WORK_DIR/widedeep_dataset \
             --checkpoint $MODEL_WORK_DIR/tf_models/wide_deep_fp32_pretrained_model \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
             --verbose
        ```
    * Running the model in batch inference mode, set `--batch-size` = `1024`
@@ -76,7 +76,7 @@ use in the next step.
             --batch-size 1024 \
             --data-location $MODEL_WORK_DIR/widedeep_dataset \
             --checkpoint $MODEL_WORK_DIR/tf_models/wide_deep_fp32_pretrained_model \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
             --verbose
        ```
 6. The log file is saved to the value of `--output-dir`.

@@ -67,7 +67,7 @@ $ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location $MODEL_WORK_DIR/COCO2014 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 5. Log files are located at the value of `--output-dir`.

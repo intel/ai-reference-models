@@ -32,7 +32,7 @@ requires.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/inceptionv3_int8_pretrained_model.pb
 ```
 
 3. If you would like to run Inception V3 inference with real data or test for
@@ -93,7 +93,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_int8_pretrained_model.pb \
     --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords
 ```
@@ -116,7 +116,7 @@ $ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_int8_pretrained_model.pb \
     --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -135,7 +135,7 @@ $ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -153,7 +153,7 @@ $ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_int8_pretrained_model.pb \
     --data-location $MODEL_WORK_DIR/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -172,7 +172,7 @@ $ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -238,7 +238,7 @@ $ git clone https://github.com/IntelAI/models.git
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/inceptionv3_fp32_pretrained_model.pb
 ```
 
 3. If you would like to run Inception V3 FP32 inference and test for
@@ -272,7 +272,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for online inference:
@@ -305,7 +305,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for batch inference:
@@ -339,7 +339,7 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --data-location $MODEL_WORK_DIR/dataset/Imagenet_Validation \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --in-graph $MODEL_WORK_DIR/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for accuracy:

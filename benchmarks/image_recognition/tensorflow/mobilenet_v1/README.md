@@ -45,7 +45,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilenetv1_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mobilenetv1_int8_pretrained_model.pb
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -70,7 +70,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --batch-size 240  \
          --socket-id 0 \
          --in-graph $MODEL_WORK_DIR/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -86,7 +86,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --batch-size 1  \
          --socket-id 0 \
          --in-graph $MODEL_WORK_DIR/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -103,7 +103,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --batch-size 100  \
          --socket-id 0 \
          --in-graph $MODEL_WORK_DIR/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
          --data-location $MODEL_WORK_DIR/dataset/Imagenet_Validation \
          -- input_height=224 input_width=224 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
@@ -227,7 +227,7 @@ $ popd
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
          --model-source-dir $MODEL_WORK_DIR/tf_models  \
          --batch-size 1 \
          --socket-id 0 \
@@ -245,7 +245,7 @@ $ popd
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
          --model-source-dir $MODEL_WORK_DIR/tf_models  \
          --batch-size 100 \
          --socket-id 0 \
@@ -259,7 +259,7 @@ $ popd
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
          --model-source-dir $MODEL_WORK_DIR/tf_models  \
          --batch-size 100 \
          --accuracy-only \

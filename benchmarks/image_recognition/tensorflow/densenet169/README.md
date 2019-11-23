@@ -33,7 +33,7 @@ following modes/precisions:
 
 2. Download the pretrained model and store the path to the current directory:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/densenet169_fp32_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/densenet169_fp32_pretrained_model.pb
 
    $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
    $ pushd $MODEL_WORK_DIR
@@ -61,7 +61,7 @@ following modes/precisions:
        --batch-size 100 \
        --socket-id 0 \
        --in-graph $MODEL_WORK_DIR/densenet169_fp32_pretrained_model.pb \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
        input_layer="input" output_layer="densenet169/predictions/Reshape_1"
     ```
@@ -77,7 +77,7 @@ following modes/precisions:
         --batch-size 1 \
         --socket-id 0 \
         --in-graph $MODEL_WORK_DIR/densenet169_fp32_pretrained_model.pb \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
         -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"
     ```
@@ -94,7 +94,7 @@ following modes/precisions:
         --batch-size 100 \
         --socket-id 0 \
         --in-graph $MODEL_WORK_DIR/densenet169_fp32_pretrained_model.pb \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
         --data-location $MODEL_WORK_DIR/imagenet_validation_dataset \
         -- input_height=224 input_width=224 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"

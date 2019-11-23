@@ -106,7 +106,7 @@ git clone https://github.com/IntelAI/models.git
 ```
 mkdir ~/wide_deep_files
 cd ~/wide_deep_files
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_fp32_pretrained_model.pb
 
 ```
 Refer to the Wide and Deep [README](/benchmarks/recommendation/tensorflow/wide_deep_large_ds) to get the latest location of the pretrained model.

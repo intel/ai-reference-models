@@ -97,7 +97,7 @@ total 792084
 
 ```
 $ cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssdvgg16_int8_pretrained_model.pb
 ```
 
 7. Navigate to the `benchmarks` directory (step 2), and run the model scripts for either batch or online
@@ -116,7 +116,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/SSD.TensorFlow \
     --data-location $MODEL_WORK_DIR/tf_records \
     --in-graph $MODEL_WORK_DIR/ssdvgg16_int8_pretrained_model.pb \
@@ -146,7 +146,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/SSD.TensorFlow \
     --data-location $MODEL_WORK_DIR/tf_records \
     --in-graph $MODEL_WORK_DIR/ssdvgg16_int8_pretrained_model.pb \
@@ -204,7 +204,7 @@ Use the steps 1, 2 ,3, 4 and 5 as above.
 
 6. Download the pretrained model:
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdvgg16_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssdvgg16_fp32_pretrained_model.pb
 ```
 
 7. Navigate to the `benchmarks` directory (step 2), and run the model scripts for either batch
@@ -226,7 +226,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --batch-size 1 \
     --socket-id 0 \
     --num-inter-threads 11 \
@@ -253,7 +253,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/SSD.TensorFlow \
     --data-location $MODEL_WORK_DIR/tf_records \
     --in-graph $MODEL_WORK_DIR/ssdvgg16_fp32_pretrained_model.pb \

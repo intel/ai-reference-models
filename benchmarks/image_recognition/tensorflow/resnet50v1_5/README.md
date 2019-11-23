@@ -31,7 +31,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 
 2. Download the pre-trained model and store the path to the current directory.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50v1_5_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/resnet50v1_5_int8_pretrained_model.pb
 ```
 
 3. Clone the
@@ -45,7 +45,7 @@ $ git clone https://github.com/IntelAI/models.git
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 
-    The docker image (`gcr.io/deeplearning-platform-release/tf-cpu.1-14`)
+    The docker image (`gcr.io/deeplearning-platform-release/tf-cpu.1-15`)
     used in the commands above were built using
     [TensorFlow](git@github.com:tensorflow/tensorflow.git) master for TensorFlow
     version 1.14.
@@ -64,7 +64,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -103,7 +103,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
@@ -171,7 +171,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -209,7 +209,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -250,7 +250,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location $MODEL_WORK_DIR/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -287,7 +287,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location $MODEL_WORK_DIR/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another

@@ -31,7 +31,7 @@ Instructions for MTCC model training and inference for other precisions are comi
 
 3. Download the pre-trained model.
 ```
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mtcc_fp32_pretrained_model.tar.gz
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mtcc_fp32_pretrained_model.tar.gz
     $ tar -xzvf mtcc_fp32_pretrained_model.tar.gz
 ```
 
@@ -59,7 +59,7 @@ Run:
         --mode inference \
         --socket-id 0 \
         --checkpoint $MODEL_WORK_DIR/MTCNN_model \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
 ```
 
 6. The log file is saved to the value of `--output-dir`.

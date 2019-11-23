@@ -108,7 +108,7 @@ The `coco_val.record` file is what we will use in this inference example.
 6. Download the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_fp32_bs1_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssd_resnet34_fp32_bs1_pretrained_model.pb
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -142,7 +142,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --benchmark-only
 ```
 
@@ -162,7 +162,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --accuracy-only
 ```
 
@@ -297,7 +297,7 @@ The `coco_val.record` file is what we will use in this inference example.
 6. Download the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_int8_bs1_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssd_resnet34_int8_bs1_pretrained_model.pb
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -330,7 +330,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --benchmark-only
 ```
 
@@ -350,7 +350,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --accuracy-only
 ```
 

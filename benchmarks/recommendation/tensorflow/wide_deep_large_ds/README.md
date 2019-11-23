@@ -76,7 +76,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
     $ cd $MODEL_WORK_DIR
 
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_int8_pretrained_model.pb
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_int8_pretrained_model.pb
     ```
 
 2. Run Accuracy test
@@ -165,7 +165,7 @@ $ popd
     ```
     $ cd $MODEL_WORK_DIR
 
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.pb
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_fp32_pretrained_model.pb
     ```
 
 2. Run Accuracy test
@@ -202,7 +202,7 @@ $ popd
             --benchmark-only \
             --batch-size 1 \
             --socket-id 0 \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecord \
             --num-intra-threads 1 --num-inter-threads 1 --num-cores 1 \
@@ -220,7 +220,7 @@ $ popd
             --benchmark-only \
             --batch-size 512 \
             --socket-id 0 \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecords \
             --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
@@ -268,6 +268,6 @@ $ popd
            --framework tensorflow \
            --batch-size 512 \
            --data-location /root/dataset \
-           --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+           --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
         
         ```

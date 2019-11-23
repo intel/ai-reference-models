@@ -27,7 +27,7 @@ modes/precisions:
    ```
    cd $MODEL_WORK_DIR
 
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/draw_fp32_pretrained_model.tar.gz
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/draw_fp32_pretrained_model.tar.gz
    $ tar -xvf draw_fp32_pretrained_model.tar.gz
    ```
 
@@ -53,7 +53,7 @@ modes/precisions:
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
             --checkpoint $MODEL_WORK_DIR/draw_fp32_pretrained_model \
             --data-location $MODEL_WORK_DIR/mnist \
             --batch-size 1 \
@@ -66,7 +66,7 @@ modes/precisions:
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
             --checkpoint $MODEL_WORK_DIR/draw_fp32_pretrained_model \
             --data-location $MODEL_WORK_DIR/mnist \
             --batch-size 100 \

@@ -22,7 +22,7 @@ an optimized version of the GNMT model code.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/gnmt_4layer_fp32_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/gnmt_4layer_fp32_pretrained_model.tar.gz
 ```
 
 3. To run GNMT inference, you will WMT16 German-English data. You can
@@ -88,7 +88,7 @@ $ python launch_benchmark.py \
 --socket-id 0 \
 --checkpoint $MODEL_WORK_DIR/gnmt_checkpoints \
 --data-location $MODEL_WORK_DIR/wmt16 \
---docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+--docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
 --infer_mode=beam_search
 ```
 
@@ -105,7 +105,7 @@ $ python launch_benchmark.py \
 --socket-id 0 \
 --checkpoint $MODEL_WORK_DIR/gnmt_checkpoints \
 --data-location $MODEL_WORK_DIR/wmt16 \
---docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+--docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
 --infer_mode=beam_search
 ```
 
@@ -241,7 +241,7 @@ python  launch_benchmark.py \
     --precision fp32 \
     --batch-size 512 \
     --benchmark-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --volume /home/<user>/l_mpi/l_mpi_2019.3.199:/l_mpi \
     --shm-size 4g \
     --num-processes 2 \

@@ -27,7 +27,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv4_int8_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/inceptionv4_int8_pretrained_model.pb
    ```
 
 3. If you would like to run Inception V4 inference and test for
@@ -61,7 +61,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        --in-graph $MODEL_WORK_DIR/inceptionv4_int8_pretrained_model.pb \
        --data-location $MODEL_WORK_DIR/ImageNet_TFRecords
    ```
@@ -78,7 +78,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        --in-graph $MODEL_WORK_DIR/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -94,7 +94,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        --in-graph $MODEL_WORK_DIR/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -169,7 +169,7 @@ $ popd
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv4_fp32_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/inceptionv4_fp32_pretrained_model.pb
    ```
 
 3. If you would like to run Inception V4 inference and test for
@@ -204,7 +204,7 @@ $ popd
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        --in-graph $MODEL_WORK_DIR/inceptionv4_fp32_pretrained_model.pb \
        --data-location $MODEL_WORK_DIR/ImageNet_TFRecords
    ```
@@ -221,7 +221,7 @@ $ popd
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        --in-graph $MODEL_WORK_DIR/inceptionv4_fp32_pretrained_model.pb
    ```
 
@@ -237,7 +237,7 @@ $ popd
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
        --in-graph $MODEL_WORK_DIR/inceptionv4_fp32_pretrained_model.pb
    ```
 

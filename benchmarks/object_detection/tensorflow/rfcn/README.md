@@ -101,7 +101,7 @@ The `coco_val.record` file is what we will use in this inference example.
 
 ```
 cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 $ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 ```
 
@@ -139,7 +139,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --checkpoint $MODEL_WORK_DIR/rfcn_resnet101_fp32_coco \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     -- config_file=rfcn_pipeline.config
 ```
 
@@ -154,7 +154,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/tf_models \
     --data-location $MODEL_WORK_DIR/output/coco_val.record \
     --in-graph $MODEL_WORK_DIR/rfcn_resnet101_fp32_coco/frozen_inference_graph.pb  \
