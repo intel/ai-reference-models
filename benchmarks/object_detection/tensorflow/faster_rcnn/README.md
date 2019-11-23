@@ -3,7 +3,6 @@
 This document has instructions for how to run Faster R-CNN for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
-* [Int8 inference](#int8-inference-instructions)
 
 Instructions and scripts for the Faster R-CNN ResNet50 model training and inference
 for other precisions are coming later.
@@ -224,125 +223,6 @@ Log location outside container: {--output-dir value}/benchmark_faster_rcnn_infer
 ```
 
 10. To return to where you started from:
-```
-$ popd
-```
-
-## Int8 Inference Instructions
-
-These instructions use the TCMalloc memory allocator, which produces 
-better performance results for Int8 precision models with smaller batch sizes. 
-If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
-when calling `launch_benchmark.py` and the script will run without TCMalloc.
-
-1. Please follow the steps from the
-[Faster R-CNN FP32 instructions](#fp32-inference-instructions) written
-above for cloning dependecy repositories and getting the coco dataset:
-* Performance bechmarking uses the raw coco dataset images. Follow steps
-1, 2 and 3 from the FP32 instructions.
-* Accuracy testing requires the coco daataset to be in the TF records
-format. Follow steps 1, 2, 3, 4, and 5 from the FP32 instructions.
-
-2. Download the pre-trained model.
-```
-$ cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_int8_pretrained_model.pb
-```
-
-3. Clone the [intelai/models](https://github.com/intelai/models) repo.
-This repo has the launch script for running the model.
-
-```
-$ git clone https://github.com/IntelAI/models.git
-Cloning into 'models'...
-remote: Enumerating objects: 11, done.
-remote: Counting objects: 100% (11/11), done.
-remote: Compressing objects: 100% (7/7), done.
-remote: Total 11 (delta 3), reused 4 (delta 0), pack-reused 0
-Receiving objects: 100% (11/11), done.
-Resolving deltas: 100% (3/3), done.
-```
-
-4. Run the `launch_benchmark.py` script from the intelai/models repo,
-with the appropriate parameters. To run on single socket use `--socket_id` switch,
-by default it will be using all available sockets. Optional parameter `number_of_steps`
-(default value = 5000) can be added at the end of command after `--` as shown below:
-
-Run batch and online inference using the following command. 
-The `--data-location` is the path to the directory that contains the raw coco dataset 
-validation images which you downloaded and unzipped:
-
-```
-$ cd $MODEL_WORK_DIR/models/benchmarks
-
-$ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/val/val2017 \
-    --model-source-dir $MODEL_WORK_DIR/tf_models  \
-    --model-name faster_rcnn \
-    --framework tensorflow \
-    --precision int8 \
-    --mode inference \
-    --socket-id 0 \
-    --in-graph $MODEL_WORK_DIR/faster_rcnn_int8_pretrained_model.pb \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --benchmark-only \
-    -- number_of_steps=5000
-```
-
-Or for accuracy where the `--data-location` is the path the directory
-where your `coco_val.record` file is located and the `--in-graph` is
-the pre-trained graph model:
-```
-$ python launch_benchmark.py \
-    --model-name faster_rcnn \
-    --mode inference \
-    --precision int8 \
-    --framework tensorflow \
-    --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
-    --data-location $MODEL_WORK_DIR/output/coco_val.record \
-    --in-graph $MODEL_WORK_DIR/faster_rcnn_int8_pretrained_model.pb  \
-    --accuracy-only
-```
-
-5. The log file is saved to the value of `--output-dir`.
-
-Below is a sample log file tail when running for batch
-and online inference:
-
-```
-Step 4950: 0.0722849369049 seconds
-Step 4960: 0.0763049125671 seconds
-Step 4970: 0.070191860199 seconds
-Step 4980: 0.0755469799042 seconds
-Step 4990: 0.0742928981781 seconds
-Avg. Duration per Step:0.0760930150986
-Ran inference with batch size -1
-Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_int8_20190117_232539.log
-```
-
-And here is a sample log file tail when running for accuracy:
-```
-Accumulating evaluation results...
-DONE (t=1.34s).
- Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.310
- Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.479
- Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.351
- Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.310
- Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
- Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.267
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.372
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.375
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.375
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-Ran inference with batch size -1
-Log location outside container: {--output-dir value}/benchmark_faster_rcnn_inference_int8_20190117_231937.log
-```
-
-6. To return to where you started from:
 ```
 $ popd
 ```
