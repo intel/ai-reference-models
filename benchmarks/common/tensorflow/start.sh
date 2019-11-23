@@ -287,19 +287,6 @@ function add_calibration_arg() {
   echo "${calibration_arg}"
 }
 
-# DCGAN model
-function dcgan() {
-  if [ ${PRECISION} == "fp32" ]; then
-
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/gan/cifar
-
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
 # DenseNet 169 model
 function densenet169() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -320,21 +307,6 @@ function draw() {
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
-  fi
-}
-
-# FaceNet model
-function facenet() {
-  if [ ${PRECISION} == "fp32" ]; then
-    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${PRECISION}/validate_on_lfw.py \
-        ${MOUNT_EXTERNAL_MODELS_SOURCE}/src/validate_on_lfw.py
-
-    CMD="${CMD} $(add_arg "--lfw_pairs" ${lfw_pairs})"
-    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit
   fi
 }
 
@@ -362,12 +334,6 @@ function faster_rcnn() {
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
         echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
-      fi
-
-    elif [ ${PRECISION} == "int8" ]; then
-      number_of_steps_arg=""
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        CMD="${CMD} --number-of-steps=${number_of_steps}"
       fi
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -615,37 +581,18 @@ function rfcn() {
       split_arg="--split=${split}"
   fi
 
-  if [ ${PRECISION} == "int8" ]; then
-      number_of_steps_arg=""
-
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          number_of_steps_arg="--number_of_steps=${number_of_steps}"
-      fi
-
-      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
-
-  elif [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ]; then
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1
       fi
 
       CMD="${CMD} --config_file=${config_file} ${split_arg}"
-   else
+  else
       echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
   fi
   cd $original_dir
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-}
-
-# SqueezeNet model
-function squeezenet() {
-  if [ ${PRECISION} == "fp32" ]; then
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
 }
 
 # SSD-MobileNet model
@@ -770,145 +717,6 @@ function ssd_vgg16() {
     fi
 }
 
-# UNet model
-function unet() {
-  if [ ${PRECISION} == "fp32" ]; then
-    if [[ -z "${checkpoint_name}" ]]; then
-      echo "wavenet requires -- checkpoint_name arg to be defined"
-      exit 1
-    fi
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      pip3 install --force-reinstall Pillow
-    fi
-    if [ ${ACCURACY_ONLY} == "True" ]; then
-      echo "Accuracy testing is not supported for ${MODEL_NAME}"
-      exit 1
-    fi
-    CMD="${CMD} --checkpoint_name=${checkpoint_name}"
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# transformer language model
-function transformer_language() {
-  if [ ${PRECISION} == "fp32" ]; then
-
-    if [[ -z "${decode_from_file}" ]]; then
-        echo "transformer-language requires -- decode_from_file arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
-        echo "transformer-language requires --checkpoint arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${DATASET_LOCATION}" ]]; then
-        echo "transformer-language requires --data-location arg to be defined"
-        exit 1
-    fi
-
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      echo "Installing tensor2tensor for CPU..."
-      pip install tensor2tensor[tensorflow]
-    fi
-
-    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/decoding.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/tensor2tensor/utils/decoding.py
-
-    CMD="${CMD} --decode_from_file=${CHECKPOINT_DIRECTORY}/${decode_from_file}"
-
-    if [[ -n "${reference}" ]]; then
-      CMD="${CMD} --reference=${CHECKPOINT_DIRECTORY}/${reference}"
-    fi
-
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# transformer language model from official tensorflow models
-function transformer_lt_official() {
-  if [ ${PRECISION} == "fp32" ]; then
-
-    if [[ -z "${file}" ]]; then
-        echo "transformer-language requires -- file arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${file_out}" ]]; then
-        echo "transformer-language requires -- file_out arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${reference}" ]]; then
-        echo "transformer-language requires -- reference arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${vocab_file}" ]]; then
-        echo "transformer-language requires -- vocab_file arg to be defined"
-        exit 1
-    fi
-
-    if [ ${NOINSTALL} != "True" ]; then
-      pip install pandas
-    fi
-
-    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
-        ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/transformer/infer_ab.py
-
-    CMD="${CMD}
-    --in_graph=${IN_GRAPH} \
-    --vocab_file=${DATASET_LOCATION}/${vocab_file} \
-    --file=${DATASET_LOCATION}/${file} \
-    --file_out=${OUTPUT_DIR}/${file_out} \
-    --reference=${DATASET_LOCATION}/${reference}"
-    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# Wavenet model
-function wavenet() {
-  if [ ${PRECISION} == "fp32" ]; then
-    if [[ -z "${checkpoint_name}" ]]; then
-      echo "wavenet requires -- checkpoint_name arg to be defined"
-      exit 1
-    fi
-
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      apt-get clean && apt-get update -y && \
-      apt-get install --no-install-recommends --fix-missing libsndfile1 -y
-    fi
-
-    if [[ -z "${sample}" ]]; then
-      echo "wavenet requires -- sample arg to be defined"
-      exit 1
-    fi
-
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
-    if [ ${NOINSTALL} != "True" ]; then
-      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-    fi
-
-    CMD="${CMD} --checkpoint_name=${checkpoint_name} \
-        --sample=${sample}"
-
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
@@ -982,14 +790,10 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "dcgan" ]; then
-  dcgan
-elif [ ${MODEL_NAME} == "densenet169" ]; then
+if [ ${MODEL_NAME} == "densenet169" ]; then
   densenet169
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
-elif [ ${MODEL_NAME} == "facenet" ]; then
-  facenet
 elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
 elif [ ${MODEL_NAME} == "gnmt" ]; then
@@ -1018,22 +822,12 @@ elif [ ${MODEL_NAME} == "resnet50v1_5" ]; then
   resnet50_101_inceptionv3
 elif [ ${MODEL_NAME} == "rfcn" ]; then
   rfcn
-elif [ ${MODEL_NAME} == "squeezenet" ]; then
-  squeezenet
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "ssd-resnet34" ]; then
   ssd-resnet34
 elif [ ${MODEL_NAME} == "ssd_vgg16" ]; then
   ssd_vgg16
-elif [ ${MODEL_NAME} == "unet" ]; then
-  unet
-elif [ ${MODEL_NAME} == "transformer_language" ]; then
-  transformer_language
-elif [ ${MODEL_NAME} == "transformer_lt_official" ]; then
-  transformer_lt_official
-elif [ ${MODEL_NAME} == "wavenet" ]; then
-  wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
 elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
