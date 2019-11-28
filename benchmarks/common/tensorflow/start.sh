@@ -608,23 +608,25 @@ function ssd_mobilenet() {
 
   export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
 
-  if [ ${NOINSTALL} != "True" ]; then
-    # install dependencies for both fp32 and int8
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
+  sed -i 's/return "".join/return b"".join/g' ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/metrics/tf_example_parser.py
 
-    # get the python cocoapi
-    get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
+  OLD_PWD=${PWD}
+  cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+  git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/detection_inference.patch
+  cd ${OLD_PWD}
 
-    if [ ${PRECISION} == "int8" ]; then
-      # install protoc v3.3.0, if necessary, then compile protoc files
-      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-    elif [ ${PRECISION} == "fp32" ]; then
-      # install protoc v3.0.0, if necessary, then compile protoc files
-      install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
-    fi
+  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
+  sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
 
-    chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
-    sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
+  # install dependencies for both fp32 and int8
+  pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
+
+  if [ ${PRECISION} == "int8" ]; then
+    # install protoc v3.3.0, if necessary, then compile protoc files
+    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+  elif [ ${PRECISION} == "fp32" ]; then
+    # install protoc v3.0.0, if necessary, then compile protoc files
+    install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
   fi
 
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
