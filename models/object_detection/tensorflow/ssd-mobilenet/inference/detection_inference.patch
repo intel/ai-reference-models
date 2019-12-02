@@ -27,7 +27,7 @@ index dc66686f..84e5973c
 +    cl = [x if type(x) == 'str' else x.decode('utf-8') for x in cl]
 +  lm = label_map_util.get_label_map_dict(label_file, use_display_name = True)
 +  label_id = [lm[x] for x in cl]
-+  feature[standard_fields.TfExampleFields.object_class_label] .int64_list.value[:] = label_id
++  feature[standard_fields.TfExampleFields.object_class_label].int64_list.value[:] = label_id
  
    if discard_image_pixels:
      del feature[standard_fields.TfExampleFields.image_encoded]
