@@ -80,15 +80,16 @@ def input_fn(dataset_pattern='val-*', batch_size=1, data_location=None):
                                                               ignore_threshold=NEG_THRESHOLD,
                                                               prior_scaling=[0.1, 0.1, 0.2, 0.2])
 
-    image_preprocessing_fn = lambda image_, labels_, bboxes_: ssd_preprocessing.preprocess_image(image_, labels_,
-                                                                                                 bboxes_, out_shape,
-                                                                                                 is_training=False,
-                                                                                                 data_format=DATA_FORMAT,
-                                                                                                 output_rgb=False)
-    anchor_encoder_fn = lambda glabels_, gbboxes_: anchor_encoder_decoder.encode_all_anchors(glabels_, gbboxes_,
-                                                                                             all_anchors,
-                                                                                             all_num_anchors_depth,
-                                                                                             all_num_anchors_spatial)
+    def image_preprocessing_fn(image_, labels_, bboxes_): return ssd_preprocessing.preprocess_image(image_, labels_,
+                                                                                                    bboxes_, out_shape,
+                                                                                                    is_training=False,
+                                                                                                    data_format=DATA_FORMAT,
+                                                                                                    output_rgb=False)
+
+    def anchor_encoder_fn(glabels_, gbboxes_): return anchor_encoder_decoder.encode_all_anchors(glabels_, gbboxes_,
+                                                                                                all_anchors,
+                                                                                                all_num_anchors_depth,
+                                                                                                all_num_anchors_spatial)
 
     image, filename, shape, loc_targets, cls_targets, match_scores = \
         dataset_common.slim_get_batch(NUM_CLASSES,
@@ -112,9 +113,9 @@ class EvaluateSSDModel():
         arg_parser = ArgumentParser(description='Parse args')
 
         arg_parser.add_argument('-b', "--batch-size",
-                                help="Specify the batch size. If this " \
-                                     "parameter is not specified or is -1, the " \
-                                     "largest ideal batch size for the model will " \
+                                help="Specify the batch size. If this "
+                                     "parameter is not specified or is -1, the "
+                                     "largest ideal batch size for the model will "
                                      "be used.",
                                 dest="batch_size", type=int, default=1)
 
@@ -178,7 +179,8 @@ class EvaluateSSDModel():
         with data_graph.as_default():
             if self.args.data_location:  # real data
                 image, filename, shape = \
-                    input_fn(dataset_pattern='val-*', batch_size=self.args.batch_size, data_location=self.args.data_location)
+                    input_fn(dataset_pattern='val-*', batch_size=self.args.batch_size,
+                             data_location=self.args.data_location)
             else:  # dummy data
                 input_shape = [self.args.batch_size, SSD_VGG16_IMAGE_SIZE, SSD_VGG16_IMAGE_SIZE, 3]
                 image = tf.random.uniform(input_shape, -123.68, 151.06, dtype=tf.float32, name='synthetic_images')
@@ -214,7 +216,7 @@ class EvaluateSSDModel():
             total_images = 0
             total_duration = 0
 
-            if not self.args.data_location: # inference with dummy data
+            if not self.args.data_location:  # inference with dummy data
                 print("Inference with dummy data")
                 data_sess = tf.Session(graph=data_graph, config=data_config)
 
@@ -232,7 +234,7 @@ class EvaluateSSDModel():
                     print('Iteration %d: %.6f sec' % (step, duration))
                     sys.stdout.flush()
 
-            else: # benchmark with real data
+            else:  # benchmark with real data
                 print("Inference with real data")
                 with data_graph.as_default():
                     with tf.train.MonitoredTrainingSession(config=data_config) as data_sess:
@@ -255,7 +257,7 @@ class EvaluateSSDModel():
                 latency = (total_duration / total_images) * 1000
                 print('Latency: %.3f ms' % (latency))
 
-        else: # accuracy only
+        else:  # accuracy only
             results = []
             filenames = []
             shapes = []
@@ -308,6 +310,7 @@ class EvaluateSSDModel():
             cmd_prefix += " --annotations_file {}/instances_val2017.json".format(self.args.data_location)
             cmd = cmd_prefix
             os.system(cmd)
+
 
 if __name__ == "__main__":
     obj = EvaluateSSDModel()

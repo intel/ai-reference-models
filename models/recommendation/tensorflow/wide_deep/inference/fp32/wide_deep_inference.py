@@ -230,9 +230,9 @@ def main(argv):
         print('%s: %s' % (key, results[key]))
     main_end = time.time()
     E2Eduration = main_end - main_start
-    print ('End-to-End duration is %s', E2Eduration)
+    print('End-to-End duration is %s', E2Eduration)
     evaluate_duration = main_end - inference_start
-    print ('Evaluation duration is %s', evaluate_duration)
+    print('Evaluation duration is %s', evaluate_duration)
 
     if flags.batch_size == 1:
         print('Latency is: %s', E2Eduration / num_records)

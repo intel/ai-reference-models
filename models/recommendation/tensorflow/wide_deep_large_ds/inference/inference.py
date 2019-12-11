@@ -44,6 +44,7 @@ def str2bool(v):
     else:
         return False
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--input_graph', type=str,
                     help='file name for graph',
@@ -90,9 +91,8 @@ if args.num_omp_threads:
     os.environ["OMP_NUM_THREADS"] = args.num_omp_threads
 
 
-
 output_probabilities_node = 'import/import/head/predictions/probabilities'
-probabilities_node = 'import/'+output_probabilities_node+':0'
+probabilities_node = 'import/' + output_probabilities_node + ':0'
 placeholder_name = 'import/new_numeric_placeholder'
 categorical_placeholder = 'import/new_categorical_placeholder'
 
@@ -111,18 +111,17 @@ with open(args.input_graph, "rb") as f:
     else:
         graph_def.ParseFromString(f.read())
 with graph.as_default():
-  tf.import_graph_def(graph_def)
+    tf.import_graph_def(graph_def)
 numeric_feature_names = ["numeric_1"]
 string_feature_names = ["string_1"]
 if args.compute_accuracy:
     full_features_names = numeric_feature_names + string_feature_names + ["label"]
-    feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)]+[tf.FixedLenSequenceFeature(
-            [], tf.int64, default_value=0, allow_missing=True)]+[tf.FixedLenSequenceFeature([], tf.int64, default_value=0, allow_missing=True)]
+    feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)] + [tf.FixedLenSequenceFeature(
+        [], tf.int64, default_value=0, allow_missing=True)] + [tf.FixedLenSequenceFeature([], tf.int64, default_value=0, allow_missing=True)]
 else:
     full_features_names = numeric_feature_names + string_feature_names
-    feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)]+[tf.FixedLenSequenceFeature(
-            [], tf.int64, default_value=0, allow_missing=True)]
-
+    feature_datatypes = [tf.FixedLenSequenceFeature([], tf.float32, default_value=0.0, allow_missing=True)] + [tf.FixedLenSequenceFeature(
+        [], tf.int64, default_value=0, allow_missing=True)]
 
 
 def input_fn(data_file, num_epochs, shuffle, batch_size):
@@ -147,53 +146,53 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
         dataset = dataset.shuffle(buffer_size=20000)
     dataset = dataset.batch(batch_size)
     dataset = dataset.map(_parse_function, num_parallel_calls=28)
-    dataset = dataset.prefetch(batch_size*10)
+    dataset = dataset.prefetch(batch_size * 10)
     return dataset
 
 
 data_file = args.data_location
 no_of_test_samples = sum(1 for _ in tf.python_io.tf_record_iterator(data_file))
-no_of_batches = math.ceil(float(no_of_test_samples)/batch_size)
-placeholder_list = ['import/new_numeric_placeholder:0','import/new_categorical_placeholder:0']
+no_of_batches = math.ceil(float(no_of_test_samples) / batch_size)
+placeholder_list = ['import/new_numeric_placeholder:0', 'import/new_categorical_placeholder:0']
 input_tensor = [graph.get_tensor_by_name(name) for name in placeholder_list]
 output_name = "import/head/predictions/probabilities"
-output_tensor = graph.get_tensor_by_name("import/" + output_name + ":0" )
+output_tensor = graph.get_tensor_by_name("import/" + output_name + ":0")
 correctly_predicted = 0
 total_infer_consume = 0.0
 warm_iter = 100
 features_list = []
 with tf.Session(config=config, graph=graph) as sess:
-  res_dataset = input_fn(data_file, 1, False, batch_size)
-  iterator = res_dataset.make_one_shot_iterator()
-  next_element = iterator.get_next()
-  for i in range(int(no_of_batches)):
-    batch=sess.run(next_element)
-    features=batch[0:3]
-    features_list.append(features)
+    res_dataset = input_fn(data_file, 1, False, batch_size)
+    iterator = res_dataset.make_one_shot_iterator()
+    next_element = iterator.get_next()
+    for i in range(int(no_of_batches)):
+        batch = sess.run(next_element)
+        features = batch[0:3]
+        features_list.append(features)
 
-with tf.Session(config=config, graph=graph) as sess1:    
-  i=0
-  while True:
-    if i >= no_of_batches:
-        break
-    if i > warm_iter:
-        inference_start = time.time()
-    logistic = sess1.run(output_tensor, dict(zip(input_tensor, features_list[i][0:2])))
-    if i > warm_iter:
-        infer_time = time.time() - inference_start
-        total_infer_consume += infer_time
-    if args.compute_accuracy:
-        predicted_labels = np.argmax(logistic,1)
-        correctly_predicted=correctly_predicted+np.sum(features_list[i][2] == predicted_labels)
-    
-    i=i+1
-  inference_end = time.time()
+with tf.Session(config=config, graph=graph) as sess1:
+    i = 0
+    while True:
+        if i >= no_of_batches:
+            break
+        if i > warm_iter:
+            inference_start = time.time()
+        logistic = sess1.run(output_tensor, dict(zip(input_tensor, features_list[i][0:2])))
+        if i > warm_iter:
+            infer_time = time.time() - inference_start
+            total_infer_consume += infer_time
+        if args.compute_accuracy:
+            predicted_labels = np.argmax(logistic, 1)
+            correctly_predicted = correctly_predicted + np.sum(features_list[i][2] == predicted_labels)
+
+        i = i + 1
+    inference_end = time.time()
 if args.compute_accuracy:
     accuracy = (
-        float(correctly_predicted)/float(no_of_test_samples))
+        float(correctly_predicted) / float(no_of_test_samples))
 evaluate_duration = total_infer_consume
-latency = (1000 * batch_size* float(evaluate_duration)/float(no_of_test_samples - warm_iter*batch_size))
-throughput = (no_of_test_samples - warm_iter * batch_size)/evaluate_duration
+latency = (1000 * batch_size * float(evaluate_duration) / float(no_of_test_samples - warm_iter * batch_size))
+throughput = (no_of_test_samples - warm_iter * batch_size) / evaluate_duration
 
 print('--------------------------------------------------')
 print('Total test records           : ', no_of_test_samples)
@@ -203,6 +202,6 @@ if args.compute_accuracy:
     print('Classification accuracy (%)  : ', round((accuracy * 100), 4))
     print('No of correct predictions    : ', int(correctly_predicted))
 print('Inference duration (seconds) : ', round(evaluate_duration, 4))
-print('Average Latency (ms/batch)   : ', round(latency,4))
+print('Average Latency (ms/batch)   : ', round(latency, 4))
 print('Throughput is (records/sec)  : ', round(throughput, 3))
 print('--------------------------------------------------')

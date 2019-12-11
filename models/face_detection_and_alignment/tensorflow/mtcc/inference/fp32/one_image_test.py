@@ -51,7 +51,6 @@ print(FLAGS.num_intra_threads)
 print(FLAGS.ckpt)
 
 
-
 test_mode = "ONet"
 thresh = [0.9, 0.6, 0.7]
 min_face_size = 24
@@ -100,7 +99,7 @@ all_boxes, landmarks = mtcnn_detector.detect_face(test_data)
 end = time.time()
 count = 0
 
-accuracy = 0;
+accuracy = 0
 for imagepah in gt_imdb:
     for bbox in all_boxes[count]:
         accuracy = accuracy + bbox[4]

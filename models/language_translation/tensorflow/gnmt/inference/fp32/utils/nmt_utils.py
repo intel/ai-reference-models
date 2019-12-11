@@ -61,83 +61,84 @@ def decode_and_evaluate(name,
                         decode=True,
                         infer_mode="greedy",
                         index_pair=[]):
-  """Decode a test set and compute a score according to the evaluation task."""
-  # Decode
-  end_time = None
-  num_sentences = None
-  if decode:
-    utils.print_out("  decoding to output %s" % trans_file)
+    """Decode a test set and compute a score according to the evaluation task."""
+    # Decode
+    end_time = None
+    num_sentences = None
+    if decode:
+        utils.print_out("  decoding to output %s" % trans_file)
 
-    start_time = time.time()
-    num_sentences = 0
-    with codecs.getwriter("utf-8")(
-        tf.gfile.GFile(trans_file, mode="wb")) as trans_f:
-      trans_f.write("")  # Write empty string to ensure file is created.
+        start_time = time.time()
+        num_sentences = 0
+        with codecs.getwriter("utf-8")(
+                tf.gfile.GFile(trans_file, mode="wb")) as trans_f:
+            trans_f.write("")  # Write empty string to ensure file is created.
 
-      if infer_mode == "greedy":
-        num_translations_per_input = 1
-      elif infer_mode == "beam_search":
-        num_translations_per_input = min(num_translations_per_input, beam_width)
-      translation = []
-      while True:
-        try:
-          nmt_outputs, _ = model.decode(sess)
-          if infer_mode != "beam_search":
-            nmt_outputs = np.expand_dims(nmt_outputs, 0)
+            if infer_mode == "greedy":
+                num_translations_per_input = 1
+            elif infer_mode == "beam_search":
+                num_translations_per_input = min(num_translations_per_input, beam_width)
+            translation = []
+            while True:
+                try:
+                    nmt_outputs, _ = model.decode(sess)
+                    if infer_mode != "beam_search":
+                        nmt_outputs = np.expand_dims(nmt_outputs, 0)
 
-          batch_size = nmt_outputs.shape[1]
-          num_sentences += batch_size
+                    batch_size = nmt_outputs.shape[1]
+                    num_sentences += batch_size
 
-          for sent_id in range(batch_size):
-            for beam_id in range(num_translations_per_input):
-              translation.append(get_translation(
-                  nmt_outputs[beam_id],
-                  sent_id,
-                  tgt_eos=tgt_eos,
-                  subword_option=subword_option))
-        except tf.errors.OutOfRangeError:
-          end_time = time.time()
-          utils.print_time(
-              "  done, num sentences %d, num translations per input %d" %
-              (num_sentences, num_translations_per_input), start_time)
-          break
-      if len(index_pair) is 0:
-        for sentence in translation:
-          trans_f.write((sentence + b"\n").decode("utf-8"))
-      else:
-        for i in index_pair:
-          trans_f.write((translation[index_pair[i]] + b"\n").decode("utf-8"))
+                    for sent_id in range(batch_size):
+                        for beam_id in range(num_translations_per_input):
+                            translation.append(get_translation(
+                                nmt_outputs[beam_id],
+                                sent_id,
+                                tgt_eos=tgt_eos,
+                                subword_option=subword_option))
+                except tf.errors.OutOfRangeError:
+                    end_time = time.time()
+                    utils.print_time(
+                        "  done, num sentences %d, num translations per input %d" %
+                        (num_sentences, num_translations_per_input), start_time)
+                    break
+            if len(index_pair) is 0:
+                for sentence in translation:
+                    trans_f.write((sentence + b"\n").decode("utf-8"))
+            else:
+                for i in index_pair:
+                    trans_f.write((translation[index_pair[i]] + b"\n").decode("utf-8"))
 
-  # Evaluation
-  evaluation_scores = {}
-  if ref_file and tf.gfile.Exists(trans_file):
-    for metric in metrics:
-      score = evaluation_utils.evaluate(
-          ref_file,
-          trans_file,
-          metric,
-          subword_option=subword_option)
-      evaluation_scores[metric] = score
-      utils.print_out("  %s %s: %.1f" % (metric, name, score))
+    # Evaluation
+    evaluation_scores = {}
+    if ref_file and tf.gfile.Exists(trans_file):
+        for metric in metrics:
+            score = evaluation_utils.evaluate(
+                ref_file,
+                trans_file,
+                metric,
+                subword_option=subword_option)
+            evaluation_scores[metric] = score
+            utils.print_out("  %s %s: %.1f" % (metric, name, score))
 
-  return evaluation_scores, end_time, num_sentences
+    return evaluation_scores, end_time, num_sentences
 
 
 def get_translation(nmt_outputs, sent_id, tgt_eos, subword_option):
-  """Given batch decoding outputs, select a sentence and turn to text."""
-  if tgt_eos: tgt_eos = tgt_eos.encode("utf-8")
-  # Select a sentence
-  output = nmt_outputs[sent_id, :].tolist()
+    """Given batch decoding outputs, select a sentence and turn to text."""
+    if tgt_eos:
+        tgt_eos = tgt_eos.encode("utf-8")
+    # Select a sentence
+    output = nmt_outputs[sent_id, :].tolist()
 
-  # If there is an eos symbol in outputs, cut them at that point.
-  if tgt_eos and tgt_eos in output:
-    output = output[:output.index(tgt_eos)]
+    # If there is an eos symbol in outputs, cut them at that point.
+    if tgt_eos and tgt_eos in output:
+        output = output[:output.index(tgt_eos)]
 
-  if subword_option == "bpe":  # BPE
-    translation = utils.format_bpe_text(output)
-  elif subword_option == "spm":  # SPM
-    translation = utils.format_spm_text(output)
-  else:
-    translation = utils.format_text(output)
+    if subword_option == "bpe":  # BPE
+        translation = utils.format_bpe_text(output)
+    elif subword_option == "spm":  # SPM
+        translation = utils.format_spm_text(output)
+    else:
+        translation = utils.format_text(output)
 
-  return translation
+    return translation

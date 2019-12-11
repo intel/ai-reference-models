@@ -49,7 +49,7 @@ parser.add_argument('--wide_and_deep_large_ds', type=bool,
                     dest='enable_column_fusion', default=False)
 args = parser.parse_args()
 output_nodes = args.output_nodes.split(",")
-output_nodes = ["import/"+str(i) for i in output_nodes]
+output_nodes = ["import/" + str(i) for i in output_nodes]
 graph = ops.Graph()
 graph_def = graph_pb2.GraphDef()
 old_graph_def = graph_pb2.GraphDef()
@@ -65,7 +65,8 @@ with graph.as_default():
     tf.import_graph_def(graph_def)
     old_graph_def = graph.as_graph_def()
     name_node_dict = dict()
-    #This method optimizes tf.embedding_column and tf.categorical_column_with_hash_bucket
+    # This method optimizes tf.embedding_column and tf.categorical_column_with_hash_bucket
+
     def optimize_categorical_embedding_with_hash_bucket(nodename, gatherfound):
         if ':' in nodename:
             nodename = nodename.split(':')[0]
@@ -78,9 +79,9 @@ with graph.as_default():
             if res:
                 node.input[1] = res
                 if "embedding" in node.input[0]:
-                    embedding_column_weights_list.append(node.input[0]+":0")
+                    embedding_column_weights_list.append(node.input[0] + ":0")
                 else:
-                    categorical_column_weights_list.append(node.input[0]+":0")
+                    categorical_column_weights_list.append(node.input[0] + ":0")
                 return node.name
         for inputname in node.input:
             res = optimize_categorical_embedding_with_hash_bucket(inputname, gatherfound)
@@ -88,7 +89,7 @@ with graph.as_default():
                 return res
         return None
 
-    #This method optimizes tf.feature_column.bucketized_column
+    # This method optimizes tf.feature_column.bucketized_column
     def optimize_bucketized_column(nodename, gatherfound):
         if ':' in nodename:
             nodename = nodename.split(':')[0]
@@ -107,7 +108,7 @@ with graph.as_default():
                 return res
         return None
 
-    #This method optimizes tf.feature_column.crossed_column
+    # This method optimizes tf.feature_column.crossed_column
     def optimize_crossed_column(nodename, gatherfound):
         if ':' in nodename:
             nodename = nodename.split(':')[0]
@@ -121,18 +122,18 @@ with graph.as_default():
                 "GatherV2" in node.input[0]:
             return node.name
         elif gatherfound[0] == 2 and node.op == "GatherV2" and "Unique" in node.input[1] and \
-                 "Identity" not in node.input[0]:
+                "Identity" not in node.input[0]:
             res = optimize_crossed_column(node.input[1], gatherfound)
             if res:
-                node.input[1] = res+":1"
+                node.input[1] = res + ":1"
                 return node.name
-        if  gatherfound[0] != 2 and node.op == "GatherV2" and "Unique" in node.input[1]:
+        if gatherfound[0] != 2 and node.op == "GatherV2" and "Unique" in node.input[1]:
             gatherfound[0] = 1
             res = optimize_crossed_column(node.input[1], gatherfound)
             if res:
                 node.input[1] = res
                 return node.name
-        elif  gatherfound[0] == 2 and node.op == "Mul" and "GatherV2" in node.input[0]:
+        elif gatherfound[0] == 2 and node.op == "Mul" and "GatherV2" in node.input[0]:
             res = optimize_crossed_column(node.input[0], gatherfound)
             if res:
                 node.input[0] = res
@@ -186,7 +187,7 @@ with graph.as_default():
                 return res
         return None
 
-    #This method optimizes tf.feature_column.numeric_column
+    # This method optimizes tf.feature_column.numeric_column
     def optimize_numeric(nodename):
         if ':' in nodename:
             nodename = nodename.split(':')[0]
@@ -210,8 +211,8 @@ with graph.as_default():
         embedding_column_weights_list.sort()
         sess = session.Session()
         categorical_weights_constant, embedding_weights_constant = [], []
-        list_of_indices = [i for i in range(1, 11)]+[0] + \
-                          [i for i in range(12, 19)]+[11] + \
+        list_of_indices = [i for i in range(1, 11)] + [0] + \
+                          [i for i in range(12, 19)] + [11] + \
                           [i for i in range(19, 26)]
         with sess.as_default():
             for i in list_of_indices:
@@ -235,18 +236,17 @@ with graph.as_default():
                                                  new_categorical_placeholder,
                                                  name='gather_embedding_weights')
         embedding_reshape = tf.reshape(batch_gather_op_embedding,
-                                       shape=[-1, 32*26],
+                                       shape=[-1, 32 * 26],
                                        name='embedding_reshape')
         real_div_input_tens_list = [embedding_reshape, new_numeric_placeholder]
         new_concat_node = tf.concat(real_div_input_tens_list, name='new_concat_node', axis=1)
         concat_tensor = graph.get_tensor_by_name("new_concat_node:0")
 
-
     '''Parsing all the nodes of graph and identifying feature columns to optimize '''
     for node in old_graph_def.node:
         nodename = node.name
         if node.op == "ConcatV2" and "dnn/input_from_feature_columns" in nodename and \
-                       "input_layer/concat" in nodename:
+                "input_layer/concat" in nodename:
             dnn_concat_node = node
         elif node.op == "AddN" and "weighted_sum_no_bias" in nodename:
             weightsumnobias_node = node
@@ -254,7 +254,7 @@ with graph.as_default():
     gatherfound = [0]
     try:
         for i, inputname in enumerate(weightsumnobias_node.input):
-            if  'weighted_by' not in inputname and '_X_' not in inputname:
+            if 'weighted_by' not in inputname and '_X_' not in inputname:
                 gatherfound[0] = 0
                 res = optimize_categorical_with_voc_list(weightsumnobias_node.input[i], gatherfound)
                 if res:
@@ -284,7 +284,7 @@ with graph.as_default():
 
         for i, inputname in enumerate(dnn_concat_node.input):
             if '_embedding' in inputname and 'shared_embedding' not in inputname \
-                and 'weighted_by' not in inputname and '_X_' not in inputname:
+                    and 'weighted_by' not in inputname and '_X_' not in inputname:
                 gatherfound[0] = 0
                 res = optimize_categorical_with_voc_list(dnn_concat_node.input[i], gatherfound)
                 if res:
@@ -308,7 +308,7 @@ with graph.as_default():
                     dnn_concat_node.input[i] = res2
             else:
                 gatherfound[0] = 0
-                #shared_embedding
+                # shared_embedding
                 res = optimize_crossed_column(dnn_concat_node.input[i], gatherfound)
                 if res:
                     dnn_concat_node.input[i] = res
@@ -320,13 +320,13 @@ with graph.as_default():
                     node.input[1] = "new_numeric_placeholder:0"
                 elif node.op == "BiasAdd" and "linear_model/weighted_sum" in node.name:
                     node.input[0] = "Sum:0"
-                elif  node.op == "MatMul" and "hiddenlayer_0/MatMul" in node.name:
+                elif node.op == "MatMul" and "hiddenlayer_0/MatMul" in node.name:
                     node.input[0] = "new_concat_node:0"
     except Exception as e:
         print('--------------------------------------------------------------------------')
         print("Cannot optimize the given graph. The given graph might be an optimized one")
         print('--------------------------------------------------------------------------')
-        sys.exit()             
+        sys.exit()
 
 new_graph_def = tf.GraphDef()
 new_graph_def = tf.graph_util.extract_sub_graph(

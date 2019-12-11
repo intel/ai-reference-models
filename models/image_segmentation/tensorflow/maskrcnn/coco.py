@@ -94,7 +94,7 @@ class CocoConfig(Config):
 
     # We use a GPU with 12GB memory, which can fit two images.
     # Adjust down if you use a smaller GPU.
-    IMAGES_PER_GPU = 2 
+    IMAGES_PER_GPU = 2
 
     # Uncomment to train on 8 GPUs (default is 1)
     # GPU_COUNT = 8
@@ -364,7 +364,7 @@ def evaluate_coco(model, dataset, coco, eval_type="bbox", limit=0, warmup=0, ima
     # Pick COCO images from the dataset
     image_ids = image_ids or dataset.image_ids
 
-    limit = int(limit/config.BATCH_SIZE)*config.BATCH_SIZE;
+    limit = int(limit / config.BATCH_SIZE) * config.BATCH_SIZE
 
     # Limit to a subset
     if limit:
@@ -381,12 +381,12 @@ def evaluate_coco(model, dataset, coco, eval_type="bbox", limit=0, warmup=0, ima
         # Load image
         # image = dataset.load_image(image_id)
 
-        if (i%config.BATCH_SIZE!=0):
-            continue;
-        image_list=[];
-        for j in range(0,config.BATCH_SIZE):
-            print("i image_id",i+j, image_id+j)
-            image = dataset.load_image(image_id+j)
+        if (i % config.BATCH_SIZE != 0):
+            continue
+        image_list = []
+        for j in range(0, config.BATCH_SIZE):
+            print("i image_id", i + j, image_id + j)
+            image = dataset.load_image(image_id + j)
             image_list.append(image)
 
         # Run detection
@@ -394,9 +394,9 @@ def evaluate_coco(model, dataset, coco, eval_type="bbox", limit=0, warmup=0, ima
         r = model.detect(image_list, verbose=0)[0]
         t1 = time.time() - t
         #t_prediction += (time.time() - t)
-        if (i/config.BATCH_SIZE>=warmup):
+        if (i / config.BATCH_SIZE >= warmup):
             t_prediction += t1
-        print("pred time:",i,t1)
+        print("pred time:", i, t1)
 
         # Convert results to COCO format
         image_results = build_coco_results(dataset, coco_image_ids[i:i + 1],
@@ -415,8 +415,9 @@ def evaluate_coco(model, dataset, coco, eval_type="bbox", limit=0, warmup=0, ima
     cocoEval.summarize()
 
     print("Batch size: %d" % (config.BATCH_SIZE))
-    print("Time spent per BATCH: %.4f ms" % (t_prediction / (len(image_ids)/config.BATCH_SIZE-warmup) * 1000))
-    print("Total samples/sec: %.4f samples/s" % ((len(image_ids)/config.BATCH_SIZE-warmup) * config.BATCH_SIZE / t_prediction))
+    print("Time spent per BATCH: %.4f ms" % (t_prediction / (len(image_ids) / config.BATCH_SIZE - warmup) * 1000))
+    print("Total samples/sec: %.4f samples/s" %
+          ((len(image_ids) / config.BATCH_SIZE - warmup) * config.BATCH_SIZE / t_prediction))
     print("Total time: ", time.time() - t_start)
 
 
@@ -487,10 +488,10 @@ if __name__ == '__main__':
 
     # For pycocotools updates
     ppath = subprocess.Popen(["python3", "-m", "site", "--user-site"],
-                stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
+                             stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
     ppath = ppath[:-1] + "/pycocotools/coco.py"
     ret = subprocess.Popen(["sed", "-i", "s/unicode/bytes/", ppath],
-                stdout=subprocess.PIPE).communicate()[0]
+                           stdout=subprocess.PIPE).communicate()[0]
 
     # Configurations
     if args.command == "train":
@@ -555,7 +556,7 @@ if __name__ == '__main__':
         print("Training network heads")
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE,
-                    epochs=1, #40,
+                    epochs=1,  # 40,
                     layers='heads', warmup=int(args.nw))
 
         # Training - Stage 2
@@ -563,7 +564,7 @@ if __name__ == '__main__':
         print("Fine tune Resnet stage 4 and up")
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE,
-                    epochs=2, #120,
+                    epochs=2,  # 120,
                     layers='4+', warmup=int(args.nw))
 
         # Training - Stage 3
@@ -571,13 +572,14 @@ if __name__ == '__main__':
         print("Fine tune all layers")
         model.train(dataset_train, dataset_val,
                     learning_rate=config.LEARNING_RATE / 10,
-                    epochs=3, #160,
+                    epochs=3,  # 160,
                     layers='all', warmup=int(args.nw))
 
     elif args.command == "evaluate":
         # Validation dataset
         dataset_val = CocoDataset()
-        coco = dataset_val.load_coco(args.dataset, "minival", year=args.year, return_coco=True, auto_download=args.download)
+        coco = dataset_val.load_coco(args.dataset, "minival", year=args.year,
+                                     return_coco=True, auto_download=args.download)
         dataset_val.prepare()
         print("Running COCO evaluation on {} images.".format(args.nb))
         evaluate_coco(model, dataset_val, coco, "bbox", limit=int(args.nb), warmup=int(args.nw))
