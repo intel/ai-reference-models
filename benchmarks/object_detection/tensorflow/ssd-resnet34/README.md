@@ -395,19 +395,27 @@ $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
 $ pushd $MODEL_WORK_DIR
 ```
 
-2. Clone the `tensorflow/models` repository with the specified SHA, since we are using an older version of the models repository for SSD-ResNet34.
+2. Clone the [intelai/models](https://github.com/intelai/models) repository. This repository has the launch script for running the model.
+
+   ```bash
+   $ cd $MODEL_WORK_DIR
+   $ git clone https://github.com/IntelAI/models.git
+   ```
+
+3. Clone the `tensorflow/models` repository with the specified SHA, since we are using an older version of the models repository for SSD-ResNet34.
 
    ```bash
    $ git clone https://github.com/tensorflow/models.git tf_models
    $ cd tf_models
-   $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
+   $ git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
+   $ git apply $MODEL_WORK_DIR/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
    ```
 
    The TensorFlow models repository will be used for running training as well as converting the coco dataset to the TF records format.
 
-3. Follow the TensorFlow models object detection [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation) to get your environment setup with the required dependencies.
+4. Follow the TensorFlow models object detection [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation) to get your environment setup with the required dependencies.
 
-4. Download the 2017 train [COCO dataset](http://cocodataset.org/#home):
+5. Download the 2017 train [COCO dataset](http://cocodataset.org/#home):
 
    ```bash
    $ cd $MODEL_WORK_DIR
@@ -440,7 +448,7 @@ $ pushd $MODEL_WORK_DIR
    $ cd $MODEL_WORK_DIR
    ```
 
-5. Now that you have the raw COCO dataset, we need to convert it to the TF records format in order to use it with the training script. We will do this by running the `create_coco_tf_record.py` file in the TensorFlow models repository.
+6. Now that you have the raw COCO dataset, we need to convert it to the TF records format in order to use it with the training script. We will do this by running the `create_coco_tf_record.py` file in the TensorFlow models repository.
 
    ```bash
    # We are going to use an older version of the conversion script to checkout the git commit
@@ -456,20 +464,9 @@ $ pushd $MODEL_WORK_DIR
          --val_annotations_file="$MODEL_WORK_DIR/annotations/instances_val2017.json" \
          --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
          --output_dir="$MODEL_WORK_DIR/output"
-   
-   # Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
-   $ cd $MODEL_WORK_DIR/tf_models
-   $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
    ```
    
    The `coco_train.record-*-of-*` files are what we will use in this training example.
-   
-6. Clone the [intelai/models](https://github.com/intelai/models) repository. This repository has the launch script for running the model, which we will use in the next step.
-
-   ```bash
-   $ cd $MODEL_WORK_DIR
-   $ git clone https://github.com/IntelAI/models.git
-   ```
 
 7. Download and install the [Intel(R) MPI Library for Linux](https://software.intel.com/en-us/mpi-library/choose-download/linux). Once you have the l_mpi_2019.3.199.tgz downloaded, unzip it into /home//l_mpi directory. Make sure to accpet the installation license and **change the value of "ACCEPT_EULA" to "accept" in /home//l_mpi/l_mpi_2019.3.199/silent.cfg**, before start the silent installation. 
 
