@@ -156,8 +156,6 @@ ${benchmark_only_arg} \
 ${output_results_arg} \
 ${verbose_arg}"
 
-# echo "${CMD}"
-
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
 fi
@@ -725,11 +723,12 @@ function ssd-resnet34() {
           fi
 
           old_dir=${PWD}
-          # cd /tmp
-          # rm -rf benchmark_ssd-resnet34
-          # git clone -b cnn_tf_v1.13_compatible https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
-          # cd benchmark_ssd-resnet34
-          # git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark_v1.13.diff
+          cd /tmp
+          rm -rf benchmark_ssd-resnet34
+          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
+          cd benchmark_ssd-resnet34
+          git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
           cd ${old_dir}
 
           CMD="${CMD} \
