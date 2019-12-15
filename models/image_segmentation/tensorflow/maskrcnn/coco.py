@@ -393,7 +393,7 @@ def evaluate_coco(model, dataset, coco, eval_type="bbox", limit=0, warmup=0, ima
         t = time.time()
         r = model.detect(image_list, verbose=0)[0]
         t1 = time.time() - t
-        #t_prediction += (time.time() - t)
+        # t_prediction += (time.time() - t)
         if (i / config.BATCH_SIZE >= warmup):
             t_prediction += t1
         print("pred time:", i, t1)

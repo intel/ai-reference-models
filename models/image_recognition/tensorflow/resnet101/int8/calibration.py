@@ -148,7 +148,7 @@ if __name__ == "__main__":
             # Compute inference on the preprocessed data
             predictions1 = sess_graph.run(output_tensor,
                                           {input_tensor: np_images})
-            #predictions = predictions +1
+            # predictions = predictions +1
             # print(predictions1)
             predictions2 = tf.argmax(predictions1, axis=1)
             predictions = sess.run(predictions2)

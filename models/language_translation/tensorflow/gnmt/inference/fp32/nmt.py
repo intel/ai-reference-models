@@ -653,7 +653,7 @@ def run_main(flags, default_hparams, train_fn, inference_fn, target_session=""):
             out_dir, default_hparams, flags.hparams_path,
             save_hparams=(jobid == 0))
 
-    ## Train / Decode
+    # Train / Decode
     if flags.inference_input_file:
         # Inference output directory
         trans_file = flags.inference_output_file

@@ -155,7 +155,7 @@ class RecordInputImagePreprocessor(object):
                 ds = ds.take(1).cache().repeat()
 
             ds = ds.prefetch(buffer_size=10000)
-            #ds = ds.prefetch(buffer_size=self.batch_size)
+            # ds = ds.prefetch(buffer_size=self.batch_size)
 
             # num of parallel batches not greater than 56
             max_num_parallel_batches = min(56, 2 * self.num_cores)

@@ -133,7 +133,7 @@ if __name__ == "__main__":
         config.intra_op_parallelism_threads = num_intra_threads
     config.graph_options.rewrite_options.remapping = (
         rewriter_config_pb2.RewriterConfig.OFF)
-    #os.environ["OMP_NUM_THREADS"] = "14"
+    # os.environ["OMP_NUM_THREADS"] = "14"
     with tf.Session(config=config) as sess:
         image_data = sess.run(images)
 

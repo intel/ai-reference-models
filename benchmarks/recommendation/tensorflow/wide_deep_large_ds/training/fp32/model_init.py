@@ -34,6 +34,7 @@ class ModelInitializer(BaseModelInitializer):
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
+
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
                                         self.args.mode, "train.py")

@@ -98,7 +98,7 @@ class MtcnnDetector(object):
             generate bbox from feature cls_map
         Parameters:
         ----------
-            cls_map: numpy array , n x m 
+            cls_map: numpy array , n x m
                 detect score for each position
             reg: numpy array , n x m x 4
                 bbox
@@ -111,9 +111,9 @@ class MtcnnDetector(object):
             bbox array
         """
         stride = 2
-        #stride = 4
+        # stride = 4
         cellsize = 12
-        #cellsize = 25
+        # cellsize = 25
 
         t_index = np.where(cls_map > threshold)
 
@@ -223,10 +223,10 @@ class MtcnnDetector(object):
         all_boxes = list()
         while min(current_height, current_width) > net_size:
             # return the result predicted by pnet
-            #cls_cls_map : H*w*2
-            #reg: H*w*4
+            # cls_cls_map : H*w*2
+            # reg: H*w*4
             cls_cls_map, reg = self.pnet_detector.predict(im_resized)
-            #boxes: num*9(x1,y1,x2,y2,score,x1_offset,y1_offset,x2_offset,y2_offset)
+            # boxes: num*9(x1,y1,x2,y2,score,x1_offset,y1_offset,x2_offset,y2_offset)
             boxes = self.generate_bbox(cls_cls_map[:, :, 1], reg, current_scale, self.thresh[0])
 
             current_scale *= self.scale_factor
@@ -290,9 +290,9 @@ class MtcnnDetector(object):
             tmp = np.zeros((tmph[i], tmpw[i], 3), dtype=np.uint8)
             tmp[dy[i]:edy[i] + 1, dx[i]:edx[i] + 1, :] = im[y[i]:ey[i] + 1, x[i]:ex[i] + 1, :]
             cropped_ims[i, :, :, :] = (cv2.resize(tmp, (24, 24)) - 127.5) / 128
-        #cls_scores : num_data*2
-        #reg: num_data*4
-        #landmark: num_data*10
+        # cls_scores : num_data*2
+        # reg: num_data*4
+        # landmark: num_data*10
         cls_scores, reg, _ = self.rnet_detector.predict(cropped_ims)
         cls_scores = cls_scores[:, 1]
         keep_inds = np.where(cls_scores > self.thresh[1])[0]
@@ -300,7 +300,7 @@ class MtcnnDetector(object):
             boxes = dets[keep_inds]
             boxes[:, 4] = cls_scores[keep_inds]
             reg = reg[keep_inds]
-            #landmark = landmark[keep_inds]
+            # landmark = landmark[keep_inds]
         else:
             return None, None, None
 
@@ -411,7 +411,7 @@ class MtcnnDetector(object):
         landmarks = []
         batch_idx = 0
         sum_time = 0
-        #test_data is iter_
+        # test_data is iter_
         for databatch in test_data:
             # databatch(image returned)
             if batch_idx % 100 == 0:

@@ -156,11 +156,11 @@ def column_to_dtype(column):
 
 
 """
-  This function maps input columns (feature_placeholders) to 
-  tensors that can be inputted into the graph 
+  This function maps input columns (feature_placeholders) to
+  tensors that can be inputted into the graph
   (similar in purpose to the output of our input functions)
   In this particular case, we need to accomodate the sparse fields (strings)
-  so we have to do a slight modification to expand their dimensions, 
+  so we have to do a slight modification to expand their dimensions,
   just like in the input functions
 """
 

@@ -108,14 +108,14 @@ def create_readable_names_for_imagenet_labels():
     # synset_url = '{}/imagenet_lsvrc_2015_synsets.txt'.format(base_url)
     # synset_to_human_url = '{}/imagenet_metadata.txt'.format(base_url)
 
-    #filename, _ = urllib.request.urlretrieve(synset_url)
+    # filename, _ = urllib.request.urlretrieve(synset_url)
     current_dir = os.path.dirname(os.path.realpath(__file__))
     filename = current_dir + "/imagenet_lsvrc_2015_synsets.txt"
     synset_list = [s.strip() for s in open(filename).readlines()]
     num_synsets_in_ilsvrc = len(synset_list)
     assert num_synsets_in_ilsvrc == 1000
 
-    #filename, _ = urllib.request.urlretrieve(synset_to_human_url)
+    # filename, _ = urllib.request.urlretrieve(synset_to_human_url)
     filename = current_dir + "/imagenet_metadata.txt"
     synset_to_human_list = open(filename).readlines()
     num_synsets_in_all_imagenet = len(synset_to_human_list)
@@ -206,7 +206,7 @@ def get_split(split_name, dataset_dir, file_pattern=None, reader=None):
         labels_to_names = dataset_utils.read_label_file(dataset_dir)
     else:
         labels_to_names = create_readable_names_for_imagenet_labels()
-        #dataset_utils.write_label_file(labels_to_names, dataset_dir)
+        # dataset_utils.write_label_file(labels_to_names, dataset_dir)
 
     return slim.dataset.Dataset(
         data_sources=file_pattern,

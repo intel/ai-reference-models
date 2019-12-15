@@ -135,7 +135,7 @@ class eval_classifier_optimized_graph:
 
         # Definite input and output Tensors for detection_graph
         input_tensor = infer_graph.get_tensor_by_name('input:0')
-        #output_tensor = infer_graph.get_tensor_by_name('resnet_v1_101/SpatialSqueeze:0')
+        # output_tensor = infer_graph.get_tensor_by_name('resnet_v1_101/SpatialSqueeze:0')
         output_tensor = infer_graph.get_tensor_by_name('resnet_v1_101/predictions/Reshape_1:0')
 
         # tf.global_variables_initializer()
@@ -150,8 +150,8 @@ class eval_classifier_optimized_graph:
             warm_up_iteration = self.args.warmup_steps
             total_run = self.args.steps
             total_time = 0
-            #options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-            #run_metadata = tf.RunMetadata()
+            # options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
+            # run_metadata = tf.RunMetadata()
 
             while num_remaining_images >= self.args.batch_size and iteration < total_run:
                 iteration += 1
@@ -172,7 +172,7 @@ class eval_classifier_optimized_graph:
                 if self.args.data_location:
                     time_consume += data_load_time
 
-                #trace = timeline.Timeline(step_stats=run_metadata.step_stats)
+                # trace = timeline.Timeline(step_stats=run_metadata.step_stats)
                 # with gfile.Open('resnet101_fp32_int8_master', 'w') as trace_file:
                 #    trace_file.write(trace.generate_chrome_trace_format(show_memory=False))
 

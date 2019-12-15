@@ -499,7 +499,7 @@ class BaseModel(object):
             logits = tf.no_op()
             decoder_cell_outputs = None
 
-            ## Train or eval
+            # Train or eval
             if self.mode != tf.contrib.learn.ModeKeys.INFER:
                 # decoder_emp_inp: [max_time, batch_size, num_units]
                 target_input = iterator.target_input

@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
         while num_remaining_images >= batch_size:
             # Reads and preprocess data
-            #import pdb
+            # import pdb
             # pdb.set_trace()
             np_images, np_labels = sess.run([images[0], labels[0]])
             np_labels -= 1

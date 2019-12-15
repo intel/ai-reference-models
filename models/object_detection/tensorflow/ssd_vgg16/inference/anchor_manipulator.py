@@ -81,7 +81,7 @@ def do_dual_max_match(overlap_matrix, low_thres, high_thres, ignore_between=True
         # the matching degree
         match_values = tf.reduce_max(overlap_matrix, axis=0)
 
-        #positive_mask = tf.greater(match_values, high_thres)
+        # positive_mask = tf.greater(match_values, high_thres)
         less_mask = tf.less(match_values, low_thres)
         between_mask = tf.logical_and(tf.less(match_values, high_thres), tf.greater_equal(match_values, low_thres))
         negative_mask = less_mask if ignore_between else between_mask

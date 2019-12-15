@@ -161,9 +161,9 @@ def eval_image(image, height, width, bbox, thread_id, resize):
 
             y0 = (shape[0] - height) // 2
             x0 = (shape[1] - width) // 2
-            #y0=tf.random_uniform([],minval=0,maxval=(shape[0] - height + 1), dtype=tf.int32)
-            #x0=tf.random_uniform([],minval=0,maxval=(shape[1] - width + 1), dtype=tf.int32)
-            ## distorted_image = tf.slice(image, [y0,x0,0], [height,width,3])
+            # y0=tf.random_uniform([],minval=0,maxval=(shape[0] - height + 1), dtype=tf.int32)
+            # x0=tf.random_uniform([],minval=0,maxval=(shape[1] - width + 1), dtype=tf.int32)
+            # distorted_image = tf.slice(image, [y0,x0,0], [height,width,3])
             distorted_image = tf.image.crop_to_bounding_box(image, y0, x0, height,
                                                             width)
         else:

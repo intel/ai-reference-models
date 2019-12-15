@@ -291,7 +291,7 @@ def _aspect_preserving_resize(image, smallest_side):
       resized_image: A 3-D tensor containing the resized image.
     """
     smallest_side = tf.convert_to_tensor(smallest_side, dtype=tf.int32)
-    #import pdb
+    # import pdb
     # pdb.set_trace()
     shape = tf.shape(image)
 

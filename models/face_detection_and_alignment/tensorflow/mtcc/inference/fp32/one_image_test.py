@@ -128,7 +128,7 @@ for imagepath in gt_imdb:
     count = count + 1
     cv2.imwrite("result_landmark/%d.png" %(count),image)
     #cv2.imshow("lala",image)
-    #cv2.waitKey(0)    
+    #cv2.waitKey(0)
 """
 '''
 for data in test_data:

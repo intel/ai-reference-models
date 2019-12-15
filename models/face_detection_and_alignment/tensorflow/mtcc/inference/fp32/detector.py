@@ -16,15 +16,14 @@
 # limitations under the License.
 #
 
-#
 
 import tensorflow as tf
 import numpy as np
 
 
 class Detector(object):
-    #net_factory:rnet or onet
-    #datasize:24 or 48
+    # net_factory:rnet or onet
+    # datasize:24 or 48
     def __init__(self, net_factory, data_size, batch_size, model_path, num_inter_threads=0, num_intra_threads=0):
         graph = tf.Graph()
         with graph.as_default():
@@ -74,7 +73,7 @@ class Detector(object):
             # the last batch
             if m < batch_size:
                 keep_inds = np.arange(m)
-                #gap (difference)
+                # gap (difference)
                 gap = self.batch_size - m
                 while gap >= len(keep_inds):
                     gap -= len(keep_inds)
@@ -87,11 +86,11 @@ class Detector(object):
             # bbox_pred batch*4
             cls_prob, bbox_pred, landmark_pred = self.sess.run(
                 [self.cls_prob, self.bbox_pred, self.landmark_pred], feed_dict={self.image_op: data})
-            #num_batch * batch_size *2
+            # num_batch * batch_size *2
             cls_prob_list.append(cls_prob[:real_size])
-            #num_batch * batch_size *4
+            # num_batch * batch_size *4
             bbox_pred_list.append(bbox_pred[:real_size])
-            #num_batch * batch_size*10
+            # num_batch * batch_size*10
             landmark_pred_list.append(landmark_pred[:real_size])
             # num_of_data*2,num_of_data*4,num_of_data*10
         return np.concatenate(cls_prob_list, axis=0), np.concatenate(bbox_pred_list, axis=0), np.concatenate(landmark_pred_list, axis=0)

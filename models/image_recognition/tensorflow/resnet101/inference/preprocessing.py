@@ -160,7 +160,7 @@ class RecordInputImagePreprocessor(object):
                 ds = ds.take(1).cache().repeat()
 
             ds = ds.prefetch(buffer_size=10000)
-            #ds = ds.prefetch(buffer_size=self.batch_size)
+            # ds = ds.prefetch(buffer_size=self.batch_size)
 
             ds = ds.apply(
                 map_and_batch(

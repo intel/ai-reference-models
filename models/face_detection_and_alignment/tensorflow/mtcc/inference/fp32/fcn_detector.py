@@ -40,7 +40,7 @@ class FcnDetector(object):
             # self.cls_prob batch*2
             # self.bbox_pred batch*4
             # construct model here
-            #self.cls_prob, self.bbox_pred = net_factory(image_reshape, training=False)
+            # self.cls_prob, self.bbox_pred = net_factory(image_reshape, training=False)
             # contains landmark
             self.cls_prob, self.bbox_pred, _ = net_factory(image_reshape, training=False)
 

@@ -13,7 +13,7 @@ from __future__ import unicode_literals
 import itertools
 import numpy as np
 
-#pylint: disable=C0103
+# pylint: disable=C0103
 
 
 def _get_ngrams(n, text):

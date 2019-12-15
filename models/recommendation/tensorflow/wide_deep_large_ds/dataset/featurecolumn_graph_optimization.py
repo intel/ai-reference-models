@@ -19,7 +19,7 @@
 #
 '''This script optimizes feature columns in the model by removing error handling
 and redundant nodes. Flag wide_and_deep_large_ds should be enabled for the additional
-optimization for wide_and_deep_large_ds_model which involves fusion of categorical 
+optimization for wide_and_deep_large_ds_model which involves fusion of categorical
 and numeric columns'''
 
 from __future__ import division
@@ -198,8 +198,8 @@ with graph.as_default():
             return node.input[0]
 
     '''This method does model specific optimization(wide_deep_large_ds). It fuses 26 categorical,
-        embedding weights to one constant and expects fused normalized inputs to the 
-        numeric and hashed inputs to categorical placeholders. It also replaces gatherv2 
+        embedding weights to one constant and expects fused normalized inputs to the
+        numeric and hashed inputs to categorical placeholders. It also replaces gatherv2
         with gathernd to gather weights from fused weights constant'''
     def fuse_categorical_numeric_columns():
         new_categorical_placeholder = tf.placeholder(tf.int64, shape=(None, None),

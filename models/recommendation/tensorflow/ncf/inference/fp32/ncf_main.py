@@ -233,7 +233,7 @@ def evaluate_model(estimator, ncf_dataset, pred_input_fn):
     tf.logging.info("Computing predictions for eval set...")
 
     # OpenMP settings
-    #os.environ["OMP_NUM_THREADS"] = "11"
+    # os.environ["OMP_NUM_THREADS"] = "11"
     if not os.environ.get("KMP_BLOCKTIME"):
         os.environ["KMP_BLOCKTIME"] = "1"
     if not os.environ.get("KMP_SETTINGS"):
