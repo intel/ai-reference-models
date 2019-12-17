@@ -2614,7 +2614,7 @@ index b934976..f3ac9bb 100644
      return (inputs, boxes, classes, nboxes)
  
 diff --git a/scripts/tf_cnn_benchmarks/preprocessing.py b/scripts/tf_cnn_benchmarks/preprocessing.py
-index a6ceb7c..0db7046 100644
+index a6ceb7c..bb40b30 100644
 --- a/scripts/tf_cnn_benchmarks/preprocessing.py
 +++ b/scripts/tf_cnn_benchmarks/preprocessing.py
 @@ -25,8 +25,10 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
@@ -2961,6 +2961,15 @@ index a6ceb7c..0db7046 100644
          return tf.reshape(inp_tensor, [ssd_constants.MAX_NUM_EVAL_BOXES,
                                         inp_tensor.get_shape()[1]])
  
+@@ -1017,7 +1018,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+                      subset,
+                      train,
+                      datasets_repeat_cached_sample,
+-                     num_threads=None,
++                     num_threads=28,
+                      datasets_use_caching=False,
+                      datasets_parallel_interleave_cycle_length=None,
+                      datasets_sloppy_parallel_interleave=False,
 @@ -1064,7 +1065,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
  
      ds = ds.map(ssd_dataloader.ssd_parse_example_proto, num_parallel_calls=64)
@@ -3329,6 +3338,18 @@ index 34fea0c..06ad95f 100644
                                            (None, 1, 1, 1),
                                            name='inputs_placeholder')
        inputs_reshaped = tf.reshape(inputs_placeholder, (-1, 1))
+diff --git a/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py b/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py
+index 707dd60..5fdfa88 100644
+--- a/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py
++++ b/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py
+@@ -25,6 +25,7 @@ from __future__ import print_function
+ from absl import app
+ from absl import flags as absl_flags
+ import tensorflow as tf
++tf.compat.v1.disable_eager_execution()
+ 
+ import benchmark_cnn
+ import cnn_util
 diff --git a/scripts/tf_cnn_benchmarks/variable_mgr.py b/scripts/tf_cnn_benchmarks/variable_mgr.py
 index 354d38f..ae80649 100644
 --- a/scripts/tf_cnn_benchmarks/variable_mgr.py
