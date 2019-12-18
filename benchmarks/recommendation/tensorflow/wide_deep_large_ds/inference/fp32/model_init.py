@@ -55,12 +55,9 @@ class ModelInitializer(BaseModelInitializer):
                             "num_inter_threads", "num_intra_threads",
                             "accuracy_only", "data_location", "num_omp_threads"]
         command_prefix = self.get_command_prefix(-1)
-        if self.args.socket_id != -1:
+        if self.args.socket_id != -1 and self.args.num_cores != -1:
             command_prefix = command_prefix + " numactl --physcpubind=0-{} --membind={} ".\
                 format(str(int(self.args.num_cores) - 1), self.args.socket_id)
-        else:
-            command_prefix = command_prefix + " numactl --physcpubind=0-{} ".\
-                format(str(int(self.args.num_cores) - 1))
         cmd_prefix = command_prefix + self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
