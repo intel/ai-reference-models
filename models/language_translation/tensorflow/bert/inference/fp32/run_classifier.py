@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 from datetime import datetime
+from datetime import timedelta
 
 import collections
 import csv
@@ -146,16 +147,16 @@ class LoggerHook(tf.estimator.SessionRunHook):
 
   def after_run(self, run_context, run_values):
     duration = datetime.now() - self._start_time
-    ns = (duration.days * 24 * 60 * 60 + duration.seconds) * 1000 * 1000 + duration.microseconds
+    ms = duration.total_seconds() * 1000.00
     if self._step > self._warmup:
-      self._total_duration += ns
+      self._total_duration += ms
     else:
-      print("Warmup step: %d, time in us: %d" %(self._step, ns))
+      print("Warmup step: %d, time in ms: %.2f" %(self._step, ms))
 
   def end(self, run_context):
     print("self._step: %d" %self._step)
-    print("Total time spent (after warmup): %d us" %(self._total_duration))
-    print("Time spent per iteration (after warmup): %.4f us" %(self._total_duration/(self._step - self._warmup)))
+    print("Total time spent (after warmup): %d ms" %(self._total_duration))
+    print("Time spent per iteration (after warmup): %.4f ms" %(self._total_duration/(self._step - self._warmup)))
 
 
 class InputExample(object):
@@ -954,7 +955,8 @@ def main(_):
         drop_remainder=eval_drop_remainder)
 
     start = time.time()
-    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps)
+    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps,
+                                hooks=[LoggerHook()])
     end = time.time()
     result['global_step'] = str(eval_steps)
     result['latency_total'] = str(end - start)
