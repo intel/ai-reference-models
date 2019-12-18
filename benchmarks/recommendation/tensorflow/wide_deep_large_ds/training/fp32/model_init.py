@@ -34,11 +34,16 @@ class ModelInitializer(BaseModelInitializer):
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
+        parser.add_argument("--steps", dest='steps',
+                            type=int, default=0,
+                            help="number of train steps")
+        self.args = parser.parse_args(self.custom_args,
+                                      namespace=self.args)
 
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
                                         self.args.mode, "train.py")
-        script_args_list = ["batch_size", "data_location", "num_train_steps"]
+        script_args_list = ["batch_size", "data_location", "steps"]
         command_prefix = self.get_command_prefix(-1)
         cmd_prefix = command_prefix + self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)

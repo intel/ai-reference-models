@@ -766,6 +766,9 @@ function wide_deep_large_ds() {
       exit 1
     fi
     if [ ${MODE} == "training" ]; then
+      if [ ${steps} != None ]; then
+        CMD="${CMD} --steps=${steps}"
+      fi
       if [ ${PRECISION} == "fp32" ]; then
         CMD="${CMD}"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model

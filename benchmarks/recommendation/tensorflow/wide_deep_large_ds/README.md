@@ -260,7 +260,7 @@ $ popd
 
 2. Train the model by providing location of train.csv, eval.csv 
 
-    * Train the model (The model will be trained for 10 epochs if --num-train-steps is not specified)
+    * Train the model (The model will be trained for 10 epochs if -- steps is not specified)
         ```
         $ python launch_benchmark.py --model-name wide_deep_large_ds \
            --precision fp32 \

@@ -80,16 +80,18 @@ def input_fn(dataset_pattern='val-*', batch_size=1, data_location=None):
                                                               ignore_threshold=NEG_THRESHOLD,
                                                               prior_scaling=[0.1, 0.1, 0.2, 0.2])
 
-    def image_preprocessing_fn(image_, labels_, bboxes_): return ssd_preprocessing.preprocess_image(image_, labels_,
-                                                                                                    bboxes_, out_shape,
-                                                                                                    is_training=False,
-                                                                                                    data_format=DATA_FORMAT,
-                                                                                                    output_rgb=False)
+    def image_preprocessing_fn(image_, labels_, bboxes_):
+        return ssd_preprocessing.preprocess_image(image_, labels_,
+                                                  bboxes_, out_shape,
+                                                  is_training=False,
+                                                  data_format=DATA_FORMAT,
+                                                  output_rgb=False)
 
-    def anchor_encoder_fn(glabels_, gbboxes_): return anchor_encoder_decoder.encode_all_anchors(glabels_, gbboxes_,
-                                                                                                all_anchors,
-                                                                                                all_num_anchors_depth,
-                                                                                                all_num_anchors_spatial)
+    def anchor_encoder_fn(glabels_, gbboxes_):
+        return anchor_encoder_decoder.encode_all_anchors(glabels_, gbboxes_,
+                                                         all_anchors,
+                                                         all_num_anchors_depth,
+                                                         all_num_anchors_spatial)
 
     image, filename, shape, loc_targets, cls_targets, match_scores = \
         dataset_common.slim_get_batch(NUM_CLASSES,

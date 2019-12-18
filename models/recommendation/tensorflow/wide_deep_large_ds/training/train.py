@@ -195,14 +195,14 @@ def train_and_eval():
     no_of_training_examples = sum(1 for line in open(train_file))
     no_of_test_examples = sum(1 for line in open(test_file))
     batch_size = args.batch_size
-    if args.num_train_steps == 1:
+    if args.steps == 0:
         no_of_epochs = 10
         train_steps = math.ceil(
             (float(no_of_epochs) * no_of_training_examples) / batch_size)
     else:
         no_of_epochs = math.ceil(
-            (float(batch_size) * args.num_train_steps) / no_of_training_examples)
-        train_steps = args.num_train_steps
+            (float(batch_size) * args.steps) / no_of_training_examples)
+        train_steps = args.steps
     test_steps = math.ceil(float(no_of_test_examples) / batch_size)
     model_type = 'WIDE_AND_DEEP'
     model_dir = 'model_' + model_type + '_' + str(int(time.time()))
@@ -232,8 +232,8 @@ def get_arg_parser():
         required=True
     )
     parser.add_argument(
-        '--num_train_steps',
-        help='set the number of epochs on train dataset.Default is will set to 1 epoch',
+        '--steps',
+        help='set the number of steps on train dataset.Default is will set to 1 epoch',
         type=int,
         default=0
     )
