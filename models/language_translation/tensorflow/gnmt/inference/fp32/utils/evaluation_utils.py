@@ -18,6 +18,7 @@ import codecs
 import os
 import re
 import subprocess
+import shlex
 
 import tensorflow as tf
 
@@ -158,10 +159,9 @@ def _moses_bleu(multi_bleu_script, tgt_test, trans_file, subword_option=None):
     if subword_option == "bpe":
         debpe_tgt_test = tgt_test + ".debpe"
         if not os.path.exists(debpe_tgt_test):
-            # TODO(thangluong): not use shell=True, can be a security hazard
-            subprocess.call("cp %s %s" % (tgt_test, debpe_tgt_test), shell=True)
-            subprocess.call("sed s/@@ //g %s" % (debpe_tgt_test),
-                            shell=True)
+            subprocess.call(shlex.split("cp %s %s" % (tgt_test, debpe_tgt_test)), shell=False)
+            subprocess.call(shlex.split("sed s/@@ //g %s" % (debpe_tgt_test)),
+                            shell=False)
         tgt_test = debpe_tgt_test
     elif subword_option == "spm":
         despm_tgt_test = tgt_test + ".despm"
@@ -174,8 +174,7 @@ def _moses_bleu(multi_bleu_script, tgt_test, trans_file, subword_option=None):
     cmd = "%s %s < %s" % (multi_bleu_script, tgt_test, trans_file)
 
     # subprocess
-    # TODO(thangluong): not use shell=True, can be a security hazard
-    bleu_output = subprocess.check_output(cmd, shell=True)
+    bleu_output = subprocess.check_output(shlex.split(cmd), shell=False)
 
     # extract BLEU score
     m = re.search("BLEU = (.+?),", bleu_output)

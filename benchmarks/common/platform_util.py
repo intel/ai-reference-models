@@ -25,6 +25,7 @@ from __future__ import print_function
 import os
 import platform as system_platform
 import subprocess
+import shlex
 import sys
 
 NUMA_NODES_STR_ = "NUMA node(s)"
@@ -63,9 +64,8 @@ class PlatformUtil:
         lscpu_path = ''
         lscpu_path_cmd = "command -v lscpu"
         try:
-            lscpu_path = subprocess.check_output(lscpu_path_cmd, shell=True,
-                                                 stderr=subprocess.STDOUT).\
-                strip()
+            lscpu_path = subprocess.check_output(shlex.split(lscpu_path_cmd), shell=False, \
+                                                 stderr=subprocess.STDOUT).strip()
             if self.args.verbose:
                 print("lscpu_path_cmd = {}\nlscpu located here: {}".format(lscpu_path_cmd, lscpu_path))
             if not os.access(lscpu_path, os.F_OK | os.X_OK):
