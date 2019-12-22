@@ -49,8 +49,14 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        self.run_inference_sanity_checks(self.args, self.custom_args)
+        # set num_inter_threads and num_intra_threds
+        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_inter_threads,
+                                         num_intra_threads=self.args.num_intra_threads)
+        self.omp_num_threads = self.args.num_intra_threads if self.args.num_cores == -1 else self.args.num_cores
+        set_env_var("OMP_NUM_THREADS", self.omp_num_threads)
+
         self.parse_custom_args()
+        self.run_inference_sanity_checks(self.args, self.custom_args)
         self.research_dir = os.path.join(self.args.model_source_dir,
                                          "research")
 
@@ -71,14 +77,13 @@ class ModelInitializer(BaseModelInitializer):
                                  str(self.args.num_cores - 1) + \
                                  " " + command_prefix
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         config_file_path = os.path.join(self.args.checkpoint,
                                         self.args.config_file)
 
         run_cmd = command_prefix + \
             " --inter_op " + str(self.args.num_inter_threads) + \
             " --intra_op " + str(self.args.num_intra_threads) + \
-            " --omp " + str(self.args.num_intra_threads) + \
+            " --omp " + str(self.omp_num_threads) + \
             " --pipeline_config_path " + config_file_path + \
             " --checkpoint_dir " + str(self.args.checkpoint) + \
             " --eval_dir " + self.research_dir + \
@@ -101,27 +106,18 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_accuracy_command(self):
         if not os.path.exists(self.accuracy_script_path):
-            raise ValueError("Unable to locate the R-FCN accuracy script: "
-                             "{}".format(self.accuracy_script_path))
-        command = "FROZEN_GRAPH=" + self.args.input_graph
-
-        if self.args.data_location and os.path.exists(
-                self.args.data_location):
-            command += " TF_RECORD_FILE=" + self.args.data_location
-        else:
-            raise ValueError(
-                "Unable to locate the coco data record file at {}".format(
-                    self.args.tf_record_file))
-
-        if self.args.split:
-            command += " SPLIT=" + self.args.split
-        else:
+            raise ValueError("Unable to locate the R-FCN accuracy script: {}".format(self.accuracy_script_path))
+        if not self.args.data_location or not os.path.exists(self.args.data_location):
+            raise ValueError("Unable to locate the coco data record file at {}".format(self.args.tf_record_file))
+        if not self.args.split:
             raise ValueError("Must specify SPLIT parameter")
 
-        command += " TF_MODELS_ROOT={}".format(
-            self.args.model_source_dir)
-
-        command += " " + self.accuracy_script_path
+        command = self.get_command_prefix(self.args.socket_id, numactl=False)
+        command += " {} {} {} {} {}".format(self.accuracy_script_path,
+                                            self.args.input_graph,
+                                            self.args.data_location,
+                                            self.args.model_source_dir,
+                                            self.args.split)
         self.run_command(command)
 
     def run(self):

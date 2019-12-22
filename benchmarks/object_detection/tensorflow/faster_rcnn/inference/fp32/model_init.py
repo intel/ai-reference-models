@@ -39,14 +39,17 @@ class ModelInitializer (BaseModelInitializer):
                                          "research")
         self.run_inference_sanity_checks(self.args, self.custom_args)
 
-        # set num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads()
-
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+        # set num_inter_threads and num_intra_threds
+        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_inter_threads,
+                                         num_intra_threads=self.args.num_intra_threads)
+        omp_num_threads = self.args.num_intra_threads if self.args.num_cores == -1 else self.args.num_cores
+        set_env_var("OMP_NUM_THREADS", omp_num_threads)
+
+        self.parse_custom_args()
 
         if self.args.accuracy_only:
             accuracy_script = os.path.join(
@@ -55,12 +58,10 @@ class ModelInitializer (BaseModelInitializer):
             if not os.path.exists(accuracy_script):
                 raise ValueError("Unable to locate the Faster R-CNN accuracy "
                                  "script: {}".format(accuracy_script))
-            self.run_cmd = "sh {} {} {}/coco_val.record {}".format(
+            self.run_cmd = "sh {} {} {} {}".format(
                 accuracy_script, self.args.input_graph,
                 self.args.data_location, self.args.model_source_dir)
         else:
-            self.parse_custom_args()
-
             benchmark_script = os.path.join(
                 self.args.intelai_models, self.args.mode, self.args.precision,
                 "eval.py")

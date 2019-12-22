@@ -17,17 +17,14 @@
 # limitations under the License.
 #
 
-#
-
-########## Variables to be defined
 FROZEN_GRAPH=$1
 TF_RECORD_FILE=$2
 TF_MODELS_ROOT=$3
-
 SPLIT=$4
+
 SPLIT="rfcn-${SPLIT}"
 
-export PYTHONPATH=$PYTHONPATH:${TF_MODELS_ROOT}/research:${TF_MODELS_ROOT}/research/slim:${TF_MODELS_ROOT}/research/object_detection
+export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_ROOT}/research:${TF_MODELS_ROOT}/research/object_detection
 
 echo "SPLIT=${SPLIT}"
 echo "FROZEN_GRAPH=${FROZEN_GRAPH}"

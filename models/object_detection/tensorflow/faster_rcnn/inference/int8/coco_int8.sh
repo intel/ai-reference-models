@@ -1,8 +1,7 @@
-#!/usr/bin/env bash
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,26 +16,16 @@
 # limitations under the License.
 #
 
-#
+SPLIT=faster-rcnn #change to your favorite name
 
-########## Variables to be defined
 FROZEN_GRAPH=$1
-TF_RECORD_FILE=$2
-TF_MODELS_ROOT=$3
+TF_RECORD_FILES=$2
+TF_MODEL_ROOT=$3
 
-SPLIT=$4
-SPLIT="rfcn-${SPLIT}"
-
-export PYTHONPATH=$PYTHONPATH:${TF_MODELS_ROOT}/research:${TF_MODELS_ROOT}/research/slim:${TF_MODELS_ROOT}/research/object_detection
-
-echo "SPLIT=${SPLIT}"
-echo "FROZEN_GRAPH=${FROZEN_GRAPH}"
-echo "TF_RECORD_FILE=${TF_RECORD_FILE}"
-echo "PYTHONPATH=${PYTHONPATH}"
-echo "TF_MODELS_ROOT=$TF_MODELS_ROOT"
+export PYTHONPATH=${PYTHONPATH}:${TF_MODEL_ROOT}/research:${TF_MODEL_ROOT}/research/object_detection
 
 python -m object_detection.inference.infer_detections \
-  --input_tfrecord_paths=${TF_RECORD_FILE} \
+  --input_tfrecord_paths=${TF_RECORD_FILES} \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
   --inference_graph=${FROZEN_GRAPH} \
   --discard_image_pixels=True
@@ -45,7 +34,7 @@ python -m object_detection.inference.infer_detections \
 mkdir -p ${SPLIT}_eval_metrics
 
 echo "
-label_map_path: '${TF_MODELS_ROOT}/research/object_detection/data/mscoco_label_map.pbtxt'
+label_map_path: '${TF_MODEL_ROOT}/research/object_detection/data/mscoco_label_map.pbtxt'
 tf_record_input_reader: { input_path: '${SPLIT}_detections.tfrecord' }
 " > ${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt
 
