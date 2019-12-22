@@ -315,16 +315,16 @@ function faster_rcnn() {
     export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
     original_dir=$(pwd)
 
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
-      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-      # install protoc v3.3.0, if necessary, then compile protoc files
-      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+    # install dependencies
+    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
 
-      # install cocoapi
-      get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
-    fi
+    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+    # install protoc v3.3.0, if necessary, then compile protoc files
+    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+
+    # apply patch for tensorflow models
+    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf_models.patch
 
     if [ ${PRECISION} == "fp32" ]; then
       if [ -n "${config_file}" ]; then
@@ -332,8 +332,13 @@ function faster_rcnn() {
       fi
 
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        echo "Fast R-CNN requires -- config_file arg to be defined"
+        echo "Faster R-CNN requires -- config_file arg to be defined"
         exit 1
+      fi
+    elif [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --number-of-steps=${number_of_steps}"
       fi
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -556,32 +561,35 @@ function resnet50_101_inceptionv3() {
 
 # R-FCN (ResNet101) model
 function rfcn() {
-  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
+  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-  if [ ${NOINSTALL} != "True" ]; then
-    # install dependencies
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+  # install dependencies
+  pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
 
-    original_dir=$(pwd)
+  original_dir=$(pwd)
 
-    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-    # install protoc v3.3.0, if necessary, then compile protoc files
-    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+  cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+  # install protoc v3.3.0, if necessary, then compile protoc files
+  install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
 
-    # install cocoapi
-    get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/
-  fi
-
-  # Fix the object_detection_evaluation.py file to change unicode() to str() so that it works in py3
-  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
-  sed -i.bak "s/unicode(/str(/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
+  # apply patch for tensorflow models
+  cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+  git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf_models.patch
 
   split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       split_arg="--split=${split}"
   fi
 
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+          number_of_steps_arg="--number_of_steps=${number_of_steps}"
+      fi
+
+      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
+
+  elif [ ${PRECISION} == "fp32" ]; then
       if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
           echo "R-FCN requires -- config_file arg to be defined"
           exit 1
