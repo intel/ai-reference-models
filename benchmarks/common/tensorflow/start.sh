@@ -56,7 +56,7 @@ if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   exit 1
 fi
 
-if [[ ${NOINSTALL} != "True" ]]; then
+if [[ ${NOINSTALL} != "True" && ${DOCKER} == "True" ]]; then
   ## install common dependencies
   apt update
   apt full-upgrade -y

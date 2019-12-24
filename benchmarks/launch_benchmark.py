@@ -209,12 +209,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # Set the default value for NOINSTALL, if it's not explicitly set by the user
         if "NOINSTALL" not in env_var_dict:
-            if args.docker_image:
-                # For docker, we default to install dependencies
-                env_var_dict["NOINSTALL"] = "False"
-            else:
-                # For bare metal, we default to assume the user has set up their environment
-                env_var_dict["NOINSTALL"] = "True"
+            env_var_dict["NOINSTALL"] = "False"
 
         return env_var_dict
 
