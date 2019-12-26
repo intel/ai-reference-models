@@ -666,17 +666,19 @@ function ssd-resnet34() {
       elif [ ${MODE} == "training" ]; then
         if [ ${PRECISION} == "fp32" ]; then
           if [ ${NOINSTALL} != "True" ]; then
-            apt-get update && apt-get install -y cpio
+            if [ ${DOCKER} == "True" ]; then
+              apt-get update && apt-get install -y cpio
 
-            # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
-            cd /l_mpi
-            sh install.sh --silent silent.cfg
-            source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
-
+              # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
+              cd /l_mpi
+              sh install.sh --silent silent.cfg
+              source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+            fi
             for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
             do
               pip install $line
             done
+            pip install horovod
           fi
 
           old_dir=${PWD}

@@ -5,3 +5,4 @@ lxml
 jupyter
 matplotlib
 pycocotools
+numpy < 1.18.0
