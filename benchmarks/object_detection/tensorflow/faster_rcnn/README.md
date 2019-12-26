@@ -109,8 +109,7 @@ $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 6. Download and extract the pre-trained model.
 ```
 $ cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
-$ tar -xzvf faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/faster_rcnn_fp32_pretrained_model.pb
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -128,29 +127,7 @@ Resolving deltas: 100% (3/3), done.
 ```
 
 8. Run the `launch_benchmark.py` script from the intelai/models repo
-, with the appropriate parameters including: the
-`coco_val.record` data location (from step 4), the pre-trained model
-`pipeline.config` file and the checkpoint location (from step 5), and the
-location of your `tensorflow/models` clone (from step 1).
-
-Run for batch and online inference:
-```
-$ cd $MODEL_WORK_DIR/models/benchmarks
-
-$ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/output/ \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
-    --model-name faster_rcnn \
-    --framework tensorflow \
-    --precision fp32 \
-    --mode inference \
-    --socket-id 0 \
-    --checkpoint $MODEL_WORK_DIR/faster_rcnn_resnet50_fp32_coco \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-    -- config_file=pipeline.config
-```
-
-Or for accuracy where the `--data-location` is the path the directory
+, with the appropriate parameters including: the `--data-location` is the path the directory
 where your `coco_val.record` file is located and the `--in-graph` is
 the pre-trained graph located in the pre-trained model directory (from step 5):
 ```
@@ -162,7 +139,7 @@ $ python launch_benchmark.py \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --model-source-dir $MODEL_WORK_DIR/tf_models \
     --data-location $MODEL_WORK_DIR/output/coco_val.record \
-    --in-graph $MODEL_WORK_DIR/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
+    --in-graph $MODEL_WORK_DIR/faster_rcnn_fp32_pretrained_model.pb \
     --accuracy-only
 ```
 
