@@ -22,7 +22,10 @@ import time
 from argparse import ArgumentParser
 
 import tensorflow as tf
-import tensorflow_core.tools.graph_transforms as graph_transforms
+if tf.__version__.startswith('1.13') or tf.__version__.startswith('1.14'):
+    import tensorflow.tools.graph_transforms as graph_transforms
+else:
+    import tensorflow_core.tools.graph_transforms as graph_transforms
 
 import datasets
 
