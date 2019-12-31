@@ -22,7 +22,10 @@ import time
 from argparse import ArgumentParser
 
 import tensorflow as tf
-import tensorflow_core.tools.graph_transforms as graph_transforms
+try:
+    import tensorflow.tools.graph_transforms as graph_transforms
+except:
+    import tensorflow_core.tools.graph_transforms as graph_transforms
 
 import datasets
 import numpy as np
