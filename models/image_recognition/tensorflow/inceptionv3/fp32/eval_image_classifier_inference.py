@@ -23,9 +23,9 @@ from argparse import ArgumentParser
 
 import tensorflow as tf
 
-if tf.__version__.startswith('1.13') or tf.__version__.startswith('1.14'):
+try:
     import tensorflow.tools.graph_transforms as graph_transforms
-else:
+except:
     import tensorflow_core.tools.graph_transforms as graph_transforms
 
 import datasets
