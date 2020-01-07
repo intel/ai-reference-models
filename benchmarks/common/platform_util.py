@@ -60,19 +60,9 @@ class PlatformUtil:
             raise ValueError("Unable to determine Operating system type.")
 
     def linux_init(self):
-        # check to see if the lscpu command is present
-        lscpu_path = ''
-        lscpu_path_cmd = "command -v lscpu"
+        lscpu_cmd = "lscpu"
         try:
-            lscpu_path = subprocess.check_output(shlex.split(lscpu_path_cmd), shell=False, \
-                                                 stderr=subprocess.STDOUT).strip()
-            if self.args.verbose:
-                print("lscpu_path_cmd = {}\nlscpu located here: {}".format(lscpu_path_cmd, lscpu_path))
-            if not os.access(lscpu_path, os.F_OK | os.X_OK):
-                raise ValueError("{} does not exist or is not executable.".
-                                 format(lscpu_path))
-
-            lscpu_output = subprocess.check_output([lscpu_path],
+            lscpu_output = subprocess.check_output([lscpu_cmd],
                                                    stderr=subprocess.STDOUT)
             # handle python2 vs 3 (bytes vs str type)
             if isinstance(lscpu_output, bytes):
