@@ -15,11 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from argparse import ArgumentTypeError
 import os
+import re
 
 """
 Functions used in `type=` arguments to ArgumentParser
@@ -107,4 +108,12 @@ def check_volume_mount(value):
 
         # Check that the local directory specified is a valid folder and not a link
         check_valid_folder(value.split(':')[0])
+    return value
+
+
+def check_shm_size(value):
+    """verfies the format of docker shm-size """
+    if value is not None:
+        if not re.match("([1-9][0-9]*)['b','k','m','g']", value):
+            raise ArgumentTypeError("{} does not follow the --shm-size format definition.".format(value))
     return value

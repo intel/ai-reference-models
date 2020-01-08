@@ -31,9 +31,6 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
                    [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) | 
                    [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py) 
-* Language Translation
-    * Transformer-LT: [init](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/model_init.py) | 
-                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)    
 * Recommendation Systems
     * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
                 [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
@@ -164,7 +161,7 @@ $ python launch_benchmark.py \
         --batch-size 1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
         --volume /home/<user>/custom_folder_1:/custom_folder_1 \
         --volume /home/<user>/custom_folder_2:/custom_folder_2
 ```
@@ -201,7 +198,7 @@ Below is an example showing how to use the `--debug` flag:
         --batch-size=1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
         --debug
 
    # ls

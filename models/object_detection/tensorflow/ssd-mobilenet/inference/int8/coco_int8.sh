@@ -16,7 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 ########## Variables to be defined - run it in research folder
@@ -26,7 +26,7 @@ SPLIT=ssdmob
 FROZEN_GRAPH=$1
 TF_RECORD_FILES=$2
 
-python -m object_detection/inference/infer_detections \
+python -m object_detection.inference.infer_detections \
   --input_tfrecord_paths=$TF_RECORD_FILES \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
   --inference_graph=$FROZEN_GRAPH \
@@ -43,7 +43,7 @@ echo "
 metrics_set: 'coco_detection_metrics'
 " > ${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt
 
-python -m object_detection/metrics/offline_eval_map_corloc \
+python -m object_detection.metrics.offline_eval_map_corloc \
   --eval_dir=${SPLIT}_eval_metrics \
   --eval_config_path=${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt \
   --input_config_path=${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt

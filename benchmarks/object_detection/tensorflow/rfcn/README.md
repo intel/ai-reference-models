@@ -15,55 +15,38 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone the [tensorflow/models](https://github.com/tensorflow/models) and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
+1. Store the path to the current directory:
+```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+```
+
+2. Clone the [tensorflow/models](https://github.com/tensorflow/models) and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tf_models
+$ cd tf_models
 $ git clone https://github.com/cocodataset/cocoapi.git
-
 ```
 
 The TensorFlow models repo will be used for installing dependencies and running inference as well as
 converting the coco dataset to the TF records format.
 
-For the accuracy test, a modification is required in the cloned models repo until [this issue](https://github.com/tensorflow/models/issues/5411)
-gets fixed in the TensorFlow repository.
-This can be done either manually or using the command line as shown:
-
-Open the file RFCN/models/research/object_detection/metrics/offline_eval_map_corloc.py,
-then apply the following fixes:
-Line 162: change `configs['eval_input_config']` to `configs['eval_input_configs']`
-Line 91, 92, and 95: change `input_config` to `input_config[0]`
-
-Or using the command line:
-```
-cd models/research/object_detection
-chmod 777 metrics
-cd "metrics"
-chmod 777 offline_eval_map_corloc.py
-sed -i.bak 162s/eval_input_config/eval_input_configs/ offline_eval_map_corloc.py
-sed -i.bak 91s/input_config/input_config[0]/ offline_eval_map_corloc.py
-sed -i.bak 92s/input_config/input_config[0]/ offline_eval_map_corloc.py
-sed -i.bak 95s/input_config/input_config[0]/ offline_eval_map_corloc.py
-
-```
-
-2. Download the 2017 validation
+3. Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
+$ cd $MODEL_WORK_DIR
 $ mkdir val
 $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
-$ cd ..
 
+$ cd $MODEL_WORK_DIR
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
-$ cd ..
 ```
 
 Since we are only using the validation dataset in this example, we will
@@ -71,14 +54,15 @@ create an empty directory and empty annotations json file to pass as the
 train and test directories in the next step.
 
 ```
+$ cd $MODEL_WORK_DIR
 $ mkdir empty_dir
 
 $ cd annotations
 $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd ..
+$ cd $MODEL_WORK_DIR
 ```
 
-3. Now that you have the raw COCO dataset, we need to convert it to the
+4. Now that you have the raw COCO dataset, we need to convert it to the
 TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
@@ -92,74 +76,82 @@ located after the script has completed.
 ```
 
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tf_models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/<user>/coco/empty_dir" \
-      --val_image_dir="/home/<user>/coco/val/val2017" \
-      --test_image_dir="/home/<user>/coco/empty_dir" \
-      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --output_dir="/home/<user>/coco/output"
+      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
+      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
+      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --output_dir="$MODEL_WORK_DIR/output"
 
-$ ll /home/<user>/coco/output
+$ ll $MODEL_WORK_DIR/output
 total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
-
-# Go back to the main models directory and get master code
-$ cd /home/<user>/models
-$ git checkout master
 ```
 
-The `coco_val.record-00000-of-00001` file is what we will use in this inference example.
+The `coco_val.record` file is what we will use in this inference example.
 
-4. Download the pretrained model:
+For the accuracy test, a patch is required in the cloned models repo until [this issue](https://github.com/tensorflow/models/issues/5411)
+gets fixed in the TensorFlow repository. 
+Go back to the main models directory and get the specified SHA that we are using for the model, the patch will be applied automatically:
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_int8_coco_pretrained_model.pb
+$ cd $MODEL_WORK_DIR/tf_models
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
-5. Clone the [intelai/models](https://github.com/intelai/models) repo
+5. Download the pretrained model:
+```
+$ cd $MODEL_WORK_DIR
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/rfcn_resnet101_int8_coco_pretrained_model.pb
+```
+
+6. Clone the [intelai/models](https://github.com/intelai/models) repo
 and then run the scripts for either batch/online inference performance or accuracy.
 
 ```
 $ git clone https://github.com/IntelAI/models.git
-$ cd models/benchmarks
 ```
 
 Run for batch and online inference where the `--data-location`
 is the path to the directory with the raw coco validation images:
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow/models \
-    --data-location /home/<user>/val/val2017 \
-    --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location $MODEL_WORK_DIR/val/val2017 \
+    --in-graph $MODEL_WORK_DIR/rfcn_resnet101_int8_coco_pretrained_model.pb \
     --verbose \
     --benchmark-only \
-    -- number_of_steps=500
+    -- steps=500
 ```
 
 Or for accuracy where the `--data-location` is the path the directory
 where your `coco_val.record-00000-of-00001` file is located:
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow/models \
-    --data-location /home/<user>/coco/output/coco_val.record-00000-of-00001 \
-    --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location $MODEL_WORK_DIR/output/coco_val.record \
+    --in-graph $MODEL_WORK_DIR/rfcn_resnet101_int8_coco_pretrained_model.pb \
     --accuracy-only \
     -- split="accuracy_message"
 ```
@@ -189,31 +181,42 @@ And here is a sample log file tail when running for accuracy:
 ```
 ...
 Accumulating evaluation results...
-DONE (t=1.03s).
- Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.119
- Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.211
- Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.118
- Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.119
+DONE (t=1.44s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.320
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.497
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.361
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.320
  Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.120
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.150
- Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.150
- Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.150
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.267
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.369
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.372
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.372
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 Ran inference with batch size -1
 Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190227_194752.log
 ```
 
+8. To return to where you started from:
+```
+$ popd
+```
+
 
 ## FP32 Inference Instructions
 
-1. Clone the `tensorflow/models` and `cocoapi` repositories:
+1. Store the path to the current directory:
+```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+```
+
+2. Clone the `tensorflow/models` and `cocoapi` repositories:
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tf_models
+$ cd tf_models
 $ git clone https://github.com/cocodataset/cocoapi.git
 
 ```
@@ -221,21 +224,21 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
-2. Download the 2017 validation
+3. Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
+$ cd $MODEL_WORK_DIR
 $ mkdir val
 $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
-$ cd ..
 
+$ cd $MODEL_WORK_DIR
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
-$ cd ..
 ```
 
 Since we are only using the validation dataset in this example, we will
@@ -243,14 +246,15 @@ create an empty directory and empty annotations json file to pass as the
 train and test directories in the next step.
 
 ```
+$ cd $MODEL_WORK_DIR
 $ mkdir empty_dir
 
 $ cd annotations
 $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd ..
+$ cd $MODEL_WORK_DIR
 ```
 
-3. Now that you have the raw COCO dataset, we need to convert it to the
+4. Now that you have the raw COCO dataset, we need to convert it to the
 TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
@@ -264,40 +268,44 @@ located after the script has completed.
 ```
 
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tf_models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/<user>/coco/empty_dir" \
-      --val_image_dir="/home/<user>/coco/val/val2017" \
-      --test_image_dir="/home/<user>/coco/empty_dir" \
-      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --output_dir="/home/<user>/coco/output"
+      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
+      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
+      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --output_dir="$MODEL_WORK_DIR/output"
 
-$ ll /home/<user>/coco/output
+$ ll $MODEL_WORK_DIR/output
 total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
-
-# Go back to the main models directory and get master code
-$ cd /home/<user>/models
-$ git checkout master
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. <a name="download_fp32_pretrained_model"></a>Download and extract the pretrained model:
+For the accuracy test, a patch is required in the cloned models repo until [this issue](https://github.com/tensorflow/models/issues/5411)
+gets fixed in the TensorFlow repository. 
+Go back to the main models directory and get the specified SHA that we are using for the model, the patch will be applied automatically:
+```
+$ cd $MODEL_WORK_DIR/tf_models
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
+```
+
+5. <a name="download_fp32_pretrained_model"></a>Download and extract the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
-$ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
+cd $MODEL_WORK_DIR
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/rfcn_resnet101_fp32_coco_pretrained_model.pb
 ```
 
-5. Clone the [intelai/models](https://github.com/intelai/models) repo.
+6. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model.
 
 ```
@@ -311,48 +319,50 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-6. Run the `launch_benchmark.py` script from the 
-[intelai/models](https://github.com/intelai/models) repo
-, with the appropriate parameters including: the 
-`coco_val.record` data location (from step 3), the pre-trained model
-`pipeline.config` file and the checkpoint location (from step 4), and the
-location of your `tensorflow/models` clone (from step 1).
-
-Run for batch and online inference:
+7. Clone the [intelai/models](https://github.com/intelai/models) repo
+and then run the scripts for either batch/online inference performance or accuracy.  
 ```
-$ cd /home/<user>/models/benchmarks
+$ git clone https://github.com/IntelAI/models.git
+```
+Run for batch and online inference where the `--data-location`
+is the path to the directory with the raw coco validation images:
+```
+$ cd $MODEL_WORK_DIR/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/<user>/coco/output/ \
-    --model-source-dir /home/<user>/tensorflow/models \
     --model-name rfcn \
-    --framework tensorflow \
-    --precision fp32 \
     --mode inference \
-    --socket-id 0 \
-    --checkpoint /home/<user>/rfcn_resnet101_fp32_coco \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    -- config_file=rfcn_pipeline.config
+    --precision fp32 \
+    --framework tensorflow \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location $MODEL_WORK_DIR/val/val2017 \
+    --in-graph $MODEL_WORK_DIR/rfcn_resnet101_fp32_coco_pretrained_model.pb \
+    --verbose \
+    --benchmark-only \
+    -- steps=500
 ```
 
 Or for accuracy where the `--data-location` is the path the directory
 where your `coco_val.record` file is located and the `--in-graph` is
 the pre-trained graph located in the pre-trained model directory (from step 4):
 ```
-python launch_benchmark.py \
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow/models \
-    --data-location /home/<user>/coco/output/coco_val.record \
-    --in-graph /home/<user>/rfcn_resnet101_fp32_coco/frozen_inference_graph.pb  \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location $MODEL_WORK_DIR/output/coco_val.record \
+    --in-graph $MODEL_WORK_DIR/rfcn_resnet101_fp32_coco_pretrained_model.pb  \
     --accuracy-only \
     -- split="accuracy_message"
 ```
 
-7. Log files are located at the value of `--output-dir` (or
+8. Log files are located at the value of `--output-dir` (or
 `models/benchmarks/common/tensorflow/logs` if no path has been specified):
 
 Below is a sample log file tail when running for batch and
@@ -389,4 +399,9 @@ DONE (t=1.19s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
  Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_rfcn_inference_fp32_20181221_211905.log
+```
+
+9. To return to where you started from:
+```
+$ popd
 ```

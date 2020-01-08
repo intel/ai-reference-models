@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 """
@@ -74,16 +74,16 @@ class TimeHistory(keras.callbacks.Callback):
         self.time_start = time.time()
 
     def on_batch_end(self, batch, logs={}):
-        self.time_end =  time.time()
+        self.time_end = time.time()
         print("  Elapsed Time: %f (sec/step)  " % (self.time_end - self.time_start))
         if self.count >= self.warmup:
             self.total_time += self.time_end - self.time_start
         self.count += 1
 
     def on_epoch_end(self, epoch, logs={}):
-        print ("Batchsize: %d" % (self.batch_size))
-        print ("Time spent per BATCH: %.4f ms" % (self.total_time / (self.count - self.warmup) * 1000))
-        print ("Total samples/sec: %.4f samples/s" % ((self.count - self.warmup) * self.batch_size / self.total_time))
+        print("Batchsize: %d" % (self.batch_size))
+        print("Time spent per BATCH: %.4f ms" % (self.total_time / (self.count - self.warmup) * 1000))
+        print("Total samples/sec: %.4f samples/s" % ((self.count - self.warmup) * self.batch_size / self.total_time))
 
 
 def log(text, array=None):
@@ -763,7 +763,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
     # 1. Prepare variables
     pre_nms_class_ids = tf.gather(class_ids, keep)
     pre_nms_scores = tf.gather(class_scores, keep)
-    pre_nms_rois = tf.gather(refined_rois,   keep)
+    pre_nms_rois = tf.gather(refined_rois, keep)
     unique_pre_nms_class_ids = tf.unique(pre_nms_class_ids)[0]
 
     def nms_keep_map(class_id):
@@ -772,10 +772,10 @@ def refine_detections_graph(rois, probs, deltas, window, config):
         ixs = tf.where(tf.equal(pre_nms_class_ids, class_id))[:, 0]
         # Apply NMS
         class_keep = tf.image.non_max_suppression(
-                tf.to_float(tf.gather(pre_nms_rois, ixs)),
-                tf.gather(pre_nms_scores, ixs),
-                max_output_size=config.DETECTION_MAX_INSTANCES,
-                iou_threshold=config.DETECTION_NMS_THRESHOLD)
+            tf.to_float(tf.gather(pre_nms_rois, ixs)),
+            tf.gather(pre_nms_scores, ixs),
+            max_output_size=config.DETECTION_MAX_INSTANCES,
+            iou_threshold=config.DETECTION_NMS_THRESHOLD)
         # Map indicies
         class_keep = tf.gather(keep, tf.gather(ixs, class_keep))
         # Pad with -1 so returned tensors have the same shape
@@ -809,7 +809,7 @@ def refine_detections_graph(rois, probs, deltas, window, config):
         tf.to_float(tf.gather(refined_rois, keep)),
         tf.to_float(tf.gather(class_ids, keep))[..., tf.newaxis],
         tf.gather(class_scores, keep)[..., tf.newaxis]
-        ], axis=1)
+    ], axis=1)
 
     # Pad with zeros if detections < DETECTION_MAX_INSTANCES
     gap = config.DETECTION_MAX_INSTANCES - tf.shape(detections)[0]
@@ -1802,8 +1802,8 @@ class MaskRCNN():
         model_dir: Directory to save training logs and trained weights
         """
         assert mode in ['training', 'inference']
-        session_config = tf.ConfigProto(intra_op_parallelism_threads=config.NUM_INTRA,\
-                 inter_op_parallelism_threads=config.NUM_INTER)
+        session_config = tf.ConfigProto(intra_op_parallelism_threads=config.NUM_INTRA,
+                                        inter_op_parallelism_threads=config.NUM_INTER)
         session = tf.Session(config=session_config)
         K.set_session(session)
         K.set_image_data_format('channels_last')

@@ -16,18 +16,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 ########## Variables to be defined
+FROZEN_GRAPH=$1
+TF_RECORD_FILE=$2
+TF_MODELS_ROOT=$3
 
-SPLIT=${SPLIT:-"RFCN_final_graph"} #change to your favorite room
-FROZEN_GRAPH=${FROZEN_GRAPH:-"/in_graph/frozen_inference_graph.pb"}
-TF_RECORD_FILE=${TF_RECORD_FILE:-"/dataset/coco_val.record"}
-if [[ -z ${TF_MODELS_ROOT} ]] || [[ ! -d ${TF_MODELS_ROOT} ]]; then
-  echo "You must specify the root of the tensorflow/models source tree in the TF_MODELS_ROOT environment variable."
-  exit 1
-fi
+SPLIT=$4
+SPLIT="rfcn-${SPLIT}"
 
 export PYTHONPATH=$PYTHONPATH:${TF_MODELS_ROOT}/research:${TF_MODELS_ROOT}/research/slim:${TF_MODELS_ROOT}/research/object_detection
 
@@ -37,10 +35,10 @@ echo "TF_RECORD_FILE=${TF_RECORD_FILE}"
 echo "PYTHONPATH=${PYTHONPATH}"
 echo "TF_MODELS_ROOT=$TF_MODELS_ROOT"
 
-python -m object_detection/inference/infer_detections \
-  --input_tfrecord_paths=$TF_RECORD_FILE \
+python -m object_detection.inference.infer_detections \
+  --input_tfrecord_paths=${TF_RECORD_FILE} \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
-  --inference_graph=$FROZEN_GRAPH \
+  --inference_graph=${FROZEN_GRAPH} \
   --discard_image_pixels=True
 
 
@@ -56,7 +54,7 @@ metrics_set: 'coco_detection_metrics'
 " > ${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt
 
 
-python -m object_detection/metrics/offline_eval_map_corloc \
+python -m object_detection.metrics.offline_eval_map_corloc \
   --eval_dir=${SPLIT}_eval_metrics \
   --eval_config_path=${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt \
   --input_config_path=${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt

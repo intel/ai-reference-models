@@ -5,3 +5,4 @@ lxml
 jupyter
 matplotlib
 numpy==1.16.0
+pycocotools

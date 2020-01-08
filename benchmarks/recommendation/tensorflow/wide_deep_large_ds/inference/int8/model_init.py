@@ -15,17 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from common.base_model_init import BaseModelInitializer
-from common.base_model_init import set_env_var
-
 import os
 import argparse
+from common.base_model_init import BaseModelInitializer
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -41,14 +39,11 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        # Set env vars, if they haven't already been set
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
     def parse_args(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument(
-            "--num-parallel-batches", default=-1,
-            type=int, help="num of parallel batches")
+        parser.add_argument("--num_omp_threads", dest='num_omp_threads',
+                            type=str, default="1",
+                            help="number of omp threads")
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
 
@@ -56,14 +51,14 @@ class ModelInitializer(BaseModelInitializer):
         benchmark_script = os.path.join(self.args.intelai_models,
                                         self.args.mode, "inference.py")
 
-        if self.args.num_parallel_batches == -1:
-            self.args.num_parallel_batches = self.platform_util.num_cores_per_socket
-
-        script_args_list = ["input_graph", "num_parallel_batches", "batch_size",
-                            "num_inter_threads", "num_intra_threads", "accuracy_only", "data_location"]
-
-        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        script_args_list = ["input_graph", "batch_size",
+                            "num_inter_threads", "num_intra_threads",
+                            "accuracy_only", "data_location", "num_omp_threads"]
+        command_prefix = self.get_command_prefix(-1)
+        if self.args.socket_id != -1 and self.args.num_cores != -1:
+            command_prefix = command_prefix + " numactl --physcpubind=0-{} --membind={} ".\
+                format(str(int(self.args.num_cores) - 1), self.args.socket_id)
+        cmd_prefix = command_prefix + self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 

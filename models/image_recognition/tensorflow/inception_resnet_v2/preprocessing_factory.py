@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 
@@ -47,30 +47,30 @@ slim = tf.contrib.slim
 
 
 def get_preprocessing(name, is_training=False):
-  """Returns preprocessing_fn(image, height, width, **kwargs).
+    """Returns preprocessing_fn(image, height, width, **kwargs).
 
-  Args:
-    name: The name of the preprocessing function.
-    is_training: `True` if the model is being used for training and `False`
-      otherwise.
+    Args:
+      name: The name of the preprocessing function.
+      is_training: `True` if the model is being used for training and `False`
+        otherwise.
 
-  Returns:
-    preprocessing_fn: A function that preprocessing a single image (pre-batch).
-      It has the following signature:
-        image = preprocessing_fn(image, output_height, output_width, ...).
+    Returns:
+      preprocessing_fn: A function that preprocessing a single image (pre-batch).
+        It has the following signature:
+          image = preprocessing_fn(image, output_height, output_width, ...).
 
-  Raises:
-    ValueError: If Preprocessing `name` is not recognized.
-  """
-  preprocessing_fn_map = {
-      'inception_resnet_v2': inception_preprocessing,
-  }
+    Raises:
+      ValueError: If Preprocessing `name` is not recognized.
+    """
+    preprocessing_fn_map = {
+        'inception_resnet_v2': inception_preprocessing,
+    }
 
-  if name not in preprocessing_fn_map:
-    raise ValueError('Preprocessing name [%s] was not recognized' % name)
+    if name not in preprocessing_fn_map:
+        raise ValueError('Preprocessing name [%s] was not recognized' % name)
 
-  def preprocessing_fn(image, output_height, output_width, **kwargs):
-    return preprocessing_fn_map[name].preprocess_image(
-        image, output_height, output_width, is_training=is_training, **kwargs)
+    def preprocessing_fn(image, output_height, output_width, **kwargs):
+        return preprocessing_fn_map[name].preprocess_image(
+            image, output_height, output_width, is_training=is_training, **kwargs)
 
-  return preprocessing_fn
+    return preprocessing_fn

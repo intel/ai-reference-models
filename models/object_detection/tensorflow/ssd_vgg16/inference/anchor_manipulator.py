@@ -30,8 +30,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
-#
 import math
 
 import tensorflow as tf
@@ -39,10 +37,12 @@ import numpy as np
 
 from tensorflow.contrib.image.python.ops import image_ops
 
+
 def areas(gt_bboxes):
     with tf.name_scope('bboxes_areas', values=[gt_bboxes]):
         ymin, xmin, ymax, xmax = tf.split(gt_bboxes, 4, axis=1)
         return (xmax - xmin) * (ymax - ymin)
+
 
 def intersection(gt_bboxes, default_bboxes):
     with tf.name_scope('bboxes_intersection', values=[gt_bboxes, default_bboxes]):
@@ -59,14 +59,17 @@ def intersection(gt_bboxes, default_bboxes):
         w = tf.maximum(int_xmax - int_xmin, 0.)
 
         return h * w
+
+
 def iou_matrix(gt_bboxes, default_bboxes):
-    with tf.name_scope('iou_matrix', values = [gt_bboxes, default_bboxes]):
+    with tf.name_scope('iou_matrix', values=[gt_bboxes, default_bboxes]):
         inter_vol = intersection(gt_bboxes, default_bboxes)
         # broadcast
         union_vol = areas(gt_bboxes) + tf.transpose(areas(default_bboxes), perm=[1, 0]) - inter_vol
 
         return tf.where(tf.equal(union_vol, 0.0),
                         tf.zeros_like(inter_vol), tf.truediv(inter_vol, union_vol))
+
 
 def do_dual_max_match(overlap_matrix, low_thres, high_thres, ignore_between=True, gt_max_first=True):
     '''
@@ -78,7 +81,7 @@ def do_dual_max_match(overlap_matrix, low_thres, high_thres, ignore_between=True
         # the matching degree
         match_values = tf.reduce_max(overlap_matrix, axis=0)
 
-        #positive_mask = tf.greater(match_values, high_thres)
+        # positive_mask = tf.greater(match_values, high_thres)
         less_mask = tf.less(match_values, low_thres)
         between_mask = tf.logical_and(tf.less(match_values, high_thres), tf.greater_equal(match_values, low_thres))
         negative_mask = less_mask if ignore_between else between_mask
@@ -96,22 +99,23 @@ def do_dual_max_match(overlap_matrix, low_thres, high_thres, ignore_between=True
 
         if gt_max_first:
             # the max match from ground truth's side has higher priority
-            left_gt_to_anchors_mask = tf.one_hot(gt_to_anchors, tf.shape(overlap_matrix)[1], on_value=1, off_value=0, axis=1, dtype=tf.int32)
+            left_gt_to_anchors_mask = tf.one_hot(gt_to_anchors, tf.shape(
+                overlap_matrix)[1], on_value=1, off_value=0, axis=1, dtype=tf.int32)
         else:
             # the max match from anchors' side has higher priority
             # use match result from ground truth's side only when the the matching degree from anchors' side is lower than position threshold
             left_gt_to_anchors_mask = tf.cast(tf.logical_and(tf.reduce_max(anchors_to_gt_mask, axis=1, keep_dims=True) < 1,
-                                                            tf.one_hot(gt_to_anchors, tf.shape(overlap_matrix)[1],
+                                                             tf.one_hot(gt_to_anchors, tf.shape(overlap_matrix)[1],
                                                                         on_value=True, off_value=False, axis=1, dtype=tf.bool)
-                                                            ), tf.int64)
+                                                             ), tf.int64)
         # can not use left_gt_to_anchors_mask here, because there are many ground truthes match to one anchor, we should pick the highest one even when we are merging matching from ground truth side
         left_gt_to_anchors_scores = overlap_matrix * tf.to_float(left_gt_to_anchors_mask)
         # merge matching results from ground truth's side with the original matching results from anchors' side
         # then select all the overlap score of those matching pairs
-        selected_scores = tf.gather_nd(overlap_matrix,  tf.stack([tf.where(tf.reduce_max(left_gt_to_anchors_mask, axis=0) > 0,
-                                                                            tf.argmax(left_gt_to_anchors_scores, axis=0),
-                                                                            anchors_to_gt),
-                                                                    tf.range(tf.cast(tf.shape(overlap_matrix)[1], tf.int64))], axis=1))
+        selected_scores = tf.gather_nd(overlap_matrix, tf.stack([tf.where(tf.reduce_max(left_gt_to_anchors_mask, axis=0) > 0,
+                                                                          tf.argmax(left_gt_to_anchors_scores, axis=0),
+                                                                          anchors_to_gt),
+                                                                 tf.range(tf.cast(tf.shape(overlap_matrix)[1], tf.int64))], axis=1))
         # return the matching results for both foreground anchors and background anchors, also with overlap scores
         return tf.where(tf.reduce_max(left_gt_to_anchors_mask, axis=0) > 0,
                         tf.argmax(left_gt_to_anchors_scores, axis=0),
@@ -126,6 +130,7 @@ def do_dual_max_match(overlap_matrix, low_thres, high_thres, ignore_between=True
 #     np.save('./debug/labels_{}.npy'.format(save_image_with_bbox.counter), np.copy(labels))
 #     np.save('./debug/anchors_{}.npy'.format(save_image_with_bbox.counter), np.copy(anchors_point))
 #     return save_image_with_bbox.counter
+
 
 class AnchorEncoder(object):
     def __init__(self, allowed_borders, positive_threshold, ignore_threshold, prior_scaling, clip=False):
@@ -149,7 +154,8 @@ class AnchorEncoder(object):
         # shape info:
         # y_on_image, x_on_image: layers_shapes[0] * layers_shapes[1]
         # h_on_image, w_on_image: num_anchors
-        assert (len(all_num_anchors_depth)==len(all_num_anchors_spatial)) and (len(all_num_anchors_depth)==len(all_anchors)), 'inconsist num layers for anchors.'
+        assert (len(all_num_anchors_depth) == len(all_num_anchors_spatial)) and (
+            len(all_num_anchors_depth) == len(all_anchors)), 'inconsist num layers for anchors.'
         with tf.name_scope('encode_all_anchors'):
             num_layers = len(all_num_anchors_depth)
             list_anchors_ymin = []
@@ -158,14 +164,16 @@ class AnchorEncoder(object):
             list_anchors_xmax = []
             tiled_allowed_borders = []
             for ind, anchor in enumerate(all_anchors):
-                anchors_ymin_, anchors_xmin_, anchors_ymax_, anchors_xmax_ = self.center2point(anchor[0], anchor[1], anchor[2], anchor[3])
+                anchors_ymin_, anchors_xmin_, anchors_ymax_, anchors_xmax_ = self.center2point(
+                    anchor[0], anchor[1], anchor[2], anchor[3])
 
                 list_anchors_ymin.append(tf.reshape(anchors_ymin_, [-1]))
                 list_anchors_xmin.append(tf.reshape(anchors_xmin_, [-1]))
                 list_anchors_ymax.append(tf.reshape(anchors_ymax_, [-1]))
                 list_anchors_xmax.append(tf.reshape(anchors_xmax_, [-1]))
 
-                tiled_allowed_borders.extend([self._allowed_borders[ind]] * all_num_anchors_depth[ind] * all_num_anchors_spatial[ind])
+                tiled_allowed_borders.extend([self._allowed_borders[ind]] *
+                                             all_num_anchors_depth[ind] * all_num_anchors_spatial[ind])
 
             anchors_ymin = tf.concat(list_anchors_ymin, 0, name='concat_ymin')
             anchors_xmin = tf.concat(list_anchors_xmin, 0, name='concat_xmin')
@@ -182,7 +190,7 @@ class AnchorEncoder(object):
 
             inside_mask = tf.logical_and(tf.logical_and(anchors_ymin > -anchor_allowed_borders * 1.,
                                                         anchors_xmin > -anchor_allowed_borders * 1.),
-                                        tf.logical_and(anchors_ymax < (1. + anchor_allowed_borders * 1.),
+                                         tf.logical_and(anchors_ymax < (1. + anchor_allowed_borders * 1.),
                                                         anchors_xmax < (1. + anchor_allowed_borders * 1.)))
 
             anchors_point = tf.stack([anchors_ymin, anchors_xmin, anchors_ymax, anchors_xmax], axis=-1)
@@ -210,7 +218,8 @@ class AnchorEncoder(object):
 
             # transform to center / size.
             gt_cy, gt_cx, gt_h, gt_w = self.point2center(gt_ymin, gt_xmin, gt_ymax, gt_xmax)
-            anchor_cy, anchor_cx, anchor_h, anchor_w = self.point2center(anchors_ymin, anchors_xmin, anchors_ymax, anchors_xmax)
+            anchor_cy, anchor_cx, anchor_h, anchor_w = self.point2center(
+                anchors_ymin, anchors_xmin, anchors_ymax, anchors_xmax)
             # encode features.
             # the prior_scaling (in fact is 5 and 10) is use for balance the regression loss of center and with(or height)
             gt_cy = (gt_cy - anchor_cy) / anchor_h / self._prior_scaling[0]
@@ -243,7 +252,8 @@ class AnchorEncoder(object):
             return tf.split(tf.stack(self.center2point(pred_cy, pred_cx, pred_h, pred_w), axis=-1), num_anchors_per_layer, axis=0)
 
     def ext_decode_all_anchors(self, pred_location, all_anchors, all_num_anchors_depth, all_num_anchors_spatial):
-        assert (len(all_num_anchors_depth)==len(all_num_anchors_spatial)) and (len(all_num_anchors_depth)==len(all_anchors)), 'inconsist num layers for anchors.'
+        assert (len(all_num_anchors_depth) == len(all_num_anchors_spatial)) and (
+            len(all_num_anchors_depth) == len(all_anchors)), 'inconsist num layers for anchors.'
         with tf.name_scope('ext_decode_all_anchors', values=[pred_location]):
             num_anchors_per_layer = []
             for ind in range(len(all_anchors)):
@@ -256,7 +266,8 @@ class AnchorEncoder(object):
             list_anchors_xmax = []
             tiled_allowed_borders = []
             for ind, anchor in enumerate(all_anchors):
-                anchors_ymin_, anchors_xmin_, anchors_ymax_, anchors_xmax_ = self.center2point(anchor[0], anchor[1], anchor[2], anchor[3])
+                anchors_ymin_, anchors_xmin_, anchors_ymax_, anchors_xmax_ = self.center2point(
+                    anchor[0], anchor[1], anchor[2], anchor[3])
 
                 list_anchors_ymin.append(tf.reshape(anchors_ymin_, [-1]))
                 list_anchors_xmin.append(tf.reshape(anchors_xmin_, [-1]))
@@ -268,14 +279,16 @@ class AnchorEncoder(object):
             anchors_ymax = tf.concat(list_anchors_ymax, 0, name='concat_ymax')
             anchors_xmax = tf.concat(list_anchors_xmax, 0, name='concat_xmax')
 
-            anchor_cy, anchor_cx, anchor_h, anchor_w = self.point2center(anchors_ymin, anchors_xmin, anchors_ymax, anchors_xmax)
+            anchor_cy, anchor_cx, anchor_h, anchor_w = self.point2center(
+                anchors_ymin, anchors_xmin, anchors_ymax, anchors_xmax)
 
-            pred_h = tf.exp(pred_location[:,-2] * self._prior_scaling[2]) * anchor_h
+            pred_h = tf.exp(pred_location[:, -2] * self._prior_scaling[2]) * anchor_h
             pred_w = tf.exp(pred_location[:, -1] * self._prior_scaling[3]) * anchor_w
             pred_cy = pred_location[:, 0] * self._prior_scaling[0] * anchor_h + anchor_cy
             pred_cx = pred_location[:, 1] * self._prior_scaling[1] * anchor_w + anchor_cx
 
             return tf.split(tf.stack(self.center2point(pred_cy, pred_cx, pred_h, pred_w), axis=-1), num_anchors_per_layer, axis=0)
+
 
 class AnchorCreator(object):
     def __init__(self, img_shape, layers_shapes, anchor_scales, extra_anchor_scales, anchor_ratios, layer_steps):
@@ -289,7 +302,7 @@ class AnchorCreator(object):
         self._layer_steps = layer_steps
         self._anchor_offset = [0.5] * len(self._layers_shapes)
 
-    def get_layer_anchors(self, layer_shape, anchor_scale, extra_anchor_scale, anchor_ratio, layer_step, offset = 0.5):
+    def get_layer_anchors(self, layer_shape, anchor_scale, extra_anchor_scale, anchor_ratio, layer_step, offset=0.5):
         ''' assume layer_shape[0] = 6, layer_shape[1] = 5
         x_on_layer = [[0, 1, 2, 3, 4],
                        [0, 1, 2, 3, 4],
@@ -332,8 +345,8 @@ class AnchorCreator(object):
             # y_on_image, x_on_image: layers_shapes[0] * layers_shapes[1]
             # h_on_image, w_on_image: num_anchors_along_depth
             return tf.expand_dims(y_on_image, axis=-1), tf.expand_dims(x_on_image, axis=-1), \
-                    tf.constant(list_h_on_image, dtype=tf.float32), \
-                    tf.constant(list_w_on_image, dtype=tf.float32), num_anchors_along_depth, num_anchors_along_spatial
+                tf.constant(list_h_on_image, dtype=tf.float32), \
+                tf.constant(list_w_on_image, dtype=tf.float32), num_anchors_along_depth, num_anchors_along_spatial
 
     def get_all_anchors(self):
         all_anchors = []
@@ -350,4 +363,3 @@ class AnchorCreator(object):
             all_num_anchors_depth.append(anchors_this_layer[-2])
             all_num_anchors_spatial.append(anchors_this_layer[-1])
         return all_anchors, all_num_anchors_depth, all_num_anchors_spatial
-

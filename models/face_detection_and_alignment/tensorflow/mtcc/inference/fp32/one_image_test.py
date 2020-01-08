@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 # coding:utf-8
@@ -49,7 +49,6 @@ FLAGS = flags.FLAGS
 print(FLAGS.num_inter_threads)
 print(FLAGS.num_intra_threads)
 print(FLAGS.ckpt)
-
 
 
 test_mode = "ONet"
@@ -100,7 +99,7 @@ all_boxes, landmarks = mtcnn_detector.detect_face(test_data)
 end = time.time()
 count = 0
 
-accuracy = 0;
+accuracy = 0
 for imagepah in gt_imdb:
     for bbox in all_boxes[count]:
         accuracy = accuracy + bbox[4]
@@ -129,7 +128,7 @@ for imagepath in gt_imdb:
     count = count + 1
     cv2.imwrite("result_landmark/%d.png" %(count),image)
     #cv2.imshow("lala",image)
-    #cv2.waitKey(0)    
+    #cv2.waitKey(0)
 """
 '''
 for data in test_data:

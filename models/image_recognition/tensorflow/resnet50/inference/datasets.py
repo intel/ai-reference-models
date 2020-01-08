@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
@@ -47,50 +47,51 @@ IMAGENET_NUM_TRAIN_IMAGES = 1281167
 IMAGENET_NUM_VAL_IMAGES = 50000
 IMAGENET_NUM_CLASSES = 1000
 
+
 class Dataset(object):
-  """Abstract class for cnn benchmarks dataset."""
+    """Abstract class for cnn benchmarks dataset."""
 
-  def __init__(self, name, data_dir=None):
-    self.name = name
-    if data_dir is None:
-      raise ValueError('Data directory not specified')
-    self.data_dir = data_dir
+    def __init__(self, name, data_dir=None):
+        self.name = name
+        if data_dir is None:
+            raise ValueError('Data directory not specified')
+        self.data_dir = data_dir
 
-  def tf_record_pattern(self, subset):
-    return os.path.join(self.data_dir, '%s-*-of-*' % subset)
+    def tf_record_pattern(self, subset):
+        return os.path.join(self.data_dir, '%s-*-of-*' % subset)
 
-  def reader(self):
-    return tf.TFRecordReader()
+    def reader(self):
+        return tf.TFRecordReader()
 
-  @abstractmethod
-  def num_classes(self):
-    pass
+    @abstractmethod
+    def num_classes(self):
+        pass
 
-  @abstractmethod
-  def num_examples_per_epoch(self, subset):
-    pass
+    @abstractmethod
+    def num_examples_per_epoch(self, subset):
+        pass
 
-  def __str__(self):
-    return self.name
+    def __str__(self):
+        return self.name
 
 
 class ImagenetData(Dataset):
 
-  def __init__(self, data_dir=None):
-    super(ImagenetData, self).__init__('ImageNet', data_dir)
+    def __init__(self, data_dir=None):
+        super(ImagenetData, self).__init__('ImageNet', data_dir)
 
-  def num_classes(self):
-    return IMAGENET_NUM_CLASSES
+    def num_classes(self):
+        return IMAGENET_NUM_CLASSES
 
-  def num_examples_per_epoch(self, subset='train'):
-    if subset == 'train':
-      return IMAGENET_NUM_TRAIN_IMAGES
-    elif subset == 'validation':
-      return IMAGENET_NUM_VAL_IMAGES
-    elif subset == 'calibrate' or subset == 'calibration':
-      return 100
-    else:
-      raise ValueError('Invalid data subset "%s"' % subset)
+    def num_examples_per_epoch(self, subset='train'):
+        if subset == 'train':
+            return IMAGENET_NUM_TRAIN_IMAGES
+        elif subset == 'validation':
+            return IMAGENET_NUM_VAL_IMAGES
+        elif subset == 'calibrate' or subset == 'calibration':
+            return 100
+        else:
+            raise ValueError('Invalid data subset "%s"' % subset)
 
-  def get_image_preprocessor(self):
-    return preprocessing.RecordInputImagePreprocessor
+    def get_image_preprocessor(self):
+        return preprocessing.RecordInputImagePreprocessor
