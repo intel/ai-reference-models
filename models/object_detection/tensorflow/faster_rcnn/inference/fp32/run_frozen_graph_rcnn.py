@@ -137,8 +137,8 @@ def run_inference_for_single_image(graph):
         run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
         run_metadata = tf.RunMetadata()
       total_duration = 0
-      if args.steps is not None:
-        print("steps is not none! steps = " + str(args.steps))
+      if args.steps is not None and args.steps < 20:
+        print("This model has set 20 warm-up steps, please enlarge your steps number")
       for index, image_path in enumerate(TEST_IMAGE_PATHS):
         image = Image.open(image_path)
         # the array based representation of the image will be used later in order to prepare the

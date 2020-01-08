@@ -39,7 +39,7 @@ parser.add_argument('-v', '--visualize', help='Whether to visulize the output im
 parser.add_argument('-t', '--timeline', help='Output file name for TF timeline', type=str, default=None)
 parser.add_argument('-e', '--evaluate_tensor', help='Full tensor name to evaluate', type=str, default=None)
 parser.add_argument('-p', '--print_accuracy', help='Print accuracy results', action='store_true')
-parser.add_argument('-n', '--number_of_steps', help='Run for n number of steps', type=int, default=None)
+parser.add_argument('-n', '--steps', help='Run for n number of steps', type=int, default=None)
 parser.add_argument('--num-inter-threads', help='Num inter threads', type=int, default=None, dest="num_inter_threads")
 parser.add_argument('--num-intra-threads', help='Num intra threads', type=int, default=None, dest="num_intra_threads")
 
@@ -137,6 +137,8 @@ def run_inference_for_single_image(graph):
         run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
         run_metadata = tf.RunMetadata()
       total_duration = 0
+      if args.steps is not None and args.steps < 20:
+        print("This model has set 20 warm-up steps, please enlarge your steps number")
       for index, image_path in enumerate(TEST_IMAGE_PATHS):
         image = Image.open(image_path)
         # the array based representation of the image will be used later in order to prepare the
@@ -165,12 +167,12 @@ def run_inference_for_single_image(graph):
           if index == 4999:
             print('Avg. Duration per Step:' + str(total_duration / 5000))
 
-        if args.number_of_steps is not None:
+        if args.steps is not None:
           if args.single_image:
-            sys.exit("single_iamge and number_of_steps cannot be both enabled!")
-          elif index == (args.number_of_steps - 1):
+            sys.exit("single_iamge and steps cannot be both enabled!")
+          elif index == (args.steps - 1):
             print('Avg. Duration per Step:' +
-                   str(total_duration / (args.number_of_steps - 20)))
+                   str(total_duration / (args.steps - 20)))
             break
 
         if args.timeline is not None:
