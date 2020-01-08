@@ -387,7 +387,7 @@ function gnmt() {
 
     if [ ${MODE} == "inference" ]; then
       if [ ${PRECISION} == "fp32" ]; then
-
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
         CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
         $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
         $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
