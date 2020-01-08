@@ -135,7 +135,7 @@ $ python launch_benchmark.py \
     --in-graph $MODEL_WORK_DIR/rfcn_resnet101_int8_coco_pretrained_model.pb \
     --verbose \
     --benchmark-only \
-    -- number_of_steps=500
+    -- steps=500
 ```
 
 Or for accuracy where the `--data-location` is the path the directory
@@ -319,9 +319,31 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-7. Run the `launch_benchmark.py` script from the 
-[intelai/models](https://github.com/intelai/models) repo
-, with the appropriate parameters including: the `--data-location` is the path the directory
+7. Clone the [intelai/models](https://github.com/intelai/models) repo
+and then run the scripts for either batch/online inference performance or accuracy.  
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+Run for batch and online inference where the `--data-location`
+is the path to the directory with the raw coco validation images:
+```
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
+    --model-name rfcn \
+    --mode inference \
+    --precision fp32 \
+    --framework tensorflow \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location $MODEL_WORK_DIR/val/val2017 \
+    --in-graph $MODEL_WORK_DIR/rfcn_resnet101_fp32_coco_pretrained_model.pb \
+    --verbose \
+    --benchmark-only \
+    -- steps=500
+```
+
+Or for accuracy where the `--data-location` is the path the directory
 where your `coco_val.record` file is located and the `--in-graph` is
 the pre-trained graph located in the pre-trained model directory (from step 4):
 ```

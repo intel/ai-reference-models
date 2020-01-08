@@ -29,6 +29,9 @@ from common.base_model_init import set_env_var
 class ModelInitializer(BaseModelInitializer):
     accuracy_script = "coco_mAP.sh"
     accuracy_script_path = ""
+    benchmark_script = "run_rfcn_inference.py"
+    perf_script_path = ""
+    command = []
 
     def run_inference_sanity_checks(self, args, custom_args):
         if args.batch_size != -1 and args.batch_size != 1:
@@ -41,9 +44,9 @@ class ModelInitializer(BaseModelInitializer):
         self.accuracy_script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
             self.accuracy_script)
-        self.benchmark_script = os.path.join(
+        self.perf_script_path = os.path.join(
             self.args.intelai_models, self.args.mode,
-            self.args.precision, "eval.py")
+            self.args.precision, self.benchmark_script)
 
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
@@ -61,37 +64,39 @@ class ModelInitializer(BaseModelInitializer):
                                          "research")
 
     def run_benchmark(self):
-        command_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + self.benchmark_script
+        # Get the command previx, but numactl is added later
+        self.command.append(self.get_command_prefix(self.args.socket_id, numactl=False))
 
-        # set num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads()
-
-        if self.args.socket_id == -1:
-            if self.args.num_cores == 1:
-                command_prefix = "taskset -c 0 " + \
-                                 command_prefix
-                self.args.num_intra_threads = 1
+        if self.args.socket_id != -1:
+            self.command.append("numactl")
+            if self.args.socket_id:
+                socket_id = self.args.socket_id
             else:
-                command_prefix = "taskset -c 0-" + \
-                                 str(self.args.num_cores - 1) + \
-                                 " " + command_prefix
+                socket_id = "0"
 
-        config_file_path = os.path.join(self.args.checkpoint,
-                                        self.args.config_file)
+            if self.args.num_cores != -1:
+                self.command.append("-C")
+                self.command.append("+0")
+                i = 1
+                while i < self.args.num_cores:
+                    self.command.append(",{}".format(i))
+                    i += i
 
-        run_cmd = command_prefix + \
-            " --inter_op " + str(self.args.num_inter_threads) + \
-            " --intra_op " + str(self.args.num_intra_threads) + \
-            " --omp " + str(self.omp_num_threads) + \
-            " --pipeline_config_path " + config_file_path + \
-            " --checkpoint_dir " + str(self.args.checkpoint) + \
-            " --eval_dir " + self.research_dir + \
-            "/object_detection/models/rfcn/eval " + \
-            " --logtostderr " + \
-            " --blocktime=0 " + \
-            " --run_once=True"
-        self.run_command(run_cmd)
+            self.command.append("-N")
+            self.command.append("{}".format(socket_id))
+            self.command.append("-m")
+            self.command.append("{}".format(socket_id))
+
+        self.command += (self.python_exe, self.perf_script_path)
+        self.command += ("-m", self.args.model_source_dir)
+        self.command += ("-g", self.args.input_graph)
+        self.command += ("--num-intra-threads", str(self.args.num_intra_threads))
+        self.command += ("--num-inter-threads", str(self.args.num_inter_threads))
+        if self.args.steps:
+            self.command += ("-x", "{}".format(self.args.steps))
+        if self.args.data_location:
+            self.command += ("-d", self.args.data_location)
+        self.run_command(" ".join(self.command))
 
     def parse_custom_args(self):
         if self.custom_args:
@@ -101,6 +106,12 @@ class ModelInitializer(BaseModelInitializer):
             parser.add_argument("-q", "--split",
                                 help="Location of accuracy data",
                                 type=str, default=None)
+            parser = argparse.ArgumentParser()
+            mutex_group = parser.add_mutually_exclusive_group()
+            mutex_group.add_argument("-x", "--steps",
+                                     help="Run for n number of steps",
+                                     type=int, default=None)
+
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)
 

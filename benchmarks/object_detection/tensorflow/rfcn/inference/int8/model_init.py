@@ -66,7 +66,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.custom_args:
             parser = argparse.ArgumentParser()
             mutex_group = parser.add_mutually_exclusive_group()
-            mutex_group.add_argument("-x", "--number_of_steps",
+            mutex_group.add_argument("-x", "--steps",
                                      help="Run for n number of steps",
                                      type=int, default=None)
             mutex_group.add_argument(
@@ -140,8 +140,8 @@ class ModelInitializer(BaseModelInitializer):
         self.command += ("-g", self.args.input_graph)
         self.command += ("--num-intra-threads", str(self.args.num_intra_threads))
         self.command += ("--num-inter-threads", str(self.args.num_inter_threads))
-        if self.args.number_of_steps:
-            self.command += ("-x", "{}".format(self.args.number_of_steps))
+        if self.args.steps:
+            self.command += ("-x", "{}".format(self.args.steps))
         if self.args.visualize:
             self.command += "-v"
         if self.args.timeline:
