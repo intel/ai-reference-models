@@ -1,0 +1,68 @@
+diff --git a/research/object_detection/inference/detection_inference.py b/research/object_detection/inference/detection_inference.py
+old mode 100644
+new mode 100755
+index dc66686f..4d459a55
+--- a/research/object_detection/inference/detection_inference.py
++++ b/research/object_detection/inference/detection_inference.py
+@@ -15,9 +15,12 @@
+ """Utility functions for detection inference."""
+ from __future__ import division
+ 
++import os
++
+ import tensorflow as tf
+ 
+ from object_detection.core import standard_fields
++from object_detection.utils import label_map_util
+ 
+ 
+ def build_input(tfrecord_paths):
+@@ -65,7 +68,7 @@ def build_inference_graph(image_tensor, inference_graph_path):
+     detected_labels_tensor: Detected labels. Int64 tensor,
+         shape=[num_detections]
+   """
+-  with tf.gfile.Open(inference_graph_path, 'r') as graph_def_file:
++  with tf.gfile.Open(inference_graph_path, 'rb') as graph_def_file:
+     graph_content = graph_def_file.read()
+   graph_def = tf.GraphDef()
+   graph_def.MergeFromString(graph_content)
+@@ -134,6 +137,13 @@ def infer_detections_and_add_to_example(
+           detection_bbox_xmax].float_list.value[:] = detected_boxes[3]
+   feature[standard_fields.TfExampleFields.
+           detection_class_label].int64_list.value[:] = detected_classes
++  label_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../data/mscoco_label_map.pbtxt')
++  if feature[standard_fields.TfExampleFields.object_class_text].HasField("bytes_list"):
++    cl = feature[standard_fields.TfExampleFields.object_class_text].bytes_list.value
++    cl = [x if type(x) == 'str' else x.decode('utf-8') for x in cl]
++  lm = label_map_util.get_label_map_dict(label_file, use_display_name = True)
++  label_id = [lm[x] for x in cl]
++  feature[standard_fields.TfExampleFields.object_class_label].int64_list.value[:] = label_id
+ 
+   if discard_image_pixels:
+     del feature[standard_fields.TfExampleFields.image_encoded]
+diff --git a/research/object_detection/metrics/tf_example_parser.py b/research/object_detection/metrics/tf_example_parser.py
+index 9a5f130f..fa361bf5 100644
+--- a/research/object_detection/metrics/tf_example_parser.py
++++ b/research/object_detection/metrics/tf_example_parser.py
+@@ -44,7 +44,7 @@ class StringParser(data_parser.DataToNumpyParser):
+     self.field_name = field_name
+ 
+   def parse(self, tf_example):
+-    return "".join(tf_example.features.feature[self.field_name]
++    return b"".join(tf_example.features.feature[self.field_name]
+                    .bytes_list.value) if tf_example.features.feature[
+                        self.field_name].HasField("bytes_list") else None
+ 
+diff --git a/research/object_detection/utils/object_detection_evaluation.py b/research/object_detection/utils/object_detection_evaluation.py
+index 5826c581..450090f0 100644
+--- a/research/object_detection/utils/object_detection_evaluation.py
++++ b/research/object_detection/utils/object_detection_evaluation.py
+@@ -304,7 +304,7 @@ class ObjectDetectionEvaluator(DetectionEvaluator):
+       if idx + self._label_id_offset in category_index:
+         category_name = category_index[idx + self._label_id_offset]['name']
+         try:
+-          category_name = unicode(category_name, 'utf-8')
++          category_name = str(category_name, 'utf-8')
+         except TypeError:
+           pass
+         category_name = unicodedata.normalize(

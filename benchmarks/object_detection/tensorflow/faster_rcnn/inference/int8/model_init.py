@@ -15,8 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
-#
 
 import argparse
 import os
@@ -45,10 +43,14 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        self.validate_args()
+        # set num_inter_threads and num_intra_threds
+        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_inter_threads,
+                                         num_intra_threads=self.args.num_intra_threads)
+        omp_num_threads = self.args.num_intra_threads if self.args.num_cores == -1 else self.args.num_cores
+        set_env_var("OMP_NUM_THREADS", omp_num_threads)
 
-        # set num_inter_threads and num_intra_threds (override inter threads to 2)
-        self.set_num_inter_intra_threads(num_inter_threads=2)
+        self.parse_args()
+        self.validate_args()
 
     def validate_args(self):
         if not (self.args.batch_size == -1 or self.args.batch_size == 1):
@@ -74,20 +76,18 @@ class ModelInitializer(BaseModelInitializer):
     def parse_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
-            parser.add_argument("-n", "--number-of-steps",
+            parser.add_argument("-n", "--steps",
                                 help="Run for n number of steps",
                                 type=int, default=None)
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)
 
     def run_perf_command(self):
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-        self.parse_args()
         command = self.get_command_prefix(self.args.socket_id)
         command += " {} ".format(self.python_exe) + self.perf_script_path
         command += " -g " + self.args.input_graph
         if self.custom_args:
-            command += " -n " + str(self.args.number_of_steps)
+            command += " -n " + str(self.args.steps)
         if self.args.socket_id != -1:
             command += " -x "
         command += \
@@ -97,12 +97,6 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(command)
 
     def run_accuracy_command(self):
-        num_cores = str(self.platform_util.num_cores_per_socket)
-        if self.args.num_cores != -1:
-            num_cores = str(self.args.num_cores)
-
-        set_env_var("OMP_NUM_THREADS", num_cores)
-
         command = "{} {} {} {}".format(self.accuracy_script_path,
                                        self.args.input_graph,
                                        self.args.data_location,

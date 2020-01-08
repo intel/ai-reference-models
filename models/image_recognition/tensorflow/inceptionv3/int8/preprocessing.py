@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
@@ -54,11 +54,11 @@ from tensorflow.python.ops import control_flow_ops
 
 def parse_example_proto(example_serialized):
     """Parses an Example proto containing a training example of an image.
-  
+
     The output of the build_image_data.py image preprocessing script is a dataset
     containing serialized Example protocol buffers. Each Example proto contains
     the following fields:
-  
+
       image/height: 462
       image/width: 581
       image/colorspace: 'RGB'
@@ -74,11 +74,11 @@ def parse_example_proto(example_serialized):
       image/format: 'JPEG'
       image/filename: 'ILSVRC2012_val_00041207.JPEG'
       image/encoded: <JPEG encoded string>
-  
+
     Args:
       example_serialized: scalar Tensor tf.string containing a serialized
         Example protocol buffer.
-  
+
     Returns:
       image_buffer: Tensor tf.string containing the contents of a JPEG file.
       label: Tensor tf.int32 containing the label.
@@ -125,12 +125,12 @@ def parse_example_proto(example_serialized):
 
 def get_image_resize_method(resize_method, batch_position=0):
     """Get tensorflow resize method.
-  
+
     If resize_method is 'round_robin', return different methods based on batch
     position in a round-robin fashion. NOTE: If the batch size is not a multiple
     of the number of methods, then the distribution of methods will not be
     uniform.
-  
+
     Args:
       resize_method: (string) nearest, bilinear, bicubic, area, or round_robin.
       batch_position: position of the image in a batch. NOTE: this argument can
@@ -174,7 +174,7 @@ def get_image_resize_method(resize_method, batch_position=0):
 
 def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
     """Decode a JPEG string into one 3-D float image Tensor.
-  
+
     Args:
       image_buffer: scalar string Tensor.
       scope: Optional scope for op_scope.
@@ -201,13 +201,13 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
 def preprocess_for_eval(image, height, width,
                         central_fraction=0.875, scope=None):
     """Prepare one image for evaluation.
-  
+
     If height and width are specified it would output an image with that size by
     applying resize_bilinear.
-  
+
     If central_fraction is specified it would crop the central fraction of the
     input image.
-  
+
     Args:
       image: 3-D Tensor of image. If dtype is tf.float32 then the range should be
         [0, 1], otherwise it would converted to tf.float32 assuming that the range
@@ -242,12 +242,12 @@ def preprocess_for_eval(image, height, width,
 
 def apply_with_random_selector(x, func, num_cases):
     """Computes func(x, sel), with sel sampled from [0...num_cases-1].
-  
+
     Args:
       x: input Tensor.
       func: Python function to apply.
       num_cases: Python int32, number of cases to sample sel from.
-  
+
     Returns:
       The result of func(x, sel), where func receives the value of the
       selector as a python integer, but sel is sampled dynamically.
@@ -261,12 +261,12 @@ def apply_with_random_selector(x, func, num_cases):
 
 def distort_color(image, color_ordering=0, fast_mode=True, scope=None):
     """Distort the color of a Tensor image.
-  
+
     Each color distortion is non-commutative and thus ordering of the color ops
     matters. Ideally we would randomly permute the ordering of the color ops.
     Rather then adding that level of complication, we select a distinct ordering
     of color ops for each preprocessing thread.
-  
+
     Args:
       image: 3-D Tensor containing single image in [0, 1].
       color_ordering: Python int, a type of distortion (valid values: 0-3).
@@ -321,9 +321,9 @@ def distorted_bounding_box_crop(image,
                                 max_attempts=100,
                                 scope=None):
     """Generates cropped_image using a one of the bboxes randomly distorted.
-  
+
     See `tf.image.sample_distorted_bounding_box` for more documentation.
-  
+
     Args:
       image: 3-D Tensor of image (it will be converted to floats in [0, 1]).
       bbox: 3-D float Tensor of bounding boxes arranged [1, num_boxes, coords]
@@ -376,11 +376,11 @@ def preprocess_for_train(image, height, width, bbox,
                          scope=None,
                          add_image_summaries=True):
     """Distort one image for training a network.
-  
+
     Distorting images provides a useful technique for augmenting the data
     set during training in order to make the network invariant to aspects
     of the image that do not effect the label.
-  
+
     Args:
       image: 3-D Tensor of image. If dtype is tf.float32 then the range should be
         [0, 1], otherwise it would converted to tf.float32 assuming that the range
@@ -462,12 +462,12 @@ def preprocess_for_train(image, height, width, bbox,
 def distort_color(image, batch_position=0, distort_color_in_yiq=False,
                   scope=None):
     """Distort the color of the image.
-  
+
     Each color distortion is non-commutative and thus ordering of the color ops
     matters. Ideally we would randomly permute the ordering of the color ops.
     Rather then adding that level of complication, we select a distinct ordering
     of color ops based on the position of the image in a batch.
-  
+
     Args:
       image: float32 Tensor containing single image. Tensor values should be in
         range [0, 1].

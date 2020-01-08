@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from __future__ import absolute_import
@@ -30,7 +30,7 @@ import sys
 from argparse import ArgumentParser
 from common import base_benchmark_util
 from common import platform_util
-from common.utils.validators import check_no_spaces, check_volume_mount
+from common.utils.validators import check_no_spaces, check_volume_mount, check_shm_size
 from common.base_model_init import BaseModelInitializer
 
 
@@ -75,6 +75,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                  "docker --volume flag (https://docs.docker.com/storage/volumes/). "
                  "This argument can only be used in conjunction with a --docker-image.",
             action="append", dest="custom_volumes", type=check_volume_mount)
+
+        arg_parser.add_argument(
+            "--shm-size",
+            help="Specify the size of docker /dev/shm. The format is <number><unit>. "
+                 "number must be greater than 0. Unit is optional and can be b (bytes), k (kilobytes), "
+                 "m (megabytes), or g (gigabytes).",
+            dest="shm_size", default="64m", type=check_shm_size)
 
         arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
@@ -177,6 +184,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "NUM_INTER_THREADS": args.num_inter_threads,
             "NUM_INTRA_THREADS": args.num_intra_threads,
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
+            "NUM_PROCESSES": args.num_processes,
+            "NUM_PROCESSES_PER_NODE": args.num_processes_per_node,
+            "NUM_TRAIN_STEPS": args.num_train_steps,
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "BENCHMARK_ONLY": args.benchmark_only,
             "ACCURACY_ONLY": args.accuracy_only,
@@ -188,23 +198,18 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         }
 
         # Add custom model args as env vars)
-        for custom_arg in args.model_args:
+        for custom_arg in args.model_args + self.unknown_args:
             if "=" not in custom_arg:
                 raise ValueError("Expected model args in the format "
                                  "`name=value` but received: {}".
                                  format(custom_arg))
             split_arg = custom_arg.split("=")
-            split_arg[0] = split_arg[0].replace("-", "_")
+            split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
 
         # Set the default value for NOINSTALL, if it's not explicitly set by the user
         if "NOINSTALL" not in env_var_dict:
-            if args.docker_image:
-                # For docker, we default to install dependencies
-                env_var_dict["NOINSTALL"] = "False"
-            else:
-                # For bare metal, we default to assume the user has set up their environment
-                env_var_dict["NOINSTALL"] = "True"
+            env_var_dict["NOINSTALL"] = "False"
 
         return env_var_dict
 
@@ -260,11 +265,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             env_var_dict["OMP_NUM_THREADS"] = self.args.num_intra_threads
 
         else:
-            mount_external_models_source = args.model_source_dir
             mount_intelai_models = intelai_models
 
             # Add env vars with bare metal settings
-            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
             env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
 
             if in_graph_path:
@@ -272,6 +275,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
             if checkpoint_path:
                 env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
+
+        if args.model_source_dir:
+            mount_external_models_source = args.model_source_dir
+            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path
@@ -381,8 +388,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.debug:
             docker_run_cmd.append("-it")
 
+        docker_shm_size = "--shm-size={}".format(args.shm_size)
         docker_run_cmd = docker_run_cmd + env_vars + volume_mounts + [
-            "--privileged", "-u", "root:root", "-w",
+            docker_shm_size, "--privileged", "-u", "root:root", "-w",
             workspace, args.docker_image, "/bin/bash"]
 
         if not args.debug:

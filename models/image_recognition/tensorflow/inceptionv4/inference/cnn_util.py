@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
@@ -38,11 +38,11 @@ import tensorflow as tf
 
 
 def tensorflow_version_tuple():
-  v = tf.__version__
-  major, minor, patch = v.split('.')
-  return (int(major), int(minor), patch)
+    v = tf.__version__
+    major, minor, patch = v.split('.')
+    return (int(major), int(minor), patch)
 
 
 def tensorflow_version():
-  vt = tensorflow_version_tuple()
-  return vt[0] * 1000 + vt[1]
+    vt = tensorflow_version_tuple()
+    return vt[0] * 1000 + vt[1]

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     total_accuracy1, total_accuracy5 = (0.0, 0.0)
     num_processed_images = 0
     num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
-                           - num_processed_images
+        - num_processed_images
 
     with tf.Session() as sess:
         sess_graph = tf.Session(graph=graph, config=config)
@@ -161,7 +161,7 @@ if __name__ == "__main__":
             total_accuracy5 += np_accuracy5
             print("Iteration time: %0.4f ms" % elapsed_time)
             print(
-                "Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
+                "Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)"
                 % (
-                num_processed_images, total_accuracy1 / num_processed_images,
-                total_accuracy5 / num_processed_images))
+                    num_processed_images, total_accuracy1 / num_processed_images,
+                    total_accuracy5 / num_processed_images))

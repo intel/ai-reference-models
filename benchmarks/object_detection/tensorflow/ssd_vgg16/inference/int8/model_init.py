@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from object_detection.tensorflow.ssd_vgg16.inference.ssd_vgg16_model_init import SSDVGG16ModelInitializer

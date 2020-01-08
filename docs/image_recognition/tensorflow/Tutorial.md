@@ -127,11 +127,11 @@ git clone https://github.com/IntelAI/models.git
 any other directory of your choice. 
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/resnet50_fp32_pretrained_model.pb
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet101_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/resnet101_fp32_pretrained_model.pb
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/inceptionv3_fp32_pretrained_model.pb
 ```
 Refer to following Readme files to get the latest locations of pretrained models <br>
 a. [ResNet50](/benchmarks/image_recognition/tensorflow/resnet50) <br>
