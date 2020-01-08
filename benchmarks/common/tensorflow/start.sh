@@ -570,26 +570,23 @@ function rfcn() {
   cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
   git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf_models.patch
 
-  split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      split_arg="--split=${split}"
+      CMD="${CMD} --split=${split}"
   fi
 
   if [ ${PRECISION} == "int8" ]; then
-      number_of_steps_arg=""
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          number_of_steps_arg="--number_of_steps=${number_of_steps}"
+
+      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+          CMD="${CMD} --steps=${steps}"
       fi
 
-      CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
 
   elif [ ${PRECISION} == "fp32" ]; then
-      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          echo "R-FCN requires -- config_file arg to be defined"
-          exit 1
+
+      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+          CMD="${CMD} --steps=${steps}"
       fi
 
-      CMD="${CMD} --config_file=${config_file} ${split_arg}"
   else
       echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
   fi
