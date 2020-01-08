@@ -64,31 +64,27 @@ class ModelInitializer (BaseModelInitializer):
         else:
             benchmark_script = os.path.join(
                 self.args.intelai_models, self.args.mode, self.args.precision,
-                "eval.py")
+                "run_frozen_graph_rcnn.py")
             self.command_prefix = \
                 self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + \
                 benchmark_script
 
-            config_file_path = os.path.join(self.args.checkpoint,
-                                            self.args.config_file)
             self.run_cmd = \
                 self.command_prefix + \
-                " --num_inter_threads " + \
+                " --num-inter-threads " + \
                 str(self.args.num_inter_threads) + \
-                " --num_intra_threads " + \
+                " --num-intra-threads " + \
                 str(self.args.num_intra_threads) + \
-                " --pipeline_config_path " + \
-                config_file_path + \
-                " --checkpoint_dir " + \
-                str(args.checkpoint) + \
-                " --eval_dir " + self.research_dir + \
-                "/object_detection/log/eval"
+                " -g " + self.args.input_graph + \
+                " -d " + self.args.data_location + \
+                " -n " + str(self.args.steps)
 
     def parse_custom_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
-            parser.add_argument("--config_file", default=None,
-                                dest="config_file", type=str)
+            parser.add_argument("-n", "--steps",
+                                help="Run for n number of steps",
+                                type=int, default=None)
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)
 

@@ -126,8 +126,33 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-8. Run the `launch_benchmark.py` script from the intelai/models repo
-, with the appropriate parameters including: the `--data-location` is the path the directory
+8. Run the `launch_benchmark.py` script from the intelai/models repo,
+with the appropriate parameters. To run on single socket use `--socket_id` switch,
+by default it will be using all available sockets. Optional parameter `steps`
+(default value = 5000) can be added at the end of command after `--` as shown below:
+
+Run batch and online inference using the following command. 
+The `--data-location` is the path to the directory that contains the raw coco dataset 
+validation images which you downloaded and unzipped:
+
+```
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+$ python launch_benchmark.py \
+    --data-location $MODEL_WORK_DIR/val/val2017 \
+    --model-source-dir $MODEL_WORK_DIR/tf_models  \
+    --model-name faster_rcnn \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --socket-id 0 \
+    --in-graph $MODEL_WORK_DIR/faster_rcnn_fp32_pretrained_model.pb \
+    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --benchmark-only \
+    -- steps=5000
+```
+
+Or for accuracy where the `--data-location` is the path the directory
 where your `coco_val.record` file is located and the `--in-graph` is
 the pre-trained graph located in the pre-trained model directory (from step 5):
 ```
@@ -224,7 +249,7 @@ Resolving deltas: 100% (3/3), done.
 
 4. Run the `launch_benchmark.py` script from the intelai/models repo,
 with the appropriate parameters. To run on single socket use `--socket_id` switch,
-by default it will be using all available sockets. Optional parameter `number_of_steps`
+by default it will be using all available sockets. Optional parameter `steps`
 (default value = 5000) can be added at the end of command after `--` as shown below:
 
 Run batch and online inference using the following command. 
@@ -245,7 +270,7 @@ $ python launch_benchmark.py \
     --in-graph $MODEL_WORK_DIR/faster_rcnn_int8_pretrained_model.pb \
     --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
     --benchmark-only \
-    -- number_of_steps=5000
+    -- steps=5000
 ```
 
 Or for accuracy where the `--data-location` is the path the directory
