@@ -457,13 +457,11 @@ function maskrcnn() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-      pip3 install --force-reinstall scipy==1.2.1 Pillow
-
-      # install cocoapi
-      get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
+      pip install matplotlib==3.0.3 pycocotools cython scikit-image==0.15.0 keras scipy==1.2.1 numpy==1.17.4
+      python_path=`which python`
+      pycocotools_path=`dirname $python_path`/../lib/python*/*/pycocotools
+      sed -i "s;unicode;str;g" $pycocotools_path/coco.py
     fi
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
     cd ${original_dir}
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
