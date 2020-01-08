@@ -76,7 +76,7 @@ class ModelInitializer(BaseModelInitializer):
     def parse_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
-            parser.add_argument("-n", "--number-of-steps",
+            parser.add_argument("-n", "--steps",
                                 help="Run for n number of steps",
                                 type=int, default=None)
             self.args = parser.parse_args(self.custom_args,
@@ -87,7 +87,7 @@ class ModelInitializer(BaseModelInitializer):
         command += " {} ".format(self.python_exe) + self.perf_script_path
         command += " -g " + self.args.input_graph
         if self.custom_args:
-            command += " -n " + str(self.args.number_of_steps)
+            command += " -n " + str(self.args.steps)
         if self.args.socket_id != -1:
             command += " -x "
         command += \

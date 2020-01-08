@@ -327,18 +327,12 @@ function faster_rcnn() {
     git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf_models.patch
 
     if [ ${PRECISION} == "fp32" ]; then
-      if [ -n "${config_file}" ]; then
-        CMD="${CMD} --config_file=${config_file}"
-      fi
-
-      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        echo "Faster R-CNN requires -- config_file arg to be defined"
-        exit 1
+      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --steps=${steps}"
       fi
     elif [ ${PRECISION} == "int8" ]; then
-      number_of_steps_arg=""
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        CMD="${CMD} --number-of-steps=${number_of_steps}"
+      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --steps=${steps}"
       fi
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
