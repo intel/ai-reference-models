@@ -101,14 +101,10 @@ class ModelInitializer(BaseModelInitializer):
     def parse_custom_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
-            parser.add_argument("--config_file", default=None,
-                                dest="config_file", type=str)
             parser.add_argument("-q", "--split",
                                 help="Location of accuracy data",
                                 type=str, default=None)
-            parser = argparse.ArgumentParser()
-            mutex_group = parser.add_mutually_exclusive_group()
-            mutex_group.add_argument("-x", "--steps",
+            parser.add_argument("-x", "--steps",
                                      help="Run for n number of steps",
                                      type=int, default=None)
 
