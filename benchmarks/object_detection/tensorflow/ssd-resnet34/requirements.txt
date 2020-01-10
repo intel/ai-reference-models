@@ -1,3 +1,4 @@
 Cython
 pycocotools
+matplotlib
 numpy < 1.18.0

@@ -634,10 +634,7 @@ function ssd-resnet34() {
       if [ ${MODE} == "inference" ]; then
         if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
           if [ ${NOINSTALL} != "True" ]; then
-            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-            do
-              pip install $line
-            done
+            pip install -r ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt
           fi
 
           old_dir=${PWD}
@@ -663,10 +660,7 @@ function ssd-resnet34() {
               sh install.sh --silent silent.cfg
               source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
             fi
-            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-            do
-              pip install $line
-            done
+            pip install -r ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt
             pip install horovod
           fi
 
