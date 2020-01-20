@@ -955,13 +955,12 @@ def main(_):
 
     start = time.time()
     result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps)
-    end = time.time()
+    end = time.time() - start
     result['global_step'] = str(eval_steps)
-    result['latency_total'] = str(end - start)
-    result['latency_per_step'] = str((end-start)/eval_steps)
+    result['latency_total'] = str(end)
+    result['latency_per_step'] = str(end/eval_steps)
     if FLAGS.eval_batch_size != 1:
-      result['samples_per_sec'] = str(
-          FLAGS.eval_batch_size/((end-start)/eval_steps))
+      result['samples_per_sec'] = str(FLAGS.eval_batch_size/(end/eval_steps))
 
     output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
     with tf.compat.v1.gfile.GFile(output_eval_file, "w") as writer:
