@@ -66,14 +66,7 @@ class ModelInitializer(BaseModelInitializer):
             self.args.task_name, self.args.max_seq_length, self.args.batch_size, self.args.learning_rate)
         self.run_cmd += " --num_inter_threads={} --num_intra_threads={}".format(
             self.args.num_inter_threads, self.args.num_intra_threads)
-        self.run_cmd += " --do_eval=true"
-
-        # Test accuracy if needed
-        if self.args.accuracy_only:
-          self.run_cmd += " --do_train=true --num_train_epochs=3.0 --train_batch_size=32"
-        else:
-          self.run_cmd += " --do_train=false"
-
+        self.run_cmd += " --do_train=false --do_eval=true"
 
     def run(self):
         if self.run_cmd:
