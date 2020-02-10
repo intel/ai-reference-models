@@ -5,4 +5,4 @@ lxml
 jupyter
 matplotlib
 pycocotools
-tensorflow-addons==0.5.0
+tensorflow-addons==0.8.1
