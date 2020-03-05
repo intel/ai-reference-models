@@ -56,7 +56,8 @@ class ModelInitializer(BaseModelInitializer):
 
         omp_num_threads = platform_util.num_cores_per_socket
 
-        set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
+        # set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
+        set_env_var("OMP_NUM_THREADS", 28)
 
         cmd_args = " --data_dir {0}".format(self.args.data_location)
         cmd_args += " --batch_size {0}".format(self.args.batch_size)
@@ -67,20 +68,23 @@ class ModelInitializer(BaseModelInitializer):
         cmd_args += " --num_intra_threads {0}".format(self.args.num_intra_threads)
         cmd_args += " --model=ssd300 --data_name coco"
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
-        cmd_args += " --variable_update=horovod --horovod_device=cpu"
+        # cmd_args += " --variable_update=horovod --horovod_device=cpu"
+        # cmd_args += " --trace_file=ssd-rn34-trace-fp32-no-mpi.json --use_chrome_trace_format=True"
 
         multi_instance_param_list = ["-genv:I_MPI_PIN_DOMAIN=socket",
                                      "-genv:I_MPI_FABRICS=shm",
                                      "-genv:I_MPI_ASYNC_PROGRESS=1",
                                      "-genv:I_MPI_ASYNC_PROGRESS_PIN={},{}".format(0, self.args.num_intra_threads),
                                      "-genv:OMP_NUM_THREADS={}".format(self.args.num_intra_threads)]
-        self.cmd = self.get_multi_instance_train_prefix(multi_instance_param_list)
-        self.cmd += "{} ".format(self.python_exe)
+        # self.cmd = self.get_multi_instance_train_prefix(multi_instance_param_list)
+        # self.cmd += "{} ".format(self.python_exe)
+        self.cmd = "numactl --cpunodebind=0 --membind=0 {} ".format(self.python_exe)
 
         self.training_script_dir = os.path.join('/tmp/benchmark_ssd-resnet34/scripts/tf_cnn_benchmarks')
         training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
 
         self.cmd = self.cmd + training_script + cmd_args
+        print("Ran command: {}".format(self.cmd))
 
     def run(self):
         original_dir = os.getcwd()
