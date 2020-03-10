@@ -24,10 +24,10 @@ from datetime import timedelta
 import collections
 import csv
 import os
-import modeling
-import optimization
+import inference.fp32.modeling as modeling
+import inference.fp32.optimization as optimization
 import time
-import tokenization
+import inference.fp32.tokenization as tokenization
 import tensorflow as tf
 
 tf.compat.v1.disable_v2_behavior()
@@ -150,6 +150,8 @@ class LoggerHook(tf.estimator.SessionRunHook):
     ms = duration.total_seconds() * 1000.00
     if self._step > self._warmup:
       self._total_duration += ms
+      if self._step % 100 == 0:
+        print("Current step: %d, time in ms: %.2f" %(self._step, ms))
     else:
       print("Warmup step: %d, time in ms: %.2f" %(self._step, ms))
 
@@ -636,7 +638,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
   with tf.compat.v1.variable_scope("loss"):
     if is_training:
       # I.e., 0.1 dropout
-      output_layer = tf.nn.dropout(output_layer, keep_prob=0.9)
+      output_layer = tf.compat.v1.nn.dropout(output_layer, keep_prob=0.9)
 
     logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
@@ -945,7 +947,7 @@ def main(_):
     # number of steps.
     if FLAGS.use_tpu:
       assert len(eval_examples) % FLAGS.eval_batch_size == 0
-    eval_steps = int(len(eval_examples) // FLAGS.eval_batch_size)
+    eval_steps = int(len(eval_examples) // FLAGS.eval_batch_size) + 1
 
     eval_drop_remainder = True if FLAGS.use_tpu else False
     eval_input_fn = file_based_input_fn_builder(
@@ -955,15 +957,13 @@ def main(_):
         drop_remainder=eval_drop_remainder)
 
     start = time.time()
-    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps,
-                                hooks=[LoggerHook()])
-    end = time.time()
+    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps, hooks=[LoggerHook()])
+    end = time.time() - start
     result['global_step'] = str(eval_steps)
-    result['latency_total'] = str(end - start)
-    result['latency_per_step'] = str((end-start)/eval_steps)
+    result['latency_total'] = str(end)
+    result['latency_per_step'] = str(end/eval_steps)
     if FLAGS.eval_batch_size != 1:
-      result['samples_per_sec'] = str(
-          FLAGS.eval_batch_size/((end-start)/eval_steps))
+      result['samples_per_sec'] = str(FLAGS.eval_batch_size/(end/eval_steps))
 
     output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
     with tf.compat.v1.gfile.GFile(output_eval_file, "w") as writer:
