@@ -55,8 +55,7 @@ class ModelInitializer(BaseModelInitializer):
         # model parameter control
         script_path = os.path.join(self.args.intelai_models, self.args.mode, self.args.precision, "run_classifier.py")
         self.run_cmd = self.get_command_prefix(self.args.socket_id) + "{} {}".format(self.python_exe, script_path)
-        output_dir = os.path.join(self.args.benchmark_dir, "common", self.args.framework, "logs")
-        self.run_cmd += " --data_dir={} --output_dir={}".format(self.args.data_location, output_dir)
+        self.run_cmd += " --data_dir={} --output_dir={}".format(self.args.data_location, format(self.args.output_dir))
         vocab_file = os.path.join(self.args.checkpoint, "vocab.txt")
         bert_config_file = os.path.join(self.args.checkpoint, "bert_config.json")
         init_checkpoint = os.path.join(self.args.checkpoint, "bert_model.ckpt")
@@ -66,7 +65,14 @@ class ModelInitializer(BaseModelInitializer):
             self.args.task_name, self.args.max_seq_length, self.args.batch_size, self.args.learning_rate)
         self.run_cmd += " --num_inter_threads={} --num_intra_threads={}".format(
             self.args.num_inter_threads, self.args.num_intra_threads)
-        self.run_cmd += " --do_train=false --do_eval=true"
+        self.run_cmd += " --do_eval=true"
+
+        # Test accuracy if needed
+        if self.args.accuracy_only:
+          self.run_cmd += " --do_train=true --num_train_epochs=3.0 --train_batch_size=32"
+        else:
+          self.run_cmd += " --do_train=false"
+
 
     def run(self):
         if self.run_cmd:
