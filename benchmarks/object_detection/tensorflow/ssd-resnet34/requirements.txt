@@ -6,3 +6,5 @@ jupyter
 matplotlib
 pycocotools
 tensorflow-addons==0.8.1
+opencv-python
+numpy==1.17.4
