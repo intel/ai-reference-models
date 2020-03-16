@@ -146,6 +146,7 @@ class BaseBenchmarkUtil(object):
             "-g", "--in-graph", help="Full path to the input graph ",
             dest="input_graph", default=None, type=check_valid_filename)
 
+
         self._common_arg_parser.add_argument(
             "-k", "--benchmark-only",
             help="For benchmark measurement only. If neither --benchmark-only "
