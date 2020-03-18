@@ -74,15 +74,15 @@ class ModelInitializer(BaseModelInitializer):
         self.run_cmd += " --inter-op-parallelism-threads {0}".format(self.args.num_inter_threads)
         self.run_cmd += " --intra-op-parallelism-threads {0}".format(self.args.num_intra_threads)
         self.run_cmd += " --input-size {0}".format(self.additional_args.input_size)
-
+        
         if self.args.accuracy_only:
             self.run_cmd += " --accuracy-only "
             self.run_cmd += " --data-location {0}".format(self.args.data_location)
 
     def run(self):
         old_python_path = os.environ["PYTHONPATH"]
-        tf_models_path = os.path.join(self.args.model_source_dir,"../tf_models")
-        os.environ["PYTHONPATH"] = os.path.join(self.args.model_source_dir,"../tf_models/research")
-        os.environ["PYTHONPATH"] += ":" + os.path.join(self.args.model_source_dir,"scripts/tf_cnn_benchmarks")
+        benchmarks_path = os.path.join(self.args.model_source_dir,"../ssd-resnet-benchmarks")
+        os.environ["PYTHONPATH"] = os.path.join(self.args.model_source_dir, "research")
+        os.environ["PYTHONPATH"] += ":" + os.path.join(benchmarks_path, "scripts/tf_cnn_benchmarks")
         self.run_command(self.run_cmd)
         os.environ["PYTHONPATH"] = old_python_path
