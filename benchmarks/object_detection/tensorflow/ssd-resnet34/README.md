@@ -113,14 +113,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resn
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
 ```
 
-7. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks). 
-This repo provides some API needed for SSD-ResNet34. 
-
-```
-$ git clone --single-branch https://github.com/tensorflow/benchmarks.git
-```
-
-8. Clone the [intelai/models](https://github.com/intelai/models) repo.
+7. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, which we will
 use in the next step.
 
@@ -128,7 +121,7 @@ use in the next step.
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-9. Next, navigate to the `benchmarks` directory of the
+8. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
 batch and online inference, or accuracy. Note that we are running
@@ -146,7 +139,7 @@ $ cd /home/<user>/models/benchmarks
 # benchmarks with input size 1200x1200
 $ python launch_benchmark.py \
     --in-graph /home/<user>/ssd_resnet34_fp32_1200x1200_pretrained_model.pb \
-    --model-source-dir /home/<user>/benchmarks \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision fp32 \
@@ -170,7 +163,7 @@ input size 1200x1200.
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/ \
     --in-graph /home/<user>/ssd_resnet34_fp32_bs1_pretrained_model.pb \
-    --model-source-dir /home/<user>/benchmarks \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision fp32 \
@@ -181,7 +174,7 @@ $ python launch_benchmark.py \
     --accuracy-only 
 ```
 
-10. The log file is saved to the value of `--output-dir`.
+9. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running for performance:
 
@@ -316,14 +309,7 @@ If want to download the pretrained model for `--input-size=1200`, use the comman
 
 ```
 
-7. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks). 
-This repo provides some API needed for SSD-ResNet34. 
-
-```
-$ git clone --single-branch https://github.com/tensorflow/benchmarks.git
-```
-
-8. Clone the [intelai/models](https://github.com/intelai/models) repo.
+7. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, which we will
 use in the next step.
 
@@ -331,7 +317,7 @@ use in the next step.
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-9. Next, navigate to the `benchmarks` directory of the
+8. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
 batch and online inference, or accuracy. Note that we are running
@@ -349,7 +335,7 @@ $ cd /home/<user>/models/benchmarks
 # benchmarks with input size 300x300
 $ python launch_benchmark.py \
     --in-graph /home/<user>/ssd_resnet34_int8_bs1_pretrained_model.pb \
-    --model-source-dir /home/<user>/benchmarks \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision int8 \
@@ -372,7 +358,7 @@ input size 1200x1200.
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/ \
     --in-graph /home/<user>/ssd_resnet34_int8_1200x1200_pretrained_model.pb \
-    --model-source-dir /home/<user>/benchmarks \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision int8 \
@@ -384,7 +370,7 @@ $ python launch_benchmark.py \
     -- input-size=1200
 ```
 
-10. The log file is saved to the value of `--output-dir`.
+9. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when testing performance:
 
