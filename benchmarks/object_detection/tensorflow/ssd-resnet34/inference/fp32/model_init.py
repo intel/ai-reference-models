@@ -81,8 +81,8 @@ class ModelInitializer(BaseModelInitializer):
 
     def run(self):
         old_python_path = os.environ["PYTHONPATH"]
-        tf_models_path = os.path.join(self.args.model_source_dir,"../tf_models")
-        os.environ["PYTHONPATH"] = os.path.join(self.args.model_source_dir,"../tf_models/research")
-        os.environ["PYTHONPATH"] += ":" + os.path.join(self.args.model_source_dir,"scripts/tf_cnn_benchmarks")
+        benchmarks_path = os.path.join(self.args.model_source_dir,"../ssd-resnet-benchmarks")
+        os.environ["PYTHONPATH"] = os.path.join(self.args.model_source_dir, "research")
+        os.environ["PYTHONPATH"] += ":" + os.path.join(benchmarks_path, "scripts/tf_cnn_benchmarks")
         self.run_command(self.run_cmd)
         os.environ["PYTHONPATH"] = old_python_path
