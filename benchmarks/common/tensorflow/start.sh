@@ -668,29 +668,41 @@ function ssd-resnet34() {
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
       
       old_dir=${PWD}
-      infer_dir="${INTELAI_MODELS}/${MODE}"
-      model_source_dir="${MOUNT_EXTERNAL_MODELS_SOURCE}"
 
       if [ ${NOINSTALL} != "True" ]; then
         for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
         do
           pip install $line
         done
-        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/inference
+        model_source_dir=${MOUNT_EXTERNAL_MODELS_SOURCE}
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+      else
+        model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
+        infer_dir="${INTELAI_MODELS}/${MODE}"
       fi
-
       benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
-      cd ${model_source_dir}
+      model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+
+      cd  ${model_source_dir}/../
+      if [ ! -d "ssd-resnet-benchmarks" ];then
+        git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
+      fi
+      cd ssd-resnet-benchmarks
       git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
       git apply ${benchmarks_patch_path}
-
-      model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-      cd ${model_source_dir}/../tf_models
+      
+      cd ${model_source_dir}
       git apply ${model_patch_path}
+      
+      if [ ${NOINSTALL} != "True" ]; then
+        export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
+        export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"      
+      fi
+      
+      cd ${old_dir}
 
       CMD="${CMD} \
       $(add_arg "--input-size" ${input_size})"
-
       CMD=${CMD} run_model    
 
     else
