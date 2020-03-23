@@ -88,6 +88,16 @@ class BaseBenchmarkUtil(object):
             type=check_positive_number_or_equal_to_negative_one)
 
         self._common_arg_parser.add_argument(
+            "--mpi_num_processes", type=check_positive_number,
+            help="The number of MPI processes",
+            dest="mpi", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--mpi_num_processes_per_socket", type=check_positive_number,
+            help="Specify how many MPI processes to launch per socket",
+            dest="num_mpi", default=1)
+
+        self._common_arg_parser.add_argument(
             "-d", "--data-location",
             help="Specify the location of the data. If this parameter is not "
                  "specified, the benchmark will use random/dummy data.",
