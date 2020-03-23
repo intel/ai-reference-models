@@ -49,10 +49,12 @@ echo "    DISABLE_TCMALLOC: ${DISABLE_TCMALLOC}"
 echo "    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD: ${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
+echo "    MPI_NUM_PROCESSES: ${MPI_NUM_PROCESSES}"
+echo "    MPI_NUM_PEOCESSES_PER_SOCKET: ${MPI_NUM_PROCESSES_PER_SOCKET}"
 
-# Only inference is supported right now
+#  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
-  echo "${MODE} mode is not supported"
+  echo "${MODE} mode for ${MODEL_NAME} is not supported"
   exit 1
 fi
 
@@ -71,6 +73,28 @@ if [[ ${NOINSTALL} != "True" ]]; then
   if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
     apt-get install google-perftools -y
   fi
+
+  if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+    # Installing OpenMPI3.0
+    mkdir /tmp/openmpi && \
+    pushd /tmp/openmpi && \
+    wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz && \
+    tar zxf openmpi-3.0.0.tar.gz && \
+    cd openmpi-3.0.0 && \
+    ./configure --enable-orterun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig
+    popd
+    rm -rf /tmp/openmpi
+    # Install g++-4.8 for horovod 0.18.1
+    apt install -y g++-4.8
+    # Horovod Installation
+    export HOROVOD_WITHOUT_PYTORCH=1
+    export HOROVOD_WITHOUT_MXNET=1
+    # TODO: lock a horovod commit
+    pip install --no-cache-dir git+https://github.com/horovod/horovod
+  fi 
 fi
 
 verbose_arg=""
@@ -147,6 +171,7 @@ ${benchmark_only_arg} \
 ${output_results_arg} \
 ${verbose_arg}"
 
+
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
 fi
@@ -182,6 +207,99 @@ fi
 if [ ${DISABLE_TCMALLOC} != "None" ]; then
   CMD="${CMD} --disable-tcmalloc=${DISABLE_TCMALLOC}"
 fi
+
+## Added for bert
+function bert_options() {
+
+  if [[ -z "${train_option}" ]]; then
+     echo "Error: Please specify a train option (SQuAD, Classifier, Pretraining)"
+     exit 1
+  fi
+
+  CMD=" ${CMD} --train-option=${train_option}" 
+
+  if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
+    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}" 
+  fi
+
+  if [[ -n "${task_name}" && ${task_name} != "" ]]; then
+    CMD=" ${CMD} --task-name=${task_name}"
+  fi
+
+  if [[ -n "${warmup_steps}" && ${warmup_steps} != "" ]]; then
+    CMD=" ${CMD} --warmup-steps=${warmup_steps}"
+  fi
+
+  if [[ -n "${vocab_file}" && ${vocab_file} != "" ]]; then
+    CMD=" ${CMD} --vocab-file=${vocab_file}" 
+  fi
+
+  if [[ -n "${config_file}" && ${config_file} != "" ]]; then
+    CMD=" ${CMD} --config-file=${config_file}"
+  fi
+
+  if [[ -n "${do_predict}" && ${do_predict} != "" ]]; then
+    CMD=" ${CMD} --do-predict=${do_predict}"
+  fi
+
+  if [[ -n "${predict_file}" && ${predict_file} != "" ]]; then
+    CMD=" ${CMD} --predict-file=${predict_file}"
+  fi
+
+  if [[ -n "${do_train}" && ${do_train} != "" ]]; then
+    CMD=" ${CMD} --do-train=${do_train}"
+  fi
+
+  if [[ -n "${train_file}" && ${train_file} != "" ]]; then
+    CMD=" ${CMD} --train-file=${train_file}"
+  fi
+
+  if [[ -n "${num_train_epochs}" && ${num_train_epochs} != "" ]]; then
+    CMD=" ${CMD} --num-train-epochs=${num_train_epochs}"
+  fi
+
+  if [[ -n "${num_train_steps}" && ${num_train_steps} != "" ]]; then
+    CMD=" ${CMD} --num-train-steps=${num_train_steps}"
+  fi
+
+  if [[ -n "${max_predictions}" && ${max_predictions} != "" ]]; then
+    CMD=" ${CMD} --max-predictions=${max_predictions}"
+  fi
+
+  if [[ -n "${learning_rate}" && ${learning_rate} != "" ]]; then
+    CMD=" ${CMD} --learning-rate=${learning_rate}"
+  fi
+
+  if [[ -n "${max_seq_length}" && ${max_seq_length} != "" ]]; then
+    CMD=" ${CMD} --max-seq-length=${max_seq_length}"
+  fi
+
+  if [[ -n "${doc_stride}" && ${doc_stride} != "" ]]; then
+    CMD=" ${CMD} --doc-stride=${doc_stride}"
+  fi
+
+  if [[ -n "${input_file}" && ${input_file} != "" ]]; then
+    CMD=" ${CMD} --input-file=${input_file}"
+  fi
+
+  if [[ -n "${do_eval}" && ${do_eval} != "" ]]; then
+    CMD=" ${CMD} --do-eval=${do_eval}"
+  fi
+
+  if [[ -n "${data_dir}" && ${data_dir} != "" ]]; then
+    CMD=" ${CMD} --data-dir=${data_dir}"
+  fi
+
+  if [[ -n "${do_lower_case}" && ${do_lower_case} != "" ]]; then
+    CMD=" ${CMD} --do-lower-case=${do_lower_case}"
+  fi
+  if [[ -n "${accum_steps}" && ${accum_steps} != "" ]]; then
+    CMD=" ${CMD} --accum_steps=${accum_steps}"
+  fi
+  if [[ -n "${profile}" && ${profile} != "" ]]; then
+    CMD=" ${CMD} --profile=${profile}"
+  fi
+}
 
 function install_protoc() {
   pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
@@ -242,11 +360,21 @@ function add_arg() {
 function add_steps_args() {
   # returns string with --steps and --warmup_steps, if there are values specified
   local steps_arg=""
+  local trainepochs_arg=""
+  local epochsbtweval_arg=""
   local warmup_steps_arg=""
   local kmp_blocktime_arg=""
 
   if [ -n "${steps}" ]; then
     steps_arg="--steps=${steps}"
+  fi
+
+  if [ -n "${train_epochs}" ]; then
+    trainepochs_arg="--train_epochs=${train_epochs}"
+  fi
+
+  if [ -n "${epochs_between_evals}" ]; then
+    epochsbtweval_arg="--epochs_between_evals=${epochs_between_evals}"
   fi
 
   if [ -n "${warmup_steps}" ]; then
@@ -257,7 +385,7 @@ function add_steps_args() {
     kmp_blocktime_arg="--kmp-blocktime=${kmp_blocktime}"
   fi
 
-  echo "${steps_arg} ${warmup_steps_arg} ${kmp_blocktime_arg}"
+  echo "${steps_arg} ${trainepochs_arg} ${epochsbtweval_arg} ${warmup_steps_arg} ${kmp_blocktime_arg}"
 }
 
 function add_calibration_arg() {
@@ -526,10 +654,24 @@ function mtcc() {
 
 # NCF model
 function ncf() {
-  if [ ${PRECISION} == "fp32" ]; then
-    # For nfc, if dataset location is empty, script downloads dataset at given location.
+  if [[ -n "${clean}" ]]; then
+    CMD="${CMD} --clean"
+  fi
+
+  # NCF supports different datasets including ml-1m and ml-20m.
+  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
+    CMD="${CMD} --dataset=${dataset}"
+  fi
+
+  if [[ -n "${te}" && ${te} != "" ]]; then
+    CMD="${CMD} -te=${te}"
+  fi
+
+  if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
+    # For ncf, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
-      mkdir -p /dataset
+      mkdir -p ./dataset
+      CMD="${CMD} --data-location=./dataset"
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
@@ -545,8 +687,8 @@ function ncf() {
   fi
 }
 
-# ResNet50, ResNet101, InceptionV3 model
-function resnet50_101_inceptionv3() {
+# ResNet101, InceptionV3 model
+function 101_inceptionv3() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
     # For accuracy, dataset location is required.
@@ -559,6 +701,28 @@ function resnet50_101_inceptionv3() {
         CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     elif [ ${PRECISION} == "fp32" ]; then
+      CMD="${CMD} $(add_steps_args)"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
+
+# ResNet50  model
+function resnet50() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # For accuracy, dataset location is required.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    if [ ${PRECISION} == "int8" ]; then
+        CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
       CMD="${CMD} $(add_steps_args)"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -862,6 +1026,36 @@ function wavenet() {
   fi
 }
 
+# BERT base
+function bert_base() {
+    
+    echo "Bert base PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+    exit 1
+    # When enabled remove the above lines
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      bert_options
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
+
+# BERT Large model
+function bert_large() {
+    # Change if to support fp32
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      bert_options
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
+
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
@@ -949,7 +1143,7 @@ elif [ ${MODEL_NAME} == "gnmt" ]; then
 elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
   mlperf_gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
-  resnet50_101_inceptionv3
+  resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
@@ -965,11 +1159,11 @@ elif [ ${MODEL_NAME} == "mtcc" ]; then
 elif [ ${MODEL_NAME} == "ncf" ]; then
   ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then
-  resnet50_101_inceptionv3
+  resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "resnet50" ]; then
-  resnet50_101_inceptionv3
+  resnet50
 elif [ ${MODEL_NAME} == "resnet50v1_5" ]; then
-  resnet50_101_inceptionv3
+  resnet50
 elif [ ${MODEL_NAME} == "rfcn" ]; then
   rfcn
 elif [ ${MODEL_NAME} == "squeezenet" ]; then
@@ -992,6 +1186,10 @@ elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
 elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
   wide_deep_large_ds
+elif [ ${MODEL_NAME} == "bert_base" ]; then
+  bert_base
+elif [ ${MODEL_NAME} == "bert_large" ]; then
+  bert_large
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
