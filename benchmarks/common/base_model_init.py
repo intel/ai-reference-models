@@ -57,6 +57,18 @@ class BaseModelInitializer(object):
         if not platform_util:
             raise ValueError("Did not find any platform info.")
 
+        # Invoke mpirun if mpi_num_processes env is not None
+        if os.environ["MPI_NUM_PROCESSES"] != "None":
+            if os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] == "1":
+              # Map by socket using OpenMPI by default (PPS=1).
+              self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " --map-by socket " + self.python_exe
+            else:
+              # number of processes per socket (pps)
+              pps = int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"])
+              split_a_socket = str(platform_util.num_cores_per_socket // pps)
+              # Launch pps MPI processes over one socket
+              self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " + split_a_socket + " " + self.python_exe
+
     def run_command(self, cmd):
         """
         Prints debug messages when verbose is enabled, and then runs the
