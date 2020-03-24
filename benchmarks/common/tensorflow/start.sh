@@ -688,7 +688,7 @@ function ncf() {
 }
 
 # ResNet101, InceptionV3 model
-function 101_inceptionv3() {
+function resnet101_inceptionv3() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
     # For accuracy, dataset location is required.
