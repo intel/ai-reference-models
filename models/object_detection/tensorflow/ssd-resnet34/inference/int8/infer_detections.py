@@ -142,18 +142,14 @@ class ssd_resnet34_infer:
   def run_benchmark(self):
     print("Inference with dummy data.")
     with tf.compat.v1.Session(graph=self.freeze_graph, config=self.config) as sess:
-      if self.args.input_size == 300:
+      if self.args.input_size == 300 or self.args.input_size == 1200:
         input_images = sess.run(tf.random.truncated_normal(
             [self.args.batch_size, self.args.input_size, self.args.input_size, 3],
             dtype=tf.float32,
             stddev=10,
             name='synthetic_images'))
-      elif self.args.input_size == 1200:
-        input_images = sess.run(tf.random.truncated_normal(
-            [self.args.batch_size, 3, self.args.input_size, self.args.input_size],
-            dtype=tf.float32,
-            stddev=10,
-            name='synthetic_images'))
+      else:
+        raise Exception('input size unsupported')
 
       total_iter = 1000
       warmup_iter = 200
@@ -242,7 +238,7 @@ class ssd_resnet34_infer:
     std = np.array([0.229, 0.224, 0.225], dtype=np.float32)
     mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
     image = (image - mean) / std
-    return image.transpose([2,0,1])
+    return image
 
 
   def load_batch(self, niter, image_lines, image_root, batch_size): 
