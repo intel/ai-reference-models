@@ -70,7 +70,7 @@ def input_generator_ts():
     Sorted list of inputs, and dictionary mapping original index->sorted index
     of each element.
   """
-  with tf.gfile.Open(FLAGS.file) as f:
+  with tf.io.gfile.GFile(FLAGS.file) as f:
     records = f.read().split("\n")
     inputs = [record.strip() for record in records]
     if not inputs[-1]:
@@ -107,7 +107,7 @@ def input_generator_ws():
     Sorted list of inputs, and dictionary mapping original index->sorted index
     of each element.
   """
-  with tf.gfile.Open(FLAGS.file) as f:
+  with tf.io.gfile.GFile(FLAGS.file) as f:
     records = f.read().split("\n")
     inputs = [record.strip() for record in records]
     if not inputs[-1]:
@@ -145,7 +145,7 @@ def main(unused_args):
 
 
   start=timer()
-  with open(graph_file, "r") as f:
+  with open(graph_file, "rb") as f:
     if FLAGS.input_binary:
       graph_def.ParseFromString(f.read())
     else:
@@ -169,14 +169,14 @@ def main(unused_args):
   DATASET_SIZE=len(batches)
   print("Translating {} sentences from English to German.".format(DATASET_SIZE))
 
-  session_config = tf.ConfigProto(
+  session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.num_inter,
       intra_op_parallelism_threads=FLAGS.num_intra)
 
-  with tf.Session(config=session_config, graph=graph) as sess:
+  with tf.compat.v1.Session(config=session_config, graph=graph) as sess:
 
-    run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-    run_metadata = tf.RunMetadata()
+    run_options = tf.compat.v1.RunOptions(trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+    run_metadata = tf.compat.v1.RunMetadata()
 
     translations = []
 
@@ -225,7 +225,7 @@ def main(unused_args):
 
     print('Total number of sentences translated:%d' % (translation_count))
 
-    with tf.gfile.Open(FLAGS.file_out, "w") as f:
+    with tf.io.gfile.GFile(FLAGS.file_out, "w") as f:
       for i in sorted_keys:
         f.write("%s\n" % decoded_translations[i])
 
