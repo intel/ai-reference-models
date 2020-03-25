@@ -968,8 +968,9 @@ function transformer_lt_official() {
         exit 1
     fi
 
-    cp ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/infer_ab.py \
-        ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/transformer/infer_ab.py
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r "${MOUNT_BENCHMARK}/language_translation/tensorflow/transformer_lt_official/requirements.txt"
+    fi
 
     CMD="${CMD}
     --in_graph=${IN_GRAPH} \
@@ -977,7 +978,7 @@ function transformer_lt_official() {
     --file=${DATASET_LOCATION}/${file} \
     --file_out=${OUTPUT_DIR}/${file_out} \
     --reference=${DATASET_LOCATION}/${reference}"
-    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
