@@ -75,25 +75,13 @@ if [[ ${NOINSTALL} != "True" ]]; then
   fi
 
   if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-    # Installing OpenMPI3.0
-    mkdir /tmp/openmpi && \
-    pushd /tmp/openmpi && \
-    wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz && \
-    tar zxf openmpi-3.0.0.tar.gz && \
-    cd openmpi-3.0.0 && \
-    ./configure --enable-orterun-prefix-by-default && \
-    make -j $(nproc) all && \
-    make install && \
-    ldconfig
-    popd
-    rm -rf /tmp/openmpi
-    # Install g++-4.8 for horovod 0.18.1
-    apt install -y g++-4.8
+    ## Installing OpenMPI
+    apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
     # Horovod Installation
     export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITHOUT_MXNET=1
     # TODO: lock a horovod commit
-    pip install --no-cache-dir git+https://github.com/horovod/horovod
+    pip install --no-cache-dir horovod
   fi 
 fi
 
