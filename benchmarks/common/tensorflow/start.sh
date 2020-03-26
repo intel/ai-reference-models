@@ -69,15 +69,9 @@ if [[ ${NOINSTALL} != "True" ]]; then
   pip install --upgrade pip
   pip install requests
 
-  # install libgoogle-perftools-dev for tcmalloc
+  # install google-perftools for tcmalloc
   if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-    apt-get install --no-install-recommends --fix-missing google-perftools -y
-    if [ ! -f /usr/lib/libtcmalloc.so ]; then
-      apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
-      if [ ! -f /usr/lib/libtcmalloc.so ]; then
-        ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
-      fi
-    fi
+    apt-get install google-perftools -y
   fi
 
   if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
@@ -305,7 +299,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget unzip
+    apt-get -y install wget
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -521,60 +515,19 @@ function faster_rcnn() {
 
 # GNMT model
 function gnmt() {
-    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    if [ ${MODE} == "training" ]; then
-      if [ ${PRECISION} == "fp32" ]; then
-         # build the model source
-	 original_dir=$(pwd)
-         model_source_dir="${INTELAI_MODELS}/${MODE}/${PRECISION}"
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
-         if [ ${NOINSTALL} != "True" ]; then
-           model_source_dir="${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}"
-           # install dependencies
-           apt-get update
-           apt-get install cpio
-           # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
-           cd /l_mpi
-           sh install.sh --silent silent.cfg
-           source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
-           pip install -r "${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/requirements.txt"
-        fi
-        # Prepare the model source
-        cd ${model_source_dir}
-        export PYTHONPATH=${PYTHONPATH}:${model_source_dir}/nmt/nmt
-        rm nmt -rf
-        git clone https://github.com/tensorflow/nmt.git
-        cd nmt
-        git checkout b278487980832417ad8ac701c672b5c3dc7fa553
-        git apply ../multi_instances.patch
-        cd $original_dir
-        CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt})  \
-        $(add_arg "--vocab_prefix" ${vocab_prefix}) \
-        $(add_arg "--train_prefix" ${train_prefix}) \
-        $(add_arg "--dev_prefix" ${dev_prefix}) $(add_arg "--test_prefix" ${test_prefix}) \
-        $(add_arg "--num_units" ${num_units}) \
-        $(add_arg "--dropout" ${dropout})  \
-        $(add_arg "--hparams_path" ${hparams_path})"
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-      else
-        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-        exit 1
-      fi
+    if [ ${PRECISION} == "fp32" ]; then
+
+      CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
+      $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
+      $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
+      $(add_arg "--infer_mode" ${infer_mode})"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
     fi
-
-    if [ ${MODE} == "inference" ]; then
-      if [ ${PRECISION} == "fp32" ]; then
-
-        CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
-        $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
-        $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
-        $(add_arg "--infer_mode" ${infer_mode})"
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-      else
-        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-        exit 1
-      fi
-   fi
 }
 
 # inceptionv4 model
@@ -635,7 +588,6 @@ function maskrcnn() {
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-      pip3 install --force-reinstall scipy==1.2.1 Pillow==5.3.0
 
       # install cocoapi
       get_cocoapi ${MOUNT_EXTERNAL_MODELS_SOURCE}/coco ${MOUNT_EXTERNAL_MODELS_SOURCE}/samples/coco
@@ -815,10 +767,6 @@ function rfcn() {
     install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
   fi
 
-  # Fix the object_detection_evaluation.py file to change unicode() to str() so that it works in py3
-  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
-  sed -i.bak "s/unicode(/str(/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/utils/object_detection_evaluation.py
-
   split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       split_arg="--split=${split}"
@@ -874,7 +822,7 @@ function ssd_mobilenet() {
 function ssd-resnet34() {
       if [ ${MODE} == "inference" ]; then
         if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
-          
+
           old_dir=${PWD}
 
           if [ ${NOINSTALL} != "True" ]; then
@@ -898,20 +846,20 @@ function ssd-resnet34() {
           cd ssd-resnet-benchmarks
           git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
           git apply ${benchmarks_patch_path}
-          
+
           cd ${model_source_dir}
           git apply ${model_patch_path}
-          
+
           if [ ${NOINSTALL} != "True" ]; then
             export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
-            export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"      
+            export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
           fi
-          
+
           cd ${old_dir}
 
           CMD="${CMD} \
           $(add_arg "--input-size" ${input_size})"
-          CMD=${CMD} run_model    
+          CMD=${CMD} run_model
 
         else
           echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
@@ -988,10 +936,6 @@ function unet() {
     if [[ -z "${checkpoint_name}" ]]; then
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
-    fi
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      pip3 install --force-reinstall Pillow==5.3.0
     fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
@@ -1091,12 +1035,6 @@ function wavenet() {
       exit 1
     fi
 
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      apt-get clean && apt-get update -y && \
-      apt-get install --no-install-recommends --fix-missing libsndfile1 -y
-    fi
-
     if [[ -z "${sample}" ]]; then
       echo "wavenet requires -- sample arg to be defined"
       exit 1
@@ -1173,13 +1111,7 @@ function wide_deep_large_ds() {
     if [[ -z "${LIBTCMALLOC}" ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
-      apt-get install --no-install-recommends --fix-missing google-perftools -y
-      if [ ! -f /usr/lib/libtcmalloc.so ]; then
-        apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
-        if [ ! -f /usr/lib/libtcmalloc.so ]; then
-          ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
-        fi
-      fi
+      apt-get install google-perftools --fix-missing -y
     fi
 
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"

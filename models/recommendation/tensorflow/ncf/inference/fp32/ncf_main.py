@@ -343,12 +343,6 @@ def main(_):
   with logger.benchmark_context(FLAGS):
     run_ncf(FLAGS)
 
-def serving_input_receiver_fn():
-  inputs = {
-    'user_id': tf.placeholder(dtype=tf.int32, shape=[None], name='user_id'),
-    'item_id': tf.placeholder(dtype=tf.uint16, shape=[None], name='item_id'),
-  }
-  return tf.estimator.export.ServingInputReceiver(inputs, inputs)
 
 def run_ncf(_):
   """Run NCF training and eval loop."""
@@ -440,12 +434,6 @@ def run_ncf(_):
     tf.logging.fatal(
         "Iteration {}: HR = {:.4f}, NDCG = {:.4f}".format(
             cycle_index + 1, hr, ndcg))
-
-    # Export SavedModel
-    if FLAGS.export_savedmodel:
-        eval_estimator.export_savedmodel(FLAGS.model_dir, serving_input_receiver_fn)
-        print("SavedModel successfully exported to: {}/<timestamp>".format(
-            FLAGS.model_dir))
 
     # Some of the NumPy vector math can be quite large and likes to stay in
     # memory for a while.
@@ -577,12 +565,6 @@ def define_ncf_flags():
       help=flags_core.help_wrap(
           "If set, only performance benchmarking (i.e. no accuracy) "
           "metrics are computed."))
-
-  flags.DEFINE_bool(
-      name="export_savedmodel", default=False,
-      help=flags_core.help_wrap(
-          "If set, the model is exported in serving-compatible format to "
-          "the model_dir."))
 
 if __name__ == "__main__":
   tf.logging.set_verbosity(tf.logging.FATAL)

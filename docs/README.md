@@ -13,16 +13,12 @@
 
 * Inference with Intel® Optimization of Tensorflow:
     * [Image Recognition](/docs/image_recognition/tensorflow/Tutorial.md) (ResNet50, ResNet101, and InceptionV3)
-    * [Object Detection](/docs/object_detection/tensorflow/Tutorial.md) (SSD-VGG16)
     * [Language Translation](/docs/language_translation/tensorflow/Tutorial.md) (Transformer-LT)
     * [Recommendation Systems](/docs/recommendation/tensorflow/Tutorial.md) (Wide and Deep)
 * Inference with Intel® Optimization of Tensorflow Serving:
     * [Image Recognition](/docs/image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
     * [Object Detection](/docs/object_detection/tensorflow_serving/Tutorial.md) (R-FCN and SSD-MobileNet)
     * [Language Translation](/docs/language_translation/tensorflow_serving/Tutorial.md) (Transformer-LT)
-    * [Recommendation Systems](/docs/recommendation/tensorflow_serving/Tutorial_NCF.md) (NCF)
-    * [Recommendation Systems](/docs/recommendation/tensorflow_serving/Tutorial_WideAndDeep.md) (Wide and Deep)
-    * [Image Segmentation](/docs/image_segmentation/tensorflow_serving/Tutorial.md) (Mask R-CNN)
 * Model Quantization and Optimization
     * [Image Recognition](/docs/image_recognition/quantization/Tutorial.md) (ResNet50)
 

@@ -15,12 +15,9 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
    repository:
    ```
-   $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-   $ pushd $MODEL_WORK_DIR
-
    $ git clone https://github.com/IntelAI/models.git
    ```
    This repository includes launch scripts for running the model.
@@ -51,9 +48,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
    For accuracy (using your `--data-location`, `--accuracy-only` and
    `--batch-size 100`):
    ```
-   $ cd models/benchmarks
-
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
        --model-name inceptionv4 \
        --precision int8 \
        --mode inference \
@@ -61,16 +56,14 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --in-graph $MODEL_WORK_DIR/inceptionv4_int8_pretrained_model.pb \
-       --data-location $MODEL_WORK_DIR/ImageNet_TFRecords
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb \
+       --data-location /home/<user>/ImageNet_TFRecords
    ```
 
    For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
    ```
-   $ cd models/benchmarks
-    
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
        --model-name inceptionv4 \
        --precision int8 \
        --mode inference \
@@ -78,15 +71,13 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --in-graph $MODEL_WORK_DIR/inceptionv4_int8_pretrained_model.pb
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
    For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
    ```
-   $ cd models/benchmarks
-
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
        --model-name inceptionv4 \
        --precision int8 \
        --mode inference \
@@ -94,8 +85,8 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --in-graph $MODEL_WORK_DIR/inceptionv4_int8_pretrained_model.pb
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
    Note that the `--verbose` flag can be added to any of the above commands
@@ -150,19 +141,11 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     Log location outside container: <output directory>/benchmark_inceptionv4_inference_int8_20190415_232441.log
    ```
 
-6. To return to where you started from:
-```
-$ popd
-```
-
 ## FP32 Inference Instructions
 
-1. Store the path to the curernt directory and clone this [intelai/models](https://github.com/IntelAI/models)
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
    repository:
    ```
-   $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-   $ pushd $MODEL_WORK_DIR
-
    $ git clone https://github.com/IntelAI/models.git
    ```
    This repository includes launch scripts for running the model.
@@ -194,9 +177,7 @@ $ popd
    For accuracy (using your `--data-location`, `--accuracy-only` and
    `--batch-size 100`):
    ```
-   $ cd models/benchmarks
-
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
        --model-name inceptionv4 \
        --precision fp32 \
        --mode inference \
@@ -204,16 +185,14 @@ $ popd
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --in-graph $MODEL_WORK_DIR/inceptionv4_fp32_pretrained_model.pb \
-       --data-location $MODEL_WORK_DIR/ImageNet_TFRecords
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb \
+       --data-location /home/<user>/ImageNet_TFRecords
    ```
 
    For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
    ```
-   $ cd models/benchmarks
-
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
        --model-name inceptionv4 \
        --precision fp32 \
        --mode inference \
@@ -221,15 +200,13 @@ $ popd
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --in-graph $MODEL_WORK_DIR/inceptionv4_fp32_pretrained_model.pb
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
    For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
    ```
-   $ cd models/benchmarks
-
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
        --model-name inceptionv4 \
        --precision fp32 \
        --mode inference \
@@ -237,8 +214,8 @@ $ popd
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-       --in-graph $MODEL_WORK_DIR/inceptionv4_fp32_pretrained_model.pb
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
    Note that the `--verbose` flag can be added to any of the above commands
@@ -294,8 +271,3 @@ $ popd
    Ran inference with batch size 1
    Log location outside container: <output directory>/benchmark_inceptionv4_inference_fp32_20190307_221954.log
    ```
-
-6. To return to where you started from:
-```
-$ popd
-```

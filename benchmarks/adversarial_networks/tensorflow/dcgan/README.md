@@ -8,15 +8,10 @@ Script instructions for model training and inference.
 
 ## FP32 Inference Instructions
 
-1. Store the path to the current directory and clone the `tensorflow/models` repository into tf_models:
+1. Clone the `tensorflow/models` repository:
 
 ```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-
-$ git clone https://github.com/tensorflow/models.git tf_models
-$ cd tf_models/
-$ git checkout -b r1.11 remotes/origin/r1.11
+$ git clone https://github.com/tensorflow/models.git
 ```
 
 The TensorFlow models repo will be used for running inference as well as
@@ -28,10 +23,10 @@ converting the CIFAR-10 dataset to the TF records format.
 to download and convert the CIFAR-10 dataset.
 
 3. Download and extract the pretrained model:
-```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dcgan_fp32_unconditional_cifar10_pretrained_model.tar.gz
-$ tar -xvf dcgan_fp32_unconditional_cifar10_pretrained_model.tar.gz
-```
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dcgan_fp32_unconditional_cifar10_pretrained_model.tar.gz
+   $ tar -xvf dcgan_fp32_unconditional_cifar10_pretrained_model.tar.gz
+   ```
 
 4. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
@@ -53,19 +48,19 @@ for `--model-source-dir` (from step 1) `--data-location` (from step 2), and `--c
 
 Run the model script for batch and online inference with `--batch-size=100` :
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --model-source-dir /home/<user>/tensorflow/models \
     --model-name dcgan \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --batch-size 100 \
     --socket-id 0 \
-    --checkpoint $MODEL_WORK_DIR/dcgan_fp32_unconditional_cifar10_pretrained_model \
-    --data-location $MODEL_WORK_DIR/cifar10 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --checkpoint /home/<user>/dcgan_fp32_unconditional_cifar10_pretrained_model \
+    --data-location /home/<user>/cifar10 \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 5. Log files are located at the value of `--output-dir`.
@@ -78,9 +73,4 @@ Time spent per BATCH: 35.8268 ms
 Total samples/sec: 2791.2030 samples/s
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_dcgan_inference_fp32_20190117_220342.log
-```
-
-6. To return to where you started from:
-```
-$ popd
 ```

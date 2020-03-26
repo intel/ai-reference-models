@@ -9,15 +9,12 @@ for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Save the path to the current directory and clone the [tensorflow-wavenet](https://github.com/ibab/tensorflow-wavenet)
+1. Clone the [tensorflow-wavenet](https://github.com/ibab/tensorflow-wavenet)
 repo and get pull request #352 for the CPU optimizations.  The path to
 the cloned repo will be passed as the model source directory when
 running the launch script.
 
 ```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-
 $ git clone https://github.com/ibab/tensorflow-wavenet.git
 Cloning into 'tensorflow-wavenet'...
 remote: Enumerating objects: 1, done.
@@ -37,6 +34,8 @@ From github.com:ibab/tensorflow-wavenet
  * [new ref]         refs/pull/352/head -> cpu_optimized
 
 $ git checkout cpu_optimized
+
+$ pwd
 ```
 
 2. Clone this [intelai/models](https://github.com/intelai/models) repo.
@@ -52,10 +51,10 @@ $ cd models/benchmarks
 ```
 
 3. Download and extract the pretrained model:
-```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wavenet_fp32_pretrained_model.tar.gz
-$ tar -xvf wavenet_fp32_pretrained_model.tar.gz
-```
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wavenet_fp32_pretrained_model.tar.gz
+   $ tar -xvf wavenet_fp32_pretrained_model.tar.gz
+   ```
 
 4. Start a model run by executing the launch script and passing args
 specifying that we are running wavenet fp32 inference using TensorFlow,
@@ -65,17 +64,17 @@ files (from step 3).  We are also passing a couple of extra model args
 for wavenet: the name of the checkpoint to use and the sample number.
 
 ```
-$ python launch_benchmark.py \
-   --precision fp32 \
-   --model-name wavenet \
-   --mode inference \
-   --framework tensorflow \
-   --socket-id 0 \
-   --num-cores 1 \
-   --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-   --model-source-dir $MODEL_WORK_DIR/tensorflow-wavenet \
-   --checkpoint $MODEL_WORK_DIR/tensorflow-wavenet/models/benchmarks/wavenet_checkpoints \
-   -- checkpoint_name=model.ckpt-99 sample=8510
+python launch_benchmark.py \
+    --precision fp32 \
+    --model-name wavenet \
+    --mode inference \
+    --framework tensorflow \
+    --socket-id 0 \
+    --num-cores 1 \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --model-source-dir /home/<user>/wavenet/tensorflow-wavenet \
+    --checkpoint /home/<user>/wavenet_checkpoints \
+    -- checkpoint_name=model.ckpt-99 sample=8510
 ```
 
 5.  The logs are displayed in the console output as well as saved to a
@@ -102,9 +101,4 @@ Average Latency of whole run: msec / sample: 3.456001
 Finished generating. The result can be viewed in TensorBoard.
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_wavenet_inference_fp32_20190105_015022.log
-```
-
-6. To return to where you started from:
-```
-$ popd
 ```
