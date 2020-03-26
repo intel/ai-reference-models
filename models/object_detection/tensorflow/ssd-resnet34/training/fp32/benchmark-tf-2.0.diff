@@ -1,3 +1,12 @@
+diff --git a/perfzero/lib/cloud_manager.py b/perfzero/lib/cloud_manager.py
+old mode 100755
+new mode 100644
+diff --git a/perfzero/scripts/generate-readme-header.sh b/perfzero/scripts/generate-readme-header.sh
+old mode 100755
+new mode 100644
+diff --git a/perfzero/scripts/plot_process_info.py b/perfzero/scripts/plot_process_info.py
+old mode 100755
+new mode 100644
 diff --git a/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py b/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py
 index acb1bc4..fe12990 100644
 --- a/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py
@@ -135,7 +144,7 @@ index c70dabf..4370c26 100644
        else:
          new_t = apply_func(t, device_index, tensor_index)
 diff --git a/scripts/tf_cnn_benchmarks/benchmark_cnn.py b/scripts/tf_cnn_benchmarks/benchmark_cnn.py
-index 04f793f..ab726b2 100644
+index 04f793f..139daff 100644
 --- a/scripts/tf_cnn_benchmarks/benchmark_cnn.py
 +++ b/scripts/tf_cnn_benchmarks/benchmark_cnn.py
 @@ -703,12 +703,12 @@ class GlobalStepWatcher(threading.Thread):
@@ -725,6 +734,17 @@ index 04f793f..ab726b2 100644
              assert not self.variable_mgr.staging_delta_ops
  
      enqueue_ops = []
+@@ -3161,8 +3161,8 @@ class BenchmarkCNN(object):
+       # hack is enabled.
+       if labels_device_placement_hack and tensor.dtype == tf.int32:
+         device = ''
+-      with tf.device(device):
+-        return tf.reshape(tensor, shape=shape)
++      # with tf.device(device):
++      return tf.reshape(tensor, shape=shape)
+ 
+     subset = 'validation' if self._doing_eval else 'train'
+     input_shapes = self.model.get_input_shapes(subset)
 @@ -3206,7 +3206,7 @@ class BenchmarkCNN(object):
            rel_device_num, abs_device_num)
        l2_loss = None
@@ -749,6 +769,21 @@ index 04f793f..ab726b2 100644
        if self.loss_scale is not None:
          # TODO(reedwm): If automatic loss scaling is not used, we could avoid
          # these multiplications by directly modifying the learning rate instead.
+@@ -3340,10 +3340,10 @@ class BenchmarkCNN(object):
+ 
+       return results
+ 
+-    with tf.device(self.devices[rel_device_num]):
+-      outputs = maybe_compile(forward_pass_and_gradients, self.params)
+-      logits, loss, grads = unpack_forward_pass_and_gradients_output(outputs)
+-      return make_results(logits, loss, grads)
++    # with tf.device(self.devices[rel_device_num]):
++    outputs = maybe_compile(forward_pass_and_gradients, self.params)
++    logits, loss, grads = unpack_forward_pass_and_gradients_output(outputs)
++    return make_results(logits, loss, grads)
+ 
+   def get_input_preprocessor(self):
+     """Returns the image preprocessor to used, based on the model.
 @@ -3390,7 +3390,7 @@ class BenchmarkCNN(object):
      with tf.device(self.sync_queue_devices[(
          self.sync_queue_counter % len(self.sync_queue_devices))]):
