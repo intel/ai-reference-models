@@ -7,18 +7,8 @@ for the following modes/platforms:
 Instructions and scripts for model inference for other platforms are coming later.
 
 ## FP32 Inference Instructions
-1. Clone an older commit from the [tensorflow/models](https://github.com/tensorflow/models.git) repository:
 
-```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-
-$ git clone https://github.com/tensorflow/models.git tf_models
-$ cd tf_models
-$ git checkout 8367cf6dabe11adf7628541706b660821f397dce
-```
-
-2. Download and extract the frozen graph of the model and necessary data files.
+1. Download and extract the frozen graph of the model and necessary data files.
 
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/transformer_lt_official_fp32_pretrained_model.tar.gz
@@ -35,24 +25,19 @@ total 1064
 -rw-r--r--. 1 user group 324025 Mar 15 17:31 vocab.txt
 ```
 
-3. Clone this [intelai/models](https://github.com/IntelAI/models)
+2. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
 
 ```
-$ cd $MODEL_WORK_DIR
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-4. Next, navigate to the `benchmarks` directory in your local clone of
+3. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo (from step 3).
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the dataset location (from step 2).
-
-Substitute the `--model-source-dir` for the location where you cloned the
-[tensorflow/models](https://github.com/tensorflow/models.git) repo
-(from step 1).
 
 Transformer LT official can run for online or batch inference. Use one of the following examples below, depending on
 your use case.
@@ -60,17 +45,16 @@ your use case.
 For online inference (using `--socket-id 0` and `--batch-size 1`):
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name transformer_lt_official \
     --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir $MODEL_WORK_DIR/tf_models/ \
-    --in-graph $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
-    --data-location $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/data \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest \
+    --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
+    --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \
     file_out=translate.txt \
     reference=newstest2014.de \
@@ -80,17 +64,16 @@ $ python launch_benchmark.py \
 For batch inference (using `--socket-id 0` and `--batch-size 64`):
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name transformer_lt_official \
     --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 64 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir $MODEL_WORK_DIR/tf_models/ \
-    --in-graph $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
-    --data-location $MODEL_WORK_DIR/tf_models/transformer_lt_official_fp32_pretrained_model/data \
+    --docker-image intelaipg/intel-optimized-tensorflow:latest \
+    --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
+    --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \
     file_out=translate.txt \
     reference=newstest2014.de \
@@ -103,9 +86,5 @@ to get additional debug output.
 The num-inter-threads and num-intra-threads could be set different numbers depends on 
 the CPU in the system to achieve the best performance.
 
-5.  The log file and default translated results is saved to the `models/benchmarks/common/tensorflow/logs` directory.
+4.  The log file and default translated results is saved to the `models/benchmarks/common/tensorflow/logs` directory.
 
-6. To return to where you started from:
-```
-$ popd
-```

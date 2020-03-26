@@ -194,7 +194,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "DISABLE_TCMALLOC": args.disable_tcmalloc,
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "DOCKER": str(args.docker_image is not None),
-            "PYTHON_EXE": sys.executable if not args.docker_image else "python"
+            "PYTHON_EXE": sys.executable if not args.docker_image else "python",
+            "MPI_NUM_PROCESSES": args.mpi,
+            "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi
         }
 
         # Add custom model args as env vars)
@@ -206,6 +208,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             split_arg = custom_arg.split("=")
             split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
+
 
         # Set the default value for NOINSTALL, if it's not explicitly set by the user
         if "NOINSTALL" not in env_var_dict:
@@ -257,7 +260,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
             # Get Platformutil
             platform_util_obj = None or platform_util.PlatformUtil(self.args)
-
             # Configure num_inter_threads and num_intra_threads
             base_obj = BaseModelInitializer(args=self.args, custom_args=[], platform_util=platform_util_obj)
             base_obj.set_num_inter_intra_threads()
@@ -304,6 +306,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # Run the start script
         start_script = os.path.join(workspace, "start.sh")
         self._launch_command(["bash", start_script])
+    
 
     def run_docker_container(self, benchmark_scripts, intelai_models, env_var_dict):
         """

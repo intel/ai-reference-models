@@ -79,14 +79,14 @@ def parse_example_proto(example_serialized):
   """
   # Dense features in Example proto.
   feature_map = {
-      'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
+      'image/encoded': tf.io.FixedLenFeature([], dtype=tf.string,
                                           default_value=''),
-      'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
+      'image/class/label': tf.io.FixedLenFeature([1], dtype=tf.int64,
                                               default_value=-1),
-      'image/class/text': tf.FixedLenFeature([], dtype=tf.string,
+      'image/class/text': tf.io.FixedLenFeature([], dtype=tf.string,
                                              default_value=''),
   }
-  sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
+  sparse_float32 = tf.io.VarLenFeature(dtype=tf.float32)
   # Sparse features in Example proto.
   feature_map.update(
       {k: sparse_float32 for k in ['image/object/bbox/xmin',
@@ -94,7 +94,7 @@ def parse_example_proto(example_serialized):
                                    'image/object/bbox/xmax',
                                    'image/object/bbox/ymax']})
 
-  features = tf.parse_single_example(example_serialized, feature_map)
+  features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
   label = tf.cast(features['image/class/label'], dtype=tf.int32)
 
   xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 0)
@@ -108,7 +108,7 @@ def parse_example_proto(example_serialized):
   # Force the variable number of bounding boxes into the shape
   # [1, num_boxes, coords].
   bbox = tf.expand_dims(bbox, 0)
-  bbox = tf.transpose(bbox, [0, 2, 1])
+  bbox = tf.transpose(a=bbox, perm=[0, 2, 1])
 
   return features['image/encoded'], label, bbox, features['image/class/text']
 
@@ -124,7 +124,7 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
   """
   # with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
   # with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
-  with tf.name_scope(scope or 'decode_jpeg'):
+  with tf.compat.v1.name_scope(scope or 'decode_jpeg'):
     # Decode the string as an RGB JPEG.
     # Note that the resulting image contains an unknown height and width
     # that is set dynamically by decode_jpeg. In other words, the height
@@ -140,9 +140,9 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
 
 def eval_image(image, height, width, bbox, thread_id, resize):
   """Get the image for model evaluation."""
-  with tf.name_scope('eval_image'):
+  with tf.compat.v1.name_scope('eval_image'):
     if not thread_id:
-      tf.summary.image(
+      tf.compat.v1.summary.image(
           'original_image', tf.expand_dims(image, 0))
 
     if resize == 'crop':
@@ -150,11 +150,11 @@ def eval_image(image, height, width, bbox, thread_id, resize):
       #         It seems that the redundant pad step has huge overhead
       # distorted_image = tf.image.resize_image_with_crop_or_pad(image,
       #                                                         height, width)
-      shape = tf.shape(image)
-      image = tf.cond(tf.less(shape[0], shape[1]),
-                        lambda: tf.image.resize_images(image, tf.convert_to_tensor([256, 256*shape[1]/shape[0]], dtype=tf.int32)),
-                        lambda: tf.image.resize_images(image, tf.convert_to_tensor([256*shape[0]/shape[1], 256], dtype=tf.int32)))
-      shape = tf.shape(image)
+      shape = tf.shape(input=image)
+      image = tf.cond(pred=tf.less(shape[0], shape[1]),
+                        true_fn=lambda: tf.image.resize(image, tf.convert_to_tensor(value=[256, 256*shape[1]/shape[0]], dtype=tf.int32)),
+                        false_fn=lambda: tf.image.resize(image, tf.convert_to_tensor(value=[256*shape[0]/shape[1], 256], dtype=tf.int32)))
+      shape = tf.shape(input=image)
 
       y0 = (shape[0] - height) // 2
       x0 = (shape[1] - width) // 2
@@ -165,7 +165,7 @@ def eval_image(image, height, width, bbox, thread_id, resize):
                                                       width)
     else:
       sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
-          tf.shape(image),
+          image_size=tf.shape(input=image),
           bounding_boxes=bbox,
           min_object_covered=0.5,
           aspect_ratio_range=[0.90, 1.10],
@@ -184,16 +184,15 @@ def eval_image(image, height, width, bbox, thread_id, resize):
       # This resizing operation may distort the images because the aspect
       # ratio is not respected.
       if cnn_util.tensorflow_version() >= 11:
-        distorted_image = tf.image.resize_images(
+        distorted_image = tf.image.resize(
             distorted_image, [height, width],
-            resize_method,
-            align_corners=False)
+            resize_method)
       else:
-        distorted_image = tf.image.resize_images(
-            distorted_image, height, width, resize_method, align_corners=False)
+        distorted_image = tf.image.resize(
+            distorted_image, height, width, resize_method)
     distorted_image.set_shape([height, width, 3])
     if not thread_id:
-      tf.summary.image(
+      tf.compat.v1.summary.image(
           'cropped_resized_image', tf.expand_dims(distorted_image, 0))
     image = distorted_image
   return image
@@ -220,7 +219,7 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
   """
   # with tf.op_scope([image, height, width, bbox], scope, 'distort_image'):
   # with tf.name_scope(scope, 'distort_image', [image, height, width, bbox]):
-  with tf.name_scope(scope or 'distort_image'):
+  with tf.compat.v1.name_scope(scope or 'distort_image'):
     # Each bounding box has shape [1, num_boxes, box coords] and
     # the coordinates are ordered [ymin, xmin, ymax, xmax].
 
@@ -233,7 +232,7 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     if not thread_id:
       image_with_box = tf.image.draw_bounding_boxes(tf.expand_dims(image, 0),
                                                     bbox)
-      tf.summary.image(
+      tf.compat.v1.summary.image(
           'image_with_bounding_boxes', image_with_box)
 
   # A large fraction of image datasets contain a human-annotated bounding
@@ -244,7 +243,7 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
   # bounding box. If no box is supplied, then we assume the bounding box is
   # the entire image.
     sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
-        tf.shape(image),
+        image_size=tf.shape(input=image),
         bounding_boxes=bbox,
         min_object_covered=0.1,
         aspect_ratio_range=[0.99, 1.01],
@@ -255,7 +254,7 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     if not thread_id:
       image_with_distorted_box = tf.image.draw_bounding_boxes(
           tf.expand_dims(image, 0), distort_bbox)
-      tf.summary.image(
+      tf.compat.v1.summary.image(
           'images_with_distorted_bounding_box',
           image_with_distorted_box)
 
@@ -268,16 +267,16 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     # Note that ResizeMethod contains 4 enumerated resizing methods.
     resize_method = thread_id % 4
     if cnn_util.tensorflow_version() >= 11:
-      distorted_image = tf.image.resize_images(
-          distorted_image, [height, width], resize_method, align_corners=False)
+      distorted_image = tf.image.resize(
+          distorted_image, [height, width], resize_method)
     else:
-      distorted_image = tf.image.resize_images(
-          distorted_image, height, width, resize_method, align_corners=False)
+      distorted_image = tf.image.resize(
+          distorted_image, height, width, resize_method)
     # Restore the shape since the dynamic slice based upon the bbox_size loses
     # the third dimension.
     distorted_image.set_shape([height, width, 3])
     if not thread_id:
-      tf.summary.image(
+      tf.compat.v1.summary.image(
           'cropped_resized_image',
           tf.expand_dims(distorted_image, 0))
 
@@ -291,7 +290,7 @@ def distort_image(image, height, width, bbox, thread_id=0, scope=None):
     distorted_image *= 256
 
     if not thread_id:
-      tf.summary.image(
+      tf.compat.v1.summary.image(
           'final_distorted_image',
           tf.expand_dims(distorted_image, 0))
     return distorted_image
@@ -314,7 +313,7 @@ def distort_color(image, thread_id=0, scope=None):
   """
   # with tf.op_scope([image], scope, 'distort_color'):
   # with tf.name_scope(scope, 'distort_color', [image]):
-  with tf.name_scope(scope or 'distort_color'):
+  with tf.compat.v1.name_scope(scope or 'distort_color'):
     color_ordering = thread_id % 2
 
     if color_ordering == 0:
@@ -380,7 +379,7 @@ class ImagePreprocessor(object):
     return image
 
   def minibatch(self, dataset, subset):
-    with tf.name_scope('batch_processing'):
+    with tf.compat.v1.name_scope('batch_processing'):
       images = [[] for i in range(self.device_count)]
       labels = [[] for i in range(self.device_count)]
       record_input = data_flow_ops.RecordInput(

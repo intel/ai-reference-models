@@ -103,12 +103,12 @@ if __name__ == "__main__":
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
 
-  data_config = tf.ConfigProto()
+  data_config = tf.compat.v1.ConfigProto()
   data_config.intra_op_parallelism_threads = args.data_num_intra_threads
   data_config.inter_op_parallelism_threads = args.data_num_inter_threads
   data_config.use_per_session_threads = 1
 
-  infer_config = tf.ConfigProto()
+  infer_config = tf.compat.v1.ConfigProto()
   infer_config.intra_op_parallelism_threads = num_intra_threads
   infer_config.inter_op_parallelism_threads = num_inter_threads
   infer_config.use_per_session_threads = 1
@@ -133,17 +133,17 @@ if __name__ == "__main__":
 
   infer_graph = tf.Graph()
   with infer_graph.as_default():
-    graph_def = tf.GraphDef()
+    graph_def = tf.compat.v1.GraphDef()
     with open(model_file, "rb") as f:
       graph_def.ParseFromString(f.read())
     tf.import_graph_def(graph_def, name='')
 
   input_tensor = infer_graph.get_tensor_by_name(input_layer + ":0")
   output_tensor = infer_graph.get_tensor_by_name(output_layer + ":0")
-  tf.global_variables_initializer()
+  tf.compat.v1.global_variables_initializer()
 
-  data_sess = tf.Session(graph=data_graph, config=data_config)
-  infer_sess = tf.Session(graph=infer_graph, config=infer_config)
+  data_sess = tf.compat.v1.Session(graph=data_graph, config=data_config)
+  infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)
 
   print("[Running warmup steps...]")
   for t in range(warmup_steps):

@@ -1,0 +1,7 @@
+[
+  {
+    "_comment": "FP32 Inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=bert --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=28 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --model-source-dir=/workspace/models --data-location=/dataset --vocab_file=chinese_L-12_H-768_A-12/vocab.txt --bert_config_file=chinese_L-12_H-768_A-12/bert_config.json --init_checkpoint=chinese_L-12_H-768_A-12/bert_model.ckpt --num-inter-threads=1 --num-intra-threads=28 --disable-tcmalloc=True --task_name=XNLI --max_seq_length=128 --eval_batch_size=8 --learning_rate=5e-5",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/models/run_classifier.py --data_dir=/dataset --output_dir=/workspace/benchmarks/common/tensorflow/logs --vocab_file=/dataset/chinese_L-12_H-768_A-12/vocab.txt --bert_config_file=/dataset/chinese_L-12_H-768_A-12/bert_config.json --init_checkpoint=/dataset/chinese_L-12_H-768_A-12/bert_model.ckpt --task_name=XNLI --max_seq_length=128 --eval_batch_size=8 --learning_rate=5e-05 --num_inter_threads=1 --num_intra_threads=28 --do_train=false --do_eval=true"
+  }
+]

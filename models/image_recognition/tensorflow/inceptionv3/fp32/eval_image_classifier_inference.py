@@ -22,13 +22,13 @@ import time
 from argparse import ArgumentParser
 
 import tensorflow as tf
-import tensorflow_core.tools.graph_transforms as graph_transforms
+from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
+from tensorflow.python.framework import dtypes
 
 import datasets
 
 INPUTS = 'input'
 OUTPUTS = 'predict'
-OPTIMIZATION = 'strip_unused_nodes remove_nodes(op=Identity, op=CheckNumerics) fold_constants(ignore_errors=true) fold_batch_norms fold_old_batch_norms'
 
 INCEPTION_V3_IMAGE_SIZE = 299
 
@@ -97,12 +97,12 @@ class eval_classifier_optimized_graph:
 
     print("Run inference")
 
-    data_config = tf.ConfigProto()
+    data_config = tf.compat.v1.ConfigProto()
     data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
     data_config.inter_op_parallelism_threads = self.args.data_num_inter_threads
     data_config.use_per_session_threads = 1
 
-    infer_config = tf.ConfigProto()
+    infer_config = tf.compat.v1.ConfigProto()
     infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
     infer_config.use_per_session_threads = 1
@@ -124,21 +124,21 @@ class eval_classifier_optimized_graph:
 
     infer_graph = tf.Graph()
     with infer_graph.as_default():
-      graph_def = tf.GraphDef()
-      with tf.gfile.FastGFile(self.args.input_graph, 'rb') as input_file:
+      graph_def = tf.compat.v1.GraphDef()
+      with tf.compat.v1.gfile.FastGFile(self.args.input_graph, 'rb') as input_file:
         input_graph_content = input_file.read()
         graph_def.ParseFromString(input_graph_content)
 
-      output_graph = graph_transforms.TransformGraph(graph_def,
-                                                     [INPUTS], [OUTPUTS], [OPTIMIZATION])
+      output_graph = optimize_for_inference(graph_def, [INPUTS], 
+                              [OUTPUTS], dtypes.float32.as_datatype_enum, False)
       tf.import_graph_def(output_graph, name='')
 
     # Definite input and output Tensors for detection_graph
     input_tensor = infer_graph.get_tensor_by_name('input:0')
     output_tensor = infer_graph.get_tensor_by_name('predict:0')
 
-    data_sess  = tf.Session(graph=data_graph,  config=data_config)
-    infer_sess = tf.Session(graph=infer_graph, config=infer_config)
+    data_sess  = tf.compat.v1.Session(graph=data_graph,  config=data_config)
+    infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)
 
     num_processed_images = 0
     num_remaining_images = datasets.IMAGENET_NUM_VAL_IMAGES
@@ -197,13 +197,13 @@ class eval_classifier_optimized_graph:
 
         with tf.Graph().as_default() as accu_graph:
           accuracy1 = tf.reduce_sum(
-            tf.cast(tf.nn.in_top_k(tf.constant(predictions),
-                                   tf.constant(np_labels), 1), tf.float32))
+            input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
+                                   targets=tf.constant(np_labels), k=1), tf.float32))
 
           accuracy5 = tf.reduce_sum(
-            tf.cast(tf.nn.in_top_k(tf.constant(predictions),
-                                   tf.constant(np_labels), 5), tf.float32))
-          with tf.Session() as accu_sess:
+            input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
+                                   targets=tf.constant(np_labels), k=5), tf.float32))
+          with tf.compat.v1.Session() as accu_sess:
             np_accuracy1, np_accuracy5 = accu_sess.run([accuracy1, accuracy5])
 
           total_accuracy1 += np_accuracy1

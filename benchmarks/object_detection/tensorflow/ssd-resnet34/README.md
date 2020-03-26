@@ -11,11 +11,8 @@ for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Store the path to the current directory:
-```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-```
+1. Please ensure you have installed all the libraries listed in the 
+`requirements` before you start the next step.
 
 2. Clone the `tensorflow/models` repository with the specified SHA,
 since we are using an older version of the models repo for
@@ -72,7 +69,7 @@ models repo.
 
 Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
 Follow the steps below to navigate to the proper directory and point the
-script to the raw COCO dataset files that you have downloaded in step 2.
+script to the raw COCO dataset files that you have downloaded in step 3.
 The `--output_dir` is the location where the TF record files will be
 located after the script has completed.
 
@@ -99,16 +96,23 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
-$ cd $MODEL_WORK_DIR/tf_models
+$ cd /home/<user>/tf_models
 $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
+```
+$ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validation-00000-of-00001
+```
 
 6. Download the pretrained model:
 
 ```
+# ssd-resnet34 300x300
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_fp32_bs1_pretrained_model.pb
+
+# ssd-resnet34 1200x1200 
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -127,43 +131,49 @@ SSD-ResNet34 with a TensorFlow 1.14 docker image.
 
 To run for batch and online inference, use the following command,
 the path to the frozen graph that you downloaded in step 5 as 
-the `--in-graph`, and use the `--benchmark-only`
-flag:
+the `--in-graph`, and use the `--benchmark-only` flag. By default it runs 
+with input size 300x300, you may add `-- input-size=1200` flag last to run 
+benchmark with input size 1200x1200.
 
 ```
 $ cd $MODEL_WORK_DIR/models/benchmarks
 
+# benchmarks with input size 1200x1200
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/ssd_resnet34_fp32_bs1_pretrained_model.pb \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --in-graph /home/<user>/ssd_resnet34_fp32_1200x1200_pretrained_model.pb \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --benchmark-only
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --benchmark-only \
+    -- input-size=1200
 ```
 
-To test accuracy, use the following command but replace in your path to
-the tf record file that you generated in step 4 for the `--data-location`,
-the path to the frozen graph that you downloaded in step 5 as the
-`--in-graph`, and use the `--accuracy-only` flag:
+To run the accuracy test, use the following command but replace in your path to
+the tf record file that you generated in step 5 for the `--data-location`,
+the path to the frozen graph that you downloaded in step 6 as the
+`--in-graph`, and use the `--accuracy-only` flag. By default it runs with 
+input size 300x300, you may add `-- input-size=1200` flag last to run the test with 
+input size 1200x1200.
 
 ```
+# accuracy test with input size 300x300
 $ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/output/ \
-    --in-graph $MODEL_WORK_DIR/ssd_resnet34_fp32_bs1_pretrained_model.pb \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location /home/<user>/coco/output/ \
+    --in-graph /home/<user>/ssd_resnet34_fp32_bs1_pretrained_model.pb \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --accuracy-only
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --accuracy-only 
 ```
 
 9. The log file is saved to the value of `--output-dir`.
@@ -200,12 +210,8 @@ $ popd
 ```
 
 ## INT8 Inference Instructions
-
-1. Store the path to the current directory:
-```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-```
+1. Please ensure you have installed all the libraries listed in the 
+`requirements` before you start the next step.
 
 2. Clone the `tensorflow/models` repository with the specified SHA,
 since we are using an older version of the models repo for
@@ -288,16 +294,27 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
-$ cd $MODEL_WORK_DIR/tf_models
+$ cd /home/<user>/tf_models
 $ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
+```
+$ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validation-00000-of-00001
+```
 
 6. Download the pretrained model:
 
 ```
+# ssd-resnet34 300x300
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_int8_bs1_pretrained_model.pb
+# ssd-resnet34 1200x1200 
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+```
+
+If want to download the pretrained model for `--input-size=1200`, use the command below instead.
+```
+
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -310,48 +327,55 @@ $ git clone https://github.com/IntelAI/models.git
 
 8. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
-cloned in the previous step. SSD-ResNet34 can be run for testing batch or online inference, or testing accuracy. Note that we are running
+cloned in the previous step. SSD-ResNet34 can be run for 
+batch and online inference, or accuracy. Note that we are running
 SSD-ResNet34 with a TensorFlow 1.14 docker image.
 
 To run for batch and online inference, use the following command,
-the path to the frozen graph that you downloaded in step 5 as
-the `--in-graph`, and use the `--benchmark-only`
-flag:
+the path to the frozen graph that you downloaded in step 5 as 
+the `--in-graph`, and use the `--benchmark-only` flag.
+By default it runs with input size 300x300, you may add `-- input-size=1200` 
+flag to run benchmark with input size 1200x1200.
 
 ```
 $ cd $MODEL_WORK_DIR/models/benchmarks
 
+# benchmarks with input size 300x300
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/ssd_resnet34_int8_bs1_pretrained_model.pb \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --in-graph /home/<user>/ssd_resnet34_int8_bs1_pretrained_model.pb \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --benchmark-only
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --benchmark-only 
 ```
 
-To test accuracy, use the following command but replace in your path to
-the tf record file that you generated in step 4 for the `--data-location`,
-the path to the frozen graph that you downloaded in step 5 as the
-`--in-graph`, and use the `--accuracy-only` flag:
+To run the accuracy test, use the following command but replace in your path to
+the tf record file that you generated in step 5 for the `--data-location`,
+the path to the frozen graph that you downloaded in step 6 as the
+`--in-graph`, and use the `--accuracy-only` flag. By default it runs with 
+input size 300x300, you may add `-- input-size=1200` flag to run the test with 
+input size 1200x1200.
 
 ```
+# accuracy test with input size 1200x1200
 $ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/output/ \
-    --in-graph $MODEL_WORK_DIR/ssd_resnet34_int8_bs1_pretrained_model.pb \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location /home/<user>/coco/output/ \
+    --in-graph /home/<user>/ssd_resnet34_int8_1200x1200_pretrained_model.pb \
+    --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
     --framework tensorflow \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
     --batch-size=1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --accuracy-only
+    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --accuracy-only \
+    -- input-size=1200
 ```
 
 9. The log file is saved to the value of `--output-dir`.
