@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -52,14 +52,14 @@ class ModelInitializer(BaseModelInitializer):
         parser.add_argument('--num_processes_per_node', type=int, default=1, help='number of process per node')
         parser.add_argument('--num_inter_threads', type=int, default=1, help='number of inter-threads')
         parser.add_argument('--num_intra_threads', type=int, default=28, help='number of intra-threads')
-        # parser.add_argument('--enable_bfloat16', action='store_true',
-        #                     help='If True, rewrite graph to use bfloat16')
+        parser.add_argument('--trace_file', default=None, help='name of trace file/timeline')
+
         self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
         omp_num_threads = platform_util.num_cores_per_socket
 
-        # set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
-        set_env_var("OMP_NUM_THREADS", 28)
+        set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
+        # set_env_var("OMP_NUM_THREADS", 52)
 
         cmd_args = " --data_dir {0}".format(self.args.data_location)
         cmd_args += " --batch_size {0}".format(self.args.batch_size)
@@ -72,7 +72,10 @@ class ModelInitializer(BaseModelInitializer):
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
         cmd_args += " --rewriter_config=convert_to_bfloat16:ON"
         # cmd_args += " --variable_update=horovod --horovod_device=cpu"
-        # cmd_args += " --trace_file=ssd-rn34-trace-bfloat16-no-mpi.json --use_chrome_trace_format=True"
+        # cmd_args += " --use_chrome_trace_format=True --trace_file=latest-use-eigen-bias.json"
+        # cmd_args += " --num_warmup_batches=0"
+        if self.args.trace_file is not None:
+          cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.trace_file)
 
         multi_instance_param_list = ["-genv:I_MPI_PIN_DOMAIN=socket",
                                      "-genv:I_MPI_FABRICS=shm",
@@ -87,7 +90,6 @@ class ModelInitializer(BaseModelInitializer):
         training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
 
         self.cmd = self.cmd + training_script + cmd_args
-        print("Ran command: {}".format(self.cmd))
 
     def run(self):
         original_dir = os.getcwd()
