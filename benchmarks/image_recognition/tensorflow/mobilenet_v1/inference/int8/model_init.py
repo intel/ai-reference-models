@@ -55,7 +55,16 @@ class ModelInitializer(BaseModelInitializer):
                 "input_graph", "input_height", "input_width", "batch_size",
                 "input_layer", "output_layer", "num_inter_threads",
                 "num_intra_threads", "warmup_steps", "steps"]
-        if self.args.accuracy_only:
+
+        if self.args.calibration_only:
+            run_script = os.path.join(
+                self.args.intelai_models, self.args.mode,
+                self.args.precision, "calibration.py")
+            script_args_list = [
+                "input_graph", "data_location", "input_height", "input_width",
+                "batch_size", "input_layer", "output_layer",
+                "num_inter_threads", "num_intra_threads"]
+        elif self.args.accuracy_only:
             run_script = os.path.join(
                 self.args.intelai_models, self.args.mode,
                 self.args.precision, "accuracy.py")
@@ -76,21 +85,25 @@ class ModelInitializer(BaseModelInitializer):
                 "--input_width", default=224,
                 dest='input_width', type=int, help="input width")
             parser.add_argument(
-                '--warmup_steps', dest='warmup_steps',
-                help='number of warmup steps',
+                "--warmup_steps", dest="warmup_steps",
+                help="number of warmup steps",
                 type=int, default=10)
             parser.add_argument(
-                '--steps', dest='steps',
-                help='number of steps',
+                "--steps", dest="steps",
+                help="number of steps",
                 type=int, default=50)
             parser.add_argument(
-                '--input_layer', dest='input_layer',
-                help='name of input layer',
+                "--input_layer", dest="input_layer",
+                help="name of input layer",
                 type=str, default="input")
             parser.add_argument(
-                '--output_layer', dest='output_layer',
-                help='name of output layer',
+                "--output_layer", dest="output_layer",
+                help="name of output layer",
                 type=str, default="MobilenetV1/Predictions/Reshape_1")
+            parser.add_argument(
+                "--calibration-only", dest="calibration_only",
+                help="calibrate the accuracy",
+                action="store_true")
 
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)

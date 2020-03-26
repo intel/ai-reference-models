@@ -2,7 +2,7 @@
 # Each line is a file pattern followed by one or more owners.
 
 # These owners will be the default owners for everything in the repo.
-*   @mlukaszewski @claynerobison @dmsuehir @karthikvadla @mhbuehler @WafaaT @jitendra42 @chuanqi129
+*   @mlukaszewski @claynerobison @chuanqi129 @agramesh1 @justkw
 
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners

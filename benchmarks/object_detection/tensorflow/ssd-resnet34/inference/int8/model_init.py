@@ -24,6 +24,9 @@ import sys
 from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
 
+from common.utils.validators import check_positive_number
+
+import argparse
 
 class ModelInitializer(BaseModelInitializer):
     def run_inference_sanity_checks(self, args, custom_args):
@@ -41,6 +44,13 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args, platform_util):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
+        arg_parser = argparse.ArgumentParser(description='Parse additional args')
+        
+        arg_parser.add_argument(
+            "--input-size", help="Size of the input graph ",
+            dest="input_size", default=300, type=check_positive_number)       
+        
+        self.additional_args, unknown_args = arg_parser.parse_known_args(custom_args)
         self.run_inference_sanity_checks(self.args, self.custom_args)
 
         # Set KMP env vars, if they haven't already been set
@@ -66,14 +76,16 @@ class ModelInitializer(BaseModelInitializer):
         self.run_cmd += " --batch-size {0}".format(args.batch_size)
         self.run_cmd += " --inter-op-parallelism-threads {0}".format(self.args.num_inter_threads)
         self.run_cmd += " --intra-op-parallelism-threads {0}".format(self.args.num_intra_threads)
-
+        self.run_cmd += " --input-size {0}".format(self.additional_args.input_size)
+        
         if self.args.accuracy_only:
             self.run_cmd += " --accuracy-only "
             self.run_cmd += " --data-location {0}".format(self.args.data_location)
 
     def run(self):
         old_python_path = os.environ["PYTHONPATH"]
+        benchmarks_path = os.path.join(self.args.model_source_dir,"../ssd-resnet-benchmarks")
         os.environ["PYTHONPATH"] = os.path.join(self.args.model_source_dir, "research")
-        os.environ["PYTHONPATH"] += ":/tmp/benchmarks/scripts/tf_cnn_benchmarks/"
+        os.environ["PYTHONPATH"] += ":" + os.path.join(benchmarks_path, "scripts/tf_cnn_benchmarks")
         self.run_command(self.run_cmd)
         os.environ["PYTHONPATH"] = old_python_path

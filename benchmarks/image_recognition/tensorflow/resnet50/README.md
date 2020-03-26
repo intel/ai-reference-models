@@ -4,9 +4,8 @@ This document has instructions for how to run ResNet50 for the
 following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
-
-Instructions and scripts for ResNet50 model inference on `Int8` and `FP32`
-precisions.
+* [FP32 training](#fp32-training-instructions)
+* [BFloat16 training](#bfloat16-training-instructions)
 
 ## Int8 Inference Instructions
 
@@ -17,12 +16,9 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
-* Store the path to the current directory and clone the tensorflow/models repository:
+* Clone the tensorflow/models repository:
 ```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-
-$ git clone https://github.com/tensorflow/models.git tf_models
+$ git clone https://github.com/tensorflow/models.git
 ``` 
 The TensorFlow models repo provides
 [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
@@ -50,18 +46,18 @@ located at `models/models/image_recognition/tensorflow/resnet50/`.
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2), and the `--accuracy-only` flag.
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/dataset/FullImageNetData_directory
-    --in-graph $MODEL_WORK_DIR/resnet50_int8_pretrained_model.pb \
+    --data-location /home/<user>/dataset/FullImageNetData_directory
+    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -92,17 +88,17 @@ args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/resnet50_int8_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision int8 \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the script completes should look
@@ -123,18 +119,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location..
 
-5. To return to where you started from:
-```
-$ popd
-```
-
 ## FP32 Inference Instructions
 
-1. Store the path to the current directory and download the pre-trained model.
+1. Download the pre-trained model.
 ```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_fp32_pretrained_model.pb
 ```
 
@@ -161,17 +149,17 @@ If using dummy data for inference, `--data-location` flag is not required. Other
 
 * To measure online inference, set `--batch-size=1` and run the script as shown:
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -196,17 +184,17 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure batch inference, set `--batch-size=128` and run the launch script as shown:
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -232,10 +220,10 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -243,8 +231,8 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location $MODEL_WORK_DIR/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --data-location /home/<user>/dataset/ImageNetData_directory \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -265,10 +253,10 @@ output can only be used with real data.
 For example, the command below is the same as the accuracy test above,
 except with the `--output-results` flag added:
 ```
-$ cd models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph $MODEL_WORK_DIR/resnet50_fp32_pretrained_model.pb  \
+    --in-graph /home/<user>/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \
     --precision fp32 \
@@ -277,8 +265,8 @@ $ python launch_benchmark.py \
     --output-results \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location $MODEL_WORK_DIR/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --data-location /home/<user>/dataset/ImageNetData_directory \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -301,7 +289,96 @@ ILSVRC2012_val_00021512.JPEG,424,424
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
 
-5. To return to where you started from:
+## FP32 Training Instructions
+
+1. Download the full ImageNet dataset and convert to the TF records format.
+
+* Clone the tensorflow/models repository:
 ```
-$ popd
+$ git clone https://github.com/tensorflow/models.git
 ```
+The TensorFlow models repo provides
+[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
+to download, process and convert the ImageNet dataset to the TF records format.
+
+2. Download the FP32 version of ResNet50v1 model published by Google.
+
+* Clone the models repository for tensorflow/tpu:
+```
+$ git clone https://github.com/tensorflow/tpu.git
+```
+
+3. Clone the
+[intelai/models](https://github.com/intelai/models)
+repository
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+4. Run the following command to start ResNet50 BFloat16 training run.
+```
+$ python launch_benchmark.py \
+         --model-name=resnet50 \
+         --precision=fp32 \
+         --mode=training \
+         --framework tensorflow \
+         --checkpoint <location_to_store_training_checkpoints> \
+         --model-source-dir <location_of_TPU_models_directory> \
+         --data-location=/home/<user>/dataset/ImageNetData_directory
+```
+
+This run will take considerable amount of time since it is running for
+convergence (90 epochs, where each epoch is 1251 steps with batch size of 1024).
+
+If you want to do a trial run, add
+```
+-- steps=<number_of_training_steps>
+```
+argument to the command.
+
+## BFloat16 Training Instructions
+
+1. Download the full ImageNet dataset and convert to the TF records format.
+
+* Clone the tensorflow/models repository:
+```
+$ git clone https://github.com/tensorflow/models.git
+```
+The TensorFlow models repo provides
+[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
+to download, process and convert the ImageNet dataset to the TF records format.
+
+2. Download the BFloat16 version of ResNet50v1 model published by Google.
+
+* Clone the models repository for tensorflow/tpu:
+```
+$ git clone https://github.com/tensorflow/tpu.git
+```
+
+3. Clone the
+[intelai/models](https://github.com/intelai/models)
+repository
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+4. Run the following command to start ResNet50 BFloat16 training run.
+```
+$ python launch_benchmark.py \
+         --model-name=resnet50 \
+         --precision=bfloat16 \
+         --mode=training \
+         --framework tensorflow \
+         --checkpoint <location_to_store_training_checkpoints> \
+         --model-source-dir <location_of_TPU_models_directory> \
+         --data-location=/home/<user>/dataset/ImageNetData_directory
+```
+
+This run will take considerable amount of time since it is running for
+convergence (90 epochs, where each epoch is 1251 steps with batch size of 1024).
+
+If you want to do a trial run, add
+```
+-- steps=<number_of_training_steps>
+```
+argument to the command.
