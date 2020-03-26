@@ -562,4 +562,23 @@ $ pushd $MODEL_WORK_DIR
    
    ```
 
-   
+   ## BF16 Training Instructions
+
+   1. Follow steps 1-7 from the above FP32 Training Instructions to setup the environment.
+
+   2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
+      Use the below command to run on single socket.
+
+      ```bash
+      $ cd $MODEL_WORK_DIR/models/benchmarks/
+
+      $ python3 launch_benchmark.py \
+      --data-location /nfs/pdx/home/mabuzain/coco_training_yang/ \
+      --model-source-dir $MODEL_WORK_DIR/models \
+      --model-name ssd-resnet34 --framework tensorflow \
+      --precision bfloat16 --mode training \
+      --num-train-steps 100 --num-cores 52 \
+      --num-inter-threads 1 --num-intra-threads 52 \
+      --batch-size=52 --weight_decay=1e-4
+
+      ```
