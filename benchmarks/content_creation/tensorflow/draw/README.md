@@ -6,12 +6,9 @@ modes/precisions:
 
 ## FP32 Inference Instructions
 
-1. Save path to current directory and download the [MNIST dataset](http://yann.lecun.com/exdb/mnist/):
+1. Download the [MNIST dataset](http://yann.lecun.com/exdb/mnist/):
 
    ```
-   $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-   $ pushd $MODEL_WORK_DIR
-   
    $ mkdir mnist
    $ cd mnist
    $ wget http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz
@@ -25,8 +22,6 @@ modes/precisions:
 
 2. Download and extract the pretrained model:
    ```
-   cd $MODEL_WORK_DIR
-
    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/draw_fp32_pretrained_model.tar.gz
    $ tar -xvf draw_fp32_pretrained_model.tar.gz
    ```
@@ -48,27 +43,27 @@ modes/precisions:
 
    * Run DRAW for online inference (with `--batch-size 1`):
      ```
-        $ python launch_benchmark.py \
-            --precision fp32 \
+        python launch_benchmark.py \
+	        --precision fp32 \
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-            --checkpoint $MODEL_WORK_DIR/draw_fp32_pretrained_model \
-            --data-location $MODEL_WORK_DIR/mnist \
+            --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
+            --checkpoint /home/<user>/draw_fp32_pretrained_model \
+            --data-location /home/<user>/mnist \
             --batch-size 1 \
             --socket-id 0
      ```
     * Run DRAW for batch inference (with `--batch-size 100`):
       ```
-        $ python launch_benchmark.py \
-            --precision fp32 \
+        python launch_benchmark.py \
+	        --precision fp32 \
             --model-name draw \
             --mode inference \
             --framework tensorflow \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-            --checkpoint $MODEL_WORK_DIR/draw_fp32_pretrained_model \
-            --data-location $MODEL_WORK_DIR/mnist \
+            --docker-image intelaipg/intel-optimized-tensorflow:1.14-py3 \
+            --checkpoint /home/<user>/draw_fp32_pretrained_model \
+            --data-location /home/<user>/mnist \
             --batch-size 100 \
             --socket-id 0
       ```
@@ -86,7 +81,7 @@ modes/precisions:
      Batchsize: 1
      Time spent per BATCH: 6.6667 ms
      Total samples/sec: 149.9996 samples/s
-     Outputs saved in file: /home/user/mnist/draw_data.npy
+     Outputs saved in file: /home/<user>/mnist/draw_data.npy
      Ran inference with batch size 1
      Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_012947.log
      ```
@@ -99,12 +94,7 @@ modes/precisions:
      Batchsize: 100
      Time spent per BATCH: 28.1952 ms
      Total samples/sec: 3546.7006 samples/s
-     Outputs saved in file: /home/user/mnist/draw_data.npy
+     Outputs saved in file: /home/<user>/mnist/draw_data.npy
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_draw_inference_fp32_20190123_013432.log
      ```
-
-6. To return to where you started from:
-```
-$ popd
-```

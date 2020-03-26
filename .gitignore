@@ -8,4 +8,3 @@
 .coverage
 .tox
 test_data/
-*.bak

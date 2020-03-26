@@ -8,14 +8,10 @@ Script instructions for model training and inference for other precisions are co
 
 ## FP32 Inference Instructions
 
-1. Store path to current directory and clone the [davidsandberg/facenet](https://github.com/davidsandberg/facenet) repository:
+1. Clone the [davidsandberg/facenet](https://github.com/davidsandberg/facenet) repository:
 
 ```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-
 $ git clone https://github.com/davidsandberg/facenet.git
-$ git checkout 096ed770f163957c1e56efa7feeb194773920f6e
 ```
 
 2. Clone this [intelai/models](https://github.com/IntelAI/models)
@@ -29,7 +25,7 @@ $ git clone https://github.com/IntelAI/models.git
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/facenet_fp32_pretrained_model.tar.gz
 $ tar -zxvf facenet_fp32_pretrained_model.tar.gz
-$ ls fp32
+$ ls checkpoint
 model-20181015-153825.ckpt-90.data-00000-of-00001  model-20181015-153825.ckpt-90.index  model-20181015-153825.meta
 ```
 
@@ -53,19 +49,17 @@ Use one of the following examples below, depending on your use case.
 * For online inference (using `--batch-size 1`):
 
 ```
-$ cd models/benchmarks
-
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name facenet \
     --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --checkpoint $MODEL_WORK_DIR/fp32 \
-    --data-location  $MODEL_WORK_DIR/datasets/lfw/raw \
-    --model-source-dir $MODEL_WORK_DIR/facenet/ \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --checkpoint /home/<user>/checkpoints \
+    --data-location  /home/<user>/dataset \
+    --model-source-dir /home/<user>/facenet/ \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 Example log tail for online inference:
 ```
@@ -90,19 +84,17 @@ Log location outside container: {--output-dir value}/benchmark_facenet_inference
 * For batch inference (using `--batch-size 100`):
 
 ```
-$ cd models/benchmarks
-
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name facenet \
     --precision fp32 \
     --mode inference \
     --framework tensorflow \
     --batch-size 100 \
     --socket-id 0 \
-    --checkpoint $MODEL_WORK_DIR/fp32 \
-    --data-location  $MODEL_WORK_DIR/datasets/lfw/raw \
-    --model-source-dir $MODEL_WORK_DIR/facenet/ \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --checkpoint /home/<user>/checkpoints \
+    --data-location  /home/<user>/dataset \
+    --model-source-dir /home/<user>/facenet/ \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 Example log tail for batch inference:
 ```
@@ -123,9 +115,7 @@ Log location outside container: {--output-dir value}/benchmark_facenet_inference
 * For accuracy (using `--accuracy-only`, and `--batch-size 100`):
 
 ```
-$ cd models/benchmarks
-
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name facenet \
     --precision fp32 \
     --mode inference \
@@ -133,10 +123,10 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --checkpoint $MODEL_WORK_DIR/fp32 \
-    --data-location  $MODEL_WORK_DIR/datasets/lfw/raw \
-    --model-source-dir $MODEL_WORK_DIR/facenet/ \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --checkpoint /home/<user>/checkpoints \
+    --data-location  /home/<user>/dataset \
+    --model-source-dir /home/<user>/facenet/ \
+    --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 Example log tail for accuracy:
 ```
@@ -155,9 +145,4 @@ Log location outside container: {--output-dir value}/benchmark_facenet_inference
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
-to get additional debug output or change the default output location.
-
-6. To return to where you started from:
-```
-$ popd
-```
+to get additional debug output or change the default output location..

@@ -8,13 +8,9 @@ Instructions for MTCC model training and inference for other precisions are comi
 
 ## FP32 Inference Instructions
 
-1. Store path to current directory and clone the MTCC model repository [AITTSMD/MTCNN-Tensorflow](https://github.com/AITTSMD/MTCNN-Tensorflow):
+1. Clone the MTCC model repository [AITTSMD/MTCNN-Tensorflow](https://github.com/AITTSMD/MTCNN-Tensorflow):
 ```
-    $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-    $ pushd $MODEL_WORK_DIR
-    
     $ git clone https://github.com/AITTSMD/MTCNN-Tensorflow.git
-    $ git checkout 3b3934d38f8d34287cc933a581537a1acfd0bb60
 ```
 
 2. Download and extract the [dataset](http://mmlab.ie.cuhk.edu.hk/archive/CNN/data/train.zip), `lfw_5590` will be used. 
@@ -48,18 +44,18 @@ and the `--checkpoint` from step 3.
 
 Run:
 ```
-    $ cd models/benchmarks
+    $ cd /home/<user>/models/benchmarks
     
     $ python launch_benchmark.py \
-        --data-location $MODEL_WORK_DIR/lfw_5590 \
-        --model-source-dir $MODEL_WORK_DIR/MTCNN-Tensorflow \
+        --data-location /home/<user>/lfw_5590 \
+        --model-source-dir /home/<user>/tensorflow/MTCNN-Tensorflow \
         --model-name mtcc \
         --framework tensorflow \
         --precision fp32 \
         --mode inference \
         --socket-id 0 \
-        --checkpoint $MODEL_WORK_DIR/MTCNN_model \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+        --checkpoint /home/<user>/MTCNN_model \
+        --docker-image intelaipg/intel-optimized-tensorflow:1.14
 ```
 
 6. The log file is saved to the value of `--output-dir`.
@@ -79,10 +75,5 @@ Accuracy: 1.12
 Total images: 5590
 Latency is: 40.36, Throughput is: 24.78
 Ran inference with batch size -1
-Log location outside container: /home/user/models/benchmarks/common/tensorflow/logs/benchmark_mtcc_inference_fp32_20190322_221543.log
-```
-
-7. To return to where you started from:
-```
-$ popd
+Log location outside container: /home/<user>/intelai/models/benchmarks/common/tensorflow/logs/benchmark_mtcc_inference_fp32_20190322_221543.log
 ```

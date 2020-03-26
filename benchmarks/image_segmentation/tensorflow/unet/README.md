@@ -6,12 +6,9 @@ modes/precisions:
 
 ## FP32 Inference Instructions
 
-1. Store the path to the current directory and clone this [intelai/models](https://github.com/IntelAI/models)
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
    repository:
    ```
-   $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-   $ pushd $MODEL_WORK_DIR
-
    $ git clone git@github.com:IntelAI/models.git
    ```
    This repository includes launch scripts for running Unet.
@@ -22,8 +19,8 @@ modes/precisions:
    $ tar -xvf unet_fp32_pretrained_model.tar.gz
    ```
 
-3. Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository
-   and then get [PR #276](https://github.com/jakeret/tf_unet/pull/276)
+3. Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository,
+   and then get [PR #202](https://github.com/jakeret/tf_unet/pull/202)
    to get cpu optimizations:
 
    ```
@@ -31,9 +28,9 @@ modes/precisions:
 
    $ cd tf_unet/
 
-   $ git fetch origin pull/276/head:cpu_optimized
+   $ git fetch origin pull/202/head:cpu_optimized
    From github.com:jakeret/tf_unet
-    * [new ref]         refs/pull/276/head -> cpu_optimized
+    * [new ref]         refs/pull/202/head -> cpu_optimized
 
    $ git checkout cpu_optimized
    Switched to branch 'cpu_optimized'
@@ -52,20 +49,18 @@ modes/precisions:
    following command with your checkpoint and model-source-dir paths:
 
    ```
-   $ cd $MODEL_WORK_DIR/models/benchmarks
-   
-   $ python launch_benchmark.py \
-        --model-name unet \
-        --precision fp32 \
-        --mode inference \
-        --framework tensorflow \
-        --benchmark-only \
-        --batch-size 1 \
-        --socket-id 0 \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-        --checkpoint $MODEL_WORK_DIR/unet_trained \
-        --model-source-dir $MODEL_WORK_DIR/tf_unet \
-        -- checkpoint_name=model.ckpt
+   python launch_benchmark.py \
+       --model-name unet \
+       --precision fp32 \
+       --mode inference \
+       --framework tensorflow \
+       --benchmark-only \
+       --batch-size 1 \
+       --socket-id 0 \
+       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --checkpoint /home/<user>/unet_trained \
+       --model-source-dir /home/<user>/tf_unet \
+       -- checkpoint_name=model.cpkt
    ```
 
    Note that the `--verbose` or `--output-dir` flag can be added to the above
@@ -81,8 +76,3 @@ modes/precisions:
    Ran inference with batch size 1
    Log location outside container: {--output-dir value}/benchmark_unet_inference_fp32_20190201_205601.log
    ```
-
-6. To return to where you started from:
-```
-$ popd
-```
