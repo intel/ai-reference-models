@@ -108,9 +108,6 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
 fi
 
 export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
-# export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}:/nfs/pdx/home/mabuzain/tf-wheels/mkl-2.0-recent
-# export TF_DUMP_GRAPH_PREFIX=/tmp/graph_dump
-# export TF_CPP_MIN_VLOG_LEVEL=4
 
 # Common execution command used by all models
 function run_model() {
@@ -727,11 +724,11 @@ function ssd-resnet34() {
 
           old_dir=${PWD}
           cd /tmp
-          # rm -rf benchmark_ssd-resnet34
-          # git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
-          # cd benchmark_ssd-resnet34
-          # git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
-          # git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
+          rm -rf benchmark_ssd-resnet34
+          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
+          cd benchmark_ssd-resnet34
+          git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
           cd ${old_dir}
 
           CMD="${CMD} \
