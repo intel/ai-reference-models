@@ -332,10 +332,44 @@ def get_activation(activation_string):
     raise ValueError("Unsupported activation: %s" % act)
 
 
-def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
+def get_remaps(task):
+  regex1 = re.compile(r"layer_normalization[_0-9]*")
+  regex2 = None 
+  if task=="SQuAD" :
+    regex2 = re.compile(r"squad")
+  elif task=="Classifier":
+    regex2 = re.compile(r"classifier")
+  else :
+    regex2 = None 
+
+  return regex1, regex2
+
+def apply_remaps(name, map1, map2):
+  if map1!=None:
+    name = map1.sub("LayerNorm", name)
+  if map2!=None :
+    name = map2.sub("seq_relationship", name)
+  return name 
+
+def check_model_validity(tvars, assignment_map) :
+  # Check if all model vars have a mapping in checkpoint
+  missing_var=False
+  missed_vars=[]
+  for var in tvars:
+     if var not in assignment_map.values():
+       missed_vars.append(var)
+       missing_var=True
+  if missing_var :
+     for var in missed_vars:
+       tf.compat.v1.logging.info("Model Variable not in checkpoint", var)
+     raise ValueError("Error: Missing model variables in checkpoint!!")
+
+def get_assignment_map_from_checkpoint(tvars, init_checkpoint, task="Pretraining"):
   """Compute the union of the current variables and checkpoint variables."""
   assignment_map = {}
   initialized_variable_names = {}
+
+  map1, map2 = get_remaps(task)
 
   name_to_variable = collections.OrderedDict()
   for var in tvars:
@@ -343,6 +377,8 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
     m = re.match("^(.*):\\d+$", name)
     if m is not None:
       name = m.group(1)
+    name_to_variable[name] = var
+    name = apply_remaps(name, map1, map2)
     name_to_variable[name] = var
 
   init_vars = tf.train.list_variables(init_checkpoint)
@@ -352,12 +388,17 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint):
     (name, var) = (x[0], x[1])
     if name not in name_to_variable:
       continue
-    assignment_map[name] = name
-    initialized_variable_names[name] = 1
-    initialized_variable_names[name + ":0"] = 1
+    assignment_map[name] = name_to_variable[name]
+    ivar = name_to_variable[name]
+    initialized_variable_names[ivar.name] = 1
+    initialized_variable_names[ivar.name + ":0"] = 1
+
+  # Check if all model vars are loaded from Checkpoint
+  check_model_validity(tvars, assignment_map)
+  #for name, var in assignment_map.items():
+  #  print(name, "--->", var)
 
   return (assignment_map, initialized_variable_names)
-
 
 def dropout(input_tensor, dropout_prob):
   """Perform dropout.
