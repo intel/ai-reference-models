@@ -647,7 +647,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
     scaffold_fn = None
     if init_checkpoint:
       (assignment_map, initialized_variable_names
-      ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
+      ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint, "SQuAD")
       if use_tpu:
 
         def tpu_scaffold():
@@ -689,7 +689,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
       train_op = optimization.create_optimizer(
           total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=use_tpu)
 
-      log_hook = bf.logTheLossHook(total_loss, n=10)
+      log_hook = bf.logTheLossHook(total_loss, n=3)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
           mode=mode,
           loss=total_loss,
