@@ -51,7 +51,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--output-dir', help=' Dir to generate outputs', dest="output_dir", default='./output')
         arg_parser.add_argument('--config-file', help=' Json Config file', dest="config_file", default='bert_config.json')
         arg_parser.add_argument('--do-train', help=' Training ', dest="do_train", default="True")
-        arg_parser.add_argument('--init-checkpoint', help=' Checkpoint file', dest="init_checkpoint", default='bert_model.ckpt')
+        arg_parser.add_argument('--init-checkpoint', help=' Checkpoint file', dest="init_checkpoint", default='')
         arg_parser.add_argument('--batch-size', help=' Batch Size', type=int, dest="batch_size", default='24')
         arg_parser.add_argument('--learning-rate', help=' Learning rate', type=float, dest="learning_rate", default=3e-5)
         arg_parser.add_argument('--max-seq-length', help=' max length of sentence to train', dest="max_seq_length", type=int, default=512)
@@ -127,7 +127,7 @@ class ModelInitializer(BaseModelInitializer):
             " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)   +eoo  + \
             " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads)   +eoo  + \
             " --profile=" + str(self.args.profile)                 +eoo        + \
-            " --do_lower_case=" + str(self.args.do_lower_case) 
+            " --do_lower_case=" + str(self.args.do_lower_case)     +eoo
 
         if self.args.train_option== "SQuAD":
           self.cmd_args =  self.cmd_args +\
@@ -140,6 +140,9 @@ class ModelInitializer(BaseModelInitializer):
             " --doc_stride=" + str(self.args.doc_stride)                  
 
         if self.args.train_option == "Pretraining":
+          if self.args.init_checkpoint != '' :
+            self.cmd_args =  self.cmd_args +\
+            " --init_checkpoint=" + str(self.args.init_checkpoint)      +eoo 
           self.cmd_args =  self.cmd_args +\
             " --input_file=" + str(self.args.input_file)                +eoo   + \
             " --do_eval=" + str(self.args.do_eval)                      +eoo   + \
@@ -156,7 +159,7 @@ class ModelInitializer(BaseModelInitializer):
             " --init_checkpoint=" + str(self.args.init_checkpoint)      +eoo        + \
             " --data_dir=" + str(self.args.data_dir)  
 
-        self.benchmark_command = self.benchmark_command + eoo + self.cmd_args
+        self.benchmark_command = self.benchmark_command + eoo + self.cmd_args + "\n"
 
         if self.args.data_num_inter_threads:
             self.benchmark_command += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)
