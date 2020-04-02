@@ -836,11 +836,7 @@ function ssd-resnet34() {
       model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
 
       cd  ${model_source_dir}/../
-      if [ ! -d "ssd-resnet-benchmarks" ];then
-        git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
-      fi
       cd ssd-resnet-benchmarks
-      git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
       git apply ${benchmarks_patch_path}
       
       cd ${model_source_dir}
