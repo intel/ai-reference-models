@@ -32,6 +32,7 @@ flags = tf.compat.v1.flags
 
 
 FLAGS = flags.FLAGS
+tf.compat.v1.disable_v2_behavior()
 
 ## Required parameters
 flags.DEFINE_string(
@@ -126,6 +127,10 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
+
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
 
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
@@ -302,8 +307,9 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions,
         "output_bias",
         shape=[bert_config.vocab_size],
         initializer=tf.compat.v1.zeros_initializer())
-    logits = bf.matmul(input_tensor, output_weights, transpose_b=True)
-    logits = bf.i_cast(logits)
+    input_tensor = bf.i_cast(input_tensor)
+    output_weights = bf.i_cast(output_weights)
+    logits = tf.matmul(input_tensor, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
 
@@ -338,8 +344,9 @@ def get_next_sentence_output(bert_config, input_tensor, labels):
     output_bias = tf.compat.v1.get_variable(
         "output_bias", shape=[2], initializer=tf.compat.v1.zeros_initializer())
 
-    logits = bf.matmul(input_tensor, output_weights, transpose_b=True)
-    logits = bf.i_cast(logits)
+    input_tensor = bf.i_cast(input_tensor)
+    output_weights = bf.i_cast(output_weights)
+    logits = tf.matmul(input_tensor, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
     labels = tf.reshape(labels, [-1])
@@ -477,6 +484,9 @@ def main(_):
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
 
+  if FLAGS.mkldnn:
+    bert_config.mkldnn = FLAGS.mkldnn
+
   bert_config.new_bf16_scope = FLAGS.new_bf16_scope
 
   tf.io.gfile.makedirs(FLAGS.output_dir)
@@ -565,7 +575,7 @@ def main(_):
     if FLAGS.profile:
       tf.compat.v1.logging.info("***** Running training with profiler*****")
       hooks = [tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)]
+                                               show_memory=False)]
       estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps, hooks=hooks)
     else :
       estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps)

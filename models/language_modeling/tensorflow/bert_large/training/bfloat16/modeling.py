@@ -166,6 +166,9 @@ class BertModel(object):
       if config.new_bf16_scope :
         self.bf16_scope = True
 
+    if hasattr(config, "mkldnn"):
+      bf.set_mkldnn(config.mkldnn)
+
     config = copy.deepcopy(config)
     if not is_training:
       config.hidden_dropout_prob = 0.0

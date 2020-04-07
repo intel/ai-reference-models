@@ -34,6 +34,7 @@ from absl import logging
 flags = tf.compat.v1.flags
 
 FLAGS = flags.FLAGS
+tf.compat.v1.disable_v2_behavior()
 
 ## Required parameters
 flags.DEFINE_string(
@@ -158,6 +159,12 @@ class InputExample(object):
     self.text_a = text_a
     self.text_b = text_b
     self.label = label
+
+flags.DEFINE_string("precision", "fp32", "[Optional] TensorFlow training precision.")
+
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
 
 
 class PaddingInputExample(object):
@@ -620,7 +627,9 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
       # I.e., 0.1 dropout
       output_layer = tf.nn.dropout(output_layer, rate=1 - (0.9))
 
-    logits = bf.matmul(output_layer, output_weights, transpose_b=True)
+    output_layer = bf.i_cast(output_layer)
+    output_weights = bf.i_cast(output_weights)
+    logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     probabilities = bf.softmax(logits, axis=-1)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
@@ -637,7 +646,7 @@ def create_model_top(bert_config, is_training, input_ids, input_mask, segment_id
                      label_ids, num_labels, use_one_hot_embeddings):
 
     if bert_config.precision == "bfloat16" :
-      with tf.contrib.tpu.bfloat16_scope():
+      with tf.compat.v1.tpu.bfloat16_scope():
         (total_loss, per_example_loss, logits, probabilities) = create_model(
           bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
           num_labels, use_one_hot_embeddings)
@@ -818,6 +827,12 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 def main(_):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
+  if FLAGS.precision:
+    bert_config.precision = FLAGS.precision
+
+  if FLAGS.mkldnn:
+    bert_config.mkldnn = FLAGS.mkldnn
+
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in Classifier")
     exit(0)
@@ -929,7 +944,7 @@ def main(_):
     if FLAGS.profile == True :
       tf.compat.v1.logging.info("***** Running training with profiler *****")
       hooks = [tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)]
+                                               show_memory=False)]
       estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
     else:
       estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
