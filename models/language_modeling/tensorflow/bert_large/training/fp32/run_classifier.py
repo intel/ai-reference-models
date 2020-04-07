@@ -930,7 +930,7 @@ def main(_):
     if FLAGS.profile == True :
       tf.compat.v1.logging.info("***** Running training with profiler *****")
       hooks = [tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)]
+                                               show_memory=False)]
       estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
     else:
       estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)

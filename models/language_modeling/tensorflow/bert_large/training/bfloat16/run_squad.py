@@ -36,6 +36,7 @@ from absl import logging
 flags = tf.compat.v1.flags
 
 FLAGS = flags.FLAGS
+tf.compat.v1.disable_v2_behavior()
 
 ## Required parameters
 flags.DEFINE_string(
@@ -207,6 +208,10 @@ class SquadExample(object):
     if self.start_position:
       s += ", is_impossible: %r" % (self.is_impossible)
     return s
+
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
 
 
 class InputFeatures(object):
@@ -1143,6 +1148,9 @@ def validate_flags_or_throw(bert_config):
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
 
+  if FLAGS.mkldnn:
+    bert_config.mkldnn = FLAGS.mkldnn
+
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(
         "Cannot use sequence length %d because the BERT model "
@@ -1262,7 +1270,7 @@ def main(_):
     if FLAGS.profile ==True :
       tf.compat.v1.logging.info("***** Running training with profiler*****")
       hooks = [tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)]
+                                               show_memory=False)]
       estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
     else:
       estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)

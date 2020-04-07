@@ -287,6 +287,10 @@ function bert_options() {
   if [[ -n "${profile}" && ${profile} != "" ]]; then
     CMD=" ${CMD} --profile=${profile}"
   fi
+  if [[ -n "${more_mkldnn}" && ${more_mkldnn} != "" ]]; then
+    CMD=" ${CMD} --more-mkldnn=${more_mkldnn}"
+  fi
+
 }
 
 function install_protoc() {
