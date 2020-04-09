@@ -13,8 +13,9 @@ node('skx') {
             #!/bin/bash -x
             set -e
             # don't know OS, so trying both apt-get and yum install
-            sudo apt-get install -y python-dev || sudo yum install -y python-devel.x86_64
-            sudo apt-get install -y python3-dev || sudo yum install -y python36-devel.x86_64
+            sudo apt-get clean && sudo apt-get update -y || sudo yum update -y && sudo yum install -y epel-release
+            sudo apt-get install -y python-dev python-pip || sudo yum install -y python2-devel python2-pip
+            sudo apt-get install -y python3-dev python3-pip || sudo yum install -y python36-devel python36-pip
 
             # virtualenv 16.3.0 is broken do not use it
             python2 -m pip install --no-cache-dir --user --upgrade pip==19.0.3 virtualenv!=16.3.0 tox
