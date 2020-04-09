@@ -5,5 +5,5 @@
 
   { "_comment": "FP32 command for benchmark",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case object_detection --precision fp32 --mode inference --model-name rfcn --checkpoint /checkpoints --intelai-models . --model-source-dir . --socket-id 0 --verbose --config_file=rfcn_pipeline.config",
-    "output": "numactl --cpunodebind=0 --membind=0 python ./inference/fp32/eval.py --inter_op 1 --intra_op 28 --omp 28 --pipeline_config_path /checkpoints/rfcn_pipeline.config --checkpoint_dir /checkpoints --eval_dir ./research/object_detection/models/rfcn/eval  --logtostderr  --blocktime=0  --run_once=True"},
+    "output": "numactl --cpunodebind=0 --membind=0 python ./inference/fp32/eval.py --inter_op 1 --intra_op 28 --omp 28 --pipeline_config_path /checkpoints/rfcn_pipeline.config --checkpoint_dir /checkpoints --eval_dir ./research/object_detection/models/rfcn/eval  --logtostderr  --blocktime=0  --run_once=True"}
 ]

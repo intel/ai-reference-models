@@ -22,8 +22,10 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os  # noqa: F401
 import platform as system_platform
 import subprocess
+import shlex  # noqa: F401
 import sys
 
 NUMA_NODES_STR_ = "NUMA node(s)"
