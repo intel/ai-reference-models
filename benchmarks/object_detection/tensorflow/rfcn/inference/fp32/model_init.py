@@ -16,8 +16,6 @@
 # limitations under the License.
 #
 
-#
-
 import argparse
 import os
 import sys
@@ -105,8 +103,8 @@ class ModelInitializer(BaseModelInitializer):
                                 help="Location of accuracy data",
                                 type=str, default=None)
             parser.add_argument("-x", "--steps",
-                                     help="Run for n number of steps",
-                                     type=int, default=None)
+                                help="Run for n number of steps",
+                                type=int, default=None)
 
             self.args = parser.parse_args(self.custom_args,
                                           namespace=self.args)
