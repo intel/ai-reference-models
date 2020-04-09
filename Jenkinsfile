@@ -13,6 +13,7 @@ node('skx') {
             #!/bin/bash -x
             set -e
             # don't know OS, so trying both apt-get and yum install
+            sudo apt-get install -y python-dev || sudo yum install -y python-devel.x86_64
             sudo apt-get install -y python3-dev || sudo yum install -y python36-devel.x86_64
 
             # virtualenv 16.3.0 is broken do not use it
