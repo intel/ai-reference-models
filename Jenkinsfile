@@ -13,7 +13,8 @@ node('skx') {
             #!/bin/bash -x
             set -e
             # don't know OS, so trying both apt-get and yum install
-            sudo apt-get clean && sudo apt-get update -y || sudo yum update -y && sudo yum install -y epel-release
+            sudo apt-get clean || sudo yum update -y
+            sudo apt-get update -y || sudo yum install -y epel-release
             sudo apt-get install -y python-dev python-pip || sudo yum install -y python2-devel python2-pip
             sudo apt-get install -y python3-dev python3-pip || sudo yum install -y python36-devel python36-pip
 
