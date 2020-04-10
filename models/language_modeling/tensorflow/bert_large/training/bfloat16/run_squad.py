@@ -170,6 +170,11 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
+
+
 class SquadExample(object):
   """A single training/test example for simple sequence classification.
 
@@ -208,10 +213,6 @@ class SquadExample(object):
     if self.start_position:
       s += ", is_impossible: %r" % (self.is_impossible)
     return s
-
-flags.DEFINE_bool(
-    "mkldnn", False,
-    "[Optional] If true, use more experimental mkldnn operations in model.")
 
 
 class InputFeatures(object):

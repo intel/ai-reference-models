@@ -43,6 +43,10 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.batch_size == -1:
             self.args.batch_size = 24 
 
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
+
         # set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
 
@@ -80,6 +84,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--num-intra-threads', help=' Number of Intra ops threads', type=int, 
                                                        dest="num_intra_threads", default=self.args.num_inter_threads)
         arg_parser.add_argument('--profile', help=' Enable Tensorflow profiler hook', dest="profile", default="False")
+        arg_parser.add_argument('--experimental-mkldnn-ops', help=' [Experimental] Use more mkldnn operations.', dest="experimental_mkldnn_ops", default="False")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -127,7 +132,8 @@ class ModelInitializer(BaseModelInitializer):
             " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)   +eoo  + \
             " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads)   +eoo  + \
             " --profile=" + str(self.args.profile)                 +eoo        + \
-            " --do_lower_case=" + str(self.args.do_lower_case)     +eoo
+            " --do_lower_case=" + str(self.args.do_lower_case)     +eoo        + \
+            " --mkldnn=" + str(self.args.experimental_mkldnn_ops)  +eoo
 
         if self.args.train_option== "SQuAD":
           self.cmd_args =  self.cmd_args +\

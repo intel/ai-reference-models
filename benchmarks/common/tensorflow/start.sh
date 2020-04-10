@@ -287,8 +287,8 @@ function bert_options() {
   if [[ -n "${profile}" && ${profile} != "" ]]; then
     CMD=" ${CMD} --profile=${profile}"
   fi
-  if [[ -n "${more_mkldnn}" && ${more_mkldnn} != "" ]]; then
-    CMD=" ${CMD} --more-mkldnn=${more_mkldnn}"
+  if [[ -n "${experimental_mkldnn_ops}" && ${experimental_mkldnn_ops} != "" ]]; then
+    CMD=" ${CMD} --experimental-mkldnn-ops=${experimental_mkldnn_ops}"
   fi
 
 }

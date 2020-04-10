@@ -160,6 +160,9 @@ class BertModel(object):
     if config.precision == "bfloat16" :
       bf.set_rprecision(tf.bfloat16)
 
+    if hasattr(config, "mkldnn"):
+      bf.set_mkldnn(config.mkldnn)
+
     config = copy.deepcopy(config)
     if not is_training:
       config.hidden_dropout_prob = 0.0
@@ -389,7 +392,7 @@ def dropout(input_tensor, dropout_prob):
   if dropout_prob is None or dropout_prob == 0.0:
     return input_tensor
 
-  output = tf.nn.dropout(input_tensor, 1 - (1.0 - dropout_prob))
+  output = tf.nn.dropout(input_tensor, rate=dropout_prob)
   return output
 
 
