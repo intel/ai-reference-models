@@ -139,6 +139,11 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
+
+
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
 
@@ -817,6 +822,9 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 
 def main(_):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+
+  if FLAGS.mkldnn:
+    bert_config.mkldnn = FLAGS.mkldnn
 
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in Classifier")

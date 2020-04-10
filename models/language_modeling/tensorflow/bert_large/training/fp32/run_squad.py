@@ -169,6 +169,11 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
+
+
 class SquadExample(object):
   """A single training/test example for simple sequence classification.
 
@@ -1142,6 +1147,9 @@ def validate_flags_or_throw(bert_config):
 
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
+
+  if FLAGS.mkldnn:
+    bert_config.mkldnn = FLAGS.mkldnn
 
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(

@@ -124,6 +124,10 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "mkldnn", False,
+    "[Optional] If true, use more experimental mkldnn operations in model.")
+
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, accum_steps, use_tpu,
@@ -457,6 +461,9 @@ def main(_):
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
+
+  if FLAGS.mkldnn:
+    bert_config.mkldnn = FLAGS.mkldnn
 
   tf.io.gfile.makedirs(FLAGS.output_dir)
 

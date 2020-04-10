@@ -84,7 +84,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--num-intra-threads', help=' Number of Intra ops threads', type=int, 
                                                        dest="num_intra_threads", default=self.args.num_inter_threads)
         arg_parser.add_argument('--profile', help=' Enable Tensorflow profiler hook', dest="profile", default="False")
-        arg_parser.add_argument('--more-mkldnn', help=' [Experimental] Use more mkldnn operations.', dest="more_mkldnn", default="False")
+        arg_parser.add_argument('--experimental-mkldnn-ops', help=' [Experimental] Use more mkldnn operations.', dest="experimental_mkldnn_ops", default="False")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -133,7 +133,7 @@ class ModelInitializer(BaseModelInitializer):
             " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads)   +eoo  + \
             " --profile=" + str(self.args.profile)                 +eoo        + \
             " --do_lower_case=" + str(self.args.do_lower_case)     +eoo        + \
-            " --mkldnn=" + str(self.args.more_mkldnn)              +eoo
+            " --mkldnn=" + str(self.args.experimental_mkldnn_ops)  +eoo
 
         if self.args.train_option== "SQuAD":
           self.cmd_args =  self.cmd_args +\
