@@ -610,8 +610,8 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
     else:
       classifier.train(input_fn=input_fn_train, hooks=train_hooks + [compliance_hook], max_steps=flags.max_train_steps)
 
-    train_examples = int(_log_cache.pop()[_NUM_EXAMPLES_NAME])
-    mlperf_log.resnet_print(key=mlperf_log.INPUT_SIZE, value=train_examples)
+    #train_examples = int(_log_cache.pop()[_NUM_EXAMPLES_NAME])
+    #mlperf_log.resnet_print(key=mlperf_log.INPUT_SIZE, value=train_examples)
 
     print('Starting to evaluate.')
     # Evaluate the model and print results
