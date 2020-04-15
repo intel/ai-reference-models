@@ -4,6 +4,7 @@ This document has instructions for how to run ResNet50 (v1.5) for the
 following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
+* [BFloat16 inference](#bfloat16-inference-instructions)
 * [FP32 training](#fp32-training-instructions)
 * [BFloat16 training](#bfloat16-training-instructions)
 
@@ -280,6 +281,179 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
     --docker-image intelaipg/intel-optimized-tensorflow:1.14
+```
+The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg. Below is an
+example of what the inference results file will look like:
+```
+filename,actual,prediction
+ILSVRC2012_val_00033870.JPEG,592,592
+ILSVRC2012_val_00045598.JPEG,258,258
+ILSVRC2012_val_00047428.JPEG,736,736
+ILSVRC2012_val_00003341.JPEG,344,344
+ILSVRC2012_val_00037069.JPEG,192,192
+ILSVRC2012_val_00029701.JPEG,440,440
+ILSVRC2012_val_00016918.JPEG,286,737
+ILSVRC2012_val_00015545.JPEG,5,5
+ILSVRC2012_val_00016713.JPEG,274,274
+ILSVRC2012_val_00014735.JPEG,31,31
+...
+```
+
+Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
+to get additional debug output or change the default output location.
+
+## BFloat16 Inference Instructions
+
+1. Download the pre-trained model.
+
+(Note: Until we publish it, ask Ashraf Bhuiyan (TFDO) team for the model.)
+
+2. Clone the [intelai/models](https://github.com/intelai/models) repository
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+3. If running resnet50 for accuracy, the ImageNet dataset will be
+required (if running the model for batch or online inference, then dummy
+data will be used).
+
+The TensorFlow models repo provides
+[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
+to download, process, and convert the ImageNet dataset to the TF records format.
+
+4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
+The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
+located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
+If benchmarking uses dummy data for inference, `--data-location` flag is not required. Otherwise,
+`--data-location` needs to point to point to ImageNet dataset location.
+
+* To measure online inference, set `--batch-size=1` and run the model script as shown:
+```
+$ cd /home/<user>/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph resnet50_v1_bfloat16.pb \
+    --model-name resnet50v1_5 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --batch-size=1 \
+    --socket-id 0
+```
+
+The log file is saved to the value of `--output-dir`.
+
+The tail of the log output when the script completes should look
+something like this:
+```
+Inference with dummy data.
+Iteration 1:  TBD sec
+Iteration 2:  TBD sec
+Iteration 3:  TBD sec
+...
+Iteration 48: TBD sec
+Iteration 49: TBD sec
+Iteration 50: TBD sec
+Average time: TBD sec
+Batch size = 1
+Latency: TBD  ms
+Throughput: TBD images/sec
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size 1
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
+```
+
+* To measure batch inference, set `--batch-size=128` and run the model script as shown:
+```
+$ cd /home/<user>/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph resnet50_v1_bfloat16.pb \
+    --model-name resnet50v1_5 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --batch-size=128 \
+    --socket-id 0
+```
+
+The log file is saved to the value of `--output-dir`.
+
+The tail of the log output when the script completes should look
+something like this:
+```
+Inference with dummy data.
+Iteration 1: TBD sec
+Iteration 2: TBD sec
+Iteration 3: TBD sec
+Iteration 4: TBD sec
+...
+Iteration 46: TBD sec
+Iteration 47: TBD sec
+Iteration 48: TBD sec
+Iteration 49: TBD sec
+Iteration 50: TBD sec
+Average time: TBD sec
+Batch size = 128
+Throughput: TBD images/sec
+Ran inference with batch size 128
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
+```
+
+* To measure the model accuracy, use the `--accuracy-only` flag and pass
+the ImageNet dataset directory from step 3 as the `--data-location`:
+```
+$ cd /home/<user>/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph resnet50_v1_bfloat16.pb \
+    --model-name resnet50v1_5 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --accuracy-only \
+    --batch-size 100 \
+    --socket-id 0 \
+    --data-location /home/<user>/dataset/ImageNetData_directory
+```
+
+The log file is saved to the value of `--output-dir`.
+The tail of the log output when the accuracy run completes should look
+something like this:
+```
+...
+Iteration time: TBD ms
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7651, 0.9307)
+lscpu_path_cmd = command -v lscpu
+lscpu located here: /usr/bin/lscpu
+Ran inference with batch size 100
+Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
+```
+
+* The `--output-results` flag can be used along with above performance
+or accuracy test, in order to also output a file with the inference
+results (file name, actual label, and the predicted label). The results
+output can only be used with real data.
+
+For example, the command below is the same as the accuracy test above,
+except with the `--output-results` flag added:
+```
+$ cd /home/<user>/models/benchmarks
+
+$ python launch_benchmark.py \
+    --in-graph resnet50_v1_bfloat16.pb \
+    --model-name resnet50v1_5 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --accuracy-only \
+    --output-results \
+    --batch-size 100 \
+    --socket-id 0 \
+    --data-location /home/<user>/dataset/ImageNetData_directory
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
