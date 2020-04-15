@@ -70,9 +70,9 @@ class ModelInitializer(BaseModelInitializer):
         cmd_args += " --num_intra_threads {0}".format(self.args.num_intra_threads)
         cmd_args += " --model=ssd300 --data_name coco"
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
-        cmd_args += " --rewriter_config=convert_to_bfloat16:ON"
+        # cmd_args += " --rewriter_config=convert_to_bfloat16:ON"
         # cmd_args += " --variable_update=horovod --horovod_device=cpu"
-        # cmd_args += " --use_chrome_trace_format=True --trace_file=latest-use-eigen-bias.json"
+        # cmd_args += " --use_chrome_trace_format=True --trace_file=bfloat16-manual.json"
         # cmd_args += " --num_warmup_batches=0"
         if self.args.trace_file is not None:
           cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.trace_file)
@@ -86,7 +86,9 @@ class ModelInitializer(BaseModelInitializer):
         # self.cmd += "{} ".format(self.python_exe)
         self.cmd = "numactl --cpunodebind=0 --membind=0 {} ".format(self.python_exe)
 
-        self.training_script_dir = os.path.join('/tmp/benchmark_ssd-resnet34/scripts/tf_cnn_benchmarks')
+        username = os.environ.get('USER')
+        script_dir = '/tmp/benchmark_ssd-resnet34-'+username+'/scripts/tf_cnn_benchmarks'
+        self.training_script_dir = os.path.join(script_dir)
         training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
 
         self.cmd = self.cmd + training_script + cmd_args

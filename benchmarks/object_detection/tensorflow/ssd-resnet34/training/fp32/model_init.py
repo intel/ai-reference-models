@@ -83,7 +83,9 @@ class ModelInitializer(BaseModelInitializer):
         # self.cmd += "{} ".format(self.python_exe)
         self.cmd = "numactl --cpunodebind=0 --membind=0 {} ".format(self.python_exe)
 
-        self.training_script_dir = os.path.join('/tmp/benchmark_ssd-resnet34/scripts/tf_cnn_benchmarks')
+        username = os.environ.get('USER')
+        script_dir = '/tmp/benchmark_ssd-resnet34-'+username+'/scripts/tf_cnn_benchmarks'
+        self.training_script_dir = os.path.join(script_dir)
         training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
 
         self.cmd = self.cmd + training_script + cmd_args
