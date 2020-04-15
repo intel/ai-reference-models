@@ -512,7 +512,7 @@ $ pushd $MODEL_WORK_DIR
    
    $ python launch_benchmark.py \
        --data-location /lustre/dataset/tensorflow/coco \
-       --model-source-dir $MODEL_WORK_DIR/models \
+       --model-source-dir $MODEL_WORK_DIR/tf_models \
        --model-name ssd-resnet34 \
        --framework tensorflow \
        --precision fp32 \
@@ -574,7 +574,7 @@ $ pushd $MODEL_WORK_DIR
 
       $ python3 launch_benchmark.py \
       --data-location /nfs/pdx/home/mabuzain/coco_training_yang/ \
-      --model-source-dir $MODEL_WORK_DIR/models \
+      --model-source-dir $MODEL_WORK_DIR/tf_models \
       --model-name ssd-resnet34 --framework tensorflow \
       --precision bfloat16 --mode training \
       --num-train-steps 100 --num-cores 52 \
