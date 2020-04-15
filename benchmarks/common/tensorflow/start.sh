@@ -883,11 +883,14 @@ function ssd-resnet34() {
 
           old_dir=${PWD}
           cd /tmp
-          rm -rf benchmark_ssd-resnet34
-          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
-          cd benchmark_ssd-resnet34
+          rm -rf benchmark_ssd-resnet34-${USER}
+          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34-${USER}
+          cd benchmark_ssd-resnet34-${USER}
           git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
           git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
+          if [ ${PRECISION} == "bfloat16" ]; then
+            git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
+          fi
           cd ${old_dir}
 
           CMD="${CMD} \
