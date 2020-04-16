@@ -123,17 +123,27 @@ use in the next step.
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-8. Next, navigate to the `benchmarks` directory of the
+8. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks.git) repo. This repo contains the method needed
+to run the ssd-resnet34 model. Please ensure that the `ssd-resnet-benchmarks` and `models` repos cloned in step 7 and step 8 
+are in the same folder.
+
+```
+$ git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
+$ cd ssd-resnet-benchmarks
+$ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+$ cd ../
+```
+
+9. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
-batch and online inference, or accuracy. Note that we are running
-SSD-ResNet34 with a TensorFlow 1.14 docker image.
+batch and online inference, or accuracy.
 
 To run for batch and online inference, use the following command,
 the path to the frozen graph that you downloaded in step 5 as 
-the `--in-graph`, and use the `--benchmark-only` flag. By default it runs 
-with input size 300x300, you may add `-- input-size=1200` flag last to run 
-benchmark with input size 1200x1200.
+the `--in-graph`, and use the `--benchmark-only` flag. If you run on docker mode, you also need to provide `ssd-resnet-benchmarks` path for `volume` flag.
+By default it runs with input size 300x300, you may add `-- input-size=1200` 
+flag to run benchmark with input size 1200x1200.
 
 ```
 $ cd $MODEL_WORK_DIR/models/benchmarks
@@ -147,8 +157,9 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --batch-size=1 \
+    --batch-size 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only \
     -- input-size=1200
 ```
@@ -171,12 +182,13 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --batch-size=1 \
+    --batch-size 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --accuracy-only 
 ```
 
-9. The log file is saved to the value of `--output-dir`.
+10. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running for performance:
 
@@ -325,15 +337,25 @@ use in the next step.
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-8. Next, navigate to the `benchmarks` directory of the
+8. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks.git) repo. This repo contains the method needed
+to run the ssd-resnet34 model. Please ensure that the `ssd-resnet-benchmarks` and `models` repos cloned in step 7 and step 8 
+are in the same folder.
+
+```
+$ git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
+$ cd ssd-resnet-benchmarks
+$ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+$ cd ../
+```
+
+9. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
-batch and online inference, or accuracy. Note that we are running
-SSD-ResNet34 with a TensorFlow 1.14 docker image.
+batch and online inference, or accuracy.
 
 To run for batch and online inference, use the following command,
 the path to the frozen graph that you downloaded in step 5 as 
-the `--in-graph`, and use the `--benchmark-only` flag.
+the `--in-graph`, and use the `--benchmark-only` flag. If you run on docker mode, you also need to provide `ssd-resnet-benchmarks` path for `volume` flag.
 By default it runs with input size 300x300, you may add `-- input-size=1200` 
 flag to run benchmark with input size 1200x1200.
 
@@ -349,8 +371,9 @@ $ python launch_benchmark.py \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
-    --batch-size=1 \
+    --batch-size 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only 
 ```
 
@@ -372,13 +395,14 @@ $ python launch_benchmark.py \
     --precision int8 \
     --mode inference \
     --socket-id 0 \
-    --batch-size=1 \
+    --batch-size 1 \
     --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+    --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --accuracy-only \
     -- input-size=1200
 ```
 
-9. The log file is saved to the value of `--output-dir`.
+10. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when testing performance:
 
