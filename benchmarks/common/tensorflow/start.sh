@@ -840,11 +840,7 @@ function ssd-resnet34() {
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
 
           cd  ${model_source_dir}/../
-          if [ ! -d "ssd-resnet-benchmarks" ];then
-            git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
-          fi
           cd ssd-resnet-benchmarks
-          git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
           git apply ${benchmarks_patch_path}
 
           cd ${model_source_dir}
@@ -1023,6 +1019,51 @@ function transformer_lt_official() {
     --file_out=${OUTPUT_DIR}/${file_out} \
     --reference=${DATASET_LOCATION}/${reference}"
     PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# transformer in mlperf Translation for Tensorflow  model
+function transformer_mlperf() {
+  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}/common/tensorflow:${MOUNT_BENCHMARK}
+  #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
+  if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
+  then
+
+    if [[ -z "${random_seed}" ]]; then
+        echo "transformer-language requires --random_seed arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${params}" ]]; then
+        echo "transformer-language requires --params arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${train_steps}" ]]; then
+        echo "transformer-language requires --train_steps arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${steps_between_eval}" ]]; then
+        echo "transformer-language requires --steps_between_eval arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${do_eval}" ]]; then
+        echo "transformer-language requires --do_eval arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${save_checkpoints}" ]]; then
+        echo "transformer-language requires --save_checkpoints arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${print_iter}" ]]; then
+        echo "transformer-language requires --print_iter arg to be defined"
+        exit 1
+    fi
+
+    CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
+        --print_iter=${print_iter}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -1213,6 +1254,8 @@ elif [ ${MODEL_NAME} == "transformer_language" ]; then
   transformer_language
 elif [ ${MODEL_NAME} == "transformer_lt_official" ]; then
   transformer_lt_official
+elif [ ${MODEL_NAME} == "transformer_mlperf" ]; then
+  transformer_mlperf
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then

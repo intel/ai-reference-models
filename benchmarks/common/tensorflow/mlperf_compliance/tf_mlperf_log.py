@@ -63,7 +63,7 @@ def log_deferred(op, log_id, every_n=1, first_n=None):
 
 
 def sum_metric(tensor, name):
-  sum_var = tf.Variable(
+  sum_var = tf.compat.v1.Variable(
     initial_value=tf.zeros(shape=(), dtype=tensor.dtype),
     trainable=False,
     collections=[

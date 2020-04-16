@@ -609,11 +609,11 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
   hidden_size = output_layer.shape[-1]
 
   output_weights = tf.compat.v1.get_variable(
-      "output_weights", [num_labels, hidden_size],
+      "cls/classifier/output_weights", [num_labels, hidden_size],
       initializer=tf.compat.v1.truncated_normal_initializer(stddev=0.02))
 
   output_bias = tf.compat.v1.get_variable(
-      "output_bias", [num_labels], initializer=tf.compat.v1.zeros_initializer())
+      "cls/classifier/output_bias", [num_labels], initializer=tf.compat.v1.zeros_initializer())
 
   with tf.compat.v1.variable_scope("loss"):
     if is_training:
@@ -682,7 +682,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
     scaffold_fn = None
     if init_checkpoint:
       (assignment_map, initialized_variable_names
-      ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint)
+      ) = modeling.get_assignment_map_from_checkpoint(tvars, init_checkpoint, "Classifier")
       if use_tpu:
 
         def tpu_scaffold():
