@@ -26,7 +26,7 @@ echo "    WORKSPACE: ${WORKSPACE}"
 echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
-
+echo "    MOUNT_INTELAI_MODELS_COMMON_SOURCE_DIR: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
 if [ ${DOCKER} == "True" ]; then
   echo "    Mounted volumes:"
   echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
@@ -113,7 +113,7 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   mkdir ${OUTPUT_DIR}
 fi
 
-export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
+export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_COMMON_SOURCE}:${MOUNT_INTELAI_MODELS_SOURCE}
 
 # Common execution command used by all models
 function run_model() {
@@ -984,7 +984,7 @@ function transformer_lt_official() {
 
 # transformer in mlperf Translation for Tensorflow  model
 function transformer_mlperf() {
-  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}/common/tensorflow:${MOUNT_BENCHMARK}
+  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
   #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
   if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
   then
