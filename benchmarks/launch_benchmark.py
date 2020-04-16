@@ -50,12 +50,16 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         benchmark_scripts = os.path.dirname(os.path.realpath(__file__))
         use_case = self.get_model_use_case(benchmark_scripts)
         intelai_models = self.get_model_dir(benchmark_scripts, use_case)
-        env_var_dict = self.get_env_vars(benchmark_scripts, use_case, intelai_models)
+        intelai_models_common = self.get_model_dir(benchmark_scripts, "common")
+        env_var_dict = self.get_env_vars(benchmark_scripts, use_case, intelai_models,
+                                         intelai_models_common)
 
         if self.args.docker_image:
-            self.run_docker_container(benchmark_scripts, intelai_models, env_var_dict)
+            self.run_docker_container(benchmark_scripts, intelai_models,
+                                      intelai_models_common, env_var_dict)
         else:
-            self.run_bare_metal(benchmark_scripts, intelai_models, env_var_dict)
+            self.run_bare_metal(benchmark_scripts, intelai_models,
+                                intelai_models_common, env_var_dict)
 
     def parse_args(self):
         # Additional args that are only used with the launch script
@@ -141,6 +145,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # use the models directory as a default
         intelai_models = os.path.join(benchmark_scripts, os.pardir, "models")
 
+        if use_case == "common":
+            return os.path.join(intelai_models, "common", self.args.framework)
+
         # find the intelai_optimized model directory
         args = self.args
         optimized_model_dir = os.path.join(
@@ -153,7 +160,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         return intelai_models
 
-    def get_env_vars(self, benchmark_scripts, use_case, intelai_models):
+    def get_env_vars(self, benchmark_scripts, use_case, intelai_models,
+                     intelai_models_common):
         """
         Sets up dictionary of standard env vars that are used by start.sh
         """
@@ -164,6 +172,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "CHECKPOINT_DIRECTORY_VOL": args.checkpoint,
             "EXTERNAL_MODELS_SOURCE_DIRECTORY": args.model_source_dir,
             "INTELAI_MODELS": intelai_models,
+            "INTELAI_MODELS_COMMON": intelai_models_common,
             "BENCHMARK_SCRIPTS": benchmark_scripts,
             "SOCKET_ID": args.socket_id,
             "MODEL_NAME": args.model_name,
@@ -211,7 +220,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         return env_var_dict
 
-    def run_bare_metal(self, benchmark_scripts, intelai_models, env_var_dict):
+    def run_bare_metal(self, benchmark_scripts, intelai_models,
+                       intelai_models_common, env_var_dict):
         """
         Runs the model without a container
         """
@@ -264,10 +274,12 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         else:
             mount_external_models_source = args.model_source_dir
             mount_intelai_models = intelai_models
+            mount_intelai_models_common = intelai_models_common
 
             # Add env vars with bare metal settings
             env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
             env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
+            env_var_dict["MOUNT_INTELAI_MODELS_COMMON_SOURCE"] = mount_intelai_models_common
 
             if in_graph_path:
                 env_var_dict["IN_GRAPH"] = in_graph_path
@@ -296,7 +308,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         self._launch_command(["bash", start_script])
     
 
-    def run_docker_container(self, benchmark_scripts, intelai_models, env_var_dict):
+    def run_docker_container(self, benchmark_scripts, intelai_models,
+                             intelai_models_common, env_var_dict):
         """
         Runs a docker container with the specified image and environment
         variables to start running the benchmarking job.
@@ -305,6 +318,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         mount_benchmark = "/workspace/benchmarks"
         mount_external_models_source = "/workspace/models"
         mount_intelai_models = "/workspace/intelai_models"
+        mount_intelai_models_common = "/workspace/intelai_models_common"
         workspace = os.path.join(mount_benchmark, "common", args.framework)
 
         mount_output_dir = False
@@ -324,6 +338,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                     "--env", "MOUNT_BENCHMARK={}".format(mount_benchmark),
                     "--env", "MOUNT_EXTERNAL_MODELS_SOURCE={}".format(mount_external_models_source),
                     "--env", "MOUNT_INTELAI_MODELS_SOURCE={}".format(mount_intelai_models),
+                    "--env", "MOUNT_INTELAI_MODELS_COMMON_SOURCE={}".format(mount_intelai_models_common),
                     "--env", "OUTPUT_DIR={}".format(output_dir)]
 
         if args.input_graph:
@@ -356,7 +371,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         volume_mounts = ["--volume", "{}:{}".format(benchmark_scripts, mount_benchmark),
                          "--volume", "{}:{}".format(args.model_source_dir, mount_external_models_source),
-                         "--volume", "{}:{}".format(intelai_models, mount_intelai_models)]
+                         "--volume", "{}:{}".format(intelai_models, mount_intelai_models),
+                         "--volume", "{}:{}".format(intelai_models_common, mount_intelai_models_common)]
 
         if mount_output_dir:
             volume_mounts.extend([
