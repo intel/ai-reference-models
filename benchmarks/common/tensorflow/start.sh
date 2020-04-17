@@ -1142,6 +1142,23 @@ function wide_deep_large_ds() {
       if [ "${num_omp_threads}" != None ]; then
         CMD="${CMD} --num_omp_threads=${num_omp_threads}"
       fi
+      if [ "${use_parallel_batches}" == "True" ]; then
+        CMD="${CMD} --use_parallel_batches=${use_parallel_batches}"
+      else
+        CMD="${CMD} --use_parallel_batches=False"
+      fi
+      if [ "${num_parallel_batches}" != None  ] && [ "${use_parallel_batches}" == "True" ]; then
+        CMD="${CMD} --num_parallel_batches=${num_parallel_batches}"
+      fi
+      if [ "${kmp_block_time}" != None ] ; then
+        CMD="${CMD} --kmp_block_time=${kmp_block_time}"
+      fi
+      if [ "${kmp_affinity}" != None ]; then
+        CMD="${CMD} --kmp_affinity=${kmp_affinity}"
+      fi
+      if [ "${kmp_settings}" != None ]; then
+        CMD="${CMD} --kmp_settings=${kmp_settings}"
+      fi
       if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
           CMD="${CMD}"
           PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
