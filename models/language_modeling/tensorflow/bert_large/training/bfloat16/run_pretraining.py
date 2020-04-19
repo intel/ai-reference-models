@@ -32,7 +32,6 @@ flags = tf.compat.v1.flags
 
 
 FLAGS = flags.FLAGS
-tf.compat.v1.disable_v2_behavior()
 
 ## Required parameters
 flags.DEFINE_string(
@@ -129,8 +128,12 @@ flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hoo
                                     "The profile output will be generated in the output_dir")
 
 flags.DEFINE_bool(
-    "mkldnn", False,
-    "[Optional] If true, use more experimental mkldnn operations in model.")
+    "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
+
+flags.DEFINE_bool(
+    "experimental_mkldnn_ops", False,
+    "[Optional] If true, use more experimental mkldnn operations in model."
+    "           Be careful this flag will crash model with incompatible TF.")
 
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
@@ -161,7 +164,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
     if bert_config.precision == "bfloat16" and bert_config.new_bf16_scope == True:
       with tf.compat.v1.tpu.bfloat16_scope():
-        bf.set_rprecision(tf.bfloat16)
+        bf.set_global_precision(tf.bfloat16)
         opt_fine_tuning=True
         tf.compat.v1.logging.info("*** New bfloat16 scope set***")
         model = modeling.BertModel(
@@ -474,6 +477,10 @@ def main(_):
   #    FLAGS.train_batch_size  = 32
 
   logBatchSizeInfo(FLAGS)
+
+  if FLAGS.disable_v2_bevior:
+    tf.compat.v1.disable_v2_behavior()
+
   if FLAGS.profile:
     tf.compat.v1.disable_eager_execution()
 
@@ -484,8 +491,8 @@ def main(_):
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
 
-  if FLAGS.mkldnn:
-    bert_config.mkldnn = FLAGS.mkldnn
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   bert_config.new_bf16_scope = FLAGS.new_bf16_scope
 
@@ -531,7 +538,7 @@ def main(_):
 
   if bert_config.precision == "bfloat16" and bert_config.new_bf16_scope == False:
     with tf.compat.v1.tpu.bfloat16_scope():
-      bf.set_rprecision(tf.bfloat16)
+      bf.set_global_precision(tf.bfloat16)
       tf.compat.v1.logging.info("*** Old bfloat16 scope set***")
       model_fn = model_fn_builder(
           bert_config=bert_config,

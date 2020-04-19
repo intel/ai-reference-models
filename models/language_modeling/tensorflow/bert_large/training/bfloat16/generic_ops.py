@@ -24,11 +24,24 @@ import tensorflow as tf
 
 _inprecision = tf.float32
 _rprecision = tf.float32
+_keras_policy = tf.keras.mixed_precision.experimental.Policy("float32")
 _use_mkldnn = False
+
+def set_global_precision(dt):
+  # Set Keras API precision
+  global _keras_policy
+  if dt == tf.bfloat16:
+    _keras_policy=tf.keras.mixed_precision.experimental.Policy("mixed_bfloat16")
+
+  # Set basic API precision
+  set_rprecision(dt)
 
 def set_rprecision(dt):
   global _rprecision
   _rprecision=dt
+
+def get_keras_policy():
+  return _keras_policy
 
 def set_mkldnn(mkldnn=False):
   global _use_mkldnn
@@ -65,9 +78,7 @@ def softmax(scores, axis=None):
       return r_cast(rval)
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
-    type_string = 'float32' if _rprecision == tf.float32 else 'mixed_bfloat16'
-    policy = tf.keras.mixed_precision.experimental.Policy(type_string)
-    lnorm = tf.keras.layers.LayerNormalization(dtype=policy)
+    lnorm = tf.keras.layers.LayerNormalization(dtype=get_keras_policy())
     return lnorm(inputs)
 
 "Moved from modeling.py"

@@ -133,7 +133,7 @@ class ModelInitializer(BaseModelInitializer):
             " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads)   +eoo  + \
             " --profile=" + str(self.args.profile)                 +eoo        + \
             " --do_lower_case=" + str(self.args.do_lower_case)     +eoo        + \
-            " --mkldnn=" + str(self.args.experimental_mkldnn_ops)  +eoo
+            " --experimental_mkldnn_ops=" + str(self.args.experimental_mkldnn_ops)  +eoo
 
         if self.args.train_option== "SQuAD":
           self.cmd_args =  self.cmd_args +\
