@@ -1136,7 +1136,6 @@ def validate_flags_or_throw(bert_config):
   """Validate the input FLAGS or throw an exception."""
   tokenization.validate_case_matches_checkpoint(FLAGS.do_lower_case,
                                                 FLAGS.init_checkpoint)
-
   if FLAGS.disable_v2_bevior:
     tf.compat.v1.disable_v2_behavior()
 
