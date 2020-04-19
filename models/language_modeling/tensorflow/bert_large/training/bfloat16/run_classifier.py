@@ -34,7 +34,6 @@ from absl import logging
 flags = tf.compat.v1.flags
 
 FLAGS = flags.FLAGS
-tf.compat.v1.disable_v2_behavior()
 
 ## Required parameters
 flags.DEFINE_string(
@@ -163,8 +162,12 @@ class InputExample(object):
 flags.DEFINE_string("precision", "fp32", "[Optional] TensorFlow training precision.")
 
 flags.DEFINE_bool(
-    "mkldnn", False,
-    "[Optional] If true, use more experimental mkldnn operations in model.")
+    "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
+
+flags.DEFINE_bool(
+    "experimental_mkldnn_ops", False,
+    "[Optional] If true, use more experimental mkldnn operations in model."
+    "           Be careful this flag will crash model with incompatible TF.")
 
 
 class PaddingInputExample(object):
@@ -827,11 +830,14 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 def main(_):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
+  if FLAGS.disable_v2_bevior:
+    tf.compat.v1.disable_v2_behavior()
+
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
 
-  if FLAGS.mkldnn:
-    bert_config.mkldnn = FLAGS.mkldnn
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in Classifier")
