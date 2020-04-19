@@ -125,8 +125,12 @@ flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hoo
                                     "The profile output will be generated in the output_dir")
 
 flags.DEFINE_bool(
-    "mkldnn", False,
-    "[Optional] If true, use more experimental mkldnn operations in model.")
+    "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
+
+flags.DEFINE_bool(
+    "experimental_mkldnn_ops", False,
+    "[Optional] If true, use more experimental mkldnn operations in model."
+    "           Be careful this flag will crash model with incompatible TF.")
 
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
@@ -452,6 +456,10 @@ def main(_):
   #    FLAGS.train_batch_size  = 32
 
   logBatchSizeInfo(FLAGS)
+
+  if FLAGS.disable_v2_bevior:
+    tf.compat.v1.disable_v2_behavior()
+
   if FLAGS.profile:
     tf.compat.v1.disable_eager_execution()
 
@@ -462,8 +470,8 @@ def main(_):
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
 
-  if FLAGS.mkldnn:
-    bert_config.mkldnn = FLAGS.mkldnn
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   tf.io.gfile.makedirs(FLAGS.output_dir)
 
