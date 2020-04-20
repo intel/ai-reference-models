@@ -26,7 +26,7 @@ echo "    WORKSPACE: ${WORKSPACE}"
 echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
-
+echo "    MOUNT_INTELAI_MODELS_COMMON_SOURCE_DIR: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
 if [ ${DOCKER} == "True" ]; then
   echo "    Mounted volumes:"
   echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
@@ -75,13 +75,32 @@ if [[ ${NOINSTALL} != "True" ]]; then
   fi
 
   if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+    ### Manually Installing OpenMPI3.0 In Case apt-get install fails
+    ##mkdir /tmp/openmpi && \
+    ##pushd /tmp/openmpi && \
+    ##wget https://www.open-mpi.org/software/ompi/v3.0/downloads/openmpi-3.0.0.tar.gz && \
+    ##tar zxf openmpi-3.0.0.tar.gz && \
+    ##cd openmpi-3.0.0 && \
+    ##./configure --enable-orterun-prefix-by-default && \
+    ##make -j $(nproc) all && \
+    ##make install && \
+    ##ldconfig
+    ##popd
+    ##rm -rf /tmp/openmpi
+    ### Install g++-4.8 for horovod 0.18.1
+    ##apt install -y g++-4.8
+    ### Horovod Installation
+    ##export HOROVOD_WITHOUT_PYTORCH=1
+    ##export HOROVOD_WITHOUT_MXNET=1
+    ### lock to a horovod commit in 0.18.2
+    ##pip install --no-cache-dir git+https://github.com/horovod/horovod@d40169415ca92c6a923003dbb27e508ba4202426
     ## Installing OpenMPI
     apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
     # Horovod Installation
     export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITHOUT_MXNET=1
-    # TODO: lock a horovod commit
-    pip install --no-cache-dir horovod
+    # lock horovod==0.19.1 release commit/version
+    pip install --no-cache-dir horovod==0.19.1
   fi 
 fi
 
@@ -113,7 +132,7 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   mkdir ${OUTPUT_DIR}
 fi
 
-export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
+export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_COMMON_SOURCE}:${MOUNT_INTELAI_MODELS_SOURCE}
 
 # Common execution command used by all models
 function run_model() {
@@ -988,7 +1007,7 @@ function transformer_lt_official() {
 
 # transformer in mlperf Translation for Tensorflow  model
 function transformer_mlperf() {
-  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}/common/tensorflow:${MOUNT_BENCHMARK}
+  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
   #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
   if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
   then
@@ -1145,6 +1164,23 @@ function wide_deep_large_ds() {
     if [ ${MODE} == "inference" ]; then
       if [ "${num_omp_threads}" != None ]; then
         CMD="${CMD} --num_omp_threads=${num_omp_threads}"
+      fi
+      if [ "${use_parallel_batches}" == "True" ]; then
+        CMD="${CMD} --use_parallel_batches=${use_parallel_batches}"
+      else
+        CMD="${CMD} --use_parallel_batches=False"
+      fi
+      if [ "${num_parallel_batches}" != None  ] && [ "${use_parallel_batches}" == "True" ]; then
+        CMD="${CMD} --num_parallel_batches=${num_parallel_batches}"
+      fi
+      if [ "${kmp_block_time}" != None ] ; then
+        CMD="${CMD} --kmp_block_time=${kmp_block_time}"
+      fi
+      if [ "${kmp_affinity}" != None ]; then
+        CMD="${CMD} --kmp_affinity=${kmp_affinity}"
+      fi
+      if [ "${kmp_settings}" != None ]; then
+        CMD="${CMD} --kmp_settings=${kmp_settings}"
       fi
       if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
           CMD="${CMD}"

@@ -1,16 +1,76 @@
 # MLPerf GNMT
 
+This document has instructions for how to run GNMT for the
+following modes/platforms:
+* [FP32 inference](#fp32-inference-instructions)
+
 ## FP32 Inference Instruction
 
-1. Prerequisites
-* [tensorflow] 2.0.0rc0 or newer
+1. Clone the intelai/models repo.
+This repo has the launch script for running the model, which we will
+use in the next step.
+```
+git clone https://github.com/IntelAI/models.git
+```
 
 2. Download GNMT benchmarking data.
 ```
 wget https://zenodo.org/record/2531868/files/gnmt_inference_data.zip
+unzip gnmt_inference_data.zip
 ```
 
-3. Run inference using command from <REPO>/benchmarks dir
+3. Download the pretrained model:
 ```
-python launch_benchmark.py --model-name mlperf_gnmt --framework tensorflow --precision fp32 --mode inference --batch-size <some_number> --data-location <data_dir> --in-graph <frozen_graph_file> --accuracy_only
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mlperf_gnmt_fp32_pretrained_model.pb
+```
+
+4. Please ensure you have installed the libraries listed in the
+`requirements` before you start the next step.
+
+5. Navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
+
+Substitute in your own `--data-location` (from step 2), `--checkpoint` pre-trained
+model file path (from step 3).
+
+For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
+```
+python launch_benchmark.py \
+--model-name mlperf_gnmt \
+--framework tensorflow \
+--precision fp32 \
+--mode inference \
+--batch-size 1 \
+--socket-id 0 \
+--data-location /home/<user>/nmt/data \
+--in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
+--benchmark-only
+```
+
+For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 32`):
+```
+python launch_benchmark.py \
+--model-name mlperf_gnmt \
+--framework tensorflow \
+--precision fp32 \
+--mode inference \
+--batch-size 32 \
+--socket-id 0 \
+--data-location /home/<user>/nmt/data \
+--in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
+--benchmark-only
+```
+
+For accuracy test (using `--accuracy_only`, `--socket-id 0` and `--batch-size 32`):
+```
+python launch_benchmark.py \
+--model-name mlperf_gnmt \
+--framework tensorflow \
+--precision fp32 \
+--mode inference \
+--batch-size 32 \
+--socket-id 0 \
+--data-location /home/<user>/nmt/data \
+--in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
+--accuracy_only
 ```
