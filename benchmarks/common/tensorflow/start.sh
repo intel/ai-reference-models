@@ -1038,7 +1038,7 @@ function transformer_mlperf() {
     fi
 
     CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
-        --print_iter=${print_iter}"
+    --print_iter=${print_iter} --save_profile=${save_profile}"
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
