@@ -42,7 +42,7 @@ def get_position_encoding(
   Returns:
     Tensor with shape [length, hidden_size]
   """
-  length = tf.cast(length, tf.float32)
+  #length = tf.cast(length, tf.float32)
   position = tf.cast(tf.range(length), dtype=tf.float32)
   num_timescales = hidden_size // 2
   log_timescale_increment = (
