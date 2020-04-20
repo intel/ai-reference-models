@@ -845,12 +845,6 @@ def main(_):
   if FLAGS.disable_v2_bevior:
     tf.compat.v1.disable_v2_behavior()
 
-  if FLAGS.precision:
-    bert_config.precision = FLAGS.precision
-
-  if FLAGS.experimental_mkldnn_ops:
-    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
-
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in Classifier")
     exit(0)
@@ -873,6 +867,12 @@ def main(_):
         "At least one of `do_train`, `do_eval` or `do_predict' must be True.")
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
+
+  if FLAGS.precision:
+    bert_config.precision = FLAGS.precision
+
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(
