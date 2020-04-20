@@ -22,8 +22,10 @@ import re
 import tensorflow as tf
 import generic_ops as bf
 
+import horovod.tensorflow as hvd
 
-def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, fine_tuning=True):
+
+def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, fine_tuning=True, use_multi_cpu=0):
   """Creates an optimizer training op."""
   global_step = tf.compat.v1.train.get_or_create_global_step()
 
@@ -54,6 +56,7 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
     learning_rate = (
         (1.0 - is_warmup) * learning_rate + is_warmup * warmup_learning_rate)
 
+
   # It is recommended that you use this optimizer for fine tuning, since this
   # is how the model was trained (note that the Adam m/v variables are NOT
   # loaded from init_checkpoint.)
@@ -64,6 +67,9 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
       beta_2=0.999,
       epsilon=1e-6,
       exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+
+  if use_multi_cpu and (accum_steps == 1):
+    optimizer = hvd.DistributedOptimizer(optimizer, sparse_as_dense=True)
 
   if use_tpu:
     optimizer = tf.compat.v1.tpu.CrossShardOptimizer(optimizer)
@@ -103,6 +109,10 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
               lambda: [accum_vars[i].assign_add(grad) for i, grad in enumerate(cgrads)])
 
     def applyGrads(accum_vars, current_step):
+          # if 1 or 0 MPI process, skip allreduce; otherwise do allreduce of the accum_var
+          if use_multi_cpu > 1:
+             accum_vars = [hvd.allreduce(tf.convert_to_tensor(accum_var)) if isinstance(accum_var, tf.IndexedSlices)
+                                                             else hvd.allreduce(accum_var) for accum_var in accum_vars]
           #tf.compat.v1.logging.info("\t\t APPLYING GRADIENTS....:", global_step)
           return optimizer.apply_gradients(list(zip(accum_vars, tvars)), global_step=global_step)
 
@@ -113,8 +123,13 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
     new_global_step = tf.identity(new_global_step, name='global_step_update')
     train_op = tf.group(update_op, [global_step.assign(new_global_step)])
   else :
-    grads = tf.gradients(ys=loss, xs=tvars)
-
+    if use_multi_cpu:
+      grads_and_vars = optimizer.compute_gradients(loss, tvars)
+      grads = [grad for grad, var in grads_and_vars]
+      tvars = [var for grad, var in grads_and_vars]
+    else:
+      grads = tf.gradients(loss, tvars)
+  
     # This is how the model was pre-trained.
     if fine_tuning :
       (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
@@ -123,10 +138,10 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
       mgrads = [tf.cast(grad, tf.float32) for grad in grads] 
       (grads, _) = tf.clip_by_global_norm(mgrads, clip_norm=1.0)
       grads = [tf.cast(grad, ddtype) for grad, ddtype in zip(grads, gdtypes)]
-
+  
     train_op = optimizer.apply_gradients(
-      zip(grads, tvars), global_step=global_step, fine_tuning=fine_tuning)
-
+        zip(grads, tvars), global_step=global_step, fine_tuning=fine_tuning)
+  
     # Normally the global step update is done inside of `apply_gradients`.
     # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
     # a different optimizer, you should probably take this line out.

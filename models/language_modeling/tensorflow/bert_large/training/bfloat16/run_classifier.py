@@ -26,7 +26,16 @@ import optimization
 import tokenization
 import tensorflow as tf
 import generic_ops as bf
+import math
 
+global is_mpi
+try:
+    import horovod.tensorflow as hvd
+    hvd.init()
+    is_mpi = hvd.size()
+except ImportError:
+    is_mpi = 0
+    print("No MPI horovod support, this is running in no-MPI mode!")
 
 from absl import app
 #from absl import flags
@@ -133,8 +142,8 @@ flags.DEFINE_integer(
 flags.DEFINE_integer( "inter_op_parallelism_threads", 2,
                       "Setting inter op for the model")
 
-flags.DEFINE_integer("intra_op_parallelism_threads", 27,
-                     "Setting inter op for the model")
+flags.DEFINE_integer("intra_op_parallelism_threads", 20,
+                     "Setting intra op for the model")
 
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
@@ -663,7 +672,7 @@ def create_model_top(bert_config, is_training, input_ids, input_mask, segment_id
 
 def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings):
+                     use_one_hot_embeddings, use_multi_cpu=is_mpi):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -717,7 +726,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
     if mode == tf.estimator.ModeKeys.TRAIN:
 
       train_op = optimization.create_optimizer(
-          total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=use_tpu)
+          total_loss, learning_rate, num_train_steps, num_warmup_steps, 1, use_tpu, is_mpi)
 
       log_hook = bf.logTheLossHook(total_loss, n=10)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
@@ -828,6 +837,9 @@ def convert_examples_to_features(examples, label_list, max_seq_length,
 
 
 def main(_):
+  if is_mpi:
+    FLAGS.output_dir = FLAGS.output_dir if hvd.rank() == 0 else os.path.join(FLAGS.output_dir, str(hvd.rank()))
+
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
   if FLAGS.disable_v2_bevior:
@@ -842,6 +854,7 @@ def main(_):
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in Classifier")
     exit(0)
+
   if FLAGS.profile:
     tf.compat.v1.disable_eager_execution()
 
@@ -906,21 +919,29 @@ def main(_):
   train_examples = None
   num_train_steps = None
   num_warmup_steps = None
+  learning_rate=FLAGS.learning_rate
   if FLAGS.do_train:
     train_examples = processor.get_train_examples(FLAGS.data_dir)
     num_train_steps = int(
         len(train_examples) / FLAGS.train_batch_size * FLAGS.num_train_epochs)
     num_warmup_steps = int(num_train_steps * FLAGS.warmup_proportion)
 
+    # Horovod: adjust number of steps based on number of CPUs.
+    if is_mpi:
+      num_train_steps = num_train_steps // hvd.size()
+      num_warmup_steps = num_warmup_steps // hvd.size()
+      learning_rate=learning_rate * math.sqrt(hvd.size())
+
   model_fn = model_fn_builder(
       bert_config=bert_config,
       num_labels=len(label_list),
       init_checkpoint=FLAGS.init_checkpoint,
-      learning_rate=FLAGS.learning_rate,
+      learning_rate=learning_rate,
       num_train_steps=num_train_steps,
       num_warmup_steps=num_warmup_steps,
       use_tpu=FLAGS.use_tpu,
-      use_one_hot_embeddings=FLAGS.use_tpu)
+      use_one_hot_embeddings=FLAGS.use_tpu,
+      use_multi_cpu=is_mpi)
 
   # If TPU is not available, this will fall back to normal Estimator on CPU
   # or GPU.
@@ -946,14 +967,23 @@ def main(_):
         is_training=True,
         drop_remainder=True)
 
+    # Horovod: In the case of multi CPU training with Horovod, adding
+    # hvd.BroadcastGlobalVariablesHook(0) hook, broadcasts the initial variable
+    # states from rank 0 to all other processes. This is necessary to ensure
+    # consistent initialization of all workers when training is started with
+    # random weights or restored from a checkpoint.
+    if is_mpi:
+        hooks = [hvd.BroadcastGlobalVariablesHook(0)]
+    else:
+        hooks = []
+
     # Added to profile the run
     if FLAGS.profile == True :
       tf.compat.v1.logging.info("***** Running training with profiler *****")
-      hooks = [tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=False)]
-      estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
-    else:
-      estimator.train(input_fn=train_input_fn, max_steps=num_train_steps)
+      hooks.append([tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
+                                               show_memory=False)])
+
+    estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
 
   if FLAGS.do_eval:
     eval_examples = processor.get_dev_examples(FLAGS.data_dir)
