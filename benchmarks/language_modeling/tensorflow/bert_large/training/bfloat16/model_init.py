@@ -85,6 +85,7 @@ class ModelInitializer(BaseModelInitializer):
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path)
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
@@ -124,8 +125,8 @@ class ModelInitializer(BaseModelInitializer):
             " --max_seq_length=" + str(self.args.max_seq_length)   +eoo        + \
             " --use_tpu=" + str(self.args.use_tpu)                 +eoo        + \
             " --precision=" + str(self.args.precision)             +eoo        + \
-            " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)   +eoo  + \
-            " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads)   +eoo  + \
+            " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads) + eoo +  \
+            " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads) + eoo +  \
             " --profile=" + str(self.args.profile)                 +eoo        + \
             " --do_lower_case=" + str(self.args.do_lower_case)     +eoo
 
