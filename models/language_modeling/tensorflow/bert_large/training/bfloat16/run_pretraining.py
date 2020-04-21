@@ -23,6 +23,16 @@ import modeling
 import optimization
 import tensorflow as tf
 import generic_ops as bf
+import math
+
+global is_mpi
+try:
+  import horovod.tensorflow as hvd
+  hvd.init()
+  is_mpi = hvd.size()
+except ImportError:
+  is_mpi = 0
+  print("No MPI horovod support, this is running in no-MPI mode!")
 
 #flags = tf.flags
 from absl import app
@@ -87,6 +97,10 @@ flags.DEFINE_integer("iterations_per_loop", 1000,
 
 flags.DEFINE_integer("max_eval_steps", 100, "Maximum number of eval steps.")
 
+flags.DEFINE_integer("inter_op_parallelism_threads", 2, "inter_op_parallelism_threads.")
+
+flags.DEFINE_integer("intra_op_parallelism_threads", 20, "intra_op_parallelism_threads.")
+
 flags.DEFINE_bool("use_tpu", False, "Whether to use TPU or GPU/CPU.")
 
 flags.DEFINE_string(
@@ -118,11 +132,6 @@ flags.DEFINE_integer(
     "num_tpu_cores", 8,
     "Only used if `use_tpu` is True. Total number of TPU cores to use.")
 
-flags.DEFINE_integer( "inter_op_parallelism_threads", 2,
-                      "Setting inter op for the model")
-
-flags.DEFINE_integer("intra_op_parallelism_threads", 27,
-                     "Setting inter op for the model")
 
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
@@ -130,7 +139,7 @@ flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hoo
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, accum_steps, use_tpu,
-                     use_one_hot_embeddings):
+                     use_one_hot_embeddings, use_multi_cpu=is_mpi):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -215,7 +224,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
     if mode == tf.estimator.ModeKeys.TRAIN:
       train_op = optimization.create_optimizer(
               total_loss, learning_rate, num_train_steps, num_warmup_steps, 
-                            accum_steps, use_tpu, fine_tuning=opt_fine_tuning)
+                            accum_steps, use_tpu=use_tpu, use_multi_cpu=is_mpi, fine_tuning=opt_fine_tuning)
 
       log_hook = bf.logTheLossHook(total_loss, FLAGS.accum_steps*3)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
@@ -375,7 +384,6 @@ def input_fn_builder(input_files,
 
   def input_fn(params):
     """The actual input function."""
-    #batch_size = params["batch_size"]
 
     name_to_features = {
         "input_ids":
@@ -457,7 +465,18 @@ def logBatchSizeInfo(FLAGS) :
     tf.compat.v1.logging.info(message3)
 
 def main(_):
+  learning_rate = FLAGS.learning_rate
+  # If Horovod is successfully enabled
+  if is_mpi:
+    FLAGS.output_dir = FLAGS.output_dir if hvd.rank() == 0 else \
+        os.path.join(FLAGS.output_dir, str(hvd.rank()))
+    # Horovod: adjust number of steps based on number of CPUs.
+    FLAGS.num_train_steps = FLAGS.num_train_steps // hvd.size()
+    FLAGS.num_warmup_steps = FLAGS.num_warmup_steps // hvd.size()
+    learning_rate = learning_rate * math.sqrt(hvd.size())
+
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+
 
   #if FLAGS.train_batch_size >32 :
   #  if FLAGS.train_batch_size % 32 != 0 :
@@ -494,25 +513,23 @@ def main(_):
     tpu_cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(
         FLAGS.tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
 
+  is_per_host = tf.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
+
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
       intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
       allow_soft_placement=True)
-  #print ("INTRA OPS :", FLAGS.intra_op_parallelism_threads)
-  #print ("INTER OPS :", FLAGS.inter_op_parallelism_threads)
-
-  is_per_host = tf.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
   run_config = tf.compat.v1.estimator.tpu.RunConfig(
       cluster=tpu_cluster_resolver,
       master=FLAGS.master,
       model_dir=FLAGS.output_dir,
       save_checkpoints_steps=FLAGS.save_checkpoints_steps,
-      log_step_count_steps=100,
       session_config=session_config,
       tpu_config=tf.compat.v1.estimator.tpu.TPUConfig(
           iterations_per_loop=FLAGS.iterations_per_loop,
           num_shards=FLAGS.num_tpu_cores,
-          per_host_input_for_training=is_per_host))
+          per_host_input_for_training=is_per_host),
+      log_step_count_steps=25)
 
   if bert_config.precision == "bfloat16" :
     tf.compat.v1.logging.info("INFO: BERT bfloat16 training....!")
@@ -526,22 +543,24 @@ def main(_):
       model_fn = model_fn_builder(
           bert_config=bert_config,
           init_checkpoint=FLAGS.init_checkpoint,
-          learning_rate=FLAGS.learning_rate,
+          learning_rate=learning_rate,
           num_train_steps=FLAGS.num_train_steps,
           num_warmup_steps=FLAGS.num_warmup_steps,
           accum_steps=FLAGS.accum_steps,
           use_tpu=FLAGS.use_tpu,
-          use_one_hot_embeddings=FLAGS.use_tpu)
+          use_one_hot_embeddings=FLAGS.use_tpu,
+          use_multi_cpu=is_mpi)
   else :
     model_fn = model_fn_builder(
           bert_config=bert_config,
           init_checkpoint=FLAGS.init_checkpoint,
-          learning_rate=FLAGS.learning_rate,
+          learning_rate=learning_rate,
           num_train_steps=FLAGS.num_train_steps,
           num_warmup_steps=FLAGS.num_warmup_steps,
           accum_steps=FLAGS.accum_steps,
           use_tpu=FLAGS.use_tpu,
-          use_one_hot_embeddings=FLAGS.use_tpu)
+          use_one_hot_embeddings=FLAGS.use_tpu,
+          use_multi_cpu=is_mpi)
 
   # If TPU is not available, this will fall back to normal Estimator on CPU
   # or GPU.
@@ -561,14 +580,24 @@ def main(_):
         max_seq_length=FLAGS.max_seq_length,
         max_predictions_per_seq=FLAGS.max_predictions_per_seq,
         is_training=True)
+    # Horovod: In the case of multi CPU training with Horovod, adding
+    # hvd.BroadcastGlobalVariablesHook(0) hook, broadcasts the initial variable
+    # states from rank 0 to all other processes. This is necessary to ensure
+    # consistent initialization of all workers when training is started with
+    # random weights or restored from a checkpoint.
+    if is_mpi:
+        hooks = [hvd.BroadcastGlobalVariablesHook(0)]
+    else:
+        hooks = []
 
+    # TODO: support horovod hook
     if FLAGS.profile:
       tf.compat.v1.logging.info("***** Running training with profiler*****")
-      hooks = [tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)]
-      estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps, hooks=hooks)
-    else :
-      estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps)
+      hooks.append([tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
+                                               show_memory=True)])
+
+    estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps,
+                    hooks=hooks)
 
   if FLAGS.do_eval:
     tf.compat.v1.logging.info("***** Running evaluation *****")
