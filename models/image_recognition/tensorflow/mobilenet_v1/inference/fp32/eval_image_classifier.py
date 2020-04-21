@@ -103,7 +103,7 @@ tf.app.flags.DEFINE_integer(
 
 tf.app.flags.DEFINE_integer(
     'eval_log_frequency', 10, 'Number of eval steps to run between displaying '
-    'eval metrics.')
+     'eval metrics.')
 
 tf.app.flags.DEFINE_integer(
     'inter_op_parallelism_threads', 1, 'The number of inter-thread.')
@@ -114,161 +114,158 @@ tf.app.flags.DEFINE_integer(
 
 FLAGS = tf.app.flags.FLAGS
 
-
 class _LoggerHook(tf.train.SessionRunHook):
-    """ Logs loss and runtime."""
+  """ Logs loss and runtime."""
 
-    def begin(self):
-        self._step = -1
-        self._displayed_steps = 0
-        self._total_images_per_sec = 0
+  def begin(self):
+    self._step = -1
+    self._displayed_steps = 0
+    self._total_images_per_sec = 0
 
-    def before_run(self, run_context):
-        self._step += 1
-        self._start_time = time.time()
+  def before_run(self, run_context):
+    self._step += 1
+    self._start_time = time.time()
 
-    def after_run(self, run_context, run_values):
-        duration = time.time() - self._start_time
-        if (self._step + 1) % FLAGS.eval_log_frequency == 0:
-            images_per_sec = FLAGS.batch_size / duration
-            self._displayed_steps += 1
-            self._total_images_per_sec += images_per_sec
+  def after_run(self, run_context, run_values):
+    duration = time.time() - self._start_time
+    if (self._step + 1) % FLAGS.eval_log_frequency == 0:
+      images_per_sec = FLAGS.batch_size / duration
+      self._displayed_steps += 1
+      self._total_images_per_sec += images_per_sec
 
-            format_str = ('%s: step %d, %.1f images/sec')
-            print(format_str % (datetime.now(), (self._step + 1), images_per_sec))
+      format_str = ('%s: step %d, %.1f images/sec')
+      print (format_str % (datetime.now(), (self._step+1), images_per_sec))
 
-    def end(self, run_context):
-        print('self._total_images_per_sec = %.1f' % self._total_images_per_sec)
-        print('self._displayed_steps = %d' % self._displayed_steps)
-        images_per_sec = self._total_images_per_sec / self._displayed_steps
-        print('Total images/sec = %.1f' % (images_per_sec))
-        if FLAGS.batch_size == 1:
-            latency = 1000 / images_per_sec
-            print('Latency ms/step = %.1f' % (latency))
-
+  def end(self, run_context):
+    print('self._total_images_per_sec = %.1f' % self._total_images_per_sec)
+    print('self._displayed_steps = %d' % self._displayed_steps)
+    images_per_sec = self._total_images_per_sec / self._displayed_steps
+    print('Total images/sec = %.1f' %(images_per_sec))
+    if FLAGS.batch_size == 1:
+      latency = 1000 / images_per_sec
+      print('Latency ms/step = %.1f' % (latency))
 
 def main(_):
-    tf.logging.set_verbosity(tf.logging.INFO)
+  tf.logging.set_verbosity(tf.logging.INFO)
 
-    with tf.Graph().as_default():
-        tf_global_step = slim.get_or_create_global_step()
+  with tf.Graph().as_default():
+    tf_global_step = slim.get_or_create_global_step()
 
-        ######################
-        # Select the dataset #
-        ######################
-        if FLAGS.dataset_dir:
-            print("Inference using real data")
-            dataset = dataset_factory.get_dataset(
-                FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
-            num_classes = dataset.num_classes - FLAGS.labels_offset
-        else:
-            print("Inference using synthetic data")
-            num_classes = 1000
+    ######################
+    # Select the dataset #
+    ######################
+    if FLAGS.dataset_dir:
+        print("Inference using real data")
+        dataset = dataset_factory.get_dataset(
+            FLAGS.dataset_name, FLAGS.dataset_split_name, FLAGS.dataset_dir)
+        num_classes = dataset.num_classes - FLAGS.labels_offset
+    else:
+        print("Inference using synthetic data")
+        num_classes = 1000
 
-        ####################
-        # Select the model #
-        ####################
-        network_fn = nets_factory.get_network_fn(
-            FLAGS.model_name,
-            num_classes=num_classes,
+    ####################
+    # Select the model #
+    ####################
+    network_fn = nets_factory.get_network_fn(
+        FLAGS.model_name,
+        num_classes=num_classes,
+        is_training=False)
+
+    eval_image_size = FLAGS.eval_image_size or network_fn.default_image_size
+
+    if FLAGS.dataset_dir:
+        ##############################################################
+        # Create a dataset provider that loads data from the dataset #
+        ##############################################################
+        provider = slim.dataset_data_provider.DatasetDataProvider(
+            dataset,
+            shuffle=False,
+            common_queue_capacity=2 * FLAGS.batch_size,
+            common_queue_min=FLAGS.batch_size)
+        [image, label] = provider.get(['image', 'label'])
+        label -= FLAGS.labels_offset
+
+        #####################################
+        # Select the preprocessing function #
+        #####################################
+        preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
+        image_preprocessing_fn = preprocessing_factory.get_preprocessing(
+            preprocessing_name,
             is_training=False)
 
-        eval_image_size = FLAGS.eval_image_size or network_fn.default_image_size
+        image = image_preprocessing_fn(image, eval_image_size, eval_image_size)
 
-        if FLAGS.dataset_dir:
-            ##############################################################
-            # Create a dataset provider that loads data from the dataset #
-            ##############################################################
-            provider = slim.dataset_data_provider.DatasetDataProvider(
-                dataset,
-                shuffle=False,
-                common_queue_capacity=2 * FLAGS.batch_size,
-                common_queue_min=FLAGS.batch_size)
-            [image, label] = provider.get(['image', 'label'])
-            label -= FLAGS.labels_offset
+        images, labels = tf.train.batch(
+            [image, label],
+            batch_size=FLAGS.batch_size,
+            num_threads=FLAGS.num_preprocessing_threads,
+            capacity=5 * FLAGS.batch_size)
+    else:
+        # Generate random images and labels with constant 0 when no dataset is used
+        input_shape = [FLAGS.batch_size, eval_image_size, eval_image_size, 3]
+        label_shape = [FLAGS.batch_size]
+        images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
+        labels = tf.constant(0, shape=label_shape, dtype=tf.int64)
 
-            #####################################
-            # Select the preprocessing function #
-            #####################################
-            preprocessing_name = FLAGS.preprocessing_name or FLAGS.model_name
-            image_preprocessing_fn = preprocessing_factory.get_preprocessing(
-                preprocessing_name,
-                is_training=False)
+    ####################
+    # Define the model #
+    ####################
+    logits, _ = network_fn(images)
 
-            image = image_preprocessing_fn(image, eval_image_size, eval_image_size)
+    if FLAGS.moving_average_decay:
+      variable_averages = tf.train.ExponentialMovingAverage(
+          FLAGS.moving_average_decay, tf_global_step)
+      variables_to_restore = variable_averages.variables_to_restore(
+          slim.get_model_variables())
+      variables_to_restore[tf_global_step.op.name] = tf_global_step
+    else:
+      variables_to_restore = slim.get_variables_to_restore()
 
-            images, labels = tf.train.batch(
-                [image, label],
-                batch_size=FLAGS.batch_size,
-                num_threads=FLAGS.num_preprocessing_threads,
-                capacity=5 * FLAGS.batch_size)
-        else:
-            # Generate random images and labels with constant 0 when no dataset is used
-            input_shape = [FLAGS.batch_size, eval_image_size, eval_image_size, 3]
-            label_shape = [FLAGS.batch_size]
-            images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
-            labels = tf.constant(0, shape=label_shape, dtype=tf.int64)
+    predictions = tf.argmax(logits, 1)
+    #labels = tf.squeeze(labels)
 
-        ####################
-        # Define the model #
-        ####################
-        logits, _ = network_fn(images)
+    # Define the metrics:
+    names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
+        'Accuracy': slim.metrics.streaming_accuracy(predictions, labels),
+        'Recall_5': slim.metrics.streaming_recall_at_k(
+            logits, labels, 5),
+    })
 
-        if FLAGS.moving_average_decay:
-            variable_averages = tf.train.ExponentialMovingAverage(
-                FLAGS.moving_average_decay, tf_global_step)
-            variables_to_restore = variable_averages.variables_to_restore(
-                slim.get_model_variables())
-            variables_to_restore[tf_global_step.op.name] = tf_global_step
-        else:
-            variables_to_restore = slim.get_variables_to_restore()
+    # Print the summaries to screen.
+    for name, value in names_to_values.items():
+      summary_name = 'eval/%s' % name
+      op = tf.summary.scalar(summary_name, value, collections=[])
+      op = tf.Print(op, [value], summary_name)
+      tf.add_to_collection(tf.GraphKeys.SUMMARIES, op)
 
-        predictions = tf.argmax(logits, 1)
-        # labels = tf.squeeze(labels)
+    # TODO(sguada) use num_epochs=1
+    if FLAGS.max_num_batches:
+      num_batches = FLAGS.max_num_batches
+    else:
+      # This ensures that we make a single pass over all of the data.
+      num_batches = math.ceil(dataset.num_samples / float(FLAGS.batch_size))
 
-        # Define the metrics:
-        names_to_values, names_to_updates = slim.metrics.aggregate_metric_map({
-            'Accuracy': slim.metrics.streaming_accuracy(predictions, labels),
-            'Recall_5': slim.metrics.streaming_recall_at_k(
-                logits, labels, 5),
-        })
+    num_batches = 100
 
-        # Print the summaries to screen.
-        for name, value in names_to_values.items():
-            summary_name = 'eval/%s' % name
-            op = tf.summary.scalar(summary_name, value, collections=[])
-            op = tf.Print(op, [value], summary_name)
-            tf.add_to_collection(tf.GraphKeys.SUMMARIES, op)
+    config = tf.ConfigProto(inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads, intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads)
 
-        # TODO(sguada) use num_epochs=1
-        if FLAGS.max_num_batches:
-            num_batches = FLAGS.max_num_batches
-        else:
-            # This ensures that we make a single pass over all of the data.
-            num_batches = math.ceil(dataset.num_samples / float(FLAGS.batch_size))
+    if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
+      checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
+    else:
+      checkpoint_path = FLAGS.checkpoint_path
 
-        num_batches = 100
+    tf.logging.info('Evaluating %s' % checkpoint_path)
 
-        config = tf.ConfigProto(inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
-                                intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads)
-
-        if tf.gfile.IsDirectory(FLAGS.checkpoint_path):
-            checkpoint_path = tf.train.latest_checkpoint(FLAGS.checkpoint_path)
-        else:
-            checkpoint_path = FLAGS.checkpoint_path
-
-        tf.logging.info('Evaluating %s' % checkpoint_path)
-
-        slim.evaluation.evaluate_once(
-            master=FLAGS.master,
-            checkpoint_path=checkpoint_path,
-            logdir=FLAGS.eval_dir,
-            num_evals=num_batches,
-            eval_op=list(names_to_updates.values()),
-            variables_to_restore=variables_to_restore,
-            hooks=[_LoggerHook()],
-            session_config=config)
+    slim.evaluation.evaluate_once(
+        master=FLAGS.master,
+        checkpoint_path=checkpoint_path,
+        logdir=FLAGS.eval_dir,
+        num_evals=num_batches,
+        eval_op=list(names_to_updates.values()),
+        variables_to_restore=variables_to_restore,
+        hooks=[_LoggerHook()],
+        session_config=config)
 
 
 if __name__ == '__main__':
-    tf.app.run()
+  tf.app.run()

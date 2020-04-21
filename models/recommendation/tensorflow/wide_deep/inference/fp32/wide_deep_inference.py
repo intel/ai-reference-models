@@ -142,37 +142,38 @@ def build_estimator(model_dir, model_type):
     # Create a tf.estimator.RunConfig to ensure the model is run on CPU, which
     # trains faster than GPU for this model.
     run_config = tf.estimator.RunConfig().replace(
-        session_config=tf.ConfigProto(device_count={'GPU': 0}))
+        session_config=tf.compat.v1.ConfigProto(device_count={'GPU': 0}))
 
     if model_type == 'wide':
         return tf.estimator.LinearClassifier(
             model_dir=model_dir,
             feature_columns=wide_columns,
-            config=run_config)
+            config=run_config, loss_reduction=tf.compat.v1.losses.Reduction.SUM)
     elif model_type == 'deep':
         return tf.estimator.DNNClassifier(
             model_dir=model_dir,
             feature_columns=deep_columns,
             hidden_units=hidden_units,
-            config=run_config)
+            config=run_config, loss_reduction=tf.compat.v1.losses.Reduction.SUM)
     else:
         return tf.estimator.DNNLinearCombinedClassifier(
             model_dir=model_dir,
             linear_feature_columns=wide_columns,
             dnn_feature_columns=deep_columns,
             dnn_hidden_units=hidden_units,
-            config=run_config)
+            config=run_config, loss_reduction=tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE)
+            #config=run_config, loss_reduction=tf.compat.v1.losses.Reduction.SUM)
 
 
 def input_fn(data_file, num_epochs, shuffle, batch_size):
     """Generate an input function for the Estimator."""
-    assert tf.gfile.Exists(data_file), (
+    assert tf.io.gfile.exists(data_file), (
         '%s not found. Please make sure you have run data_download.py and '
         'set the --data_dir argument to the correct path.' % data_file)
 
     def parse_csv(value):
         print('Parsing', data_file)
-        columns = tf.decode_csv(value, record_defaults=_CSV_COLUMN_DEFAULTS)
+        columns = tf.io.decode_csv(records=value, record_defaults=_CSV_COLUMN_DEFAULTS)
         features = dict(zip(_CSV_COLUMNS, columns))
         labels = features.pop('income_bracket')
         return features, tf.equal(labels, '>50K')
@@ -230,9 +231,9 @@ def main(argv):
         print('%s: %s' % (key, results[key]))
     main_end = time.time()
     E2Eduration = main_end - main_start
-    print('End-to-End duration is %s', E2Eduration)
+    print ('End-to-End duration is %s', E2Eduration)
     evaluate_duration = main_end - inference_start
-    print('Evaluation duration is %s', evaluate_duration)
+    print ('Evaluation duration is %s', evaluate_duration)
 
     if flags.batch_size == 1:
         print('Latency is: %s', E2Eduration / num_records)
@@ -261,5 +262,5 @@ class WideDeepArgParser(argparse.ArgumentParser):
 
 if __name__ == '__main__':
     main_start = time.time()
-    tf.logging.set_verbosity(tf.logging.INFO)
+    tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
     main(argv=sys.argv)

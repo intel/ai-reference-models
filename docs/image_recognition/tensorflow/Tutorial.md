@@ -13,7 +13,7 @@ There are 2 main setbacks for CNNs for performance:
 1. Deeply layering convolutions causes the number of training parameters to increase drastically.
 2. Linear convolution filters cannot learn size-invariant features without using separate filter for each size regime.
 
-ResNet models use gate and skip logic to address issue #1 and lower the number of parameters, similar to a recurrent neural network (RNN). The InceptionV3 model utilizes “network in network” mini perceptrons to convert linear convolutions into non-linear convolutions in a compact step, addressing issue #2. InceptionV3 also includes optimization that factor and vectorize the convolutions, further increasing the speed of the network.
+ResNet models use gate and skip logic to address issue 1 and lower the number of parameters, similar to a recurrent neural network (RNN). The InceptionV3 model utilizes “network in network” mini perceptrons to convert linear convolutions into non-linear convolutions in a compact step, addressing issue 2. InceptionV3 also includes optimization that factor and vectorize the convolutions, further increasing the speed of the network.
 
 ##  Recommended Settings 
 
@@ -127,11 +127,11 @@ git clone https://github.com/IntelAI/models.git
 any other directory of your choice. 
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/resnet50_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50_fp32_pretrained_model.pb
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/resnet101_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet101_fp32_pretrained_model.pb
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/inceptionv3_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv3_fp32_pretrained_model.pb
 ```
 Refer to following Readme files to get the latest locations of pretrained models <br>
 a. [ResNet50](/benchmarks/image_recognition/tensorflow/resnet50) <br>
@@ -141,7 +141,7 @@ c. [InceptionV3](/benchmarks/image_recognition/tensorflow/inceptionv3) <br>
 3. (optional) Download and setup a data directory that has image files in TFRecord format if you are inferring on a real dataset. 
 You can refer to [ImageNet](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data) or [Coco Dataset](http://cocodataset.org/#home) which have images converted to TFRecords, or you can run the [build_image_data.py](https://github.com/tensorflow/models/blob/f87a58cd96d45de73c9a8330a06b2ab56749a7fa/research/inception/inception/data/build_image_data.py) script to convert raw images into TFRecords.
 
-4. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs on a Docker container.
+4. Install [Docker](https://docs.docker.com/install/) since the tutorial runs on a Docker container.
 
 ### Run inference
 
@@ -180,7 +180,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest 
+		--docker-image intel/intel-optimized-tensorflow:2.1.0 
 
 *Real data*
 
@@ -194,7 +194,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest
+		--docker-image intel/intel-optimized-tensorflow:2.1.0
 
 3.1.2 <b>ResNet101</b>
 
@@ -209,7 +209,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 1 \
 		--benchmark-only \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest 
+		--docker-image intel/intel-optimized-tensorflow:2.1.0 
 
 *Real data*
 
@@ -222,7 +222,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 1 \
 		--benchmark-only \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest
+		--docker-image intel/intel-optimized-tensorflow:2.1.0
 
 3.1.3 <b>InceptionV3</b>
 
@@ -239,7 +239,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest 
+		--docker-image intel/intel-optimized-tensorflow:2.1.0 
 
 *Real data*
 
@@ -253,7 +253,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest
+		--docker-image intel/intel-optimized-tensorflow:2.1.0
 
 3.2. <b>*Best Batch inference*</b>(batch_size=128)
 
@@ -273,7 +273,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest 
+		--docker-image intel/intel-optimized-tensorflow:2.1.0 
 
 *Real data*
 
@@ -287,7 +287,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest
+		--docker-image intel/intel-optimized-tensorflow:2.1.0
 
 3.2.2 <b>ResNet101</b>
 
@@ -302,7 +302,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 128 \
 		--benchmark-only \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest 
+		--docker-image intel/intel-optimized-tensorflow:2.1.0 
 
 *Real data*
 
@@ -315,7 +315,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 128 \
 		--benchmark-only \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest
+		--docker-image intel/intel-optimized-tensorflow:2.1.0
 
 3.2.3 <b>InceptionV3</b>
 
@@ -329,10 +329,10 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--framework tensorflow \
 		--precision fp32 \
 		--mode inference \
-		--batch-size 1 \
+		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest 
+		--docker-image intel/intel-optimized-tensorflow:2.1.0 
 
 *Real data*
 
@@ -343,10 +343,10 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--framework tensorflow \
 		--precision fp32 \
 		--mode inference \
-		--batch-size 1 \
+		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intelaipg/intel-optimized-tensorflow:latest
+		--docker-image intel/intel-optimized-tensorflow:2.1.0
 		
 
 <u>Example Output</u>
@@ -366,7 +366,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 The logs are captured in a directory outside of the container.<br> 
 
 
-4. <a name="step_4"></a>If you want to run the model script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker_image```,
+4. <a name="step_4"></a>If you want to run the model script interactively within the docker container, run ```launch_benchmark.py``` with ```--debug``` flag. This will launch a docker container based on the ```--docker-image```,
 performs necessary installs, runs the ```launch_benchmark.py``` script and does not terminate the container process. As an example, this step will demonstrate ResNet50 Real Time inference on Synthetic Data use case, 
 you can implement the same strategy on different use cases demoed in Step 3.
 		
@@ -378,7 +378,7 @@ you can implement the same strategy on different use cases demoed in Step 3.
 			--mode inference \
 			--batch-size 1 \
 			--benchmark-only \
-			--docker-image intelaipg/intel-optimized-tensorflow:latest \
+			--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 			--debug 				
 	
 <u>Example Output</u>

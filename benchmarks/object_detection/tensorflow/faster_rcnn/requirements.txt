@@ -1,8 +1,0 @@
-Cython
-contextlib2
-pillow>=6.2.2
-lxml
-jupyter
-matplotlib
-pycocotools
-numpy < 1.18.0

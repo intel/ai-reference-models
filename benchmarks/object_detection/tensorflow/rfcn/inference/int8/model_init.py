@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+#
 
 from __future__ import absolute_import
 from __future__ import division
@@ -50,23 +51,20 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.intelai_models in sys.path:
             sys.path.remove(self.args.intelai_models)
 
+        self.parse_args()
+
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        # set num_inter_threads and num_intra_threds
-        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_inter_threads,
-                                         num_intra_threads=self.args.num_intra_threads)
-        omp_num_threads = self.args.num_intra_threads if self.args.num_cores == -1 else self.args.num_cores
-        set_env_var("OMP_NUM_THREADS", omp_num_threads)
-
-        self.parse_args()
+        # Set num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads()
 
     def parse_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
             mutex_group = parser.add_mutually_exclusive_group()
-            mutex_group.add_argument("-x", "--steps",
+            mutex_group.add_argument("-x", "--number_of_steps",
                                      help="Run for n number of steps",
                                      type=int, default=None)
             mutex_group.add_argument(
@@ -114,6 +112,11 @@ class ModelInitializer(BaseModelInitializer):
     def run_perf_command(self):
         # Get the command previx, but numactl is added later in run_perf_command()
         self.command.append(self.get_command_prefix(self.args.socket_id, numactl=False))
+        num_cores = str(self.platform_util.num_cores_per_socket)
+        if self.args.num_cores != -1:
+            num_cores = str(self.args.num_cores)
+
+        set_env_var("OMP_NUM_THREADS", num_cores)
 
         if self.args.socket_id != -1:
             self.command.append("numactl")
@@ -140,10 +143,10 @@ class ModelInitializer(BaseModelInitializer):
         self.command += ("-g", self.args.input_graph)
         self.command += ("--num-intra-threads", str(self.args.num_intra_threads))
         self.command += ("--num-inter-threads", str(self.args.num_inter_threads))
-        if self.args.steps:
-            self.command += ("-x", "{}".format(self.args.steps))
+        if self.args.number_of_steps:
+            self.command += ("-x", "{}".format(self.args.number_of_steps))
         if self.args.visualize:
-            self.command += "-v"
+            self.command += ("-v")
         if self.args.timeline:
             self.command += ("-t", self.args.timeline)
         if self.args.data_location:
@@ -151,24 +154,31 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.evaluate_tensor:
             self.command += ("-e", self.args.evaluate_tensor)
         if self.args.print_accuracy:
-            self.command += "-p"
+            self.command += ("-p")
         self.run_command(" ".join(self.command))
 
     def run_accuracy_command(self):
         # already validated by parent
         self.command = self.get_command_prefix(self.args.socket_id, numactl=False)
+        self.command += "FROZEN_GRAPH=" + self.args.input_graph
 
-        if not self.args.data_location or not os.path.exists(self.args.data_location):
-            raise ValueError("Unable to locate the coco data record file at {}".format(self.args.data_location))
+        if self.args.data_location and os.path.exists(
+                self.args.data_location):
+            self.command += " TF_RECORD_FILE=" + self.args.data_location
+        else:
+            raise ValueError(
+                "Unable to locate the coco data record file at {}".format(
+                    self.args.tf_record_file))
 
-        if not self.args.split:
+        if self.args.split:
+            self.command += " SPLIT=" + self.args.split
+        else:
             raise ValueError("Must specify SPLIT parameter")
 
-        self.command += " {} {} {} {} {}".format(self.accuracy_script_path,
-                                                 self.args.input_graph,
-                                                 self.args.data_location,
-                                                 self.args.model_source_dir,
-                                                 self.args.split)
+        self.command += " TF_MODELS_ROOT={}".format(
+            self.args.model_source_dir)
+
+        self.command += " " + self.accuracy_script_path
         self.run_command(self.command)
 
     def run(self):
