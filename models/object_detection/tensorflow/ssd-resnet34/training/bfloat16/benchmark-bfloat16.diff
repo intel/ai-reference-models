@@ -43,7 +43,7 @@ index f3ac9bb..5bd1f2a 100644
      # Unpack model output back to locations and confidence scores of predictions
      # Shape of pred_loc: [batch_size, NUM_SSD_BOXES, 4]
 diff --git a/scripts/tf_cnn_benchmarks/preprocessing.py b/scripts/tf_cnn_benchmarks/preprocessing.py
-index bb40b30..12c8284 100644
+index bb40b30..fa3b084 100644
 --- a/scripts/tf_cnn_benchmarks/preprocessing.py
 +++ b/scripts/tf_cnn_benchmarks/preprocessing.py
 @@ -972,7 +972,8 @@ class COCOPreprocessor(BaseImagePreprocessor):
@@ -56,3 +56,13 @@ index bb40b30..12c8284 100644
  
        encoded_returns = ssd_encoder.encode_labels(boxes, classes)
        encoded_classes, encoded_boxes, num_matched_boxes = encoded_returns
+@@ -992,7 +993,8 @@ class COCOPreprocessor(BaseImagePreprocessor):
+       image /= 255.
+ 
+       image = ssd_dataloader.normalize_image(image)
+-      image = tf.cast(image, self.dtype)
++      # image = tf.cast(image, self.dtype)
++      image = tf.cast(image, tf.bfloat16)
+ 
+       def trim_and_pad(inp_tensor):
+         """Limit the number of boxes, and pad if necessary."""
