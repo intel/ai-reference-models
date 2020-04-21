@@ -43,6 +43,7 @@
 5. Navigate to the `benchmarks` directory in your local clone of the [intelai/models](https://github.com/IntelAI/models) repo from step 1. Then `launch_benchmark.py` script in the `benchmarks` directory is used for starting a model. It has arguments to specify which model, framework, mode, platform, and docker image to use.
    Small sets like MRPC have a high variance in the Dev set accuracy, even when starting from the same pre-training checkpoint. If you re-run multiple times (making sure to point to different `output-dir`), you should see results between 84% and 88%. By default model will run in performance mode without fine-tuning to save time. Using `--accuracy-only` to enable complete process and get right accuracy. 
    For online inference (using `--socket-id 0` and `--batch-size 1`).
+   For throughput, recommend batch size is 32 (using `--batch-size 32`).
 
    Run with local TensorFlow:
    ```bash
