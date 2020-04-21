@@ -1,4 +1,9 @@
+numpy==1.17.4
 Cython
-pycocotools
-numpy<1.18.0
+contextlib2
+pillow>=6.2.2
+lxml
+jupyter
 matplotlib
+pycocotools
+tensorflow-addons==0.5.0

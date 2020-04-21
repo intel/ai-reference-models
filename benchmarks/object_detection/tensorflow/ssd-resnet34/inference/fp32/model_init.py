@@ -47,12 +47,9 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        self.set_num_inter_intra_threads(num_inter_threads=self.args.num_inter_threads,
-                                         num_intra_threads=self.args.num_intra_threads)
+        self.set_num_inter_intra_threads()
 
-        omp_num_threads = platform_util.num_cores_per_socket
-
-        set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.model_dir = os.path.join(self.args.intelai_models, self.args.mode, self.args.precision)
 

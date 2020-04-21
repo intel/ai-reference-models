@@ -63,7 +63,6 @@ Example usage:
         --model_config_path=model_config.pbtxt \
         --input_config_path=eval_input_config.pbtxt
 """
-import logging
 import functools
 import os
 import tensorflow as tf
@@ -76,7 +75,8 @@ from object_detection.utils import config_util
 from object_detection.utils import label_map_util
 
 
-tf.logging.set_verbosity(tf.logging.INFO)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+import logging
 # logging.basicConfig(level=logging.INFO)
 
 flags = tf.app.flags
@@ -109,65 +109,65 @@ FLAGS = flags.FLAGS
 
 
 def main(unused_argv):
-    if (FLAGS.omp > 0):
-        if not os.environ.get("OMP_NUM_THREADS"):
-            logging.info('OMP_NUM_THREADS value= %d', FLAGS.omp)
-            os.environ["OMP_NUM_THREADS"] = str(FLAGS.omp)
-        if not os.environ.get("KMP_BLOCKTIME"):
-            logging.info('KMP_BLOCKTIME value= %d', FLAGS.blocktime)
-            os.environ["KMP_BLOCKTIME"] = str(FLAGS.blocktime)
-        if not os.environ.get("KMP_SETTINGS"):
-            os.environ["KMP_SETTINGS"] = "1"
-        # os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
-    assert FLAGS.checkpoint_dir, '`checkpoint_dir` is missing.'
-    assert FLAGS.eval_dir, '`eval_dir` is missing.'
-    tf.gfile.MakeDirs(FLAGS.eval_dir)
-    if FLAGS.pipeline_config_path:
-        configs = config_util.get_configs_from_pipeline_file(
-            FLAGS.pipeline_config_path)
-        tf.gfile.Copy(FLAGS.pipeline_config_path,
-                      os.path.join(FLAGS.eval_dir, 'pipeline.config'),
-                      overwrite=True)
-    else:
-        configs = config_util.get_configs_from_multiple_files(
-            model_config_path=FLAGS.model_config_path,
-            eval_config_path=FLAGS.eval_config_path,
-            eval_input_config_path=FLAGS.input_config_path)
-        for name, config in [('model.config', FLAGS.model_config_path),
-                             ('eval.config', FLAGS.eval_config_path),
-                             ('input.config', FLAGS.input_config_path)]:
-            tf.gfile.Copy(config,
-                          os.path.join(FLAGS.eval_dir, name),
-                          overwrite=True)
+  if (FLAGS.omp > 0):
+    if not os.environ.get("OMP_NUM_THREADS"):
+      logging.info('OMP_NUM_THREADS value= %d', FLAGS.omp)
+      os.environ["OMP_NUM_THREADS"] = str(FLAGS.omp)
+    if not os.environ.get("KMP_BLOCKTIME"):
+      logging.info('KMP_BLOCKTIME value= %d', FLAGS.blocktime)
+      os.environ["KMP_BLOCKTIME"] = str(FLAGS.blocktime)
+    if not os.environ.get("KMP_SETTINGS"):
+      os.environ["KMP_SETTINGS"] = "1"
+    # os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
+  assert FLAGS.checkpoint_dir, '`checkpoint_dir` is missing.'
+  assert FLAGS.eval_dir, '`eval_dir` is missing.'
+  tf.io.gfile.makedirs(FLAGS.eval_dir)
+  if FLAGS.pipeline_config_path:
+    configs = config_util.get_configs_from_pipeline_file(
+        FLAGS.pipeline_config_path)
+    tf.io.gfile.copy(FLAGS.pipeline_config_path,
+                  os.path.join(FLAGS.eval_dir, 'pipeline.config'),
+                  overwrite=True)
+  else:
+    configs = config_util.get_configs_from_multiple_files(
+        model_config_path=FLAGS.model_config_path,
+        eval_config_path=FLAGS.eval_config_path,
+        eval_input_config_path=FLAGS.input_config_path)
+    for name, config in [('model.config', FLAGS.model_config_path),
+                         ('eval.config', FLAGS.eval_config_path),
+                         ('input.config', FLAGS.input_config_path)]:
+      tf.io.gfile.copy(config,
+                    os.path.join(FLAGS.eval_dir, name),
+                    overwrite=True)
 
-    model_config = configs['model']
-    eval_config = configs['eval_config']
-    input_config = configs['eval_input_config']
-    if FLAGS.eval_training_data:
-        input_config = configs['train_input_config']
+  model_config = configs['model']
+  eval_config = configs['eval_config']
+  input_config = configs['eval_input_config']
+  if FLAGS.eval_training_data:
+    input_config = configs['train_input_config']
 
-    model_fn = functools.partial(
-        model_builder.build,
-        model_config=model_config,
-        is_training=False)
+  model_fn = functools.partial(
+      model_builder.build,
+      model_config=model_config,
+      is_training=False)
 
-    def get_next(config):
-        return dataset_util.make_initializable_iterator(
-            dataset_builder.build(config)).get_next()
+  def get_next(config):
+    return tf.compat.v1.data.make_initializable_iterator(
+        dataset_util, dataset_builder.build(config)).get_next()
 
-    create_input_dict_fn = functools.partial(get_next, input_config)
+  create_input_dict_fn = functools.partial(get_next, input_config)
 
-    label_map = label_map_util.load_labelmap(input_config.label_map_path)
-    max_num_classes = max([item.id for item in label_map.item])
-    categories = label_map_util.convert_label_map_to_categories(
-        label_map, max_num_classes)
+  label_map = label_map_util.load_labelmap(input_config.label_map_path)
+  max_num_classes = max([item.id for item in label_map.item])
+  categories = label_map_util.convert_label_map_to_categories(
+      label_map, max_num_classes)
 
-    if FLAGS.run_once:
-        eval_config.max_evals = 1
+  if FLAGS.run_once:
+    eval_config.max_evals = 1
 
-    evaluator.evaluate(create_input_dict_fn, model_fn, eval_config, categories,
-                       FLAGS.checkpoint_dir, FLAGS.eval_dir, intra_op=FLAGS.intra_op, inter_op=FLAGS.inter_op)
+  evaluator.evaluate(create_input_dict_fn, model_fn, eval_config, categories,
+                     FLAGS.checkpoint_dir, FLAGS.eval_dir, intra_op=FLAGS.intra_op, inter_op=FLAGS.inter_op)
 
 
 if __name__ == '__main__':
-    tf.app.run()
+  tf.compat.v1.app.run()
