@@ -22,7 +22,6 @@ import re
 import tensorflow as tf
 import generic_ops as bf
 
-import horovod.tensorflow as hvd
 
 
 def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, fine_tuning=True, use_multi_cpu=0):
@@ -69,6 +68,7 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
       exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
 
   if use_multi_cpu and (accum_steps == 1):
+    import horovod.tensorflow as hvd
     optimizer = hvd.DistributedOptimizer(optimizer, sparse_as_dense=True)
 
   if use_tpu:
@@ -111,6 +111,7 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
     def applyGrads(accum_vars, current_step):
           # if 1 or 0 MPI process, skip allreduce; otherwise do allreduce of the accum_var
           if use_multi_cpu > 1:
+             import horovod.tensorflow as hvd
              accum_vars = [hvd.allreduce(tf.convert_to_tensor(accum_var)) if isinstance(accum_var, tf.IndexedSlices)
                                                              else hvd.allreduce(accum_var) for accum_var in accum_vars]
           #tf.compat.v1.logging.info("\t\t APPLYING GRADIENTS....:", global_step)
