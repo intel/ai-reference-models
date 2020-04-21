@@ -16,11 +16,8 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1.  Store path to current directory and download ImageNet dataset. 
-    ```
-    $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-    $ pushd $MODEL_WORK_DIR
-    ```
+1. Download ImageNet dataset.
+
     This step is required only for running accuracy, for running benchmark we do not need to provide dataset.
 
     Register and download the ImageNet dataset. Once you have the raw ImageNet dataset downloaded, we need to convert
@@ -29,7 +26,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     to download, process and convert the ImageNet dataset to the TF records format. After converting data, you should have a directory
     with the sharded dataset something like below, we only need `validation-*` files, discard `train-*` files:
     ```
-    $ ll datasets/ImageNet_TFRecords
+    $ ll /home/myuser/datasets/ImageNet_TFRecords
     -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
     -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
     -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
@@ -45,23 +42,23 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mobilenetv1_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mobilenetv1_int8_pretrained_model.pb
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
     and then run the model scripts for either online or batch inference or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
     Each model run has user configurable arguments separated from regular arguments by '--' at the end of the command.
     Unless configured, these arguments will run with default values. Below are the example codes for each use case:
-
+    
     ```
     $ git clone https://github.com/IntelAI/models.git
 
-    $ cd models/benchmarks
+    $ cd benchmarks
     ```
 
     For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
     ```
-    $ python launch_benchmark.py  \
+    python launch_benchmark.py  \
          --model-name mobilenet_v1 \
          --precision int8 \
          --mode inference \
@@ -69,15 +66,15 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mob
          --benchmark-only \
          --batch-size 240  \
          --socket-id 0 \
-         --in-graph $MODEL_WORK_DIR/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+         --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
 
     For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`)
     ```
-    $ python launch_benchmark.py  \
+    python launch_benchmark.py  \
          --model-name mobilenet_v1 \
          --precision int8 \
          --mode inference \
@@ -85,8 +82,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mob
          --benchmark-only \
          --batch-size 1  \
          --socket-id 0 \
-         --in-graph $MODEL_WORK_DIR/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+         --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -94,7 +91,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mob
     For accuracy (using your `--data-location`, `--accuracy-only` and
     `--batch-size 100`):
     ```
-    $ python launch_benchmark.py  \
+    python launch_benchmark.py  \
          --model-name mobilenet_v1 \
          --precision int8 \
          --mode inference \
@@ -102,15 +99,17 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mob
          --accuracy-only \
          --batch-size 100  \
          --socket-id 0 \
-         --in-graph $MODEL_WORK_DIR/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-         --data-location $MODEL_WORK_DIR/dataset/Imagenet_Validation \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+         --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
+         --data-location /home/<user>/imagenet_validation_dataset \
          -- input_height=224 input_width=224 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
 
     Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
     to get additional debug output or change the default output location.
+    
+    At present no relesed docker image support the latest MobileNet Int8 inference and accuracy.
 
 4. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory,
     or the directory specified by the `--output-dir` arg. Below are examples of
@@ -156,11 +155,6 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/mob
     Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_int8_20190523_164955.log
     ```
 
-5. To return to where you started from:
-```
-$ popd
-```
-
 ## FP32 Inference Instructions
 
 1. The ImageNet dataset is required for testing accuracy and can also be
@@ -171,30 +165,16 @@ $ popd
    using the instructions
    [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
 
-2. Store the path to the current directory and then download and extract the checkpoint files for the pretrained MobileNetV1 FP32 model:
-
-   ```
-   $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-   $ pushd $MODEL_WORK_DIR
-
-   $ wget http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz
-
-   $ tar -xvf mobilenet_v1_1.0_224.tgz
-   x ./
-   x ./mobilenet_v1_1.0_224.tflite
-   x ./mobilenet_v1_1.0_224.ckpt.meta
-   x ./mobilenet_v1_1.0_224.ckpt.index
-   x ./mobilenet_v1_1.0_224.ckpt.data-00000-of-00001
-   x ./mobilenet_v1_1.0_224_info.txt
-   x ./mobilenet_v1_1.0_224_frozen.pb
-   x ./mobilenet_v1_1.0_224_eval.pbtxt
-   ```
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mobilenet_v1_1.0_224_frozen.pb
+```
 
 3. Clone the [tensorflow/models](https://github.com/tensorflow/models)
    repository.
 
     ```
-    $ git clone https://github.com/tensorflow/models tf_models
+    $ git clone https://github.com/tensorflow/models
     ```
 
     The [tensorflow/models](https://github.com/tensorflow/models) files
@@ -205,7 +185,6 @@ $ popd
 
    ```
    $ git clone https://github.com/IntelAI/models.git
-
    $ cd models/benchmarks
    ```
 
@@ -222,17 +201,19 @@ $ popd
      is optional):
      
      ```
-     $ python launch_benchmark.py \
+     python launch_benchmark.py \
          --precision fp32 \
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-         --model-source-dir $MODEL_WORK_DIR/tf_models  \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+         --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
-         --data-location $MODEL_WORK_DIR/dataset/Imagenet_Validation \
-         --checkpoint $MODEL_WORK_DIR
+         --data-location /dataset/Imagenet_Validation \
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
+         -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
+         input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
      ```
      
     * Run for batch inference (with `--batch-size 100`,
@@ -240,31 +221,33 @@ $ popd
       the `--data-location` is optional):
 
       ```
-      $ python launch_benchmark.py \
+      python launch_benchmark.py \
          --precision fp32 \
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-         --model-source-dir $MODEL_WORK_DIR/tf_models  \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+         --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
-         --data-location $MODEL_WORK_DIR/dataset/Imagenet_Validation \
-         --checkpoint $MODEL_WORK_DIR
+         --data-location /dataset/Imagenet_Validation \
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
+         -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
+         input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
       ```
     * Run for accuracy (with `--batch-size 100`, `--accuracy-only` and `--in-graph` with a path to the frozen graph .pb file):
       ```
-      $ python launch_benchmark.py \
+      python launch_benchmark.py \
          --precision fp32 \
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-         --model-source-dir $MODEL_WORK_DIR/tf_models  \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+         --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \
-         --data-location $MODEL_WORK_DIR/dataset/Imagenet_Validation \
-         --in-graph $MODEL_WORK_DIR/mobilenet_v1_1.0_224_frozen.pb
+         --data-location /dataset/Imagenet_Validation \
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
       ```
       Note that the `--verbose` or `--output-dir` flag can be added to any of the above
       commands to get additional debug output or change the default output location.
@@ -312,8 +295,3 @@ $ popd
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190110_211648.log
      ```
-
-6. To return to where you started from:
-```
-$ popd
-```

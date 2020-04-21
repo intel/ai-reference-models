@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,8 +67,8 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "-p", "--precision",
-            help="Specify the model precision to use: fp32, int8, or bfloat16",
-            required=required_arg, choices=["fp32", "int8", "bfloat16"],
+            help="Specify the model precision to use: fp32, int8",
+            required=required_arg, choices=["fp32", "int8"],
             dest="precision")
 
         self._common_arg_parser.add_argument(
@@ -86,6 +86,16 @@ class BaseBenchmarkUtil(object):
                  "be used",
             dest="batch_size", default=-1,
             type=check_positive_number_or_equal_to_negative_one)
+
+        self._common_arg_parser.add_argument(
+            "--mpi_num_processes", type=check_positive_number,
+            help="The number of MPI processes",
+            dest="mpi", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--mpi_num_processes_per_socket", type=check_positive_number,
+            help="Specify how many MPI processes to launch per socket",
+            dest="num_mpi", default=1)
 
         self._common_arg_parser.add_argument(
             "-d", "--data-location",
@@ -108,6 +118,11 @@ class BaseBenchmarkUtil(object):
             dest="num_cores", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
+            "--num-instances", type=check_positive_number,
+            help="Specify the number of instances to run.",
+            dest="num_instances", default=1)
+
+        self._common_arg_parser.add_argument(
             "-a", "--num-intra-threads", type=check_positive_number,
             help="Specify the number of threads within the layer",
             dest="num_intra_threads", default=None)
@@ -116,23 +131,6 @@ class BaseBenchmarkUtil(object):
             "-e", "--num-inter-threads", type=check_positive_number,
             help="Specify the number threads between layers",
             dest="num_inter_threads", default=None)
-
-        self._common_arg_parser.add_argument(
-            "-np", "--num-processes", type=check_positive_number,
-            help="Specify the number of processes to run on as mpirun '-np' "
-                 "input for multi-instance execution. ",
-            dest="num_processes", default=1)
-
-        self._common_arg_parser.add_argument(
-            "-ppn", "--num-processes-per-node", type=check_positive_number,
-            help="Specify the number of processes per node as mpirun '-ppn' "
-                 "input for multi-instance execution. ",
-            dest="num_processes_per_node", default=1)
-
-        self._common_arg_parser.add_argument(
-            "-ts", "--num-train-steps", type=check_positive_number,
-            help="Specify the number of training steps ",
-            dest="num_train_steps", default=1)
 
         self._common_arg_parser.add_argument(
             "--data-num-intra-threads", type=check_positive_number,
@@ -157,6 +155,7 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-g", "--in-graph", help="Full path to the input graph ",
             dest="input_graph", default=None, type=check_valid_filename)
+
 
         self._common_arg_parser.add_argument(
             "-k", "--benchmark-only",
@@ -221,11 +220,11 @@ class BaseBenchmarkUtil(object):
     def _validate_args(self):
         """validate the args and initializes platform_util"""
         # check if socket id is in socket number range
-        num_numas = self._platform_util.num_numa_nodes
+        num_sockets = self._platform_util.num_cpu_sockets
         args = self.args
-        if not -1 <= args.socket_id < num_numas:
-            raise ValueError("Socket id must be within NUMA number range: "
-                             "[0, {}].".format(num_numas - 1))
+        if not -1 <= args.socket_id < num_sockets:
+            raise ValueError("Socket id must be within socket number range: "
+                             "[0, {}].".format(num_sockets - 1))
 
         # check number of cores
         num_logical_cores_per_socket = \
