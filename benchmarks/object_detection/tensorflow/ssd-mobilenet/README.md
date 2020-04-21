@@ -15,58 +15,54 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Store the path to the current directory:
+1. Clone the [tensorflow/models](https://github.com/tensorflow/models)
+repository as `tensorflow-models` at the specified SHA and clone the
+[cocoapi repo](git clone https://github.com/cocodataset/cocoapi.git) in
+the models directory:
 ```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-```
-
-2. Clone the [tensorflow/models](https://github.com/tensorflow/models) and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
-
-```
-$ git clone https://github.com/tensorflow/models.git tf_models
-$ cd tf_models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
+$ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
 The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
-3. Download the 2017 validation
+2.  Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
-
 ```
-$ cd $MODEL_WORK_DIR
 $ mkdir val
 $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
+$ cd ..
+```
 
-$ cd $MODEL_WORK_DIR
+If you would like to run the model for batch and online inference, the
+validation dataset is all that you will need. If you would like to get
+accuracy metrics, then continue the instructions below to generate the
+TF record file as well.
+```
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
+$ cd ..
 ```
-If you would like to run the model for batch and online inference, the
-validation dataset is all that you will need. If you would like to get
-accuracy metrics, then continue the instructions below to generate the
-TF record file as well. Otherwise, skip to Step 5.
 
 Since we are only using the validation dataset in this example, we will
 create an empty directory and empty annotations json file to pass as the
 train and test directories in the next step.
-
 ```
-$ cd $MODEL_WORK_DIR
 $ mkdir empty_dir
 
 $ cd annotations
 $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd $MODEL_WORK_DIR
+$ cd ..
 ```
 
-4. Now that you have the raw COCO dataset, we need to convert it to the
-TF records format in order to use it with the inference script.  We will
+3. Now that you have the raw COCO dataset, we need to convert it to the
+TF records format in order to use it with the inference script. We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
 
@@ -77,60 +73,59 @@ The `--output_dir` is the location where the TF record files will be
 located after the script has completed.
 
 ```
-
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd tf_models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
-      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
-      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --output_dir="$MODEL_WORK_DIR/output"
+      --train_image_dir="/home/<user>/coco/empty_dir" \
+      --val_image_dir="/home/<user>/coco/val/val2017" \
+      --test_image_dir="/home/<user>/coco/empty_dir" \
+      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
+      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --output_dir="/home/<user>/coco/output"
 
-$ ll $MODEL_WORK_DIR/output
+$ ll /home/myuser/coco/output
 total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and get the specified SHA that we are using for SSD-MobileNet
-$ cd $MODEL_WORK_DIR/tf_models
+$ cd /home/<user>/tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
-5. Download the pretrained model:
+4. Download the pretrained model:
 
 ```
-$ cd $MODEL_WORK_DIR
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ssdmobilenet_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssdmobilenet_int8_pretrained_model.pb
 ```
 
-6. Clone the [intelai/models](https://github.com/intelai/models) repo
+5. Clone the [intelai/models](https://github.com/intelai/models) repo
 and then run the scripts for either batch/online inference performance
 or accuracy.
 ```
-$ git clone https://github.com/IntelAI/models.git
-$ cd $MODEL_WORK_DIR/models/benchmarks
+$ git clone git@github.com:IntelAI/models.git
+$ cd benchmarks
 ```
 
 Run for batch and online inference where the `--data-location`
-is the path to the directory with the unzipped coco validation images:
+is the path to the tf record file that you generated in step 2:
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name ssd-mobilenet \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
-    --data-location $MODEL_WORK_DIR/val/val2017 \
-    --in-graph $MODEL_WORK_DIR/ssdmobilenet_int8_pretrained_model.pb \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --data-location /home/<user>/coco/output/coco_val.record \
+    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --benchmark-only \
     --batch-size 1
 ```
@@ -138,16 +133,17 @@ $ python launch_benchmark.py \
 Or for accuracy where the `--data-location` is the path to
 the tf record file that you generated in step 2:
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name ssd-mobilenet \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
-    --data-location $MODEL_WORK_DIR/output/coco_val.record \
-    --in-graph $MODEL_WORK_DIR/ssdmobilenet_int8_pretrained_model.pb \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --data-location /home/<user>/coco/output/coco_val.record \
+    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
     --batch-size 1
 ```
@@ -155,7 +151,7 @@ $ python launch_benchmark.py \
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
 
-7. The log file is saved to the value of `--output-dir`.
+6. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running for batch
 and online inference:
@@ -194,26 +190,15 @@ Ran inference with batch size 1
 Log location outside container: <output directory>/benchmark_ssd-mobilenet_inference_int8_20181204_185432.log
 ```
 
-8. To return to where you started from:
-```
-$ popd
-```
-
 ## FP32 Inference Instructions
 
-1. Store the path to the current directory:
-```
-$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-$ pushd $MODEL_WORK_DIR
-```
-
-2. Clone the `tensorflow/models` repository with the specified SHA,
+1. Clone the `tensorflow/models` repository as `tensorflow-models` with the specified SHA,
 since we are using an older version of the models repo for
 SSD-MobileNet.
 
 ```
-$ git clone https://github.com/tensorflow/models.git tf_models
-$ cd tf_models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
@@ -221,26 +206,25 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
-3. Follow the TensorFlow models object detection
+2. Follow the TensorFlow models object detection
 [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
-4.  Download the 2017 validation
+3.  Download the 2017 validation
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
-$ cd $MODEL_WORK_DIR
 $ mkdir val
 $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
+$ cd ..
 
-$ cd $MODEL_WORK_DIR
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
-$ cd $MODEL_WORK_DIR
+$ cd ..
 ```
 
 Since we are only using the validation dataset in this example, we will
@@ -252,10 +236,10 @@ $ mkdir empty_dir
 
 $ cd annotations
 $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd $MODEL_WORK_DIR
+$ cd ..
 ```
 
-5. Now that you have the raw COCO dataset, we need to convert it to the
+4. Now that you have the raw COCO dataset, we need to convert it to the
 TF records format in order to use it with the inference script.  We will
 do this by running the `create_coco_tf_record.py` file in the TensorFlow
 models repo.
@@ -269,33 +253,33 @@ located after the script has completed.
 ```
 
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd tf_models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
-      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
-      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --output_dir="$MODEL_WORK_DIR/output"
+      --train_image_dir="/home/<user>/coco/empty_dir" \
+      --val_image_dir="/home/<user>/coco/val/val2017" \
+      --test_image_dir="/home/<user>/coco/empty_dir" \
+      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
+      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
+      --output_dir="/home/<user>/coco/output"
 
-$ ll $MODEL_WORK_DIR/output
+$ ll /home/<user>/coco/output
 total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and checkout the SHA that we are using for SSD-MobileNet
-$ cd $MODEL_WORK_DIR/tf_models
+$ cd /home/<user>/tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
 The `coco_val.record` file is what we will use in this inference example.
 
-6. Download and extract the pre-trained SSD-MobileNet model from the
+5. Download and extract the pre-trained SSD-MobileNet model from the
 [TensorFlow detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models).
 The downloaded .tar file includes a `frozen_inference_graph.pb` which we
 will be using when running inference.
@@ -328,12 +312,11 @@ total 58132
 drwxr-sr-x. 3 <user> <group>     4096 Feb  1  2018 saved_model
 ```
 
-7. Clone the [intelai/models](https://github.com/intelai/models) repo.
+6. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, which we will
 use in the next step.
 
 ```
-$ cd $MODEL_WORK_DIR
 $ git clone https://github.com/IntelAI/models.git
 Cloning into 'models'...
 remote: Enumerating objects: 11, done.
@@ -344,7 +327,7 @@ Receiving objects: 100% (11/11), done.
 Resolving deltas: 100% (3/3), done.
 ```
 
-8. Next, navigate to the `benchmarks` directory of the
+7. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-MobileNet can be run for testing
 batch and online inference, or testing accuracy. Note that we are running
@@ -357,18 +340,19 @@ downloaded in step 5 as the `--in-graph`, and use the `--benchmark-only`
 flag:
 
 ```
-$ cd $MODEL_WORK_DIR/models/benchmarks
+$ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/output/coco_val.record \
-    --in-graph $MODEL_WORK_DIR/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location /home/<user>/coco/output/coco_val.record \
+    --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --benchmark-only
 ```
 
@@ -379,19 +363,20 @@ the path to the frozen graph that you downloaded in step 5 as the
 
 ```
 $ python launch_benchmark.py \
-    --data-location $MODEL_WORK_DIR/output/coco_val.record \
-    --in-graph $MODEL_WORK_DIR/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --data-location /home/<user>/coco/output/coco_val.record \
+    --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --accuracy-only
 ```
 
-9. The log file is saved to the value of `--output-dir`.
+8. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running for performance:
 
@@ -420,9 +405,4 @@ Below is a sample log file tail when testing accuracy:
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_ssd-mobilenet_inference_fp32_20190123_225145.log
-```
-
-10. To return to where you started from:
-```
-$ popd
 ```

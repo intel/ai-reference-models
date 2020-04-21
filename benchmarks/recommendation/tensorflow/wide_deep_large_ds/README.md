@@ -25,7 +25,7 @@ following modes/precisions:
 
    Note: The dataset does not contain the eval.txt file required for measuring model accuracy. So, download the evaluation
    dataset for accuracy measurement from https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/eval.csv
-
+   Download the train dataset from https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/train.csv
 3. Pre-process the downloaded dataset to tfrecords using [preprocess_csv_tfrecords.py](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py)
 
     Copy the eval.csv and test.csv into your current working directory (i.e. root of models repo) and launch
@@ -76,7 +76,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
     $ cd $MODEL_WORK_DIR
 
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_int8_pretrained_model.pb
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/wide_deep_int8_pretrained_model.pb
     ```
 
 2. Run Accuracy test
@@ -93,15 +93,15 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            --docker-image intel/intel-optimized-tensorflow:2.1.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecords
+            --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords
         ```
 
 3. Run Performance test
 
    * Running in online inference mode, set `--batch-size 1`
-
+     
        ``` 
        $ cd $MODEL_WORK_DIR/models/benchmarks
 
@@ -113,47 +113,87 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --benchmark-only \
             --batch-size 1 \
             --socket-id 0 \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            --docker-image intel/intel-optimized-tensorflow:2.1.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecords \
+            --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
             --num-intra-threads 1 --num-inter-threads 1 --num-cores 1 \
             -- num_omp_threads=1
        ```
    * Running in batch inference mode, set `--batch-size 512`
-       ``` 
-        $ cd $MODEL_WORK_DIR/models/benchmarks
-    
-        $ python launch_benchmark.py \
-            --model-name wide_deep_large_ds \
-            --precision int8 \
-            --mode inference \
-            --framework tensorflow \
-            --benchmark-only \
-            --batch-size 512 \
-            --socket-id 0 \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
-            --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecords \
-            --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
-            -- num_omp_threads=16
-       ```
-   * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
-     should look something like this:
-        ```
-        --------------------------------------------------
-        Total test records           :  2000000
-        Batch size is                :  512
-        Number of batches            :  3907
-        Classification accuracy (%)  :  77.6405
-        No of correct predictions    :  1552720
-        Inference duration (seconds) :  4.2531
-        Avergare Latency (ms/batch)  :  1.1173
-        Throughput is (records/sec)  :  696784.187
-        --------------------------------------------------
-        Ran inference with batch size 512
-        Log location outside container:  {--output-dir value}/benchmark_wide_deep_large_ds_inference_int8_20190225_061815.log
-        ```
 
+        Case 1 : Disabling `use_parallel_batches` option. In this case the batches are inferred in sequential order. By default `use_parallel_batches` is disabled. Kmp variables can also be set by using the arguments shown below.
+
+
+           ``` 
+            $ cd $MODEL_WORK_DIR/models/benchmarks
+        
+            $ python launch_benchmark.py \
+                --model-name wide_deep_large_ds \
+                --precision int8 \
+                --mode inference \
+                --framework tensorflow \
+                --benchmark-only \
+                --batch-size 512 \
+                --socket-id 0 \
+                --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+                --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
+                --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
+                --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
+                -- num_omp_threads=16  kmp_block_time=0 kmp_settings=1 kmp_affinity="noverbose,warnings,respect,granularity=core,none"
+           ```
+           * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
+             should look something like this:
+
+                ```
+                --------------------------------------------------
+                Total test records           :  2000000
+                Batch size is                :  512
+                Number of batches            :  3907
+                Classification accuracy (%)  :  77.636
+                Inference duration (seconds) :  36.2106
+                Average Latency (ms/batch)   :  3.0946
+                Throughput is (records/sec)  :  165446.881 
+                --------------------------------------------------
+
+                Ran inference with batch size 512
+                Log location outside container:  {--output-dir value}/benchmark_wide_deep_large_ds_inference_int8_20190225_061815.log
+                ```
+
+        Case 2 : Enabling `use_parallel_batches` option. In this case multiples batches are inferred in parallel. Number of batches to be executed in parallel can be given by argument num_parallel_batches.
+
+           ``` 
+            $ cd $MODEL_WORK_DIR/models/benchmarks
+        
+            $ python launch_benchmark.py \
+                --model-name wide_deep_large_ds \
+                --precision int8 \
+                --mode inference \
+                --framework tensorflow \
+                --benchmark-only \
+                --batch-size 512 \
+                --socket-id 0 \
+                --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+                --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
+                --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
+                --num-intra-threads 1 --num-inter-threads 28 --num-cores 28 \
+                -- num_omp_threads=1 use_parallel_batches=True num_parallel_batches=28 kmp_block_time=0 kmp_settings=1 kmp_affinity="noverbose,warnings,respect,granularity=core,none"
+           ```
+
+           * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
+             should look something like this:
+
+                ```
+                --------------------------------------------------
+                Total test records           :  2000000
+                Batch size is                :  512
+                Number of batches            :  3907
+                Inference duration (seconds) :  1.9365
+                Average Latency (ms/batch)   :  13.8807
+                Throughput is (records/sec)  :  1032799.599
+                --------------------------------------------------
+                Ran inference with batch size 512
+                Log location outside container:  {--output-dir value}/benchmark_wide_deep_large_ds_inference_int8_20190225_061815.log
+                ```
 4. To return to where you started from:
 ```
 $ popd
@@ -165,7 +205,7 @@ $ popd
     ```
     $ cd $MODEL_WORK_DIR
 
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_fp32_pretrained_model.pb
+    $wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/wide_deep_fp32_pretrained_model.pb
     ```
 
 2. Run Accuracy test
@@ -174,7 +214,7 @@ $ popd
         ```
         $ cd $MODEL_WORK_DIR/models/benchmarks
 
-        $ python launch_benchmark.py \
+        $ python launch_benchmark.py
             --model-name wide_deep_large_ds \
             --precision fp32 \
             --mode inference \
@@ -182,9 +222,9 @@ $ popd
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
-            --docker-image docker.io/intelaipg/intel-optimized-tensorflow:latest \
+            --docker-image intel/intel-optimized-tensorflow:2.1.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR/dataset_preprocessed_eval.tfrecords
+            --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords
        ```
 
 3. Run Performance test
@@ -194,7 +234,7 @@ $ popd
         ```
         $ cd $MODEL_WORK_DIR/models/benchmarks
 
-        $ python launch_benchmark.py \
+        $ python launch_benchmark.py
             --model-name wide_deep_large_ds \
             --precision fp32 \
             --mode inference \
@@ -202,46 +242,81 @@ $ popd
             --benchmark-only \
             --batch-size 1 \
             --socket-id 0 \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+            --docker-image intel/intel-optimized-tensorflow:2.1.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecord \
+            --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
             --num-intra-threads 1 --num-inter-threads 1 --num-cores 1 \
             -- num_omp_threads=1
         ```
     * Running in batch inference mode, set `--batch-size 512`
-        ```
-        $ cd $MODEL_WORK_DIR/models/benchmarks
 
-        $ python launch_benchmark.py \
-            --model-name wide_deep_large_ds \
-            --precision fp32 \
-            --mode inference \
-            --framework tensorflow \
-            --benchmark-only \
-            --batch-size 512 \
-            --socket-id 0 \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-            --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
-            --data-location $MODEL_WORK_DIR/eval_preprocessed_eval.tfrecords \
-            --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
-            -- num_omp_threads=20
-        ```
-    * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
-        should look something like this:
-        ```
-        --------------------------------------------------
-        Total test records           :  2000000
-        Batch size is                :  512
-        Number of batches            :  3907
-        Classification accuracy (%)  :  77.6693
-        No of correct predictions    :  1553386
-        Inference duration (seconds) :  5.6724
-        Avergare Latency (ms/batch)  :  1.4902
-        Throughput is (records/sec)  :  343560.261
-        --------------------------------------------------
-        Ran inference with batch size 512
-        Log location outside container: {--output-dir value}/benchmark_wide_deep_large_ds_inference_fp32_20190225_062206.log
-        ```
+        Case 1 : Disabling `use_parallel_batches` option
+
+            ```
+            $ cd $MODEL_WORK_DIR/models/benchmarks
+
+            $ python launch_benchmark.py
+                --model-name wide_deep_large_ds \
+                --precision fp32 \
+                --mode inference \
+                --framework tensorflow \
+                --benchmark-only \
+                --batch-size 512 \
+                --socket-id 0 \
+                --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+                --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
+                --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
+                --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
+                -- num_omp_threads=20 kmp_block_time=0 kmp_settings=1 kmp_affinity="noverbose,warnings,respect,granularity=core,none"
+          ```
+                --------------------------------------------------
+                Total test records           :  2000000
+                Batch size is                :  512
+                Number of batches            :  3907
+                Classification accuracy (%)  :  77.6693
+                No of correct predictions    :  1553386
+                Inference duration (seconds) :  7.7408
+                Average Latency (ms/batch)   :  2.0337
+                Throughput is (records/sec)  :  251755.95 
+                --------------------------------------------------
+         
+        Case 2 : Enabling `use_parallel_batches` option.
+
+            ```
+            cd /home/<user>/models/benchmarks
+
+            python launch_benchmark.py
+                --model-name wide_deep_large_ds \
+                --precision fp32 \
+                --mode inference \
+                --framework tensorflow \
+                --benchmark-only \
+                --batch-size 512 \
+                --socket-id 0 \
+                --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+                --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
+                --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
+                --num-intra-threads 1 --num-inter-threads 28 --num-cores 28 \
+                -- num_omp_threads=1 use_parallel_batches=True num_parallel_batches=28 kmp_block_time=0 kmp_settings=1 kmp_affinity="noverbose,warnings,respect,granularity=core,none"
+          ```
+
+            * The log file is saved to the value of `--output-dir`. The tail of the log output when the script completes 
+                should look something like this:
+                
+                ```
+                --------------------------------------------------
+                Total test records           :  2000000
+                Batch size is                :  512
+                Number of batches            :  3907
+                Classification accuracy (%)  :  77.6693
+                No of correct predictions    :  1553386
+                Inference duration (seconds) :  3.362
+                Average Latency (ms/batch)   :  24.0985
+                Throughput is (records/sec)  :  594891.931
+                --------------------------------------------------
+                Ran inference with batch size 512
+                Log location outside container: {--output-dir value}/benchmark_wide_deep_large_ds_inference_fp32_20190225_062206.log
+                ```
 
 4. To return to where you started from:
 ```
@@ -268,6 +343,6 @@ $ popd
            --framework tensorflow \
            --batch-size 512 \
            --data-location /root/dataset \
-           --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15
+           --docker-image intel/intel-optimized-tensorflow:2.1.0
         
         ```

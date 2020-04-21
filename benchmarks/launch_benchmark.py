@@ -184,9 +184,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "NUM_INTER_THREADS": args.num_inter_threads,
             "NUM_INTRA_THREADS": args.num_intra_threads,
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
-            "NUM_PROCESSES": args.num_processes,
-            "NUM_PROCESSES_PER_NODE": args.num_processes_per_node,
-            "NUM_TRAIN_STEPS": args.num_train_steps,
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "BENCHMARK_ONLY": args.benchmark_only,
             "ACCURACY_ONLY": args.accuracy_only,
@@ -194,17 +191,19 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "DISABLE_TCMALLOC": args.disable_tcmalloc,
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "DOCKER": str(args.docker_image is not None),
-            "PYTHON_EXE": sys.executable if not args.docker_image else "python"
+            "PYTHON_EXE": sys.executable if not args.docker_image else "python",
+            "MPI_NUM_PROCESSES": args.mpi,
+            "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi
         }
 
         # Add custom model args as env vars)
-        for custom_arg in args.model_args + self.unknown_args:
+        for custom_arg in args.model_args:
             if "=" not in custom_arg:
                 raise ValueError("Expected model args in the format "
                                  "`name=value` but received: {}".
                                  format(custom_arg))
             split_arg = custom_arg.split("=")
-            split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
+            split_arg[0] = split_arg[0].replace("-", "_")
             env_var_dict[split_arg[0]] = split_arg[1]
 
         # Set the default value for NOINSTALL, if it's not explicitly set by the user
@@ -226,59 +225,18 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         checkpoint_path = args.checkpoint
         dataset_path = args.data_location
 
-        # To Launch Tensorflow Serving benchmark we need only --in-graph arg.
-        # It does not support checkpoint files.
-        if args.framework == "tensorflow_serving":
-            if args.docker_image:
-                raise ValueError("--docker-image arg is not supported with tensorflow serving benchmarking, "
-                                 "as script automatically builds image and supplies it.")
+        mount_external_models_source = args.model_source_dir
+        mount_intelai_models = intelai_models
 
-            if checkpoint_path:
-                raise ValueError("--checkpoint-path arg is not supported with tensorflow serving benchmarking")
+        # Add env vars with bare metal settings
+        env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
+        env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
 
-            if args.mode != "inference":
-                raise ValueError("--mode arg should be set to inference")
+        if in_graph_path:
+            env_var_dict["IN_GRAPH"] = in_graph_path
 
-            if in_graph_path:
-                env_var_dict["IN_GRAPH"] = in_graph_path
-            else:
-                raise ValueError("--in-graph arg is required to run tensorflow serving benchmarking")
-
-            for env_var_name in env_var_dict:
-                os.environ[env_var_name] = str(env_var_dict[env_var_name])
-
-            # We need this env to be set for the platform util
-            os.environ["PYTHON_EXE"] = str(sys.executable if not args.docker_image else "python")
-
-            # Get Platformutil
-            platform_util_obj = None or platform_util.PlatformUtil(self.args)
-
-            # Configure num_inter_threads and num_intra_threads
-            base_obj = BaseModelInitializer(args=self.args, custom_args=[], platform_util=platform_util_obj)
-            base_obj.set_num_inter_intra_threads()
-
-            # Update num_inter_threads and num_intra_threads in env dictionary
-            env_var_dict["NUM_INTER_THREADS"] = self.args.num_inter_threads
-            env_var_dict["NUM_INTRA_THREADS"] = self.args.num_intra_threads
-
-            # Set OMP_NUM_THREADS
-            env_var_dict["OMP_NUM_THREADS"] = self.args.num_intra_threads
-
-        else:
-            mount_intelai_models = intelai_models
-
-            # Add env vars with bare metal settings
-            env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
-
-            if in_graph_path:
-                env_var_dict["IN_GRAPH"] = in_graph_path
-
-            if checkpoint_path:
-                env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
-
-        if args.model_source_dir:
-            mount_external_models_source = args.model_source_dir
-            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
+        if checkpoint_path:
+            env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path

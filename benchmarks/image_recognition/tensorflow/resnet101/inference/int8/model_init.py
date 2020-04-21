@@ -101,7 +101,7 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(cmd)
 
     def run_calibration(self):
-        calibration_script = os.path.join(self.args.intelai_models,
+        calibration_script = os.path.join(self.args.intelai_models, self.args.mode,
                                           self.args.precision, "calibration.py")
         script_args_list = [
             "input_graph", "data_location",
