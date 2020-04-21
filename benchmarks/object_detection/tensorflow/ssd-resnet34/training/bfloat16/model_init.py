@@ -74,6 +74,17 @@ class ModelInitializer(BaseModelInitializer):
         # cmd_args += " --variable_update=horovod --horovod_device=cpu"
         # cmd_args += " --use_chrome_trace_format=True --trace_file=bfloat16-manual.json"
         # cmd_args += " --num_warmup_batches=0"
+
+        # Accuracy run arguments
+        # cmd_args += " --save_model_steps=10000"
+        # cmd_args += " --max_ckpts_to_keep=100"
+
+        # cmd_args += " --collect_eval_results_async=true"
+        # cmd_args += " --eval=true"
+        # cmd_args += " --print_training_accuracy=True"
+        # cmd_args += " --backbone_model_path=/tmp/mabuzain-ssd-rn34"
+        # cmd_args += " --train_dir=/tmp/mabuzain-ssd-rn34"
+
         if self.args.trace_file is not None:
           cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.trace_file)
 
