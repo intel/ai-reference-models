@@ -154,8 +154,6 @@ CMD="${PYTHON_EXE} ${RUN_SCRIPT_PATH} \
 --batch-size=${BATCH_SIZE} \
 --socket-id=${SOCKET_ID} \
 --output-dir=${OUTPUT_DIR} \
---num-processes=${NUM_PROCESSES} \
---num-processes-per-node=${NUM_PROCESSES_PER_NODE} \
 --num-train-steps=${NUM_TRAIN_STEPS} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
@@ -879,9 +877,9 @@ function ssd-resnet34() {
 
           old_dir=${PWD}
           cd /tmp
-          rm -rf benchmark_ssd-resnet34-${USER}
-          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34-${USER}
-          cd benchmark_ssd-resnet34-${USER}
+          rm -rf benchmark_ssd_resnet34
+          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd_resnet34
+          cd benchmark_ssd_resnet34
           git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
           git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
           if [ ${PRECISION} == "bfloat16" ]; then
