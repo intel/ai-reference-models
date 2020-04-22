@@ -44,6 +44,8 @@ from utils import dataset
 from utils import metrics
 from utils import tokenizer
 
+tf.compat.v1.disable_eager_execution()
+
 DEFAULT_TRAIN_EPOCHS = 10
 BLEU_DIR = "bleu"
 INF = 10000
@@ -300,15 +302,23 @@ def train_schedule(
 
   # Loop training/evaluation/bleu cycles
   mlperf_log.transformer_print(key=mlperf_log.TRAIN_LOOP)
+  # Profiling with timeline
+  if FLAGS.save_profile == "Yes":
+    profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file 
+  #profile file will be saved in in profile_dir
   #Creating hooks for printing Examples per Second, used with estimator.train
   train_hooks = hooks_helper.get_train_hooks(
       ["ExamplesPerSecondHook"],
       model_dir=FLAGS.model_dir,
       batch_size=estimator.params.batch_size,
       every_n_steps=FLAGS.print_iter,
-      warm_steps=20
+      warm_steps=5
   )
-
+  if FLAGS.save_profile == "Yes":
+    hooks = profile_hooks
+  else:
+    hooks = train_hooks
+  
   for i in xrange(train_eval_iterations):
     print("Starting iteration", i + 1)
 
@@ -318,7 +328,7 @@ def train_schedule(
 
     # Train the model for single_iteration_train_steps or until the input fn
     # runs out of examples (if single_iteration_train_steps is None).
-    estimator.train(dataset.train_input_fn, steps=single_iteration_train_steps, hooks=train_hooks)
+    estimator.train(dataset.train_input_fn, steps=single_iteration_train_steps, hooks=hooks)
 
     mlperf_log.transformer_print(key=mlperf_log.EVAL_START)
     # To save training time, we can turn off evaluation
@@ -433,6 +443,11 @@ if __name__ == "__main__":
            "if No, then the training time is faster.",
       metavar="SC>")
   parser.add_argument(
+      "--save_profile", "-sp", type=str, default="No",
+      help="[if profile files(json) needs to be saved. If Yes, then save the profiles files"
+           "if No, then the training time is faster.",
+      metavar="SP>")
+  parser.add_argument(
       "--data_dir", "-dd", type=str, default="/tmp/translate_ende",
       help="[default: %(default)s] Directory containing training and "
            "evaluation data, and vocab file used for encoding.",
@@ -442,7 +457,7 @@ if __name__ == "__main__":
       help="[default: %(default)s] Name of vocabulary file.",
       metavar="<vf>")
   parser.add_argument(
-      "--model_dir", "-md", type=str, default="/tmp/transformer_model",
+      "--model_dir", "-md", type=str, default="/tmp/fp32model",
       help="[default: %(default)s] Directory to save Transformer model "
            "training checkpoints",
       metavar="<MD>")
@@ -514,6 +529,11 @@ if __name__ == "__main__":
   parser.add_argument(
       "--print_iter", "-pi", type=int, default=None,
       help="print_iteration to print loss and timing", metavar="<PI>")
+  # additional data_dir to save timeline
+  parser.add_argument(
+      #"--output_dir", "-od", type=str, default="/root/mbhuiyan/bf16-timeline/NameChangeMklCast_ln_bf16softmax",
+      "--profile_dir", "-od", type=str, default="/tmp/fp32profile",
+      help="prifile dir", metavar="<OD>")
 
   FLAGS, unparsed = parser.parse_known_args()
 

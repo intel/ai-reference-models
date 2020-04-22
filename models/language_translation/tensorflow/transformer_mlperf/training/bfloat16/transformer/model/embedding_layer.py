@@ -83,13 +83,13 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
       float32 tensor with shape [batch_size, length, vocab_size].
     """
     #with tf.compat.v1.tpu.bfloat16_scope():
-    #with tf.compat.v1.name_scope("presoftmax_linear"):
-    #x = tf.cast(x, tf.bfloat16)
-    batch_size = tf.shape(input=x)[0]
-    length = tf.shape(input=x)[1]
+    with tf.compat.v1.name_scope("presoftmax_linear"):
+      #x = tf.cast(x, tf.bfloat16)
+      batch_size = tf.shape(input=x)[0]
+      length = tf.shape(input=x)[1]
 
-    x = tf.reshape(x, [-1, self.hidden_size])
-    logits = tf.matmul(x, self.shared_weights, transpose_b=True)
-    #logits = tf.cast(logits, tf.float32)
+      x = tf.reshape(x, [-1, self.hidden_size])
+      logits = tf.matmul(x, self.shared_weights, transpose_b=True)
+      #logits = tf.cast(logits, tf.float32)
 
-    return tf.reshape(logits, [batch_size, length, self.vocab_size])
+      return tf.reshape(logits, [batch_size, length, self.vocab_size])

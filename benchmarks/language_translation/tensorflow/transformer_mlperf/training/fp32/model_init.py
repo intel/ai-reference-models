@@ -123,6 +123,11 @@ class ModelInitializer(BaseModelInitializer):
           "to reduce training time.",
           metavar="<SC>") 
         parser.add_argument(
+      	  "--save_profile", "-sp", type=str, default="No", 
+      	  help="[default: %(default)s]  set, to not saving profiles "
+          "to reduce training time.",
+          metavar="<SP>") 
+        parser.add_argument(
       	  "--print_iter", "-pi", type=int, default="10",
       	  help="[default: %(default)s]  set, to print in every 10 iterations "
           "to reduce print time",
@@ -148,6 +153,7 @@ class ModelInitializer(BaseModelInitializer):
                    " --steps_between_eval=" + str(self.args.steps_between_eval) + \
                    " --do_eval=" + str(self.args.do_eval) + \
                    " --save_checkpoints=" + str(self.args.save_checkpoints) + \
+                   " --save_profile=" + str(self.args.save_profile) + \
                    " --print_iter=" + str(self.args.print_iter) + \
                    " --inter_op_parallelism_threads=" + \
                    str(self.args.num_inter_threads) + \
