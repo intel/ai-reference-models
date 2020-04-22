@@ -139,13 +139,13 @@ class LoggerHook(tf.estimator.SessionRunHook):
   def begin(self):
     self._step = 0
     self._total_duration = 0
-    self._warmup = 5
+    self._warmup = 2
 
   def before_run(self, run_context):
-    self._step += 1
     self._start_time = datetime.now()
 
   def after_run(self, run_context, run_values):
+    self._step += 1
     duration = datetime.now() - self._start_time
     ms = duration.total_seconds() * 1000.00
     if self._step > self._warmup:
@@ -157,8 +157,8 @@ class LoggerHook(tf.estimator.SessionRunHook):
 
   def end(self, run_context):
     print("self._step: %d" %self._step)
-    print("Total time spent (after warmup): %d ms" %(self._total_duration))
-    print("Time spent per iteration (after warmup): %.4f ms" %(self._total_duration/(self._step - self._warmup)))
+    print("Total time spent (after warmup): %.2f ms" %(self._total_duration))
+    print("Time spent per iteration (after warmup): %.2f ms" %(self._total_duration/(self._step - self._warmup)))
 
 
 class InputExample(object):
@@ -638,7 +638,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
   with tf.compat.v1.variable_scope("loss"):
     if is_training:
       # I.e., 0.1 dropout
-      output_layer = tf.compat.v1.nn.dropout(output_layer, keep_prob=0.9)
+      output_layer = tf.nn.dropout(output_layer, rate=0.1)
 
     logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
