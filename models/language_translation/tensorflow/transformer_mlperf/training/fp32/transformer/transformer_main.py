@@ -457,7 +457,7 @@ if __name__ == "__main__":
       help="[default: %(default)s] Name of vocabulary file.",
       metavar="<vf>")
   parser.add_argument(
-      "--model_dir", "-md", type=str, default="/home/user/mbhuiyan/transformer_ckpt_bf16_test",
+      "--model_dir", "-md", type=str, default="/tmp/fp32model",
       help="[default: %(default)s] Directory to save Transformer model "
            "training checkpoints",
       metavar="<MD>")
@@ -532,7 +532,7 @@ if __name__ == "__main__":
   # additional data_dir to save timeline
   parser.add_argument(
       #"--output_dir", "-od", type=str, default="/root/mbhuiyan/bf16-timeline/NameChangeMklCast_ln_bf16softmax",
-      "--profile_dir", "-od", type=str, default="/root/mbhuiyan/fp32_timelinApr21/fp32",
+      "--profile_dir", "-od", type=str, default="/tmp/fp32profile",
       help="prifile dir", metavar="<OD>")
 
   FLAGS, unparsed = parser.parse_known_args()
