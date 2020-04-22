@@ -44,6 +44,8 @@ from utils import dataset
 from utils import metrics
 from utils import tokenizer
 
+tf.compat.v1.disable_eager_execution()
+
 DEFAULT_TRAIN_EPOCHS = 10
 BLEU_DIR = "bleu"
 INF = 10000
@@ -530,7 +532,7 @@ if __name__ == "__main__":
   # additional data_dir to save timeline
   parser.add_argument(
       #"--output_dir", "-od", type=str, default="/root/mbhuiyan/bf16-timeline/NameChangeMklCast_ln_bf16softmax",
-      "--profile_dir", "-od", type=str, default="/home/user/mbhuiyan/transformer_bf16_profile/bf16_bf16softmax_eigencast",
+      "--profile_dir", "-od", type=str, default="/root/mbhuiyan/fp32_timelinApr21/fp32",
       help="prifile dir", metavar="<OD>")
 
   FLAGS, unparsed = parser.parse_known_args()
