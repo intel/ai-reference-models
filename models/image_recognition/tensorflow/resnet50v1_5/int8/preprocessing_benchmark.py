@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 
@@ -40,8 +40,8 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-from tensorflow.data.experimental import parallel_interleave
-from tensorflow.data.experimental import map_and_batch
+from tensorflow.python.data.experimental import parallel_interleave
+from tensorflow.python.data.experimental import map_and_batch
 from tensorflow.python.platform import gfile
 
 
@@ -50,12 +50,12 @@ def parse_example_proto(example_serialized):
   """
   # Dense features in Example proto.
   feature_map = {
-    'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
+    'image/encoded': tf.io.FixedLenFeature([], dtype=tf.string,
                                         default_value=''),
-    'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
+    'image/class/label': tf.io.FixedLenFeature([1], dtype=tf.int64,
                                             default_value=-1),
   }
-  sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
+  sparse_float32 = tf.io.VarLenFeature(dtype=tf.float32)
   # Sparse features in Example proto.
   feature_map.update(
     {k: sparse_float32 for k in ['image/object/bbox/xmin',
@@ -63,7 +63,7 @@ def parse_example_proto(example_serialized):
                                  'image/object/bbox/xmax',
                                  'image/object/bbox/ymax']})
 
-  features = tf.parse_single_example(example_serialized, feature_map)
+  features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
   label = tf.cast(features['image/class/label'], dtype=tf.int32)
 
   return features['image/encoded'], label
@@ -71,22 +71,22 @@ def parse_example_proto(example_serialized):
 
 def eval_image(image, height, width, resize_method,
                central_fraction=0.875, scope=None):
-  with tf.name_scope('eval_image'):
+  with tf.compat.v1.name_scope('eval_image'):
     if resize_method == 'crop':
-      shape = tf.shape(image)
-      image = tf.cond(tf.less(shape[0], shape[1]),
-                      lambda: tf.image.resize_images(image,
-                                                     tf.convert_to_tensor([256, 256 * shape[1] / shape[0]],
+      shape = tf.shape(input=image)
+      image = tf.cond(pred=tf.less(shape[0], shape[1]),
+                      true_fn=lambda: tf.image.resize(image,
+                                                     tf.convert_to_tensor(value=[256, 256 * shape[1] / shape[0]],
                                                                           dtype=tf.int32)),
-                      lambda: tf.image.resize_images(image,
-                                                     tf.convert_to_tensor([256 * shape[0] / shape[1], 256],
+                      false_fn=lambda: tf.image.resize(image,
+                                                     tf.convert_to_tensor(value=[256 * shape[0] / shape[1], 256],
                                                                           dtype=tf.int32)))
-      shape = tf.shape(image)
+      shape = tf.shape(input=image)
       y0 = (shape[0] - height) // 2
       x0 = (shape[1] - width) // 2
       distorted_image = tf.image.crop_to_bounding_box(image, y0, x0, height, width)
       distorted_image.set_shape([height, width, 3])
-      means = tf.broadcast_to([123.68, 116.78, 103.94], tf.shape(distorted_image))
+      means = tf.broadcast_to([123.68, 116.78, 103.94], tf.shape(input=distorted_image))
       return distorted_image - means
     else:  # bilinear
       if image.dtype != tf.float32:
@@ -99,8 +99,8 @@ def eval_image(image, height, width, resize_method,
       if height and width:
         # Resize the image to the specified height and width.
         image = tf.expand_dims(image, 0)
-        image = tf.image.resize_bilinear(image, [height, width],
-                                         align_corners=False)
+        image = tf.image.resize(image, [height, width],
+                                         method=tf.image.ResizeMethod.BILINEAR)
         image = tf.squeeze(image, [0])
       image = tf.subtract(image, 0.5)
       image = tf.multiply(image, 2.0)
@@ -135,7 +135,7 @@ class RecordInputImagePreprocessor(object):
 
   def minibatch(self, dataset, subset, cache_data=False):
 
-    with tf.name_scope('batch_processing'):
+    with tf.compat.v1.name_scope('batch_processing'):
 
       glob_pattern = dataset.tf_record_pattern(subset)
       file_names = gfile.Glob(glob_pattern)
@@ -165,9 +165,9 @@ class RecordInputImagePreprocessor(object):
           num_parallel_batches=max_num_parallel_batches,
           num_parallel_calls=None))  # this number should be tuned
 
-      ds = ds.prefetch(buffer_size=tf.contrib.data.AUTOTUNE)  # this number can be tuned
+      ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)  # this number can be tuned
 
-      ds_iterator = ds.make_one_shot_iterator()
+      ds_iterator = tf.compat.v1.data.make_one_shot_iterator(ds)
       images, _ = ds_iterator.get_next()
 
       return images

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from image_recognition.tensorflow.inceptionv4.inference.inceptionv4_model_init import InceptionV4ModelInitializer

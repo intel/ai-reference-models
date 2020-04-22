@@ -1,0 +1,22 @@
+diff --git a/research/object_detection/matchers/bipartite_matcher.py b/research/object_detection/matchers/bipartite_matcher.py
+index 56cff85a..6ffc91df 100644
+--- a/research/object_detection/matchers/bipartite_matcher.py
++++ b/research/object_detection/matchers/bipartite_matcher.py
+@@ -12,15 +12,14 @@
+ # See the License for the specific language governing permissions and
+ # limitations under the License.
+ # ==============================================================================
+-
++pass
+ """Bipartite matcher implementation."""
+ 
+ import tensorflow as tf
+ 
+-from tensorflow.contrib.image.python.ops import image_ops
++from tensorflow.python.ops import image_ops
+ from object_detection.core import matcher
+ 
+-
+ class GreedyBipartiteMatcher(matcher.Matcher):
+   """Wraps a Tensorflow greedy bipartite matcher."""
+ 

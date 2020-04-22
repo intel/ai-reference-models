@@ -15,17 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
-#
 
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from common.base_model_init import BaseModelInitializer
-from common.base_model_init import set_env_var
-
 import os
 import argparse
+from common.base_model_init import BaseModelInitializer
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -33,37 +29,48 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-        # Set the num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_cores_per_socket,
-                                         num_intra_threads=1)
-
-        # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
-        self.set_kmp_vars(config_file_path)
-
-        # Set env vars, if they haven't already been set
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
+        
     def parse_args(self):
         parser = argparse.ArgumentParser()
-        parser.add_argument(
-            "--num-parallel-batches", default=-1,
-            type=int, help="num of parallel batches")
-
+        parser.add_argument("--num_omp_threads", dest='num_omp_threads',
+                            type=str, default=None,
+                            help="number of omp threads")
+        parser.add_argument("--use_parallel_batches", dest='use_parallel_batches',
+                            type=str, default="False",
+                            help="Enable to batches in parallel")
+        parser.add_argument("--num_parallel_batches",dest='num_parallel_batches', default="1",
+                            type=str, help="num of parallel batches.Default is 1")
+        parser.add_argument('--kmp_block_time', dest='kmp_block_time',
+                            help='number of kmp block time.',
+                            type=str, default=None)
+        parser.add_argument('--kmp_affinity', dest='kmp_affinity',
+                            help='kmp affinity value',
+                            type=str, default=None)
+        parser.add_argument('--kmp_settings', dest='kmp_settings',
+                            help='kmp settings',
+                            type=str, default=None)
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path,kmp_settings=str(self.args.kmp_settings),kmp_blocktime=str(self.args.kmp_block_time),kmp_affinity=str(self.args.kmp_affinity))
 
     def run_benchmark(self):
-        benchmark_script = os.path.join(self.args.intelai_models,
-                                        self.args.mode, "inference.py")
-        if self.args.num_parallel_batches == -1:
-            self.args.num_parallel_batches = self.platform_util.num_cores_per_socket
-
-        script_args_list = ["input_graph", "num_parallel_batches", "batch_size",
-                            "num_inter_threads", "num_intra_threads", "accuracy_only", "data_location"]
-
-        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        enable_parallel_batches = getattr(self.args, 'use_parallel_batches')
+        script_args_list = ["input_graph", "batch_size",
+                            "num_inter_threads", "num_intra_threads",
+                            "accuracy_only", "data_location", "num_omp_threads"]
+        if enable_parallel_batches=='True':
+            benchmark_script = os.path.join(self.args.intelai_models,
+                                        self.args.mode, "parallel_inference.py") 
+            script_args_list.append("num_parallel_batches")   
+        else:
+            benchmark_script = os.path.join(self.args.intelai_models,
+                                        self.args.mode, "inference.py")    
+        command_prefix = self.get_command_prefix(-1)
+        if self.args.socket_id != -1 and self.args.num_cores != -1:
+            command_prefix = command_prefix + " numactl --physcpubind=0-{} --membind={} ".\
+                format(str(int(self.args.num_cores) - 1), self.args.socket_id)
+        cmd_prefix = command_prefix + self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
@@ -47,7 +47,7 @@ import tensorflow as tf
 
 def load_graph(model_file):
   graph = tf.Graph()
-  graph_def = tf.GraphDef()
+  graph_def = tf.compat.v1.GraphDef()
 
   import os
   file_ext = os.path.splitext(model_file)[1]
@@ -110,14 +110,17 @@ if __name__ == "__main__":
   num_inter_threads = args.num_inter_threads
   num_intra_threads = args.num_intra_threads
 
-  input_shape = [batch_size, input_height, input_width, 3]
-  images = tf.truncated_normal(
-        input_shape,
-        dtype=tf.float32,
-        stddev=10,
-        name='synthetic_images')
+  data_graph = tf.Graph() ##
+  with data_graph.as_default():##
+    input_shape = [batch_size, input_height, input_width, 3]
+    images = tf.random.truncated_normal(
+          input_shape,
+          dtype=tf.float32,
+          stddev=10,
+          name='synthetic_images')
 
-  image_data = None
+  #image_data = None
+  
   graph = load_graph(model_file)
 
   input_tensor = graph.get_tensor_by_name(input_layer + ":0");
@@ -125,19 +128,25 @@ if __name__ == "__main__":
 
   rewrite_options = rewriter_config_pb2.RewriterConfig(
           layout_optimizer=rewriter_config_pb2.RewriterConfig.ON)
-  config = tf.ConfigProto()
+  config = tf.compat.v1.ConfigProto()
   if (args.gpu < 0):
     config.inter_op_parallelism_threads = num_inter_threads
     config.intra_op_parallelism_threads = num_intra_threads
   config.graph_options.rewrite_options.remapping = (
           rewriter_config_pb2.RewriterConfig.OFF)
   #os.environ["OMP_NUM_THREADS"] = "14"
-  with tf.Session(config=config) as sess:
-    image_data = sess.run(images)
+  #with tf.compat.v1.Session(config=config) as sess:
+  #  image_data = sess.run(images)
 
-  with tf.Session(graph=graph, config=config) as sess:
+  data_config = tf.compat.v1.ConfigProto()###
+  data_config.inter_op_parallelism_threads = num_inter_threads ###
+  data_config.intra_op_parallelism_threads = num_intra_threads ###
+  
+  data_sess = tf.compat.v1.Session(graph=data_graph, config=data_config) ###
+  with tf.compat.v1.Session(graph=graph, config=config) as sess:
     sys.stdout.flush()
     print("[Running warmup steps...]")
+    image_data = data_sess.run(images) ###
     for t in range(warmup_steps):
       start_time = time.time()
       sess.run(output_tensor, {input_tensor: image_data})

@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 import numpy as np
@@ -128,9 +127,8 @@ class RFCNRunner:
   def run(self):
       self.log("Running performance test")
       self.read_graph()
-      self.load_label_map()
       self.get_image_paths()
-      self.load_label_map()
+      #self.load_label_map()
       # Actual detection.
       output_dict, image_np = self.run_inference(self.detection_graph)
       self.visualize(output_dict, image_np)
@@ -157,8 +155,8 @@ class RFCNRunner:
   def read_graph(self):
     self.detection_graph = tf.Graph()
     with self.detection_graph.as_default():
-      od_graph_def = tf.GraphDef()
-      with tf.gfile.GFile(self.args.input_graph, 'rb') as fid:
+      od_graph_def = tf.compat.v1.GraphDef()
+      with tf.io.gfile.GFile(self.args.input_graph, 'rb') as fid:
         serialized_graph = fid.read()
         od_graph_def.ParseFromString(serialized_graph)
         tf.import_graph_def(od_graph_def, name='')
@@ -191,23 +189,23 @@ class RFCNRunner:
           (im_height, im_width, 3)).astype(np.uint8)
 
   def run_inference(self,graph):
-    sess_config = tf.ConfigProto()
+    sess_config = tf.compat.v1.ConfigProto()
     sess_config.intra_op_parallelism_threads = self.args.num_intra_threads
     sess_config.inter_op_parallelism_threads = self.args.num_inter_threads
     with self.detection_graph.as_default():
-      with tf.Session(config=sess_config) as sess:
+      with tf.compat.v1.Session(config=sess_config) as sess:
         # Get handles to input and output tensors
         tensor_dict = {}
         if not self.args.evaluate_tensor:
-          ops = tf.get_default_graph().get_operations()
+          ops = tf.compat.v1.get_default_graph().get_operations()
           all_tensor_names = {output.name for op in ops for output in op.outputs}
           for key in self.RFCN_OUTPUTS:
             tensor_name = key + ':0'
             if tensor_name in all_tensor_names:
-              tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
+              tensor_dict[key] = tf.compat.v1.get_default_graph().get_tensor_by_name(
                   tensor_name)
         else:
-          our_op = tf.get_default_graph().get_operation_by_name(self.args.evaluate_tensor)
+          our_op = tf.compat.v1.get_default_graph().get_operation_by_name(self.args.evaluate_tensor)
           tensor_names = our_op.outputs
           list_ops = []
           for i, tensor in enumerate(tensor_names):
@@ -217,8 +215,8 @@ class RFCNRunner:
         run_options = None
         run_metadata = None
         if self.args.timeline:
-          run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-          run_metadata = tf.RunMetadata()
+          run_options = tf.compat.v1.RunOptions(trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+          run_metadata = tf.compat.v1.RunMetadata()
 
         total_duration = 0
         for index, image_path in enumerate(self.test_image_paths):
@@ -226,7 +224,7 @@ class RFCNRunner:
           # the array based representation of the image will be used later in order to prepare the
           # result image with boxes and labels on it.
           image_np = self.load_image_into_numpy_array(image)
-          image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
+          image_tensor = tf.compat.v1.get_default_graph().get_tensor_by_name('image_tensor:0')
 
           # Run inference
           start_time = time.time()
@@ -261,7 +259,7 @@ class RFCNRunner:
 
           if self.args.evaluate_tensor:
             for tensor in output_dict[self.args.evaluate_tensor]:
-              print tensor.shape
+              print (tensor.shape)
             return None, None
 
           # all outputs are float32 numpy arrays, so convert types as appropriate

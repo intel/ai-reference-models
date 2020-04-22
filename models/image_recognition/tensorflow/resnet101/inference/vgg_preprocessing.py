@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
@@ -39,8 +39,6 @@ from __future__ import division
 from __future__ import print_function
 
 import tensorflow as tf
-
-slim = tf.contrib.slim
 
 _R_MEAN = 123.68
 _G_MEAN = 116.78
@@ -70,7 +68,7 @@ def _crop(image, offset_height, offset_width, crop_height, crop_width):
     InvalidArgumentError: if the rank is not 3 or if the image dimensions are
       less than the crop size.
   """
-  original_shape = tf.shape(image)
+  original_shape = tf.shape(input=image)
 
   rank_assertion = tf.Assert(
       tf.equal(tf.rank(image), 3),
@@ -84,7 +82,7 @@ def _crop(image, offset_height, offset_width, crop_height, crop_width):
           tf.greater_equal(original_shape[1], crop_width)),
       ['Crop size greater than the image size.'])
 
-  offsets = tf.to_int32(tf.stack([offset_height, offset_width, 0]))
+  offsets = tf.cast(tf.stack([offset_height, offset_width, 0]), dtype=tf.int32)
 
   # Use tf.slice instead of crop_to_bounding box as it accepts tensors to
   # define the crop size.
@@ -129,7 +127,7 @@ def _random_crop(image_list, crop_height, crop_width):
     rank_assertions.append(rank_assert)
 
   with tf.control_dependencies([rank_assertions[0]]):
-    image_shape = tf.shape(image_list[0])
+    image_shape = tf.shape(input=image_list[0])
   image_height = image_shape[0]
   image_width = image_shape[1]
   crop_size_assert = tf.Assert(
@@ -144,7 +142,7 @@ def _random_crop(image_list, crop_height, crop_width):
     image = image_list[i]
     asserts.append(rank_assertions[i])
     with tf.control_dependencies([rank_assertions[i]]):
-      shape = tf.shape(image)
+      shape = tf.shape(input=image)
     height = shape[0]
     width = shape[1]
 
@@ -167,9 +165,9 @@ def _random_crop(image_list, crop_height, crop_width):
     max_offset_height = tf.reshape(image_height - crop_height + 1, [])
   with tf.control_dependencies(asserts):
     max_offset_width = tf.reshape(image_width - crop_width + 1, [])
-  offset_height = tf.random_uniform(
+  offset_height = tf.random.uniform(
       [], maxval=max_offset_height, dtype=tf.int32)
-  offset_width = tf.random_uniform(
+  offset_width = tf.random.uniform(
       [], maxval=max_offset_width, dtype=tf.int32)
 
   return [_crop(image, offset_height, offset_width,
@@ -190,8 +188,8 @@ def _central_crop(image_list, crop_height, crop_width):
   """
   outputs = []
   for image in image_list:
-    image_height = tf.shape(image)[0]
-    image_width = tf.shape(image)[1]
+    image_height = tf.shape(input=image)[0]
+    image_width = tf.shape(input=image)[1]
 
     offset_height = (image_height - crop_height) / 2
     offset_width = (image_width - crop_width) / 2
@@ -250,17 +248,17 @@ def _smallest_size_at_least(height, width, smallest_side):
     new_height: an int32 scalar tensor indicating the new height.
     new_width: and int32 scalar tensor indicating the new width.
   """
-  smallest_side = tf.convert_to_tensor(smallest_side, dtype=tf.int32)
+  smallest_side = tf.convert_to_tensor(value=smallest_side, dtype=tf.int32)
 
-  height = tf.to_float(height)
-  width = tf.to_float(width)
-  smallest_side = tf.to_float(smallest_side)
+  height = tf.cast(height, dtype=tf.float32)
+  width = tf.cast(width, dtype=tf.float32)
+  smallest_side = tf.cast(smallest_side, dtype=tf.float32)
 
-  scale = tf.cond(tf.greater(height, width),
-                  lambda: smallest_side / width,
-                  lambda: smallest_side / height)
-  new_height = tf.to_int32(tf.rint(height * scale))
-  new_width = tf.to_int32(tf.rint(width * scale))
+  scale = tf.cond(pred=tf.greater(height, width),
+                  true_fn=lambda: smallest_side / width,
+                  false_fn=lambda: smallest_side / height)
+  new_height = tf.cast(tf.math.rint(height * scale), dtype=tf.int32)
+  new_width = tf.cast(tf.math.rint(width * scale), dtype=tf.int32)
   return new_height, new_width
 
 
@@ -275,17 +273,17 @@ def _aspect_preserving_resize(image, smallest_side):
   Returns:
     resized_image: A 3-D tensor containing the resized image.
   """
-  smallest_side = tf.convert_to_tensor(smallest_side, dtype=tf.int32)
+  smallest_side = tf.convert_to_tensor(value=smallest_side, dtype=tf.int32)
   #import pdb
   #pdb.set_trace()
-  shape = tf.shape(image)
+  shape = tf.shape(input=image)
 
   height = shape[0]
   width = shape[1]
   new_height, new_width = _smallest_size_at_least(height, width, smallest_side)
   image = tf.expand_dims(image, 0)
-  resized_image = tf.image.resize_bilinear(image, [new_height, new_width],
-                                           align_corners=False)
+  resized_image = tf.image.resize(image, [new_height, new_width],
+                                           method=tf.image.ResizeMethod.BILINEAR)
   resized_image = tf.squeeze(resized_image)
   resized_image.set_shape([None, None, 3])
   return resized_image
@@ -313,13 +311,13 @@ def preprocess_for_train(image,
   Returns:
     A preprocessed image.
   """
-  resize_side = tf.random_uniform(
+  resize_side = tf.random.uniform(
       [], minval=resize_side_min, maxval=resize_side_max+1, dtype=tf.int32)
 
   image = _aspect_preserving_resize(image, resize_side)
   image = _random_crop([image], output_height, output_width)[0]
   image.set_shape([output_height, output_width, 3])
-  image = tf.to_float(image)
+  image = tf.cast(image, dtype=tf.float32)
   image = tf.image.random_flip_left_right(image)
   return _mean_image_subtraction(image, [_R_MEAN, _G_MEAN, _B_MEAN])
 
@@ -339,7 +337,7 @@ def preprocess_for_eval(image, output_height, output_width, resize_side):
   image = _aspect_preserving_resize(image, resize_side)
   image = _central_crop([image], output_height, output_width)[0]
   image.set_shape([output_height, output_width, 3])
-  image = tf.to_float(image)
+  image = tf.cast(image, dtype=tf.float32)
   return _mean_image_subtraction(image, [_R_MEAN, _G_MEAN, _B_MEAN])
 
 
