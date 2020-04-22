@@ -6,12 +6,4 @@
   { "_comment": "FP32 command for benchmark",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case object_detection --precision fp32 --mode inference --model-name rfcn --checkpoint /checkpoints --intelai-models . --model-source-dir . --socket-id 0 --verbose --config_file=rfcn_pipeline.config",
     "output": "numactl --cpunodebind=0 --membind=0 python ./inference/fp32/eval.py --inter_op 1 --intra_op 28 --omp 28 --pipeline_config_path /checkpoints/rfcn_pipeline.config --checkpoint_dir /checkpoints --eval_dir ./research/object_detection/models/rfcn/eval  --logtostderr  --blocktime=0  --run_once=True"},
-
-  { "_comment": "Int8 accuracy command",
-    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset --accuracy-only --split=accuracy_message",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 FROZEN_GRAPH=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb TF_RECORD_FILE=/dataset SPLIT=accuracy_message TF_MODELS_ROOT=/workspace/models /workspace/intelai_models/inference/int8/coco_mAP.sh"},
-
-  { "_comment": "Int8 benchmark command",
-    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset --benchmark-only --number_of_steps=500",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb -x 500 -d /dataset --num-inter-threads 2 --num-intra-threads 56"}
 ]

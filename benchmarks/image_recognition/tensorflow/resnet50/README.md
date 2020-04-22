@@ -17,9 +17,9 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
-* Clone the tensorflow/models repository:
+* Clone the tensorflow/models repository as tensorflow-models. This is to avoid conflict with Intel's `models` repo:
 ```
-$ git clone https://github.com/tensorflow/models.git
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
 ``` 
 The TensorFlow models repo provides
 [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
@@ -29,7 +29,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50_int8_pretrained_model.pb
 ```
 
 3. Clone the 
@@ -58,7 +58,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -99,7 +99,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the script completes should look
@@ -124,7 +124,7 @@ to get additional debug output or change the default output location..
 
 1. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50_fp32_pretrained_model.pb
 ```
 
 2. Clone the 
@@ -160,7 +160,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -195,7 +195,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -233,7 +233,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -267,7 +267,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another

@@ -24,10 +24,10 @@ $ git clone https://github.com/IntelAI/models.git
 This repository includes launch scripts for running an optimized version of the Inception V3 model code.
 
 2. Clone the [tensorflow/models](https://github.com/tensorflow/models)
-repository:
+repository as `tensorflow-models`. This is to avoid conflict with Intel's `models` repo:
 
 ```
-git clone https://github.com/tensorflow/models.git
+git clone https://github.com/tensorflow/models.git tensorflow-models
 ```
 
 This repository is used for dependencies that the Inception V3 model
@@ -35,7 +35,7 @@ requires.
 
 3. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv3_int8_pretrained_model.pb
 ```
 
 4. If you would like to run Inception V3 inference with real data or test for
@@ -97,7 +97,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -118,7 +118,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -135,7 +135,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -151,7 +151,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -168,7 +168,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -226,7 +226,7 @@ $ git clone https://github.com/IntelAI/models.git
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv3_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv3_fp32_pretrained_model.pb
 ```
 
 3. If you would like to run Inception V3 FP32 inference and test for
@@ -258,7 +258,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for online inference:
@@ -289,7 +289,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for batch inference:
@@ -321,7 +321,7 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --data-location /dataset/Imagenet_Validation \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for accuracy:

@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from __future__ import absolute_import
@@ -101,7 +101,7 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(cmd)
 
     def run_calibration(self):
-        calibration_script = os.path.join(self.args.intelai_models,
+        calibration_script = os.path.join(self.args.intelai_models, self.args.mode,
                                           self.args.precision, "calibration.py")
         script_args_list = [
             "input_graph", "data_location",

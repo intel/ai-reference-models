@@ -1,7 +1,8 @@
 Cython
 contextlib2
-pillow
+pillow>=6.2.2
 lxml
 jupyter
 matplotlib
-numpy==1.16.0
+numpy==1.17.4
+pycocotools
