@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,17 +48,14 @@ class ModelInitializer(BaseModelInitializer):
         parser.add_argument('--weight_decay', type=float, default=1e-4)
         parser.add_argument('--num_warmup_batches', type=int, default=20)
         parser.add_argument('--num_train_steps', type=int, default=500, help='number of training batches')
-        parser.add_argument('--num_processes', type=int, default=2, help='number of process')
-        parser.add_argument('--num_processes_per_node', type=int, default=1, help='number of process per node')
         parser.add_argument('--num_inter_threads', type=int, default=1, help='number of inter-threads')
         parser.add_argument('--num_intra_threads', type=int, default=28, help='number of intra-threads')
-        parser.add_argument("--trace_file", default=None, help='name of trace file (timeline)')
+
         self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
         omp_num_threads = platform_util.num_cores_per_socket
 
         set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
-        # set_env_var("OMP_NUM_THREADS", 52)
 
         cmd_args = " --data_dir {0}".format(self.args.data_location)
         cmd_args += " --batch_size {0}".format(self.args.batch_size)
@@ -69,23 +66,23 @@ class ModelInitializer(BaseModelInitializer):
         cmd_args += " --num_intra_threads {0}".format(self.args.num_intra_threads)
         cmd_args += " --model=ssd300 --data_name coco"
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
-        # cmd_args += " --variable_update=horovod --horovod_device=cpu"
+        cmd_args += " --variable_update=horovod --horovod_device=cpu"
+        
+        # cmd_args += " --use_chrome_trace_format=True --trace_file=ssd_resnet34_timeline.json"
         # cmd_args += " --num_warmup_batches=0"
-        if self.args.trace_file:
-          cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.trace_file)
 
-        multi_instance_param_list = ["-genv:I_MPI_PIN_DOMAIN=socket",
-                                     "-genv:I_MPI_FABRICS=shm",
-                                     "-genv:I_MPI_ASYNC_PROGRESS=1",
-                                     "-genv:I_MPI_ASYNC_PROGRESS_PIN={},{}".format(0, self.args.num_intra_threads),
-                                     "-genv:OMP_NUM_THREADS={}".format(self.args.num_intra_threads)]
-        # self.cmd = self.get_multi_instance_train_prefix(multi_instance_param_list)
-        # self.cmd += "{} ".format(self.python_exe)
-        self.cmd = "numactl --cpunodebind=0 --membind=0 {} ".format(self.python_exe)
+        # Accuracy run arguments
+        # cmd_args += " --save_model_steps=10000"
+        # cmd_args += " --max_ckpts_to_keep=100"
+        # cmd_args += " --collect_eval_results_async=true"
+        # cmd_args += " --eval=true"
+        # cmd_args += " --print_training_accuracy=True"
+        # cmd_args += " --train_dir=/tmp/ssd_rn34_train_dir"
+        # cmd_args += " --backbone_model_path=/tmp/ssd_rn34_train_dir"
 
-        username = os.environ.get('USER')
-        script_dir = '/tmp/benchmark_ssd-resnet34-'+username+'/scripts/tf_cnn_benchmarks'
-        self.training_script_dir = os.path.join(script_dir)
+        self.cmd = "{} ".format(self.python_exe)
+
+        self.training_script_dir = os.path.join('/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks')
         training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
 
         self.cmd = self.cmd + training_script + cmd_args

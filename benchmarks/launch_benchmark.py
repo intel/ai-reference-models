@@ -184,8 +184,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "NUM_INTER_THREADS": args.num_inter_threads,
             "NUM_INTRA_THREADS": args.num_intra_threads,
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
-            "NUM_PROCESSES": args.num_processes,
-            "NUM_PROCESSES_PER_NODE": args.num_processes_per_node,
             "NUM_TRAIN_STEPS": args.num_train_steps,
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "BENCHMARK_ONLY": args.benchmark_only,
