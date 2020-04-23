@@ -156,7 +156,8 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
     #grads = tf.gradients(ys=loss, xs=tvars)
 
     if use_multi_cpu:
-      grads_and_vars = optimizer.compute_gradients(loss, tvars)
+      grads_and_vars = optimizer.compute_gradients(
+          loss, tvars, gate_gradients=tf.compat.v1.train.Optimizer.GATE_NONE)
       grads = [grad for grad, var in grads_and_vars]
       tvars = [var for grad, var in grads_and_vars]
     else:
