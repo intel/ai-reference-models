@@ -4,6 +4,8 @@ This document has instructions for how to run BERT for the
 following modes/platforms:
 * [BFloat16 training](#training-instructions)
 * [FP32 training](#fp32-training-instructions)
+* [BFloat16 inference](#inference-instructions)
+* [FP32 inference](#fp32-inference-instructions)
 
 This repo contains model for BERT Large optmized for bfloat16 and fp32 on Intel CPUs. For all fine-tunining the datasets (SQuAD, MultiNLI, and MRPC) should be downloaded as mentioned in the Google bert repo.
 
@@ -174,6 +176,7 @@ python launch_benchmark.py \
   
 
 ```
+
 To run distributed training of pretraining (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
@@ -201,3 +204,107 @@ python launch_benchmark.py \
 
 ## FP32 Training Instructions
 FP32 training instructions are the same as Bfloat16 training instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
+
+## Inference Instructions
+
+ 1. Clone the Intel model zoo:
+    ```
+    git clone https://github.com/IntelAI/models.git
+    ```
+
+ 2. Download and unzip the BERT large uncased model from the
+    [google bert repo](https://github.com/google-research/bert#pre-trained-models).
+    Then, download the `dev-v1.1.json` file from the
+    [google bert repo](https://github.com/google-research/bert#squad-11)
+    into the `uncased_L-24_H-1024_A-16` directory that was just unzipped.
+
+    ```
+    wget https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-24_H-1024_A-16.zip
+    unzip uncased_L-24_H-1024_A-16.zip
+
+    wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P uncased_L-24_H-1024_A-16
+    ```
+
+    The `uncased_L-24_H-1024_A-16` directory is what will be passed as
+    the `--data-location` when running inference in step 4.
+
+ 3. Download the pretrained model from [TBD](gcloud link).
+    This directory will be passed as the `--checkpoint` location when
+    running inference in step 4.
+
+ 4. Navigate to the `benchmarks` directory in the model zoo that you
+    cloned in step 1. This directory contains the
+    [launch_benchmarks.py script](/models/docs/general/tensorflow/LaunchBenchmark.md)
+    that will be used to run inference.
+    ```
+    cd benchmarks
+    ```
+
+    Bert large inference can be run in 3 different modes:
+    * **Benchmark**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=bfloat16 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert-squad-ckpts \
+            --output-dir /home/<user>/bert-squad-output \
+            --benchmark-only \
+            --docker-image intel/tensorflow-2.2-bf16
+        ```
+
+    * **Profile**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=bfloat16 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert-squad-ckpts \
+            --output-dir /home/<user>/bert-squad-output \
+            --docker-image intel/tensorflow-2.2-bf16 \
+            -- profile=True
+        ```
+
+    * **Accuracy**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=bfloat16 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert-squad-ckpts \
+            --output-dir /home/<user>/bert-squad-output \
+            --docker-image intel/tensorflow-2.2-bf16 \
+            --accuracy-only
+        ```
+
+    Output files and logs are saved to the
+    `models/benchmarks/common/tensorflow/logs` directory. To change the
+    location, use the `--output-dir` flag in the
+    [launch_benchmarks.py script](/models/docs/general/tensorflow/LaunchBenchmark.md).
+
+    Note that args specific to this model are specified after ` -- ` at
+    the end of the command (like the `profile=True` arg in the Profile
+    command above. Below is a list of all of the model specific args and
+    their default values:
+
+    | Model arg | Default value |
+    |-----------|---------------|
+    | doc_stride | `128` |
+    | max_seq_length | `384` |
+    | profile | `False` |
+    | config_file | `bert_config.json` |
+    | vocab_file | `vocab.txt` |
+    | predict_file | `dev-v1.1.json` |
+    | init_checkpoint | `model.ckpt-7299` |
+
+## FP32 Inference Instructions
+FP32 inference instructions are the same as Bfloat16 inference instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
