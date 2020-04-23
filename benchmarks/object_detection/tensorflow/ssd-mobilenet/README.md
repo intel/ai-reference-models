@@ -16,12 +16,12 @@ If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True`
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 1. Clone the [tensorflow/models](https://github.com/tensorflow/models)
-repository at the specified SHA and clone the
+repository as `tensorflow-models` at the specified SHA and clone the
 [cocoapi repo](git clone https://github.com/cocodataset/cocoapi.git) in
 the models directory:
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
@@ -74,7 +74,7 @@ located after the script has completed.
 
 ```
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
@@ -94,14 +94,14 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and get the specified SHA that we are using for SSD-MobileNet
-$ cd /home/<user>/models
+$ cd /home/<user>/tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
 4. Download the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssdmobilenet_int8_pretrained_model.pb
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -113,7 +113,7 @@ $ cd benchmarks
 ```
 
 Run for batch and online inference where the `--data-location`
-is the path to the directory with the unzipped coco validation images:
+is the path to the tf record file that you generated in step 2:
 ```
 python launch_benchmark.py \
     --model-name ssd-mobilenet \
@@ -121,9 +121,10 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow/models \
-    --data-location /home/<user>/val/val2017 \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --benchmark-only \
     --batch-size 1
@@ -138,8 +139,9 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
@@ -190,13 +192,13 @@ Log location outside container: <output directory>/benchmark_ssd-mobilenet_infer
 
 ## FP32 Inference Instructions
 
-1. Clone the `tensorflow/models` repository with the specified SHA,
+1. Clone the `tensorflow/models` repository as `tensorflow-models` with the specified SHA,
 since we are using an older version of the models repo for
 SSD-MobileNet.
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
@@ -251,7 +253,7 @@ located after the script has completed.
 ```
 
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
@@ -271,7 +273,7 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and checkout the SHA that we are using for SSD-MobileNet
-$ cd /home/<user>/models
+$ cd /home/<user>/tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
@@ -343,13 +345,14 @@ $ cd /home/<user>/models/benchmarks
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
-    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --benchmark-only
 ```
 
@@ -362,13 +365,14 @@ the path to the frozen graph that you downloaded in step 5 as the
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
-    --model-source-dir /home/<user>/tensorflow/models \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --num-intra-threads 28 \
+    --num-inter-threads 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --accuracy-only
 ```
 

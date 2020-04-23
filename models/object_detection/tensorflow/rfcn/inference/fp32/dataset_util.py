@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
@@ -75,7 +75,7 @@ def read_examples_list(path):
   Returns:
     list of example identifiers (strings).
   """
-  with tf.gfile.GFile(path) as fid:
+  with tf.io.gfile.GFile(path) as fid:
     lines = fid.readlines()
   return [line.strip().split(' ')[0] for line in lines]
 
@@ -118,8 +118,8 @@ def make_initializable_iterator(dataset):
   Returns:
     A `tf.data.Iterator`.
   """
-  iterator = dataset.make_initializable_iterator()
-  tf.add_to_collection(tf.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
+  iterator = tf.compat.v1.data.make_initializable_iterator(dataset)
+  tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS, iterator.initializer)
   return iterator
 
 
@@ -137,20 +137,20 @@ def read_dataset(file_read_func, decode_func, input_files, config):
     A tf.data.Dataset based on config.
   """
   # Shard, shuffle, and read files.
-  filenames = tf.concat([tf.matching_files(pattern) for pattern in input_files],
+  filenames = tf.concat([tf.io.matching_files(pattern) for pattern in input_files],
                         0)
   filename_dataset = tf.data.Dataset.from_tensor_slices(filenames)
   if config.shuffle:
     filename_dataset = filename_dataset.shuffle(
         config.filenames_shuffle_buffer_size)
   elif config.num_readers > 1:
-    tf.logging.warning('`shuffle` is false, but the input data stream is '
+    tf.compat.v1.logging.warning('`shuffle` is false, but the input data stream is '
                        'still slightly shuffled since `num_readers` > 1.')
 
   filename_dataset = filename_dataset.repeat(config.num_epochs or None)
 
   records_dataset = filename_dataset.apply(
-      tf.contrib.data.parallel_interleave(
+      tf.data.experimental.parallel_interleave(
           file_read_func, cycle_length=config.num_readers,
           block_length=config.read_block_length, sloppy=True))
   if config.shuffle:

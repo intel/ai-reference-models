@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 import tensorflow as tf
@@ -75,7 +75,7 @@ class ssd_resnet34_infer:
     self.args = arg_parser.parse_args()
 
     self.freeze_graph = self.load_graph(self.args.input_graph)
-    self.config = tf.ConfigProto()
+    self.config = tf.compat.v1.ConfigProto()
     self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
 
@@ -93,8 +93,8 @@ class ssd_resnet34_infer:
 
   def load_graph(self, frozen_graph_filename):
     print('load graph from: ' + frozen_graph_filename)
-    with tf.gfile.GFile(frozen_graph_filename, "rb") as f:
-        graph_def = tf.GraphDef()
+    with tf.io.gfile.GFile(frozen_graph_filename, "rb") as f:
+        graph_def = tf.compat.v1.GraphDef()
         graph_def.ParseFromString(f.read())
 
     # Then, we import the graph_def into a new Graph and returns it
@@ -105,9 +105,9 @@ class ssd_resnet34_infer:
 
   def run_benchmark(self):
     print("Inference with dummy data.")
-    with tf.Session(graph=self.freeze_graph, config=self.config) as sess:
+    with tf.compat.v1.Session(graph=self.freeze_graph, config=self.config) as sess:
       
-      input_images = sess.run(tf.truncated_normal(
+      input_images = sess.run(tf.random.truncated_normal(
           [self.args.batch_size, IMAGE_SIZE, IMAGE_SIZE, 3],
           dtype=tf.float32,
           stddev=10,
@@ -166,14 +166,14 @@ class ssd_resnet34_infer:
   def accuracy_check(self):
     print(self.args)
     input_list = self.__get_input()
-    ds_init = tf.get_collection(tf.GraphKeys.TABLE_INITIALIZERS)
+    ds_init = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS)
 
-    ds_sess = tf.Session()
+    ds_sess = tf.compat.v1.Session()
     params = benchmark_cnn.make_params(data_dir=self.args.data_location)
     self.model = ssd_model.SSD300Model(params=params)
 
     print("Inference for accuracy check.")
-    with tf.Session(graph=self.freeze_graph, config=self.config) as sess:
+    with tf.compat.v1.Session(graph=self.freeze_graph, config=self.config) as sess:
       ds_sess.run(ds_init)
       global_step = 0
 

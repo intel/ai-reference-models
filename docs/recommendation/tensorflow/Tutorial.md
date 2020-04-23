@@ -27,25 +27,21 @@ Unlike image recognition models such as ResNet50 or ResNet101, the "wide" compon
 does not provide opportunities to exploit parallelism within each node, while, the "deep" component of this topology demands more parallelism within each node.
  
 The wide or linear component of this topology depends on the data features, i.e. on the dataset width. 
-Max performance can be enabled by setting intra_op_threads and num_parallel_batches based on the number of features. 
-For a dataset with high number of features, it is always recommended to set higher inter_op_threads and num_parallel_batches. 
 The deep component depends on the number of hidden units in the graph where threading can be enabled within the operations, 
 hence exhibiting a direct relation to compute power. This setback can be eliminated by setting the right number of intra_op_threads and OMP_NUM_THREADS. 
-The best choice for all these parameters depends on the "feature" columns in your dataset and "hidden units" in the deep model. 
 Note that while tuning these important run-time parameters, do not over/under use the threadpool. 
  
 | Run-time options  | Recommendations|
 | ------------- | ------------- |
 | Batch Size | 512 |
 | Hyperthreading  | Enabled. Turn on in BIOS. Requires a restart. |
-|intra_op_parallelism_threads| 1 or 2 (Start tuning from a lower number) | 
-|inter_op_parallelism_threads | 1 to physical cores (Depends on the number of features. Start tuning from a higher number.) |
-|num_parallel_batches | 1 to physical cores (Depends on the number of features. Start tuning from a higher number.) |
-|Data Layout| NCHW|
+|intra_op_parallelism_threads| 1 to physical cores | 
+|inter_op_parallelism_threads | 1 |
+|Data Layout| NC|
 |Sockets | all |
 |KMP_AFFINITY| granularity=fine,noverbose,compact,1,0|
-|KMP_BLOCKTIME| 0 |
-|OMP_NUM_THREADS |intra_op_parallelism_threads|
+|KMP_BLOCKTIME| 1 |
+|OMP_NUM_THREADS | 1 to physical cores |
 
 *Note: Refer to [this article](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) to learn more about the run time options.*
 
@@ -65,26 +61,24 @@ You can either set them in the CLI or in the Python script. Note that inter and 
 in the Python script.
 
 ```bash
-export OMP_NUM_THREADS=physical cores
+export OMP_NUM_THREADS=no of physical cores
 export KMP_AFFINITY="granularity=fine,noverbose,compact,1,0"
-export KMP_BLOCKTIME=0
+export KMP_BLOCKTIME=1
 export KMP_SETTINGS=1
 ```
 (or)
 ```
 import os
-os.environ["KMP_BLOCKTIME"] = "0"
+os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
-os.environ["OMP_NUM_THREADS"]= 1 
+os.environ["OMP_NUM_THREADS"]= no of physical cores 
 config = tf.ConfigProto()
-config.intra_op_parallelism_threads = 1 
-config.inter_op_parallelism_threads = <1 to # of physical cores>
+config.intra_op_parallelism_threads = no of physical cores 
+config.inter_op_parallelism_threads = 1
 tf.Session(config=config)
 ```
 
-num_parallel_batches from the table refers to arguments in TensorFlow methods such as `parallel_iterations` in `tf.while_loop()` or
-`num_parallel_calls` in  `tf.data.TFRecordDataset.map()` where execution can be parallelized whether in data transformation stage or in control flow operations.  
 
 To control the execution to one NUMA node or socket id, run the python script with the command:
 
@@ -112,12 +106,12 @@ git clone https://github.com/IntelAI/models.git
 ```
 mkdir ~/wide_deep_files
 cd ~/wide_deep_files
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/wide_deep_fp32_pretrained_model.pb
 
 ```
 Refer to the Wide and Deep [README](/benchmarks/recommendation/tensorflow/wide_deep_large_ds) to get the latest location of the pretrained model.
 
-3. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs on a Docker container.
+3. Install [Docker](https://docs.docker.com/install/) since the tutorial runs on a Docker container.
 
 
 4. Data Preparation: You will need approximately 20GB of available disk space to complete this step. 
@@ -146,7 +140,8 @@ Follow the instructions below to download and prepare the dataset.
     This step may take a while to complete.
     ```
     python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
-        --csv-datafile eval.csv \
+        --inputcsv-datafile eval.csv \
+        --calibrationcsv-datafile train.csv \
         --outputfile-name preprocessed
     ```
   - Exit the docker container and find the processed dataset `eval_preprocessed.tfrecords` in the location `~/models/models`.
@@ -156,7 +151,7 @@ Follow the instructions below to download and prepare the dataset.
 1. Pull the relevant Intel Optimizations for TensorFlow Docker image. We'll be running the pretrained model to infer in a Docker container. 
    [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intelaipg/intel-optimized-tensorflow:latest
+docker pull intel/intel-optimized-tensorflow:2.1.0
 ```
 2. cd to the inference script directory:
 ```bash        
@@ -183,7 +178,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --mode inference \
         --framework tensorflow \
         --benchmark-only \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
@@ -200,7 +195,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --mode inference \
         --framework tensorflow \
         --benchmark-only \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
@@ -217,10 +212,10 @@ Set this parameter to a socket id to run the workload on a single socket.
 	--------------------------------------------------
 	num_inter_threads: 28
 	num_intra_threads: 1
-	Received these standard args: Namespace(accuracy_only=False, batch_size=512, benchmark_dir='/workspace/benchmarks', benchmark_only=True, checkpoint=None, data_location='/dataset', data_num_inter_threads=None, data_num_intra_threads=None, framework='tensorflow', input_graph='/in_graph/wide_deep_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='wide_deep_large_ds', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=28, num_intra_threads=1, num_parallel_batches=28, output_dir='/workspace/benchmarks/common/tensorflow/logs', output_results=False, precision='fp32', socket_id=-1, use_case='recommendation', verbose=True)
+	Received these standard args: Namespace(accuracy_only=False, batch_size=512, benchmark_dir='/workspace/benchmarks', benchmark_only=True, checkpoint=None, data_location='/dataset', data_num_inter_threads=None, data_num_intra_threads=None, framework='tensorflow', input_graph='/in_graph/wide_deep_fp32_pretrained_model.pb', intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='wide_deep_large_ds', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=28, num_intra_threads=1, output_dir='/workspace/benchmarks/common/tensorflow/logs', output_results=False, precision='fp32', socket_id=-1, use_case='recommendation', verbose=True)
 	Received these custom args: []
 	Current directory: /workspace/benchmarks
-	Running: python /workspace/intelai_models/inference/inference.py --num_intra_threads=1 --num_inter_threads=28 --batch_size=512 --input_graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data_location=/dataset --num_parallel_batches=28
+	Running: python /workspace/intelai_models/inference/inference.py --num_intra_threads=1 --num_inter_threads=28 --batch_size=512 --input_graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data_location=/dataset
 	PYTHONPATH: :/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
 	RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=512 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --in-graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data-location=/dataset
 	Batch Size: 512
@@ -238,7 +233,7 @@ The logs are captured in a directory outside of the container.<br>
         --mode inference \
         --framework tensorflow \
         --accuracy-only \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose		
@@ -251,7 +246,7 @@ With `accuracy-only` flag, you can find an additional metric on accuracy as show
 	Total test records           :  2000000
 	Batch size is                :  512
 	Number of batches            :  3907
-	Classification accuracy (%)  :  77.5223
+	Classification accuracy (%)  :  77.6693
 	No of correct predictions    :  ...
 	Inference duration (seconds) :  ...
 	Average Latency (ms/batch)   :  ...
@@ -268,7 +263,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 			--mode inference \
 			--framework tensorflow \
 			--benchmark-only \
-			--docker-image intelaipg/intel-optimized-tensorflow:latest \
+			--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
 			--data-location ~/models/models/eval_preprocessed.tfrecords \
 			--debug				
@@ -293,7 +288,7 @@ To run inference on a large dataset, download the test dataset in `~/wide_deep_f
 ```    
 cd ~/wide_deep_files/real_dataset
 ```	    
- - Go to this [page](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) on the Criteo website.
+- Go to this [page](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) on the Criteo website.
 Agree to the terms of use, enter your name, and submit the form. Then copy the download link for the 4.3GB tar file called `dac.tar.gz` and use it in the `wget` command in the code block below.
 Untar the file to create three files:
     1. readme.txt
@@ -321,7 +316,7 @@ Untar the file to create three files:
     This step may take a while to complete
 	```
     python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
-        --csv-datafile test.csv \
+        --inputcsv-datafile test.csv \
         --outputfile-name preprocessed
     ```
   - Exit the docker container and find the processed dataset `test_preprocessed.tfrecords` in the location `~/models/models`.
@@ -337,7 +332,7 @@ Untar the file to create three files:
 			--mode inference \
 			--framework tensorflow \
 			--benchmark-only \
-			--docker-image intelaipg/intel-optimized-tensorflow:latest \
+			--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
 			--data-location ~/models/models/test_preprocessed.tfrecords \
 			--verbose

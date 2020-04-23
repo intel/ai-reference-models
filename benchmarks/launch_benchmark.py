@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from __future__ import absolute_import
@@ -30,7 +30,7 @@ import sys
 from argparse import ArgumentParser
 from common import base_benchmark_util
 from common import platform_util
-from common.utils.validators import check_no_spaces, check_volume_mount
+from common.utils.validators import check_no_spaces, check_volume_mount, check_shm_size
 from common.base_model_init import BaseModelInitializer
 
 
@@ -75,6 +75,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                  "docker --volume flag (https://docs.docker.com/storage/volumes/). "
                  "This argument can only be used in conjunction with a --docker-image.",
             action="append", dest="custom_volumes", type=check_volume_mount)
+
+        arg_parser.add_argument(
+            "--shm-size",
+            help="Specify the size of docker /dev/shm. The format is <number><unit>. "
+                 "number must be greater than 0. Unit is optional and can be b (bytes), k (kilobytes), "
+                 "m (megabytes), or g (gigabytes).",
+            dest="shm_size", default="64m", type=check_shm_size)
 
         arg_parser.add_argument(
             "--debug", help="Launches debug mode which doesn't execute "
@@ -184,7 +191,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "DISABLE_TCMALLOC": args.disable_tcmalloc,
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "DOCKER": str(args.docker_image is not None),
-            "PYTHON_EXE": sys.executable if not args.docker_image else "python"
+            "PYTHON_EXE": sys.executable if not args.docker_image else "python",
+            "MPI_NUM_PROCESSES": args.mpi,
+            "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi
         }
 
         # Add custom model args as env vars)
@@ -199,12 +208,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # Set the default value for NOINSTALL, if it's not explicitly set by the user
         if "NOINSTALL" not in env_var_dict:
-            if args.docker_image:
-                # For docker, we default to install dependencies
-                env_var_dict["NOINSTALL"] = "False"
-            else:
-                # For bare metal, we default to assume the user has set up their environment
-                env_var_dict["NOINSTALL"] = "True"
+            env_var_dict["NOINSTALL"] = "False"
 
         return env_var_dict
 
@@ -221,57 +225,18 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         checkpoint_path = args.checkpoint
         dataset_path = args.data_location
 
-        # To Launch Tensorflow Serving benchmark we need only --in-graph arg.
-        # It does not support checkpoint files.
-        if args.framework == "tensorflow_serving":
-            if args.docker_image:
-                raise ValueError("--docker-image arg is not supported with tensorflow serving benchmarking, "
-                                 "as script automatically builds image and supplies it.")
+        mount_external_models_source = args.model_source_dir
+        mount_intelai_models = intelai_models
 
-            if checkpoint_path:
-                raise ValueError("--checkpoint-path arg is not supported with tensorflow serving benchmarking")
+        # Add env vars with bare metal settings
+        env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
+        env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
 
-            if args.mode != "inference":
-                raise ValueError("--mode arg should be set to inference")
+        if in_graph_path:
+            env_var_dict["IN_GRAPH"] = in_graph_path
 
-            if in_graph_path:
-                env_var_dict["IN_GRAPH"] = in_graph_path
-            else:
-                raise ValueError("--in-graph arg is required to run tensorflow serving benchmarking")
-
-            for env_var_name in env_var_dict:
-                os.environ[env_var_name] = str(env_var_dict[env_var_name])
-
-            # We need this env to be set for the platform util
-            os.environ["PYTHON_EXE"] = str(sys.executable if not args.docker_image else "python")
-
-            # Get Platformutil
-            platform_util_obj = None or platform_util.PlatformUtil(self.args)
-
-            # Configure num_inter_threads and num_intra_threads
-            base_obj = BaseModelInitializer(args=self.args, custom_args=[], platform_util=platform_util_obj)
-            base_obj.set_num_inter_intra_threads()
-
-            # Update num_inter_threads and num_intra_threads in env dictionary
-            env_var_dict["NUM_INTER_THREADS"] = self.args.num_inter_threads
-            env_var_dict["NUM_INTRA_THREADS"] = self.args.num_intra_threads
-
-            # Set OMP_NUM_THREADS
-            env_var_dict["OMP_NUM_THREADS"] = self.args.num_intra_threads
-
-        else:
-            mount_external_models_source = args.model_source_dir
-            mount_intelai_models = intelai_models
-
-            # Add env vars with bare metal settings
-            env_var_dict["MOUNT_EXTERNAL_MODELS_SOURCE"] = mount_external_models_source
-            env_var_dict["MOUNT_INTELAI_MODELS_SOURCE"] = mount_intelai_models
-
-            if in_graph_path:
-                env_var_dict["IN_GRAPH"] = in_graph_path
-
-            if checkpoint_path:
-                env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
+        if checkpoint_path:
+            env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path
@@ -381,8 +346,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.debug:
             docker_run_cmd.append("-it")
 
+        docker_shm_size = "--shm-size={}".format(args.shm_size)
         docker_run_cmd = docker_run_cmd + env_vars + volume_mounts + [
-            "--privileged", "-u", "root:root", "-w",
+            docker_shm_size, "--privileged", "-u", "root:root", "-w",
             workspace, args.docker_image, "/bin/bash"]
 
         if not args.debug:

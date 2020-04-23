@@ -72,33 +72,23 @@ This section shows how to measure inference performance on Intel's Model Zoo pre
  
 ### Initial Setup
 
-1. The model source is based off a specific commit from the TensorFlow models repo. Follow the instructions below to clone an older commit into your home directory.
-
-```
-cd ~
-mkdir tensorflow-models
-cd tensorflow-models
-git clone https://github.com/tensorflow/models.git
-cd models
-git checkout 8367cf6dabe11adf7628541706b660821f397dce
-```
-
-2. Clone IntelAI models and download into your home directory, skip this step if you already have Intel AI models installed.
+1. Clone IntelAI models and download into your home directory, skip this step if you already have Intel AI models installed.
 
 ```bash
 cd ~
 git clone https://github.com/IntelAI/models.git
 ```
 
-3. Skip to step 4 if you already have a pretrained model or download the file `transformer_lt_official_fp32_pretrained_model.tar.gz` into your ~/transformer_LT_german location.
+2. Skip to step 3 if you already have a pretrained model or download the file `transformer_lt_official_fp32_pretrained_model.tar.gz` into your ~/transformer_LT_german location.
 ```
 mkdir ~/transformer_LT_german
 cd ~/transformer_LT_german
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/transformer_lt_official_fp32_pretrained_model.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
 tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
 ```
+Refer to the Transformer LT Official [README](/benchmarks/language_translation/tensorflow/transformer_lt_official) to get the latest location of the pretrained model.
 
-4. After extraction, you should see the following folders and files in the `transformer_lt_official_fp32_pretrained_model` directory:
+3. After extraction, you should see the following folders and files in the `transformer_lt_official_fp32_pretrained_model` directory:
 ```
 $ ls -l transformer_lt_official_fp32_pretrained_model/*
 
@@ -124,20 +114,20 @@ Or, if you have your own model/data, ensure the folder structure following the s
 ├─ transformer_LT_german
 │	    ├── transformer_pretrained_model
 │	    	 ├── data
-│	         │   ├── newstest2014.en(Input file)
+│	         │   ├── newstest2014.en (Input file)
 │	   	 │   ├── newstest2014.de (Reference file, this is optional)
 │	         │   └── vocab.txt
 │	         └── graph
 │	    	     └── pretrained_model.pb
 ```
-5. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs in a Docker container.
+4. Install [Docker](https://docs.docker.com/install/) since the tutorial runs in a Docker container.
 
 ### Run inference
 
 1. Pull the relevant Intel-optimized TensorFlow Docker image.
    [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intelaipg/intel-optimized-tensorflow:latest
+docker pull docker.io/intel/intel-optimized-tensorflow:2.1.0
 ```
 2. cd to the inference script directory in local IntelAI repo
 ```bash        
@@ -151,13 +141,6 @@ but if you choose to set your own options, refer to full of available flags and 
 explanation on ```launch_benchmarking.py``` script [here](/docs/general/tensorflow/LaunchBenchmark.md).
  This step will automatically launch a new container on every run and terminate. Go to [Step 4](#step_4) to interactively run the script on the container.
 
-Substitute the `--model-source-dir` for the location where you cloned the
-[tensorflow/models](https://github.com/tensorflow/models.git) repo
-
-
-```
-~/tensorflow-models/models
-``` 
 3.1. <b> *Online inference*</b> (using `--socket-id 0` and `--batch-size 1`)
 
 If you wish to calculate the [BLEU](https://en.wikipedia.org/wiki/BLEU) metric to find out the machine-translation quality, pass the file as `reference` flag.
@@ -173,8 +156,7 @@ python launch_benchmark.py \
      --framework tensorflow \
      --batch-size 1 \
      --socket-id 0 \
-     --docker-image intelaipg/intel-optimized-tensorflow:latest \
-     --model-source-dir ~/tensorflow-models/models \
+     --docker-image intel/intel-optimized-tensorflow:2.1.0 \
      --in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
      --data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
      -- file=newstest2014.en \
@@ -195,8 +177,7 @@ python launch_benchmark.py \
 	--framework tensorflow \
 	--batch-size 64 \
 	--socket-id 0 \
-	--docker-image intelaipg/intel-optimized-tensorflow:latest \
-	--model-source-dir ~/tensorflow-models/models \
+	--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 	--in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
 	--data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
 	-- file=newstest2014.en \
@@ -233,8 +214,7 @@ python launch_benchmark.py \
 	--framework tensorflow \
 	--batch-size 64 \
 	--socket-id 0 \
-	--docker-image intelaipg/intel-optimized-tensorflow:latest \
-	--model-source-dir ~/tensorflow-models/models \
+	--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 	--in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
 	--data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
 	--debug
@@ -251,7 +231,7 @@ console out:
 	root@a78677f56d69:/workspace/benchmarks/common/tensorflow#
 ```
 	
-To rerun the bechmarking script, execute the ```start.sh``` bash script from your existing directory with the available flags, which inturn will run ```launch_benchmark.py```. For e.g  to rerun with the different batch size (batch size=64) settings run with ```BATCH_SIZE``` 
+To rerun the benchmarking script, execute the ```start.sh``` bash script from your existing directory with the available flags, which in turn will run ```launch_benchmark.py```. For e.g  to rerun with the different batch size (batch size=64) settings run with ```BATCH_SIZE``` 
 and to skip the run from reinstalling packages pass ```True``` to ```NOINSTALL```. 
 
 ```bash	
