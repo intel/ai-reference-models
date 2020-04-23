@@ -173,6 +173,7 @@ CMD="${PYTHON_EXE} ${RUN_SCRIPT_PATH} \
 --batch-size=${BATCH_SIZE} \
 --socket-id=${SOCKET_ID} \
 --output-dir=${OUTPUT_DIR} \
+--num-train-steps=${NUM_TRAIN_STEPS} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
@@ -842,46 +843,87 @@ function ssd_mobilenet() {
 
 # SSD-ResNet34 model
 function ssd-resnet34() {
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
-      
-      old_dir=${PWD}
+      if [ ${MODE} == "inference" ]; then
+        if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
 
-      if [ ${NOINSTALL} != "True" ]; then
-        for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-        do
-          pip install $line
-        done
-        model_source_dir=${MOUNT_EXTERNAL_MODELS_SOURCE}
-        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
-      else
-        model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
-        infer_dir="${INTELAI_MODELS}/${MODE}"
+          old_dir=${PWD}
+
+          if [ ${NOINSTALL} != "True" ]; then
+            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            do
+              pip install $line
+            done
+            model_source_dir=${MOUNT_EXTERNAL_MODELS_SOURCE}
+            infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+          else
+            model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
+            infer_dir="${INTELAI_MODELS}/${MODE}"
+          fi
+          benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
+          model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+
+          cd  ${model_source_dir}/../
+          cd ssd-resnet-benchmarks
+          git apply ${benchmarks_patch_path}
+
+          cd ${model_source_dir}
+          git apply ${model_patch_path}
+
+          if [ ${NOINSTALL} != "True" ]; then
+            export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
+            export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
+          fi
+
+          cd ${old_dir}
+
+          CMD="${CMD} \
+          $(add_arg "--input-size" ${input_size})"
+          CMD=${CMD} run_model
+
+        else
+          echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+          exit 1
+        fi
+      elif [ ${MODE} == "training" ]; then
+        if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+          if [ ${NOINSTALL} != "True" ]; then
+            apt-get update && apt-get install -y cpio
+
+            # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
+            cd /l_mpi
+            sh install.sh --silent silent.cfg
+            source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+
+            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            do
+              pip install $line
+            done
+          fi
+
+          old_dir=${PWD}
+          cd /tmp
+          rm -rf benchmark_ssd_resnet34
+          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd_resnet34
+          cd benchmark_ssd_resnet34
+          git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
+          if [ ${PRECISION} == "bfloat16" ]; then
+            git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
+          fi
+          cd ${old_dir}
+
+          CMD="${CMD} \
+          $(add_arg "--weight_decay" ${weight_decay}) \
+          $(add_arg "--num_warmup_batches" ${num_warmup_batches})"
+          local old_pythonpath=${PYTHONPATH}
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
+          CMD=${CMD} run_model
+          PYTHONPATH=${old_pythonpath}
+        else
+          echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+          exit 1
+        fi
       fi
-      benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
-      model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-
-      cd  ${model_source_dir}/../
-      cd ssd-resnet-benchmarks
-      git apply ${benchmarks_patch_path}
-      
-      cd ${model_source_dir}
-      git apply ${model_patch_path}
-      
-      if [ ${NOINSTALL} != "True" ]; then
-        export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
-        export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"      
-      fi
-      
-      cd ${old_dir}
-
-      CMD="${CMD} \
-      $(add_arg "--input-size" ${input_size})"
-      CMD=${CMD} run_model    
-
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
-    fi
 }
 
 # SSD-VGG16 model
