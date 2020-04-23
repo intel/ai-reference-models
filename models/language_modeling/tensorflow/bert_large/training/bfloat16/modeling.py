@@ -162,9 +162,12 @@ class BertModel(object):
     # Flags for BF16 CPU
     self.bf16_scope = False
     if config.precision == "bfloat16" :
-      bf.set_rprecision(tf.bfloat16)
+      bf.set_global_precision(tf.bfloat16)
       if config.new_bf16_scope :
         self.bf16_scope = True
+
+    if hasattr(config, "mkldnn"):
+      bf.set_mkldnn(config.mkldnn)
 
     config = copy.deepcopy(config)
     if not is_training:
@@ -414,7 +417,7 @@ def dropout(input_tensor, dropout_prob):
   if dropout_prob is None or dropout_prob == 0.0:
     return input_tensor
 
-  output = tf.nn.dropout(input_tensor, 1 - (1.0 - dropout_prob))
+  output = tf.nn.dropout(input_tensor, rate=dropout_prob)
   return output
 
 

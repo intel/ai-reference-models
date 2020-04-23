@@ -136,6 +136,14 @@ flags.DEFINE_integer(
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
+
+flags.DEFINE_bool(
+    "experimental_mkldnn_ops", False,
+    "[Optional] If true, use more experimental mkldnn operations in model."
+    "           Be careful this flag will crash model with incompatible TF.")
+
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, accum_steps, use_tpu,
@@ -165,7 +173,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
     if bert_config.precision == "bfloat16" and bert_config.new_bf16_scope == True:
       with tf.compat.v1.tpu.bfloat16_scope():
-        bf.set_rprecision(tf.bfloat16)
+        bf.set_global_precision(tf.bfloat16)
         opt_fine_tuning=True
         tf.compat.v1.logging.info("*** New bfloat16 scope set***")
         model = modeling.BertModel(
@@ -311,8 +319,9 @@ def get_masked_lm_output(bert_config, input_tensor, output_weights, positions,
         "output_bias",
         shape=[bert_config.vocab_size],
         initializer=tf.compat.v1.zeros_initializer())
-    logits = bf.matmul(input_tensor, output_weights, transpose_b=True)
-    logits = bf.i_cast(logits)
+    input_tensor = bf.i_cast(input_tensor)
+    output_weights = bf.i_cast(output_weights)
+    logits = tf.matmul(input_tensor, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
 
@@ -347,8 +356,9 @@ def get_next_sentence_output(bert_config, input_tensor, labels):
     output_bias = tf.compat.v1.get_variable(
         "output_bias", shape=[2], initializer=tf.compat.v1.zeros_initializer())
 
-    logits = bf.matmul(input_tensor, output_weights, transpose_b=True)
-    logits = bf.i_cast(logits)
+    input_tensor = bf.i_cast(input_tensor)
+    output_weights = bf.i_cast(output_weights)
+    logits = tf.matmul(input_tensor, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
     labels = tf.reshape(labels, [-1])
@@ -486,6 +496,10 @@ def main(_):
   #    FLAGS.train_batch_size  = 32
 
   logBatchSizeInfo(FLAGS)
+
+  if FLAGS.disable_v2_bevior:
+    tf.compat.v1.disable_v2_behavior()
+
   if FLAGS.profile:
     tf.compat.v1.disable_eager_execution()
 
@@ -495,6 +509,9 @@ def main(_):
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
+
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   bert_config.new_bf16_scope = FLAGS.new_bf16_scope
 
@@ -538,7 +555,7 @@ def main(_):
 
   if bert_config.precision == "bfloat16" and bert_config.new_bf16_scope == False:
     with tf.compat.v1.tpu.bfloat16_scope():
-      bf.set_rprecision(tf.bfloat16)
+      bf.set_global_precision(tf.bfloat16)
       tf.compat.v1.logging.info("*** Old bfloat16 scope set***")
       model_fn = model_fn_builder(
           bert_config=bert_config,
@@ -594,7 +611,7 @@ def main(_):
     if FLAGS.profile:
       tf.compat.v1.logging.info("***** Running training with profiler*****")
       hooks.append([tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)])
+                                               show_memory=False)])
 
     estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps,
                     hooks=hooks)

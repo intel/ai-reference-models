@@ -148,6 +148,15 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 20,
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
+
+flags.DEFINE_bool(
+    "experimental_mkldnn_ops", False,
+    "[Optional] If true, use more experimental mkldnn operations in model."
+    "           Be careful this flag will crash model with incompatible TF.")
+
+
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
 
@@ -830,6 +839,9 @@ def main(_):
 
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
+  if FLAGS.disable_v2_bevior:
+    tf.compat.v1.disable_v2_behavior()
+
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in Classifier")
     exit(0)
@@ -852,6 +864,9 @@ def main(_):
         "At least one of `do_train`, `do_eval` or `do_predict' must be True.")
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
+
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(
@@ -960,7 +975,7 @@ def main(_):
     if FLAGS.profile == True :
       tf.compat.v1.logging.info("***** Running training with profiler *****")
       hooks.append([tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)])
+                                               show_memory=False)])
 
     estimator.train(input_fn=train_input_fn, max_steps=num_train_steps, hooks=hooks)
 

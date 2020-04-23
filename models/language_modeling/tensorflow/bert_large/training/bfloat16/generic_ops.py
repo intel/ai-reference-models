@@ -24,10 +24,28 @@ import tensorflow as tf
 
 _inprecision = tf.float32
 _rprecision = tf.float32
+_keras_policy = tf.keras.mixed_precision.experimental.Policy("float32")
+_use_mkldnn = False
+
+def set_global_precision(dt):
+  # Set Keras API precision
+  global _keras_policy
+  if dt == tf.bfloat16:
+    _keras_policy=tf.keras.mixed_precision.experimental.Policy("mixed_bfloat16")
+
+  # Set basic API precision
+  set_rprecision(dt)
 
 def set_rprecision(dt):
   global _rprecision
   _rprecision=dt
+
+def get_keras_policy():
+  return _keras_policy
+
+def set_mkldnn(mkldnn=False):
+  global _use_mkldnn
+  _use_mkldnn = mkldnn
 
 def i_cast(x) :
      return tf.cast(x, _inprecision)
@@ -35,12 +53,6 @@ def i_cast(x) :
 def r_cast(x) :
      return tf.cast(x, _rprecision)
 
-def matmul(matA, matB, transpose_b=False) :
-    matA = i_cast(matA)
-    matB = i_cast(matB)
-    matC = tf.matmul(matA, matB, transpose_b=transpose_b)
-    return r_cast(matC)
-         
 def multiply(x,y):
     x = r_cast(x)
     y = r_cast(y)
@@ -58,21 +70,16 @@ def tanh(x):
     return r_cast(rval)
 
 def softmax(scores, axis=None):
-    scores = i_cast(scores)
-    rval = tf.nn.softmax(scores, axis)
-    return r_cast(rval)
-
-def pow(x, y):
-    x = i_cast(x)
-    rval = tf.pow(x,y)
-    return r_cast(rval)
+    if _use_mkldnn:
+      return tf.nn.softmax(scores, axis)
+    else:
+      scores = i_cast(scores)
+      rval = tf.nn.softmax(scores, axis)
+      return r_cast(rval)
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
-    inputs = i_cast(inputs)
-    #lnorm = tf.keras.layers.LayerNormalization(axis=1, center=True, scale=True)
-    lnorm = tf.keras.layers.LayerNormalization()
-    out_tensor = lnorm(inputs)
-    return r_cast(out_tensor)
+    lnorm = tf.keras.layers.LayerNormalization(dtype=get_keras_policy())
+    return lnorm(inputs)
 
 "Moved from modeling.py"
 def gelu(x):
@@ -86,12 +93,14 @@ def gelu(x):
   Returns:
     `x` with the GELU activation applied.
   """
-  x = i_cast(x)
-  cdf = 0.5 * (1.0 + tf.tanh(
-      (np.sqrt(2 / np.pi) * (x + 0.044715 * tf.pow(x, 3)))))
-  rval = x * cdf
-  return r_cast(rval)
-
+  if _use_mkldnn:
+    return tf.nn.gelu(x)
+  else:
+    x = i_cast(x)
+    cdf = 0.5 * (1.0 + tf.tanh(
+        (np.sqrt(2 / np.pi) * (x + 0.044715 * tf.pow(x, 3)))))
+    rval = x * cdf
+    return r_cast(rval)
 
 def logTheLossHook(total_loss, n):
     return tf.compat.v1.train.LoggingTensorHook({"\t Loss " : total_loss}, every_n_iter=n)
