@@ -132,6 +132,14 @@ flags.DEFINE_integer(
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool(
+    "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
+
+flags.DEFINE_bool(
+    "experimental_mkldnn_ops", False,
+    "[Optional] If true, use more experimental mkldnn operations in model."
+    "           Be careful this flag will crash model with incompatible TF.")
+
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, accum_steps, use_tpu,
@@ -466,6 +474,10 @@ def main(_):
   #    FLAGS.train_batch_size  = 32
 
   logBatchSizeInfo(FLAGS)
+
+  if FLAGS.disable_v2_bevior:
+    tf.compat.v1.disable_v2_behavior()
+
   if FLAGS.profile:
     tf.compat.v1.disable_eager_execution()
 
@@ -475,6 +487,9 @@ def main(_):
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
+
+  if FLAGS.experimental_mkldnn_ops:
+    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
 
   tf.io.gfile.makedirs(FLAGS.output_dir)
 
@@ -571,7 +586,7 @@ def main(_):
     if FLAGS.profile:
       tf.compat.v1.logging.info("***** Running training with profiler*****")
       hooks.append([tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
-                                               show_memory=True)])
+                                               show_memory=False)])
 
     estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps,
                     hooks=hooks)

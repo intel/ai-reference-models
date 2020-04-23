@@ -24,10 +24,15 @@ import tensorflow as tf
 
 _inprecision = tf.float32
 _rprecision = tf.float32
+_use_mkldnn = False
 
 def set_rprecision(dt):
   global _rprecision
   _rprecision=dt
+
+def set_mkldnn(mkldnn=False):
+  global _use_mkldnn
+  _use_mkldnn = mkldnn
 
 def i_cast(x) :
      return tf.cast(x, _inprecision)
@@ -40,7 +45,7 @@ def matmul(matA, matB, transpose_b=False) :
     matB = i_cast(matB)
     matC = tf.matmul(matA, matB, transpose_b=transpose_b)
     return r_cast(matC)
-         
+
 def multiply(x,y):
     x = r_cast(x)
     y = r_cast(y)
@@ -62,11 +67,6 @@ def softmax(scores, axis=None):
     rval = tf.nn.softmax(scores, axis)
     return r_cast(rval)
 
-def pow(x, y):
-    x = i_cast(x)
-    rval = tf.pow(x,y)
-    return r_cast(rval)
-
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
     inputs = i_cast(inputs)
     #lnorm = tf.keras.layers.LayerNormalization(axis=1, center=True, scale=True)
@@ -86,11 +86,14 @@ def gelu(x):
   Returns:
     `x` with the GELU activation applied.
   """
-  x = i_cast(x)
-  cdf = 0.5 * (1.0 + tf.tanh(
-      (np.sqrt(2 / np.pi) * (x + 0.044715 * tf.pow(x, 3)))))
-  rval = x * cdf
-  return r_cast(rval)
+  if _use_mkldnn:
+    return tf.nn.gelu(x)
+  else:
+    x = i_cast(x)
+    cdf = 0.5 * (1.0 + tf.tanh(
+        (np.sqrt(2 / np.pi) * (x + 0.044715 * tf.pow(x, 3)))))
+    rval = x * cdf
+    return r_cast(rval)
 
 def logTheLossHook(total_loss, n):
     return tf.compat.v1.train.LoggingTensorHook({"\t Loss " : total_loss}, every_n_iter=n)
