@@ -517,7 +517,10 @@ $ pushd $MODEL_WORK_DIR
    The `coco_train.record-*-of-*` files are what we will use in this training example.
 
 7. Install OpenMPI if running on baremetal. If using docker, this should be automatically installed.
+
+   ```bash
     apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
+   ```
    
 8. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step.
 
