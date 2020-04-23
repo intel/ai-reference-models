@@ -516,74 +516,26 @@ $ pushd $MODEL_WORK_DIR
    
    The `coco_train.record-*-of-*` files are what we will use in this training example.
 
-7. Download and install the [Intel(R) MPI Library for Linux](https://software.intel.com/en-us/mpi-library/choose-download/linux). Once you have the l_mpi_2019.3.199.tgz downloaded, unzip it into /home//l_mpi directory. Make sure to accpet the installation license and **change the value of "ACCEPT_EULA" to "accept" in /home//l_mpi/l_mpi_2019.3.199/silent.cfg**, before start the silent installation. 
-
-   The software is installed by default to "/opt/intel" location. If want to run the training in docker, please keep the default installation location.
+7. Install OpenMPI if running on baremetal. If using docker, this should be automatically installed.
+    apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
    
-   ```bash
-   $ tar -zxvf l_mpi_2019.3.199.tgz -C $MODEL_WORK_DIR/l_mpi
-   $ cd $MODEL_WORK_DIR/l_mpi/l_mpi_2019.3.199
-   # change the value of "ACCEPT_EULA" to "accept"
-   $ vim silent.cfg
-   ```
-   
-8. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step. Note that we are running SSD-ResNet34 with a TensorFlow 1.14-pre-rc0 docker image.
+8. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step.
 
-   To run for training, use the following command, but replace in your path to the unzipped coco dataset images from step 3 for the `--data-location`, `--volume` Intel(R) MPI package path,`--num_processes` the number of MPI processes, `--processes_per_node` the number of processes to launch on each node.
+   To run for training, use the following command.
 
    ```bash
    $ cd $MODEL_WORK_DIR/models/benchmarks/
    
-   $ python launch_benchmark.py \
-       --data-location /lustre/dataset/tensorflow/coco \
-       --model-source-dir $MODEL_WORK_DIR/tf_models \
-       --model-name ssd-resnet34 \
-       --framework tensorflow \
-       --precision fp32 \
-       --mode training \
-       --num-train-steps 500 \
-       --num-processes 2 \
-       --num-processes-per-node 1 \
-       --num-cores 27 \
-       --num-inter-threads 1 \
-       --num-intra-threads 27 \
-       --batch-size=32 \
-       --weight_decay=1e-4 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14-pre-rc0-devel-mkl-py3 \
-       --volume $MODEL_WORK_DIR/l_mpi/l_mpi_2019.3.199:/l_mpi \
-       --shm-size 4g
-   ```
-
-9. The log file is saved to the value of `--output-dir`.
-
-   Below is a sample log file tail when running for training:
-
-   ```bash
-   TensorFlow:  1.14
-   Model:       ssd300
-   Dataset:     coco
-   Mode:        training
-   SingleSess:  False
-   Batch size:  64 global
-                32 per device
-   Num batches: 500
-   Num epochs:  0.27
-   Devices:     ['horovod/cpu:0', 'horovod/cpu:1']
-   NUMA bind:   False
-   Data format: NCHW
-   Optimizer:   sgd
-   Variables:   horovod
-   Horovod on:  cpu
-   
-   
-   Step    Img/sec                                 total_loss
-   1       images/sec: 21.6 +/- 0.0 (jitter = 0.0) 52.921
-   10      images/sec: 22.3 +/- 0.1 (jitter = 0.2) 44.674
-   20      images/sec: 22.3 +/- 0.1 (jitter = 0.2) 43.106
-   30      images/sec: 22.3 +/- 0.0 (jitter = 0.2) 34.703
-   40      images/sec: 22.3 +/- 0.0 (jitter = 0.2) 30.737
-   50      images/sec: 22.3 +/- 0.0 (jitter = 0.2) 28.466
-   
+    $ python3 launch_benchmark.py \
+    --data-location /tf_dataset/dataset/ssd-resnet34/coco_training_yang/ \
+    --model-source-dir /tmp/public-models \
+    --model-name ssd-resnet34 --framework tensorflow \
+    --precision fp32 --mode training \
+    --num-train-steps 100 --num-cores 52 \
+    --num-inter-threads 1 --num-intra-threads 52 \
+    --batch-size=52 --weight_decay=1e-4 \
+    --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+    --docker-image amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow:nightly-cpx-launch-unified-DNNL1-TF-v2-BFLOAT16-avx512-devel-mkl-py3
    ```
 
    ## BF16 Training Instructions
@@ -592,17 +544,22 @@ $ pushd $MODEL_WORK_DIR
 
    2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
       Use the below command to run on single socket.
+      Note: for best performance, use the same value for the arguments num-cores, num-intra-thread and batch-size as follows:
+        For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+        For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
 
       ```bash
       $ cd $MODEL_WORK_DIR/models/benchmarks/
 
       $ python3 launch_benchmark.py \
-      --data-location /nfs/pdx/home/mabuzain/coco_training_yang/ \
-      --model-source-dir $MODEL_WORK_DIR/tf_models \
+      --data-location /tf_dataset/dataset/ssd-resnet34/coco_training_yang/ \
+      --model-source-dir /tmp/public-models \
       --model-name ssd-resnet34 --framework tensorflow \
       --precision bfloat16 --mode training \
       --num-train-steps 100 --num-cores 52 \
       --num-inter-threads 1 --num-intra-threads 52 \
-      --batch-size=52 --weight_decay=1e-4
+      --batch-size=52 --weight_decay=1e-4 \
+      --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+      --docker-image amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow:nightly-cpx-launch-unified-DNNL1-TF-v2-BFLOAT16-avx512-devel-mkl-py3
 
       ```
