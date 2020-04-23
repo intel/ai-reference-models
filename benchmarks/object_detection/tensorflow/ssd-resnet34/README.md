@@ -4,6 +4,7 @@ This document has instructions for how to run SSD-ResNet34 for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 * [INT8 inference](#int8-inference-instructions)
+* [FP32 Training](#fp32-training-instructions)
 
 Instructions and scripts for model training and inference
 for other precisions are coming later.
@@ -35,17 +36,18 @@ to get your environment setup with the required dependencies.
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
+cd $MODEL_WORK_DIR
 $ mkdir val
 $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
-$ cd ..
+$ cd $MODEL_WORK_DIR
 
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
-$ cd ..
+$ cd $MODEL_WORK_DIR
 ```
 
 Since we are only using the validation dataset in this example, we will
@@ -57,7 +59,7 @@ $ mkdir empty_dir
 
 $ cd annotations
 $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd ..
+$ cd $MODEL_WORK_DIR
 ```
 
 5. Now that you have the raw COCO dataset, we need to convert it to the
@@ -79,15 +81,15 @@ $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/<user>/coco/empty_dir" \
-      --val_image_dir="/home/<user>/coco/val/val2017" \
-      --test_image_dir="/home/<user>/coco/empty_dir" \
-      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --output_dir="/home/<user>/coco/output"
+      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
+      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
+      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --output_dir="$MODEL_WORK_DIR/output"
 
-$ ll /home/<user>/coco/output
+$ ll $MODEL_WORK_DIR/output
 total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
@@ -144,7 +146,7 @@ By default it runs with input size 300x300, you may add `-- input-size=1200`
 flag to run benchmark with input size 1200x1200.
 
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd $MODEL_WORK_DIR/models/benchmarks
 
 # benchmarks with input size 1200x1200
 $ python launch_benchmark.py \
@@ -214,6 +216,11 @@ Below is a sample log file tail when testing accuracy:
 Current AP: 0.21082
 ```
 
+10. To return to where you started from:
+```
+$ popd
+```
+
 ## INT8 Inference Instructions
 1. Please ensure you have installed all the libraries listed in the 
 `requirements` before you start the next step.
@@ -240,17 +247,18 @@ to get your environment setup with the required dependencies.
 [COCO dataset](http://cocodataset.org/#home) and annotations:
 
 ```
+cd $MODEL_WORK_DIR
 $ mkdir val
 $ cd val
 $ wget http://images.cocodataset.org/zips/val2017.zip
 $ unzip val2017.zip
-$ cd ..
 
+$ cd $MODEL_WORK_DIR
 $ mkdir annotations
 $ cd annotations
 $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
 $ unzip annotations_trainval2017.zip
-$ cd ..
+$ cd $MODEL_WORK_DIR
 ```
 
 Since we are only using the validation dataset in this example, we will
@@ -262,7 +270,7 @@ $ mkdir empty_dir
 
 $ cd annotations
 $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd ..
+$ cd $MODEL_WORK_DIR
 ```
 
 5. Now that you have the raw COCO dataset, we need to convert it to the
@@ -283,15 +291,15 @@ $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="/home/<user>/coco/empty_dir" \
-      --val_image_dir="/home/<user>/coco/val/val2017" \
-      --test_image_dir="/home/<user>/coco/empty_dir" \
-      --train_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --val_annotations_file="/home/<user>/coco/annotations/instances_val2017.json" \
-      --testdev_annotations_file="/home/<user>/coco/annotations/empty.json" \
-      --output_dir="/home/<user>/coco/output"
+      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
+      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
+      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
+      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+      --output_dir="$MODEL_WORK_DIR/output"
 
-$ ll /home/<user>/coco/output
+$ ll $MODEL_WORK_DIR/output
 total 1598276
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
 -rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
@@ -352,7 +360,7 @@ By default it runs with input size 300x300, you may add `-- input-size=1200`
 flag to run benchmark with input size 1200x1200.
 
 ```
-$ cd /home/<user>/models/benchmarks
+$ cd $MODEL_WORK_DIR/models/benchmarks
 
 # benchmarks with input size 300x300
 $ python launch_benchmark.py \
@@ -421,3 +429,140 @@ Below is a sample log file tail when testing accuracy:
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.484
 Current AP: 0.20408
 ```
+
+10. To return to where you started from:
+```
+$ popd
+```
+
+## FP32 Training Instructions
+
+1. Store the path to the current directory:
+```
+$ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
+$ pushd $MODEL_WORK_DIR
+```
+
+2. Clone the [intelai/models](https://github.com/intelai/models) repository. This repository has the launch script for running the model.
+
+   ```bash
+   $ cd $MODEL_WORK_DIR
+   $ git clone https://github.com/IntelAI/models.git
+   ```
+
+3. Clone the `tensorflow/models` repository with the specified SHA, since we are using an older version of the models repository for SSD-ResNet34.
+
+   ```bash
+   $ git clone https://github.com/tensorflow/models.git tf_models
+   $ cd tf_models
+   $ git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
+   $ git apply $MODEL_WORK_DIR/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
+   ```
+
+   The TensorFlow models repository will be used for running training as well as converting the coco dataset to the TF records format.
+
+4. Follow the TensorFlow models object detection [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation) to get your environment setup with the required dependencies.
+
+5. Download the 2017 train [COCO dataset](http://cocodataset.org/#home):
+
+   ```bash
+   $ cd $MODEL_WORK_DIR
+   $ mkdir train
+   $ cd train
+   $ wget http://images.cocodataset.org/zips/train2017.zip
+   $ unzip train2017.zip
+   
+   $ cd $MODEL_WORK_DIR
+   $ mkdir val
+   $ cd val
+   $ wget http://images.cocodataset.org/zips/val2017.zip
+   $ unzip val2017.zip
+   
+   $ cd $MODEL_WORK_DIR
+   $ mkdir annotations
+   $ cd annotations
+   $ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+   $ unzip annotations_trainval2017.zip
+   ```
+
+   Since we are only using the train and validation dataset in this example, we will create an empty directory and empty annotations json file to pass as the test directories in the next step.
+
+   ```
+   $ cd $MODEL_WORK_DIR
+   $ mkdir empty_dir
+   
+   $ cd annotations
+   $ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
+   $ cd $MODEL_WORK_DIR
+   ```
+
+6. Now that you have the raw COCO dataset, we need to convert it to the TF records format in order to use it with the training script. We will do this by running the `create_coco_tf_record.py` file in the TensorFlow models repository.
+
+   ```bash
+   # We are going to use an older version of the conversion script to checkout the git commit
+   $ cd models
+   $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
+   
+   $ cd research/object_detection/dataset_tools/
+   $ python create_coco_tf_record.py --logtostderr \
+         --train_image_dir="$MODEL_WORK_DIR/train2017" \
+         --val_image_dir="$MODEL_WORK_DIR/val2017" \
+         --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
+         --train_annotations_file="$MODEL_WORK_DIR/annotations/instances_train2017.json" \
+         --val_annotations_file="$MODEL_WORK_DIR/annotations/instances_val2017.json" \
+         --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
+         --output_dir="$MODEL_WORK_DIR/output"
+   ```
+   
+   The `coco_train.record-*-of-*` files are what we will use in this training example.
+
+7. Install OpenMPI if running on baremetal. If using docker, this should be automatically installed.
+
+   ```bash
+    apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
+   ```
+   
+8. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step.
+
+   To run for training, use the following command.
+
+   ```bash
+   $ cd $MODEL_WORK_DIR/models/benchmarks/
+   
+    $ python3 launch_benchmark.py \
+    --data-location /tf_dataset/dataset/ssd-resnet34/coco_training_yang/ \
+    --model-source-dir /tmp/public-models \
+    --model-name ssd-resnet34 --framework tensorflow \
+    --precision fp32 --mode training \
+    --num-train-steps 100 --num-cores 52 \
+    --num-inter-threads 1 --num-intra-threads 52 \
+    --batch-size=52 --weight_decay=1e-4 \
+    --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+    --docker-image amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow:nightly-cpx-launch-unified-DNNL1-TF-v2-BFLOAT16-avx512-devel-mkl-py3
+   ```
+
+   ## BF16 Training Instructions
+
+   1. Follow steps 1-7 from the above FP32 Training Instructions to setup the environment.
+
+   2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
+      Use the below command to run on single socket.
+      Note: for best performance, use the same value for the arguments num-cores, num-intra-thread and batch-size as follows:
+        For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+        For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
+
+      ```bash
+      $ cd $MODEL_WORK_DIR/models/benchmarks/
+
+      $ python3 launch_benchmark.py \
+      --data-location /tf_dataset/dataset/ssd-resnet34/coco_training_yang/ \
+      --model-source-dir /tmp/public-models \
+      --model-name ssd-resnet34 --framework tensorflow \
+      --precision bfloat16 --mode training \
+      --num-train-steps 100 --num-cores 52 \
+      --num-inter-threads 1 --num-intra-threads 52 \
+      --batch-size=52 --weight_decay=1e-4 \
+      --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+      --docker-image amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow:nightly-cpx-launch-unified-DNNL1-TF-v2-BFLOAT16-avx512-devel-mkl-py3
+
+      ```

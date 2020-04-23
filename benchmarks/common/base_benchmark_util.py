@@ -133,6 +133,11 @@ class BaseBenchmarkUtil(object):
             dest="num_inter_threads", default=None)
 
         self._common_arg_parser.add_argument(
+            "-ts", "--num-train-steps", type=check_positive_number,
+            help="Specify the number of training steps ",
+            dest="num_train_steps", default=1)
+
+        self._common_arg_parser.add_argument(
             "--data-num-intra-threads", type=check_positive_number,
             help="The number intra op threads for the data layer config",
             dest="data_num_intra_threads", default=None)
@@ -220,11 +225,11 @@ class BaseBenchmarkUtil(object):
     def _validate_args(self):
         """validate the args and initializes platform_util"""
         # check if socket id is in socket number range
-        num_sockets = self._platform_util.num_cpu_sockets
+        num_numas = self._platform_util.num_numa_nodes
         args = self.args
-        if not -1 <= args.socket_id < num_sockets:
-            raise ValueError("Socket id must be within socket number range: "
-                             "[0, {}].".format(num_sockets - 1))
+        if not -1 <= args.socket_id < num_numas:
+            raise ValueError("Socket id must be within NUMA number range: "
+                             "[0, {}].".format(num_numas - 1))
 
         # check number of cores
         num_logical_cores_per_socket = \
