@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
@@ -75,7 +75,7 @@ from object_detection.utils import config_util
 from object_detection.utils import label_map_util
 
 
-tf.logging.set_verbosity(tf.logging.INFO)
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 import logging
 # logging.basicConfig(level=logging.INFO)
 
@@ -121,11 +121,11 @@ def main(unused_argv):
     # os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
   assert FLAGS.checkpoint_dir, '`checkpoint_dir` is missing.'
   assert FLAGS.eval_dir, '`eval_dir` is missing.'
-  tf.gfile.MakeDirs(FLAGS.eval_dir)
+  tf.io.gfile.makedirs(FLAGS.eval_dir)
   if FLAGS.pipeline_config_path:
     configs = config_util.get_configs_from_pipeline_file(
         FLAGS.pipeline_config_path)
-    tf.gfile.Copy(FLAGS.pipeline_config_path,
+    tf.io.gfile.copy(FLAGS.pipeline_config_path,
                   os.path.join(FLAGS.eval_dir, 'pipeline.config'),
                   overwrite=True)
   else:
@@ -136,7 +136,7 @@ def main(unused_argv):
     for name, config in [('model.config', FLAGS.model_config_path),
                          ('eval.config', FLAGS.eval_config_path),
                          ('input.config', FLAGS.input_config_path)]:
-      tf.gfile.Copy(config,
+      tf.io.gfile.copy(config,
                     os.path.join(FLAGS.eval_dir, name),
                     overwrite=True)
 
@@ -152,8 +152,8 @@ def main(unused_argv):
       is_training=False)
 
   def get_next(config):
-    return dataset_util.make_initializable_iterator(
-        dataset_builder.build(config)).get_next()
+    return tf.compat.v1.data.make_initializable_iterator(
+        dataset_util, dataset_builder.build(config)).get_next()
 
   create_input_dict_fn = functools.partial(get_next, input_config)
 
@@ -170,4 +170,4 @@ def main(unused_argv):
 
 
 if __name__ == '__main__':
-  tf.app.run()
+  tf.compat.v1.app.run()

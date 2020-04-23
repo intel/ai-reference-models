@@ -23,7 +23,7 @@ This repository includes launch scripts for running an optimized version of the 
 
 2. Download the pretrained model:
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inception_resnet_v2_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
@@ -84,7 +84,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -100,7 +100,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
@@ -115,7 +115,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inception_resnet_v2_int8_pretrained_model.pb
 ```
 
@@ -182,7 +182,7 @@ This repository includes launch scripts for running an optimized version of the 
 2. Download the pre-trained Inception ResNet V2 model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inception_resnet_v2_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inception_resnet_v2_fp32_pretrained_model.pb
 ```
 
 3. If you would like to run Inception ResNet V2 inference and test for
@@ -242,7 +242,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -259,7 +259,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 128`):
@@ -274,7 +274,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --socket-id 0 \
     --in-graph /home/<user>/inception_resnet_v2_fp32_pretrained_model.pb \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands

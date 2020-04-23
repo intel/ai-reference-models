@@ -33,7 +33,7 @@ following modes/precisions:
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/densenet169_fp32_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/densenet169_fp32_pretrained_model.pb
    ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -58,7 +58,7 @@ following modes/precisions:
         --batch-size 100 \
         --socket-id 0 \
         --in-graph /home/<user>/densenet169_fp32_pretrained_model.pb \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"
     ```
@@ -74,7 +74,7 @@ following modes/precisions:
         --batch-size 1 \
         --socket-id 0 \
         --in-graph /home/<user>/densenet169_fp32_pretrained_model.pb \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"
     ```
@@ -91,7 +91,7 @@ following modes/precisions:
         --batch-size 100 \
         --socket-id 0 \
         --in-graph /home/<user>/densenet169_fp32_pretrained_model.pb \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --data-location /home/<user>/imagenet_validation_dataset \
         -- input_height=224 input_width=224 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"

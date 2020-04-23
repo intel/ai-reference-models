@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 import os
@@ -40,7 +39,7 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        MODEL_EXEC_DIR = str(self.args.model_source_dir) + "/official/transformer/"
+        MODEL_EXEC_DIR = os.path.join(self.args.intelai_models, self.args.mode, self.args.precision)
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
@@ -100,12 +99,13 @@ class ModelInitializer(BaseModelInitializer):
                             " --reference=" + self.args.reference
 
         self.cmd += " " + run_script + cmd_args
-        self.bleucmd = self.python_exe + " " + MODEL_EXEC_DIR + \
-            "compute_bleu.py" + self.bleu_params
+        compute_bleu_script = os.path.join(MODEL_EXEC_DIR, "compute_bleu.py")
+        self.bleucmd = self.python_exe + " " + compute_bleu_script \
+            + self.bleu_params
 
     def run(self):
         original_dir = os.getcwd()
-        os.chdir(self.args.model_source_dir)
+        #os.chdir(self.args.model_source_dir)
         self.run_command(self.cmd)
 
         # calculate the bleu number after inference is done

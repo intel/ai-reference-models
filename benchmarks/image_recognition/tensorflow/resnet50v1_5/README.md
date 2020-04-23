@@ -4,21 +4,24 @@ This document has instructions for how to run ResNet50 (v1.5) for the
 following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
+* [FP32 training](#fp32-training-instructions)
 
 Original ResNet model has multiple versions which have shown better accuracy
-and/or batch inference performance. As mentioned in TensorFlow's [official ResNet
+and/or batch inference and training performance. As mentioned in TensorFlow's [official ResNet
 model page](https://github.com/tensorflow/models/tree/master/official/resnet), 3 different
 versions of the original ResNet model exists - ResNet50v1, ResNet50v1.5, and ResNet50v2.
 As a side note, ResNet50v1.5 is also in MLPerf's [cloud inference benchmark for
-image classification](https://github.com/mlperf/inference/tree/master/cloud/image_classification).
+image
+classification](https://github.com/mlperf/inference/tree/master/cloud/image_classification)
+and [training benchmark](https://github.com/mlperf/training).
 
 ## Int8 Inference Instructions
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
-* Clone the tensorflow/models repository:
+* Clone the tensorflow/models repository as `tensorflow-models`. This is to avoid conflict with Intel's `models` repo:
 ```
-$ git clone https://github.com/tensorflow/models.git
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
 ```
 The TensorFlow models repo provides
 [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
@@ -28,7 +31,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 
 2. Download the pre-trained model.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/resnet50v1_5_int8_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50v1_5_int8_pretrained_model.pb
 ```
 
 3. Clone the
@@ -42,10 +45,10 @@ $ git clone https://github.com/IntelAI/models.git
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 
-    The docker image (`gcr.io/deeplearning-platform-release/tf-cpu.1-14`)
+    The docker image (`intel/intel-optimized-tensorflow:2.1.0`)
     used in the commands above were built using
     [TensorFlow](git@github.com:tensorflow/tensorflow.git) master for TensorFlow
-    version 1.14.
+    version 2.1.0.
 
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `resnet50v1_5_int8_pretrained_model.pb` input graph file (from step 2), and the `--accuracy-only` flag.
@@ -53,7 +56,7 @@ the pre-trained `resnet50v1_5_int8_pretrained_model.pb` input graph file (from s
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --data-location /home/<user>/dataset/FullImageNetData_directory
+    --data-location /home/<user>/dataset/FullImageNetData_directory \
     --in-graph resnet50v1_5_int8_pretrained_model.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -61,7 +64,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -100,7 +103,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
@@ -158,8 +161,8 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --batch-size=1 \
-    --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --socket-id=0 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -196,8 +199,8 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --batch-size=128 \
-    --socket-id 0 \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --socket-id=0 \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -236,9 +239,9 @@ $ python launch_benchmark.py \
     --mode inference \
     --accuracy-only \
     --batch-size 100 \
-    --socket-id 0 \
+    --socket-id=0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -273,9 +276,9 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --output-results \
     --batch-size 100 \
-    --socket-id 0 \
+    --socket-id=0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-14
+    --docker-image intel/intel-optimized-tensorflow:2.1.0
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -298,3 +301,51 @@ ILSVRC2012_val_00014735.JPEG,31,31
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
+
+## FP32 Training Instructions
+
+1. Download the full ImageNet dataset and convert to the TF records format.
+
+* Clone the tensorflow/models repository as `tensorflow-models`. This is to avoid conflict with Intel's `models` repo:
+```
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+```
+The TensorFlow models repo provides
+[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
+to download, process and convert the ImageNet dataset to the TF records format.
+
+2. Clone the
+[intelai/models](https://github.com/intelai/models)
+repository
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+3. Run the following command to start ResNet50v1.5 FP32 training run.
+```
+$ python launch_benchmark.py \
+         --model-name=resnet50v1_5 \
+         --precision=fp32 \
+         --mode=training \
+         --framework tensorflow \
+         --checkpoint <location_to_store_training_checkpoints> \
+         --data-location=/home/<user>/dataset/ImageNetData_directory
+```
+
+This run will take considerable amount of time since it is running for
+convergence (90 epochs).
+
+If you want to do a trial run, add
+```
+-- steps=<number_of_training_steps>
+```
+argument to the command.
+
+If you run the script for more than 100 steps, you should see training loss
+decreasing like below:
+
+```
+I0816 basic_session_run_hooks.py:262] loss = 8.442491, step = 0
+I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (174.484 sec)
+...
+```

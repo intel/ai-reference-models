@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 
 from __future__ import absolute_import
@@ -67,8 +67,8 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "-p", "--precision",
-            help="Specify the model precision to use: fp32, int8, or bfloat16",
-            required=required_arg, choices=["fp32", "int8", "bfloat16"],
+            help="Specify the model precision to use: fp32, int8",
+            required=required_arg, choices=["fp32", "int8"],
             dest="precision")
 
         self._common_arg_parser.add_argument(
@@ -86,6 +86,16 @@ class BaseBenchmarkUtil(object):
                  "be used",
             dest="batch_size", default=-1,
             type=check_positive_number_or_equal_to_negative_one)
+
+        self._common_arg_parser.add_argument(
+            "--mpi_num_processes", type=check_positive_number,
+            help="The number of MPI processes",
+            dest="mpi", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--mpi_num_processes_per_socket", type=check_positive_number,
+            help="Specify how many MPI processes to launch per socket",
+            dest="num_mpi", default=1)
 
         self._common_arg_parser.add_argument(
             "-d", "--data-location",
@@ -106,6 +116,11 @@ class BaseBenchmarkUtil(object):
             help="Specify the number of cores to use. If the parameter is not"
                  " specified or is -1, all cores will be used.",
             dest="num_cores", type=int, default=-1)
+
+        self._common_arg_parser.add_argument(
+            "--num-instances", type=check_positive_number,
+            help="Specify the number of instances to run.",
+            dest="num_instances", default=1)
 
         self._common_arg_parser.add_argument(
             "-a", "--num-intra-threads", type=check_positive_number,
@@ -140,6 +155,7 @@ class BaseBenchmarkUtil(object):
         self._common_arg_parser.add_argument(
             "-g", "--in-graph", help="Full path to the input graph ",
             dest="input_graph", default=None, type=check_valid_filename)
+
 
         self._common_arg_parser.add_argument(
             "-k", "--benchmark-only",
