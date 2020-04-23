@@ -218,12 +218,14 @@ fi
 ## Added for bert
 function bert_options() {
 
-  if [[ -z "${train_option}" ]]; then
-     echo "Error: Please specify a train option (SQuAD, Classifier, Pretraining)"
-     exit 1
-  fi
+  if [[ ${MODE} == "training" ]]; then
+    if [[ -z "${train_option}" ]]; then
+      echo "Error: Please specify a train option (SQuAD, Classifier, Pretraining)"
+      exit 1
+    fi
 
-  CMD=" ${CMD} --train-option=${train_option}" 
+    CMD=" ${CMD} --train-option=${train_option}"
+  fi
 
   if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
     CMD=" ${CMD} --init-checkpoint=${init_checkpoint}" 
