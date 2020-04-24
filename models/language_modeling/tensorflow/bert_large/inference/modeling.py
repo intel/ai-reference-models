@@ -373,14 +373,7 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, task="Pretraining
 
   name_to_variable = collections.OrderedDict()
   for var in tvars:
-    split = re.split("bfloat16/",var.name)
-    if len(split) == 1:
-      tf.compat.v1.logging.info("Float32")  
-      name = split[0]
-    if len(split) == 2:
-      tf.compat.v1.logging.info("BFloat16")
-      name = split[1]
-    #name = var.name
+    name = var.name
     m = re.match("^(.*):\\d+$", name)
     if m is not None:
       name = m.group(1)
@@ -393,7 +386,6 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, task="Pretraining
   assignment_map = collections.OrderedDict()
   for x in init_vars:
     (name, var) = (x[0], x[1])
-    #tf.compat.v1.logging.info("init_varname {0} ".format(name))
     if name not in name_to_variable:
       continue
     assignment_map[name] = name_to_variable[name]
@@ -403,9 +395,8 @@ def get_assignment_map_from_checkpoint(tvars, init_checkpoint, task="Pretraining
 
   # Check if all model vars are loaded from Checkpoint
   check_model_validity(tvars, assignment_map)
-  #tf.compat.v1.logging.info("Mapping Values:")
   #for name, var in assignment_map.items():
-  #  tf.compat.v1.logging.info("{0} -----> {1}".format(name,var))
+  #  print(name, "--->", var)
 
   return (assignment_map, initialized_variable_names)
 
