@@ -42,7 +42,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilenetv1_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mobilenetv1_int8_pretrained_model.pb
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -162,22 +162,10 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
    using the instructions
    [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
 
-2. Download and extract the checkpoint files for the pretrained MobileNet
-   V1 FP32 model:
-
-   ```
-   $ wget http://download.tensorflow.org/models/mobilenet_v1_2018_08_02/mobilenet_v1_1.0_224.tgz
-
-   $ tar -xvf mobilenet_v1_1.0_224.tgz
-   x ./
-   x ./mobilenet_v1_1.0_224.tflite
-   x ./mobilenet_v1_1.0_224.ckpt.meta
-   x ./mobilenet_v1_1.0_224.ckpt.index
-   x ./mobilenet_v1_1.0_224.ckpt.data-00000-of-00001
-   x ./mobilenet_v1_1.0_224_info.txt
-   x ./mobilenet_v1_1.0_224_frozen.pb
-   x ./mobilenet_v1_1.0_224_eval.pbtxt
-   ```
+2. Download the pre-trained model.
+```
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mobilenet_v1_1.0_224_frozen.pb
+```
 
 3. Clone the [tensorflow/models](https://github.com/tensorflow/models)
    repository.
@@ -215,7 +203,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:2.0.0-mkl-py3 \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
@@ -235,7 +223,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:2.0.0-mkl-py3 \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
@@ -251,7 +239,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/mobilene
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intelaipg/intel-optimized-tensorflow:2.0.0-mkl-py3 \
+         --docker-image intel/intel-optimized-tensorflow:2.1.0 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \

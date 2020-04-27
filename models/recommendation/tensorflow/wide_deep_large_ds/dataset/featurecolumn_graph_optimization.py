@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 '''This script optimizes feature columns in the model by removing error handling
 and redundant nodes. Flag wide_and_deep_large_ds should be enabled for the additional

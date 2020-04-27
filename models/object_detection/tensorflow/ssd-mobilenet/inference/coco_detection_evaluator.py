@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 from inference import coco_tools
@@ -103,4 +102,3 @@ class CocoDetectionEvaluator:
         box_metrics = {'DetectionBoxes_'+ key: value
                        for key, value in iter(box_metrics.items())}
         return box_metrics
-    

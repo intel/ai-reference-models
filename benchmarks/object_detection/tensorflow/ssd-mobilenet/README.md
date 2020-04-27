@@ -16,12 +16,12 @@ If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True`
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 1. Clone the [tensorflow/models](https://github.com/tensorflow/models)
-repository at the specified SHA and clone the
+repository as `tensorflow-models` at the specified SHA and clone the
 [cocoapi repo](git clone https://github.com/cocodataset/cocoapi.git) in
 the models directory:
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
@@ -74,7 +74,7 @@ located after the script has completed.
 
 ```
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
@@ -94,14 +94,14 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and get the specified SHA that we are using for SSD-MobileNet
-$ cd /home/<user>/models
+$ cd /home/<user>/tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
 4. Download the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model_tr.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssdmobilenet_int8_pretrained_model.pb
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -123,7 +123,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --benchmark-only \
@@ -141,7 +141,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
@@ -192,13 +192,13 @@ Log location outside container: <output directory>/benchmark_ssd-mobilenet_infer
 
 ## FP32 Inference Instructions
 
-1. Clone the `tensorflow/models` repository with the specified SHA,
+1. Clone the `tensorflow/models` repository as `tensorflow-models` with the specified SHA,
 since we are using an older version of the models repo for
 SSD-MobileNet.
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
@@ -253,7 +253,7 @@ located after the script has completed.
 ```
 
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
@@ -273,7 +273,7 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and checkout the SHA that we are using for SSD-MobileNet
-$ cd /home/<user>/models
+$ cd /home/<user>/tensorflow-models
 $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 ```
 
@@ -352,7 +352,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --benchmark-only
 ```
 
@@ -372,7 +372,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
     --accuracy-only
 ```
 

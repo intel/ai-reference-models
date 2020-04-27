@@ -54,9 +54,8 @@ optional arguments:
   -r [MODEL_SOURCE_DIR], --model-source-dir [MODEL_SOURCE_DIR]
                         Specify the models source directory from your local
                         machine
-  -p {fp32,int8,bfloat16}, --precision {fp32,int8,bfloat16}
-                        Specify the model precision to use: fp32, int8, or
-                        bfloat16
+  -p {fp32,int8}, --precision {fp32,int8}
+                        Specify the model precision to use: fp32, int8
   -mo {training,inference}, --mode {training,inference}
                         Specify the type training or inference
   -m MODEL_NAME, --model-name MODEL_NAME
@@ -166,7 +165,7 @@ $ python launch_benchmark.py \
         --batch-size 1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --volume /home/<user>/custom_folder_1:/custom_folder_1 \
         --volume /home/<user>/custom_folder_2:/custom_folder_2
 ```
@@ -203,7 +202,7 @@ Below is an example showing how to use the `--debug` flag:
         --batch-size=1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --debug
 
    # ls

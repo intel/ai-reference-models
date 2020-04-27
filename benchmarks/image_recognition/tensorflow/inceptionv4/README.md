@@ -24,7 +24,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv4_int8_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv4_int8_pretrained_model.pb
    ```
 
 3. If you would like to run Inception V4 inference and test for
@@ -56,7 +56,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intel/intel-optimized-tensorflow:2.1.0 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb \
        --data-location /home/<user>/ImageNet_TFRecords
    ```
@@ -71,7 +71,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intel/intel-optimized-tensorflow:2.1.0 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -85,7 +85,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intel/intel-optimized-tensorflow:2.1.0 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -152,7 +152,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/inceptionv4_fp32_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv4_fp32_pretrained_model.pb
    ```
 
 3. If you would like to run Inception V4 inference and test for
@@ -185,7 +185,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intel/intel-optimized-tensorflow:2.1.0 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb \
        --data-location /home/<user>/ImageNet_TFRecords
    ```
@@ -200,7 +200,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intel/intel-optimized-tensorflow:2.1.0 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
@@ -214,7 +214,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+       --docker-image intel/intel-optimized-tensorflow:2.1.0 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
