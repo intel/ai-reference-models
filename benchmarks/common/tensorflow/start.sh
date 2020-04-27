@@ -534,7 +534,6 @@ function minigo() {
         source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
         pip install mpi4py
       fi
-
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
@@ -619,6 +618,7 @@ function minigo() {
       $(add_arg "--quantization" ${quantization}) \
       $(add_arg "--multi-node" ${multi_node})"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    fi
   else
     echo "MODE=${MODE} PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
@@ -974,9 +974,15 @@ function unet() {
     fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
       exit 1
     fi
+    CMD="${CMD} --checkpoint_name=${checkpoint_name}"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
 }
 
 # transformer language model from official tensorflow models
