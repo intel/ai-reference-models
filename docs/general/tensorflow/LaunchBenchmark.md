@@ -64,6 +64,12 @@ optional arguments:
                         Specify the batch size. If this parameter is not
                         specified or is -1, the largest ideal batch size for
                         the model will be used
+  -ts NUM_TRAIN_STEPS, --num-train-steps NUM_TRAIN_STEPS
+                        Specify the number of training steps
+  --mpi_num_processes MPI
+                        The number of MPI processes
+  --mpi_num_processes_per_socket NUM_MPI
+                        Specify how many MPI processes to launch per socket
   -d DATA_LOCATION, --data-location DATA_LOCATION
                         Specify the location of the data. If this parameter is
                         not specified, the script will use random/dummy
