@@ -9,21 +9,21 @@ for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Clone `tensorflow/models` 
+1. Clone `tensorflow/models` as a `tensorflow-models`
        
     ```
     # We going to use a branch based on older version of the tensorflow model repo.
     # Since, we need to to use logs utils on that branch, which were removed from 
     # the latest master
-    $ git clone https://github.com/tensorflow/models.git 
-    $ cd models
+    $ git clone https://github.com/tensorflow/models.git tensorflow-models
+    $ cd tensorflow-models
     $ git fetch origin pull/7461/head:wide-deep-tf2  
     $ git checkout wide-deep-tf2 
     ```
     
 2. Download and extract the pre-trained model.
     ```
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wide_deep_fp32_pretrained_model.tar.gz
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/wide_deep_fp32_pretrained_model.tar.gz
     $ tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
     ```
  
@@ -59,7 +59,7 @@ use in the next step.
              --batch-size 1 \
              --data-location /home/<user>/widedeep_dataset \
              --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+             --docker-image intel/intel-optimized-tensorflow:2.1.0 \
              --verbose
        ```
        The three locations used (model-source-dir, data-location, checkpoint) here, 
@@ -79,7 +79,7 @@ use in the next step.
              --batch-size 1024 \
              --data-location /home/<user>/path/to/dataset \
              --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
+             --docker-image intel/intel-optimized-tensorflow:2.1.0 \
              --verbose
        ```
        The three locations used (model-source-dir, data-location, checkpoint) here, 

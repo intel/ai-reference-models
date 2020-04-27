@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
 #
 
 import os
@@ -106,7 +105,7 @@ class ModelInitializer(BaseModelInitializer):
 
     def run(self):
         original_dir = os.getcwd()
-        os.chdir(self.args.model_source_dir)
+        #os.chdir(self.args.model_source_dir)
         self.run_command(self.cmd)
 
         # calculate the bleu number after inference is done

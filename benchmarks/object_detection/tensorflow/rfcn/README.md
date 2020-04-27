@@ -15,11 +15,11 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone the [tensorflow/models](https://github.com/tensorflow/models) and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
+1. Clone the [tensorflow/models](https://github.com/tensorflow/models) as `tensorflow-models` and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
 $ git apply models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 $ git clone https://github.com/cocodataset/cocoapi.git
@@ -92,7 +92,7 @@ total 1598276
 -rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
 
 # Go back to the main models directory and get master code
-$ cd /home/<user>/models
+$ cd /home/<user>/tensorflow-models
 $ git checkout master
 ```
 
@@ -101,7 +101,7 @@ The `coco_val.record` file is what we will use in this inference example.
 4. Download the pretrained model:
   Int8 Graph
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_int8_coco_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/rfcn_resnet101_int8_coco_pretrained_model.pb
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -122,8 +122,8 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
     --verbose \
@@ -139,8 +139,8 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
     --accuracy-only \
@@ -196,11 +196,11 @@ better performance results for FP32 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone the [tensorflow/models](https://github.com/tensorflow/models) and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
+1. Clone the [tensorflow/models](https://github.com/tensorflow/models) as `tensorflow-models` and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
 
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
+$ git clone https://github.com/tensorflow/models.git tensorflow-models
+$ cd tensorflow-models
 $ git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
 $ git apply models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 $ git clone https://github.com/cocodataset/cocoapi.git
@@ -249,7 +249,7 @@ located after the script has completed.
 
 ```
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
+$ cd tensorflow-models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 $ cd research/object_detection/dataset_tools/
 $ python create_coco_tf_record.py --logtostderr \
@@ -276,7 +276,7 @@ The `coco_val.record` file is what we will use in this inference example.
 
   FP32 Graph
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 $ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 ```
 
@@ -299,8 +299,8 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco_pretrained_model \
     --verbose \
@@ -317,8 +317,8 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image gcr.io/deeplearning-platform-release/tf2-cpu.2-0 \
-    --model-source-dir /home/<user>/tensorflow/models \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco_pretrained_model.pb \
     --accuracy-only \

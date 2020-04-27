@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
+
 #
 from contextlib import contextmanager
 import os
@@ -242,3 +242,19 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     command_prefix = base_model_init.get_command_prefix(args.socket_id, numactl=False)
     assert "LD_PRELOAD={}".format(test_tcmalloc_lib) not in command_prefix
     assert "numactl" not in command_prefix
+
+
+def test_multi_instance_train_prefix():
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    args.num_processes = 2
+    args.num_processes_per_node = 1
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test"])
+    assert command == "mpirun -n 2 -ppn 1 --genv test "
+
+    args.num_processes = None
+    args.num_processes_per_node = None
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test", "--genv:test2"])
+    assert command == "mpirun --genv test --genv test2 "
