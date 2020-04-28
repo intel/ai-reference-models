@@ -1,4 +1,4 @@
-# ResNet50
+# ResNet50 (v1.5)
 
 This document has instructions for how to run ResNet50 (v1.5) for the
 following precisions:
@@ -308,7 +308,9 @@ to get additional debug output or change the default output location.
 
 1. Download the pre-trained model.
 
-(Note: Until we publish it, ask Ashraf Bhuiyan (TFDO) team for the model.)
+```
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/resnet50_v1_5_bfloat16.pb
+```
 
 2. Clone the [intelai/models](https://github.com/intelai/models) repository
 ```
@@ -327,7 +329,7 @@ to download, process, and convert the ImageNet dataset to the TF records format.
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 If benchmarking uses dummy data for inference, `--data-location` flag is not required. Otherwise,
-`--data-location` needs to point to point to ImageNet dataset location.
+`--data-location` needs to point to ImageNet dataset location.
 
 * To measure online inference, set `--batch-size=1` and run the model script as shown:
 ```
@@ -340,7 +342,8 @@ $ python launch_benchmark.py \
     --precision bfloat16 \
     --mode inference \
     --batch-size=1 \
-    --socket-id 0
+    --socket-id 0 \
+    --docker-image=intel/tensorflow-2.2-bf16-nightly
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -349,19 +352,17 @@ The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
-Iteration 1:  TBD sec
-Iteration 2:  TBD sec
-Iteration 3:  TBD sec
+Iteration 1: 0.587902 sec
+Iteration 2: 0.005289 sec
+Iteration 3: 0.005279 sec
 ...
-Iteration 48: TBD sec
-Iteration 49: TBD sec
-Iteration 50: TBD sec
-Average time: TBD sec
+Iteration 48: 0.004525 sec
+Iteration 49: 0.004565 sec
+Iteration 50: 0.004590 sec
+Average time: 0.004636 sec
 Batch size = 1
-Latency: TBD  ms
-Throughput: TBD images/sec
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Latency: 4.636 ms
+Throughput: 215.701 images/sec
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
 ```
@@ -377,7 +378,8 @@ $ python launch_benchmark.py \
     --precision bfloat16 \
     --mode inference \
     --batch-size=128 \
-    --socket-id 0
+    --socket-id 0 \
+    --docker-image=intel/tensorflow-2.2-bf16-nightly
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -386,19 +388,17 @@ The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
-Iteration 1: TBD sec
-Iteration 2: TBD sec
-Iteration 3: TBD sec
-Iteration 4: TBD sec
+Iteration 1: 0.878853 sec
+Iteration 2: 0.281792 sec
+Iteration 3: 0.285449 sec
 ...
-Iteration 46: TBD sec
-Iteration 47: TBD sec
-Iteration 48: TBD sec
-Iteration 49: TBD sec
-Iteration 50: TBD sec
-Average time: TBD sec
+Iteration 47: 0.282784 sec
+Iteration 48: 0.281823 sec
+Iteration 49: 0.280562 sec
+Iteration 50: 0.282528 sec
+Average time: 0.282864 sec
 Batch size = 128
-Throughput: TBD images/sec
+Throughput: 452.515 images/sec
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
 ```
@@ -417,7 +417,8 @@ $ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/<user>/dataset/ImageNetData_directory
+    --data-location /home/<user>/dataset/ImageNetData_directory \
+    --docker-image=intel/tensorflow-2.2-bf16-nightly
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -425,10 +426,8 @@ The tail of the log output when the accuracy run completes should look
 something like this:
 ```
 ...
-Iteration time: TBD ms
-Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7651, 0.9307)
-lscpu_path_cmd = command -v lscpu
-lscpu located here: /usr/bin/lscpu
+Iteration time: 0.2839 ms
+Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9316)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
 ```
@@ -453,7 +452,8 @@ $ python launch_benchmark.py \
     --output-results \
     --batch-size 100 \
     --socket-id 0 \
-    --data-location /home/<user>/dataset/ImageNetData_directory
+    --data-location /home/<user>/dataset/ImageNetData_directory \
+    --docker-image=intel/tensorflow-2.2-bf16-nightly
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -552,7 +552,8 @@ $ python launch_benchmark.py \
          --mode=training \
          --framework tensorflow \
          --checkpoint <location_to_store_training_checkpoints> \
-         --data-location=/home/<user>/dataset/ImageNetData_directory
+         --data-location=/home/<user>/dataset/ImageNetData_directory \
+         --docker-image=intel/tensorflow-2.2-bf16-nightly
 ```
 
 This run will take considerable amount of time since it is running for
@@ -573,15 +574,16 @@ I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (174.484 sec)
 ...
 ```
 ## Distributed Training Instructions
-Training can be done in a distributed fasion. On a dual (or eight) socket system, one can create two (or eight) MPI processes (one socket each) to do the training. As an example, run the following command to start ResNet50v1.5 FP32 training run using 2 MPI processes.
+Training can be done in a distributed fashion. On a dual (or eight) socket system, one can create two (or eight) MPI processes (one socket each) to do the training. As an example, run the following command to start ResNet50v1.5 FP32 training run using 2 MPI processes.
 ```
 $ python launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \
          --mode=training \
          --framework tensorflow \
-         --data-location=/home/<user>/dataset/ImageNetData_directory
-         --mpi_num_processes=2
+         --data-location=/home/<user>/dataset/ImageNetData_directory \
+         --mpi_num_processes=2 \
+         --docker-image=intel/tensorflow-2.2-bf16-nightly
 ```
 The above distributed training runs one MPI process per socket, to maximize performance, users can run more than one (commonly two) MPI processes per socket. The following command achieves launching 4 MPI processes over 2 sockets. Note that in this case we need to reduce the OMP_NUM_THREADS and intra_op_parallelism_threads by half (minus one or two for performance sometimes, e.g. half of 28 becomes 14, and we can use 12 for good performance).  This is controlled by "-a <half the amount of cores of per socket or less>". Batch size can remain the same for weak scaling or reduced by half as well for strong scaling.
 
@@ -591,10 +593,11 @@ $ python launch_benchmark.py \
          --precision=bfloat16 \
          --mode=training \
          --framework tensorflow \
-         --data-location=/home/<user>/dataset/ImageNetData_directory
-         --mpi_num_processes=4
-	 --mpi_num_processes_per_socket=2
-	 -a <half the amount of cores per socket or less>
+         --data-location=/home/<user>/dataset/ImageNetData_directory \
+         --mpi_num_processes=4 \
+         --mpi_num_processes_per_socket=2 \
+         --docker-image=intel/tensorflow-2.2-bf16-nightly \
+         -a <half the amount of cores per socket or less>
 ```
 
 Similarly, the following command achieves launching 2 MPI processes over 1 socket.
@@ -605,7 +608,11 @@ $ python launch_benchmark.py \
          --precision=bfloat16 \
          --mode=training \
          --framework tensorflow \
-         --data-location=/home/<user>/dataset/ImageNetData_directory
-         --mpi_num_processes=2
-	 --mpi_two_processes_per_socket=1
-	 -a <half the amount of cores per socket or less>
+         --data-location=/home/<user>/dataset/ImageNetData_directory \
+         --mpi_num_processes=2 \
+         --mpi_num_processes_per_socket=1 \
+         --docker-image=intel/tensorflow-2.2-bf16-nightly \
+         -a <half the amount of cores per socket or less>
+```
+
+You can check output trained model accuracy by setting `--eval=True` in the command. After training is over, it automatically run inference and report accuracy results.
