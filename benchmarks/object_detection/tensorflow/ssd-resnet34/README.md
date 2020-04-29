@@ -5,6 +5,7 @@ following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 * [INT8 inference](#int8-inference-instructions)
 * [FP32 Training](#fp32-training-instructions)
+* [BF16 Training](#bf16-training-instructions)
 
 Instructions and scripts for model training and inference
 for other precisions are coming later.
@@ -457,7 +458,7 @@ $ pushd $MODEL_WORK_DIR
    $ git clone https://github.com/tensorflow/models.git tf_models
    $ cd tf_models
    $ git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
-   $ git apply $MODEL_WORK_DIR/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
+   $ git apply $MODEL_WORK_DIR/models/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
    ```
 
    The TensorFlow models repository will be used for running training as well as converting the coco dataset to the TF records format.
@@ -517,13 +518,8 @@ $ pushd $MODEL_WORK_DIR
    
    The `coco_train.record-*-of-*` files are what we will use in this training example.
 
-7. Install OpenMPI if running on baremetal. If using docker, this should be automatically installed.
 
-   ```bash
-    apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
-   ```
-   
-8. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step.
+7. Next, navigate to the `benchmarks` directory of the [intelai/models](https://github.com/intelai/models) repository that was just cloned in the previous step.
 
    To run for training, use the following command.
 
@@ -531,39 +527,38 @@ $ pushd $MODEL_WORK_DIR
    $ cd $MODEL_WORK_DIR/models/benchmarks/
    
     $ python3 launch_benchmark.py \
-    --data-location /tf_dataset/dataset/ssd-resnet34/coco_training_yang/ \
-    --model-source-dir /tmp/public-models \
+    --data-location /path/to/coco-dataset \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
     --model-name ssd-resnet34 --framework tensorflow \
     --precision fp32 --mode training \
     --num-train-steps 100 --num-cores 52 \
     --num-inter-threads 1 --num-intra-threads 52 \
     --batch-size=52 --weight_decay=1e-4 \
     --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow:nightly-cpx-launch-unified-DNNL1-TF-v2-BFLOAT16-avx512-devel-mkl-py3
+    --docker-image intel/tensorflow-2.2-bf16-nightly
    ```
 
-   ## BF16 Training Instructions
+## BF16 Training Instructions
 
-   1. Follow steps 1-7 from the above FP32 Training Instructions to setup the environment.
+1. Follow steps 1-6 from the above FP32 Training Instructions to setup the environment.
 
-   2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
-      Use the below command to run on single socket.
-      Note: for best performance, use the same value for the arguments num-cores, num-intra-thread and batch-size as follows:
-        For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
-        For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
+2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
+   Use the below command to run on single socket.
+   Note: for best performance, use the same value for the arguments num-cores, num-intra-thread and batch-size as follows:
+     For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+     For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
 
-      ```bash
-      $ cd $MODEL_WORK_DIR/models/benchmarks/
+   ```bash
+   $ cd $MODEL_WORK_DIR/models/benchmarks/
 
-      $ python3 launch_benchmark.py \
-      --data-location /tf_dataset/dataset/ssd-resnet34/coco_training_yang/ \
-      --model-source-dir /tmp/public-models \
-      --model-name ssd-resnet34 --framework tensorflow \
-      --precision bfloat16 --mode training \
-      --num-train-steps 100 --num-cores 52 \
-      --num-inter-threads 1 --num-intra-threads 52 \
-      --batch-size=52 --weight_decay=1e-4 \
-      --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-      --docker-image amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow:nightly-cpx-launch-unified-DNNL1-TF-v2-BFLOAT16-avx512-devel-mkl-py3
-
-      ```
+   $ python3 launch_benchmark.py \
+    --data-location /path/to/coco-dataset/ \
+    --model-source-dir $MODEL_WORK_DIR/tf_models \
+    --model-name ssd-resnet34 --framework tensorflow \
+    --precision bfloat16 --mode training \
+    --num-train-steps 100 --num-cores 52 \
+    --num-inter-threads 1 --num-intra-threads 52 \
+    --batch-size=52 --weight_decay=1e-4 \
+    --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+    --docker-image intel/tensorflow-2.2-bf16-nightly
+    ```
