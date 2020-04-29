@@ -1378,7 +1378,10 @@ def main(_):
                 end_logits=end_logits))
     if FLAGS.mode in ('benchmark', 'profile'):
       end = time.time()
-      print("Elapsed time: %f" % (end-start))
+      print("Elapsed time: %f num processed examples: %d threshod_examples: %d"
+                                            % (end-start, num_processed_examples, threshod_examples))
+      print("throughput((num_processed_examples-threshod_examples)/Elapsedtime): %3.2f"
+                                           % (float(num_processed_examples-threshod_examples)/float(end-start)))
     if FLAGS.mode == 'accuracy':
       output_prediction_file = os.path.join(FLAGS.output_dir, "predictions.json")
       output_nbest_file = os.path.join(FLAGS.output_dir, "nbest_predictions.json")
