@@ -202,7 +202,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                 raise ValueError("Expected model args in the format "
                                  "`name=value` but received: {}".
                                  format(custom_arg))
-            split_arg = custom_arg.split("=")
+            split_arg = custom_arg.split("=", 1)
             split_arg[0] = split_arg[0].replace("-", "_")
             env_var_dict[split_arg[0]] = split_arg[1]
 
