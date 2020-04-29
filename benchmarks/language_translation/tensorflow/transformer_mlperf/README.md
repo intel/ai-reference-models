@@ -19,44 +19,44 @@ repository:
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-2. Obtain the dataset
+2. Obtain the dataset.
 Decide the problem you want to run to get the appropriate dataset.
 We will get the training data of it as an example:
 
-```
-# Download dataset for computing BLEU score reported in the paper
-wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
-wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
-
-# Download training dataset
-Navigate to the [intelai/models](https://github.com/IntelAI/models) repo (from step 1), and cd to the directory 
-$model/models/language_translation/tensorflow/transformer_mlperf_training_bf16/training/bfloat16/transformer
-
-DATA_DIR=/home/<user>/transformer_data \
-python data_download.py --data_dir=$DATA_DIR
-```
-
-5. Next, navigate to the `benchmarks` directory in your local clone of
-the [intelai/models](https://github.com/IntelAI/models) repo (from step 4).
+    Download dataset for computing BLEU score reported in the paper
+    ```
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    ```
+    Download training dataset
+    ```
+    $ export PYTHONPATH=$PYTHONPATH:/home/<user>/models/models/common/tensorflow
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ cd /home/<user>/models/models/language_translation/tensorflow/transformer_mlperf/training/bfloat16/transformer
+    $ python data_download.py --data_dir=$DATA_DIR
+    ```
+    
+3. Next, navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the dataset location (from step 2).
 
 Transformer Language in mlperf benchmark can run with full training or
-fewer trainig steps. During training we can control if it will do the evaluation
+fewer training steps. During training we can control if it will do the evaluation
 or not.  
 
 For training with all epochs, with evaluation, and with saving checkpoints (for convergence):
 
 ```
-python launch_benchmark.py 
+python launch_benchmark.py \
     --framework tensorflow \ 
     --precision fp32 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data\
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3  \
+    --data-location /home/<user>/transformer_data \
+    --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
 ```
@@ -69,7 +69,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3  \
+    --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
 ```
@@ -83,7 +83,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3 \ 
+    --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -93,13 +93,13 @@ For training only for Benchmarking, to reduce training time,
 "saving checkpoints" and "doing the evaluation" can be disabled as below:
 
 ```
-python launch_benchmark.py \ 
+python launch_benchmark.py \
     --framework tensorflow \ 
     --precision bfloat16 \ 
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3 \ 
+    --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -108,7 +108,7 @@ Note that the `--verbose` flag can be added to any of the above commands
 to get additional debug output. 
 The transformer model related parameters is appended after "-- "
 
-6.  The log file is saved to the
+4.  The log file is saved to the
 `models/benchmarks/common/tensorflow/logs` directory. Below are
 examples of what the tail of your log file should look like for the
 different configs.
@@ -161,28 +161,28 @@ $ git clone https://github.com/IntelAI/models.git
 Decide the problem you want to run to get the appropriate dataset.
 We will get the training data of it as an example:
 
-```
-# Download dataset for computing BLEU score reported in the paper
-wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
-wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    Download dataset for computing BLEU score reported in the paper
+    ```
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    ```
+    Download training dataset
+    ```
+    $ export PYTHONPATH=$PYTHONPATH:/home/<user>/models/models/common/tensorflow
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ cd /home/<user>/models/models/language_translation/tensorflow/transformer_mlperf/training/bfloat16/transformer
+    $ python data_download.py --data_dir=$DATA_DIR
+    ```
 
-# Download training dataset
-Navigate to the [intelai/models](https://github.com/IntelAI/models) repo (from step 1), and cd to the directory
-$model/models/language_translation/tensorflow/transformer_mlperf_training_bf16/training/bfloat16/transformer
-
-DATA_DIR=/home/<user>/transformer_data \
-python data_download.py --data_dir=$DATA_DIR
-```
-
-5. Next, navigate to the `benchmarks` directory in your local clone of
-the [intelai/models](https://github.com/IntelAI/models) repo (from step 4).
+3. Next, navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
 The `launch_benchmark.py` script in the `benchmarks` directory is
 used for starting a model run in a optimized TensorFlow docker
 container. It has arguments to specify which model, framework, mode,
 precision, and docker image to use, along with your path to the dataset location (from step 2).
 
 Transformer Language in mlperf benchmark can run with full training or
-fewer trainig steps. During training we can control if it will do the evaluation
+fewer training steps. During training we can control if it will do the evaluation
 or not.
 
 For training with all epochs, with evaluation, and with saving checkpoints (for convergence):
@@ -194,11 +194,11 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3  \
+    --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10
 ```
-The Tensorflow binary in the docker iamge needed to be compiled correctly so that Bfloat16 code is included.
+The Tensorflow binary in the docker image needed to be compiled correctly so that Bfloat16 code is included.
 
 For training with fewer training steps, such as 100 steps, and with no evaluation:
 
@@ -209,7 +209,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3  \
+    --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
 ```
@@ -217,13 +217,13 @@ python launch_benchmark.py \
 For training with fewer training steps, and with evaluation:
 
 ```
-python launch_benchmark.py
+python launch_benchmark.py \
     --framework tensorflow \
     --precision bfloat16 \
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3 \
+    --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -232,13 +232,13 @@ For training only for Benchmarking, to reduce training time,
 "saving checkpoints" and "doing the evaluation" can be disabled as below:
 
 ```
-python launch_benchmark.py
+python launch_benchmark.py \
     --framework tensorflow \
     --precision bfloat16 \
     --mode training \
     --model-name transformer_mlperf \
     --data-location /home/<user>/transformer_data \
-    --docker-image amr-registry.caas.intel.com/aipg-tf/qa:nightly-master-TF-v2-avx2-devel-mkl-py3 \
+    --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10
 ```
@@ -247,7 +247,7 @@ Note that the `--verbose` flag can be added to any of the above commands
 to get additional debug output.
 The transformer model related parameters is appended after "-- "
 
-6.  The log file is saved to the
+4.  The log file is saved to the
 `models/benchmarks/common/tensorflow/logs` directory. Below are
 examples of what the tail of your log file should look like for the
 different configs.
