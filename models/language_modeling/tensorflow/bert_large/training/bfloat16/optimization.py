@@ -20,11 +20,10 @@ from __future__ import print_function
 
 import re
 import tensorflow as tf
-import generic_ops as bf
 
 
 
-def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, fine_tuning=True, use_multi_cpu=0):
+def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=False, use_multi_cpu=0):
   """Creates an optimizer training op."""
   global_step = tf.compat.v1.train.get_or_create_global_step()
 
@@ -131,19 +130,13 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
       tvars = [var for grad, var in grads_and_vars]
     else:
       grads = tf.gradients(loss, tvars)
-  
+
     # This is how the model was pre-trained.
-    if fine_tuning :
-      (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
-    else :
-      gdtypes = [grad.dtype for grad in grads];
-      mgrads = [tf.cast(grad, tf.float32) for grad in grads] 
-      (grads, _) = tf.clip_by_global_norm(mgrads, clip_norm=1.0)
-      grads = [tf.cast(grad, ddtype) for grad, ddtype in zip(grads, gdtypes)]
-  
+    (grads, _) = tf.clip_by_global_norm(grads, clip_norm=1.0)
+
     train_op = optimizer.apply_gradients(
-        zip(grads, tvars), global_step=global_step, fine_tuning=fine_tuning)
-  
+        zip(grads, tvars), global_step=global_step)
+
     # Normally the global step update is done inside of `apply_gradients`.
     # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
     # a different optimizer, you should probably take this line out.
@@ -175,7 +168,7 @@ class AdamWeightDecayOptimizer(tf.compat.v1.train.Optimizer):
     self.epsilon = epsilon
     self.exclude_from_weight_decay = exclude_from_weight_decay
 
-  def apply_gradients(self, grads_and_vars, fine_tuning=True, global_step=None, name=None):
+  def apply_gradients(self, grads_and_vars, global_step=None, name=None):
     """See base class."""
     assignments = []
     for (grad, param) in grads_and_vars:
@@ -198,17 +191,10 @@ class AdamWeightDecayOptimizer(tf.compat.v1.train.Optimizer):
           initializer=tf.compat.v1.zeros_initializer())
 
       # Standard Adam update.
-      if fine_tuning :
-        next_m = (
+      next_m = (
           tf.multiply(self.beta_1, m) + tf.multiply(1.0 - self.beta_1, grad))
-        next_v = (
+      next_v = (
           tf.multiply(self.beta_2, v) + tf.multiply(1.0 - self.beta_2,
-                                                    tf.square(grad)))
-      else :
-        next_m = (
-          bf.multiply(self.beta_1, m) + bf.multiply(1.0 - self.beta_1, grad))
-        next_v = (
-          bf.multiply(self.beta_2, v) + bf.multiply(1.0 - self.beta_2,
                                                     tf.square(grad)))
 
       update = next_m / (tf.sqrt(next_v) + self.epsilon)
@@ -221,29 +207,17 @@ class AdamWeightDecayOptimizer(tf.compat.v1.train.Optimizer):
       # with the m/v parameters. This is equivalent to adding the square
       # of the weights to the loss with plain (non-momentum) SGD.
       if self._do_use_weight_decay(param_name):
-        if fine_tuning :
-          update += self.weight_decay_rate * param
-        else :
-          update += tf.cast(self.weight_decay_rate * param, update.dtype)
+        update += self.weight_decay_rate * param
 
-      if fine_tuning :
-        update_with_lr = self.learning_rate * update
+      update_with_lr = self.learning_rate * update
 
-        next_param = param - update_with_lr
+      next_param = param - update_with_lr
 
-        assignments.extend(
+      assignments.extend(
           [param.assign(next_param),
            m.assign(next_m),
            v.assign(next_v)])
-      else :
-        update_with_lr = tf.cast(self.learning_rate, update.dtype) * update
 
-        next_param = tf.cast(param, update_with_lr.dtype) - update_with_lr
-
-      
-        param, m, v = tf.cast(next_param, param.dtype), tf.cast(m, m.dtype), tf.cast(v, v.dtype)
-
-        assignments.extend([param, m, v])
     return tf.group(*assignments, name=name)
 
   def _do_use_weight_decay(self, param_name):
