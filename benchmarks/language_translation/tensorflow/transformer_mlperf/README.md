@@ -55,8 +55,8 @@ python launch_benchmark.py \
     --precision fp32 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
-    --docker-image intel/tensorflow-2.2-bf16-nightly  \
+    -i 0 --data-location $DATA_DIR \
+    --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
 ```
@@ -68,7 +68,7 @@ python launch_benchmark.py \
     --precision fp32 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
@@ -79,10 +79,10 @@ For training with fewer training steps, and with evaluation:
 ```
 python launch_benchmark.py \
     --framework tensorflow \ 
-    --precision bfloat16 \ 
+    --precision fp32 \ 
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
@@ -95,15 +95,46 @@ For training only for Benchmarking, to reduce training time,
 ```
 python launch_benchmark.py \
     --framework tensorflow \ 
-    --precision bfloat16 \ 
+    --precision fp32 \ 
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \
+    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --verbose \
+    -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
+```
+
+For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
+where we are "saving checkpoints" and "doing the evaluation":
+
+```
+python launch_benchmark.py \ 
+    --framework tensorflow \ 
+    --precision fp32 \ 
+    --mode training \
+    --model-name transformer_mlperf \
+    --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
-    -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 \
-    bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
+    --mpi_num_processes=2 \
+    -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
 ```
+For training only in multi-instance mode (4 sockets in a single node for example) for benchmrking,
+"saving checkpoints" and "doing the evaluation" can be disabled as below:
+
+```
+python launch_benchmark.py \ 
+    --framework tensorflow \ 
+    --precision fp32 \ 
+    --mode training \
+    --model-name transformer_mlperf \
+    --data-location $DATA_DIR \
+    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --verbose \
+    --mpi_num_processes=2 \
+    -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
+```
+
 Note that the `--verbose` flag can be added to any of the above commands
 to get additional debug output. 
 The transformer model related parameters is appended after "-- "
@@ -113,6 +144,7 @@ The transformer model related parameters is appended after "-- "
 examples of what the tail of your log file should look like for the
 different configs.
 
+Single Instance sample log: 
 Example log tail when running training with saving checkpoints, but not doing the evaluations:
 ```
 I1010 00:14:10.006996 140608628639552 monitored_session.py:240] Graph was finalized.
@@ -147,6 +179,33 @@ num_inter_threads: 2
 num_intra_threads: 56
 
 ````
+
+Multi-instance sample log:
+Running 2 instances only. Both the instance prining loss values.
+
+```
+Example log tail when running training with saving checkpoints, but not doing the evaluations:
+I0408 14:32:44.900605 140564697147200 hooks.py:117] Batch [10]:  last 10 steps exp/sec = TBD, completed 10/20 wamrup steps
+I0408 14:32:44.900944 139850962708288 basic_session_run_hooks.py:260] loss = 10.014245 (TBD sec)
+INFO:tensorflow:loss = 9.9818325 (42.110 sec)
+I0408 14:32:44.901092 140564697147200 basic_session_run_hooks.py:260] loss = 9.9818325 (TBD sec)
+INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.16, completed 20/20 wamrup steps
+I0408 14:33:25.011524 139850962708288 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBD, completed 20/20 wamrup steps
+INFO:tensorflow:loss = 9.758567 (40.111 sec)
+I0408 14:33:25.012046 139850962708288 basic_session_run_hooks.py:260] loss = 9.758567 (TBD sec)
+INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.11, completed 20/20 wamrup steps
+I0408 14:33:25.013776 140564697147200 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBD, completed 20/20 wamrup steps
+INFO:tensorflow:loss = 9.7565155 (40.113 sec)
+I0408 14:33:25.014259 140564697147200 basic_session_run_hooks.py:260] loss = 9.7565155 (TBD sec)
+INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.26, total average exp/sec = TBD
+I0408 14:34:05.515469 139850962708288 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = TBD
+INFO:tensorflow:loss = 9.43642 (40.504 sec)
+I0408 14:34:05.515967 139850962708288 basic_session_run_hooks.py:260] loss = 9.43642 (TBD sec)
+INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.31, total average exp/sec = TBD
+I0408 14:34:05.515844 140564697147200 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = TBD
+INFO:tensorflow:loss = 9.385353 (40.502 sec)
+I0408 14:34:05.516412 140564697147200 basic_session_run_hooks.py:260] loss = 9.385353 (40.502 sec)
+```
 
 ## Bfloat16 Training Instructions
 
@@ -193,7 +252,7 @@ python launch_benchmark.py \
     --precision bfloat16 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10
@@ -208,7 +267,7 @@ python launch_benchmark.py \
     --precision bfloat16 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
@@ -222,7 +281,7 @@ python launch_benchmark.py \
     --precision bfloat16 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
@@ -237,10 +296,40 @@ python launch_benchmark.py \
     --precision bfloat16 \
     --mode training \
     --model-name transformer_mlperf \
-    --data-location /home/<user>/transformer_data \
+    -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10
+```
+For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
+where you are "saving checkpoints" and "doing the evaluation":
+
+```
+python launch_benchmark.py \ 
+    --framework tensorflow \ 
+    --precision bfloat16 \ 
+    --mode training \
+    --model-name transformer_mlperf \
+    --data-location $DATA_DIR \ 
+    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --verbose \
+    --mpi_num_processes=2 \
+    -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
+```
+For training only in multi-instance mode (4 sockets in a single node for example) for benchmrking,
+"saving checkpoints" and "doing the evaluation" can be disabled as below:
+
+```
+python launch_benchmark.py \ 
+    --framework tensorflow \ 
+    --precision bfloat16 \ 
+    --mode training \
+    --model-name transformer_mlperf \
+    --data-location $DATA_DIR \ 
+    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --verbose \
+    --mpi_num_processes=4 \
+    -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
@@ -284,4 +373,30 @@ lscpu_path_cmd = command -v lscpu
 lscpu located here: b'/usr/bin/lscpu'
 num_inter_threads: 2
 num_intra_threads: 56
+```
+
+Multi-instance sample log:
+Running 2 instances only. Both the instance prining loss values.
+
+```
+I0408 14:32:44.900605 140564697147200 hooks.py:117] Batch [10]:  last 10 steps exp/sec = TBD, completed 10/20 wamrup steps
+I0408 14:32:44.900944 139850962708288 basic_session_run_hooks.py:260] loss = 10.014245 (TBD sec)
+INFO:tensorflow:loss = 9.9818325 (42.110 sec)
+I0408 14:32:44.901092 140564697147200 basic_session_run_hooks.py:260] loss = 9.9818325 (TBD sec)
+INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.16, completed 20/20 wamrup steps
+I0408 14:33:25.011524 139850962708288 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBD, completed 20/20 wamrup steps
+INFO:tensorflow:loss = 9.758567 (40.111 sec)
+I0408 14:33:25.012046 139850962708288 basic_session_run_hooks.py:260] loss = 9.758567 (TBD sec)
+INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.11, completed 20/20 wamrup steps
+I0408 14:33:25.013776 140564697147200 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBF, completed 20/20 wamrup steps
+INFO:tensorflow:loss = 9.7565155 (40.113 sec)
+I0408 14:33:25.014259 140564697147200 basic_session_run_hooks.py:260] loss = 9.7565155 (TBD sec)
+INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.26, total average exp/sec = TBD
+I0408 14:34:05.515469 139850962708288 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = 1011.26
+INFO:tensorflow:loss = 9.43642 (40.504 sec)
+I0408 14:34:05.515967 139850962708288 basic_session_run_hooks.py:260] loss = 9.43642 (TBD sec)
+INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.31, total average exp/sec = TBD
+I0408 14:34:05.515844 140564697147200 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD total average exp/sec = TBD
+INFO:tensorflow:loss = 9.385353 (40.502 sec)
+I0408 14:34:05.516412 140564697147200 basic_session_run_hooks.py:260] loss = 9.385353 (TBD)
 ```

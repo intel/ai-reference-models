@@ -45,6 +45,15 @@ from utils import metrics
 from utils import tokenizer
 
 tf.compat.v1.disable_eager_execution()
+#Horovod support
+global is_mpi 
+try:
+  import horovod.tensorflow as hvd
+  hvd.init()
+  is_mpi = hvd.size()
+except ImportError:
+  is_mpi = 0
+  print("No MPI horovod support, this is running in no-MPI mode!")
 
 DEFAULT_TRAIN_EPOCHS = 10
 BLEU_DIR = "bleu"
@@ -126,6 +135,9 @@ def get_train_op(loss, params):
                                  value=params.optimizer_adam_beta2)
     mlperf_log.transformer_print(key=mlperf_log.OPT_HP_ADAM_EPSILON,
                                  value=params.optimizer_adam_epsilon)
+
+    if is_mpi:
+      learning_rate = learning_rate * hvd.size()
     # Using optimizer v1(from tensorflow.python.trainings*)
     # The optimizer v2 version of code is in the below. 
     # Optimzer v1 does not
@@ -135,6 +147,9 @@ def get_train_op(loss, params):
         beta1=params.optimizer_adam_beta1,
         beta2=params.optimizer_adam_beta2,
         epsilon=params.optimizer_adam_epsilon)
+
+    if is_mpi:
+      optimizer = hvd.DistributedOptimizer(optimizer)
 
     # Calculate and apply gradients using LazyAdamOptimizer.
     global_step = tf.compat.v1.train.get_global_step()
@@ -326,6 +341,9 @@ def train_schedule(
       mlperf_log.transformer_print(key=mlperf_log.TRAIN_EPOCH,
                                  value=i * single_iteration_train_epochs + 1)
 
+    #Can we move the following out of the loop
+    if is_mpi:
+      train_hooks.append(hvd.BroadcastGlobalVariablesHook(0))
     # Train the model for single_iteration_train_steps or until the input fn
     # runs out of examples (if single_iteration_train_steps is None).
     estimator.train(dataset.train_input_fn, steps=single_iteration_train_steps, hooks=hooks)
@@ -355,6 +373,10 @@ def main(_):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
   mlperf_log.transformer_print(key=mlperf_log.RUN_START)
+
+  #TODO: Do we need this, or remove
+  if is_mpi:
+    hvd.init()
 
   # Set random seed.
   if FLAGS.random_seed is None:
@@ -401,6 +423,8 @@ def main(_):
   params.num_cpu_cores = FLAGS.num_cpu_cores
   params.epochs_between_eval = FLAGS.epochs_between_eval
   params.repeat_dataset = single_iteration_train_epochs
+  params.horovod = is_mpi 
+  params.static_batch = FLAGS.static_batch
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
@@ -415,6 +439,8 @@ def main(_):
   else:
     run_config = tf.estimator.RunConfig(session_config=session_config)
 
+  if is_mpi:
+    FLAGS.model_dir = FLAGS.model_dir + str(hvd.rank())
   estimator = tf.estimator.Estimator(
       model_fn=model_fn, model_dir=FLAGS.model_dir, params=params, config=run_config)
   train_schedule(
@@ -534,6 +560,15 @@ if __name__ == "__main__":
       #"--output_dir", "-od", type=str, default="/root/mbhuiyan/bf16-timeline/NameChangeMklCast_ln_bf16softmax",
       "--profile_dir", "-od", type=str, default="/tmp/fp32profile",
       help="prifile dir", metavar="<OD>")
+  parser.add_argument(
+      "--static_batch", "-sb", type=str, default="No",
+      help="Whether the batches in the dataset should have static shapes. In "
+          "general, this setting should be False. Dynamic shapes allow the "
+          "inputs to be grouped so that the number of padding tokens is "
+          "minimized, and helps model training. In cases where the input shape "
+          "must be static (e.g. running on TPU), this setting will be ignored "
+          "and static batching will always be used.",
+      metavar="<SB>")
 
   FLAGS, unparsed = parser.parse_known_args()
 
