@@ -167,14 +167,10 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
     is_training = (mode == tf.estimator.ModeKeys.TRAIN)
 
-    opt_fine_tuning=True
-    if bert_config.precision == "bfloat16" :
-      opt_fine_tuning=False
 
     if bert_config.precision == "bfloat16" and bert_config.new_bf16_scope == True:
       with tf.compat.v1.tpu.bfloat16_scope():
         bf.set_global_precision(tf.bfloat16)
-        opt_fine_tuning=True
         tf.compat.v1.logging.info("*** New bfloat16 scope set***")
         model = modeling.BertModel(
           config=bert_config,
@@ -232,7 +228,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
     if mode == tf.estimator.ModeKeys.TRAIN:
       train_op = optimization.create_optimizer(
               total_loss, learning_rate, num_train_steps, num_warmup_steps, 
-                            accum_steps, use_tpu=use_tpu, use_multi_cpu=is_mpi, fine_tuning=opt_fine_tuning)
+                            accum_steps, use_tpu=use_tpu, use_multi_cpu=is_mpi)
 
       log_hook = bf.logTheLossHook(total_loss, FLAGS.accum_steps*3)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
