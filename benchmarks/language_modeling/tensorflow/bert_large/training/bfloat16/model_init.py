@@ -109,8 +109,12 @@ class ModelInitializer(BaseModelInitializer):
             run_script)
 
         data_location =str(self.args.data_location)
-        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        if os.environ["MPI_NUM_PROCESSES"] == "None":
+          self.benchmark_command = self.get_command_prefix(args.socket_id)
+        else:
+          if os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] == "1":
+            # Map by socket using OpenMPI by default (PPS=1).
+            self.benchmark_command = "mpirun --allow-run-as-root --map-by socket "
 
         num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
             else self.args.num_cores
@@ -166,12 +170,20 @@ class ModelInitializer(BaseModelInitializer):
             " --init_checkpoint=" + str(self.args.init_checkpoint)      +eoo        + \
             " --data_dir=" + str(self.args.data_dir)  
 
-        self.benchmark_command = self.benchmark_command + eoo + self.cmd_args + "\n"
+        benchmark_script = benchmark_script + eoo + self.cmd_args
 
         if self.args.data_num_inter_threads:
-            self.benchmark_command += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)
+            benchmark_script += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)
         if self.args.data_num_intra_threads:
-            self.benchmark_command += " --data-num-intra-threads=" + str(self.args.data_num_intra_threads)
+            benchmark_script += " --data-num-intra-threads=" + str(self.args.data_num_intra_threads)
+
+        if os.environ["MPI_NUM_PROCESSES"] == "None":
+          self.benchmark_command = self.benchmark_command + self.python_exe + " " + benchmark_script + "\n"
+        else:
+          numa_cmd = " -np 1 numactl -N {} -m {} "
+          self.benchmark_command = self.benchmark_command + numa_cmd.format(0,0) + os.environ["PYTHON_EXE"] + " " + benchmark_script
+          for i in range(1, int(os.environ["MPI_NUM_PROCESSES"])):
+            self.benchmark_command = self.benchmark_command + eoo + " : " + numa_cmd.format(i,i) + os.environ["PYTHON_EXE"] + " " + benchmark_script
 
         # if output results is enabled, generate a results file name and pass it to the inference script
         if self.args.output_results:
