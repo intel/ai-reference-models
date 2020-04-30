@@ -54,7 +54,7 @@ class TransformerBaseParams(object):
 
 class TransformerBigParams(TransformerBaseParams):
   """Parameters for the big Transformer model."""
-  batch_size = 4096
+  batch_size = 4096 # 2048 #4096
   hidden_size = 1024
   filter_size = 4096
   num_heads = 16

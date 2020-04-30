@@ -192,7 +192,8 @@ def _batch_examples(dataset, batch_size, max_length):
 
 
 def _read_and_batch_from_files(
-    file_pattern, batch_size, max_length, num_cpu_cores, shuffle, repeat):
+    file_pattern, batch_size, max_length, num_cpu_cores, shuffle, repeat,
+      has_horovod=False, static_batch=False):
   """Create dataset where each item is a dict of "inputs" and "targets".
 
   Args:
@@ -203,6 +204,18 @@ def _read_and_batch_from_files(
     shuffle: If true, randomizes order of elements.
     repeat: Number of times to repeat the dataset. If None, the dataset is
       repeated forever.
+    has_horovod: mark if this instance is running with horovod
+    static_batch: Whether the batches in the dataset should have static shapes.
+      If True, the input is batched so that every batch has the
+      shape [batch_size // max_length, max_length]. If False, the input is
+      grouped by length, and batched so that batches may have different
+      shapes [N, M], where:
+        N * M <= batch_size
+        M <= max_length
+      In general, this setting should be False. Dynamic shapes allow the inputs
+      to be grouped so that the number of padding tokens is minimized, and helps
+      model training. In cases where the input shape must be static
+      (e.g. running on TPU), this setting should be set to True.
 
   Returns:
     tf.data.Dataset object containing examples loaded from the files.
@@ -233,8 +246,23 @@ def _read_and_batch_from_files(
                                value=batch_size)
   mlperf_log.transformer_print(key=mlperf_log.INPUT_MAX_LENGTH,
                                value=max_length)
-  dataset = _batch_examples(dataset, batch_size, max_length)
+  #dataset = _batch_examples(dataset, batch_size, max_length)
+  if static_batch == "Yes":
+    dataset = dataset.padded_batch(
+        batch_size // max_length, ([max_length], [max_length]),
+        drop_remainder=True)
+  else:
+    # Group and batch such that each batch has examples of similar length.
+    dataset = _batch_examples(dataset, batch_size, max_length)
+
   dataset = dataset.repeat(repeat)
+
+  # horovod: do shard if enabled multi-instance while training
+  #TODO: verify if it is working
+  if shuffle and has_horovod:
+    import horovod.tensorflow as hvd
+    shape = dataset.output_shapes
+    dataset = dataset.shard(hvd.size(), hvd.rank())
 
   # Prefetch the next element to improve speed of input pipeline.
   dataset = dataset.prefetch(1)
@@ -246,7 +274,9 @@ def train_input_fn(params):
   file_pattern = os.path.join(getattr(params, "data_dir", ""), "*encoded-train*")
   return _read_and_batch_from_files(
       file_pattern, params.batch_size, params.max_length, params.num_cpu_cores,
-      shuffle=True, repeat=params.repeat_dataset)
+      #shuffle=True, repeat=params.repeat_dataset)
+      shuffle=False, repeat=params.repeat_dataset,
+      has_horovod=params.horovod, static_batch=params.static_batch)
 
 
 def eval_input_fn(params):
@@ -254,4 +284,5 @@ def eval_input_fn(params):
   file_pattern = os.path.join(getattr(params, "data_dir", ""), "*encoded-dev*")
   return _read_and_batch_from_files(
       file_pattern, params.batch_size, params.max_length, params.num_cpu_cores,
-      shuffle=False, repeat=1)
+      #shuffle=False, repeat=1)
+      shuffle=False, repeat=1, static_batch=params.static_batch)
