@@ -148,9 +148,9 @@ python launch_benchmark.py \
 ```
  
  **5. To run pre-training** 
- ***(This is still experimental).*** Need to run pretraining of data as discussed in original google bert location).
-        Replace SQuAD with "Pretraining" in --train_option and use the right options for Pretraining from Google BERT"
-           ```train-option=Pretraining```
+ ***(This is still experimental).*** Need to run pretraining of data as discussed in original [google bert](https://github.com/mlperf/training/tree/bert-cleanup/language_model/tensorflow/bert).
+        Replace SQuAD with "Pretraining" in --train_option and use the right options ```train-option=Pretraining``` for Pretraining from Google BERT"
+
 As shown below
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
@@ -160,7 +160,10 @@ python launch_benchmark.py \
     --precision=bfloat16 \
     --mode=training \
     --framework=tensorflow \
-    --batch-size=32 \
+    --batch-size=24 \
+    --socket-id=0 \
+    --num-intra-threads=24 \
+    --num-inter-threads=1 \
     -- train-option=Pretraining \
        input-file=/tmp/tf_examples.tfrecord \
        output-dir=/tmp/pretraining_output \
@@ -168,11 +171,12 @@ python launch_benchmark.py \
        do-eval=True \
        config-file=$BERT_LARGE_DIR/bert_config.json \
        init-checkpoint=$BERT_LARGE_DIR/bert_model.ckpt \
-       max-seq-length=128 \
-       max-predictions=20 \
+       max-seq-length=512 \
+       max-predictions=76 \
        num-train-steps=20 \
        warmup-steps=10 \
-       learning-rate=2e-5
+       learning-rate=2e-5 \
+       profile=False experimental-mkldnn-ops=True
   
 
 ```
@@ -186,7 +190,9 @@ python launch_benchmark.py \
     --precision=bfloat16 \
     --mode=training \
     --framework=tensorflow \
-    --batch-size=32 \
+    --batch-size=24 \
+    --num-intra-threads=22 \
+    --num-inter-threads=1 \
     --mpi_num_processes=4 \
     -- train-option=Pretraining \
        input-file=/tmp/tf_examples.tfrecord \
@@ -195,12 +201,17 @@ python launch_benchmark.py \
        do-eval=True \
        config-file=$BERT_LARGE_DIR/bert_config.json \
        init-checkpoint=$BERT_LARGE_DIR/bert_model.ckpt \
-       max-seq-length=128 \
-       max-predictions=20 \
+       max-seq-length=512 \
+       max-predictions=76 \
        num-train-steps=20 \
        warmup-steps=10 \
-       learning-rate=2e-5
+       learning-rate=2e-5 \
+       profile=False experimental-mkldnn-ops=True
 ```
+
+Note: for best performance, we will set num-intra-thread as follows:
+- For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+- For multi-instance run (mpi_num_processes>1): the value is equal to (#_of_logical_cores_per_socket - 2)
 
 ## FP32 Training Instructions
 FP32 training instructions are the same as Bfloat16 training instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
