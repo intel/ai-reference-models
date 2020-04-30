@@ -132,7 +132,15 @@ class ModelInitializer(BaseModelInitializer):
       	  help="[default: %(default)s]  set, to print in every 10 iterations "
           "to reduce print time",
           metavar="<PI>") 
-
+        parser.add_argument(
+      	  "--learning_rate", "-lr", type=int, default="2",
+      	  help="[default: %(default)s]  set learning rate 2 "
+          "or can be set",
+          metavar="<LR>") 
+        parser.add_argument(
+      	  "--static_batch", "-sb", type=str, default="No",
+      	  help="[default: %(default)s]  set, to not using static batch ",
+          metavar="<SB>")
 
         #Ashraf: work with the platform.py file to add the following arg
         parser.add_argument(
@@ -157,10 +165,15 @@ class ModelInitializer(BaseModelInitializer):
                    " --inter_op_parallelism_threads=" + \
                    str(self.args.num_inter_threads) + \
                    " --intra_op_parallelism_threads=" + \
-                   str(self.args.num_intra_threads)
+                   str(self.args.num_intra_threads) +  \
+                   " --learning_rate=" + \
+                   str(self.args.learning_rate) +    \
+                   " --static_batch=" + \
+                   str(self.args.static_batch)
+
 
         #Running on single socket
-        self.cmd = " numactl --cpubind=0 --membind=0  " + self.cmd + run_script + cmd_args
+        self.cmd = self.cmd + run_script + cmd_args
 
     def run(self):
         original_dir = os.getcwd()
