@@ -59,6 +59,7 @@ python launch_benchmark.py \
 
 ```
 To run distributed training of SQuAD (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
+For fine-tuning tasks like BERT, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers. The "--mpi_workers_sync_gradients=[True/False]" controls whether the MPI workers sync gradients. By default it is set to "False" meaning the workers are training independently and the best performing training results will be picked in the end. To enable gradients synchronization, set the "--mpi_workers_sync_gradients" to true in BERT options.
 
 Change dir to bechmarks and run the following command.
  
