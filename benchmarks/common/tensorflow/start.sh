@@ -325,6 +325,10 @@ function bert_options() {
     CMD=" ${CMD} --experimental-mkldnn-ops=${experimental_mkldnn_ops}"
   fi
 
+  if [[ -n "${mpi_workers_sync_gradients}" && ${mpi_workers_sync_gradients} != "" ]]; then
+    CMD=" ${CMD} --mpi_workers_sync_gradients=${mpi_workers_sync_gradients}"
+  fi
+
 }
 
 function install_protoc() {
