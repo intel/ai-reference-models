@@ -58,6 +58,7 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
 ```
 For training with fewer training steps, and with no evaluation:
@@ -71,6 +72,7 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
 ```
 
@@ -85,6 +87,7 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
 ```
@@ -101,8 +104,11 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \ 
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
 ```
+All the above command runs on a single socket of the CPU, where each socket has 28 cores. In general,
+please use --num-intra-threads="number of cores per socket" for the best threading performance. 
 
 For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
 where we are "saving checkpoints" and "doing the evaluation":
@@ -116,9 +122,11 @@ python launch_benchmark.py \
     --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
+    --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
 ```
+
 For training only in multi-instance mode (4 sockets in a single node for example) for benchmrking,
 "saving checkpoints" and "doing the evaluation" can be disabled as below:
 
@@ -131,12 +139,15 @@ python launch_benchmark.py \
     --data-location $DATA_DIR \
     --docker-image intel/tensorflow-2.2-bf16-nightly \ 
     --verbose \
+    --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output. 
+to get additional debug output. The above two command assumes 2 sockets in the CPU,
+and 28 cores per socket. We keep aside 2 cores for horovod communications. Thus,
+in general the num-intra-threads is equal to "available cores per socket - 2". 
 The transformer model related parameters is appended after "-- "
 
 4.  The log file is saved to the
@@ -255,6 +266,7 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10
 ```
 The Tensorflow binary in the docker image needed to be compiled correctly so that Bfloat16 code is included.
@@ -270,6 +282,7 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly  \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
 ```
 
@@ -284,6 +297,7 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
 ```
@@ -299,8 +313,12 @@ python launch_benchmark.py \
     -i 0 --data-location $DATA_DIR \ 
     --docker-image intel/tensorflow-2.2-bf16-nightly \
     --verbose \
+    --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10
 ```
+All the above command runs on a single socket of the CPU, where each socket has 28 cores. In general,
+please use --num-intra-threads="number of cores per socket" for the best threading performance. 
+
 For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
 where you are "saving checkpoints" and "doing the evaluation":
 
@@ -314,6 +332,7 @@ python launch_benchmark.py \
     --docker-image intel/tensorflow-2.2-bf16-nightly \ 
     --verbose \
     --mpi_num_processes=2 \
+    --num-intra-threads=26 --num-inter-threads=1 \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
 ```
 For training only in multi-instance mode (4 sockets in a single node for example) for benchmrking,
@@ -329,11 +348,17 @@ python launch_benchmark.py \
     --docker-image intel/tensorflow-2.2-bf16-nightly \ 
     --verbose \
     --mpi_num_processes=4 \
+    --num-intra-threads=26 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
 ```
 
 Note that the `--verbose` flag can be added to any of the above commands
-to get additional debug output.
+to get additional debug output. The above two command assumes 2 sockets in the CPU,
+and 28 cores per socket. We keep aside 2 cores for horovod communications. Thus,
+in general the num-intra-threads is equal to "available cores per socket - 2". 
+
+The transformer model related parameters is appended after "-- "
+the num-intra-threads is equal to available cores - 2. 
 The transformer model related parameters is appended after "-- "
 
 4.  The log file is saved to the
