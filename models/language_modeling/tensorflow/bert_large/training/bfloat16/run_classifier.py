@@ -726,7 +726,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
     if mode == tf.estimator.ModeKeys.TRAIN:
 
       train_op = optimization.create_optimizer(
-          total_loss, learning_rate, num_train_steps, num_warmup_steps, 1, use_tpu, is_mpi)
+          total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps=1, use_tpu=use_tpu, use_multi_cpu=is_mpi)
 
       log_hook = bf.logTheLossHook(total_loss, n=10)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
