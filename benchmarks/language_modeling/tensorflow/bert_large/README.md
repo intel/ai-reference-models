@@ -239,7 +239,13 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
     The `uncased_L-24_H-1024_A-16` directory is what will be passed as
     the `--data-location` when running inference in step 4.
 
- 3. Download the pretrained model from [TBD](gcloud link).
+ 3. Download and unzip the pretrained model:
+  
+    ```
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
+    unzip bert_large_checkpoints.zip
+    ```
+
     This directory will be passed as the `--checkpoint` location when
     running inference in step 4.
 
@@ -261,7 +267,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --framework=tensorflow \
             --batch-size=32 \
             --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
-            --checkpoint /home/<user>/bert-squad-ckpts \
+            --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --benchmark-only \
             --docker-image intel/tensorflow-2.2-bf16
@@ -276,7 +282,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --framework=tensorflow \
             --batch-size=32 \
             --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
-            --checkpoint /home/<user>/bert-squad-ckpts \
+            --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --docker-image intel/tensorflow-2.2-bf16 \
             -- profile=True
@@ -291,7 +297,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --framework=tensorflow \
             --batch-size=32 \
             --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
-            --checkpoint /home/<user>/bert-squad-ckpts \
+            --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --docker-image intel/tensorflow-2.2-bf16 \
             --accuracy-only
@@ -315,7 +321,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
     | config_file | `bert_config.json` |
     | vocab_file | `vocab.txt` |
     | predict_file | `dev-v1.1.json` |
-    | init_checkpoint | `model.ckpt-7299` |
+    | init_checkpoint | `model.ckpt-3649` |
 
 ## FP32 Inference Instructions
 FP32 inference instructions are the same as Bfloat16 inference instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
