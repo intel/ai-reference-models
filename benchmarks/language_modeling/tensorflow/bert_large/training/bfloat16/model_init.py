@@ -67,7 +67,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--train-file', help=' Json file for BERT', dest="train_file", default='train-v1.1.json')
         arg_parser.add_argument('--predict-file', help=' Do prediction ', dest="predict_file", default='dev-v1.1.json')
         arg_parser.add_argument('--do-predict', help=' use prediction', dest="do_predict", default="True")
-        arg_parser.add_argument('--num-train-epochs', help=' Number of epochs to train ', dest="num_train_epochs", type=int, default=20)
+        arg_parser.add_argument('--num-train-epochs', help=' Number of epochs to train ', dest="num_train_epochs", type=float, default=20)
         arg_parser.add_argument('--doc-stride', help=' Stride of the doc', dest="doc_stride", type=int, default=128)
 
         arg_parser.add_argument('--input-file', help=' Input file for pretraining', dest="input_file", default='/tmp/tf_examples.tfrecord')
