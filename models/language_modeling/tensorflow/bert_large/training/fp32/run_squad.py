@@ -182,8 +182,8 @@ flags.DEFINE_bool(
     "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
 
 flags.DEFINE_bool(
-    "experimental_mkldnn_ops", False,
-    "[Optional] If true, use more experimental mkldnn operations in model."
+    "experimental_gelu", False,
+    "[Optional] If true, use experimental gelu op in model."
     "           Be careful this flag will crash model with incompatible TF.")
 
 flags.DEFINE_bool(
@@ -1165,11 +1165,8 @@ def validate_flags_or_throw(bert_config):
       raise ValueError(
           "If `do_predict` is True, then `predict_file` must be specified.")
 
-  if FLAGS.precision:
-    bert_config.precision = FLAGS.precision
-
-  if FLAGS.experimental_mkldnn_ops:
-    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
+  bert_config.set_additional_options(FLAGS.precision, 
+                                     FLAGS.experimental_gelu)
 
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(
