@@ -25,7 +25,8 @@ import tensorflow as tf
 _inprecision = tf.float32
 _rprecision = tf.float32
 _keras_policy = tf.keras.mixed_precision.experimental.Policy("float32")
-_use_mkldnn = False
+_use_optimized_softmax = False
+_use_experimental_gelu = False
 
 def set_global_precision(dt):
   # Set Keras API precision
@@ -43,9 +44,11 @@ def set_rprecision(dt):
 def get_keras_policy():
   return _keras_policy
 
-def set_mkldnn(mkldnn=False):
-  global _use_mkldnn
-  _use_mkldnn = mkldnn
+def set_global_flags(optimized_softmax, experimental_gelu):
+  global _use_optimized_softmax
+  global _use_experimental_gelu
+  _use_optimized_softmax = optimized_softmax
+  _use_experimental_gelu = experimental_gelu
 
 def i_cast(x) :
      return tf.cast(x, _inprecision)
@@ -70,7 +73,7 @@ def tanh(x):
     return r_cast(rval)
 
 def softmax(scores, axis=None):
-    if _use_mkldnn:
+    if _use_optimized_softmax:
       return tf.nn.softmax(scores, axis)
     else:
       scores = i_cast(scores)
@@ -93,7 +96,7 @@ def gelu(x):
   Returns:
     `x` with the GELU activation applied.
   """
-  if _use_mkldnn:
+  if _use_experimental_gelu:
     return tf.nn.gelu(x)
   else:
     x = i_cast(x)

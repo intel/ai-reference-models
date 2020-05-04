@@ -152,8 +152,8 @@ flags.DEFINE_bool(
     "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
 
 flags.DEFINE_bool(
-    "experimental_mkldnn_ops", False,
-    "[Optional] If true, use more experimental mkldnn operations in model."
+    "experimental_gelu", False,
+    "[Optional] If true, use experimental gelu op in model."
     "           Be careful this flag will crash model with incompatible TF.")
 
 
@@ -864,9 +864,7 @@ def main(_):
         "At least one of `do_train`, `do_eval` or `do_predict' must be True.")
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
-
-  if FLAGS.experimental_mkldnn_ops:
-    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
+  bert_config.set_additional_options("fp32", FLAGS.experimental_gelu)
 
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(

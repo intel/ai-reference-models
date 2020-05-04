@@ -82,6 +82,7 @@ class BertConfig(object):
     self.type_vocab_size = type_vocab_size
     self.initializer_range = initializer_range
     self.precision = precision
+    self.experimental_gelu=False
 
   @classmethod
   def from_dict(cls, json_object):
@@ -106,6 +107,14 @@ class BertConfig(object):
   def to_json_string(self):
     """Serializes this instance to a JSON string."""
     return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
+
+  def set_additional_options(self, precision, experimental_gelu):
+    if precision :
+      self.precision= precision
+    if experimental_gelu :
+      self.experimental_gelu = experimental_gelu
+      tf.compat.v1.logging.info("Experimental gelu enabled for model.") 
+      tf.compat.v1.logging.info("Set experimental gelu to false(default) if you see issues. ")
 
 
 class BertModel(object):
@@ -160,8 +169,7 @@ class BertModel(object):
     if config.precision == "bfloat16" :
       bf.set_rprecision(tf.bfloat16)
 
-    if hasattr(config, "mkldnn"):
-      bf.set_mkldnn(config.mkldnn)
+    bf.set_global_flags(config.experimental_gelu)
 
     config = copy.deepcopy(config)
     if not is_training:
