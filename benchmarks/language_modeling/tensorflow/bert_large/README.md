@@ -240,20 +240,20 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
     git clone https://github.com/IntelAI/models.git
     ```
 
- 2. Download and unzip the BERT large uncased model from the
+ 2. Download and unzip the BERT large uncased (whole word masking) model from the
     [google bert repo](https://github.com/google-research/bert#pre-trained-models).
     Then, download the `dev-v1.1.json` file from the
     [google bert repo](https://github.com/google-research/bert#squad-11)
-    into the `uncased_L-24_H-1024_A-16` directory that was just unzipped.
+    into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
 
     ```
-    wget https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-24_H-1024_A-16.zip
-    unzip uncased_L-24_H-1024_A-16.zip
+    wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
+    unzip wwm_uncased_L-24_H-1024_A-16.zip
 
-    wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P uncased_L-24_H-1024_A-16
+    wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_uncased_L-24_H-1024_A-16
     ```
 
-    The `uncased_L-24_H-1024_A-16` directory is what will be passed as
+    The `wwm_uncased_L-24_H-1024_A-16` directory is what will be passed as
     the `--data-location` when running inference in step 4.
 
  3. Download and unzip the pretrained model:
@@ -283,7 +283,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --mode=inference \
             --framework=tensorflow \
             --batch-size=32 \
-            --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --benchmark-only \
@@ -298,7 +298,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --mode=inference \
             --framework=tensorflow \
             --batch-size=32 \
-            --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --docker-image intel/tensorflow-2.2-bf16 \
@@ -313,7 +313,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --mode=inference \
             --framework=tensorflow \
             --batch-size=32 \
-            --data-location /home/<user>/uncased_L-24_H-1024_A-16 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --docker-image intel/tensorflow-2.2-bf16 \
