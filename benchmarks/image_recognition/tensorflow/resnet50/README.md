@@ -337,6 +337,7 @@ If you want to do a trial run, add
 argument to the command.
 
 ## BFloat16 Training Instructions
+(Experimental)
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
