@@ -139,7 +139,7 @@ class ModelInitializer(BaseModelInitializer):
             " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads) + eoo +  \
             " --profile=" + str(self.args.profile)                 +eoo        + \
             " --do_lower_case=" + str(self.args.do_lower_case)     +eoo        + \
-            " --experimental_gelu=" + str(self.args.experimental_gelu)  +eoo
+            " --experimental_gelu=" + str(self.args.experimental_gelu)  +eoo   + \
             " --mpi_workers_sync_gradients=" + str(self.args.mpi_workers_sync_gradients)  +eoo
 
         if self.args.train_option== "SQuAD":
