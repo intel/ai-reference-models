@@ -2,9 +2,9 @@
 
 This document has instructions for how to run BERT for the
 following modes/platforms:
-* [BFloat16 training](#training-instructions)
+* [BFloat16 training](#bfloat16-training-instructions)
 * [FP32 training](#fp32-training-instructions)
-* [BFloat16 inference](#inference-instructions)
+* [BFloat16 inference](#bfloat16-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
 This repo contains model for BERT Large optmized for bfloat16 and fp32 on Intel CPUs. For all fine-tunining the datasets (SQuAD, MultiNLI, and MRPC) should be downloaded as mentioned in the Google bert repo.
@@ -20,7 +20,8 @@ export TRAINED_CLASSIFIER=/path/to/fine/tuned/classifier
 ```
 Refer to google reference page for approriate settings needed for each type of task.
 
-## Training Instructions
+## BFloat16 Training Instructions
+(Experimental)
 
  1. Download the intel-model zoo for bfloat16
        ```git clone https://github.com/IntelAI/models```
@@ -231,7 +232,8 @@ Note: for best performance, we will set num-intra-thread as follows:
 ## FP32 Training Instructions
 FP32 training instructions are the same as Bfloat16 training instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
 
-## Inference Instructions
+## BFloat16 Inference Instructions
+(Experimental)
 
  1. Clone the Intel model zoo:
     ```
