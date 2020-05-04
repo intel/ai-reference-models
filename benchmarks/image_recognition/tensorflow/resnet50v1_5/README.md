@@ -73,13 +73,13 @@ The log file is saved to the value of `--output-dir`.
 The tail of the log output when the benchmarking completes should look
 something like this:
 ```
-Iteration time: 239.899 ms
+Iteration time: ... ms
 Processed 49700 images. (Top1 accuracy, Top5 accuracy) = (0.7622, 0.9296)
-Iteration time: 239.110 ms
+Iteration time: ... ms
 Processed 49800 images. (Top1 accuracy, Top5 accuracy) = (0.7621, 0.9295)
-Iteration time: 239.512 ms
+Iteration time: ... ms
 Processed 49900 images. (Top1 accuracy, Top5 accuracy) = (0.7622, 0.9296)
-Iteration time: 239.989 ms
+Iteration time: ... ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7623, 0.9296)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_{timestamp}.log
@@ -112,11 +112,11 @@ The tail of the log output when the benchmarking completes should look
 something like this:
 ```
 ...
-Iteration 490: 0.249899 sec
-Iteration 500: 0.249110 sec
-Average time: 0.251280 sec
+Iteration 490: ... sec
+Iteration 500: ... sec
+Average time: ... sec
 Batch size = 128
-Throughput: 509.392 images/sec
+Throughput: ... images/sec
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_int8_{timestamp}.log
 ```
@@ -305,6 +305,7 @@ Note that the `--verbose` or `--output-dir` flag can be added to any of the abov
 to get additional debug output or change the default output location.
 
 ## BFloat16 Inference Instructions
+(Experimental)
 
 1. Download the pre-trained model.
 
@@ -352,17 +353,17 @@ The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
-Iteration 1: 0.587902 sec
-Iteration 2: 0.005289 sec
-Iteration 3: 0.005279 sec
+Iteration 1: ... sec
+Iteration 2: ... sec
+Iteration 3: ... sec
 ...
-Iteration 48: 0.004525 sec
-Iteration 49: 0.004565 sec
-Iteration 50: 0.004590 sec
-Average time: 0.004636 sec
+Iteration 48: ... sec
+Iteration 49: ... sec
+Iteration 50: ... sec
+Average time: ... sec
 Batch size = 1
-Latency: 4.636 ms
-Throughput: 215.701 images/sec
+Latency: ... ms
+Throughput: ... images/sec
 Ran inference with batch size 1
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
 ```
@@ -388,17 +389,17 @@ The tail of the log output when the script completes should look
 something like this:
 ```
 Inference with dummy data.
-Iteration 1: 0.878853 sec
-Iteration 2: 0.281792 sec
-Iteration 3: 0.285449 sec
+Iteration 1: ... sec
+Iteration 2: ... sec
+Iteration 3: ... sec
 ...
-Iteration 47: 0.282784 sec
-Iteration 48: 0.281823 sec
-Iteration 49: 0.280562 sec
-Iteration 50: 0.282528 sec
-Average time: 0.282864 sec
+Iteration 47: ... sec
+Iteration 48: ... sec
+Iteration 49: ... sec
+Iteration 50: ... sec
+Average time: ... sec
 Batch size = 128
-Throughput: 452.515 images/sec
+Throughput: ... images/sec
 Ran inference with batch size 128
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
 ```
@@ -426,7 +427,7 @@ The tail of the log output when the accuracy run completes should look
 something like this:
 ```
 ...
-Iteration time: 0.2839 ms
+Iteration time: ... ms
 Processed 50000 images. (Top1 accuracy, Top5 accuracy) = (0.7674, 0.9316)
 Ran inference with batch size 100
 Log location outside container: {--output-dir value}/benchmark_resnet50_inference_bfloat16_{timestamp}.log
@@ -521,11 +522,12 @@ decreasing like below:
 
 ```
 I0816 basic_session_run_hooks.py:262] loss = 8.442491, step = 0
-I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (174.484 sec)
+I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (... sec)
 ...
 ```
 
 ## BFloat16 Training Instructions
+(Experimental)
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
@@ -570,7 +572,7 @@ decreasing like below:
 
 ```
 I0816 basic_session_run_hooks.py:262] loss = 8.442491, step = 0
-I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (174.484 sec)
+I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (... sec)
 ...
 ```
 ## Distributed Training Instructions
