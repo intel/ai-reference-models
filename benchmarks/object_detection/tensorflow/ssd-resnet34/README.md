@@ -196,8 +196,8 @@ Below is a sample log file tail when running for performance:
 
 ```
 Batchsize: 1
-Time spent per BATCH:    21.8225 ms
-Total samples/sec:    45.8243 samples/s
+Time spent per BATCH:    ... ms
+Total samples/sec:    ... samples/s
 ```
 
 Below is a sample log file tail when testing accuracy:
@@ -410,8 +410,8 @@ Below is a sample log file tail when testing performance:
 
 ```
 Batchsize: 1
-Time spent per BATCH:    12.0245 ms
-Total samples/sec:    83.1635 samples/s
+Time spent per BATCH:    ... ms
+Total samples/sec:    ... samples/s
 ```
 
 Below is a sample log file tail when testing accuracy:
@@ -539,6 +539,7 @@ $ pushd $MODEL_WORK_DIR
    ```
 
 ## BF16 Training Instructions
+(Experimental)
 
 1. Follow steps 1-6 from the above FP32 Training Instructions to setup the environment.
 

@@ -13,6 +13,6 @@
     * [Language Translation](/docs/language_translation/tensorflow/Tutorial.md) (Transformer-LT)
     * [Recommendation Systems](/docs/recommendation/tensorflow/Tutorial.md) (Wide and Deep)
 * Model Quantization and Optimization
-    * [Image Recognition](/docs/image_recognition/quantization/Tutorial.md) (ResNet50)
+    * [Image Recognition](/docs/image_recognition/quantization/Tutorial.md) (ResNet50, ResNet50v1.5)
 
 *Note: For model quantization and optimization tools, see [https://github.com/IntelAI/tools](https://github.com/IntelAI/tools)*.
