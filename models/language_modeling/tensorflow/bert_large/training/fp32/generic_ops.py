@@ -24,15 +24,15 @@ import tensorflow as tf
 
 _inprecision = tf.float32
 _rprecision = tf.float32
-_use_mkldnn = False
+_use_experimental_gelu = False
 
 def set_rprecision(dt):
   global _rprecision
   _rprecision=dt
 
-def set_mkldnn(mkldnn=False):
-  global _use_mkldnn
-  _use_mkldnn = mkldnn
+def set_global_flags(experimental_gelu):
+  global _use_experimental_gelu
+  _use_experimental_gelu = experimental_gelu
 
 def i_cast(x) :
      return tf.cast(x, _inprecision)
@@ -86,7 +86,7 @@ def gelu(x):
   Returns:
     `x` with the GELU activation applied.
   """
-  if _use_mkldnn:
+  if _use_experimental_gelu :
     return tf.nn.gelu(x)
   else:
     x = i_cast(x)

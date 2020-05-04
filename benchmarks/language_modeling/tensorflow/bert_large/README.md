@@ -55,11 +55,15 @@ python launch_benchmark.py \
        max_seq_length=384 \
        doc_stride=128 \
        output_dir=./large \
+       optimized_softmax=True \
+       experimental_gelu=True \
        do_lower_case=False
 
 ```
 To run distributed training of SQuAD (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 For fine-tuning tasks like BERT, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers. The "--mpi_workers_sync_gradients=[True/False]" controls whether the MPI workers sync gradients. By default it is set to "False" meaning the workers are training independently and the best performing training results will be picked in the end. To enable gradients synchronization, set the "--mpi_workers_sync_gradients" to true in BERT options.
+
+The options optimized_softmax=True and experimental_gelu=True can be set for better performance.
 
 Change dir to bechmarks and run the following command.
  
@@ -89,6 +93,8 @@ python launch_benchmark.py \
        max_seq_length=384 \
        doc_stride=128 \
        output_dir=./large \
+       optimized_softmax=True \
+       experimental_gelu=True \
        do_lower_case=False
 ```
 Please refer to google docs for SQuAD specific arguments.
@@ -117,6 +123,8 @@ python launch_benchmark.py \
        learning-rate=2e-5 \
        num-train-epochs=30 \
        output-dir=/tmp/mrpc_output/ \
+       optimized_softmax=True \
+       experimental_gelu=True \
        do-lower-case=False
 
 ```
@@ -144,6 +152,8 @@ python launch_benchmark.py \
        learning-rate=2e-5 \
        num-train-epochs=30 \
        output-dir=/tmp/mrpc_output/ \
+       optimized_softmax=True \
+       experimental_gelu=True \
        do-lower-case=False
 
 ```
@@ -177,7 +187,9 @@ python launch_benchmark.py \
        num-train-steps=20 \
        warmup-steps=10 \
        learning-rate=2e-5 \
-       profile=False experimental-mkldnn-ops=True
+       optimized_softmax=True \
+       experimental_gelu=True \
+       profile=False 
   
 
 ```
@@ -207,7 +219,9 @@ python launch_benchmark.py \
        num-train-steps=20 \
        warmup-steps=10 \
        learning-rate=2e-5 \
-       profile=False experimental-mkldnn-ops=True
+       optimized_softmax=True \
+       experimental_gelu=True \
+       profile=False 
 ```
 
 Note: for best performance, we will set num-intra-thread as follows:
