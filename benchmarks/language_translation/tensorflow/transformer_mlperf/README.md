@@ -177,13 +177,13 @@ I1010 00:15:02.218935 140608628639552 basic_session_run_hooks.py:606] Saving che
 INFO:tensorflow:Loss for final step: 9.856145.
 I1010 00:15:05.596456 140608628639552 estimator.py:371] Loss for final step: 9.856145.
 :::MLPv0.5.0 transformer 1570666505.598165274 (transformer/transformer_main.py:312) eval_start
-I1010 00:15:05.598198 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.598165274 (transformer/transformer_main.py:312) eval_start
+I1010 00:15:05.598198 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:312) eval_start
 :::MLPv0.5.0 transformer 1570666505.598524094 (transformer/transformer_main.py:328) eval_stop
-I1010 00:15:05.598533 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.598524094 (transformer/transformer_main.py:328) eval_stop
+I1010 00:15:05.598533 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:328) eval_stop
 :::MLPv0.5.0 transformer 1570666505.598799944 (transformer/transformer_main.py:399) run_stop
-I1010 00:15:05.598808 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.598799944 (transformer/transformer_main.py:399) run_stop
+I1010 00:15:05.598808 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:399) run_stop
 :::MLPv0.5.0 transformer 1570666505.599067211 (transformer/transformer_main.py:400) run_final
-I1010 00:15:05.599075 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.599067211 (transformer/transformer_main.py:400) run_final
+I1010 00:15:05.599075 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:400) run_final
 lscpu_path_cmd = command -v lscpu
 lscpu located here: b'/usr/bin/lscpu'
 num_inter_threads: 2
@@ -198,27 +198,28 @@ Running 2 instances only. Both the instance prining loss values.
 Example log tail when running training with saving checkpoints, but not doing the evaluations:
 I0408 14:32:44.900605 140564697147200 hooks.py:117] Batch [10]:  last 10 steps exp/sec = TBD, completed 10/20 wamrup steps
 I0408 14:32:44.900944 139850962708288 basic_session_run_hooks.py:260] loss = 10.014245 (TBD sec)
-INFO:tensorflow:loss = 9.9818325 (42.110 sec)
+INFO:tensorflow:loss = 9.9818325 (... sec)
 I0408 14:32:44.901092 140564697147200 basic_session_run_hooks.py:260] loss = 9.9818325 (TBD sec)
 INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.16, completed 20/20 wamrup steps
 I0408 14:33:25.011524 139850962708288 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBD, completed 20/20 wamrup steps
-INFO:tensorflow:loss = 9.758567 (40.111 sec)
+INFO:tensorflow:loss = 9.758567 (... sec)
 I0408 14:33:25.012046 139850962708288 basic_session_run_hooks.py:260] loss = 9.758567 (TBD sec)
 INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.11, completed 20/20 wamrup steps
 I0408 14:33:25.013776 140564697147200 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBD, completed 20/20 wamrup steps
-INFO:tensorflow:loss = 9.7565155 (40.113 sec)
+INFO:tensorflow:loss = 9.7565155 (... sec)
 I0408 14:33:25.014259 140564697147200 basic_session_run_hooks.py:260] loss = 9.7565155 (TBD sec)
 INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.26, total average exp/sec = TBD
 I0408 14:34:05.515469 139850962708288 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = TBD
-INFO:tensorflow:loss = 9.43642 (40.504 sec)
+INFO:tensorflow:loss = 9.43642 (... sec)
 I0408 14:34:05.515967 139850962708288 basic_session_run_hooks.py:260] loss = 9.43642 (TBD sec)
 INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.31, total average exp/sec = TBD
 I0408 14:34:05.515844 140564697147200 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = TBD
-INFO:tensorflow:loss = 9.385353 (40.502 sec)
-I0408 14:34:05.516412 140564697147200 basic_session_run_hooks.py:260] loss = 9.385353 (40.502 sec)
+INFO:tensorflow:loss = 9.385353 (... sec)
+I0408 14:34:05.516412 140564697147200 basic_session_run_hooks.py:260] loss = 9.385353 (... sec)
 ```
 
 ## Bfloat16 Training Instructions
+(Experimental)
 
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
@@ -387,13 +388,13 @@ I1010 00:15:02.218935 140608628639552 basic_session_run_hooks.py:606] Saving che
 INFO:tensorflow:Loss for final step: 9.856145.
 I1010 00:15:05.596456 140608628639552 estimator.py:371] Loss for final step: 9.856145.
 :::MLPv0.5.0 transformer 1570666505.598165274 (transformer/transformer_main.py:312) eval_start
-I1010 00:15:05.598198 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.598165274 (transformer/transformer_main.py:312) eval_start
+I1010 00:15:05.598198 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:312) eval_start
 :::MLPv0.5.0 transformer 1570666505.598524094 (transformer/transformer_main.py:328) eval_stop
-I1010 00:15:05.598533 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.598524094 (transformer/transformer_main.py:328) eval_stop
+I1010 00:15:05.598533 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:328) eval_stop
 :::MLPv0.5.0 transformer 1570666505.598799944 (transformer/transformer_main.py:399) run_stop
-I1010 00:15:05.598808 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.598799944 (transformer/transformer_main.py:399) run_stop
+I1010 00:15:05.598808 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:399) run_stop
 :::MLPv0.5.0 transformer 1570666505.599067211 (transformer/transformer_main.py:400) run_final
-I1010 00:15:05.599075 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer 1570666505.599067211 (transformer/transformer_main.py:400) run_final
+I1010 00:15:05.599075 140608628639552 mlperf_log.py:134] :::MLPv0.5.0 transformer ... (transformer/transformer_main.py:400) run_final
 lscpu_path_cmd = command -v lscpu
 lscpu located here: b'/usr/bin/lscpu'
 num_inter_threads: 2
@@ -406,22 +407,22 @@ Running 2 instances only. Both the instance prining loss values.
 ```
 I0408 14:32:44.900605 140564697147200 hooks.py:117] Batch [10]:  last 10 steps exp/sec = TBD, completed 10/20 wamrup steps
 I0408 14:32:44.900944 139850962708288 basic_session_run_hooks.py:260] loss = 10.014245 (TBD sec)
-INFO:tensorflow:loss = 9.9818325 (42.110 sec)
+INFO:tensorflow:loss = 9.9818325 (... sec)
 I0408 14:32:44.901092 140564697147200 basic_session_run_hooks.py:260] loss = 9.9818325 (TBD sec)
 INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.16, completed 20/20 wamrup steps
 I0408 14:33:25.011524 139850962708288 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBD, completed 20/20 wamrup steps
-INFO:tensorflow:loss = 9.758567 (40.111 sec)
+INFO:tensorflow:loss = 9.758567 (... sec)
 I0408 14:33:25.012046 139850962708288 basic_session_run_hooks.py:260] loss = 9.758567 (TBD sec)
 INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1021.11, completed 20/20 wamrup steps
 I0408 14:33:25.013776 140564697147200 hooks.py:117] Batch [20]:  last 10 steps exp/sec = TBF, completed 20/20 wamrup steps
-INFO:tensorflow:loss = 9.7565155 (40.113 sec)
+INFO:tensorflow:loss = 9.7565155 (... sec)
 I0408 14:33:25.014259 140564697147200 basic_session_run_hooks.py:260] loss = 9.7565155 (TBD sec)
 INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.26, total average exp/sec = TBD
-I0408 14:34:05.515469 139850962708288 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = 1011.26
-INFO:tensorflow:loss = 9.43642 (40.504 sec)
+I0408 14:34:05.515469 139850962708288 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD, total average exp/sec = ...
+INFO:tensorflow:loss = 9.43642 (... sec)
 I0408 14:34:05.515967 139850962708288 basic_session_run_hooks.py:260] loss = 9.43642 (TBD sec)
 INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1011.31, total average exp/sec = TBD
 I0408 14:34:05.515844 140564697147200 hooks.py:113] Batch [30]:  last 10 steps exp/sec = TBD total average exp/sec = TBD
-INFO:tensorflow:loss = 9.385353 (40.502 sec)
+INFO:tensorflow:loss = 9.385353 (... sec)
 I0408 14:34:05.516412 140564697147200 basic_session_run_hooks.py:260] loss = 9.385353 (TBD)
 ```
