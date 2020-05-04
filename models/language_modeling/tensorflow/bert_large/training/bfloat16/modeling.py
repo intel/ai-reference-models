@@ -84,6 +84,8 @@ class BertConfig(object):
     self.initializer_range = initializer_range
     self.precision = precision
     self.new_bf16_scope = new_bf16_scope 
+    self.experimental_gelu = False
+    self.optimized_softmax = False
 
   @classmethod
   def from_dict(cls, json_object):
@@ -109,6 +111,21 @@ class BertConfig(object):
     """Serializes this instance to a JSON string."""
     return json.dumps(self.to_dict(), indent=2, sort_keys=True) + "\n"
 
+  def set_additional_options(self, precision, experimental_gelu, optimized_softmax):
+    if precision :
+      self.precision= precision
+    if experimental_gelu :
+      self.experimental_gelu = experimental_gelu
+      tf.compat.v1.logging.info("Experimental gelu enabled for model.") 
+      tf.compat.v1.logging.info("Set experimental gelu to false(default) if you see issues. ")
+    if optimized_softmax :
+      self.optimized_softmax = optimized_softmax
+      tf.compat.v1.logging.info("Optimized softmax enabled for model.")
+
+  def new_scope_settings(self, new_bf16_scope):
+    if new_bf16_scope:
+      self.new_bf16_scope = new_bf16_scope
+      tf.compat.v1.logging.info("Bfloat16 scope set for model..!")
 
 class BertModel(object):
   """BERT model ("Bidirectional Encoder Representations from Transformers").
@@ -166,8 +183,8 @@ class BertModel(object):
       if config.new_bf16_scope :
         self.bf16_scope = True
 
-    if hasattr(config, "mkldnn"):
-      bf.set_mkldnn(config.mkldnn)
+    bf.set_global_flags(optimized_softmax=config.optimized_softmax, 
+                        experimental_gelu=config.experimental_gelu)
 
     config = copy.deepcopy(config)
     if not is_training:

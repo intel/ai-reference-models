@@ -174,10 +174,14 @@ flags.DEFINE_bool(
     "disable_v2_bevior", False, "If true, disable the new features in TF 2.x.")
 
 flags.DEFINE_bool(
-    "experimental_mkldnn_ops", False,
-    "[Optional] If true, use more experimental mkldnn operations in model."
+    "optimized_softmax", False,
+    "[Optional] If true, use experimental bf16 softmax for internal softmaxes inside each layer."
     "           Be careful this flag will crash model with incompatible TF.")
 
+flags.DEFINE_bool(
+    "experimental_gelu", False,
+    "[Optional] If true, use more experimental op(gelu) in model."
+    "           Be careful this flag will crash model with incompatible TF.")
 
 class PaddingInputExample(object):
   """Fake example so the num input examples is a multiple of the batch size.
@@ -868,12 +872,9 @@ def main(_):
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
 
-  if FLAGS.precision:
-    bert_config.precision = FLAGS.precision
-
-  if FLAGS.experimental_mkldnn_ops:
-    bert_config.mkldnn = FLAGS.experimental_mkldnn_ops
-
+  bert_config.set_additional_options(FLAGS.precision, 
+                                     FLAGS.experimental_gelu, 
+                                     FLAGS.optimized_softmax)
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(
         "Cannot use sequence length %d because the BERT model "

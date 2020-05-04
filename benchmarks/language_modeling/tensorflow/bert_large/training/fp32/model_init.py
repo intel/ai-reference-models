@@ -84,7 +84,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--num-intra-threads', help=' Number of Intra ops threads', type=int, 
                                                        dest="num_intra_threads", default=self.args.num_inter_threads)
         arg_parser.add_argument('--profile', help=' Enable Tensorflow profiler hook', dest="profile", default="False")
-        arg_parser.add_argument('--experimental-mkldnn-ops', help=' [Experimental] Use more mkldnn operations.', dest="experimental_mkldnn_ops", default="False")
+        arg_parser.add_argument('--experimental-gelu', help=' [Experimental] Use experimental gelu op.', dest="experimental_gelu", default="False")
         arg_parser.add_argument('--mpi_workers_sync_gradients', help='Set to True for Syncing horovod gradients, False otherwise', dest="mpi_workers_sync_gradients", default="False")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
@@ -139,7 +139,7 @@ class ModelInitializer(BaseModelInitializer):
             " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads) + eoo +  \
             " --profile=" + str(self.args.profile)                 +eoo        + \
             " --do_lower_case=" + str(self.args.do_lower_case)     +eoo        + \
-            " --experimental_mkldnn_ops=" + str(self.args.experimental_mkldnn_ops)  +eoo + \
+            " --experimental_gelu=" + str(self.args.experimental_gelu)  +eoo
             " --mpi_workers_sync_gradients=" + str(self.args.mpi_workers_sync_gradients)  +eoo
 
         if self.args.train_option== "SQuAD":
