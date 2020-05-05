@@ -569,14 +569,8 @@ function minigo() {
         git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-multinode.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-large-scale.patch
         # git apply ${INTELAI_MODEL_DIR}/training/fp32/large-scale-no-bg.patch
-      elif [ "${large_num_cores}" == "True" ]; then
-        # single-node large num mode
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/tune_for_many_core.patch
-      else 
-        # single-node normal mode
+      else
+        # single-node mode
         git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/mlperf_split.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
