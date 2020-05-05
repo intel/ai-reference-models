@@ -545,6 +545,7 @@ $ pushd $MODEL_WORK_DIR
 
 2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
    Use the below command to run on single socket.
+
    Note: for best performance, use the same value for the arguments num-cores, num-intra-thread and batch-size as follows:
      For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
      For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
@@ -563,3 +564,21 @@ $ pushd $MODEL_WORK_DIR
     --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
     --docker-image intel/tensorflow-2.2-bf16-nightly
     ```
+
+3. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
+
+  Note that --data-location now points to the location of COCO validation dataset.
+
+  ```bash
+
+ $ python3 launch_benchmark.py \
+  --data-location /tf_dataset/dataset/ssd-resnet34/ \
+  --model-source-dir /tmp/public-models \
+  --model-name ssd-resnet34 --framework tensorflow \
+  --precision bfloat16 --mode training \
+  --num-cores 52 --num-inter-threads 1 \
+  --num-intra-threads 52 --batch-size=52 --mpi_num_processes=1 \
+  --mpi_num_processes_per_socket=1 --accuracy-only \
+  --checkpoint /localdisk/mabuzain/ssd-bf16-train-dir \
+  --docker-image intel/tensorflow-2.2-bf16-nightly
+  ```
