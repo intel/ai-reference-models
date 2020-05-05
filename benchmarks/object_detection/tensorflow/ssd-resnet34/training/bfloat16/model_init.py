@@ -59,9 +59,6 @@ class ModelInitializer(BaseModelInitializer):
 
         cmd_args = " --data_dir {0}".format(self.args.data_location)
         cmd_args += " --batch_size {0}".format(self.args.batch_size)
-        cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
-        cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
-        cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
         cmd_args += " --num_inter_threads {0}".format(self.args.num_inter_threads)
         cmd_args += " --num_intra_threads {0}".format(self.args.num_intra_threads)
         cmd_args += " --model=ssd300 --data_name coco"
@@ -72,14 +69,29 @@ class ModelInitializer(BaseModelInitializer):
         # cmd_args += " --use_chrome_trace_format=True --trace_file=ssd_resnet34_timeline.json"
         # cmd_args += " --num_warmup_batches=0"
 
-        # Accuracy run arguments
-        # cmd_args += " --save_model_steps=10000"
-        # cmd_args += " --max_ckpts_to_keep=100"
-        # cmd_args += " --collect_eval_results_async=true"
-        # cmd_args += " --eval=true"
-        # cmd_args += " --print_training_accuracy=True"
-        # cmd_args += " --train_dir=/tmp/ssd_rn34_train_dir"
-        # cmd_args += " --backbone_model_path=/tmp/ssd_rn34_train_dir"
+        if (self.args.accuracy_only):
+          # eval run arguments
+          cmd_args += " --train_dir={0}".format(self.args.checkpoint)
+          cmd_args += " --eval=true"
+          cmd_args += " --num_eval_epochs=1"
+          cmd_args += " --print_training_accuracy=True"
+        else:
+          cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
+          cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
+          cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
+          # convergence training arguments
+          # cmd_args += " --backbone_model_path=/nfs/pdx/home/mabuzain/ssd-resnet34/resnet34-backbone-trained-model/model.ckpt-28152"
+          # cmd_args += " --optimizer=momentum"
+          # cmd_args += " --weight_decay=5e-4"
+          # cmd_args += " --momentum=0.9"
+          # cmd_args += " --num_epochs=60"
+          # cmd_args += " --num_eval_epochs=1"
+          # cmd_args += " --num_warmup_batches=0"
+          # cmd_args += " --eval_during_training_at_specified_steps='30000,40000,45000,50000,55000,60000'"
+          # cmd_args += " --stop_at_top_1_accuracy=0.212"
+          # cmd_args += " --train_dir=/localdisk/mabuzain/ssd-bf16-train-dir"
+          # cmd_args += " --save_model_steps=10000"
+
 
         self.cmd = "{} ".format(self.python_exe)
 
