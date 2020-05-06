@@ -56,7 +56,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 
@@ -70,7 +70,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly  \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
@@ -85,7 +85,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
@@ -102,7 +102,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10 
@@ -120,7 +120,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
@@ -137,7 +137,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
@@ -265,7 +265,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly  \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10
@@ -281,7 +281,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly  \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="No" print_iter=10
@@ -296,7 +296,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=10 \
@@ -312,7 +312,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --num-intra-threads=28 --num-inter-threads=1 \
     -- random_seed=11 train_steps=100 steps_between_eval=100 params=big save_checkpoints="No" do_eval="No" print_iter=10
@@ -330,7 +330,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --mpi_num_processes=2 \
     --num-intra-threads=26 --num-inter-threads=1 \
@@ -346,7 +346,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \ 
-    --docker-image intel/tensorflow-2.2-bf16-nightly \ 
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --mpi_num_processes=4 \
     --num-intra-threads=26 --num-inter-threads=1 \
