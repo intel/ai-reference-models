@@ -535,7 +535,7 @@ $ pushd $MODEL_WORK_DIR
     --num-inter-threads 1 --num-intra-threads 52 \
     --batch-size=52 --weight_decay=1e-4 \
     --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-    --docker-image intel/tensorflow-2.2-bf16-nightly
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
    ```
 
 ## BF16 Training Instructions
@@ -562,7 +562,7 @@ $ pushd $MODEL_WORK_DIR
     --num-inter-threads 1 --num-intra-threads 52 \
     --batch-size=52 --weight_decay=1e-4 \
     --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-    --docker-image intel/tensorflow-2.2-bf16-nightly
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
     ```
 
 3. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
@@ -580,5 +580,5 @@ $ pushd $MODEL_WORK_DIR
   --num-intra-threads 52 --batch-size=52 --mpi_num_processes=1 \
   --mpi_num_processes_per_socket=1 --accuracy-only \
   --checkpoint /localdisk/mabuzain/ssd-bf16-train-dir \
-  --docker-image intel/tensorflow-2.2-bf16-nightly
+  --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
   ```
