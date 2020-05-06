@@ -1,36 +1,39 @@
 # BERT
 
-This document has instructions for how to run BERT for the
+This document has instructions for how to run [BERT](https://github.com/google-research/bert#what-is-bert) for the
 following modes/platforms:
 * [BFloat16 training](#bfloat16-training-instructions)
 * [FP32 training](#fp32-training-instructions)
 * [BFloat16 inference](#bfloat16-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-This repo contains model for BERT Large optmized for bfloat16 and fp32 on Intel CPUs. For all fine-tunining the datasets (SQuAD, MultiNLI, and MRPC) should be downloaded as mentioned in the Google bert repo.
+This repo contains model for BERT Large optimized for bfloat16 and fp32 on Intel CPUs. For all fine-tuning the datasets (SQuAD, MultiNLI, MRPC etc..)  and checkpoints should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
+
+Refer to google reference page for [checkpoints](https://github.com/google-research/bert#pre-trained-models).
 
 ## BERT Environment Variables
-Running BERT may need the right env variables for different tasks : SQuAD and Classifier and Pretraining. 
+When running BERT for different tasks : SQuAD, Classifiers and Pretraining setting env variables can simplify the commands. 
+
 An example setting is below.
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
- # For Classifiers
+# For Classifiers
 export GLUE_DIR=/path/to/glue 
-export TRAINED_CLASSIFIER=/path/to/fine/tuned/classifier
+#For SQuAD
+export SQUAD_DIR=/path/to/fine/tuning/SQUAD
 ```
-Refer to google reference page for approriate settings needed for each type of task.
 
 ## BFloat16 Training Instructions
 (Experimental)
 
- 1. Download the intel-model zoo for bfloat16
-       ```git clone https://github.com/IntelAI/models```
- 2. Download data for BERT from [google bert repo]((https://github.com/google-research/bert). Keep all data under one directory.
- 
- 3. **To run SQUAD** 
- Change dir to bechmarks and run the following command.
+ 1. Download the intel-model zoo for bfloat16.
+       git clone https://github.com/IntelAI/models.git
+ 2. Download checkpoints and data for BERT from [google bert repo]((https://github.com/google-research/bert). 
+    Keep all data under one directory ([SQuAD](https://github.com/google-research/bert#squad-11), GLUE). For training from scratch Wikipedia and BookCorpus need to be downloaded and pre-processed.
+ 3. **To run SQuAD** 
+    Change directory to benchmarks and run the following command.
 
-  Note : Add space after ```--```, for BERT options.
+Note : Add space after `--`, for BERT options.
 
 ```
 # These simplify the settings
@@ -60,6 +63,18 @@ python launch_benchmark.py \
        experimental_gelu=True \
        do_lower_case=False
 
+```
+The dev set predictions will be saved into a file called predictions.json in the output_dir:
+
+```
+python $SQUAD_DIR/evaluate-v1.1.py $SQUAD_DIR/dev-v1.1.json ./squad/predictions.json
+```
+
+An execution with these parameters produces results in line with below scores:
+
+```
+Bf16: {"exact_match": 86.77388836329234, "f1": 92.98642358746287}
+FP32: {"exact_match": 86.72658467360453, "f1": 92.98046893150796}
 ```
 To run distributed training of SQuAD (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 For fine-tuning tasks like BERT, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers. The "--mpi_workers_sync_gradients=[True/False]" controls whether the MPI workers sync gradients. By default it is set to "False" meaning the workers are training independently and the best performing training results will be picked in the end. To enable gradients synchronization, set the "--mpi_workers_sync_gradients" to true in BERT options.
@@ -102,8 +117,10 @@ Please refer to google docs for SQuAD specific arguments.
 
 4. **To run Classifier**
          ```train-option=Classifier```
+      Download [GLUE](https://gluebenchmark.com/tasks) data by running the [script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e)
+      This example code fine-tunes BERT-Base on the Microsoft Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples.
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
+export BERT_BASE_DIR=/path/to/bert/wwm_uncased_L-12_H-768_A-16
 export GLUE_DIR=/path/to/glue 
 
 python launch_benchmark.py \
@@ -117,9 +134,9 @@ python launch_benchmark.py \
        do-train=true \
        do-eval=true \
        data-dir=$GLUE_DIR/MRPC \
-       vocab-file=$BERT_LARGE_DIR/vocab.txt \
-       config-file=$BERT_LARGE_DIR/bert_config.json \
-       init-checkpoint=$BERT_LARGE_DIR/bert_model.ckpt \
+       vocab-file=$BERT_BASE_DIR/vocab.txt \
+       config-file=$BERT_BASE_DIR/bert_config.json \
+       init-checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
        max-seq-length=128 \
        learning-rate=2e-5 \
        num-train-epochs=30 \
@@ -129,6 +146,16 @@ python launch_benchmark.py \
        do-lower-case=False
 
 ```
+
+You should see output like below:
+```
+***** Eval results *****
+  eval_accuracy = 0.845588
+  eval_loss = 0.505248
+  global_step = 343
+  loss = 0.505248
+```
+
 To run distributed training of Classifier (e.g. one MPI process per socket) for better throughput, specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
@@ -160,9 +187,11 @@ python launch_benchmark.py \
 ```
  
  **5. To run pre-training** 
- ***(This is still experimental).*** Need to run pretraining of data as discussed in original [google bert](https://github.com/mlperf/training/tree/bert-cleanup/language_model/tensorflow/bert).
-        Replace SQuAD with "Pretraining" in --train_option and use the right options ```train-option=Pretraining``` for Pretraining from Google BERT"
-
+ ***Pre-training from scratch.*** Pre-training has two phases. 
+       In the first phase it is run with data generated for seq length 128. In the second phase for 
+       sequential length 512. This needs data to be preprocessed as discussed in original [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert)).
+        Replace SQuAD with "Pretraining" in --train_option and use the right options for Pretraining"
+           ```train-option=Pretraining```
 As shown below
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
@@ -177,7 +206,7 @@ python launch_benchmark.py \
     --num-intra-threads=24 \
     --num-inter-threads=1 \
     -- train-option=Pretraining \
-       input-file=/tmp/tf_examples.tfrecord \
+       input-file=<path_to_tf_record>/tf_wiki_formatted_slen512.tfrecord \
        output-dir=/tmp/pretraining_output \
        do-train=True \
        do-eval=True \
@@ -209,7 +238,7 @@ python launch_benchmark.py \
     --num-inter-threads=1 \
     --mpi_num_processes=4 \
     -- train-option=Pretraining \
-       input-file=/tmp/tf_examples.tfrecord \
+       input-file=<path_to_tf_record>/tf_wiki_formatted_slen512.tfrecord \
        output-dir=/tmp/pretraining_output \
        do-train=True \
        do-eval=True \
