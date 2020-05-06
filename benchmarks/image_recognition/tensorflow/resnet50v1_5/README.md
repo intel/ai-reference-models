@@ -344,7 +344,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image=intel/tensorflow-2.2-bf16-nightly
+    --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -380,7 +380,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image=intel/tensorflow-2.2-bf16-nightly
+    --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -419,7 +419,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image=intel/tensorflow-2.2-bf16-nightly
+    --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -454,7 +454,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image=intel/tensorflow-2.2-bf16-nightly
+    --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -555,7 +555,7 @@ $ python launch_benchmark.py \
          --framework tensorflow \
          --checkpoint <location_to_store_training_checkpoints> \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
-         --docker-image=intel/tensorflow-2.2-bf16-nightly
+         --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 ```
 
 This run will take considerable amount of time since it is running for
@@ -585,7 +585,7 @@ $ python launch_benchmark.py \
          --framework tensorflow \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=2 \
-         --docker-image=intel/tensorflow-2.2-bf16-nightly
+         --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 ```
 The above distributed training runs one MPI process per socket, to maximize performance, users can run more than one (commonly two) MPI processes per socket. The following command achieves launching 4 MPI processes over 2 sockets. Note that in this case we need to reduce the OMP_NUM_THREADS and intra_op_parallelism_threads by half (minus one or two for performance sometimes, e.g. half of 28 becomes 14, and we can use 12 for good performance).  This is controlled by "-a <half the amount of cores of per socket or less>". Batch size can remain the same for weak scaling or reduced by half as well for strong scaling.
 
@@ -598,7 +598,7 @@ $ python launch_benchmark.py \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=4 \
          --mpi_num_processes_per_socket=2 \
-         --docker-image=intel/tensorflow-2.2-bf16-nightly \
+         --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
          -a <half the amount of cores per socket or less>
 ```
 
@@ -613,7 +613,7 @@ $ python launch_benchmark.py \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=2 \
          --mpi_num_processes_per_socket=1 \
-         --docker-image=intel/tensorflow-2.2-bf16-nightly \
+         --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
          -a <half the amount of cores per socket or less>
 ```
 
