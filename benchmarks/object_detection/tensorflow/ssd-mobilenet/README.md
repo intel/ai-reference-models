@@ -123,7 +123,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --benchmark-only \
@@ -141,7 +141,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
     --accuracy-only \
@@ -352,7 +352,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --benchmark-only
 ```
 
@@ -372,7 +372,7 @@ $ python launch_benchmark.py \
     --socket-id 0 \
     --num-intra-threads 28 \
     --num-inter-threads 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0:latest \
+    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --accuracy-only
 ```
 
