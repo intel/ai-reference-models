@@ -28,7 +28,7 @@ export SQUAD_DIR=/path/to/fine/tuning/SQUAD
 
  1. Download the intel-model zoo for bfloat16.
        git clone https://github.com/IntelAI/models.git
- 2. Download checkpoints and data for BERT from [google bert repo]((https://github.com/google-research/bert). 
+ 2. Download checkpoints and data for BERT from [google bert repo](https://github.com/google-research/bert).
     Keep all data under one directory ([SQuAD](https://github.com/google-research/bert#squad-11), GLUE). For training from scratch Wikipedia and BookCorpus need to be downloaded and pre-processed.
  3. **To run SQuAD** 
     Change directory to benchmarks and run the following command.
@@ -46,6 +46,9 @@ python launch_benchmark.py \
     --mode=training \
     --framework=tensorflow \
     --batch-size=24 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
+    --volume $SQUAD_DIR:$SQUAD_DIR \
     -- train_option=SQuAD \
        vocab_file=$BERT_LARGE_DIR/vocab.txt \
        config_file=$BERT_LARGE_DIR/bert_config.json \
@@ -89,6 +92,7 @@ Change dir to bechmarks and run the following command.
 # These simplify the settings
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
 export SQUAD_DIR=/path/to/bert/SQuAD
+
 python launch_benchmark.py \
     --model-name=bert_large \
     --precision=bfloat16 \
@@ -96,6 +100,9 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=24 \ 
     --mpi_num_processes=4 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
+    --volume $SQUAD_DIR:$SQUAD_DIR \
     -- train_option=SQuAD \
        vocab_file=$BERT_LARGE_DIR/vocab.txt \
        config_file=$BERT_LARGE_DIR/bert_config.json \
@@ -129,6 +136,9 @@ python launch_benchmark.py \
     --mode=training \
     --framework=tensorflow \
     --batch-size=32 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --volume $BERT_BASE_DIR:$BERT_BASE_DIR \
+    --volume $GLUE_DIR:$GLUE_DIR \
     -- train-option=Classifier \
        task-name=MRPC \
        do-train=true \
@@ -168,6 +178,9 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=32 \
     --mpi_num_processes=4 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
+    --volume $GLUE_DIR:$GLUE_DIR \
     -- train-option=Classifier \
        task-name=MRPC \
        do-train=true \
@@ -189,12 +202,13 @@ python launch_benchmark.py \
  **5. To run pre-training** 
  ***Pre-training from scratch.*** Pre-training has two phases. 
        In the first phase it is run with data generated for seq length 128. In the second phase for 
-       sequential length 512. This needs data to be preprocessed as discussed in original [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert)).
+       sequential length 512. This needs data to be preprocessed as discussed in original [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert).
         Replace SQuAD with "Pretraining" in --train_option and use the right options for Pretraining"
            ```train-option=Pretraining```
 As shown below
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
+export PRETRAINING_DATA_DIR=/path/to/pretraining/tf-record-diretory
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -205,8 +219,11 @@ python launch_benchmark.py \
     --socket-id=0 \
     --num-intra-threads=24 \
     --num-inter-threads=1 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
+    --volume $PRETRAINING_DATA_DIR:$PRETRAINING_DATA_DIR \
     -- train-option=Pretraining \
-       input-file=<path_to_tf_record>/tf_wiki_formatted_slen512.tfrecord \
+       input-file=$PRETRAINING_DATA_DIR/tf_wiki_formatted_slen512.tfrecord \
        output-dir=/tmp/pretraining_output \
        do-train=True \
        do-eval=True \
@@ -227,6 +244,7 @@ python launch_benchmark.py \
 To run distributed training of pretraining (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
+export PRETRAINING_DATA_DIR=/path/to/pretraining/tf-record-diretory
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -237,8 +255,11 @@ python launch_benchmark.py \
     --num-intra-threads=22 \
     --num-inter-threads=1 \
     --mpi_num_processes=4 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
+    --volume $PRETRAINING_DATA_DIR:$PRETRAINING_DATA_DIR \
     -- train-option=Pretraining \
-       input-file=<path_to_tf_record>/tf_wiki_formatted_slen512.tfrecord \
+       input-file=$PRETRAINING_DATA_DIR/tf_wiki_formatted_slen512.tfrecord \
        output-dir=/tmp/pretraining_output \
        do-train=True \
        do-eval=True \
@@ -316,7 +337,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --benchmark-only \
-            --docker-image intel/tensorflow-2.2-bf16
+            --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
         ```
 
     * **Profile**
@@ -330,7 +351,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
-            --docker-image intel/tensorflow-2.2-bf16 \
+            --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
             -- profile=True
         ```
 
@@ -345,7 +366,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
-            --docker-image intel/tensorflow-2.2-bf16 \
+            --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
             --accuracy-only
         ```
 

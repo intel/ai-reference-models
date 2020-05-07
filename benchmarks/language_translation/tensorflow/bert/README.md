@@ -14,11 +14,12 @@
    This repository includes launch scripts for running an optimized version of the BERT model code.
 
 
-2. Download Microsoft Research Paraphrase Corpus (MRPC) corpus by running `download_glue_data.py` in cloned repository:
+2. Download Microsoft Research Paraphrase Corpus (MRPC) data in cloned repository and save it inside `data` folder.
+You can also use the helper script [download_glue_data.py](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e) to download the data:
 
    ```bash
-   $ mkdir data
-   $ python models/language_translation/tensorflow/bert/inference/fp32/download_glue_data.py --data_dir ./data/ --tasks MRPC
+   # Obtain a copy of download_glue_data.py to the current directory
+   $ python3 download_glue_data.py --data_dir ./data/ --tasks MRPC
    ```
 
 
