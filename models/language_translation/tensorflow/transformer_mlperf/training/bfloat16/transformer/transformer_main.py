@@ -319,16 +319,17 @@ def train_schedule(
   # Loop training/evaluation/bleu cycles
   mlperf_log.transformer_print(key=mlperf_log.TRAIN_LOOP)
   # Profiling with timeline
+  # profile file will be saved in in profile_dir
   if FLAGS.save_profile == "Yes":
     profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file 
-  #profile file will be saved in in profile_dir
-  #Creating hooks for printing Examples per Second, used with estimator.train
+
+  # Creating hooks for printing Examples per Second, used with estimator.train
   train_hooks = hooks_helper.get_train_hooks(
       ["ExamplesPerSecondHook"],
       model_dir=FLAGS.model_dir,
       batch_size=estimator.params.batch_size,
       every_n_steps=FLAGS.print_iter,
-      warm_steps=5
+      warm_steps=50
   )
   if FLAGS.save_profile == "Yes":
     hooks = profile_hooks
@@ -342,7 +343,7 @@ def train_schedule(
       mlperf_log.transformer_print(key=mlperf_log.TRAIN_EPOCH,
                                  value=i * single_iteration_train_epochs + 1)
 
-    #Can we move the following out of the loop
+    # Can we move the following out of the loop
     if is_mpi:
       train_hooks.append(hvd.BroadcastGlobalVariablesHook(0))
     # Train the model for single_iteration_train_steps or until the input fn

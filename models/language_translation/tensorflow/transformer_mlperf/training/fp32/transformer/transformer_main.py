@@ -327,7 +327,7 @@ def train_schedule(
       model_dir=FLAGS.model_dir,
       batch_size=estimator.params.batch_size,
       every_n_steps=FLAGS.print_iter,
-      warm_steps=5
+      warm_steps=50
   )
   if FLAGS.save_profile == "Yes":
     hooks = profile_hooks
