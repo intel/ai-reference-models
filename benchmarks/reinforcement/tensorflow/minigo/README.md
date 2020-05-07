@@ -194,6 +194,8 @@ cloned in the previous step. MiniGo can be run for training.
 
 
 7.1 Single-node training
+
+7.1.1 Run single-node training
 You may run the scripts below to execute the single-node training. The flag `model-source-dir` is the repository cloned in step 1. The flag `steps` sets the num of iterations to run (1 training, 1 selfplay and 1 eval per step).
 The default value for `step` is 30. The flag `quantization` sets to apply int8 quantization or not and its default value is True.
 
@@ -208,6 +210,25 @@ $ python launch_benchmark.py \
     -- steps=30 quantization=True
 
 ```
+
+7.1.2 (Optional) Optimize for large number of cores on a single node
+
+If you run Minigo on a node with large number of cores (typically more than 200 cores and 8 sockets).
+You can add `large_num_cores` flag to enable the optimization features for large number of cores. Caution:
+when you have small number of cores on the node, for example 50 cores, use `large_num_cores` flag may downgrade the performance significantly. 
+
+```
+$ cd /home/<user>/models/benchmarks
+$ python launch_benchmark.py \
+    --model-source-dir /home/<user>/minigo \
+    --model-name minigo \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode training \
+    -- steps=30 quantization=True large_num_cores=True
+
+```
+
 
 7.2 Multi-node training (normal mode)
 
