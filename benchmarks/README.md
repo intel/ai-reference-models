@@ -1,4 +1,4 @@
-# Model Zoo Scripts
+# Model Zoo Scripts 
 
 Training and inference scripts with Intel-optimized MKL
 
