@@ -57,7 +57,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument(
             "--predict-file", dest="predict_file", default="dev-v1.1.json")
         arg_parser.add_argument(
-            "--init-checkpoint", dest="init_checkpoint", default="model.ckpt-3549")
+            "--init-checkpoint", dest="init_checkpoint", default="model.ckpt-3649")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
