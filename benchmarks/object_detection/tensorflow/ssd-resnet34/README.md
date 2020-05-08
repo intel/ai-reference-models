@@ -541,44 +541,74 @@ $ pushd $MODEL_WORK_DIR
 ## BF16 Training Instructions
 (Experimental)
 
-1. Follow steps 1-6 from the above FP32 Training Instructions to setup the environment.
+   1. Follow steps 1-7 from the above FP32 Training Instructions to setup the environment.
 
-2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
-   Use the below command to run on single socket.
+   2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
+      Use the below command to run the model in benchmarking mode:
 
-   Note: for best performance, use the same value for the arguments num-cores, num-intra-thread and batch-size as follows:
-     For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
-     For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
+      Note: for best performance, use the same value for the arguments num-cores and num-intra-thread as follows:
+        For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+        For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
 
-   ```bash
-   $ cd $MODEL_WORK_DIR/models/benchmarks/
+      ```bash
+      $ cd $MODEL_WORK_DIR/models/benchmarks/
 
-   $ python3 launch_benchmark.py \
-    --data-location /path/to/coco-dataset/ \
-    --model-source-dir $MODEL_WORK_DIR/tf_models \
-    --model-name ssd-resnet34 --framework tensorflow \
-    --precision bfloat16 --mode training \
-    --num-train-steps 100 --num-cores 52 \
-    --num-inter-threads 1 --num-intra-threads 52 \
-    --batch-size=52 --weight_decay=1e-4 \
-    --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
-    ```
+      $ python3 launch_benchmark.py \
+      --data-location <path to coco_training_dataset> \
+      --model-source-dir <path to tf_models> \
+      --model-name ssd-resnet34 --framework tensorflow \
+      --precision bfloat16 --mode training \
+      --num-train-steps 100 --num-cores 52 \
+      --num-inter-threads 1 --num-intra-threads 52 \
+      --batch-size=100 --weight_decay=1e-4 \
+      --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+      --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 
-3. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
+      ```
 
-  Note that --data-location now points to the location of COCO validation dataset.
+   3. To run training and achieve convergence, download the backbone model from the links below , then use the folowing command:
 
-  ```bash
+      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/checkpoint
 
- $ python3 launch_benchmark.py \
-  --data-location /tf_dataset/dataset/ssd-resnet34/ \
-  --model-source-dir /tmp/public-models \
-  --model-name ssd-resnet34 --framework tensorflow \
-  --precision bfloat16 --mode training \
-  --num-cores 52 --num-inter-threads 1 \
-  --num-intra-threads 52 --batch-size=52 --mpi_num_processes=1 \
-  --mpi_num_processes_per_socket=1 --accuracy-only \
-  --checkpoint /localdisk/mabuzain/ssd-bf16-train-dir \
-  --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
-  ```
+      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.data-00000-of-00001
+
+      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.index
+
+      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.meta
+
+      Place the above files in one directory, and pass that location below as --backbone-model.
+
+      ```bash
+
+      $ python3 launch_benchmark.py \
+      --data-location <path to coco_training_dataset> \
+      --model-source-dir <path to tf_models> \
+      --model-name ssd-resnet34 --framework tensorflow \
+      --precision bfloat16 --mode training \
+      --num-cores 50 --num-inter-threads 1 \
+      --num-intra-threads 50 --batch-size=100 --mpi_num_processes=4 \
+      --mpi_num_processes_per_socket=1 \
+      --checkpoint <path to output_train_directory> \
+      --backbone-model <path to resnet34_backbone_trained_model> \
+      --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+
+      ```
+   
+   4. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
+
+      Note that --data-location now points to the location of COCO validation dataset.
+
+      ```bash
+
+      $ python3 launch_benchmark.py \
+      --data-location <path to coco_validation_dataset> \
+      --model-source-dir <path to tf_models> \
+      --model-name ssd-resnet34 --framework tensorflow \
+      --precision bfloat16 --mode training \
+      --num-cores 52 --num-inter-threads 1 \
+      --num-intra-threads 52 --batch-size=100 --mpi_num_processes=1 \
+      --mpi_num_processes_per_socket=1 --accuracy-only \
+      --checkpoint <path to pretrained_checkpoints> \
+      --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+
+      ```
