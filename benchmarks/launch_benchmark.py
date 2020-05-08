@@ -177,6 +177,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         env_var_dict = {
             "DATASET_LOCATION_VOL": args.data_location,
             "CHECKPOINT_DIRECTORY_VOL": args.checkpoint,
+            "BACKBONE_MODEL_DIRECTORY_VOL": args.backbone_model,
             "EXTERNAL_MODELS_SOURCE_DIRECTORY": args.model_source_dir,
             "INTELAI_MODELS": intelai_models,
             "INTELAI_MODELS_COMMON": intelai_models_common,
@@ -235,6 +236,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         mount_benchmark = benchmark_scripts
         in_graph_path = args.input_graph
         checkpoint_path = args.checkpoint
+        backbone_model_path = args.backbone_model
         dataset_path = args.data_location
 
         mount_external_models_source = args.model_source_dir
@@ -291,6 +293,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
             if checkpoint_path:
                 env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
+            
+            if backbone_model_path:
+                env_var_dict["BACKBONE_MODEL_DIRECTORY"] = backbone_model_path
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path
@@ -355,6 +360,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.checkpoint:
             env_vars += ["--env", "CHECKPOINT_DIRECTORY=/checkpoints"]
 
+        if args.backbone_model:
+            env_vars += ["--env", "BACKBONE_MODEL_DIRECTORY=/backbone_model"]
+
         # Add env vars with common settings
         for env_var_name in env_var_dict:
             env_vars += ["--env", "{}={}".format(env_var_name, env_var_dict[env_var_name])]
@@ -390,6 +398,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.checkpoint:
             volume_mounts.extend([
                 "--volume", "{}:{}".format(args.checkpoint, "/checkpoints")])
+
+        if args.backbone_model:
+            volume_mounts.extend([
+                "--volume", "{}:{}".format(args.backbone_model, "/backbone_model")])
 
         if in_graph_dir:
             volume_mounts.extend([

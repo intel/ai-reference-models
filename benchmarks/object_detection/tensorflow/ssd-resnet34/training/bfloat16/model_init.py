@@ -21,6 +21,7 @@
 import os
 import sys
 import argparse
+import time
 
 from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
@@ -75,22 +76,21 @@ class ModelInitializer(BaseModelInitializer):
           cmd_args += " --eval=true"
           cmd_args += " --num_eval_epochs=1"
           cmd_args += " --print_training_accuracy=True"
-        else:
+        elif (self.args.backbone_model == None):
+          # benchmarking run arguments
           cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
           cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
           cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
+        else:
           # convergence training arguments
-          # cmd_args += " --backbone_model_path=/nfs/pdx/home/mabuzain/ssd-resnet34/resnet34-backbone-trained-model/model.ckpt-28152"
-          # cmd_args += " --optimizer=momentum"
-          # cmd_args += " --weight_decay=5e-4"
-          # cmd_args += " --momentum=0.9"
-          # cmd_args += " --num_epochs=60"
-          # cmd_args += " --num_eval_epochs=1"
-          # cmd_args += " --num_warmup_batches=0"
-          # cmd_args += " --eval_during_training_at_specified_steps='30000,40000,45000,50000,55000,60000'"
-          # cmd_args += " --stop_at_top_1_accuracy=0.212"
-          # cmd_args += " --train_dir=/localdisk/mabuzain/ssd-bf16-train-dir"
-          # cmd_args += " --save_model_steps=10000"
+          cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
+          cmd_args += " --optimizer=momentum"
+          cmd_args += " --weight_decay=5e-4"
+          cmd_args += " --momentum=0.9"
+          cmd_args += " --num_epochs=60"
+          cmd_args += " --num_warmup_batches=0"
+          cmd_args += " --train_dir={0}".format(self.args.checkpoint)
+          cmd_args += " --save_model_steps=10000"
 
 
         self.cmd = "{} ".format(self.python_exe)
@@ -104,5 +104,7 @@ class ModelInitializer(BaseModelInitializer):
         original_dir = os.getcwd()
         os.chdir(self.training_script_dir)
         # Run benchmarking
+        start_time = time.time()
         self.run_command(self.cmd)
+        print ("Total execution time: {} seconds".format(time.time() - start_time))
         os.chdir(original_dir)
