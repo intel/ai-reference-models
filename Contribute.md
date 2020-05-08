@@ -71,10 +71,10 @@ required:
    first step where you setup the directories for your model. In this
    function, add commands to install any third-party dependencies within
    an `if [ ${NOINSTALL} != "True" ]; then` conditional block. The
-   purpose of the `NOINSTALL` flag is to be able to skip the installs
-   for quicker iteration when running on bare metal or debugging. If
-   your model requires the `PYTHONPATH` environment variable to be setup
-   to find model code or dependencies, that should be done in the
+   purpose of the `--noinstall` flag or `NOINSTALL` env var is to be able 
+   to skip the installs for quicker iteration when running on bare metal 
+   or debugging. If your model requires the `PYTHONPATH` environment variable 
+   to be setup to find model code or dependencies, that should be done in the
    model's function. Next, setup the command that will be run. The
    standard launch script args are already added to the `CMD` variable,
    so your model function will only need to add on more args if you have

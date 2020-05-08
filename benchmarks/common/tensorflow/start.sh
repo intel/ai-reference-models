@@ -51,6 +51,9 @@ echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 echo "    MPI_NUM_PROCESSES: ${MPI_NUM_PROCESSES}"
 echo "    MPI_NUM_PEOCESSES_PER_SOCKET: ${MPI_NUM_PROCESSES_PER_SOCKET}"
+echo "    MPI_HOSTNAMES: ${MPI_HOSTNAMES}"
+echo "    PYTHON_EXE: ${PYTHON_EXE}"
+echo "    PYTHONPATH: ${PYTHONPATH}"
 
 #  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
@@ -77,7 +80,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
   fi
 
   if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-    #  Installing OpenMPI
+    ## Installing OpenMPI
     apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
     # Horovod Installation
     export HOROVOD_WITHOUT_PYTORCH=1
