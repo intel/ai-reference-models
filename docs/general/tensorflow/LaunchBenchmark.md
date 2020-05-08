@@ -137,6 +137,9 @@ optional arguments:
                         argument can only be used in conjunction with a
                         --docker-image.
   --debug               Launches debug mode which doesn't execute start.sh
+  --noinstall           Whether to install packages for a given model when
+                        running in docker (default --noinstall='False') or on
+                        bare metal (default --noinstall='True')
 ```
 
 ## Volume mounts
@@ -292,7 +295,8 @@ Docker container, running on bare metal also will only work when running
 on Ubuntu.
 
 Before running a model, you must also install all the dependencies
-that are required to run that model.
+that are required to run that model. **(Note: the `--noinstall` 
+flag defaults to 'True' when running on bare metal.)**
 
 Basic requirements for running all models include:
  * python (If the model's README file specifies to use a python3 TensorFlow docker image, then use python 3 on bare metal, otherwise use python 2.7)

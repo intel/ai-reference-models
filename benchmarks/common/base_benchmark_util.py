@@ -98,6 +98,11 @@ class BaseBenchmarkUtil(object):
             dest="num_mpi", default=1)
 
         self._common_arg_parser.add_argument(
+            "--mpi_hostnames",
+            help="Specify MPI hostnames string of the form --mpi_hostnames host1,host2,host3",
+            dest="mpi_hostnames", default=None)
+
+        self._common_arg_parser.add_argument(
             "-d", "--data-location",
             help="Specify the location of the data. If this parameter is not "
                  "specified, the benchmark will use random/dummy data.",
