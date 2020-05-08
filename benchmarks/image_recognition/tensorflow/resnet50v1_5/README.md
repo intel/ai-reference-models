@@ -49,7 +49,7 @@ located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 
     The docker image (`intel/intel-optimized-tensorflow:2.1.0`)
     used in the commands above were built using
-    [TensorFlow](git@github.com:tensorflow/tensorflow.git) master for TensorFlow
+    [TensorFlow](https://github.com/tensorflow/tensorflow.git) master for TensorFlow
     version 2.1.0.
 
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
