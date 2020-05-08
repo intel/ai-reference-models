@@ -4,8 +4,6 @@ This document has instructions for how to run ResNet50 for the
 following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
-* [FP32 training](#fp32-training-instructions)
-* [BFloat16 training](#bfloat16-training-instructions)
 
 ## Int8 Inference Instructions
 
@@ -288,98 +286,3 @@ ILSVRC2012_val_00021512.JPEG,424,424
 
 Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
 to get additional debug output or change the default output location.
-
-## FP32 Training Instructions
-
-1. Download the full ImageNet dataset and convert to the TF records format.
-
-* Clone the tensorflow/models repository:
-```
-$ git clone https://github.com/tensorflow/models.git
-```
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process and convert the ImageNet dataset to the TF records format.
-
-2. Download the FP32 version of ResNet50v1 model published by Google.
-
-* Clone the models repository for tensorflow/tpu:
-```
-$ git clone https://github.com/tensorflow/tpu.git
-```
-
-3. Clone the
-[intelai/models](https://github.com/intelai/models)
-repository
-```
-$ git clone https://github.com/IntelAI/models.git
-```
-
-4. Run the following command to start ResNet50 BFloat16 training run.
-```
-$ python launch_benchmark.py \
-         --model-name=resnet50 \
-         --precision=fp32 \
-         --mode=training \
-         --framework tensorflow \
-         --checkpoint <location_to_store_training_checkpoints> \
-         --model-source-dir <location_of_TPU_models_directory> \
-         --data-location=/home/<user>/dataset/ImageNetData_directory
-```
-
-This run will take considerable amount of time since it is running for
-convergence (90 epochs, where each epoch is 1251 steps with batch size of 1024).
-
-If you want to do a trial run, add
-```
--- steps=<number_of_training_steps>
-```
-argument to the command.
-
-## BFloat16 Training Instructions
-(Experimental)
-
-1. Download the full ImageNet dataset and convert to the TF records format.
-
-* Clone the tensorflow/models repository:
-```
-$ git clone https://github.com/tensorflow/models.git
-```
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process and convert the ImageNet dataset to the TF records format.
-
-2. Download the BFloat16 version of ResNet50v1 model published by Google.
-
-* Clone the models repository for tensorflow/tpu:
-```
-$ git clone https://github.com/tensorflow/tpu.git
-```
-
-3. Clone the
-[intelai/models](https://github.com/intelai/models)
-repository
-```
-$ git clone https://github.com/IntelAI/models.git
-```
-
-4. Run the following command to start ResNet50 BFloat16 training run.
-```
-$ python launch_benchmark.py \
-         --model-name=resnet50 \
-         --precision=bfloat16 \
-         --mode=training \
-         --framework tensorflow \
-         --checkpoint <location_to_store_training_checkpoints> \
-         --model-source-dir <location_of_TPU_models_directory> \
-         --data-location=/home/<user>/dataset/ImageNetData_directory
-```
-
-This run will take considerable amount of time since it is running for
-convergence (90 epochs, where each epoch is 1251 steps with batch size of 1024).
-
-If you want to do a trial run, add
-```
--- steps=<number_of_training_steps>
-```
-argument to the command.
