@@ -234,8 +234,7 @@ python launch_benchmark.py \
     --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --debug
 ```
-     
-```
+
 Console out:	
 ```bash
 root@c49f3442efb1:/workspace/benchmarks/common/tensorflow#
