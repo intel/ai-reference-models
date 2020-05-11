@@ -47,8 +47,6 @@ _NUM_TRAIN_FILES = 1024
 _SHUFFLE_BUFFER = 1500
 
 
-_BASE_LR = 0.128
-
 ###############################################################################
 # Data processing
 ###############################################################################
@@ -292,7 +290,7 @@ def imagenet_model_fn(features, labels, mode, params):
   learning_rate_fn = resnet_run_loop.learning_rate_with_decay(
       batch_size=global_batch_size, batch_denom=256,
       num_images=_NUM_IMAGES['train'], boundary_epochs=[30, 60, 80, 90],
-      decay_rates=[1, 0.1, 0.01, 0.001, 1e-4], base_lr=_BASE_LR,
+      decay_rates=[1, 0.1, 0.01, 0.001, 1e-4], base_lr=base_lr,
       enable_lars=params['enable_lars'])
 
   return resnet_run_loop.resnet_model_fn(
