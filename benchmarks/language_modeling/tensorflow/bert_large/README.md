@@ -64,7 +64,7 @@ python launch_benchmark.py \
        output_dir=./large \
        optimized_softmax=True \
        experimental_gelu=True \
-       do_lower_case=False
+       do_lower_case=True
 
 ```
 The dev set predictions will be saved into a file called predictions.json in the output_dir:
@@ -118,7 +118,7 @@ python launch_benchmark.py \
        output_dir=./large \
        optimized_softmax=True \
        experimental_gelu=True \
-       do_lower_case=False
+       do_lower_case=True
 ```
 Please refer to google docs for SQuAD specific arguments.
 
@@ -153,7 +153,7 @@ python launch_benchmark.py \
        output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
        experimental_gelu=True \
-       do-lower-case=False
+       do-lower-case=True
 
 ```
 
@@ -195,7 +195,7 @@ python launch_benchmark.py \
        output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
        experimental_gelu=True \
-       do-lower-case=False
+       do-lower-case=True
 
 ```
  
