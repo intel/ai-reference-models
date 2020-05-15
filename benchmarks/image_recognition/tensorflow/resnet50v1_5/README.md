@@ -612,9 +612,47 @@ $ python launch_benchmark.py \
          --framework tensorflow \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=2 \
-         --mpi_num_processes_per_socket=1 \
+         --mpi_num_processes_per_socket=2 \
          --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
          -a <half the amount of cores per socket or less>
 ```
 
 You can check output trained model accuracy by setting `--eval=True` in the command. After training is over, it automatically run inference and report accuracy results.
+
+ResNet50 convergence with MLPerf target Top-1 accuracy of 75.9% can be achieved using the following set of instructions. The instructions have been tested on a 8-socket 28-core Xeon server.
+```
+$ cd models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet
+$ RANDOM_SEED=`date +%s`
+
+# Save the original PYTHONPATH
+$ export ORIG_PYTHONPATH="${PYTHONPATH}"
+
+# Register the model as a source root
+$ export PYTHONPATH="$(pwd):${PYTHONPATH}"
+
+# Add MLPerf source to PYTHONPATH
+$ export PYTHONPATH="$(pwd)/../:$(pwd)/../../../../../common/tensorflow/:${PYTHONPATH}"
+
+# Set path for saving checkpoints
+$ MODEL_DIR=“PATH_TO_CHECKPOINT/resnet_imagenet_${RANDOM_SEED}"
+  
+$ export OMP_NUM_THREADS=4
+$ export KMP_BLOCKTIME=1
+  
+$ mpirun --allow-run-as-root -n 32  --map-by ppr:4:socket:pe=7 python imagenet_main.py $RANDOM_SEED \
+  --data_dir PATH_TO_DATASET/imagenet_dataset --model_dir $MODEL_DIR --train_epochs 10000 \
+  --stop_threshold 0.759 --batch_size 128 --version 1 --resnet_size 50 --epochs_between_evals 4 --weight_decay 1e-4 \
+  --inter_op_parallelism_threads 2 --intra_op_parallelism_threads 4 --fine_tune --use_bfloat16
+
+# Restore the original PYTHONPATH
+export PYTHONPATH="${ORIG_PYTHONPATH}"
+```
+--map-by ppr:4:socket:pe=7 starts 4 mpi processes per socket and binds each of them to 7 cores
+
+--fine_tune is optional. Adding this param sets base learning rate to 0.1. The default base learning rate (when —fine-tune is not set) is 0.128. Convergence with mlperf target accuracy of 75.9% has been achieved using both 0.1 and 0.128.
+
+Although --train_epochs is set to 1000, target accuracy of 75.9% can be reached in 84 epochs. --stop_threshold ensures that training will stop once target accuracy of 75.9% has been reached.
+
+For bfloat16 training, pass the param --use_bfloat16 in mpirun command (as indicated above). For FP32, do not pass this param. Other than this difference, rest of instructions remain same for convergence with bfloat16 and FP32.
+
+For running distributed training on a cluster, modify params passed to mpirun (add --host … , modify --map-by …), OMP_NUM_THREADS and model hyper parameters depending on hardware configuration of machines in the cluster
