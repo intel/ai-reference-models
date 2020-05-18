@@ -58,7 +58,7 @@ class BaseModelInitializer(object):
             raise ValueError("Did not find any platform info.")
 
         # use case: bare-metal with openmpi, horovod and multi-node
-        if os.environ["MPI_HOSTNAMES"] != "None" and not "DOCKER" in os.environ or os.environ["DOCKER"] == "False":
+        if os.environ["MPI_HOSTNAMES"] != "None" and (not "DOCKER" in os.environ or os.environ["DOCKER"] == "False"):
           if os.environ["MPI_NUM_PROCESSES"] != "None":
             try:
               # slots per host calculation using MPI_NUM_PROCESSES and number of hosts
