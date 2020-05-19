@@ -15,13 +15,14 @@ better performance results for Int8 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone the [tensorflow/models](https://github.com/tensorflow/models) as `tensorflow-models` and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
+1. Clone [intelai/models](https://github.com/intelai/models), [tensorflow/models](https://github.com/tensorflow/models) as `tensorflow-models`, and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
 
 ```
+$ git clone https://github.com/IntelAI/models.git intel-models
 $ git clone https://github.com/tensorflow/models.git tensorflow-models
 $ cd tensorflow-models
 $ git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
-$ git apply models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
+$ git apply ../intel-models/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 $ git clone https://github.com/cocodataset/cocoapi.git
 
 ```
@@ -70,9 +71,7 @@ The `--output_dir` is the location where the TF record files will be
 located after the script has completed.
 
 ```
-
 # We are going to use an older version of the conversion script to checkout the git commit
-$ cd models
 $ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
 
 $ cd research/object_detection/dataset_tools/
@@ -98,18 +97,16 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. Download the pretrained model:
-  Int8 Graph
+4. Download the pre-trained model (Int8 graph):
+
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/rfcn_resnet101_int8_coco_pretrained_model.pb
 ```
 
-5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the scripts for either batch/online inference performance or accuracy.
+5. Go to the Model Zoo benchmarks directory and run the scripts for either batch/online inference performance or accuracy.
 
 ```
-$ git clone https://github.com/IntelAI/models.git
-$ cd models/benchmarks
+$ cd /home/<user>/intel-models/benchmarks
 ```
 
 Run for batch and online inference where the `--data-location`
@@ -122,7 +119,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -139,7 +136,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -151,19 +148,20 @@ Note that the `--verbose` or `--output-dir` flag can be added to any of the abov
 to get additional debug output or change the default output location.
 
 6. Log files are located at the value of `--output-dir` (or
-`models/benchmarks/common/tensorflow/logs` if no path has been specified):
+`intel-models/benchmarks/common/tensorflow/logs` if no path has been specified):
 
 Below is a sample log file tail when running for batch
 and online inference:
 ```
-Step 0: 11.4450089931 seconds
-Step 10: 0.25656080246 seconds
+Step 0: ... seconds
+Step 10: ... seconds
 ...
-Step 460: 0.256786823273 seconds
-Step 470: 0.267828941345 seconds
-Step 480: 0.141321897507 seconds
-Step 490: 0.127830982208 seconds
-Avg. Duration per Step:0.195356227875
+Step 460: ... seconds
+Step 470: ... seconds
+Step 480: ... seconds
+Step 490: ... seconds
+Avg. Duration per Step: ...
+...
 Ran inference with batch size -1
 Log location outside container: {--output-dir}/benchmark_rfcn_inference_int8_20190416_182445.log
 ```
@@ -196,13 +194,14 @@ better performance results for FP32 precision models with smaller batch sizes.
 If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True` 
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
-1. Clone the [tensorflow/models](https://github.com/tensorflow/models) as `tensorflow-models` and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
+Clone [intelai/models](https://github.com/intelai/models), [tensorflow/models](https://github.com/tensorflow/models) as `tensorflow-models`, and [cocodataset/cocoapi](https://github.com/cocodataset/cocoapi) repositories:
 
 ```
+$ git clone https://github.com/IntelAI/models.git intel-models
 $ git clone https://github.com/tensorflow/models.git tensorflow-models
 $ cd tensorflow-models
 $ git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
-$ git apply models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
+$ git apply ../intel-models/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 $ git clone https://github.com/cocodataset/cocoapi.git
 ```
 
@@ -272,21 +271,17 @@ $ git checkout master
 
 The `coco_val.record` file is what we will use in this inference example.
 
-4. Download the pretrained model:
+4. Download the pre-trained model (FP32 graph):
 
-  FP32 Graph
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 $ tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 ```
 
-
-5. Clone the [intelai/models](https://github.com/intelai/models) repo
-and then run the scripts for either batch/online inference performance or accuracy.
+5. Go to the Model Zoo benchmarks directory and run the scripts for either batch/online inference performance or accuracy.
 
 ```
-$ git clone https://github.com/IntelAI/models.git
-$ cd models/benchmarks
+$ cd /home/<user>/intel-models/benchmarks
 ```
 
 Run for batch and online inference where the `--data-location`
@@ -299,7 +294,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/val/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco_pretrained_model \
@@ -317,7 +312,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location /home/<user>/coco/output/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco_pretrained_model.pb \
@@ -329,12 +324,12 @@ Note that the `--verbose` or `--output-dir` flag can be added to any of the abov
 to get additional debug output or change the default output location.
 
 6. Log files are located at the value of `--output-dir` (or
-`models/benchmarks/common/tensorflow/logs` if no path has been specified):
+`intel-models/benchmarks/common/tensorflow/logs` if no path has been specified):
 
 Below is a sample log file tail when running for batch
 and online inference:
 ```
-Average time per step: 0.262 sec
+Average time per step: ... sec
 Received these standard args: Namespace(accuracy_only=False, batch_size=1, benchmark_only=False, checkpoint='/checkpoints', data_location='/dataset', framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', mode='inference', model_args=[], model_name='rfcn', model_source_dir='/workspace/models', num_cores=-1, num_inter_threads=2, num_intra_threads=56, precision='fp32, socket_id=0, use_case='object_detection', verbose=True)
 Received these custom args: ['--config_file=rfcn_pipeline.config']
 Run model here.
