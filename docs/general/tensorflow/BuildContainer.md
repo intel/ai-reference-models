@@ -1,10 +1,10 @@
 # Steps to generate a container with Intel® Optimization for TensorFlow
 
-This guide will help you generate a container with Intel's cpx launch release candidate.
+This guide will help you generate a container with Intel's cpx release candidate.
 
 ## Steps:
 
-1. Clone intel-tensorflow cpx launch branch:
+1. Clone intel-tensorflow bf16/base branch:
 
     ```
     $ git clone https://github.com/Intel-tensorflow/tensorflow.git --branch=bf16/base --single-branch
