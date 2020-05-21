@@ -30,7 +30,7 @@ If you have installed `gsutil` before, please skip this step. You may type comma
 check whether the `gsutil` has already been installed   
 
 ```bash
-$ wget https://storage.googleapis.com/pub/gsutil.zip
+$ wget https://storage.googleapis.com/pub/gsutil.tar.gz
 $ tar xfz gsutil.tar.gz -C $HOME
 $ export PATH=${PATH}:$HOME/gsutil
 ```
@@ -38,14 +38,14 @@ $ export PATH=${PATH}:$HOME/gsutil
 2.2 Download the `checkpoint` and `target` folders and copy them to the `minigo/mlperf` directory 
 ```bash
 # under minigo directory
-$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/checkpoint ml_perf/
 # organize target folders
+$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/target ml_perf/
 $ cd ml_perf/target
 $ mkdir 9
 $ mv target* ./9
 $ cd ../../
 # organize checkpoint folders
-$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/target ml_perf/
+$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/checkpoint ml_perf/
 $ cd ml_perf/checkpoint/
 $ mv ./work_dir/work_dir/* ./work_dir/
 $ rm -rf ./work_dir/work_dir/
