@@ -91,6 +91,12 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "--debug", help="Launches debug mode which doesn't execute "
                             "start.sh when running in a docker container.", action="store_true")
 
+        arg_parser.add_argument(
+            "--noinstall",
+            help="whether to install packages for a given model when running in docker "
+                 "(default --noinstall='False') or on bare metal (default --noinstall='True')",
+            dest="noinstall", action="store_true", default=None)
+
         return arg_parser.parse_known_args()
 
     def validate_args(self):
@@ -192,6 +198,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "FRAMEWORK": args.framework,
             "NUM_CORES": args.num_cores,
             "NUM_INTER_THREADS": args.num_inter_threads,
+            "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",
             "NUM_INTRA_THREADS": args.num_intra_threads,
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
             "NUM_TRAIN_STEPS": args.num_train_steps,
@@ -216,11 +223,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             split_arg = custom_arg.split("=")
             split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
-
-
-        # Set the default value for NOINSTALL, if it's not explicitly set by the user
-        if "NOINSTALL" not in env_var_dict:
-            env_var_dict["NOINSTALL"] = "False"
 
         return env_var_dict
 
