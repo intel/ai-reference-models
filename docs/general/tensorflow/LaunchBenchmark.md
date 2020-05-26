@@ -101,6 +101,10 @@ optional arguments:
                         written to this location. If mode=inference assumes
                         that the location points to a model that has already
                         been trained.
+  -bb BACKBONE_MODEL, --backbone_model BACKBONE_MODEL
+                        Specify the location of backbone-model directory.
+                        This option can be used by models (like SSD_Resnet34)
+                        to do fine-tuning training or achieve convergence.
   -k, --benchmark-only  For performance measurement only. If neither
                         --benchmark-only or --accuracy-only are specified, it
                         will default to run for performance.
