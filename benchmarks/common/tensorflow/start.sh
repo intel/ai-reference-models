@@ -25,6 +25,7 @@ echo "    FRAMEWORK: ${FRAMEWORK}"
 echo "    WORKSPACE: ${WORKSPACE}"
 echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
+echo "    BACKBONE_MODEL_DIRECTORY: ${BACKBONE_MODEL_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
 echo "    MOUNT_INTELAI_MODELS_COMMON_SOURCE_DIR: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
 if [ ${DOCKER} == "True" ]; then
@@ -34,6 +35,7 @@ if [ ${DOCKER} == "True" ]; then
   echo "        ${INTELAI_MODELS} mounted on: ${MOUNT_INTELAI_MODELS_SOURCE}"
   echo "        ${DATASET_LOCATION_VOL} mounted on: ${DATASET_LOCATION}"
   echo "        ${CHECKPOINT_DIRECTORY_VOL} mounted on: ${CHECKPOINT_DIRECTORY}"
+  echo "        ${BACKBONE_MODEL_DIRECTORY_VOL} mounted on: ${BACKBONE_MODEL_DIRECTORY}"
 fi
 
 echo "    SOCKET_ID: ${SOCKET_ID}"
@@ -177,6 +179,10 @@ fi
 
 if [[ -n "${CHECKPOINT_DIRECTORY}" && ${CHECKPOINT_DIRECTORY} != "" ]]; then
   CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+fi
+
+if [[ -n "${BACKBONE_MODEL_DIRECTORY}" && ${BACKBONE_MODEL_DIRECTORY} != "" ]]; then
+  CMD="${CMD} --backbone-model=${BACKBONE_MODEL_DIRECTORY}"
 fi
 
 if [[ -n "${DATASET_LOCATION}" && ${DATASET_LOCATION} != "" ]]; then
