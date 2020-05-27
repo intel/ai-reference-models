@@ -28,7 +28,6 @@ import os
 import argparse
 
 
-
 class ModelInitializer(BaseModelInitializer):
     """Model initializer for minigo"""
 
@@ -36,25 +35,25 @@ class ModelInitializer(BaseModelInitializer):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         arg_parser = argparse.ArgumentParser(description='Parse additional args')
-        
+
         arg_parser.add_argument(
             "--quantization", help="quantization flag",
-            dest="quantization", default="False")     
+            dest="quantization", default="False")
         arg_parser.add_argument(
             "--large-scale", help="train on large scale",
-            dest="large_scale", default="False") 
+            dest="large_scale", default="False")
         arg_parser.add_argument(
             "--num-train-nodes", help="number of train nodes",
-            dest="num_train_nodes", default=0, type=int) 
+            dest="num_train_nodes", default=0, type=int)
         arg_parser.add_argument(
             "--num-eval-nodes", help="number of evaluation nodes",
-            dest="num_eval_nodes", default=0, type=int)  
+            dest="num_eval_nodes", default=0, type=int)
         arg_parser.add_argument(
             "--multi-node", help="train on large scale",
-            dest="multi_node", default="False")    
-        
+            dest="multi_node", default="False")
+
         self.additional_args, unknown_args = arg_parser.parse_known_args(custom_args)
-        
+
         if self.additional_args.large_scale == "True" and self.additional_args.multi_node == "True":
             # multi-node training mode with large scale
             self.cmd = "./run_mn.sh "
@@ -70,7 +69,7 @@ class ModelInitializer(BaseModelInitializer):
             # single-node training mode
             self.cmd = "./run.sh "
             self.cmd += " {0}".format(self.additional_args.quantization)
-            
+
     def run(self):
         org_path = os.getcwd()
         os.chdir(self.args.model_source_dir)

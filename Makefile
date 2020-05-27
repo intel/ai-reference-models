@@ -27,7 +27,7 @@ all: venv
 # we need to update pip and setuptools because venv versions aren't latest
 # need to prepend $(ACTIVATE) everywhere because all make calls are in subshells
 # otherwise we won't be installing anything in the venv itself
-$(ACTIVATE): tests/requirements.txt
+$(ACTIVATE):
 	@echo "Updating virtualenv dependencies in: $(VIRTUALENV_DIR)..."
 	@test -d $(VIRTUALENV_DIR) || $(VIRTUALENV_EXE) $(VIRTUALENV_DIR)
 	@. $(ACTIVATE) && python -m pip install -r requirements-test.txt
