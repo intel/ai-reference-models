@@ -201,7 +201,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "MPI_HOSTNAMES": args.mpi_hostnames,
             "MPI_NUM_PROCESSES": args.mpi,
             "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi,
-            "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",
+            "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",  # noqa: E501
             "NUM_CORES": args.num_cores,
             "NUM_INTER_THREADS": args.num_inter_threads,
             "NUM_INTRA_THREADS": args.num_intra_threads,
@@ -296,7 +296,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
             if checkpoint_path:
                 env_var_dict["CHECKPOINT_DIRECTORY"] = checkpoint_path
-            
+
             if backbone_model_path:
                 env_var_dict["BACKBONE_MODEL_DIRECTORY"] = backbone_model_path
 
@@ -319,7 +319,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # Run the start script
         start_script = os.path.join(workspace, "start.sh")
         self._launch_command(["bash", start_script])
-    
 
     def run_docker_container(self, benchmark_scripts, intelai_models,
                              intelai_models_common, env_var_dict):

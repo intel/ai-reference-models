@@ -19,7 +19,6 @@
 #
 
 import os
-import sys
 
 from common.base_model_init import BaseModelInitializer, set_env_var
 
@@ -38,8 +37,8 @@ class ModelInitializer(BaseModelInitializer):
 
         benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
                                         self.args.precision, "infer_detections.py")
-        self.command_prefix = self.get_command_prefix(self.args.socket_id) + \
-                "{} {}".format(self.python_exe, benchmark_script)                                        
+        self.command_prefix = self.get_command_prefix(self.args.socket_id) \
+            + "{} {}".format(self.python_exe, benchmark_script)
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.command_prefix += " -g {0}".format(self.args.input_graph)
