@@ -69,10 +69,9 @@ class ModelInitializer(BaseModelInitializer):
 
         # Test accuracy if needed
         if self.args.accuracy_only:
-          self.run_cmd += " --do_train=true --num_train_epochs=3.0 --train_batch_size=32"
+            self.run_cmd += " --do_train=true --num_train_epochs=3.0 --train_batch_size=32"
         else:
-          self.run_cmd += " --do_train=false"
-
+            self.run_cmd += " --do_train=false"
 
     def run(self):
         if self.run_cmd:

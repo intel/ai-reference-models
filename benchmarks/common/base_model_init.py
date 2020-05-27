@@ -58,31 +58,39 @@ class BaseModelInitializer(object):
             raise ValueError("Did not find any platform info.")
 
         # use case: bare-metal with openmpi, horovod and multi-node
-        if os.environ["MPI_HOSTNAMES"] != "None" and (not "DOCKER" in os.environ or os.environ["DOCKER"] == "False"):
-          if os.environ["MPI_NUM_PROCESSES"] != "None":
-            try:
-              # slots per host calculation using MPI_NUM_PROCESSES and number of hosts
-              host_names = os.environ["MPI_HOSTNAMES"]
-              number_of_hosts = len(host_names.split(','))
-              slots_per_host = int(int(os.environ["MPI_NUM_PROCESSES"]) / number_of_hosts)
-              host_names = ",".join([ host + ":" + str(slots_per_host) for host in host_names.split(',') ])
-              # see the [examples](https://horovod.readthedocs.io/en/latest/mpirun.html) for the mca flags
-              self.python_exe = "mpirun " + " -x LD_LIBRARY_PATH " + " -x PYTHONPATH " + " --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " -H " + host_names + " -mca pml ob1 -mca btl ^openib -mca btl_tcp_if_exclude lo,docker0 --bind-to none --map-by slot " + self.python_exe
-            except Exception as exception:
-              raise ValueError("Caught exception calculating slots per host {}".format(str(exception)))
-          else:
-            raise ValueError("MPI_NUM_PROCESSES is required for MPI_HOSTNAMES and will be split evenly across the hosts.")
+        if os.environ["MPI_HOSTNAMES"] != "None" and ("DOCKER" not in os.environ or os.environ["DOCKER"] == "False"):
+            if os.environ["MPI_NUM_PROCESSES"] != "None":
+                try:
+                    # slots per host calculation using MPI_NUM_PROCESSES and number of hosts
+                    host_names = os.environ["MPI_HOSTNAMES"]
+                    number_of_hosts = len(host_names.split(','))
+                    slots_per_host = int(int(os.environ["MPI_NUM_PROCESSES"]) / number_of_hosts)
+                    host_names = ",".join([host + ":" + str(slots_per_host) for host in host_names.split(',')])
+                    # see the [examples](https://horovod.readthedocs.io/en/latest/mpirun.html) for the mca flags
+                    self.python_exe = "mpirun " + " -x LD_LIBRARY_PATH " + " -x PYTHONPATH " \
+                        + " --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " -H " + host_names \
+                        + " -mca pml ob1 -mca btl ^openib -mca btl_tcp_if_exclude " \
+                          "lo,docker0 --bind-to none --map-by slot " \
+                        + self.python_exe
+                except Exception as exception:
+                    raise ValueError("Caught exception calculating slots per host {}".format(str(exception)))
+            else:
+                raise ValueError("MPI_NUM_PROCESSES is required for MPI_HOSTNAMES and will be split evenly across the "
+                                 "hosts.")
         # use case: docker with openmpi, single-node, multi-instance
         elif os.environ["MPI_NUM_PROCESSES"] != "None":
             if os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] == "1":
-              # Map by socket using OpenMPI by default (PPS=1).
-              self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " --map-by socket " + self.python_exe
+                # Map by socket using OpenMPI by default (PPS=1).
+                self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] \
+                    + " --map-by socket " + self.python_exe
             else:
-              # number of processes per socket (pps)
-              pps = int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"])
-              split_a_socket = str(platform_util.num_cores_per_socket // pps)
-              # Launch pps MPI processes over one socket
-              self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " + split_a_socket + " " + self.python_exe
+                # number of processes per socket (pps)
+                pps = int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"])
+                split_a_socket = str(platform_util.num_cores_per_socket // pps)
+                # Launch pps MPI processes over one socket
+                self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] \
+                    + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " \
+                    + split_a_socket + " " + self.python_exe
 
     def run_command(self, cmd):
         """
@@ -182,15 +190,14 @@ class BaseModelInitializer(object):
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = self.platform_util.num_cpu_sockets
                 if os.environ["MPI_NUM_PROCESSES"] != "None":
-                  self.args.num_inter_threads = 1
+                    self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
                 if self.args.num_cores == -1:
                     self.args.num_intra_threads = \
                         int(self.platform_util.num_cores_per_socket *
                             self.platform_util.num_cpu_sockets)
                     if os.environ["MPI_NUM_PROCESSES"] != "None":
-                      self.args.num_intra_threads = \
-                             self.platform_util.num_cores_per_socket - 2
+                        self.args.num_intra_threads = self.platform_util.num_cores_per_socket - 2
                 else:
                     self.args.num_intra_threads = self.args.num_cores
 

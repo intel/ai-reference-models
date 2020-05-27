@@ -65,33 +65,32 @@ class ModelInitializer(BaseModelInitializer):
         cmd_args += " --model=ssd300 --data_name coco"
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
-        
+
         # cmd_args += " --rewriter_config=convert_to_bfloat16:ON"
         # cmd_args += " --use_chrome_trace_format=True --trace_file=ssd_resnet34_timeline.json"
         # cmd_args += " --num_warmup_batches=0"
 
         if (self.args.accuracy_only):
-          # eval run arguments
-          cmd_args += " --train_dir={0}".format(self.args.checkpoint)
-          cmd_args += " --eval=true"
-          cmd_args += " --num_eval_epochs=1"
-          cmd_args += " --print_training_accuracy=True"
-        elif (self.args.backbone_model == None):
-          # benchmarking run arguments
-          cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
-          cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
-          cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
+            # eval run arguments
+            cmd_args += " --train_dir={0}".format(self.args.checkpoint)
+            cmd_args += " --eval=true"
+            cmd_args += " --num_eval_epochs=1"
+            cmd_args += " --print_training_accuracy=True"
+        elif (self.args.backbone_model is None):
+            # benchmarking run arguments
+            cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
+            cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
+            cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
         else:
-          # convergence training arguments
-          cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
-          cmd_args += " --optimizer=momentum"
-          cmd_args += " --weight_decay=5e-4"
-          cmd_args += " --momentum=0.9"
-          cmd_args += " --num_epochs=60"
-          cmd_args += " --num_warmup_batches=0"
-          cmd_args += " --train_dir={0}".format(self.args.checkpoint)
-          cmd_args += " --save_model_steps=10000"
-
+            # convergence training arguments
+            cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
+            cmd_args += " --optimizer=momentum"
+            cmd_args += " --weight_decay=5e-4"
+            cmd_args += " --momentum=0.9"
+            cmd_args += " --num_epochs=60"
+            cmd_args += " --num_warmup_batches=0"
+            cmd_args += " --train_dir={0}".format(self.args.checkpoint)
+            cmd_args += " --save_model_steps=10000"
 
         self.cmd = "{} ".format(self.python_exe)
 
@@ -106,5 +105,5 @@ class ModelInitializer(BaseModelInitializer):
         # Run benchmarking
         start_time = time.time()
         self.run_command(self.cmd)
-        print ("Total execution time: {} seconds".format(time.time() - start_time))
+        print("Total execution time: {} seconds".format(time.time() - start_time))
         os.chdir(original_dir)

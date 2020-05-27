@@ -25,7 +25,6 @@ from common.base_model_init import set_env_var
 
 import os
 from argparse import ArgumentParser
-import time
 
 
 class ResNet50ModelInitializer(BaseModelInitializer):
@@ -72,7 +71,7 @@ class ResNet50ModelInitializer(BaseModelInitializer):
 
         # We need to change directory to model source to avoid python
         # module name conflicts.
-        #self.benchmark_command = "cd " + self.args.model_source_dir + \
+        # self.benchmark_command = "cd " + self.args.model_source_dir + \
         #    "/models && " + self.get_command_prefix(args.socket_id) + \
         #    self.python_exe + " " + benchmark_script
 
