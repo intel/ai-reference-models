@@ -227,6 +227,12 @@ class BaseBenchmarkUtil(object):
                  "'models/benchmarks/common/tensorflow/logs' if no path is specified.",
             default="/models/benchmarks/common/tensorflow/logs")
 
+        self._common_arg_parser.add_argument(
+            "--tf-serving-version",
+            help="TF serving version to run the script with"
+                 "'master' if no value is specified.",
+            default="master")
+
         # Allow for additional command line args after --
         self._common_arg_parser.add_argument(
             "model_args", nargs="*",
