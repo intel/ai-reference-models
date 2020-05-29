@@ -489,7 +489,7 @@ $ pushd $MODEL_WORK_DIR
 
    Since we are only using the train and validation dataset in this example, we will create an empty directory and empty annotations json file to pass as the test directories in the next step.
 
-   ```
+   ```bash
    $ cd $MODEL_WORK_DIR
    $ mkdir empty_dir
    
@@ -552,7 +552,6 @@ $ pushd $MODEL_WORK_DIR
 
       ```bash
       $ cd $MODEL_WORK_DIR/models/benchmarks/
-
       $ python3 launch_benchmark.py \
       --data-location <path to coco_training_dataset> \
       --model-source-dir <path to tf_models> \
@@ -566,7 +565,7 @@ $ pushd $MODEL_WORK_DIR
 
       ```
 
-   3. To run training and achieve convergence, download the backbone model from the links below , then use the following command:
+   3. To run training and achieve convergence, download the backbone model from the links below, then use the following command:
 
       https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/checkpoint
 
@@ -579,7 +578,6 @@ $ pushd $MODEL_WORK_DIR
       Place the above files in one directory, and pass that location below as --backbone-model.
 
       ```bash
-
       $ python3 launch_benchmark.py \
       --data-location <path to coco_training_dataset> \
       --model-source-dir <path to tf_models> \
@@ -593,19 +591,19 @@ $ pushd $MODEL_WORK_DIR
       --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 
       ```
-   
+
    4. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
 
       Note that --data-location now points to the location of COCO validation dataset.
 
       ```bash
-
       $ python3 launch_benchmark.py \
       --data-location <path to coco_validation_dataset> \
       --model-source-dir <path to tf_models> \
       --model-name ssd-resnet34 --framework tensorflow \
       --precision bfloat16 --mode training \
-      --num-cores 52 --num-inter-threads 1 \
+      --num-cores 52 --num-train-steps 100 \
+      --num-inter-threads 1 \
       --num-intra-threads 52 --batch-size=100 --mpi_num_processes=1 \
       --mpi_num_processes_per_socket=1 --accuracy-only \
       --checkpoint <path to pretrained_checkpoints> \

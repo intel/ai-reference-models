@@ -200,11 +200,10 @@ python launch_benchmark.py \
 ```
  
  **5. To run pre-training** 
- ***Pre-training from scratch.*** Pre-training has two phases. 
+ ***Pre-training from scratch.*** Pre-training has two phases.
        In the first phase it is run with data generated for seq length 128. In the second phase for 
        sequential length 512. This needs data to be preprocessed as discussed in original [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert).
-        Replace SQuAD with "Pretraining" in --train_option and use the right options for Pretraining"
-           ```train-option=Pretraining```
+       Replace SQuAD with "Pretraining" in --train_option and use the right options ```train-option=Pretraining``` for Pretraining"
 As shown below
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
@@ -237,8 +236,6 @@ python launch_benchmark.py \
        optimized_softmax=True \
        experimental_gelu=True \
        profile=False 
-  
-
 ```
 
 To run distributed training of pretraining (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
