@@ -115,6 +115,10 @@ optional arguments:
                         conjunction with --accuracy-only and --mode=inference.
   --output-dir OUTPUT_DIR
                         Folder to dump output into.
+  --tf-serving-version TF_SERVING_VERSION
+                        Specify the version of tensorflow serving.
+                        If nothing is specified, it defaults to master
+                        of tensorflow serving.
   --disable-tcmalloc {True,False}
                         When TCMalloc is enabled, the google-perftools are
                         installed (if running using docker) and the LD_PRELOAD
