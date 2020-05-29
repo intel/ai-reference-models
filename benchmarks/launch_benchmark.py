@@ -211,6 +211,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "PYTHON_EXE": sys.executable if not args.docker_image else "python",
             "SOCKET_ID": args.socket_id,
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
+            "TF_SERVING_VERSION": args.tf_serving_version,
             "USE_CASE": use_case,
             "VERBOSE": args.verbose
         }
@@ -262,6 +263,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                 env_var_dict["IN_GRAPH"] = in_graph_path
             else:
                 raise ValueError("--in-graph arg is required to run tensorflow serving benchmarking")
+
+            if args.tf_serving_version:
+                env_var_dict["TF_SERVING_VERSION"] = args.tf_serving_version
 
             for env_var_name in env_var_dict:
                 os.environ[env_var_name] = str(env_var_dict[env_var_name])
