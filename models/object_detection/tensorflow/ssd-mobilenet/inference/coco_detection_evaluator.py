@@ -102,4 +102,3 @@ class CocoDetectionEvaluator:
         box_metrics = {'DetectionBoxes_'+ key: value
                        for key, value in iter(box_metrics.items())}
         return box_metrics
-    

@@ -137,7 +137,7 @@ with tf.python_io.TFRecordWriter(output_file) as writer:
                 new_categorical_list.append("")
             else:
                 new_categorical_list.append(new_categorical_dict[i])
-        hash_values = tf.string_to_hash_bucket_fast(
+        hash_values =  tf.string_to_hash_bucket_fast(
             new_categorical_list, 1000).numpy()
         new_numerical_dict = dict(zip(NUMERIC_COLUMNS2, normalized_vals))
         example = tf.train.Example()

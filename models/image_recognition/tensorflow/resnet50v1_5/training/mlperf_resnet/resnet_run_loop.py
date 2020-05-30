@@ -600,7 +600,7 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
       # Also assuming when -- steps is specified, the train epochs should
       # be set to be equal to epochs_between_evals so that the
       # range(flags.train_epochs // flags.epochs_between_evals) gets to be 1
-      if flags.max_train_steps < steps_per_eval_per_worker:
+      if (flags.max_train_steps) and (flags.max_train_steps < steps_per_eval_per_worker):
           train_steps = flags.max_train_steps
       else:
           train_steps = steps_per_eval_per_worker
