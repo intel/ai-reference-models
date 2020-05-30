@@ -144,6 +144,9 @@ class BaseModelInitializer(object):
          * num_inter_threads = The number of sockets
          * num_intra_threads = The total number of cores across all sockets, or
            self.args.num_cores if a specific number of cores was defined.
+         * in case MPI_NUM_PROCESSES is used
+           * num_inter_threads = 1
+           * num_intra_threads = the number of cores on a single socket minus 2
         """
         # if num_inter_threads is specified, use that value as long as the arg isn't set
         if num_inter_threads and not self.args.num_inter_threads:
@@ -163,11 +166,16 @@ class BaseModelInitializer(object):
         else:
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = self.platform_util.num_cpu_sockets
+                if os.environ["MPI_NUM_PROCESSES"] != "None":
+                  self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
                 if self.args.num_cores == -1:
                     self.args.num_intra_threads = \
                         int(self.platform_util.num_cores_per_socket *
                             self.platform_util.num_cpu_sockets)
+                    if os.environ["MPI_NUM_PROCESSES"] != "None":
+                      self.args.num_intra_threads = \
+                             self.platform_util.num_cores_per_socket - 2
                 else:
                     self.args.num_intra_threads = self.args.num_cores
 
