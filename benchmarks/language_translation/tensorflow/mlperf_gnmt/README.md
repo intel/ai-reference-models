@@ -24,7 +24,8 @@ unzip gnmt_inference_data.zip
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mlperf_gnmt_fp32_pretrained_model.pb
 ```
 
-4. Build `tensorflow-addons` `v0.5.2` before you start the next step.
+4. Please ensure you have installed the libraries listed in the
+`requirements.txt` before you start the next step.
 Clone tensorflow-addons repo
 ```
 pip install intel-tensorflow==2.1.0
