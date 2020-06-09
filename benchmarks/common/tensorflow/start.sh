@@ -899,6 +899,9 @@ function ssd-resnet34() {
 
           CMD="${CMD} \
           $(add_arg "--weight_decay" ${weight_decay}) \
+          $(add_arg "--epochs" ${epochs}) \
+          $(add_arg "--save_model_steps" ${save_model_steps}) \
+          $(add_arg "--timeline" ${timeline}) \
           $(add_arg "--num_warmup_batches" ${num_warmup_batches})"
           local old_pythonpath=${PYTHONPATH}
           export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
