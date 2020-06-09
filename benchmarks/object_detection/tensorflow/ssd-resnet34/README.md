@@ -560,6 +560,7 @@ $ pushd $MODEL_WORK_DIR
       --num-train-steps 100 --num-cores 52 \
       --num-inter-threads 1 --num-intra-threads 52 \
       --batch-size=100 --weight_decay=1e-4 \
+      --num_warmup_batches=20 \
       --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
       --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 
@@ -585,13 +586,12 @@ $ pushd $MODEL_WORK_DIR
       --precision bfloat16 --mode training \
       --num-cores 50 --num-inter-threads 1 \
       --num-intra-threads 50 --batch-size=100 --mpi_num_processes=4 \
-      --mpi_num_processes_per_socket=1 \
+      --mpi_num_processes_per_socket=1 --epochs=60 \
       --checkpoint <path to output_train_directory> \
       --backbone-model <path to resnet34_backbone_trained_model> \
       --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
 
       ```
-
    4. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
 
       Note that --data-location now points to the location of COCO validation dataset.
@@ -602,8 +602,7 @@ $ pushd $MODEL_WORK_DIR
       --model-source-dir <path to tf_models> \
       --model-name ssd-resnet34 --framework tensorflow \
       --precision bfloat16 --mode training \
-      --num-cores 52 --num-train-steps 100 \
-      --num-inter-threads 1 \
+      --num-cores 52 --num-inter-threads 1 \
       --num-intra-threads 52 --batch-size=100 --mpi_num_processes=1 \
       --mpi_num_processes_per_socket=1 --accuracy-only \
       --checkpoint <path to pretrained_checkpoints> \
