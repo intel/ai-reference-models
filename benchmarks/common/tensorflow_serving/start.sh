@@ -38,6 +38,7 @@ echo "    NUM_INTRA_THREADS: ${NUM_INTRA_THREADS}"
 echo "    NUM_INTER_THREADS: ${NUM_INTER_THREADS}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 echo "    TF_SERVING_VERSION: ${TF_SERVING_VERSION}"
+echo "    DOCKER_IMAGE: ${DOCKER}"
 
 
 if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -74,13 +75,7 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   mkdir ${OUTPUT_DIR}
 fi
 
-MKL_IMAGE_TAG=tensorflow/serving:latest-mkl
-
-# Build Tensorflow Serving docker image
-echo "Building tensorflow serving image..."
-echo "First time it takes few minutes to build images, consecutive builds are much faster"
-
-TF_SERVING_VERSION=${TF_SERVING_VERSION} MKL_IMAGE_TAG=${MKL_IMAGE_TAG} bash ${WORKSPACE}/build_tfserving_image.sh
+MKL_IMAGE_TAG=${DOCKER}
 
 function docker_run(){
     docker run \
@@ -108,7 +103,7 @@ function resnet50_or_inceptionv3(){
     pip install grpcio \
     intel-tensorflow \
     requests \
-    tensorflow-serving-api
+    tensorflow-serving-api==2.1.0
 
     # cd to image recognition tfserving scripts
     cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
