@@ -55,8 +55,12 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                                          intelai_models_common)
 
         if self.args.docker_image:
-            self.run_docker_container(benchmark_scripts, intelai_models,
-                                      intelai_models_common, env_var_dict)
+            if self.args.framework == 'tensorflow_serving':
+                self.run_bare_metal(benchmark_scripts, intelai_models,
+                                    intelai_models_common, env_var_dict)
+            elif self.args.framework == 'tensorflow':
+                self.run_docker_container(benchmark_scripts, intelai_models,
+                                          intelai_models_common, env_var_dict)
         else:
             self.run_bare_metal(benchmark_scripts, intelai_models,
                                 intelai_models_common, env_var_dict)
@@ -191,7 +195,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "DISABLE_TCMALLOC": args.disable_tcmalloc,
-            "DOCKER": str(args.docker_image is not None),
+            "DOCKER": args.docker_image or str(args.docker_image is not None),
             "EXTERNAL_MODELS_SOURCE_DIRECTORY": args.model_source_dir,
             "FRAMEWORK": args.framework,
             "INTELAI_MODELS": intelai_models,
@@ -225,7 +229,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             split_arg = custom_arg.split("=")
             split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
-
+        
         return env_var_dict
 
     def run_bare_metal(self, benchmark_scripts, intelai_models,
@@ -249,10 +253,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # To Launch Tensorflow Serving benchmark we need only --in-graph arg.
         # It does not support checkpoint files.
         if args.framework == "tensorflow_serving":
-            if args.docker_image:
-                raise ValueError("--docker-image arg is not supported with tensorflow serving benchmarking, "
-                                 "as script automatically builds image and supplies it.")
-
             if checkpoint_path:
                 raise ValueError("--checkpoint-path arg is not supported with tensorflow serving benchmarking")
 
@@ -263,9 +263,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                 env_var_dict["IN_GRAPH"] = in_graph_path
             else:
                 raise ValueError("--in-graph arg is required to run tensorflow serving benchmarking")
-
-            if args.tf_serving_version:
-                env_var_dict["TF_SERVING_VERSION"] = args.tf_serving_version
 
             for env_var_name in env_var_dict:
                 os.environ[env_var_name] = str(env_var_dict[env_var_name])
