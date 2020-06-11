@@ -28,7 +28,7 @@ echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
 echo "    BACKBONE_MODEL_DIRECTORY: ${BACKBONE_MODEL_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
 echo "    MOUNT_INTELAI_MODELS_COMMON_SOURCE_DIR: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
-if [ ${DOCKER} == "True" ]; then
+if [ -n "${DOCKER}" ]; then
   echo "    Mounted volumes:"
   echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
   echo "        ${EXTERNAL_MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_EXTERNAL_MODELS_SOURCE}"
@@ -502,7 +502,7 @@ function minigo() {
       local INTELAI_MODEL_DIR=${INTELAI_MODELS}
       local BENCHMARK_DIR=${BENCHMARK_SCRIPTS}
 
-      if [ ${DOCKER} == "True" ]; then
+      if [ -n "${DOCKER}" ]; then
         MODEL_DIR=${MOUNT_EXTERNAL_MODELS_SOURCE}
         INTELAI_MODEL_DIR=${MOUNT_INTELAI_MODELS_SOURCE}
         BENCHMARK_DIR=${MOUNT_BENCHMARK}
