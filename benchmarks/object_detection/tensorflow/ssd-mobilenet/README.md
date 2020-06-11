@@ -101,7 +101,7 @@ $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 4. Download the pretrained model:
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssdmobilenet_int8_pretrained_model.pb
+$ wget -O ssdmobilenet_int8_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model_tr.pb
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
