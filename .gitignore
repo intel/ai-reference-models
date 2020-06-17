@@ -8,4 +8,5 @@
 .coverage
 .tox
 test_data/
-*.bak
+download_glue_data.py
+data/

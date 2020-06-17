@@ -24,7 +24,8 @@ unzip gnmt_inference_data.zip
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mlperf_gnmt_fp32_pretrained_model.pb
 ```
 
-4. Build `tensorflow-addons` `v0.5.2` before you start the next step.
+4. Please ensure you have installed the libraries listed in the
+`requirements.txt` before you start the next step.
 Clone tensorflow-addons repo
 ```
 pip install intel-tensorflow==2.1.0
@@ -34,7 +35,7 @@ sed -i 's;\${PYTHON_VERSION:=python} -m pip install $QUIET_FLAG -r $REQUIREMENTS
 sh configure.sh
 bazel build --enable_runfiles build_pip_pkg
 bazel-bin/build_pip_pkg artifacts
-pip install --no-deps artifacts/tensorflow_addons-*.whl
+pip install artifacts/tensorflow_addons-*.whl
 ```
 
 5. Navigate to the `benchmarks` directory in your local clone of

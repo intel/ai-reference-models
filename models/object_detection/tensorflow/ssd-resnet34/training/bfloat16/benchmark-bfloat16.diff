@@ -1,0 +1,68 @@
+diff --git a/scripts/tf_cnn_benchmarks/benchmark_cnn.py b/scripts/tf_cnn_benchmarks/benchmark_cnn.py
+index 139daff..8a392c8 100644
+--- a/scripts/tf_cnn_benchmarks/benchmark_cnn.py
++++ b/scripts/tf_cnn_benchmarks/benchmark_cnn.py
+@@ -3194,9 +3194,12 @@ class BenchmarkCNN(object):
+         outputs: A list of tensors depending on different modes.
+       """
+ 
+-      build_network_result = self.model.build_network(
+-          input_list, phase_train, nclass)
+-      logits = build_network_result.logits
++      with tf.compat.v1.tpu.bfloat16_scope():
++        build_network_result = self.model.build_network(
++            input_list, phase_train, nclass)
++        logits = build_network_result.logits
++
++      logits = tf.cast(logits, tf.float32)
+ 
+       if not phase_train:
+         return [logits]
+diff --git a/scripts/tf_cnn_benchmarks/convnet_builder.py b/scripts/tf_cnn_benchmarks/convnet_builder.py
+index b357297..b503081 100644
+--- a/scripts/tf_cnn_benchmarks/convnet_builder.py
++++ b/scripts/tf_cnn_benchmarks/convnet_builder.py
+@@ -214,6 +214,7 @@ class ConvNetBuilder(object):
+           biases = self.get_variable('biases', [num_out_channels],
+                                      self.variable_dtype, self.dtype,
+                                      initializer=tf.compat.v1.constant_initializer(bias))
++          biases = tf.cast(biases, tf.bfloat16)
+           biased = tf.reshape(
+               tf.nn.bias_add(conv, biases, data_format=self.data_format),
+               conv.get_shape())
+diff --git a/scripts/tf_cnn_benchmarks/models/ssd_model.py b/scripts/tf_cnn_benchmarks/models/ssd_model.py
+index f3ac9bb..5bd1f2a 100644
+--- a/scripts/tf_cnn_benchmarks/models/ssd_model.py
++++ b/scripts/tf_cnn_benchmarks/models/ssd_model.py
+@@ -341,6 +341,7 @@ class SSD300Model(model_lib.CNNModel):
+ 
+   def loss_function(self, inputs, build_network_result):
+     logits = build_network_result.logits
++    logits = tf.cast(logits, tf.float32)
+ 
+     # Unpack model output back to locations and confidence scores of predictions
+     # Shape of pred_loc: [batch_size, NUM_SSD_BOXES, 4]
+diff --git a/scripts/tf_cnn_benchmarks/preprocessing.py b/scripts/tf_cnn_benchmarks/preprocessing.py
+index bb40b30..fa3b084 100644
+--- a/scripts/tf_cnn_benchmarks/preprocessing.py
++++ b/scripts/tf_cnn_benchmarks/preprocessing.py
+@@ -972,7 +972,8 @@ class COCOPreprocessor(BaseImagePreprocessor):
+       # See https://github.com/tensorflow/models/blob/master/research/object_detection/core/preprocessor.py  # pylint: disable=line-too-long
+       mlperf.logger.log(key=mlperf.tags.RANDOM_FLIP_PROBABILITY, value=0.5)
+ 
+-      image = tf.cast(image, self.dtype)
++      # image = tf.cast(image, self.dtype)
++      image = tf.cast(image, tf.bfloat16)
+ 
+       encoded_returns = ssd_encoder.encode_labels(boxes, classes)
+       encoded_classes, encoded_boxes, num_matched_boxes = encoded_returns
+@@ -992,7 +993,8 @@ class COCOPreprocessor(BaseImagePreprocessor):
+       image /= 255.
+ 
+       image = ssd_dataloader.normalize_image(image)
+-      image = tf.cast(image, self.dtype)
++      # image = tf.cast(image, self.dtype)
++      image = tf.cast(image, tf.bfloat16)
+ 
+       def trim_and_pad(inp_tensor):
+         """Limit the number of boxes, and pad if necessary."""
