@@ -108,7 +108,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssd
 and then run the scripts for either batch/online inference performance
 or accuracy.
 ```
-$ git clone git@github.com:IntelAI/models.git
+$ git clone https://github.com/IntelAI/models.git
 $ cd benchmarks
 ```
 

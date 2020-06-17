@@ -31,7 +31,6 @@ import re
 import subprocess
 import sys
 import typing
-import shlex
 
 import tensorflow as tf
 
@@ -180,8 +179,8 @@ def clear_system_caches():
   if not LOGGER.enabled:
     return
   ret_code = subprocess.call(
-      [shlex.split("sync && echo 3 | {} tee {}".format(SUDO, DROP_CACHE_LOC))],
-      shell=False)
+      ["sync && echo 3 | {} tee {}".format(SUDO, DROP_CACHE_LOC)],
+      shell=True)
 
   if ret_code:
     raise ValueError("Failed to clear caches")
