@@ -133,7 +133,7 @@ Follow the instructions below to download and prepare the dataset.
     docker run -it --privileged -u root:root \
             -w /models \
             --volume $PWD:/models \
-            docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            docker.io/intelaipg/intel-optimized-tensorflow:latest \
             /bin/bash
     ```
   - Preprocess and convert eval dataset to TFRecord format. We will use a script in the Intel Model Zoo repository.
@@ -309,7 +309,7 @@ Untar the file to create three files:
     docker run -it --privileged -u root:root \
             -w /models \
             --volume $PWD:/models \
-            docker.io/intelaipg/intel-optimized-tensorflow:nightly-latestprs-bdw \
+            docker.io/intelaipg/intel-optimized-tensorflow:latest \
             /bin/bash
     ```
   - Preprocess and convert test dataset to TFRecord format. We will use a script in the Intel Model Zoo repository.

@@ -14,7 +14,7 @@ for other precisions are coming later.
     ```
     # We going to use a branch based on older version of the tensorflow model repo.
     # Since, we need to to use logs utils on that branch, which were removed from 
-    # the latest master.
+    # the latest master
     $ git clone https://github.com/tensorflow/models.git tensorflow-models
     $ cd tensorflow-models
     $ git fetch origin pull/7461/head:wide-deep-tf2  
