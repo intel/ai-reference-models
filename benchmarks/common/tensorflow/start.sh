@@ -221,6 +221,15 @@ function bert_options() {
     CMD=" ${CMD} --train-option=${train_option}"
   fi
 
+  if [[ ${MODE} == "inference" ]]; then
+    if [[ -z "${infer_option}" ]]; then
+      echo "Error: Please specify a inference option (SQuAD, Classifier, Pretraining)"
+      exit 1
+    fi
+
+    CMD=" ${CMD} --infer-option=${infer_option}"
+  fi
+
   if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
     CMD=" ${CMD} --init-checkpoint=${init_checkpoint}" 
   fi
@@ -1097,18 +1106,14 @@ function wavenet() {
 
 # BERT base
 function bert_base() {
-    
-    echo "Bert base PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+  if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    bert_options
+    CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
     exit 1
-    # When enabled remove the above lines
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
-      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-      bert_options
-      CMD=${CMD} run_model
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
-    fi
+  fi
 }
 
 # BERT Large model
