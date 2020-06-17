@@ -67,8 +67,8 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "-p", "--precision",
-            help="Specify the model precision to use: fp32, int8",
-            required=required_arg, choices=["fp32", "int8"],
+            help="Specify the model precision to use: fp32, int8, or bfloat16",
+            required=required_arg, choices=["fp32", "int8", "bfloat16"],
             dest="precision")
 
         self._common_arg_parser.add_argument(
@@ -133,6 +133,11 @@ class BaseBenchmarkUtil(object):
             dest="num_inter_threads", default=None)
 
         self._common_arg_parser.add_argument(
+            "-ts", "--num-train-steps", type=check_positive_number,
+            help="Specify the number of training steps ",
+            dest="num_train_steps", default=1)
+
+        self._common_arg_parser.add_argument(
             "--data-num-intra-threads", type=check_positive_number,
             help="The number intra op threads for the data layer config",
             dest="data_num_intra_threads", default=None)
@@ -152,6 +157,13 @@ class BaseBenchmarkUtil(object):
                  "of using frozen graphs.",
             dest="checkpoint", default=None, type=check_valid_folder)
 
+        self._common_arg_parser.add_argument(
+            "-bb", "--backbone-model",
+            help="Specify the location of backbone-model directory. "
+                 "This option can be used by models (like SSD_Resnet34) "
+                 "to do fine-tuning training or achieve convergence.",
+            dest="backbone_model", default=None, type=check_valid_folder)
+        
         self._common_arg_parser.add_argument(
             "-g", "--in-graph", help="Full path to the input graph ",
             dest="input_graph", default=None, type=check_valid_filename)
@@ -220,11 +232,11 @@ class BaseBenchmarkUtil(object):
     def _validate_args(self):
         """validate the args and initializes platform_util"""
         # check if socket id is in socket number range
-        num_sockets = self._platform_util.num_cpu_sockets
+        num_numas = self._platform_util.num_numa_nodes
         args = self.args
-        if not -1 <= args.socket_id < num_sockets:
-            raise ValueError("Socket id must be within socket number range: "
-                             "[0, {}].".format(num_sockets - 1))
+        if not -1 <= args.socket_id < num_numas:
+            raise ValueError("Socket id must be within NUMA number range: "
+                             "[0, {}].".format(num_numas - 1))
 
         # check number of cores
         num_logical_cores_per_socket = \

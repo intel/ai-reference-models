@@ -5,9 +5,6 @@ following precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-Instructions and scripts for ResNet50 model inference on `Int8` and `FP32`
-precisions.
-
 ## Int8 Inference Instructions
 
 These instructions use the TCMalloc memory allocator, which produces 

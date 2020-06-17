@@ -64,6 +64,12 @@ optional arguments:
                         Specify the batch size. If this parameter is not
                         specified or is -1, the largest ideal batch size for
                         the model will be used
+  -ts NUM_TRAIN_STEPS, --num-train-steps NUM_TRAIN_STEPS
+                        Specify the number of training steps
+  --mpi_num_processes MPI
+                        The number of MPI processes
+  --mpi_num_processes_per_socket NUM_MPI
+                        Specify how many MPI processes to launch per socket
   -d DATA_LOCATION, --data-location DATA_LOCATION
                         Specify the location of the data. If this parameter is
                         not specified, the script will use random/dummy
@@ -95,6 +101,10 @@ optional arguments:
                         written to this location. If mode=inference assumes
                         that the location points to a model that has already
                         been trained.
+  -bb BACKBONE_MODEL, --backbone_model BACKBONE_MODEL
+                        Specify the location of backbone-model directory.
+                        This option can be used by models (like SSD_Resnet34)
+                        to do fine-tuning training or achieve convergence.
   -k, --benchmark-only  For performance measurement only. If neither
                         --benchmark-only or --accuracy-only are specified, it
                         will default to run for performance.
