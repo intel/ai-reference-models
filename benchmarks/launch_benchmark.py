@@ -229,7 +229,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             split_arg = custom_arg.split("=")
             split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
-        
+
         return env_var_dict
 
     def run_bare_metal(self, benchmark_scripts, intelai_models,
