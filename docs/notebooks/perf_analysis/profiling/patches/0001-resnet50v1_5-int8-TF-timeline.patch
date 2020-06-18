@@ -1,0 +1,62 @@
+From 8182b2255b582d0cc96a8ab1fa68935b99d14f15 Mon Sep 17 00:00:00 2001
+From: ltsai1 <louie.tsai@intel.com>
+Date: Thu, 18 Jun 2020 12:40:24 -0700
+Subject: [PATCH] resnet50v1_5 int8 TF timeline
+
+---
+ .../tensorflow/resnet50v1_5/int8/benchmark.py | 20 ++++++++++++++++---
+ 1 file changed, 17 insertions(+), 3 deletions(-)
+
+diff --git a/models/image_recognition/tensorflow/resnet50v1_5/int8/benchmark.py b/models/image_recognition/tensorflow/resnet50v1_5/int8/benchmark.py
+index b5938b98..949ded7b 100644
+--- a/models/image_recognition/tensorflow/resnet50v1_5/int8/benchmark.py
++++ b/models/image_recognition/tensorflow/resnet50v1_5/int8/benchmark.py
+@@ -45,6 +45,12 @@ import time
+ import datasets
+ import tensorflow as tf
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
++
+ if __name__ == "__main__":
+   parser = argparse.ArgumentParser()
+   parser.add_argument("--input_graph", default=None,
+@@ -115,6 +121,11 @@ if __name__ == "__main__":
+   infer_config.inter_op_parallelism_threads = num_inter_threads
+   infer_config.use_per_session_threads = 1
+ 
++  config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  config.read_config('resnet50v1_5 infer int8')
++  infer_many_runs_timeline = TimeLiner()
++  infer_run_metadata = tf.compat.v1.RunMetadata()
++
+   data_graph = tf.Graph()
+   with data_graph.as_default():
+     if args.data_location:
+@@ -144,8 +155,10 @@ if __name__ == "__main__":
+   output_tensor = infer_graph.get_tensor_by_name(output_layer + ":0")
+   tf.compat.v1.global_variables_initializer()
+ 
+-  data_sess = tf.compat.v1.Session(graph=data_graph, config=data_config)
+-  infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)
++  data_sess = tfSession(graph=data_graph,  config=data_config,
++    run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
++  infer_sess = tfSession(graph=infer_graph, config=infer_config,
++    run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
+ 
+   print("[Running warmup steps...]")
+   step_total_time = 0
+@@ -209,5 +222,6 @@ if __name__ == "__main__":
+     except tf.errors.OutOfRangeError:
+       print("Running out of images from dataset.")
+       break
+-
++  print("json_fname : ",config.json_fname)
++  infer_many_runs_timeline.save(config.json_fname)
+   print("Average throughput for batch size {0}: {1} images/sec".format(batch_size, total_images / total_time))
+-- 
+2.22.1
+
