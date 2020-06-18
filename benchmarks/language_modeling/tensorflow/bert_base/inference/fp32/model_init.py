@@ -22,11 +22,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from common.base_model_init import BaseModelInitializer
-from common.base_model_init import set_env_var
 
 import os
 from argparse import ArgumentParser
-import time
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -48,18 +46,19 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-
         arg_parser = ArgumentParser(description="Parse bert inference args")
-        arg_parser.add_argument('--infer-option', help=' Inference Classifier', dest="infer_option", default='Classifier')
+        arg_parser.add_argument('--infer-option', help=' Inference Classifier', dest="infer_option",
+                                default='Classifier')
         arg_parser.add_argument("--max-seq-length", type=int, dest="max_seq_length", default=None)
         arg_parser.add_argument("--profile", dest="profile", default=None)
         arg_parser.add_argument("--config-file", dest="bert_config_file", default="bert_config.json")
         arg_parser.add_argument("--vocab-file", dest="vocab_file", default="vocab.txt")
         arg_parser.add_argument('--task-name', help=' Task name for classifier', dest="task_name", default='MRPC')
-        arg_parser.add_argument('--do-eval', help=' Eval for Classifier', dest="do_eval", default="False") # compatible with SQuAD
+        arg_parser.add_argument('--do-eval', help=' Eval for Classifier', dest="do_eval",
+                                default="False")  # compatible with SQuAD
         arg_parser.add_argument('--data-dir', help=' data dir for Classifier', dest="data_dir", default='MRPC')
         arg_parser.add_argument('--do-lower-case', help=' Use lowercase for data',
-                                dest="do_lower_case", default="False") # compatible with training
+                                dest="do_lower_case", default="False")  # compatible with training
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -76,8 +75,8 @@ class ModelInitializer(BaseModelInitializer):
 
         run_script = ""
         if self.args.infer_option == "Classifier":
-          run_script = "run_classifier.py"
-          print("INFO:Running Classify...!")
+            run_script = "run_classifier.py"
+            print("INFO:Running Classify...!")
         else:
             print("ERROR: only support classifier now")
 
@@ -93,26 +92,26 @@ class ModelInitializer(BaseModelInitializer):
             model_args = " --frozen_graph_path=" + str(self.args.input_graph)
 
         eoo = " \\\n"
-        model_args = model_args                                           + \
-            " --output_dir=" +str(self.args.output_dir)              +eoo + \
-            " --bert_config_file=" + str(self.args.bert_config_file) +eoo + \
-            " --do_train=" + str(False)                              +eoo + \
-            " --precision=" + str(self.args.precision)               +eoo + \
+        model_args = model_args + \
+            " --output_dir=" + str(self.args.output_dir) + eoo + \
+            " --bert_config_file=" + str(self.args.bert_config_file) + eoo + \
+            " --do_train=" + str(False) + eoo + \
+            " --precision=" + str(self.args.precision) + eoo + \
             " --do_lower_case=" + str(self.args.do_lower_case)
 
-        if self.args.infer_option== "SQuAD":
-          model_args =  model_args                                   + \
-            " --vocab_file=" + str(self.args.vocab_file)        +eoo + \
-            " --predict_file=" + str(self.args.predict_file)    +eoo + \
-            " --do_predict=True"
+        if self.args.infer_option == "SQuAD":
+            model_args = model_args + \
+                " --vocab_file=" + str(self.args.vocab_file) + eoo + \
+                " --predict_file=" + str(self.args.predict_file) + eoo + \
+                " --do_predict=True"
 
         if self.args.infer_option == "Classifier":
-          model_args =  model_args                                    + \
-            " --task_name=" + str(self.args.task_name)          +eoo  + \
-            " --do_eval=" + str(self.args.do_eval)              +eoo  + \
-            " --vocab_file=" + str(self.args.vocab_file)        +eoo  + \
-            " --data_dir=" + str(self.args.data_dir)            +eoo  + \
-            " --eval_batch_size=" + str(self.args.batch_size)
+            model_args = model_args + \
+                " --task_name=" + str(self.args.task_name) + eoo + \
+                " --do_eval=" + str(self.args.do_eval) + eoo + \
+                " --vocab_file=" + str(self.args.vocab_file) + eoo + \
+                " --data_dir=" + str(self.args.data_dir) + eoo + \
+                " --eval_batch_size=" + str(self.args.batch_size)
 
         if self.args.accuracy_only:
             model_args += " --mode=accuracy"
