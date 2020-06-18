@@ -24,15 +24,31 @@ import tensorflow as tf
 
 _inprecision = tf.float32
 _rprecision = tf.float32
-_use_mkldnn = True 
+_keras_policy = tf.keras.mixed_precision.experimental.Policy("float32")
+_use_optimized_softmax = True
+_use_experimental_gelu = False
+
+def set_global_precision(dt):
+  # Set Keras API precision
+  global _keras_policy
+  if dt == tf.bfloat16:
+    _keras_policy=tf.keras.mixed_precision.experimental.Policy("mixed_bfloat16")
+
+  # Set basic API precision
+  set_rprecision(dt)
 
 def set_rprecision(dt):
   global _rprecision
   _rprecision=dt
 
-def set_mkldnn(mkldnn=False):
-  global _use_mkldnn
-  _use_mkldnn = mkldnn
+def get_keras_policy():
+  return _keras_policy
+
+def set_global_flags(optimized_softmax, experimental_gelu):
+  global _use_optimized_softmax
+  global _use_experimental_gelu
+  _use_optimized_softmax = optimized_softmax
+  _use_experimental_gelu = experimental_gelu
 
 def i_cast(x) :
      return tf.cast(x, _inprecision)
@@ -57,8 +73,7 @@ def tanh(x):
     return r_cast(rval)
 
 def softmax(scores, axis=None):
-    if _use_mkldnn:
-      #print("softmax using mkldnn")  
+    if _use_optimized_softmax:
       return tf.nn.softmax(scores, axis)
     else:
       scores = i_cast(scores)
@@ -66,9 +81,7 @@ def softmax(scores, axis=None):
       return r_cast(rval)
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
-    type_string = 'float32' if _rprecision == tf.float32 else 'mixed_bfloat16'
-    policy = tf.keras.mixed_precision.experimental.Policy(type_string)
-    lnorm = tf.keras.layers.LayerNormalization(dtype=policy)
+    lnorm = tf.keras.layers.LayerNormalization(dtype=get_keras_policy())
     return lnorm(inputs)
 
 "Moved from modeling.py"
@@ -83,8 +96,7 @@ def gelu(x):
   Returns:
     `x` with the GELU activation applied.
   """
-  if _use_mkldnn:
-    #print("gelu using mkldnn")  
+  if _use_experimental_gelu:
     return tf.nn.gelu(x)
   else:
     x = i_cast(x)

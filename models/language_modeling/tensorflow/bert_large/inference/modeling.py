@@ -162,7 +162,7 @@ class BertModel(object):
     # Flags for BF16 CPU
     self.bf16_scope = False
     if config.precision == "bfloat16" :
-      bf.set_rprecision(tf.bfloat16)
+      bf.set_global_precision(tf.bfloat16)
       if config.new_bf16_scope :
         self.bf16_scope = True
 
