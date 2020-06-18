@@ -52,7 +52,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         parser.add_argument('--num_inter_threads', type=int, default=1, help='number of inter-threads')
         parser.add_argument('--num_intra_threads', type=int, default=28, help='number of intra-threads')
         parser.add_argument('--epochs', dest="epochs", type=int, default=60,
-                            help='number of training epochs. Pass 0 to train based on number of train_steps instead of number of epochs')
+                            help='number of training epochs. Pass 0 to train based on number of train_steps instead of number of epochs')  # noqa: E501
         parser.add_argument('--save_model_steps', dest="save_model_steps", type=int, default=10000,
                             help='number of steps at which the model is periodically saved.')
         parser.add_argument('--timeline', dest="timeline", default=None, help='Trace filename for timeline')
@@ -71,7 +71,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
 
-        if (self.args.timeline != None):
+        if (self.args.timeline is not None):
             cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.timeline)
 
         if (self.args.accuracy_only):
@@ -80,7 +80,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
             cmd_args += " --eval=true"
             cmd_args += " --num_eval_epochs=1"
             cmd_args += " --print_training_accuracy=True"
-        elif (self.args.backbone_model == None):
+        elif (self.args.backbone_model is None):
             # benchmarking run arguments
             cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
             cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)

@@ -193,6 +193,18 @@ class BaseBenchmarkUtil(object):
                  "with --accuracy-only and --mode=inference.",
             dest="output_results", action="store_true")
 
+        self._common_arg_parser.add_argument(
+            "--optimized-softmax",
+            help="Use tf.nn.softmax as opposed to basic math ops",
+            dest="optimized_softmax", choices=["True", "False"],
+            default=True)
+
+        self._common_arg_parser.add_argument(
+            "--experimental-gelu",
+            help="use tf.nn.gelu as opposed to basic math ops",
+            dest="experimental_gelu", choices=["True", "False"],
+            default=False)
+
         # Note this can't be a normal boolean flag, because we need to know when the user
         # does not explicitly set the arg value so that we can apply the appropriate
         # default value, depending on the the precision.

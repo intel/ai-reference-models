@@ -18,12 +18,6 @@
 # SPDX-License-Identifier: EPL-2.0
 #
 
-import os
-import sys
-import argparse
-import time
-
-from common.base_model_init import BaseModelInitializer
 from ..common_model_init import SSDResnet34ModelInitializer
 
 

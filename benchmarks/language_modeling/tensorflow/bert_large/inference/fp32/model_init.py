@@ -43,6 +43,8 @@ class ModelInitializer(BaseModelInitializer):
             self.args.batch_size = 32
 
         arg_parser = ArgumentParser(description="Parse bert inference args")
+        arg_parser.add_argument('--infer-option', help=' Inference SQuAD, Pretraining or classifier',
+                                dest="infer_option", default='SQuAD')
         arg_parser.add_argument(
             "--doc-stride", dest="doc_stride", type=int, default=None)
         arg_parser.add_argument(

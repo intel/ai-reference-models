@@ -188,7 +188,7 @@ class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
     self._global_step_tensor = training_util.get_global_step()
     if self._global_step_tensor is None:
       raise RuntimeError("Global step should be created to use UpdateGlobalStepHook.")
-    ops.get_default_graph()._unsafe_unfinalize()
+    tf.compat.v1.get_default_graph()._unsafe_unfinalize()
     self._updated_global_step = state_ops.assign_add(self._global_step_tensor, 1, use_locking=True)
   def after_create_session(self, session, coord):
     pass
