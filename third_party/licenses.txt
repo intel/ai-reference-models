@@ -231,7 +231,7 @@ The MIT License (MIT)
 --------------------------------------------------------------------------------------
 The following third party programs have their own third party program files. These additional third party program files are as follows:
 
-1. IntelAI Tool: <Location>
+1. N/A: <Location>
 
 --------------------------------------------------------------------------------------
 Other names and brands may be claimed as the property of others. 
