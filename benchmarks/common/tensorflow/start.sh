@@ -17,7 +17,6 @@
 # limitations under the License.
 #
 
-#
 
 echo 'Running with parameters:'
 echo "    USE_CASE: ${USE_CASE}"
@@ -63,13 +62,19 @@ if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   exit 1
 fi
 
+# Determines if we are running in a container by checking for .dockerenv
+function _running-in-container()
+{
+  [ -f /.dockerenv ]
+}
+
 if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
   apt update
   apt full-upgrade -y
   # Set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
-  apt-get install gcc-8 g++-8 cmake python-tk numactl -y
+  apt-get install gcc-8 g++-8 cmake python-tk -y
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
   apt install -y libsm6 libxext6
@@ -91,6 +96,18 @@ if [[ ${NOINSTALL} != "True" ]]; then
     # lock horovod==0.19.1 release commit/version
     pip install --no-cache-dir horovod==0.19.1
   fi 
+fi
+
+# If we are running in a container, call the container_init.sh files
+if _running-in-container ; then
+  # Call the framework's container_init.sh, if it exists
+  if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+     ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+  fi
+  # Call the model specific container_init.sh, if it exists
+  if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+    ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+  fi
 fi
 
 verbose_arg=""
@@ -146,7 +163,7 @@ function run_model() {
   else
     LOG_LOCATION_OUTSIDE_CONTAINER=${LOGFILE}
   fi
-  echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
+  echo "Log file location: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
 # basic run command with commonly used args
