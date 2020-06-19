@@ -1,0 +1,53 @@
+apiVersion: kubeflow.org/v1alpha2
+kind: MPIJob
+metadata:
+  name: resnet50v1-5-fp32-training
+spec:
+  mpiReplicaSpecs:
+    Launcher:
+      template:
+        spec:
+          containers:
+          - name: mpi-launcher
+            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training
+            imagePullPolicy: Always
+            securityContext:
+              runAsUser: 11486040
+              runAsGroup: 17685
+              fsGroup: 17685
+            envFrom:
+            - configMapRef:
+                name: mlops-env
+            workingDir: /
+            command:
+            - $(MODEL_DIR)/examples/fp32_training_multi_node.sh
+            volumeMounts:
+            - name: datasets
+              mountPath: /tf_dataset
+              readOnly: true
+            - name: users
+              mountPath: /Users
+    Worker:
+      template:
+        spec:
+          securityContext:
+            runAsUser: 11486040
+            runAsGroup: 17685
+            fsGroup: 17685
+          containers:
+          - name: mpi-worker
+            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training
+            securityContext:
+              runAsUser: 11486040
+              runAsGroup: 17685
+              fsGroup: 17685
+            envFrom:
+            - configMapRef:
+                name: mlops-env
+            workingDir: /
+            volumeMounts:
+            - name: datasets
+              mountPath: /tf_dataset
+              readOnly: true
+            - name: users
+              mountPath: /Users
