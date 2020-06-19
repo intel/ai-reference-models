@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+# Untar checkpoint files
+pretrained_model_dir="pretrained_model/rfcn_resnet101_coco_2018_01_28"
+if [ ! -d "${pretrained_model_dir}" ]; then
+    tar -C pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+fi
+FROZEN_GRAPH="$(pwd)/${pretrained_model_dir}/frozen_inference_graph.pb"
+
+if [ -z "${TF_RECORD_FILE}" ]; then
+    TF_RECORD_FILE="coco_val.record"
+fi
+
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
+  exit 1
+fi
+
+# Create the output directory in case it doesn't already exist
+mkdir -p ${OUTPUT_DIR}
+
+if [ -z "${DATASET_DIR}" ]; then
+  echo "The required environment variable DATASET_DIR has not been set"
+  exit 1
+fi
+
+if [ -z "${TF_MODELS_DIR}" ]; then
+  echo "The required environment variable TF_MODELS_DIR has not been set"
+  exit 1
+fi
+
+python benchmarks/launch_benchmark.py \
+    --model-name rfcn \
+    --mode inference \
+    --precision fp32 \
+    --framework tensorflow \
+    --model-source-dir ${TF_MODELS_DIR} \
+    --data-location ${DATASET_DIR}/${TF_RECORD_FILE} \
+    --in-graph ${FROZEN_GRAPH} \
+    --accuracy-only \
+    --output-dir ${OUTPUT_DIR} \
+    -- split="accuracy_message"
+
