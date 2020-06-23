@@ -1,28 +1,26 @@
-# ResNet50 v1.5
+# ResNet50 v1.5 FP32 Training
 
-The following examples are available for ResNet50 v1.5 using a model package:
-* [FP32 Training](#fp32-training)
+This document has instructions for running ResNet50 v1.5 FP32 training
+using Intel-optimized TensorFlow.
 
-Note that the ImageNet dataset is used in the ResNet50 v1.5 examples. To download and preprocess
+Note that the ImageNet dataset is used in these ResNet50 v1.5 examples. To download and preprocess
 the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
 from the TensorFlow models repo.
 
-## FP32 Training
-
-### Example Scripts
+## Example Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_training_demo.sh`](/examples/tensorflow/resnet50v1_5/fp32_training_demo.sh) | Executes a short run using small batch sizes and a limited number of steps to demonstrate the training flow |
-| [`fp32_training_1_epoch.sh`](/examples/tensorflow/resnet50v1_5/fp32_training_1_epoch.sh) | Executes a test run that trains the model for 1 epoch and saves checkpoint files to an output directory. |
-| [`fp32_training_full.sh`](/examples/tensorflow/resnet50v1_5/fp32_training_full.sh) | Trains the model using the full dataset and runs until convergence (90 epochs) and saves checkpoint files to an output directory. Note that this will take a considerable amount of time. |
+| [`fp32_training_demo.sh`](fp32_training_demo.sh) | Executes a short run using small batch sizes and a limited number of steps to demonstrate the training flow |
+| [`fp32_training_1_epoch.sh`](fp32_training_1_epoch.sh) | Executes a test run that trains the model for 1 epoch and saves checkpoint files to an output directory. |
+| [`fp32_training_full.sh`](fp32_training_full.sh) | Trains the model using the full dataset and runs until convergence (90 epochs) and saves checkpoint files to an output directory. Note that this will take a considerable amount of time. |
 
 These examples can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
-#### Bare Metal
+## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your enviornment:
 * Python 3
@@ -42,7 +40,7 @@ cd resnet50v1_5_fp32_training
 examples/<script name>.sh
 ```
 
-#### Docker
+## Docker
 
 The ResNet50 v1.5 FP32 training model container includes the scripts
 and libraries needed to run ResNet50 v1.5 FP32 training. To run one of the model
@@ -54,17 +52,17 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
 
 docker run \
-        --env DATASET_DIR=${DATASET_DIR} \
-        --env OUTPUT_DIR=${OUTPUT_DIR} \
-        --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
-        --volume ${DATASET_DIR}:${DATASET_DIR} \
-        --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-        --privileged --init -t \
-        amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training \
-        /bin/bash examples/<script name>.sh
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training \
+  /bin/bash examples/<script name>.sh
 ```
 
-#### Kubernetes
+## Kubernetes
 
 Download and untar the ResNet50 v1.5 FP32 training package:
 ```
@@ -72,7 +70,7 @@ wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-
 tar -xvf resnet50v1_5_fp32_training.tar.gz
 ```
 
-##### Execution
+### Execution
 
 The model package for ResNet50 v1.5 FP32 training includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
 The directory tree within the model package is shown below:
@@ -103,9 +101,9 @@ The multi-node use case makes the following assumptions:
 
 The parameters are configured by editing kustomize related files described in the sections below.
 
-###### multi-node distributed training
+#### multi-node distributed training
 
-###### devops 
+##### devops
 
 The k8 resources needed to run the multi-node resnet50v1-5 training example require deployment of the mpi-operator.
 This deployment needs to be done by a devops user with Cluster RBAC permissions. The steps below explain how to
@@ -129,7 +127,7 @@ For more information on deploying the mpi-operator to the k8s cluster, see the
 Once these resources have been deployed, the mlops user then has a choice 
 of running resnet50v1-5 multi-node (distributed training) or single-node. 
 
-###### mlops
+##### mlops
 
 Distributed training is done by posting an MPIJob to the k8s api-server which is handled by the mpi-operator that was deployed by 
 the devops user. The mpi-operator then runs a 'launcher' and workers defined in the MPIJob which communicate through horovod.
@@ -157,13 +155,13 @@ The mlops user may run the distributed training job with their own uid/gid permi
 The securityContext appears within Launcher and Worker sections. The runAsUser, runAsGroup and fsGroup should reflect the user's UID, GID.
 
 ```
-            securityContext:
-              runAsUser: <User ID>
-              runAsGroup: <Group ID>
-              fsGroup: <Group ID>
+securityContext:
+  runAsUser: <User ID>
+  runAsGroup: <Group ID>
+  fsGroup: <Group ID>
 ```
 
-###### multi-node distributed training output
+#### multi-node distributed training output
 
 Viewing the log output of the resnet50v1_5 MPIJob is done by viewing the logs of the 
 launcher pod. The launcher pod aggregrates output from the workerpods. 
@@ -179,7 +177,7 @@ This can be combined with the kubectl logs subcommand to tail the output of the 
 kubectl logs -f $(kubectl get pods -oname|grep launch|cut -c5-)
 ```
 
-###### single-node training
+#### single-node training
 
 Single node training is similar to the docker use case but the command is run within a pod.
 Training is done by submitting a pod.yaml to the k8s api-server which results in the pod creation and running 
@@ -207,13 +205,13 @@ The mlops user may run the single-node training job with their own uid/gid permi
 The securityContext appears within Launcher and Worker sections. The runAsUser, runAsGroup and fsGroup should reflect the user's UID, GID.
 
 ```
-            securityContext:
-              runAsUser: <User ID>
-              runAsGroup: <Group ID>
-              fsGroup: <Group ID>
+securityContext:
+  runAsUser: <User ID>
+  runAsGroup: <Group ID>
+  fsGroup: <Group ID>
 ```
 
-###### single-node training output
+#### single-node training output
 
 Viewing the log output of the resnet50v1_5 Pod is done by viewing the logs of the 
 training pod. This pod is found by filtering the list of pods for the name 'training'
@@ -228,7 +226,7 @@ This can be combined with the kubectl logs subcommand to tail the output of the 
 kubectl logs -f $(kubectl get pods -oname|grep training|cut -c5-)
 ```
 
-##### Cleanup
+#### Cleanup
 
 Removing this MPIJob (and stopping training) is done by running:
 
@@ -244,15 +242,15 @@ kubectl delete -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.2.3
 ```
 
 
-### Advanced Options
+## Advanced Options
 
-#### Custom training runs
+### Custom training runs
 
 To do a custom model training run instead of using a predefined example, the 
 [launch_benchmark.py](/docs/general/tensorflow/LaunchBenchmark.md) script can be called
 directly. The snippets below demonstrate how to do this in different environments:
 
-*Bare Metal*
+#### Bare Metal
 
 Follow the [Bare Metal](#bare-metal) setup above to setup your environment and download
 and untar the model package on your machine. Then, call the `launch_benchmarks.py` script
@@ -267,16 +265,16 @@ tar -xcf resnet50v1_5_fp32_training.tar.gz
 cd resnet50v1_5_fp32_training/benchmarks
 
 python launch_benchmark.py \
-     --model-name resnet50v1_5 \
-     --precision fp32 \
-     --mode training \
-     --framework tensorflow \
-     --output-dir {OUTPUT_DIR} \
-     --checkpoint ${OUTPUT_DIR} \
-     --data-location ${DATASET_DIR}
+  --model-name resnet50v1_5 \
+  --precision fp32 \
+  --mode training \
+  --framework tensorflow \
+  --output-dir {OUTPUT_DIR} \
+  --checkpoint ${OUTPUT_DIR} \
+  --data-location ${DATASET_DIR}
 ```
 
-*Docker*
+#### Docker
 
 Similarly to running the [docker example](#docker) above, the container needs to be run with
 volume mounts for the dataset and an output directory where checkpoints and log files will be
@@ -288,22 +286,22 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
 
 docker run \
-    --volume ${DATASET_DIR}:${DATASET_DIR} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
-    --privileged --init -t \
-    amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training \
-    python benchmarks/launch_benchmark.py \
-        --model-name resnet50v1_5 \
-        --precision fp32 \
-        --mode training \
-        --framework tensorflow \
-        --output-dir {OUTPUT_DIR} \
-        --checkpoint ${OUTPUT_DIR} \
-        --data-location ${DATASET_DIR}
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training \
+  python benchmarks/launch_benchmark.py \
+    --model-name resnet50v1_5 \
+    --precision fp32 \
+    --mode training \
+    --framework tensorflow \
+    --output-dir {OUTPUT_DIR} \
+    --checkpoint ${OUTPUT_DIR} \
+    --data-location ${DATASET_DIR}
 ```
 
-#### Using a local copy of the model package with docker
+### Using a local copy of the model package with docker
 
 A download of the model package can be run in a docker container by mounting the
 model package directory to `/workspace` container and using the image recognition
@@ -317,15 +315,13 @@ wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-
 tar -xcf resnet50v1_5_fp32_training.tar.gz
 
 docker run \
-    --env DATASET_DIR=${DATASET_DIR} \
-    --env OUTPUT_DIR=${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
-    <mark><b>--volume resnet50v1_5_fp32_training:/workspace</b></mark> \
-    --volume ${DATASET_DIR}:${DATASET_DIR} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --privileged --init -w /workspace -t \
-    <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition</b></mark> \
-    /bin/bash /workspace/examples/&lt;script name&gt;.sh
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
+  <mark><b>--volume resnet50v1_5_fp32_training:/workspace</b></mark> \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -w /workspace -t \
+  <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition</b></mark> \
+  /bin/bash /workspace/examples/&lt;script name&gt;.sh
 </pre>
-
-
