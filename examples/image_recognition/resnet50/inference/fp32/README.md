@@ -1,27 +1,25 @@
-# ResNet50
+# ResNet50 FP32 Inference
 
-The following examples are available for ResNet50 using a model package:
-* [FP32 Inference](#fp32-inference)
+This document has instructions for running ResNet50 FP32 inference using
+Intel-optimized TensorFlow.
 
-Note that the ImageNet dataset is used in the ResNet50 examples. To download and preprocess
+Note that the ImageNet dataset is used in these ResNet50 examples. To download and preprocess
 the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
 from the TensorFlow models repo.
 
-## FP32 Inference
-
-### Example Scripts
+## Example Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_online_inference.sh`](/examples/tensorflow/resnet50/fp32_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`fp32_batch_inference.sh`](/examples/tensorflow/resnet50/fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
-| [`fp32_accuracy.sh`](/examples/tensorflow/resnet50/fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
+| [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
+| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
+| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
 
 These examples can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 
-#### Bare Metal
+## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
@@ -41,7 +39,7 @@ cd resnet50_fp32_inference
 examples/<script name>.sh
 ```
 
-#### Docker
+## Docker
 
 The model container `model-zoo:2.1.0-resnet50-fp32-inference` includes the scripts 
 and libraries needed to run ResNet50 v1.5 FP32 training. To run one of the model
@@ -53,26 +51,26 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
-        --env DATASET_DIR=${DATASET_DIR} \
-        --env OUTPUT_DIR=${OUTPUT_DIR} \
-        --env http_proxy=${http_proxy} \
-        --env https_proxy=${https_proxy} \
-        --volume ${DATASET_DIR}:${DATASET_DIR} \
-        --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-        --privileged --init -t \
-        amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
-        /bin/bash examples/<script name>.sh
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
+  /bin/bash examples/<script name>.sh
 ```
 
-### Advanced Options
+## Advanced Options
 
-#### Custom inference runs
+### Custom inference runs
 
 To do a custom model training run instead of using a predefined example, the 
 [launch_benchmark.py](/docs/general/tensorflow/LaunchBenchmark.md) script can be called
 directly. The snippets below demonstrate how to do this in different environments:
 
-*Bare Metal*
+#### Bare Metal
 
 Follow the [Bare Metal](#bare-metal) setup above to setup your environment and download
 and untar the model package on your machine. Then, call the `launch_benchmarks.py` script
@@ -89,18 +87,18 @@ cd resnet50_fp32_inference/benchmarks
 MODEL_FILE=resnet50_fp32_inference/resnet50_fp32_pretrained_model.pb
 
 python launch_benchmark.py \
-     --model-name resnet50 \
-     --precision fp32 \
-     --mode inference \
-     --batch-size=128 \
-     --socket-id 0 \
-     --framework tensorflow \
-     --output-dir {OUTPUT_DIR} \
-     --in-graph ${MODEL_FILE} \
-     --data-location ${DATASET_DIR}
+  --model-name resnet50 \
+  --precision fp32 \
+  --mode inference \
+  --batch-size=128 \
+  --socket-id 0 \
+  --framework tensorflow \
+  --output-dir {OUTPUT_DIR} \
+  --in-graph ${MODEL_FILE} \
+  --data-location ${DATASET_DIR}
 ```
 
-*Docker*
+#### Docker
 
 Similarly to running the [docker example](#docker) above, the container needs to be run with
 volume mounts for the dataset and an output directory where log files will be
@@ -112,25 +110,25 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
-    --volume ${DATASET_DIR}:${DATASET_DIR} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} \
-    --env https_proxy=${https_proxy} \
-    --privileged --init -t \
-    amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
-    python benchmarks/launch_benchmark.py \
-        --model-name resnet50 \
-        --precision fp32 \
-        --mode inference \
-        --batch-size=128 \
-        --socket-id 0 \
-        --framework tensorflow \
-        --output-dir {OUTPUT_DIR} \
-        --in-graph resnet50_fp32_pretrained_model.pb \
-        --data-location ${DATASET_DIR}
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
+  python benchmarks/launch_benchmark.py \
+    --model-name resnet50 \
+    --precision fp32 \
+    --mode inference \
+    --batch-size=128 \
+    --socket-id 0 \
+    --framework tensorflow \
+    --output-dir {OUTPUT_DIR} \
+    --in-graph resnet50_fp32_pretrained_model.pb \
+    --data-location ${DATASET_DIR}
 ```
 
-#### Using a local copy of the model package with docker
+### Using a local copy of the model package with docker
 
 A download of the model package can be run in a docker container by mounting the
 model package directory to `/workspace` container and using the image recognition
@@ -144,16 +142,14 @@ wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-
 tar -xzf resnet50_fp32_inference.tar.gz
 
 docker run \
-    --env DATASET_DIR=${DATASET_DIR} \
-    --env OUTPUT_DIR=${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} \
-    --env https_proxy=${https_proxy} \
-    <mark><b>--volume resnet50_fp32_inference:/workspace</b></mark> \
-    --volume ${DATASET_DIR}:${DATASET_DIR} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --privileged --init -w /workspace -t \
-    <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference</b></mark> \
-    /bin/bash /workspace/examples/&lt;script name&gt;.sh
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  <mark><b>--volume resnet50_fp32_inference:/workspace</b></mark> \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -w /workspace -t \
+  <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference</b></mark> \
+  /bin/bash /workspace/examples/&lt;script name&gt;.sh
 </pre>
-
-
