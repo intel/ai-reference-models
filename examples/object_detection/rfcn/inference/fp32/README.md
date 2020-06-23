@@ -1,16 +1,14 @@
 # RFCN
 
-The following examples are available for RFCN using a model package:
-* [FP32 Inference](#fp32-inference)
+This document has instructions for running RFCN FP32 inference using
+Intel-optimized TensorFlow.
 
-Note that the [COCO dataset](http://cocodataset.org) is used in the RFCN examples. The inference
+Note that the [COCO dataset](http://cocodataset.org) is used in these RFCN examples. The inference
 examples use raw images, and the accuracy examples require the dataset to be converted into the
 TF records format. See the document <HERE> for instructions on downloading and preprocessing the 
 COCO dataset.
 
-## FP32 Inference
-
-### Examples
+## Examples
 
 * fp32_inferece: Runs inference on a directory of raw images for 500 steps and outputs performance metrics
 * fp32_accuracy: Processes the TF records to run inference and check accuracy on the results.
@@ -20,7 +18,7 @@ These examples can be run in different environments:
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
-#### Bare Metal
+### Bare Metal
 
 To run on bare metal, prerequisites to run the model zoo scripts must be installed on in your environment <LINK>.
 
@@ -70,7 +68,7 @@ examples/fp32_accuracy
 ```
 
 
-#### Docker
+### Docker
 
 When running in docker, the `tf-rfcn-fp32-inference` container includes the libraries and the model
 package, which are needed to run RFCN FP32 inference. To run the examples, you'll need to provide
