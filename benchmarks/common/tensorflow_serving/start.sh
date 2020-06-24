@@ -94,16 +94,13 @@ function docker_run(){
 
 function resnet50_or_inceptionv3(){
     # Setup virtual env
-    pip --version
-    pip install virtualenv
-    python -m virtualenv venv
+    python3 -m virtualenv venv
  
     source venv/bin/activate
-    pip install --upgrade pip==19.3.1
     pip install grpcio \
     intel-tensorflow \
     requests \
-    tensorflow-serving-api==2.1.0
+    tensorflow-serving-api
 
     # cd to image recognition tfserving scripts
     cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
