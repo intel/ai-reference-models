@@ -125,7 +125,20 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.data_location and os.path.exists(
                 self.args.data_location):
-            command += " TF_RECORD_FILE=" + self.args.data_location
+            if os.path.isdir(self.args.data_location):
+                # For directories, create a comma separated list of all the TF record files
+                tf_records_files = []
+                for file in os.listdir(self.args.data_location):
+                    if ".record" in file:
+                        tf_records_files.append(os.path.join(self.args.data_location, file))
+                if len(tf_records_files) == 0:
+                    print("ERROR: No TF records files were found in "
+                          "the data location: {}".format(self.args.data_location))
+                    sys.exit(1)
+                command += " TF_RECORD_FILES=" + ",".join(tf_records_files)
+            else:
+                # Single TF record file
+                command += " TF_RECORD_FILES=" + self.args.data_location
         else:
             raise ValueError(
                 "Unable to locate the coco data record file at {}".format(
