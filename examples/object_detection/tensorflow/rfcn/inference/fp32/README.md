@@ -1,17 +1,19 @@
-# RFCN
+# RFCN FP32 inference
 
 This document has instructions for running RFCN FP32 inference using
 Intel-optimized TensorFlow.
 
 Note that the [COCO dataset](http://cocodataset.org) is used in these RFCN examples. The inference
 examples use raw images, and the accuracy examples require the dataset to be converted into the
-TF records format. See the document <HERE> for instructions on downloading and preprocessing the 
-COCO dataset.
+TF records format. See the [COCO dataset](/dataset/coco/README.md) for instructions on
+downloading and preprocessing the COCO validation dataset.
 
 ## Examples
 
-* fp32_inferece: Runs inference on a directory of raw images for 500 steps and outputs performance metrics
-* fp32_accuracy: Processes the TF records to run inference and check accuracy on the results.
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_inference.sh`](fp32_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
 These examples can be run in different environments:
 * [Bare Metal](#bare-metal)
@@ -20,7 +22,8 @@ These examples can be run in different environments:
 
 ### Bare Metal
 
-To run on bare metal, prerequisites to run the model zoo scripts must be installed on in your environment <LINK>.
+To run on bare metal, [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
+to run the RFCN scripts must be installed in your environment.
 
 Download and untar the RFCN FP32 inference model package:
 
@@ -52,60 +55,96 @@ an example.
 To run inference with performance metrics:
 
 ```
-DATASET_DIR=<path to the raw coco images>
+DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
 
-examples/fp32_inference
+examples/fp32_inference.sh
 ```
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<directory where your TF records file is located>
-TF_RECORD_FILE=<name of your TF records file>
+DATASET_DIR=<path to the COCO tf_records directory>
 OUTPUT_DIR=<directory where log files will be written>
 
-examples/fp32_accuracy
+examples/fp32_accuracy.sh
 ```
 
 
 ### Docker
 
-When running in docker, the `tf-rfcn-fp32-inference` container includes the libraries and the model
-package, which are needed to run RFCN FP32 inference. To run the examples, you'll need to provide
-volume mounts for the COCO dataset and an output directory where log files will be written.
+When running in docker, the RFCN FP32 inference container includes the
+libraries and the model package, which are needed to run RFCN FP32
+inference. To run the examples, you'll need to provide volume mounts for the
+[COCO validation dataset](/dataset/coco/README.md) and an output directory
+where log files will be written.
 
 To run inference with performance metrics:
-
 ```
-DATASET_DIR=<path to the raw coco images>
+DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
-        --env DATASET_DIR=${DATASET_DIR} \
-        --env OUTPUT_DIR=${OUTPUT_DIR} \
-        --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
-        --volume ${DATASET_DIR}:${DATASET_DIR} \
-        --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-        --privileged --init -it \
-        tf-rfcn-fp32-inference:2.1.0 \
-        /bin/bash examples/fp32_inference
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference \
+  /bin/bash examples/fp32_inference.sh
+```
+
+When the run completes, the log tail will note the average duration per step:
+
+```
+Avg. Duration per Step: ...
+Ran inference with batch size 1
+Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002239.log
 ```
 
 To get accuracy metrics:
-
 ```
-DATASET_DIR=<directory where your TF records file is located>
-TF_RECORD_FILE=<name of your TF records file>
+DATASET_DIR=<path to the COCO tf_records directory>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
-        --env DATASET_DIR=${DATASET_DIR} \
-        --env OUTPUT_DIR=${OUTPUT_DIR} \
-        --env TF_RECORD_FILE=${TF_RECORD_FILE} \
-        --env http_proxy=${http_proxy} --env https_proxy=${https_proxy} \
-        --volume ${DATASET_DIR}:${DATASET_DIR} \
-        --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-        --privileged --init -it \
-        tf-rfcn-fp32-inference:2.1.0 \
-        /bin/bash examples/fp32_accuracy
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference \
+  /bin/bash examples/fp32_accuracy.sh
 ```
+
+Below is a sample log file tail when running for accuracy:
+
+```
+Running per image evaluation...
+Evaluate annotation type *bbox*
+DONE (t=10.41s).
+Accumulating evaluation results...
+DONE (t=1.62s).
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.347
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.532
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.389
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.347
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.282
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.396
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.400
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.400
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
+Ran inference with batch size 1
+Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002841.log
+```
+
+### Advanced Options
+
+See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+document for more advanced use cases.

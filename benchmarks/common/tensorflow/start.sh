@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2018 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -152,9 +150,14 @@ function run_model() {
   if [ ${VERBOSE} == "True" ]; then
     echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
     echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
-    echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+    if [[ ${BATCH_SIZE} != "-1" ]]; then
+      echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+    fi
   fi
-  echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
+
+  if [[ ${BATCH_SIZE} != "-1" ]]; then
+    echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
+  fi
 
   # if it starts with /workspace then it's not a separate mounted dir
   # so it's custom and is in same spot as LOGFILE is, otherwise it's mounted in a different place
