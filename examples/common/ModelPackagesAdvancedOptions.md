@@ -1,0 +1,117 @@
+# Advanced Options for Model Packages and Containers
+
+## Advanced model configuration
+
+Model packages include example scripts that provide an easy way to get started
+with various use cases such as running batch inference, getting accuracy metrics,
+or training a model. These script typically have options to configure a path for
+the dataset and an output directory. More advance control to change parameters
+like the model's batch size or the number of steps will require calling the
+`launch_benchmark.py` script directly. See the
+[launch benchmarks documentation](LaunchBenchmark.md) for information on
+the available arguments.
+
+Below are instructions for calling the `launch_benchmark.py` script with
+bare metal and docker.
+
+### Bare metal
+
+Download and untar the model package, then call the `launch_benchmarks.py`
+script in the benchmarks folder. The example below is showing how to do
+this with the ResNet50 FP32 inference package, but the same process
+can be used with other model packages.
+
+```
+DATASET_DIR=<path to the preprocessed imagenet dataset>
+OUTPUT_DIR=<directory where log files will be written>
+
+wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50-fp32-inference.tar.gz
+tar -xzf resnet50_fp32_inference.tar.gz
+
+cd resnet50_fp32_inference/benchmarks
+
+python launch_benchmark.py \
+  --model-name=resnet50 \
+  --precision=fp32 \
+  --mode=inference \
+  --framework tensorflow \
+  --in-graph ../resnet50_fp32_pretrained_model.pb \
+  --data-location=${DATASET_DIR} \
+  --output-dir ${OUTPUT_DIR} \
+  --batch-size=128 \
+  --socket-id 0
+```
+
+### Docker
+
+Running the `launch_benchmarks.py` command in docker is similar to running
+the example scripts, where volume mounts and environment variables are set to
+for the dataset and output directories. However, instead of having the
+container execute the example script, have it call
+`python benchmarks/launch_benchmark.py` with your desired arguments. The
+snippet below is showing how to do this using the ResNet50 FP32 inference
+container, but the same process can be followed for other model usages by
+swapping in the appropriate docker image/tag for your model.
+
+```
+DATASET_DIR=<path to the preprocessed imagenet dataset>
+OUTPUT_DIR=<directory where log files will be written>
+
+docker run \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --privileged --init -t \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
+  python benchmarks/launch_benchmark.py \
+    --model-name resnet50 \
+    --precision fp32 \
+    --mode inference \
+    --batch-size=128 \
+    --socket-id 0 \
+    --framework tensorflow \
+    --output-dir {OUTPUT_DIR} \
+    --in-graph resnet50_fp32_pretrained_model.pb \
+    --data-location ${DATASET_DIR}
+```
+
+## Mounting local model packages in docker
+
+A download of the model package can be run in a docker container by mounting the
+model package to a directory a use case category
+container (such as the category containers for image recognition, object
+detection, etc). The category containers include library installs and
+dependencies needed to run the model, but they do not have the model
+package. This method of mounting the model package in the category
+container allows you to locally make edits to the model package, but still
+run the model using docker.
+
+The example below shows the process of downloading and untarring the
+model package and then using docker to mount directories for the dataset,
+output, and the model package, and running an example script. The model
+package is being mounted to the `/workspace` directory in this example.
+Note that this example is using ResNet50 FP32 inference, but the same
+process can be used with other models by downloading a different model
+package and using the category container that is approriate for that
+model.
+
+<pre>
+DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
+OUTPUT_DIR=&lt;directory where log files will be written&gt;
+
+wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50-fp32-inference.tar.gz
+tar -xzf resnet50_fp32_inference.tar.gz
+
+docker run \
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  <mark><b>--volume resnet50_fp32_inference:/workspace</b></mark> \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -w /workspace -t \
+  <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference</b></mark> \
+  /bin/bash /workspace/examples/&lt;script name&gt;.sh
+</pre>

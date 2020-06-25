@@ -15,13 +15,6 @@
 # limitations under the License.
 #
 
-# Untar checkpoint files
-pretrained_model_dir="pretrained_model/rfcn_resnet101_coco_2018_01_28"
-if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
-fi
-FROZEN_GRAPH="$(pwd)/${pretrained_model_dir}/frozen_inference_graph.pb"
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -40,6 +33,13 @@ if [ -z "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
+# Untar the pretrained model
+pretrained_model_dir="pretrained_model/rfcn_resnet101_coco_2018_01_28"
+if [ ! -d "${pretrained_model_dir}" ]; then
+    tar -C pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+fi
+FROZEN_GRAPH="$(pwd)/${pretrained_model_dir}/frozen_inference_graph.pb"
+
 python benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
@@ -49,7 +49,7 @@ python benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
     --in-graph ${FROZEN_GRAPH} \
     --output-dir ${OUTPUT_DIR} \
-    --verbose \
+    --batch-size 1 \
     --benchmark-only \
     -- number_of_steps=500
 

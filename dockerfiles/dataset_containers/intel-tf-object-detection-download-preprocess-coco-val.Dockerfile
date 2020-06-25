@@ -72,5 +72,5 @@ WORKDIR /workspace/${PACKAGE_NAME}
 
 RUN apt-get install -y wget unzip
 
-CMD examples/download_and_preprocess_coco.sh
+CMD scripts/download_and_preprocess_coco_val.sh
 
