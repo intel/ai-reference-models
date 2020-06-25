@@ -15,17 +15,6 @@
 # limitations under the License.
 #
 
-# Untar checkpoint files
-pretrained_model_dir="pretrained_model/rfcn_resnet101_coco_2018_01_28"
-if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
-fi
-FROZEN_GRAPH="$(pwd)/${pretrained_model_dir}/frozen_inference_graph.pb"
-
-if [ -z "${TF_RECORD_FILE}" ]; then
-    TF_RECORD_FILE="coco_val.record"
-fi
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -44,14 +33,22 @@ if [ -z "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
+# Untar pretrained model files
+pretrained_model_dir="pretrained_model/rfcn_resnet101_coco_2018_01_28"
+if [ ! -d "${pretrained_model_dir}" ]; then
+    tar -C pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+fi
+FROZEN_GRAPH="$(pwd)/${pretrained_model_dir}/frozen_inference_graph.pb"
+
 python benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
     --model-source-dir ${TF_MODELS_DIR} \
-    --data-location ${DATASET_DIR}/${TF_RECORD_FILE} \
+    --data-location ${DATASET_DIR} \
     --in-graph ${FROZEN_GRAPH} \
+    --batch-size 1 \
     --accuracy-only \
     --output-dir ${OUTPUT_DIR} \
     -- split="accuracy_message"
