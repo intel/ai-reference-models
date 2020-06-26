@@ -1,0 +1,13 @@
+varReference:
+- kind: MPIJob
+  path: spec/mpiReplicaSpecs/Launcher/template/spec/containers/image
+- kind: MPIJob
+  path: spec/mpiReplicaSpecs/Launcher/template/spec/containers/command
+- kind: MPIJob
+  path: spec/mpiReplicaSpecs/Launcher/template/spec/containers/volumeMounts/mountPath
+- kind: MPIJob
+  path: spec/mpiReplicaSpecs/Worker/template/spec/containers/image
+- kind: MPIJob
+  path: spec/mpiReplicaSpecs/Worker/template/spec/containers/command
+- kind: MPIJob
+  path: spec/mpiReplicaSpecs/Worker/template/spec/containers/volumeMounts/mountPath
