@@ -180,6 +180,13 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
 
+flags.DEFINE_bool("experimental_gelu", False,
+    "[Optional] If true, use experimental gelu op in model."
+    "           Be careful this flag will crash model with incompatible TF.")
+
+flags.DEFINE_bool("optimized_softmax", False,
+    "[Optional] If true, use optimized softmax op in model.")
+
 class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
   def __init__(self):
     pass
@@ -1196,6 +1203,8 @@ def main(_):
     tf.compat.v1.disable_eager_execution()
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
+  bert_config.experimental_gelu = FLAGS.experimental_gelu
+  bert_config.optimized_softmax = FLAGS.optimized_softmax
 
   validate_flags_or_throw(bert_config)
 
