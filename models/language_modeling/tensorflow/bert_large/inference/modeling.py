@@ -84,6 +84,8 @@ class BertConfig(object):
     self.initializer_range = initializer_range
     self.precision = precision
     self.new_bf16_scope = new_bf16_scope 
+    self.experimental_gelu = False
+    self.optimized_softmax = False
 
   @classmethod
   def from_dict(cls, json_object):
@@ -165,6 +167,9 @@ class BertModel(object):
       bf.set_global_precision(tf.bfloat16)
       if config.new_bf16_scope :
         self.bf16_scope = True
+
+    bf.set_global_flags(optimized_softmax=config.optimized_softmax,
+                        experimental_gelu=config.experimental_gelu)
 
     config = copy.deepcopy(config)
     if not is_training:
