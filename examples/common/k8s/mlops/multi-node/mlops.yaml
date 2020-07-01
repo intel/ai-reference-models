@@ -1,5 +1,7 @@
 varReference:
 - kind: MPIJob
+  path: metadata/name
+- kind: MPIJob
   path: spec/mpiReplicaSpecs/Launcher/template/spec/containers/image
 - kind: MPIJob
   path: spec/mpiReplicaSpecs/Launcher/template/spec/containers/command

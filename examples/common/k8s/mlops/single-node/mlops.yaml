@@ -2,6 +2,8 @@ varReference:
 - kind: PersistentVolume
   path: spec/hostPath/path
 - kind: Pod
+  path: metadata/name
+- kind: Pod
   path: spec/containers/image
 - kind: Pod
   path: spec/containers/workingDir

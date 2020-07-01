@@ -1,7 +1,7 @@
 apiVersion: kubeflow.org/v1alpha2
 kind: MPIJob
 metadata:
-  name: bert-large-fp32-training
+  name: $(MODEL_NAME)
 spec:
   mpiReplicaSpecs:
     Launcher:
@@ -10,7 +10,6 @@ spec:
           containers:
           - name: mpi-launcher
             image: $(REGISTRY)/model-zoo:2.1.0-language-modeling-bert-large-fp32-training
-            imagePullPolicy: Always
             securityContext:
               runAsUser: 0
               runAsGroup: 0
@@ -18,7 +17,6 @@ spec:
             envFrom:
             - configMapRef:
                 name: mlops-env
-            workingDir: /
             command:
             - $(MODEL_DIR)/examples/fp32_training_multi_node.sh
             volumeMounts:
@@ -26,7 +24,7 @@ spec:
               mountPath: $(DATASET_DIR)
               readOnly: true
             - name: users
-              mountPath: /Users
+              mountPath: $(NFS_MOUNT_PATH)
     Worker:
       template:
         spec:
@@ -40,10 +38,9 @@ spec:
             envFrom:
             - configMapRef:
                 name: mlops-env
-            workingDir: /
             volumeMounts:
             - name: datasets
               mountPath: $(DATASET_DIR)
               readOnly: true
             - name: users
-              mountPath: /Users
+              mountPath: $(NFS_MOUNT_PATH)
