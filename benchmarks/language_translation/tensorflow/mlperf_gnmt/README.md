@@ -33,6 +33,9 @@ git clone -b v0.5.2 https://github.com/tensorflow/addons.git
 cd addons
 sed -i 's;\${PYTHON_VERSION:=python} -m pip install $QUIET_FLAG -r $REQUIREMENTS_TXT;PYTHON_VERSION=python;' configure.sh
 sh configure.sh
+```
+>Note: Ubuntu systems, run `source configure.sh` 
+```
 bazel build --enable_runfiles build_pip_pkg
 bazel-bin/build_pip_pkg artifacts
 pip install artifacts/tensorflow_addons-*.whl
