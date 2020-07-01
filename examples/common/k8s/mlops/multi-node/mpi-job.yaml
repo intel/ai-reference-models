@@ -1,7 +1,7 @@
 apiVersion: kubeflow.org/v1alpha2
 kind: MPIJob
 metadata:
-  name: resnet50v1-5-fp32-training
+  name: $(MODEL_NAME)
 spec:
   slotsPerWorker: 1
   cleanPodPolicy: Running
@@ -13,17 +13,8 @@ spec:
           serviceAccountName: model-service
           containers:
           - name: mpi-launcher
-            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training
             imagePullPolicy: Always
             workingDir: /
-            command:
-            - /workspace/resnet50v1_5_fp32_training/examples/fp32_training_multi_node.sh
-            volumeMounts:
-            - name: datasets
-              mountPath: $(DATASET_DIR)
-              readOnly: true
-            - name: users
-              mountPath: /Users
           volumes:
           - name: datasets
             persistentVolumeClaim:
@@ -38,15 +29,8 @@ spec:
           serviceAccountName: model-service
           containers:
           - name: mpi-worker
-            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training
             imagePullPolicy: Always
             workingDir: /
-            volumeMounts:
-            - name: datasets
-              mountPath: $(DATASET_DIR)
-              readOnly: true
-            - name: users
-              mountPath: /Users
           volumes:
           - name: datasets
             persistentVolumeClaim:
