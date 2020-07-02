@@ -74,7 +74,7 @@ class ModelInitializer(BaseModelInitializer):
                 self.command_prefix, script_args_list)
 
     def parse_args(self):
-        if self.custom_args == None:
+        if self.custom_args is None:
             return
 
         parser = argparse.ArgumentParser()
@@ -101,8 +101,7 @@ class ModelInitializer(BaseModelInitializer):
             help="name of output layer",
             type=str, default="MobilenetV1/Predictions/Reshape_1")
 
-        self.args = parser.parse_args(self.custom_args,
-            namespace=self.args)
+        self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
     def run(self):
         self.run_command(self.command_prefix)

@@ -105,7 +105,7 @@ class ModelInitializer(BaseModelInitializer):
 
     def run(self):
         original_dir = os.getcwd()
-        #os.chdir(self.args.model_source_dir)
+        # os.chdir(self.args.model_source_dir)
         self.run_command(self.cmd)
 
         # calculate the bleu number after inference is done
