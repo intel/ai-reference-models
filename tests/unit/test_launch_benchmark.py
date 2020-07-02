@@ -244,7 +244,7 @@ def test_launch_benchmark_validate_model(launch_benchmark, mock_popen):
 def test_bare_metal(launch_benchmark, mock_popen):
     """ Tests the bare metal launch script function """
     test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
-    launch_benchmark.run_bare_metal("/foo", "/bar", test_env_vars)
+    launch_benchmark.run_bare_metal("/foo", "/bar", "/baz", test_env_vars)
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
 
@@ -262,11 +262,11 @@ def test_launch_benchmark_tensorflow_serving_framework(launch_benchmark, mock_po
     """
     Tests that the launch script works for tensorflow serving framework
     """
-    test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
+    test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b", "MPI_NUM_PROCESSES": "None"}
     # Override framework and docker image.
     launch_benchmark.args.framework = test_tfserving_framework
     launch_benchmark.args.docker_image = None
-    launch_benchmark.run_bare_metal("/foo", "/bar", test_env_vars)
+    launch_benchmark.run_bare_metal("/foo", "/bar", "/baz", test_env_vars)
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
 
