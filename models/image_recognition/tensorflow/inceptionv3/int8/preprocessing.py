@@ -41,9 +41,6 @@ import math
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 
-from tensorflow.contrib.data.python.ops import batching
-from tensorflow.contrib.data.python.ops import interleave_ops
-from tensorflow.contrib.image.python.ops import distort_image_ops
 from tensorflow.python.layers import utils
 from tensorflow.python.ops import data_flow_ops
 from tensorflow.python.platform import gfile
@@ -54,11 +51,11 @@ from tensorflow.python.ops import control_flow_ops
 
 def parse_example_proto(example_serialized):
     """Parses an Example proto containing a training example of an image.
-
+  
     The output of the build_image_data.py image preprocessing script is a dataset
     containing serialized Example protocol buffers. Each Example proto contains
     the following fields:
-
+  
       image/height: 462
       image/width: 581
       image/colorspace: 'RGB'
@@ -74,11 +71,11 @@ def parse_example_proto(example_serialized):
       image/format: 'JPEG'
       image/filename: 'ILSVRC2012_val_00041207.JPEG'
       image/encoded: <JPEG encoded string>
-
+  
     Args:
       example_serialized: scalar Tensor tf.string containing a serialized
         Example protocol buffer.
-
+  
     Returns:
       image_buffer: Tensor tf.string containing the contents of a JPEG file.
       label: Tensor tf.int32 containing the label.
@@ -89,14 +86,14 @@ def parse_example_proto(example_serialized):
     """
     # Dense features in Example proto.
     feature_map = {
-        'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
+        'image/encoded': tf.io.FixedLenFeature([], dtype=tf.string,
                                             default_value=''),
-        'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
+        'image/class/label': tf.io.FixedLenFeature([1], dtype=tf.int64,
                                                 default_value=-1),
-        'image/class/text': tf.FixedLenFeature([], dtype=tf.string,
+        'image/class/text': tf.io.FixedLenFeature([], dtype=tf.string,
                                                default_value=''),
     }
-    sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
+    sparse_float32 = tf.io.VarLenFeature(dtype=tf.float32)
     # Sparse features in Example proto.
     feature_map.update(
         {k: sparse_float32 for k in ['image/object/bbox/xmin',
@@ -104,7 +101,7 @@ def parse_example_proto(example_serialized):
                                      'image/object/bbox/xmax',
                                      'image/object/bbox/ymax']})
 
-    features = tf.parse_single_example(example_serialized, feature_map)
+    features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
     label = tf.cast(features['image/class/label'], dtype=tf.int32)
 
     xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 0)
@@ -118,19 +115,19 @@ def parse_example_proto(example_serialized):
     # Force the variable number of bounding boxes into the shape
     # [1, num_boxes, coords].
     bbox = tf.expand_dims(bbox, 0)
-    bbox = tf.transpose(bbox, [0, 2, 1])
+    bbox = tf.transpose(a=bbox, perm=[0, 2, 1])
 
     return features['image/encoded'], label, bbox, features['image/class/text']
 
 
 def get_image_resize_method(resize_method, batch_position=0):
     """Get tensorflow resize method.
-
+  
     If resize_method is 'round_robin', return different methods based on batch
     position in a round-robin fashion. NOTE: If the batch size is not a multiple
     of the number of methods, then the distribution of methods will not be
     uniform.
-
+  
     Args:
       resize_method: (string) nearest, bilinear, bicubic, area, or round_robin.
       batch_position: position of the image in a batch. NOTE: this argument can
@@ -174,7 +171,7 @@ def get_image_resize_method(resize_method, batch_position=0):
 
 def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
     """Decode a JPEG string into one 3-D float image Tensor.
-
+  
     Args:
       image_buffer: scalar string Tensor.
       scope: Optional scope for op_scope.
@@ -183,7 +180,7 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
     """
     # with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
     # with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
-    with tf.name_scope(scope or 'decode_jpeg'):
+    with tf.compat.v1.name_scope(scope or 'decode_jpeg'):
         # Decode the string as an RGB JPEG.
         # Note that the resulting image contains an unknown height and width
         # that is set dynamically by decode_jpeg. In other words, the height
@@ -201,13 +198,13 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
 def preprocess_for_eval(image, height, width,
                         central_fraction=0.875, scope=None):
     """Prepare one image for evaluation.
-
+  
     If height and width are specified it would output an image with that size by
     applying resize_bilinear.
-
+  
     If central_fraction is specified it would crop the central fraction of the
     input image.
-
+  
     Args:
       image: 3-D Tensor of image. If dtype is tf.float32 then the range should be
         [0, 1], otherwise it would converted to tf.float32 assuming that the range
@@ -220,7 +217,7 @@ def preprocess_for_eval(image, height, width,
     Returns:
       3-D float Tensor of prepared image.
     """
-    with tf.name_scope(scope, 'eval_image', [image, height, width]):
+    with tf.compat.v1.name_scope(scope, 'eval_image', [image, height, width]):
         if image.dtype != tf.float32:
             image = tf.image.convert_image_dtype(image, dtype=tf.float32)
         # Crop the central region of the image with an area containing 87.5% of
@@ -232,8 +229,8 @@ def preprocess_for_eval(image, height, width,
         if height and width:
             # Resize the image to the specified height and width.
             image = tf.expand_dims(image, 0)
-            image = tf.image.resize_bilinear(image, [height, width],
-                                             align_corners=False)
+            image = tf.image.resize(image, [height, width],
+                                             method=tf.image.ResizeMethod.BILINEAR)
             image = tf.squeeze(image, [0])
         image = tf.subtract(image, 0.5)
         image = tf.multiply(image, 2.0)
@@ -242,17 +239,17 @@ def preprocess_for_eval(image, height, width,
 
 def apply_with_random_selector(x, func, num_cases):
     """Computes func(x, sel), with sel sampled from [0...num_cases-1].
-
+  
     Args:
       x: input Tensor.
       func: Python function to apply.
       num_cases: Python int32, number of cases to sample sel from.
-
+  
     Returns:
       The result of func(x, sel), where func receives the value of the
       selector as a python integer, but sel is sampled dynamically.
     """
-    sel = tf.random_uniform([], maxval=num_cases, dtype=tf.int32)
+    sel = tf.random.uniform([], maxval=num_cases, dtype=tf.int32)
     # Pass the real x only to one of the func calls.
     return control_flow_ops.merge([
         func(control_flow_ops.switch(x, tf.equal(sel, case))[1], case)
@@ -261,12 +258,12 @@ def apply_with_random_selector(x, func, num_cases):
 
 def distort_color(image, color_ordering=0, fast_mode=True, scope=None):
     """Distort the color of a Tensor image.
-
+  
     Each color distortion is non-commutative and thus ordering of the color ops
     matters. Ideally we would randomly permute the ordering of the color ops.
     Rather then adding that level of complication, we select a distinct ordering
     of color ops for each preprocessing thread.
-
+  
     Args:
       image: 3-D Tensor containing single image in [0, 1].
       color_ordering: Python int, a type of distortion (valid values: 0-3).
@@ -277,7 +274,7 @@ def distort_color(image, color_ordering=0, fast_mode=True, scope=None):
     Raises:
       ValueError: if color_ordering not in [0, 3]
     """
-    with tf.name_scope(scope, 'distort_color', [image]):
+    with tf.compat.v1.name_scope(scope, 'distort_color', [image]):
         if fast_mode:
             if color_ordering == 0:
                 image = tf.image.random_brightness(image, max_delta=32. / 255.)
@@ -321,9 +318,9 @@ def distorted_bounding_box_crop(image,
                                 max_attempts=100,
                                 scope=None):
     """Generates cropped_image using a one of the bboxes randomly distorted.
-
+  
     See `tf.image.sample_distorted_bounding_box` for more documentation.
-
+  
     Args:
       image: 3-D Tensor of image (it will be converted to floats in [0, 1]).
       bbox: 3-D float Tensor of bounding boxes arranged [1, num_boxes, coords]
@@ -344,7 +341,7 @@ def distorted_bounding_box_crop(image,
     Returns:
       A tuple, a 3-D Tensor cropped_image and the distorted bbox
     """
-    with tf.name_scope(scope, 'distorted_bounding_box_crop', [image, bbox]):
+    with tf.compat.v1.name_scope(scope, 'distorted_bounding_box_crop', [image, bbox]):
         # Each bounding box has shape [1, num_boxes, box coords] and
         # the coordinates are ordered [ymin, xmin, ymax, xmax].
 
@@ -356,7 +353,7 @@ def distorted_bounding_box_crop(image,
         # bounding box. If no box is supplied, then we assume the bounding box is
         # the entire image.
         sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
-            tf.shape(image),
+            image_size=tf.shape(input=image),
             bounding_boxes=bbox,
             min_object_covered=min_object_covered,
             aspect_ratio_range=aspect_ratio_range,
@@ -376,11 +373,11 @@ def preprocess_for_train(image, height, width, bbox,
                          scope=None,
                          add_image_summaries=True):
     """Distort one image for training a network.
-
+  
     Distorting images provides a useful technique for augmenting the data
     set during training in order to make the network invariant to aspects
     of the image that do not effect the label.
-
+  
     Args:
       image: 3-D Tensor of image. If dtype is tf.float32 then the range should be
         [0, 1], otherwise it would converted to tf.float32 assuming that the range
@@ -400,7 +397,7 @@ def preprocess_for_train(image, height, width, bbox,
       3-D float Tensor of distorted image used for training with range [-1, 1].
     """
 
-    with tf.name_scope(scope, 'distort_image', [image, height, width, bbox]):
+    with tf.compat.v1.name_scope(scope, 'distort_image', [image, height, width, bbox]):
         if bbox is None:
             bbox = tf.constant([0.0, 0.0, 1.0, 1.0],
                                dtype=tf.float32,
@@ -412,7 +409,7 @@ def preprocess_for_train(image, height, width, bbox,
         image_with_box = tf.image.draw_bounding_boxes(tf.expand_dims(image, 0),
                                                       bbox)
         if add_image_summaries:
-            tf.summary.image('image_with_bounding_boxes', image_with_box)
+            tf.compat.v1.summary.image('image_with_bounding_boxes', image_with_box)
 
         distorted_image, distorted_bbox = distorted_bounding_box_crop(image,
                                                                       bbox)
@@ -422,7 +419,7 @@ def preprocess_for_train(image, height, width, bbox,
         image_with_distorted_box = tf.image.draw_bounding_boxes(
             tf.expand_dims(image, 0), distorted_bbox)
         if add_image_summaries:
-            tf.summary.image('images_with_distorted_bounding_box',
+            tf.compat.v1.summary.image('images_with_distorted_bounding_box',
                              image_with_distorted_box)
 
         # This resizing operation may distort the images because the aspect
@@ -434,12 +431,12 @@ def preprocess_for_train(image, height, width, bbox,
         num_resize_cases = 1 if fast_mode else 4
         distorted_image = apply_with_random_selector(
             distorted_image,
-            lambda x, method: tf.image.resize_images(x, [height, width],
+            lambda x, method: tf.image.resize(x, [height, width],
                                                      method),
             num_cases=num_resize_cases)
 
         if add_image_summaries:
-            tf.summary.image('cropped_resized_image',
+            tf.compat.v1.summary.image('cropped_resized_image',
                              tf.expand_dims(distorted_image, 0))
 
         # Randomly flip the image horizontally.
@@ -452,7 +449,7 @@ def preprocess_for_train(image, height, width, bbox,
             num_cases=num_distort_cases)
 
         if add_image_summaries:
-            tf.summary.image('final_distorted_image',
+            tf.compat.v1.summary.image('final_distorted_image',
                              tf.expand_dims(distorted_image, 0))
         distorted_image = tf.subtract(distorted_image, 0.5)
         distorted_image = tf.multiply(distorted_image, 2.0)
@@ -462,12 +459,12 @@ def preprocess_for_train(image, height, width, bbox,
 def distort_color(image, batch_position=0, distort_color_in_yiq=False,
                   scope=None):
     """Distort the color of the image.
-
+  
     Each color distortion is non-commutative and thus ordering of the color ops
     matters. Ideally we would randomly permute the ordering of the color ops.
     Rather then adding that level of complication, we select a distinct ordering
     of color ops based on the position of the image in a batch.
-
+  
     Args:
       image: float32 Tensor containing single image. Tensor values should be in
         range [0, 1].
@@ -478,7 +475,7 @@ def distort_color(image, batch_position=0, distort_color_in_yiq=False,
     Returns:
       color-distorted image
     """
-    with tf.name_scope(scope or 'distort_color'):
+    with tf.compat.v1.name_scope(scope or 'distort_color'):
         def distort_fn_0(image=image):
             """Variant 0 of distort function."""
             image = tf.image.random_brightness(image, max_delta=32. / 255.)
@@ -570,7 +567,7 @@ class RecordInputImagePreprocessor(object):
                   shift_ratio=-1):
         if shift_ratio < 0:
             shift_ratio = self.shift_ratio
-        with tf.name_scope('batch_processing'):
+        with tf.compat.v1.name_scope('batch_processing'):
             # Build final results per split.
             images = [[] for _ in range(self.num_splits)]
             labels = [[] for _ in range(self.num_splits)]
@@ -583,7 +580,7 @@ class RecordInputImagePreprocessor(object):
                         .format(glob_pattern))
                 ds = tf.data.TFRecordDataset.list_files(file_names)
                 ds = ds.apply(
-                    interleave_ops.parallel_interleave(
+                    tf.data.experimental.parallel_interleave(
                         tf.data.TFRecordDataset, cycle_length=10))
                 if cache_data:
                     ds = ds.take(1).cache().repeat()
@@ -594,12 +591,12 @@ class RecordInputImagePreprocessor(object):
                 ds = ds.shuffle(buffer_size=10000)
                 ds = ds.repeat()
                 ds = ds.apply(
-                    batching.map_and_batch(
+                    tf.compat.v1.data.experimental.map_and_batch(
                         map_func=self.parse_and_preprocess,
                         batch_size=self.batch_size_per_split,
                         num_parallel_batches=self.num_splits))
                 ds = ds.prefetch(buffer_size=self.num_splits)
-                ds_iterator = ds.make_one_shot_iterator()
+                ds_iterator = tf.compat.v1.data.make_one_shot_iterator(ds)
                 for d in xrange(self.num_splits):
                     labels[d], images[d] = ds_iterator.get_next()
 

@@ -106,12 +106,12 @@ git clone https://github.com/IntelAI/models.git
 ```
 mkdir ~/wide_deep_files
 cd ~/wide_deep_files
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/wide_deep_fp32_pretrained_model.pb
 
 ```
 Refer to the Wide and Deep [README](/benchmarks/recommendation/tensorflow/wide_deep_large_ds) to get the latest location of the pretrained model.
 
-3. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs on a Docker container.
+3. Install [Docker](https://docs.docker.com/install/) since the tutorial runs on a Docker container.
 
 
 4. Data Preparation: You will need approximately 20GB of available disk space to complete this step. 
@@ -140,7 +140,8 @@ Follow the instructions below to download and prepare the dataset.
     This step may take a while to complete.
     ```
     python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
-        --csv-datafile eval.csv \
+        --inputcsv-datafile eval.csv \
+        --calibrationcsv-datafile train.csv \
         --outputfile-name preprocessed
     ```
   - Exit the docker container and find the processed dataset `eval_preprocessed.tfrecords` in the location `~/models/models`.
@@ -150,7 +151,7 @@ Follow the instructions below to download and prepare the dataset.
 1. Pull the relevant Intel Optimizations for TensorFlow Docker image. We'll be running the pretrained model to infer in a Docker container. 
    [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intelaipg/intel-optimized-tensorflow:latest
+docker pull intel/intel-optimized-tensorflow:2.1.0
 ```
 2. cd to the inference script directory:
 ```bash        
@@ -177,7 +178,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --mode inference \
         --framework tensorflow \
         --benchmark-only \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
@@ -194,7 +195,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --mode inference \
         --framework tensorflow \
         --benchmark-only \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
@@ -232,7 +233,7 @@ The logs are captured in a directory outside of the container.<br>
         --mode inference \
         --framework tensorflow \
         --accuracy-only \
-        --docker-image intelaipg/intel-optimized-tensorflow:latest \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose		
@@ -262,7 +263,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 			--mode inference \
 			--framework tensorflow \
 			--benchmark-only \
-			--docker-image intelaipg/intel-optimized-tensorflow:latest \
+			--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
 			--data-location ~/models/models/eval_preprocessed.tfrecords \
 			--debug				
@@ -287,7 +288,7 @@ To run inference on a large dataset, download the test dataset in `~/wide_deep_f
 ```    
 cd ~/wide_deep_files/real_dataset
 ```	    
- - Go to this [page](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) on the Criteo website.
+- Go to this [page](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) on the Criteo website.
 Agree to the terms of use, enter your name, and submit the form. Then copy the download link for the 4.3GB tar file called `dac.tar.gz` and use it in the `wget` command in the code block below.
 Untar the file to create three files:
     1. readme.txt
@@ -315,7 +316,7 @@ Untar the file to create three files:
     This step may take a while to complete
 	```
     python recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py \
-        --csv-datafile test.csv \
+        --inputcsv-datafile test.csv \
         --outputfile-name preprocessed
     ```
   - Exit the docker container and find the processed dataset `test_preprocessed.tfrecords` in the location `~/models/models`.
@@ -331,7 +332,7 @@ Untar the file to create three files:
 			--mode inference \
 			--framework tensorflow \
 			--benchmark-only \
-			--docker-image intelaipg/intel-optimized-tensorflow:latest \
+			--docker-image intel/intel-optimized-tensorflow:2.1.0 \
 			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
 			--data-location ~/models/models/test_preprocessed.tfrecords \
 			--verbose

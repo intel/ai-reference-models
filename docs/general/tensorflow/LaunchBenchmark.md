@@ -31,6 +31,9 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
                    [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) | 
                    [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py) 
+* Language Translation
+    * Transformer-LT: [init](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/model_init.py) | 
+                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)    
 * Recommendation Systems
     * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
                 [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
@@ -51,9 +54,8 @@ optional arguments:
   -r [MODEL_SOURCE_DIR], --model-source-dir [MODEL_SOURCE_DIR]
                         Specify the models source directory from your local
                         machine
-  -p {fp32,int8,bfloat16}, --precision {fp32,int8,bfloat16}
-                        Specify the model precision to use: fp32, int8, or
-                        bfloat16
+  -p {fp32,int8}, --precision {fp32,int8}
+                        Specify the model precision to use: fp32, int8
   -mo {training,inference}, --mode {training,inference}
                         Specify the type training or inference
   -m MODEL_NAME, --model-name MODEL_NAME
@@ -62,6 +64,12 @@ optional arguments:
                         Specify the batch size. If this parameter is not
                         specified or is -1, the largest ideal batch size for
                         the model will be used
+  -ts NUM_TRAIN_STEPS, --num-train-steps NUM_TRAIN_STEPS
+                        Specify the number of training steps
+  --mpi_num_processes MPI
+                        The number of MPI processes
+  --mpi_num_processes_per_socket NUM_MPI
+                        Specify how many MPI processes to launch per socket
   -d DATA_LOCATION, --data-location DATA_LOCATION
                         Specify the location of the data. If this parameter is
                         not specified, the script will use random/dummy
@@ -71,6 +79,8 @@ optional arguments:
                         used when this value is set. If used in conjunction
                         with --num-cores, all cores will be allocated on the
                         single socket.
+  --num-instances NUM_INSTANCES
+                        Specify the number of instances to run.
   -n NUM_CORES, --num-cores NUM_CORES
                         Specify the number of cores to use. If the parameter
                         is not specified or is -1, all cores will be used.
@@ -91,6 +101,10 @@ optional arguments:
                         written to this location. If mode=inference assumes
                         that the location points to a model that has already
                         been trained.
+  -bb BACKBONE_MODEL, --backbone_model BACKBONE_MODEL
+                        Specify the location of backbone-model directory.
+                        This option can be used by models (like SSD_Resnet34)
+                        to do fine-tuning training or achieve convergence.
   -k, --benchmark-only  For performance measurement only. If neither
                         --benchmark-only or --accuracy-only are specified, it
                         will default to run for performance.
@@ -161,7 +175,7 @@ $ python launch_benchmark.py \
         --batch-size 1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --volume /home/<user>/custom_folder_1:/custom_folder_1 \
         --volume /home/<user>/custom_folder_2:/custom_folder_2
 ```
@@ -198,7 +212,7 @@ Below is an example showing how to use the `--debug` flag:
         --batch-size=1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
+        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
         --debug
 
    # ls

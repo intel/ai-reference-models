@@ -9,21 +9,21 @@ for other precisions are coming later.
 
 ## FP32 Inference Instructions
 
-1. Store path to current directory and then clone `tensorflow/models`
+1. Clone `tensorflow/models` as a `tensorflow-models`
        
     ```
-    # We are going to use an older version of the tensorflow model repo.
-    $ MODEL_WORK_DIR=${MODEL_WORK_DIR:=`pwd`}
-    $ pushd $MODEL_WORK_DIR
-
-    $ git clone https://github.com/tensorflow/models.git tf_models
-    $ cd tf_models
-    $ git checkout 6ff0a53f81439d807a78f8ba828deaea3aaaf269 
+    # We going to use a branch based on older version of the tensorflow model repo.
+    # Since, we need to to use logs utils on that branch, which were removed from 
+    # the latest master
+    $ git clone https://github.com/tensorflow/models.git tensorflow-models
+    $ cd tensorflow-models
+    $ git fetch origin pull/7461/head:wide-deep-tf2  
+    $ git checkout wide-deep-tf2 
     ```
     
 2. Download and extract the pre-trained model.
     ```
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/wide_deep_fp32_pretrained_model.tar.gz
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/wide_deep_fp32_pretrained_model.tar.gz
     $ tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
     ```
  
@@ -32,7 +32,6 @@ This repo has the launch script for running the model, which we will
 use in the next step.
 
     ```
-    $ cd $MODEL_WORK_DIR
     $ git clone https://github.com/IntelAI/models.git
     ```
 4. Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running 
@@ -42,43 +41,51 @@ use in the next step.
    using `--http_proxy` and `--https_proxy` arguments.
    ```
    $ cd models
-   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir $MODEL_WORK_DIR/widedeep_dataset
+   $ python benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
    ```
 
 5. How to run
 
    * Running the model in online inference mode, set `--batch-size` = `1`
        ``` 
-       $ cd $MODEL_WORK_DIR/models/benchmarks
+       $ cd /home/<user>/models/benchmarks
     
-       $ python launch_benchmark.py \
-            --framework tensorflow \
-            --model-source-dir $MODEL_WORK_DIR/tf_models \
-            --precision fp32 \
-            --mode inference \
-            --model-name wide_deep \
-            --batch-size 1 \
-            --data-location $MODEL_WORK_DIR/widedeep_dataset \
-            --checkpoint $MODEL_WORK_DIR/tf_models/wide_deep_fp32_pretrained_model \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-            --verbose
+       $ python launch_benchmark.py \ 
+             --framework tensorflow \ 
+             --model-source-dir /home/<user>/path/to/tensorflow-models \
+             --precision fp32 \
+             --mode inference \
+             --model-name wide_deep \
+             --batch-size 1 \
+             --data-location /home/<user>/widedeep_dataset \
+             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
+             --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+             --verbose
        ```
+       The three locations used (model-source-dir, data-location, checkpoint) here, 
+       works better with docker if they are located in the local disk. The locations 
+       should be pointed as absolute path.
+
    * Running the model in batch inference mode, set `--batch-size` = `1024`
        ``` 
-       $ cd $MODEL_WORK_DIR/models/benchmarks
+       $ cd /home/<user>/models/benchmarks
     
-       $ python launch_benchmark.py \
-            --framework tensorflow \
-            --model-source-dir $MODEL_WORK_DIR/tf_models \
-            --precision fp32 \
-            --mode inference \
-            --model-name wide_deep \
-            --batch-size 1024 \
-            --data-location $MODEL_WORK_DIR/widedeep_dataset \
-            --checkpoint $MODEL_WORK_DIR/tf_models/wide_deep_fp32_pretrained_model \
-            --docker-image gcr.io/deeplearning-platform-release/tf-cpu.1-15 \
-            --verbose
+       $ python launch_benchmark.py \ 
+             --framework tensorflow \ 
+             --model-source-dir /home/<user>/path/to/tensorflow-models \
+             --precision fp32 \
+             --mode inference \
+             --model-name wide_deep \
+             --batch-size 1024 \
+             --data-location /home/<user>/path/to/dataset \
+             --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
+             --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+             --verbose
        ```
+       The three locations used (model-source-dir, data-location, checkpoint) here, 
+       works better with docker if they are located in the local disk. The locations 
+       should be pointed as absolute path.
+
 6. The log file is saved to the value of `--output-dir`.
 
    The tail of the log output when the script completes should look
@@ -102,10 +109,5 @@ use in the next step.
     search path: /workspace/benchmarks/*/tensorflow/wide_deep/inference/fp32/model_init.py
     Using model init: /workspace/benchmarks/classification/tensorflow/wide_deep/inference/fp32/model_init.py
     PYTHONPATH: :/workspace/models
-    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --precision=fp32         --mode=inference         --model-source-dir=/workspace/tf_models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
+    RUNCMD: python common/tensorflow/run_tf_benchmark.py         --framework=tensorflow         --model-name=wide_deep         --precision=fp32         --mode=inference         --model-source-dir=/workspace/models         --intelai-models=/workspace/intelai_models         --batch-size=1                  --data-location=/dataset         --checkpoint=/checkpoints
     ```
-
-7. To return to where you started from:
-```
-$ popd
-```

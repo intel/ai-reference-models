@@ -25,8 +25,9 @@ echo "    FRAMEWORK: ${FRAMEWORK}"
 echo "    WORKSPACE: ${WORKSPACE}"
 echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
+echo "    BACKBONE_MODEL_DIRECTORY: ${BACKBONE_MODEL_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
-
+echo "    MOUNT_INTELAI_MODELS_COMMON_SOURCE_DIR: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
 if [ ${DOCKER} == "True" ]; then
   echo "    Mounted volumes:"
   echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
@@ -34,6 +35,7 @@ if [ ${DOCKER} == "True" ]; then
   echo "        ${INTELAI_MODELS} mounted on: ${MOUNT_INTELAI_MODELS_SOURCE}"
   echo "        ${DATASET_LOCATION_VOL} mounted on: ${DATASET_LOCATION}"
   echo "        ${CHECKPOINT_DIRECTORY_VOL} mounted on: ${CHECKPOINT_DIRECTORY}"
+  echo "        ${BACKBONE_MODEL_DIRECTORY_VOL} mounted on: ${BACKBONE_MODEL_DIRECTORY}"
 fi
 
 echo "    SOCKET_ID: ${SOCKET_ID}"
@@ -49,34 +51,43 @@ echo "    DISABLE_TCMALLOC: ${DISABLE_TCMALLOC}"
 echo "    TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD: ${TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD}"
 echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
+echo "    MPI_NUM_PROCESSES: ${MPI_NUM_PROCESSES}"
+echo "    MPI_NUM_PEOCESSES_PER_SOCKET: ${MPI_NUM_PROCESSES_PER_SOCKET}"
 
-# Only inference and training are supported right now
+#  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
-  echo "${MODE} mode is not supported"
+  echo "${MODE} mode for ${MODEL_NAME} is not supported"
   exit 1
 fi
 
-if [[ ${NOINSTALL} != "True" && ${DOCKER} == "True" ]]; then
+if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
   apt update
   apt full-upgrade -y
   # Set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
-  apt-get install python-tk numactl -y
+  apt-get install gcc-8 g++-8 cmake python-tk numactl -y
+  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
   apt install -y libsm6 libxext6
   pip install --upgrade pip
   pip install requests
 
-  # install libgoogle-perftools-dev for tcmalloc
+  # install google-perftools for tcmalloc
   if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-    apt-get install --no-install-recommends --fix-missing google-perftools -y
-    if [ ! -f /usr/lib/libtcmalloc.so ]; then
-      apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
-      if [ ! -f /usr/lib/libtcmalloc.so ]; then
-        ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
-      fi
-    fi
+    apt-get install google-perftools -y
   fi
+
+  if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+    #  Installing OpenMPI
+    apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
+    # Horovod Installation
+    export HOROVOD_WITHOUT_PYTORCH=1
+    export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITH_TENSORFLOW=1
+    # lock horovod==0.19.1 release commit/version
+    pip install --no-cache-dir horovod==0.19.1
+  fi 
 fi
 
 verbose_arg=""
@@ -107,7 +118,7 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   mkdir ${OUTPUT_DIR}
 fi
 
-export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}
+export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_COMMON_SOURCE}:${MOUNT_INTELAI_MODELS_SOURCE}
 
 # Common execution command used by all models
 function run_model() {
@@ -148,13 +159,12 @@ CMD="${PYTHON_EXE} ${RUN_SCRIPT_PATH} \
 --batch-size=${BATCH_SIZE} \
 --socket-id=${SOCKET_ID} \
 --output-dir=${OUTPUT_DIR} \
---num-processes=${NUM_PROCESSES} \
---num-processes-per-node=${NUM_PROCESSES_PER_NODE} \
 --num-train-steps=${NUM_TRAIN_STEPS} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
 ${verbose_arg}"
+
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
@@ -166,6 +176,10 @@ fi
 
 if [[ -n "${CHECKPOINT_DIRECTORY}" && ${CHECKPOINT_DIRECTORY} != "" ]]; then
   CMD="${CMD} --checkpoint=${CHECKPOINT_DIRECTORY}"
+fi
+
+if [[ -n "${BACKBONE_MODEL_DIRECTORY}" && ${BACKBONE_MODEL_DIRECTORY} != "" ]]; then
+  CMD="${CMD} --backbone-model=${BACKBONE_MODEL_DIRECTORY}"
 fi
 
 if [[ -n "${DATASET_LOCATION}" && ${DATASET_LOCATION} != "" ]]; then
@@ -192,6 +206,112 @@ if [ ${DISABLE_TCMALLOC} != "None" ]; then
   CMD="${CMD} --disable-tcmalloc=${DISABLE_TCMALLOC}"
 fi
 
+## Added for bert
+function bert_options() {
+
+  if [[ ${MODE} == "training" ]]; then
+    if [[ -z "${train_option}" ]]; then
+      echo "Error: Please specify a train option (SQuAD, Classifier, Pretraining)"
+      exit 1
+    fi
+
+    CMD=" ${CMD} --train-option=${train_option}"
+  fi
+
+  if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
+    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}" 
+  fi
+
+  if [[ -n "${task_name}" && ${task_name} != "" ]]; then
+    CMD=" ${CMD} --task-name=${task_name}"
+  fi
+
+  if [[ -n "${warmup_steps}" && ${warmup_steps} != "" ]]; then
+    CMD=" ${CMD} --warmup-steps=${warmup_steps}"
+  fi
+
+  if [[ -n "${vocab_file}" && ${vocab_file} != "" ]]; then
+    CMD=" ${CMD} --vocab-file=${vocab_file}" 
+  fi
+
+  if [[ -n "${config_file}" && ${config_file} != "" ]]; then
+    CMD=" ${CMD} --config-file=${config_file}"
+  fi
+
+  if [[ -n "${do_predict}" && ${do_predict} != "" ]]; then
+    CMD=" ${CMD} --do-predict=${do_predict}"
+  fi
+
+  if [[ -n "${predict_file}" && ${predict_file} != "" ]]; then
+    CMD=" ${CMD} --predict-file=${predict_file}"
+  fi
+
+  if [[ -n "${do_train}" && ${do_train} != "" ]]; then
+    CMD=" ${CMD} --do-train=${do_train}"
+  fi
+
+  if [[ -n "${train_file}" && ${train_file} != "" ]]; then
+    CMD=" ${CMD} --train-file=${train_file}"
+  fi
+
+  if [[ -n "${num_train_epochs}" && ${num_train_epochs} != "" ]]; then
+    CMD=" ${CMD} --num-train-epochs=${num_train_epochs}"
+  fi
+
+  if [[ -n "${num_train_steps}" && ${num_train_steps} != "" ]]; then
+    CMD=" ${CMD} --num-train-steps=${num_train_steps}"
+  fi
+
+  if [[ -n "${max_predictions}" && ${max_predictions} != "" ]]; then
+    CMD=" ${CMD} --max-predictions=${max_predictions}"
+  fi
+
+  if [[ -n "${learning_rate}" && ${learning_rate} != "" ]]; then
+    CMD=" ${CMD} --learning-rate=${learning_rate}"
+  fi
+
+  if [[ -n "${max_seq_length}" && ${max_seq_length} != "" ]]; then
+    CMD=" ${CMD} --max-seq-length=${max_seq_length}"
+  fi
+
+  if [[ -n "${doc_stride}" && ${doc_stride} != "" ]]; then
+    CMD=" ${CMD} --doc-stride=${doc_stride}"
+  fi
+
+  if [[ -n "${input_file}" && ${input_file} != "" ]]; then
+    CMD=" ${CMD} --input-file=${input_file}"
+  fi
+
+  if [[ -n "${do_eval}" && ${do_eval} != "" ]]; then
+    CMD=" ${CMD} --do-eval=${do_eval}"
+  fi
+
+  if [[ -n "${data_dir}" && ${data_dir} != "" ]]; then
+    CMD=" ${CMD} --data-dir=${data_dir}"
+  fi
+
+  if [[ -n "${do_lower_case}" && ${do_lower_case} != "" ]]; then
+    CMD=" ${CMD} --do-lower-case=${do_lower_case}"
+  fi
+  if [[ -n "${accum_steps}" && ${accum_steps} != "" ]]; then
+    CMD=" ${CMD} --accum_steps=${accum_steps}"
+  fi
+  if [[ -n "${profile}" && ${profile} != "" ]]; then
+    CMD=" ${CMD} --profile=${profile}"
+  fi
+  if [[ -n "${experimental_gelu}" && ${experimental_gelu} != "" ]]; then
+    CMD=" ${CMD} --experimental-gelu=${experimental_gelu}"
+  fi
+  if [[ -n "${optimized_softmax}" && ${optimized_softmax} != "" ]]; then
+    CMD=" ${CMD} --optimized-softmax=${optimized_softmax}"
+  fi
+
+  if [[ -n "${mpi_workers_sync_gradients}" && ${mpi_workers_sync_gradients} != "" ]]; then
+    CMD=" ${CMD} --mpi_workers_sync_gradients=${mpi_workers_sync_gradients}"
+  fi
+
+}
+
 function install_protoc() {
   pushd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
 
@@ -199,7 +319,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget unzip
+    apt-get -y install wget
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -251,11 +371,21 @@ function add_arg() {
 function add_steps_args() {
   # returns string with --steps and --warmup_steps, if there are values specified
   local steps_arg=""
+  local trainepochs_arg=""
+  local epochsbtweval_arg=""
   local warmup_steps_arg=""
   local kmp_blocktime_arg=""
 
   if [ -n "${steps}" ]; then
     steps_arg="--steps=${steps}"
+  fi
+
+  if [ -n "${train_epochs}" ]; then
+    trainepochs_arg="--train_epochs=${train_epochs}"
+  fi
+
+  if [ -n "${epochs_between_evals}" ]; then
+    epochsbtweval_arg="--epochs_between_evals=${epochs_between_evals}"
   fi
 
   if [ -n "${warmup_steps}" ]; then
@@ -266,7 +396,7 @@ function add_steps_args() {
     kmp_blocktime_arg="--kmp-blocktime=${kmp_blocktime}"
   fi
 
-  echo "${steps_arg} ${warmup_steps_arg} ${kmp_blocktime_arg}"
+  echo "${steps_arg} ${trainepochs_arg} ${epochsbtweval_arg} ${warmup_steps_arg} ${kmp_blocktime_arg}"
 }
 
 function add_calibration_arg() {
@@ -287,6 +417,45 @@ function add_calibration_arg() {
   echo "${calibration_arg}"
 }
 
+#BERT model
+function bert() {
+   if [ ${PRECISION} == "fp32" ]; then
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    if [ ${NOINSTALL} != "True" ]; then
+      apt-get update && apt-get install -y git
+      pip install -r ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt
+    fi
+
+    CMD="${CMD} \
+    $(add_arg "--task_name" ${task_name}) \
+    $(add_arg "--max_seq_length" ${max_seq_length}) \
+    $(add_arg "--eval_batch_size" ${eval_batch_size}) \
+    $(add_arg "--learning_rate" ${learning_rate}) \
+    $(add_arg "--vocab_file" ${vocab_file}) \
+    $(add_arg "--bert_config_file" ${bert_config_file}) \
+    $(add_arg "--init_checkpoint" ${init_checkpoint})"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# DCGAN model
+function dcgan() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/gan/cifar
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # DenseNet 169 model
 function densenet169() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -298,106 +467,6 @@ function densenet169() {
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
-}
-
-# DRAW model
-function draw() {
-  if [ ${PRECISION} == "fp32" ]; then
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# Faster R-CNN (ResNet50) model
-function faster_rcnn() {
-    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
-    original_dir=$(pwd)
-
-    # install dependencies
-    pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
-
-    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-    # install protoc v3.3.0, if necessary, then compile protoc files
-    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-
-    # apply patch for tensorflow models
-    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
-    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf_models.patch
-
-    if [ ${PRECISION} == "fp32" ]; then
-      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        CMD="${CMD} --steps=${steps}"
-      fi
-    elif [ ${PRECISION} == "int8" ]; then
-      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        CMD="${CMD} --steps=${steps}"
-      fi
-    else
-      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-      exit 1
-    fi
-    cd $original_dir
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-}
-
-# GNMT model
-function gnmt() {
-    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-    if [ ${MODE} == "training" ]; then
-      if [ ${PRECISION} == "fp32" ]; then
-         # build the model source
-	 original_dir=$(pwd)
-         model_source_dir="${INTELAI_MODELS}/${MODE}/${PRECISION}"
-
-         if [ ${NOINSTALL} != "True" ]; then
-           model_source_dir="${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}"
-           # install dependencies
-           apt-get update
-           apt-get install cpio
-           # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
-           cd /l_mpi
-           sh install.sh --silent silent.cfg
-           source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
-           pip install -r "${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/requirements.txt"
-        fi
-        # Prepare the model source
-        cd ${model_source_dir}
-        export PYTHONPATH=${PYTHONPATH}:${model_source_dir}/nmt/nmt
-        rm nmt -rf
-        git clone https://github.com/tensorflow/nmt.git
-        cd nmt
-        git checkout b278487980832417ad8ac701c672b5c3dc7fa553
-        git apply ../multi_instances.patch
-        cd $original_dir
-        CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt})  \
-        $(add_arg "--vocab_prefix" ${vocab_prefix}) \
-        $(add_arg "--train_prefix" ${train_prefix}) \
-        $(add_arg "--dev_prefix" ${dev_prefix}) $(add_arg "--test_prefix" ${test_prefix}) \
-        $(add_arg "--num_units" ${num_units}) \
-        $(add_arg "--dropout" ${dropout})  \
-        $(add_arg "--hparams_path" ${hparams_path})"
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-      else
-        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-        exit 1
-      fi
-    fi
-
-    if [ ${MODE} == "inference" ]; then
-      if [ ${PRECISION} == "fp32" ]; then
-        export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
-        CMD="${CMD} $(add_arg "--src" ${src}) $(add_arg "--tgt" ${tgt}) $(add_arg "--hparams_path" ${hparams_path}) \
-        $(add_arg "--vocab_prefix" ${vocab_prefix}) $(add_arg "--inference_input_file" ${inference_input_file}) \
-        $(add_arg "--inference_output_file" ${inference_output_file}) $(add_arg "--inference_ref_file" ${inference_ref_file}) \
-        $(add_arg "--infer_mode" ${infer_mode})"
-        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-      else
-        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-        exit 1
-      fi
-   fi
 }
 
 # inceptionv4 model
@@ -422,50 +491,127 @@ function inceptionv4() {
   fi
 }
 
-# inception_resnet_v2 model
-function inception_resnet_v2() {
-  # For accuracy, dataset location is required, see README for more information.
-  if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
-    echo "No Data directory specified, accuracy will not be calculated."
-    exit 1
-  fi
+# MiniGo model
+function minigo() {
+  if [ ${MODE} == "training" ] && [ ${PRECISION} == "fp32" ]; then
+      original_dir=$(pwd)
+      local MODEL_DIR=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
+      local INTELAI_MODEL_DIR=${INTELAI_MODELS}
+      local BENCHMARK_DIR=${BENCHMARK_SCRIPTS}
 
-  if [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp32" ]; then
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# language modeling lm-1b
-function lm-1b() {
-  if [ ${PRECISION} == "fp32" ]; then
-    CMD="${CMD} $(add_steps_args)"
-
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
-# Mask R-CNN model
-function maskrcnn() {
-  if [ ${PRECISION} == "fp32" ]; then
-    original_dir=$(pwd)
-
+      if [ ${DOCKER} == "True" ]; then
+        MODEL_DIR=${MOUNT_EXTERNAL_MODELS_SOURCE}
+        INTELAI_MODEL_DIR=${MOUNT_INTELAI_MODELS_SOURCE}
+        BENCHMARK_DIR=${MOUNT_BENCHMARK}
+        # install dependencies
+        apt-get update && apt-get install -y cpio
+        # pip3 install -r ${MODEL_DIR}/requirements.txt
+        pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
+        if [ ! -f "bazel-0.22.0-installer-linux-x86_64.sh" ];then
+          wget https://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
+          chmod 755 bazel-0.22.0-installer-linux-x86_64.sh
+        fi 
+        ./bazel-0.22.0-installer-linux-x86_64.sh --prefix=/tmp/bazel
+        rm /root/.bazelrc
+        export PATH=/tmp/bazel/bin:$PATH
+        cd /l_mpi
+        sh install.sh --silent silent.cfg
+        source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+        pip install mpi4py
+      fi
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip install matplotlib==3.0.3 pycocotools cython scikit-image==0.15.0 keras scipy==1.2.1 numpy==1.17.4
-      python_path=`which python`
-      pycocotools_path=`dirname $python_path`/../lib/python*/*/pycocotools
-      sed -i "s;unicode;str;g" $pycocotools_path/coco.py
+      pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
+      if [ "${EXTERNAL_MODELS_SOURCE_DIRECTORY}" == "None" ]; then
+        echo "You are supposed to provide model dir."
+        exit 1
+      fi
+    
+      # MODEL_DIR is the official mlperf minigo repo 
+      cd ${MODEL_DIR}
+      git checkout 60ecb12f29582227a473fdc7cd09c2605f42bcd6
+
+      # delete the previous patch influence
+      git reset --hard
+      git clean -fd
+      rm -rf ./ml_perf/flags/9.mn/
+
+      # remove the quantization tools downloaded before
+      rm -rf ${MODEL_DIR}/ml_perf/tools/
+      rm -rf ${MODEL_DIR}/cc/ml_perf/tools/
+
+      if [ "${large_scale}" == "True" ]; then
+        # multi-node mode
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf_large_scale.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-multinode.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-large-scale.patch
+        # git apply ${INTELAI_MODEL_DIR}/training/fp32/large-scale-no-bg.patch
+      elif [ "${large_num_cores}" == "True" ]; then
+        # single-node large num mode
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/tune_for_many_core.patch
+      else 
+        # single-node normal mode
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/mlperf_split.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
+        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
+      fi
+
+      # generate the flags with specified iterations
+      if [ -z "$steps" ];then
+        steps=30
+      fi
+      mv ml_perf/flags/9/rl_loop.flags ml_perf/flags/9/rl_loop.flags-org
+      sed "s/iterations=30/iterations=${steps}/g" ml_perf/flags/9/rl_loop.flags-org &> ml_perf/flags/9/rl_loop.flags
+      mv ml_perf/flags/9/train.flags ml_perf/flags/9/train.flags-org
+      sed "s/train_batch_size=8192/train_batch_size=4096/g" ml_perf/flags/9/train.flags-org &> ml_perf/flags/9/train.flags
+
+      # MiniGo need specified tensorflow version and to build selfplay part with tensorflow c lib.
+      rm -rf cc/minigo_tf/tensorflow-*.data
+      rm -rf cc/minigo_tf/tensorflow-*.dist-info
+      chmod +777 ./cc/configure_tensorflow.sh
+      chmod +777 ./build.sh
+      ./cc/configure_tensorflow.sh
+      pip uninstall -y ./cc/tensorflow_pkg/tensorflow-*.whl
+      pip uninstall -y tensorflow
+      pip uninstall -y intel-tensorflow
+      pip install ./cc/tensorflow_pkg/tensorflow-*.whl
+      ./build.sh
+
+      # ensure horovod installed
+      pip install horovod==0.15.1
+
+
+      # set the python path for quantization tools
+      export PYTHONPATH=${PYTHONPATH}:${MODEL_DIR}/cc/ml_perf/tools/api/intel_quantization:${MODEL_DIR}/ml_perf/tools/api/intel_quantization
+
+      # freeze the tfrecord and target to the checkpoint for training
+      git apply ${INTELAI_MODEL_DIR}/training/fp32/get-data.patch
+      BOARD_SIZE=9 python ml_perf/get_data.py
+
+      # $HOSTLIST.txt contains all the ip address
+
+      if [ ! $multi_node ];then
+        unset -v HOSTLIST 
+      else
+        export HOSTLIST=${BENCHMARK_DIR}/node_list 
+      fi
+      
+      cd ${original_dir}
+      CMD="${CMD} \
+      $(add_arg "--large-scale" ${large_scale}) \
+      $(add_arg "--num-train-nodes" ${num_train_nodes}) \
+      $(add_arg "--num-eval-nodes" ${num_eval_nodes}) \
+      $(add_arg "--quantization" ${quantization}) \
+      $(add_arg "--multi-node" ${multi_node})"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     fi
-    cd ${original_dir}
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    echo "MODE=${MODE} PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
@@ -473,13 +619,18 @@ function maskrcnn() {
 # mobilenet_v1 model
 function mobilenet_v1() {
   if [ ${PRECISION} == "fp32" ]; then
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
+    $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) \
+    $(add_arg "--input_layer" ${input_layer}) $(add_arg "--output_layer" ${output_layer})"
+
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   elif [ ${PRECISION} == "int8" ]; then
-      CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
-      $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) $(add_arg "--input_layer" ${input_layer}) \
-      $(add_arg "--output_layer" ${output_layer})"
-      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
+    $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) \
+    $(add_arg "--input_layer" ${input_layer}) $(add_arg "--output_layer" ${output_layer}) \
+    $(add_calibration_arg)"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
@@ -509,10 +660,24 @@ function mtcc() {
 
 # NCF model
 function ncf() {
-  if [ ${PRECISION} == "fp32" ]; then
-    # For nfc, if dataset location is empty, script downloads dataset at given location.
+  if [[ -n "${clean}" ]]; then
+    CMD="${CMD} --clean"
+  fi
+
+  # NCF supports different datasets including ml-1m and ml-20m.
+  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
+    CMD="${CMD} --dataset=${dataset}"
+  fi
+
+  if [[ -n "${te}" && ${te} != "" ]]; then
+    CMD="${CMD} -te=${te}"
+  fi
+
+  if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
+    # For ncf, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
-      mkdir -p /dataset
+      mkdir -p ./dataset
+      CMD="${CMD} --data-location=./dataset"
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
@@ -528,8 +693,8 @@ function ncf() {
   fi
 }
 
-# ResNet50, ResNet101, InceptionV3 model
-function resnet50_101_inceptionv3() {
+# ResNet101, InceptionV3 model
+function resnet101_inceptionv3() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
     # For accuracy, dataset location is required.
@@ -550,44 +715,84 @@ function resnet50_101_inceptionv3() {
     fi
 }
 
+# ResNet50  model
+function resnet50() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # For accuracy, dataset location is required.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    if [ ${PRECISION} == "int8" ]; then
+        CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
+        PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+      CMD="${CMD} $(add_steps_args)"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
+
+# MLPerf GNMT model
+function mlperf_gnmt() {
+    export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+
+    # install dependencies
+    pip install ${MOUNT_BENCHMARK}/tensorflow_addons*.whl --no-deps
+
+    # For accuracy, dataset location is required.
+    if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "No Data directory specified, accuracy will not be calculated."
+      exit 1
+    fi
+
+    if [ ${PRECISION} == "int8" ]; then
+      CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    elif [ ${PRECISION} == "fp32" ]; then
+      CMD="${CMD} $(add_steps_args)"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
 
 # R-FCN (ResNet101) model
 function rfcn() {
-  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}
+  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
-  # install dependencies
-  pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt"
+  if [ ${NOINSTALL} != "True" ]; then
+    # install dependencies
+    for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt)
+    do
+      pip install $line
+    done
+    original_dir=$(pwd)
 
-  original_dir=$(pwd)
+    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+    git apply --ignore-space-change --ignore-whitespace ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf-2.0.patch
 
-  cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
-  # install protoc v3.3.0, if necessary, then compile protoc files
-  install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+    cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+    # install protoc v3.3.0, if necessary, then compile protoc files
+    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+  fi
 
-  # apply patch for tensorflow models
-  cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
-  git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/tf_models.patch
-
+  split_arg=""
   if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      CMD="${CMD} --split=${split}"
+      split_arg="--split=${split}"
   fi
 
-  if [ ${PRECISION} == "int8" ]; then
-
-      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          CMD="${CMD} --steps=${steps}"
-      fi
-
-
-  elif [ ${PRECISION} == "fp32" ]; then
-
-      if [ -n "${steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-          CMD="${CMD} --steps=${steps}"
-      fi
-
-  else
-      echo "MODE:${MODE} and PRECISION=${PRECISION} not supported"
+  number_of_steps_arg=""
+  if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+      number_of_steps_arg="--number_of_steps=${number_of_steps}"
   fi
+  CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
+
   cd $original_dir
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
@@ -603,27 +808,16 @@ function ssd_mobilenet() {
     exit 1
   fi
 
-  export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection
+  export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}
 
-  sed -i 's/return "".join/return b"".join/g' ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/metrics/tf_example_parser.py
-
-  OLD_PWD=${PWD}
-  cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
-  git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/detection_inference.patch
-  cd ${OLD_PWD}
-
-  chmod -R 777 ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
-  sed -i.bak "s/'r'/'rb'/g" ${MOUNT_EXTERNAL_MODELS_SOURCE}/research/object_detection/inference/detection_inference.py
-
-  # install dependencies for both fp32 and int8
-  pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt"
-
-  if [ ${PRECISION} == "int8" ]; then
-    # install protoc v3.3.0, if necessary, then compile protoc files
-    install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
-  elif [ ${PRECISION} == "fp32" ]; then
-    # install protoc v3.0.0, if necessary, then compile protoc files
-    install_protoc "https://github.com/google/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip"
+  if [ ${NOINSTALL} != "True" ]; then
+    # install dependencies for both fp32 and int8
+    apt-get update && apt-get install -y git
+    # install one by one to solve dependency problems
+    for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt)
+    do
+      pip install $line
+    done
   fi
 
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -633,49 +827,71 @@ function ssd_mobilenet() {
 function ssd-resnet34() {
       if [ ${MODE} == "inference" ]; then
         if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
-          if [ ${NOINSTALL} != "True" ]; then
-            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-            do 
-              pip install $line
-            done
-          fi
 
           old_dir=${PWD}
-          cd /tmp
-          git clone --single-branch https://github.com/tensorflow/benchmarks.git
-          cd benchmarks
-          git checkout 1e7d788042dfc6d5e5cd87410c57d5eccee5c664
+
+          if [ ${NOINSTALL} != "True" ]; then
+            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            do
+              pip install $line
+            done
+            model_source_dir=${MOUNT_EXTERNAL_MODELS_SOURCE}
+            infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+          else
+            model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
+            infer_dir="${INTELAI_MODELS}/${MODE}"
+          fi
+          benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
+          model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+
+          cd  ${model_source_dir}/../
+          cd ssd-resnet-benchmarks
+          git apply ${benchmarks_patch_path}
+
+          cd ${model_source_dir}
+          git apply ${model_patch_path}
+
+          if [ ${NOINSTALL} != "True" ]; then
+            export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
+            export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
+          fi
+
           cd ${old_dir}
-          
+
+          CMD="${CMD} \
+          $(add_arg "--input-size" ${input_size})"
           CMD=${CMD} run_model
+
         else
           echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
           exit 1
         fi
       elif [ ${MODE} == "training" ]; then
-        if [ ${PRECISION} == "fp32" ]; then
+        if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
           if [ ${NOINSTALL} != "True" ]; then
-            if [ ${DOCKER} == "True" ]; then
-              apt-get update && apt-get install -y cpio
+            apt-get update && apt-get install -y cpio
 
-              # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
-              cd /l_mpi
-              sh install.sh --silent silent.cfg
-              source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
-            fi
+            # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
+            cd /l_mpi
+            sh install.sh --silent silent.cfg
+            source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
+
             for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
-            do 
+            do
               pip install $line
             done
-            pip install horovod
           fi
 
           old_dir=${PWD}
           cd /tmp
-          rm -rf benchmark_ssd-resnet34
-          git clone -b cnn_tf_v1.13_compatible https://github.com/tensorflow/benchmarks.git benchmark_ssd-resnet34
-          cd benchmark_ssd-resnet34
-          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark_v1.13.diff
+          rm -rf benchmark_ssd_resnet34
+          git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd_resnet34
+          cd benchmark_ssd_resnet34
+          git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
+          if [ ${PRECISION} == "bfloat16" ]; then
+            git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
+          fi
           cd ${old_dir}
 
           CMD="${CMD} \
@@ -708,15 +924,200 @@ function ssd_vgg16() {
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/preprocessing
     cp ${MOUNT_INTELAI_MODELS_SOURCE}/__init__.py ${MOUNT_EXTERNAL_MODELS_SOURCE}/utility
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
 
-    if [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp32" ]; then
-       CMD="${CMD} $(add_steps_args)"
-       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+      if [ ${NOINSTALL} != "True" ]; then
+        for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+        do
+          pip install $line
+        done
+
+        old_dir=${PWD}
+
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/inference
+        benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
+        cd /tmp
+        git clone --single-branch https://github.com/tensorflow/benchmarks.git
+        cd benchmarks
+        git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+        git apply ${benchmarks_patch_path}
+
+        model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+        cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+        git apply ${model_patch_path}
+
+        cd ${old_dir}
+      fi
+      CMD=${CMD} run_model
+
     else
         echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
         exit 1
     fi
 }
+
+# UNet model
+function unet() {
+  if [ ${PRECISION} == "fp32" ]; then
+    if [[ -z "${checkpoint_name}" ]]; then
+      echo "wavenet requires -- checkpoint_name arg to be defined"
+      exit 1
+    fi
+    if [ ${ACCURACY_ONLY} == "True" ]; then
+      echo "Accuracy testing is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+    CMD="${CMD} --checkpoint_name=${checkpoint_name}"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# transformer language model from official tensorflow models
+function transformer_lt_official() {
+  if [ ${PRECISION} == "fp32" ]; then
+
+    if [[ -z "${file}" ]]; then
+        echo "transformer-language requires -- file arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${file_out}" ]]; then
+        echo "transformer-language requires -- file_out arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${reference}" ]]; then
+        echo "transformer-language requires -- reference arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${vocab_file}" ]]; then
+        echo "transformer-language requires -- vocab_file arg to be defined"
+        exit 1
+    fi
+
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r "${MOUNT_BENCHMARK}/language_translation/tensorflow/transformer_lt_official/requirements.txt"
+    fi
+
+    CMD="${CMD}
+    --in_graph=${IN_GRAPH} \
+    --vocab_file=${DATASET_LOCATION}/${vocab_file} \
+    --file=${DATASET_LOCATION}/${file} \
+    --file_out=${OUTPUT_DIR}/${file_out} \
+    --reference=${DATASET_LOCATION}/${reference}"
+    PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# transformer in mlperf Translation for Tensorflow  model
+function transformer_mlperf() {
+  export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+  #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
+  if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
+  then
+
+    if [[ -z "${random_seed}" ]]; then
+        echo "transformer-language requires --random_seed arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${params}" ]]; then
+        echo "transformer-language requires --params arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${train_steps}" ]]; then
+        echo "transformer-language requires --train_steps arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${steps_between_eval}" ]]; then
+        echo "transformer-language requires --steps_between_eval arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${do_eval}" ]]; then
+        echo "transformer-language requires --do_eval arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${save_checkpoints}" ]]; then
+        echo "transformer-language requires --save_checkpoints arg to be defined"
+        exit 1
+    fi
+    if [[ -z "${print_iter}" ]]; then
+        echo "transformer-language requires --print_iter arg to be defined"
+        exit 1
+    fi
+
+    CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
+    --print_iter=${print_iter} --save_profile=${save_profile}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# Wavenet model
+function wavenet() {
+  if [ ${PRECISION} == "fp32" ]; then
+    if [[ -z "${checkpoint_name}" ]]; then
+      echo "wavenet requires -- checkpoint_name arg to be defined"
+      exit 1
+    fi
+
+    if [[ -z "${sample}" ]]; then
+      echo "wavenet requires -- sample arg to be defined"
+      exit 1
+    fi
+
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+    if [ ${NOINSTALL} != "True" ]; then
+      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+    fi
+
+    CMD="${CMD} --checkpoint_name=${checkpoint_name} \
+        --sample=${sample}"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
+# BERT base
+function bert_base() {
+    
+    echo "Bert base PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+    exit 1
+    # When enabled remove the above lines
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      bert_options
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+}
+
+# BERT Large model
+function bert_large() {
+    # Change if to support fp32
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      bert_options
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
 
 # Wide & Deep model
 function wide_deep() {
@@ -743,13 +1144,7 @@ function wide_deep_large_ds() {
     if [[ -z "${LIBTCMALLOC}" ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
-      apt-get install --no-install-recommends --fix-missing google-perftools -y
-      if [ ! -f /usr/lib/libtcmalloc.so ]; then
-        apt-get install --no-install-recommends --fix-missing libgoogle-perftools-dev -y
-        if [ ! -f /usr/lib/libtcmalloc.so ]; then
-          ln -sf /usr/lib/x86_64-linux-gnu/libtcmalloc.so /usr/lib/libtcmalloc.so
-        fi
-      fi
+      apt-get install google-perftools --fix-missing -y
     fi
 
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
@@ -780,6 +1175,23 @@ function wide_deep_large_ds() {
       if [ "${num_omp_threads}" != None ]; then
         CMD="${CMD} --num_omp_threads=${num_omp_threads}"
       fi
+      if [ "${use_parallel_batches}" == "True" ]; then
+        CMD="${CMD} --use_parallel_batches=${use_parallel_batches}"
+      else
+        CMD="${CMD} --use_parallel_batches=False"
+      fi
+      if [ "${num_parallel_batches}" != None  ] && [ "${use_parallel_batches}" == "True" ]; then
+        CMD="${CMD} --num_parallel_batches=${num_parallel_batches}"
+      fi
+      if [ "${kmp_block_time}" != None ] ; then
+        CMD="${CMD} --kmp_block_time=${kmp_block_time}"
+      fi
+      if [ "${kmp_affinity}" != None ]; then
+        CMD="${CMD} --kmp_affinity=${kmp_affinity}"
+      fi
+      if [ "${kmp_settings}" != None ]; then
+        CMD="${CMD} --kmp_settings=${kmp_settings}"
+      fi
       if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
           CMD="${CMD}"
           PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -794,48 +1206,56 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "densenet169" ]; then
+if [ ${MODEL_NAME} == "bert" ]; then
+  bert
+elif [ ${MODEL_NAME} == "dcgan" ]; then
+  dcgan
+elif [ ${MODEL_NAME} == "densenet169" ]; then
   densenet169
 elif [ ${MODEL_NAME} == "draw" ]; then
   draw
+elif [ ${MODEL_NAME} == "facenet" ]; then
+  facenet
 elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
 elif [ ${MODEL_NAME} == "gnmt" ]; then
   gnmt
+elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
+  mlperf_gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
-  resnet50_101_inceptionv3
+  resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
-elif [ ${MODEL_NAME} == "inception_resnet_v2" ]; then
-  inception_resnet_v2
-elif [ ${MODEL_NAME} == "lm-1b" ]; then
-  lm-1b
-elif [ ${MODEL_NAME} == "maskrcnn" ]; then
-  maskrcnn
+elif [ ${MODEL_NAME} == "minigo" ]; then
+  minigo
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
-elif [ ${MODEL_NAME} == "mtcc" ]; then
-  mtcc
-elif [ ${MODEL_NAME} == "ncf" ]; then
-  ncf
 elif [ ${MODEL_NAME} == "resnet101" ]; then
-  resnet50_101_inceptionv3
+  resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "resnet50" ]; then
-  resnet50_101_inceptionv3
+  resnet50
 elif [ ${MODEL_NAME} == "resnet50v1_5" ]; then
-  resnet50_101_inceptionv3
+  resnet50
 elif [ ${MODEL_NAME} == "rfcn" ]; then
   rfcn
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ]; then
   ssd_mobilenet
 elif [ ${MODEL_NAME} == "ssd-resnet34" ]; then
   ssd-resnet34
-elif [ ${MODEL_NAME} == "ssd_vgg16" ]; then
-  ssd_vgg16
+elif [ ${MODEL_NAME} == "transformer_lt_official" ]; then
+  transformer_lt_official
+elif [ ${MODEL_NAME} == "transformer_mlperf" ]; then
+  transformer_mlperf
+elif [ ${MODEL_NAME} == "wavenet" ]; then
+  wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
   wide_deep
 elif [ ${MODEL_NAME} == "wide_deep_large_ds" ]; then
   wide_deep_large_ds
+elif [ ${MODEL_NAME} == "bert_base" ]; then
+  bert_base
+elif [ ${MODEL_NAME} == "bert_large" ]; then
+  bert_large
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

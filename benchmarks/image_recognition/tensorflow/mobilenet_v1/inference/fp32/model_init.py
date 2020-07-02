@@ -18,6 +18,7 @@
 
 #
 
+import argparse
 import os
 from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
@@ -41,7 +42,7 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads(num_inter_threads=2)
 
         script_name = "accuracy.py" if self.args.accuracy_only \
-            else "eval_image_classifier.py"
+            else "benchmark.py"
         script_path = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
             script_name)
@@ -53,22 +54,16 @@ class ModelInitializer(BaseModelInitializer):
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        if not self.args.accuracy_only:
-            self.command_prefix = ("{prefix} "
-                                   "--dataset_name imagenet "
-                                   "--checkpoint_path {checkpoint} "
-                                   "--dataset_split_name=validation "
-                                   "--clone_on_cpu=True "
-                                   "--model_name {model} "
-                                   "--inter_op_parallelism_threads {inter} "
-                                   "--intra_op_parallelism_threads {intra} "
-                                   "--batch_size {bz}").format(
-                prefix=self.command_prefix, checkpoint=self.args.checkpoint,
-                model=self.args.model_name, inter=self.args.num_inter_threads,
-                intra=self.args.num_intra_threads, bz=self.args.batch_size)
+        self.parse_args()
 
-            if self.args.data_location:
-                self.command_prefix += " --dataset_dir {}".format(self.args.data_location)
+        if not self.args.accuracy_only:
+            # add args for the benchmark script
+            script_args_list = [
+                "input_graph", "input_height", "input_width", "batch_size",
+                "input_layer", "output_layer", "num_inter_threads",
+                "num_intra_threads", "warmup_steps", "steps"]
+            self.command_prefix = self.add_args_to_command(
+                self.command_prefix, script_args_list)
         else:
             # add args for the accuracy script
             script_args_list = [
@@ -77,6 +72,36 @@ class ModelInitializer(BaseModelInitializer):
                 "num_inter_threads", "num_intra_threads"]
             self.command_prefix = self.add_args_to_command(
                 self.command_prefix, script_args_list)
+
+    def parse_args(self):
+        if self.custom_args is None:
+            return
+
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--input_height", default=224,
+            dest='input_height', type=int, help="input height")
+        parser.add_argument(
+            "--input_width", default=224,
+            dest='input_width', type=int, help="input width")
+        parser.add_argument(
+            "--warmup_steps", dest="warmup_steps",
+            help="number of warmup steps",
+            type=int, default=10)
+        parser.add_argument(
+            "--steps", dest="steps",
+            help="number of steps",
+            type=int, default=50)
+        parser.add_argument(
+            "--input_layer", dest="input_layer",
+            help="name of input layer",
+            type=str, default="input")
+        parser.add_argument(
+            "--output_layer", dest="output_layer",
+            help="name of output layer",
+            type=str, default="MobilenetV1/Predictions/Reshape_1")
+
+        self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
     def run(self):
         self.run_command(self.command_prefix)

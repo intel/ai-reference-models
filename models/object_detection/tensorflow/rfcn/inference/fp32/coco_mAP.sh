@@ -20,12 +20,14 @@
 #
 
 ########## Variables to be defined
-FROZEN_GRAPH=$1
-TF_RECORD_FILE=$2
-TF_MODELS_ROOT=$3
 
-SPLIT=$4
-SPLIT="rfcn-${SPLIT}"
+SPLIT=${SPLIT:-"RFCN_final_graph"} #change to your favorite room
+FROZEN_GRAPH=${FROZEN_GRAPH:-"/in_graph/frozen_inference_graph.pb"}
+TF_RECORD_FILE=${TF_RECORD_FILE:-"/dataset/coco_val.record"}
+if [[ -z ${TF_MODELS_ROOT} ]] || [[ ! -d ${TF_MODELS_ROOT} ]]; then
+  echo "You must specify the root of the tensorflow/models source tree in the TF_MODELS_ROOT environment variable."
+  exit 1
+fi
 
 export PYTHONPATH=$PYTHONPATH:${TF_MODELS_ROOT}/research:${TF_MODELS_ROOT}/research/slim:${TF_MODELS_ROOT}/research/object_detection
 
@@ -36,10 +38,10 @@ echo "PYTHONPATH=${PYTHONPATH}"
 echo "TF_MODELS_ROOT=$TF_MODELS_ROOT"
 
 python -m object_detection.inference.infer_detections \
-  --input_tfrecord_paths=${TF_RECORD_FILE} \
+  --input_tfrecord_paths=$TF_RECORD_FILE \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
-  --inference_graph=${FROZEN_GRAPH} \
-  --discard_image_pixels=True
+  --inference_graph=$FROZEN_GRAPH \
+  --discard_image_pixels
 
 
 mkdir -p ${SPLIT}_eval_metrics

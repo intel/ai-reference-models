@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -88,6 +88,16 @@ class BaseBenchmarkUtil(object):
             type=check_positive_number_or_equal_to_negative_one)
 
         self._common_arg_parser.add_argument(
+            "--mpi_num_processes", type=check_positive_number,
+            help="The number of MPI processes",
+            dest="mpi", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--mpi_num_processes_per_socket", type=check_positive_number,
+            help="Specify how many MPI processes to launch per socket",
+            dest="num_mpi", default=1)
+
+        self._common_arg_parser.add_argument(
             "-d", "--data-location",
             help="Specify the location of the data. If this parameter is not "
                  "specified, the benchmark will use random/dummy data.",
@@ -108,6 +118,11 @@ class BaseBenchmarkUtil(object):
             dest="num_cores", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
+            "--num-instances", type=check_positive_number,
+            help="Specify the number of instances to run.",
+            dest="num_instances", default=1)
+
+        self._common_arg_parser.add_argument(
             "-a", "--num-intra-threads", type=check_positive_number,
             help="Specify the number of threads within the layer",
             dest="num_intra_threads", default=None)
@@ -116,18 +131,6 @@ class BaseBenchmarkUtil(object):
             "-e", "--num-inter-threads", type=check_positive_number,
             help="Specify the number threads between layers",
             dest="num_inter_threads", default=None)
-
-        self._common_arg_parser.add_argument(
-            "-np", "--num-processes", type=check_positive_number,
-            help="Specify the number of processes to run on as mpirun '-np' "
-                 "input for multi-instance execution. ",
-            dest="num_processes", default=1)
-
-        self._common_arg_parser.add_argument(
-            "-ppn", "--num-processes-per-node", type=check_positive_number,
-            help="Specify the number of processes per node as mpirun '-ppn' "
-                 "input for multi-instance execution. ",
-            dest="num_processes_per_node", default=1)
 
         self._common_arg_parser.add_argument(
             "-ts", "--num-train-steps", type=check_positive_number,
@@ -153,6 +156,13 @@ class BaseBenchmarkUtil(object):
                  "checkpoint files for inference is being deprecated, in favor "
                  "of using frozen graphs.",
             dest="checkpoint", default=None, type=check_valid_folder)
+
+        self._common_arg_parser.add_argument(
+            "-bb", "--backbone-model",
+            help="Specify the location of backbone-model directory. "
+                 "This option can be used by models (like SSD_Resnet34) "
+                 "to do fine-tuning training or achieve convergence.",
+            dest="backbone_model", default=None, type=check_valid_folder)
 
         self._common_arg_parser.add_argument(
             "-g", "--in-graph", help="Full path to the input graph ",

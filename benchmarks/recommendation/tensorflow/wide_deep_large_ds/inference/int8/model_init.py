@@ -16,8 +16,6 @@
 # limitations under the License.
 #
 
-#
-
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -31,29 +29,42 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-        # Set the num_inter_threads and num_intra_threads
-        self.set_num_inter_intra_threads(num_inter_threads=platform_util.num_cores_per_socket,
-                                         num_intra_threads=1)
-
-        # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
-        self.set_kmp_vars(config_file_path)
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("--num_omp_threads", dest='num_omp_threads',
-                            type=str, default="1",
+                            type=str, default=None,
                             help="number of omp threads")
+        parser.add_argument("--use_parallel_batches", dest='use_parallel_batches',
+                            type=str, default="False",
+                            help="Enable to run batches in parallel")
+        parser.add_argument("--num_parallel_batches", dest='num_parallel_batches', default="1",
+                            type=str, help="num of parallel batches.Default is 1")
+        parser.add_argument('--kmp_block_time', dest='kmp_block_time',
+                            help='number of kmp block time.',
+                            type=str, default=None)
+        parser.add_argument('--kmp_affinity', dest='kmp_affinity',
+                            help='kmp affinity value',
+                            type=str, default=None)
+        parser.add_argument('--kmp_settings', dest='kmp_settings',
+                            help='kmp settings',
+                            type=str, default=None)
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path, kmp_settings=str(self.args.kmp_settings),
+                          kmp_blocktime=str(self.args.kmp_block_time), kmp_affinity=str(self.args.kmp_affinity))
 
     def run_benchmark(self):
-        benchmark_script = os.path.join(self.args.intelai_models,
-                                        self.args.mode, "inference.py")
-
+        enable_parallel_batches = getattr(self.args, 'use_parallel_batches')
         script_args_list = ["input_graph", "batch_size",
                             "num_inter_threads", "num_intra_threads",
                             "accuracy_only", "data_location", "num_omp_threads"]
+        if enable_parallel_batches == 'True':
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode, "parallel_inference.py")
+            script_args_list.append("num_parallel_batches")
+        else:
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode, "inference.py")
         command_prefix = self.get_command_prefix(-1)
         if self.args.socket_id != -1 and self.args.num_cores != -1:
             command_prefix = command_prefix + " numactl --physcpubind=0-{} --membind={} ".\

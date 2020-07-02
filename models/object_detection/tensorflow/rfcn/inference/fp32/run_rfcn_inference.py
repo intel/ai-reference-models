@@ -15,11 +15,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+#
 
 import numpy as np
 import os
+import six.moves.urllib as urllib
 import sys
+import tarfile
 import tensorflow as tf
+import zipfile
+import subprocess
+
+from collections import defaultdict
+from io import StringIO
 import matplotlib
 matplotlib.use('Agg')
 from matplotlib import pyplot as plt
@@ -28,7 +36,6 @@ import time
 import argparse
 from tensorflow.python.client import timeline
 import importlib
-
 
 class RFCNRunner:
   '''Add code here to detect the environment and set necessary variables before launching the model'''
@@ -61,7 +68,7 @@ class RFCNRunner:
   def parse_args(self):
     parser = argparse.ArgumentParser()
     mutex_group = parser.add_mutually_exclusive_group()
-    mutex_group.add_argument('-x', '--steps', help='Run for n number of steps', type=int, default=None)
+    mutex_group.add_argument('-x', '--number_of_steps', help='Run for n number of steps', type=int, default=None)
     mutex_group.add_argument('-z', '--visualize', help='Whether to visulize the output image', action='store_true' )
     parser.add_argument('-v', '--verbose', help='Print some useful info.', action='store_true' )
     parser.add_argument('-t', '--timeline', help='Output file name for TF timeline', type=str, default=None)
@@ -69,8 +76,8 @@ class RFCNRunner:
     parser.add_argument('-p', '--print_accuracy', help='Print accuracy results', action='store_true')
     parser.add_argument('-g', '--input_graph', help='The input frozen graph pb file', dest='input_graph', required=True, default=None)
     parser.add_argument('-d', '--data_location', help='The location of the image data to be analyzed.', dest='data_location', default=None, required=True)
-    parser.add_argument('-m', '--tensorflow-models-path', 
-        help='Path to the tensorflow-models directory (or clone of github.com/tensorflow/models', 
+    parser.add_argument('-m', '--tensorflow-models-path',
+        help='Path to the tensorflow-models directory (or clone of github.com/tensorflow/models',
         dest='tf_models_path', default=None, required=True)
     parser.add_argument(
         '--num-inter-threads', dest='num_inter_threads',
@@ -85,26 +92,25 @@ class RFCNRunner:
     self.finish_import()
 
   def log(self, msg):
-    if self.args.verbose:
-      print(msg)
+    if self.args.verbose: print(msg)
 
   def validate_args(self):
     self.log('Validating Args...')
     self.research_dir = os.path.join(self.args.tf_models_path, self.RESEARCH_DIR)
-    if not ( self.args.data_location and 
+    if not ( self.args.data_location and
         os.path.exists(os.path.join(self.args.data_location, self.TEST_IMG_FILE))):
       raise ValueError ("Unable to locate images for evaluation at {}".format(self.args.data_location))
     if os.path.isdir(self.research_dir):
       # List of the strings that is used to add correct label for each box.
-      self.label_map_file = os.path.join(self.research_dir, 
-                                          self.OBJ_DETECTION_DIR, 
-                                          self.DATA_DIR, 
+      self.label_map_file = os.path.join(self.research_dir,
+                                          self.OBJ_DETECTION_DIR,
+                                          self.DATA_DIR,
                                           self.label_map_file)
       if not os.path.exists(self.label_map_file):
         raise ValueError ("Unable to locate label map file at {}".format(self.label_map_file))
     else:
       raise ValueError ("{} is not a valid path to the TensorFlow models.".format(self.args.tf_models_path))
-    
+
     if not os.path.exists(self.args.input_graph):
       raise ValueError("Unable to find the input graph protobuf file: {}".format(self.args.input_graph))
 
@@ -121,17 +127,16 @@ class RFCNRunner:
   def run(self):
       self.log("Running performance test")
       self.read_graph()
-      self.load_label_map()
       self.get_image_paths()
-      self.load_label_map()
+      #self.load_label_map()
       # Actual detection.
       output_dict, image_np = self.run_inference(self.detection_graph)
       self.visualize(output_dict, image_np)
 
   def visualize(self, output_dict, image_np):
     # Visualization of the results of a detection.
-    if (self.args.visualize and 
-        self.args.evaluate_tensor is None and 
+    if (self.args.visualize and
+        self.args.evaluate_tensor is None and
         self.category_index and
         output_dict and
         image_np ):
@@ -150,15 +155,15 @@ class RFCNRunner:
   def read_graph(self):
     self.detection_graph = tf.Graph()
     with self.detection_graph.as_default():
-      od_graph_def = tf.GraphDef()
-      with tf.gfile.GFile(self.args.input_graph, 'rb') as fid:
+      od_graph_def = tf.compat.v1.GraphDef()
+      with tf.io.gfile.GFile(self.args.input_graph, 'rb') as fid:
         serialized_graph = fid.read()
         od_graph_def.ParseFromString(serialized_graph)
         tf.import_graph_def(od_graph_def, name='')
 
 
   def get_image_paths(self):
-    if self.args.visualize:
+    if (self.args.visualize):
       self.test_image_paths = [os.path.join(self.args.data_location, self.TEST_IMG_FILE)]
     else:
       self.test_image_paths = []
@@ -170,7 +175,7 @@ class RFCNRunner:
     label_map = self.label_map_util.load_labelmap(self.label_map_file)
     categories = self.label_map_util.convert_label_map_to_categories(
         label_map, max_num_classes=self.NUM_CLASSES, use_display_name=True)
-    if self.args.visualize and self.args.evaluate_tensor is None:
+    if (self.args.visualize and self.args.evaluate_tensor is None):
       self.category_index = self.label_map_util.create_category_index(categories)
 
   def load_image_into_numpy_array(self, image):
@@ -184,23 +189,23 @@ class RFCNRunner:
           (im_height, im_width, 3)).astype(np.uint8)
 
   def run_inference(self,graph):
-    sess_config = tf.ConfigProto()
+    sess_config = tf.compat.v1.ConfigProto()
     sess_config.intra_op_parallelism_threads = self.args.num_intra_threads
     sess_config.inter_op_parallelism_threads = self.args.num_inter_threads
     with self.detection_graph.as_default():
-      with tf.Session(config=sess_config) as sess:
+      with tf.compat.v1.Session(config=sess_config) as sess:
         # Get handles to input and output tensors
         tensor_dict = {}
         if not self.args.evaluate_tensor:
-          ops = tf.get_default_graph().get_operations()
+          ops = tf.compat.v1.get_default_graph().get_operations()
           all_tensor_names = {output.name for op in ops for output in op.outputs}
           for key in self.RFCN_OUTPUTS:
             tensor_name = key + ':0'
             if tensor_name in all_tensor_names:
-              tensor_dict[key] = tf.get_default_graph().get_tensor_by_name(
+              tensor_dict[key] = tf.compat.v1.get_default_graph().get_tensor_by_name(
                   tensor_name)
         else:
-          our_op = tf.get_default_graph().get_operation_by_name(self.args.evaluate_tensor)
+          our_op = tf.compat.v1.get_default_graph().get_operation_by_name(self.args.evaluate_tensor)
           tensor_names = our_op.outputs
           list_ops = []
           for i, tensor in enumerate(tensor_names):
@@ -210,8 +215,8 @@ class RFCNRunner:
         run_options = None
         run_metadata = None
         if self.args.timeline:
-          run_options = tf.RunOptions(trace_level=tf.RunOptions.FULL_TRACE)
-          run_metadata = tf.RunMetadata()
+          run_options = tf.compat.v1.RunOptions(trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+          run_metadata = tf.compat.v1.RunMetadata()
 
         total_duration = 0
         for index, image_path in enumerate(self.test_image_paths):
@@ -219,7 +224,7 @@ class RFCNRunner:
           # the array based representation of the image will be used later in order to prepare the
           # result image with boxes and labels on it.
           image_np = self.load_image_into_numpy_array(image)
-          image_tensor = tf.get_default_graph().get_tensor_by_name('image_tensor:0')
+          image_tensor = tf.compat.v1.get_default_graph().get_tensor_by_name('image_tensor:0')
 
           # Run inference
           start_time = time.time()
@@ -235,16 +240,16 @@ class RFCNRunner:
 
           if (self.args.visualize):
             if index == 0:
-              print('Avg. Duration per Step:' + str(total_duration / 1))
+              print ('Avg. Duration per Step:' + str(total_duration / 1))
           else:
             if (index % self.STEP_SIZE == 0):
-              print('Step ' + str(index) + ': ' + str(step_duration) + ' seconds')
+              print ('Step ' + str(index) + ': ' + str(step_duration) + ' seconds')
             if index == self.MAX_STEPS - 1:
-              print('Avg. Duration per Step:' + str(total_duration / self.MAX_STEPS))
+              print ('Avg. Duration per Step:' + str(total_duration / self.MAX_STEPS))
 
-          if self.args.steps and index == (self.args.steps - 1):
-              print('Avg. Duration per Step:' +
-                    str(total_duration / self.args.steps))
+          if self.args.number_of_steps and index == (self.args.number_of_steps - 1):
+              print ('Avg. Duration per Step:' +
+                    str(total_duration / self.args.number_of_steps))
               break
 
           if self.args.timeline:
@@ -254,7 +259,7 @@ class RFCNRunner:
 
           if self.args.evaluate_tensor:
             for tensor in output_dict[self.args.evaluate_tensor]:
-              print(tensor.shape)
+              print (tensor.shape)
             return None, None
 
           # all outputs are float32 numpy arrays, so convert types as appropriate
@@ -264,16 +269,15 @@ class RFCNRunner:
           output_dict['detection_boxes'] = output_dict['detection_boxes'][0]
           output_dict['detection_scores'] = output_dict['detection_scores'][0]
 
-          if self.args.print_accuracy:
-            print('num_detections:\n' + str(output_dict['num_detections']))
-            print('detection_classes:\n' + str(output_dict['detection_classes']))
-            print('detection_boxes:\n' + str(output_dict['detection_boxes']))
-            print('detection_scores:\n' + str(output_dict['detection_scores']))
+          if (self.args.print_accuracy):
+            print ('num_detections:\n' + str(output_dict['num_detections']))
+            print ('detection_classes:\n' + str(output_dict['detection_classes']))
+            print ('detection_boxes:\n' + str(output_dict['detection_boxes']))
+            print ('detection_scores:\n' + str(output_dict['detection_scores']))
 
           if 'detection_masks' in output_dict:
             output_dict['detection_masks'] = output_dict['detection_masks'][0]
     return output_dict, image_np
-
 
 if __name__ == "__main__":
   rr = RFCNRunner(sys.argv)

@@ -19,7 +19,6 @@
 #
 
 import os
-import sys
 
 from common.base_model_init import BaseModelInitializer, set_env_var
 
@@ -36,44 +35,27 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        # set num_inter_threads and num_intra_threads (override inter threads to 2)
-        self.set_num_inter_intra_threads(num_inter_threads=2)
+        benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
+                                        self.args.precision, "infer_detections.py")
+        self.command_prefix = self.get_command_prefix(self.args.socket_id) \
+            + "{} {}".format(self.python_exe, benchmark_script)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        # remove intelai models path, so that imports don't conflict
-        if "MOUNT_BENCHMARK" in os.environ and \
-                os.environ["MOUNT_BENCHMARK"] in sys.path:
-            sys.path.remove(os.environ["MOUNT_BENCHMARK"])
-        if self.args.intelai_models in sys.path:
-            sys.path.remove(self.args.intelai_models)
-        threads_per_socket = platform_util.num_cores_per_socket * \
-            platform_util.num_threads_per_core
+        self.command_prefix += " -g {0}".format(self.args.input_graph)
+        self.command_prefix += " -i 1000"
+        self.command_prefix += " -w 200"
+        self.command_prefix += " -a {0}".format(self.args.num_intra_threads)
+        self.command_prefix += " -e {0}".format(self.args.num_inter_threads)
+        if self.args.data_location:
+            self.command_prefix += " -d {0}".format(self.args.data_location)
 
-        if self.args.benchmark_only:
-            benchmark_script = os.path.join(
-                self.args.intelai_models, self.args.mode, self.args.precision,
-                "run_frozen_graph_ssdmob.py")
-            self.command_prefix = self.get_command_prefix(self.args.socket_id) + \
-                "{} {}".format(self.python_exe, benchmark_script)
-            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
-            self.command_prefix = "{} -g {} -n 5000 -d {} --num-inter-threads {} --num-intra-threads {}".format(
-                self.command_prefix, self.args.input_graph, self.args.data_location,
-                self.args.num_inter_threads, self.args.num_intra_threads)
-
-            if self.args.socket_id != -1:
-                self.command_prefix += " -x"
+        if self.args.accuracy_only:
+            self.command_prefix += " -r"
+            assert self.args.data_location, "accuracy must provide the data."
         else:
-            set_env_var("OMP_NUM_THREADS", threads_per_socket)
-            accuracy_script = os.path.join(
-                self.args.intelai_models, self.args.mode, self.args.precision,
-                "coco_int8.sh")
-            self.command_prefix = "sh {} {} {}".format(
-                accuracy_script, self.args.input_graph,
-                self.args.data_location)
+            # Did not support multi-batch accuracy check.
+            self.command_prefix += " -b {0}".format(self.args.batch_size)
 
     def run(self):
         # Run script from the tensorflow models research directory
-        original_dir = os.getcwd()
-        os.chdir(os.path.join(self.args.model_source_dir, "research"))
         self.run_command(self.command_prefix)
-        os.chdir(original_dir)
