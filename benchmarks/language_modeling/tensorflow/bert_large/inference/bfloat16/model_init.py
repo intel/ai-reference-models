@@ -26,7 +26,6 @@ from common.base_model_init import set_env_var
 
 import os
 from argparse import ArgumentParser
-import time
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -143,4 +142,3 @@ class ModelInitializer(BaseModelInitializer):
             else:
                 print("Warning: The {} preditions file was not found. Unable to "
                       "run the evaluation script.".format(predictions_json))
-
