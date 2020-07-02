@@ -48,12 +48,12 @@ if [[ ! -d $DATASET_DIR ]]; then
   exit 1
 fi
 
-BERT_BASE_DIR=$DATASET_DIR/dataset/bert_official/MRPC
+BERT_BASE_DIR=$DATASET_DIR/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
 GLUE_DIR=$DATASET_DIR/dataset/bert_official
 
 python benchmarks/launch_benchmark.py \
     --model-name=bert_large \
-    --precision=bfloat16 \
+    --precision=fp32 \
     --mode=training \
     --framework=tensorflow \
     --batch-size=32 \
@@ -70,5 +70,5 @@ python benchmarks/launch_benchmark.py \
        num-train-epochs=30 \
        output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do-lower-case=True
