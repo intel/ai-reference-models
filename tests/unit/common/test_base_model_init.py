@@ -84,6 +84,8 @@ def test_base_model_initializer(
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     os.environ["PYTHON_EXE"] = "python"
+    os.environ["MPI_HOSTNAMES"] = "None"
+    os.environ["MPI_NUM_PROCESSES"] = "None"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
     # call run_command and then check the output
@@ -244,6 +246,7 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     assert "numactl" not in command_prefix
 
 
+@pytest.mark.skip("Method get_multi_instance_train_prefix() no longer exists")
 def test_multi_instance_train_prefix():
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
