@@ -58,6 +58,7 @@ def test_platform_util_lscpu_parsing(platform_mock, subprocess_mock, os_mock):
     subprocess_mock.side_effect = [platform_config.LSCPU_PATH,
                                    platform_config.LSCPU_OUTPUT]
     platform_util = PlatformUtil(MagicMock(verbose=True))
+    platform_util.linux_init()
     assert platform_util.num_cpu_sockets == 2
     assert platform_util.num_cores_per_socket == 28
     assert platform_util.num_threads_per_core == 2
