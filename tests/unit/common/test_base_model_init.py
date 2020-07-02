@@ -248,6 +248,7 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     assert "LD_PRELOAD={}".format(test_tcmalloc_lib) not in command_prefix
     assert "numactl" not in command_prefix
 
+
 @pytest.mark.skip("Method get_multi_instance_train_prefix() no longer exists")
 def test_multi_instance_train_prefix():
     platform_util = MagicMock()

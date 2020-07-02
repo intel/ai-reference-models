@@ -60,14 +60,17 @@ class BaseModelInitializer(object):
         # Invoke mpirun if mpi_num_processes env is not None
         if os.environ["MPI_NUM_PROCESSES"] != "None":
             if os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] == "1":
-              # Map by socket using OpenMPI by default (PPS=1).
-              self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " --map-by socket " + self.python_exe
+                # Map by socket using OpenMPI by default (PPS=1).
+                self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] \
+                    + " --map-by socket " + self.python_exe
             else:
-              # number of processes per socket (pps)
-              pps = int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"])
-              split_a_socket = str(platform_util.num_cores_per_socket // pps)
-              # Launch pps MPI processes over one socket
-              self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " + split_a_socket + " " + self.python_exe
+                # number of processes per socket (pps)
+                pps = int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"])
+                split_a_socket = str(platform_util.num_cores_per_socket // pps)
+                # Launch pps MPI processes over one socket
+                self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] \
+                    + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " \
+                    + split_a_socket + " " + self.python_exe
 
     def run_command(self, cmd):
         """
@@ -167,15 +170,14 @@ class BaseModelInitializer(object):
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = self.platform_util.num_cpu_sockets
                 if os.environ["MPI_NUM_PROCESSES"] != "None":
-                  self.args.num_inter_threads = 1
+                    self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
                 if self.args.num_cores == -1:
                     self.args.num_intra_threads = \
                         int(self.platform_util.num_cores_per_socket *
                             self.platform_util.num_cpu_sockets)
                     if os.environ["MPI_NUM_PROCESSES"] != "None":
-                      self.args.num_intra_threads = \
-                             self.platform_util.num_cores_per_socket - 2
+                        self.args.num_intra_threads = self.platform_util.num_cores_per_socket - 2
                 else:
                     self.args.num_intra_threads = self.args.num_cores
 

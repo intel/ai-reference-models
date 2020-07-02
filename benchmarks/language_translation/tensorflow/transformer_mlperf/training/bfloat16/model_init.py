@@ -19,7 +19,6 @@
 #
 
 import os
-import shutil
 from argparse import ArgumentParser
 
 from common.base_model_init import BaseModelInitializer
@@ -28,6 +27,7 @@ from common.base_model_init import set_env_var
 DEFAULT_TRAIN_EPOCHS = 10
 BLEU_DIR = "bleu"
 INF = 10000
+
 
 class ModelInitializer(BaseModelInitializer):
     """Model initializer for Transformer LT FP32 inference"""
@@ -52,11 +52,9 @@ class ModelInitializer(BaseModelInitializer):
                             (str(self.args.num_cores - 1)) + " "
         self.cmd += "{} ".format(self.python_exe)
 
-        #run_script = os.path.join(self.args.model_source_dir,
-        #                          "tensor2tensor/bin/t2t_decoder.py")
-        run_script = os.path.join(
-                            self.args.intelai_models, self.args.mode,
-                                        "bfloat16/transformer/transformer_main.py")
+        # run_script = os.path.join(self.args.model_source_dir,
+        #                           "tensor2tensor/bin/t2t_decoder.py")
+        run_script = os.path.join(self.args.intelai_models, self.args.mode, "bfloat16/transformer/transformer_main.py")
 
         parser = ArgumentParser(description='process custom_args')
         # Flags for training with epochs. (default)
@@ -86,73 +84,50 @@ class ModelInitializer(BaseModelInitializer):
             metavar="<SBE>")
 
         # BLEU score computation
-        parser.add_argument(
-            "--bleu_source", "-bs", type=str, default=None,
-            help="Path to source file containing text translate when calculating the "
-                 "official BLEU score. Both --bleu_source and --bleu_ref must be "
-                 "set. The BLEU score will be calculated during model evaluation.",
-            metavar="<BS>")
-        parser.add_argument(
-            "--bleu_ref", "-br", type=str, default=None,
-            help="Path to file containing the reference translation for calculating "
-                 "the official BLEU score. Both --bleu_source and --bleu_ref must be "
-                 "set. The BLEU score will be calculated during model evaluation.",
-            metavar="<BR>")
-        parser.add_argument(
-            "--bleu_threshold", "-bt", type=float, default=None,
-            help="Stop training when the uncased BLEU score reaches this value. "
-                 "Setting this overrides the total number of steps or epochs set by "
-                 "--train_steps or --train_epochs.",
-            metavar="<BT>")
-        parser.add_argument(
-          "--random_seed", "-rs", type=int, default=None,
-          help="the random seed to use", metavar="<SEED>")
-        parser.add_argument(
-      	  "--params", "-p", type=str, default="big", choices=["base", "big"],
-      	  help="[default: %(default)s] Parameter set to use when creating and "
-          "training the model.",
-          metavar="<P>") 
-        parser.add_argument(
-      	  "--do_eval", "-de", type=str, default="No", choices=["Yes", "No"],
-      	  help="[default: %(default)s] set, to not do  evaluation "
-          "to reduce train time.",
-          metavar="<DE>") 
-        parser.add_argument(
-      	  "--save_checkpoints", "-sc", type=str, default="No", choices=["Yes", "No"],
-      	  help="[default: %(default)s]  set, to not saving checkpoints "
-          "to reduce training time.",
-          metavar="<SC>") 
-        parser.add_argument(
-      	  "--save_profile", "-sp", type=str, default="No", 
-      	  help="[default: %(default)s]  set, to not saving profiles "
-          "to reduce training time.",
-          metavar="<SP>") 
-        parser.add_argument(
-      	  "--print_iter", "-pi", type=int, default="10",
-      	  help="[default: %(default)s]  set, to print in every 10 iterations "
-          "to reduce print time",
-          metavar="<PI>") 
-        parser.add_argument(
-      	  "--learning_rate", "-lr", type=int, default="2",
-      	  help="[default: %(default)s]  set learning rate 2 "
-          "or can be set",
-          metavar="<LR>") 
-        parser.add_argument(
-      	  "--static_batch", "-sb", type=str, default="No",
-      	  help="[default: %(default)s]  set, to not using static batch ",
-          metavar="<SB>")
+        parser.add_argument("--bleu_source", "-bs", type=str, default=None,
+                            help="Path to source file containing text translate when calculating the official BLEU "
+                            "score. Both --bleu_source and --bleu_ref must be set. The BLEU score will be calculated "
+                            "during model evaluation.", metavar="<BS>")
+        parser.add_argument("--bleu_ref", "-br", type=str, default=None,
+                            help="Path to file containing the reference translation for calculating the official BLEU "
+                            "score. Both --bleu_source and --bleu_ref must be set. The BLEU score will be calculated "
+                            "during model evaluation.", metavar="<BR>")
+        parser.add_argument("--bleu_threshold", "-bt", type=float, default=None,
+                            help="Stop training when the uncased BLEU score reaches this value. Setting this "
+                            "overrides the total number of steps or epochs set by --train_steps or --train_epochs.",
+                            metavar="<BT>")
+        parser.add_argument("--random_seed", "-rs", type=int, default=None,
+                            help="the random seed to use", metavar="<SEED>")
+        parser.add_argument("--params", "-p", type=str, default="big", choices=["base", "big"],
+                            help="[default: %(default)s] Parameter set to use when creating and training the model.",
+                            metavar="<P>")
+        parser.add_argument("--do_eval", "-de", type=str, default="No", choices=["Yes", "No"],
+                            help="[default: %(default)s] set, to not do  evaluation to reduce train time.",
+                            metavar="<DE>")
+        parser.add_argument("--save_checkpoints", "-sc", type=str, default="No", choices=["Yes", "No"],
+                            help="[default: %(default)s]  set, to not saving checkpoints to reduce training time.",
+                            metavar="<SC>")
+        parser.add_argument("--save_profile", "-sp", type=str, default="No",
+                            help="[default: %(default)s]  set, to not saving profiles to reduce training time.",
+                            metavar="<SP>")
+        parser.add_argument("--print_iter", "-pi", type=int, default="10",
+                            help="[default: %(default)s]  set, to print in every 10 iterations to reduce print time",
+                            metavar="<PI>")
+        parser.add_argument("--learning_rate", "-lr", type=int, default="2",
+                            help="[default: %(default)s]  set learning rate 2 or can be set",
+                            metavar="<LR>")
+        parser.add_argument("--static_batch", "-sb", type=str, default="No",
+                            help="[default: %(default)s]  set, to not using static batch ",
+                            metavar="<SB>")
 
-        #Ashraf: work with the platform.py file to add the following arg
-        parser.add_argument(
-          "--num_cpu_cores", "-nc", type=int, default=4,
-          help="[default: %(default)s] Number of CPU cores to use in the input "
-               "pipeline.",
-          metavar="<NC>")
+        # Ashraf: work with the platform.py file to add the following arg
+        parser.add_argument("--num_cpu_cores", "-nc", type=int, default=4,
+                            help="[default: %(default)s] Number of CPU cores to use in the input pipeline.",
+                            metavar="<NC>")
 
-        self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
-        # Model parameter control 
-        #TODO: need more arguments for full training
+        self.args = parser.parse_args(self.custom_args, namespace=self.args)
+        # Model parameter control
+        # TODO: need more arguments for full training
         cmd_args = " --data_dir=" + str(self.args.data_location) + \
                    " --random_seed=" + str(self.args.random_seed) + \
                    " --params=" + str(self.args.params) + \
@@ -171,13 +146,12 @@ class ModelInitializer(BaseModelInitializer):
                    " --static_batch=" + \
                    str(self.args.static_batch)
 
-
-        #Running on single socket
+        # Running on single socket
         self.cmd = self.cmd + run_script + cmd_args
 
     def run(self):
         original_dir = os.getcwd()
-        #os.chdir(self.args.model_source_dir)
+        # os.chdir(self.args.model_source_dir)
         self.run_command(self.cmd)
 
         os.chdir(original_dir)

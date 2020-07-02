@@ -63,7 +63,7 @@ To run individual unit tests using python 2:
   ```
   tox -e py2.7-py.test -- <test_file_path>
   ```
-- Run one test in a file: 
+- Run one test in a file:
   ```
   tox -e py2.7-py.test -- <test_file_path>::<test_name>
   ```
@@ -78,7 +78,7 @@ To run individual unit tests using python 3:
   ```
   tox -e py3-py.test -- <test_file_path>
   ```
-- Run one test in a file: 
+- Run one test in a file:
   ```
   tox -e py3-py.test -- <test_file_path>::<test_name>
   ```

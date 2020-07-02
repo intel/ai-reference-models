@@ -257,6 +257,7 @@ def test_bare_metal(launch_benchmark, mock_popen):
     assert os.environ["TEST_ENV_VAR_2"] == test_env_vars["TEST_ENV_VAR_2"]
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize('launch_benchmark', [["--in-graph", test_input_graph]], indirect=True)
 def test_launch_benchmark_tensorflow_serving_framework(launch_benchmark, mock_popen):
     """
