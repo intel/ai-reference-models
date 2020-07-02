@@ -163,11 +163,10 @@ class BaseBenchmarkUtil(object):
                  "This option can be used by models (like SSD_Resnet34) "
                  "to do fine-tuning training or achieve convergence.",
             dest="backbone_model", default=None, type=check_valid_folder)
-        
+
         self._common_arg_parser.add_argument(
             "-g", "--in-graph", help="Full path to the input graph ",
             dest="input_graph", default=None, type=check_valid_filename)
-
 
         self._common_arg_parser.add_argument(
             "-k", "--benchmark-only",

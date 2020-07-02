@@ -39,6 +39,7 @@ class ModelInitializer(BaseModelInitializer):
                             help="number of train steps")
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
+
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
                                         self.args.mode, "train.py")
