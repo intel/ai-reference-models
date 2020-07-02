@@ -63,6 +63,7 @@ def clear_kmp_env_vars():
 test_arg_values = parse_model_args_file()
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize("test_args,expected_cmd,comment", test_arg_values)
 @patch("os.mkdir")
 @patch("shutil.rmtree")
