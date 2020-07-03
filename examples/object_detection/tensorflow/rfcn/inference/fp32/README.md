@@ -3,9 +3,12 @@
 This document has instructions for running RFCN FP32 inference using
 Intel-optimized TensorFlow.
 
-Note that the [COCO dataset](http://cocodataset.org) is used in these RFCN examples. The inference
-examples use raw images, and the accuracy examples require the dataset to be converted into the
-TF records format. See the [COCO dataset](/dataset/coco/README.md) for instructions on
+## Dataset
+
+The [COCO validation dataset](http://cocodataset.org) is used in these
+RFCN examples. The inference examples use raw images, and the accuracy
+examples require the dataset to be converted into the TF records format.
+See the [COCO dataset](/datasets/coco/README.md) for instructions on
 downloading and preprocessing the COCO validation dataset.
 
 ## Examples
@@ -63,7 +66,7 @@ examples/fp32_inference.sh
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO tf_records directory>
+DATASET_DIR=<path to the COCO validation TF record directory>
 OUTPUT_DIR=<directory where log files will be written>
 
 examples/fp32_accuracy.sh
@@ -105,7 +108,7 @@ Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002239.l
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO tf_records directory>
+DATASET_DIR=<path to the COCO validation TF record directory>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
