@@ -61,18 +61,19 @@ RUN cd ${TF_MODELS_DIR}/research && \
 
 ARG PACKAGE_DIR=model_packages
 ARG PACKAGE_NAME
+ARG WORKSPACE
 
-# /workspace and below needs to be owned by root:root rather than the current UID:GID
+# ${WORKSPACE} and below needs to be owned by root:root rather than the current UID:GID
 # this allows the default user (root) to work in k8s single-node, multi-node
-ADD --chown=0:0 ${PACKAGE_DIR}/${PACKAGE_NAME}.tar.gz /workspace
-RUN chown -R root /workspace/${PACKAGE_NAME} && chgrp -R root /workspace/${PACKAGE_NAME} && chmod -R g+s+w /workspace/${PACKAGE_NAME}
+ADD --chown=0:0 ${PACKAGE_DIR}/${PACKAGE_NAME}.tar.gz ${WORKSPACE}
+RUN chown -R root ${WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${WORKSPACE}/${PACKAGE_NAME} && chmod -R g+s+w ${WORKSPACE}/${PACKAGE_NAME}
 
-WORKDIR /workspace/${PACKAGE_NAME}
+WORKDIR ${WORKSPACE}/${PACKAGE_NAME}
 
 
 RUN cd ${TF_MODELS_DIR} && \
     git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b && \
-    git apply --ignore-space-change --ignore-whitespace /workspace/${PACKAGE_NAME}/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
+    git apply --ignore-space-change --ignore-whitespace ${WORKSPACE}/${PACKAGE_NAME}/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 
 
 RUN apt-get install -y tar
