@@ -70,7 +70,5 @@ RUN chown -R root /workspace/${PACKAGE_NAME} && chgrp -R root /workspace/${PACKA
 WORKDIR /workspace/${PACKAGE_NAME}
 
 
-RUN apt-get install -y wget unzip
-
-CMD scripts/download_and_preprocess_coco_val.sh
+CMD scripts/preprocess_coco_val.sh
 
