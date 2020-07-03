@@ -5,34 +5,54 @@
 The [COCO dataset](http://cocodataset.org/#home) validation images are used
 for inference with object detection models.
 
-The [download_and_preprocess_coco_val.sh](download_and_preprocess_coco_val.sh)
-script downloads the raw validation images and annotations and then
-calls the [create_coco_tf_record.py](https://github.com/tensorflow/models/blob/1efe98bb8e8d98bbffc703a90d88df15fc2ce906/research/object_detection/dataset_tools/create_coco_tf_record.py)
+The [preprocess_coco_val.sh](preprocess_coco_val.sh) script calls the
+[create_coco_tf_record.py](https://github.com/tensorflow/models/blob/1efe98bb8e8d98bbffc703a90d88df15fc2ce906/research/object_detection/dataset_tools/create_coco_tf_record.py)
 script from the [TensorFlow Model Garden](https://github.com/tensorflow/models)
-to convert the raw images to TF records.
+to convert the raw images and annotations to TF records.
 
-Running the script requires that the `DATASET_DIR` is set to specify
-a directory where the raw images and TF records will be written. If the
-script is not being run in the model zoo's container, the `TF_MODELS_DIR`
+Prior to running the script, you must download and extract the COCO
+validation images and annotations from the
+[COCO website](https://cocodataset.org/#download).
+```
+wget http://images.cocodataset.org/zips/val2017.zip
+unzip val2017.zip
+
+wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
+unzip annotations_trainval2017.zip
+```
+
+Set following environment variables are expected by the script:
+* `VAL_IMAGE_DIR`: Directory with the raw validation images (val2017)
+* `ANNOTATIONS_DIR`: Directory with the annotations files
+* `OUTPUT_DIR`: Directory where the TF records file will be written
+
+If the script is not being run in the model zoo's container, the `TF_MODELS_DIR`
 environment variable will need to be set to point to a clone of
 the [TensorFlow Model Garden](https://github.com/tensorflow/models) repo
 and the [dependencies needed to run object detection](https://github.com/tensorflow/models/blob/1efe98bb8e8d98bbffc703a90d88df15fc2ce906/research/object_detection/g3doc/installation.md#installation)
 need to be installed in your environment.
 
-The snipped below shows how to run the `1.15.2-object-detection-download-preprocess-coco-val`
-container, which mounts a directory for the dataset, and runs the script
-to download and preprocess the COCO validation images.
+The snipped below shows how to run the coco preprocessing container,
+which mounts input and output directories and then runs the script to
+create TF records in the output directory.
 ```
-export DATASET_DIR=<directory where the dataset will be written>
+export VAL_IMAGE_DIR=<directory with the raw validation images (val2017)>
+export ANNOTATIONS_DIR=<directory with the annotations files>
+export OUTPUT_DIR=<directory where TF records will be written>
 
 docker run \
---env http_proxy=${http_proxy} \
---env https_proxy=${https_proxy} \
---env DATASET_DIR=${DATASET_DIR} \
--v ${DATASET_DIR}:${DATASET_DIR} \
--t amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-object-detection-download-preprocess-coco-val
+--env VAL_IMAGE_DIR=${VAL_IMAGE_DIR} \
+--env ANNOTATIONS_DIR=${ANNOTATIONS_DIR} \
+--env OUTPUT_DIR=${OUTPUT_DIR} \
+-v ${VAL_IMAGE_DIR}:${VAL_IMAGE_DIR} \
+-v ${ANNOTATIONS_DIR}:${ANNOTATIONS_DIR} \
+-v ${OUTPUT_DIR}:${OUTPUT_DIR} \
+-t amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-object-detection-preprocess-coco-val
 ```
 
-After the script completes, the `DATASET_DIR` will contain a `val2017`
-folder with raw images and a `tf_records` with the TF records file for
-the coco validation dataset.
+After the script completes, the `OUTPUT_DIR` will have a TF records file
+for the coco validation dataset:
+```
+$ ls $OUTPUT_DIR
+coco_val.record
+```
