@@ -209,8 +209,6 @@ The TensorFlow models repo will be used for installing dependencies and running 
 
 2. Download and preprocess the COCO validation images using the
    [instructions here](datasets/coco/README.md#download-and-preprocess-the-coco-validation-images).
-   After running the COCO dataset container, you'll have a `DATASET_DIR`
-   that contains raw images and the TF records file.
 
 3. Download the pre-trained model (FP32 graph):
 
@@ -255,7 +253,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --model-source-dir /home/<user>/tensorflow-models \
-    --data-location ${DATASET_DIR}/tf_records/coco_val.record \
+    --data-location ${DATASET_DIR}/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_fp32_coco_pretrained_model.pb \
     --accuracy-only \
     -- split="accuracy_message"
