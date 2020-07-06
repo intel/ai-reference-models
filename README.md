@@ -16,7 +16,9 @@ For any performance and/or benchmarking information on specific Intel platforms,
 ### Getting Started
 - If you know what model you are interested in, or if you want to see a full list of models in the Model Zoo, start **[here](/benchmarks)**.
 - For framework best practice guides, and step-by-step tutorials for some models in the Model Zoo, start **[here](/docs)**.
-
+- With [Intel® AI Analytics Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/ai-analytics-toolkit.html)
+   - Intel Model Zoo is also released as a part of Intel® AI Analytics Toolkit. Along with Model Zoo, the toolkit contains DL frameworks (Tensorflow, PyTorch), Python distribution and other software optimized on Intel architecture.
+   - To get started you can refer to [ResNet50 FP32 Inference code sample.](https://github.com/intel/AiKit-code-samples/tree/master/Intel_Model_Zoo_with_Tensorflow)
 ### Directory Structure
 The Model Zoo is divided into four main directories:
 - **[benchmarks](/benchmarks)**: Look here for sample scripts and complete instructions on downloading and running each Intel-optimized pre-trained model.
