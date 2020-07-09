@@ -31,6 +31,7 @@ echo "    MODEL_NAME: ${MODEL_NAME}"
 echo "    MODE: ${MODE}"
 echo "    PRECISION: ${PRECISION}"
 echo "    BATCH_SIZE: ${BATCH_SIZE}"
+echo "    DATASET_LOCATION: ${DATASET_LOCATION}"
 echo "    BENCHMARK_ONLY: ${BENCHMARK_ONLY}"
 echo "    ACCURACY_ONLY: ${ACCURACY_ONLY}"
 echo "    OMP_NUM_THREADS: ${OMP_NUM_THREADS}"
@@ -77,6 +78,25 @@ fi
 
 MKL_IMAGE_TAG=${DOCKER}
 
+# Intial setup
+
+# Setup virtual env
+python3 -m virtualenv venv
+
+source venv/bin/activate
+pip install grpcio \
+intel-tensorflow \
+requests \
+tensorflow-serving-api
+
+# by default converted model is saved at /tmp/1
+rm -rf /tmp/1
+
+RUNNING=$(docker ps --filter="expose=8501/tcp" -q | xargs)
+if [[ -n ${RUNNING} ]]; then
+    docker rm -f ${RUNNING}
+fi
+
 function docker_run(){
     docker run \
         --name=${CONTAINER_NAME} \
@@ -93,28 +113,11 @@ function docker_run(){
 
 
 function resnet50_or_inceptionv3(){
-    # Setup virtual env
-    python3 -m virtualenv venv
- 
-    source venv/bin/activate
-    pip install grpcio \
-    intel-tensorflow \
-    requests \
-    tensorflow-serving-api
-
     # cd to image recognition tfserving scripts
     cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
 
-    # by default converted model is saved at /tmp/1
-    rm -rf /tmp/1
-
     # convert pretrained model to savedmodel
     python model_graph_to_saved_model.py --import_path ${IN_GRAPH}
-
-    RUNNING=$(docker ps --filter="expose=8501/tcp" -q | xargs)
-    if [[ -n ${RUNNING} ]]; then
-        docker rm -f ${RUNNING}
-    fi
 
     CONTAINER_NAME=tfserving_${RANDOM}
 
@@ -137,11 +140,58 @@ function resnet50_or_inceptionv3(){
     docker rm -f ${CONTAINER_NAME}
 }
 
+function ssd_mobilenet(){
+    #TODO: Install protofbuf and other requirement
+
+    pip install Cython \
+                contextlib2 \
+                pillow \
+                lxml \
+                absl-py \
+                tf_slim
+
+    cd ${WORKSPACE}
+    rm -rf tensorflow-models
+    git clone https://github.com/tensorflow/models tensorflow-models
+    TF_MODELS_ROOT=$(pwd)/tensorflow-models
+    cd ${TF_MODELS_ROOT}/research/
+    # Checkout out this specific commit otherwise benchmark script is broken
+    # with latest changes in tensorflow/models repo. 
+    git checkout 3b56ba8d1134724c87a670e9d95a34d320c223d8
+    wget -O protobuf.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.0.0/protoc-3.0.0-linux-x86_64.zip
+    unzip protobuf.zip
+    ./bin/protoc object_detection/protos/*.proto --python_out=.
+    
+    # Install object detection apis
+    python setup.py install
+    
+    python object_detection/builders/model_builder_test.py
+
+    # cd to image recognition tfserving scripts
+    cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
+
+    # copy model at /tmp/1 location
+    mkdir /tmp/1
+    cp $IN_GRAPH /tmp/1
+
+    CONTAINER_NAME=tfserving_${RANDOM}
+
+    # Run container
+    MKL_IMAGE_TAG=${MKL_IMAGE_TAG} CONTAINER_NAME=${CONTAINER_NAME} docker_run
+
+    python object_detection_benchmark.py -i ${DATASET_LOCATION} -m ${MODEL_NAME} -b ${BATCH_SIZE}
+
+    # Clean up
+    docker rm -f ${CONTAINER_NAME}
+}
+
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "inceptionv3" ] || [ ${MODEL_NAME} == "resnet50" ] && [ ${PRECISION} == "fp32" ]; then
   resnet50_or_inceptionv3 | tee -a ${LOGFILE}
+elif [ ${MODEL_NAME} == "ssd-mobilenet" ] && [ ${PRECISION} == "fp32" ]; then
+  ssd_mobilenet | tee -a ${LOGFILE}
 else
   echo "Unsupported Model: ${MODEL_NAME} or Precision: ${PRECISION}"
   exit 1
