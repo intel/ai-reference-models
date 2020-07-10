@@ -17,7 +17,6 @@
 from __future__ import print_function
 
 import os
-import sys
 import time
 import argparse
 import grpc
@@ -42,14 +41,16 @@ def check_for_link(value):
             (os.path.isfile(value) and os.stat(value).st_nlink > 1):
         raise argparse.ArgumentTypeError("{} cannot be a link.".format(value))
 
+
 def check_valid_file_or_folder(value):
     """verifies filename exists and isn't a link"""
     if value is not None:
         if not os.path.isfile(value) and not os.path.isdir(value):
             raise argparse.ArgumentTypeError("{} does not exist or is not a file/folder.".
-                                    format(value))
+                                             format(value))
         check_for_link(value)
     return value
+
 
 def input_generator_ts(file_path, vocab_file):
     """Read and sort lines based on token count from the file
@@ -88,6 +89,7 @@ def input_generator_ts(file_path, vocab_file):
 
     return batch, sorted_keys
 
+
 def _trim_and_decode(ids, vocab_file):
     """Trim EOS and PAD tokens from ids, and decode to return a string."""
     subtokenizer = Subtokenizer(vocab_file)
@@ -96,6 +98,7 @@ def _trim_and_decode(ids, vocab_file):
         return subtokenizer.decode(ids[:index])
     except ValueError:  # No EOS found in sequence
         return subtokenizer.decode(ids)
+
 
 def benchmark(batch_size=1, num_iteration=20, warm_up_iteration=10):
     channel = grpc.insecure_channel(SERVER_URL)
@@ -141,17 +144,18 @@ def benchmark(batch_size=1, num_iteration=20, warm_up_iteration=10):
         decoded_translations = []
         for i, tr in enumerate(translations):
             decoded_translations.append(_trim_and_decode(tr, VOCAB_FILE))
-        
+
         with tf.io.gfile.GFile(OUT_FILE, "w") as f:
             for i in sorted_keys:
                 if i < len(decoded_translations):
                     f.write("%s\n" % decoded_translations[i])
         print('Done!')
 
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
     ap.add_argument("-s", "--server", type=str, required=False, default='localhost:8500',
-            help="Server URL (default localhost:8500)")
+                    help="Server URL (default localhost:8500)")
     ap.add_argument("-d", "--data_file", type=check_valid_file_or_folder, required=True,
                     help="Path to English language input file")
     ap.add_argument("-v", "--vocab_file", type=check_valid_file_or_folder, required=True,
@@ -167,7 +171,7 @@ if __name__ == '__main__':
 
     args = vars(ap.parse_args())
 
-    SERVER_URL = args['server'] 
+    SERVER_URL = args['server']
     DATA_FILE = args['data_file']
     VOCAB_FILE = args['vocab_file']
     OUT_FILE = args['out_file']
@@ -178,6 +182,7 @@ if __name__ == '__main__':
     tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.WARN)
 
     print('\n SERVER_URL: {} \n DATA_FILE: {}'.format(SERVER_URL, DATA_FILE))
-    
-    print('\nStarting Transformer-LT (Official) model benchmarking for Latency with batch_size={}, num_iteration={}, warm_up_iteration={}'.format(BATCH_SIZE, NUM_ITERATION, WARM_UP_ITERATION))
+
+    print("\nStarting Transformer-LT (Official) model benchmarking for Latency with batch_size={}, "
+          "num_iteration={}, warm_up_iteration={}".format(BATCH_SIZE, NUM_ITERATION, WARM_UP_ITERATION))
     benchmark(batch_size=BATCH_SIZE, num_iteration=NUM_ITERATION, warm_up_iteration=WARM_UP_ITERATION)
