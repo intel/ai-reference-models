@@ -141,7 +141,7 @@ function resnet50_or_inceptionv3(){
 }
 
 function ssd_mobilenet(){
-    #TODO: Install protofbuf and other requirement
+    # Install protofbuf and other requirement
 
     pip install Cython \
                 contextlib2 \
@@ -185,6 +185,46 @@ function ssd_mobilenet(){
     docker rm -f ${CONTAINER_NAME}
 }
 
+function transformer_lt_official(){
+    # Install required packages
+    pip install pandas
+
+    cd ${WORKSPACE}
+    rm -rf tensorflow-models
+    git clone https://github.com/tensorflow/models tensorflow-models
+    cd tensorflow-models
+    # Checked out latest working commit as future code changes to tf models repo
+    # may broke current scripts
+    git checkout 89ba70ff1d2a2666a853805136ccbf31dc5e0b7a
+    cd ..
+    TF_MODELS_ROOT=$(pwd)/tensorflow-models
+
+    # We are in virtual env, following code is way to add a path to PYTHONPATH, its equivalent to:
+    # export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_ROOT}/official/nlp/transformer
+    PY_LIB_PATH=$(python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())")
+    echo ${TF_MODELS_ROOT}/official/nlp/transformer > ${PY_LIB_PATH}/transformer.pth
+    
+    # cd to tfserving scripts
+    cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
+
+    # Convert pretrained model to saved model
+    python transformer_graph_to_saved_model.py --import_path ${IN_GRAPH}
+    
+    CONTAINER_NAME=tfserving_${RANDOM}
+
+    # Run container
+    MKL_IMAGE_TAG=${MKL_IMAGE_TAG} CONTAINER_NAME=${CONTAINER_NAME} docker_run
+
+    # Run benchmark
+    python transformer_benchmark.py \
+        -d ${DATASET_LOCATION}/newstest2014.en \
+        -v ${DATASET_LOCATION}/vocab.txt \
+        -b ${BATCH_SIZE}
+
+    # Clean up
+    docker rm -f ${CONTAINER_NAME}
+}
+
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
@@ -192,6 +232,8 @@ if [ ${MODEL_NAME} == "inceptionv3" ] || [ ${MODEL_NAME} == "resnet50" ] && [ ${
   resnet50_or_inceptionv3 | tee -a ${LOGFILE}
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ] && [ ${PRECISION} == "fp32" ]; then
   ssd_mobilenet | tee -a ${LOGFILE}
+elif [ ${MODEL_NAME} == "transformer_lt_official" ] && [ ${PRECISION} == "fp32" ]; then
+  transformer_lt_official | tee -a ${LOGFILE}
 else
   echo "Unsupported Model: ${MODEL_NAME} or Precision: ${PRECISION}"
   exit 1
