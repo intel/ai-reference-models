@@ -153,7 +153,6 @@ def test_set_kmp_vars_config_json_does_not_exists():
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     os.environ["PYTHON_EXE"] = "python"
-    os.environ["MPI_NUM_PROCESSES"] = "None"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
     config_file_path = '/test/foo/config.json'
@@ -172,7 +171,6 @@ def test_set_kmp_vars_config_json_exists(mock_json):
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     os.environ["PYTHON_EXE"] = "python"
-    os.environ["MPI_NUM_PROCESSES"] = "None"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
     file_descriptor, config_file_path = tempfile.mkstemp(suffix=".json")
@@ -189,7 +187,6 @@ def test_command_prefix_tcmalloc_int8(precision, mock_glob):
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
     mock_glob.return_value = [test_tcmalloc_lib]
     os.environ["PYTHON_EXE"] = "python"
-    os.environ["MPI_NUM_PROCESSES"] = "None"
     args.socket_id = 0
     args.precision = precision
 
@@ -224,7 +221,6 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
     mock_glob.return_value = [test_tcmalloc_lib]
     os.environ["PYTHON_EXE"] = "python"
-    os.environ["MPI_NUM_PROCESSES"] = "None"
     args.socket_id = 0
     args.precision = precision
 
