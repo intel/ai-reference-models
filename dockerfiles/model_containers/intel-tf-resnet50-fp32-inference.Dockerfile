@@ -34,12 +34,13 @@ RUN apt-get update && \
 
 ARG PACKAGE_DIR=model_packages
 ARG PACKAGE_NAME
+
 ARG WORKSPACE
 
 # ${WORKSPACE} and below needs to be owned by root:root rather than the current UID:GID
 # this allows the default user (root) to work in k8s single-node, multi-node
+RUN umask 002 && mkdir ${WORKSPACE} && chgrp root ${WORKSPACE} && chmod g+s+w,o+s+r ${WORKSPACE}
 ADD --chown=0:0 ${PACKAGE_DIR}/${PACKAGE_NAME}.tar.gz ${WORKSPACE}
-RUN chown -R root ${WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${WORKSPACE}/${PACKAGE_NAME} && chmod -R g+s+w ${WORKSPACE}/${PACKAGE_NAME}
+RUN chown -R root ${WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${WORKSPACE}/${PACKAGE_NAME} && chmod -R g+s+w ${WORKSPACE}/${PACKAGE_NAME} && find ${WORKSPACE}/${PACKAGE_NAME} -type d | xargs chmod o+r+x 
 
 WORKDIR ${WORKSPACE}/${PACKAGE_NAME}
-
