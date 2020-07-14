@@ -63,7 +63,6 @@ def clear_kmp_env_vars():
 test_arg_values = parse_model_args_file()
 
 
-@pytest.mark.skip
 @pytest.mark.parametrize("test_args,expected_cmd,comment", test_arg_values)
 @patch("os.mkdir")
 @patch("shutil.rmtree")
@@ -88,14 +87,22 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os
     test_args and verifying that the model_init file calls run_command with
     the expected_cmd string.
     """
+    if comment in ["tf_ssd_resnet34_args.json :: ssd_resnet34_fp32_training",
+                   "tf_gnmt_args.json :: gnmt_fp32_throughput",
+                   "tf_gnmt_args.json :: gnmt_fp32_latency"]:
+        pytest.skip()
+
     print("****** Running The {} test ******".format(comment))
     os.environ["PYTHON_EXE"] = "python"
+    if "mpi" not in mock_run_command:
+        os.environ["MPI_NUM_PROCESSES"] = "None"
+        os.environ["MPI_HOSTNAMES"] = "None"
     mock_path_exists.return_value = True
     mock_is_dir.return_value = True
     mock_is_file.return_value = True
     mock_stat.return_value = MagicMock(st_nlink=0)
     parse_model_args_file()
-    mock_listdir.return_value = True
+    mock_listdir.return_value = ["data.record"]
     mock_glob.return_value = ["/usr/lib/libtcmalloc.so.4.2.6"]
     clear_kmp_env_vars()
     platform_config.set_mock_system_type(mock_platform)
