@@ -16,7 +16,7 @@ Refer to google reference page for [checkpoints](https://github.com/google-resea
 Download and extract checkpoints the bert pretrained model from the
 [google bert repo](https://github.com/google-research/bert#pre-trained-models).
 The extracted directory should be set to the `CHECKPOINT_DIR` environment
-variable when running example scripts.
+variable when running the quickstart scripts.
 
 For training from scratch, Wikipedia and BookCorpus need to be downloaded
 and pre-processed.
@@ -25,7 +25,7 @@ and pre-processed.
 
 [GLUE data](https://gluebenchmark.com/tasks) is used when running BERT
 classification training. Download and unpack the GLUE data by running
-(this script)[https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e].
+[this script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e).
 
 ### SQuAD data
 
@@ -35,7 +35,7 @@ The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
 should be downloaded to the same directory. Set the `DATASET_DIR` to point to
 that directory when running bert fine tuning using the SQuAD data.
 
-## Example Scripts
+## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
@@ -44,7 +44,7 @@ that directory when running bert fine tuning using the SQuAD data.
 | [`fp32_training_single_node.sh`](fp32_training_single_node.sh) | This script is used by the single node Kubernetes job to run bert classifier inference. |
 | [`fp32_training_multi_node.sh`](fp32_training_multi_node.sh) | This script is used by the Kubernetes pods to run bert classifier training across multiple nodes using mpirun and horovod. |
 
-These examples can be run the following environments:
+These quickstart scripts can be run the following environments:
 * [Bare metal](#bare-metal)
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
@@ -58,11 +58,11 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * git
 
 Once the above dependencies have been installed, download and untar the model
-package, set environment variables, and then run an example script. See the
-[datasets](#datasets) and [list of example scripts](#example-scripts) for more
+package, set environment variables, and then run a quickstart script. See the
+[datasets](#datasets) and [list of quickstart scripts](#quick-start-scripts) for more
 details on the different options.
 
-The snippet below shows an example running with a single instance:
+The snippet below shows a quickstart script running with a single instance:
 ```
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-training.tar.gz
 tar -xvf bert-large-fp32-training.tar.gz
@@ -73,7 +73,7 @@ DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 
 # Run a script for your desired usage
-./examples/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 To run distributed training (one MPI process per socket) for better throughput,
@@ -89,7 +89,7 @@ workers sync gradients. By default it is set to "False" meaning the workers
 are training independently and the best performing training results will be
 picked in the end. To enable gradients synchronization, set the
 `mpi_workers_sync_gradients` to true in BERT options. To modify the bert
-options, modify the example .sh script or call the `launch_benchmarks.py`
+options, modify the quickstart .sh script or call the `launch_benchmarks.py`
 script directly with your preferred args.
 
 To run with multiple instances, these additional dependencies will need to be
@@ -112,17 +112,17 @@ OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 MPI_NUM_PROCESSES=<number of sockets to use>
 
 # Run a script for your desired usage
-./examples/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 ## Docker
 
 The bert FP32 training model container includes the scripts and libraries
-needed to run bert large FP32 fine tuning. To run one of the example usage scripts
+needed to run bert large FP32 fine tuning. To run one of the quickstart scripts
 using this container, you'll need to provide volume mounts for the pretrained model,
 dataset, and an output directory where log and checkpoint files will be written.
 
-The snippet below shows an example running with a single instance:
+The snippet below shows a quickstart script running with a single instance:
 ```
 CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>
@@ -139,7 +139,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-training \
-  /bin/bash examples/<script name>.sh
+  /bin/bash quickstart/<script name>.sh
 ```
 
 To run distributed training (one MPI process per socket) for better throughput,
@@ -155,7 +155,7 @@ workers sync gradients. By default it is set to "False" meaning the workers
 are training independently and the best performing training results will be
 picked in the end. To enable gradients synchronization, set the
 `mpi_workers_sync_gradients` to true in BERT options. To modify the bert
-options, modify the example .sh script or call the `launch_benchmarks.py`
+options, modify the quickstart .sh script or call the `launch_benchmarks.py`
 script directly with your preferred args.
 ```
 CHECKPOINT_DIR=<path to the pretrained bert model directory>
@@ -175,7 +175,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-training \
-  /bin/bash examples/<script name>.sh
+  /bin/bash quickstart/<script name>.sh
 ```
 
 ## Kubernetes
@@ -192,7 +192,7 @@ The model package for bert large FP32 training includes a deployment that does '
 The directory tree within the model package is shown below:
 
 ```
-examples
+quickstart
 └── k8s
     └── mlops
         ├── base
@@ -204,9 +204,9 @@ The deployments use [kustomize](https://kustomize.io/) to configure deployment p
 following directories:
 
 ```
-examples/k8s/mlops/single-node/kustomization.yaml
-examples/k8s/mlops/base/kustomization.yaml
-examples/k8s/mlops/multi-node/kustomization.yaml
+quickstart/k8s/mlops/single-node/kustomization.yaml
+quickstart/k8s/mlops/base/kustomization.yaml
+quickstart/k8s/mlops/multi-node/kustomization.yaml
 ```
 
 The multi-node use case makes the following assumptions:
@@ -221,7 +221,7 @@ The parameters are configured by editing kustomize related files described in th
 
 ##### devops
 
-The k8 resources needed to run the multi-node training example require deployment of the mpi-operator.
+The k8 resources needed to run the multi-node training quickstart require deployment of the mpi-operator.
 See the MPI operator deployment section of the Kubernetes DevOps document
 for instructions.
 
@@ -237,7 +237,7 @@ The distributed training algorithm is handled by mpirun.
 The command to run an MPIJob is shown below:
 
 ```
-kubectl -k bert-large-fp32-training/examples/k8s/mlops/multi-node apply
+kubectl -k bert-large-fp32-training/quickstart/k8s/mlops/multi-node apply
 ```
 
 Within the multi-node use case, a number of kustomize processing directives are enabled.
@@ -283,12 +283,12 @@ kubectl logs -f $(kubectl get pods -oname|grep launch|cut -c5-)
 
 Single node training is similar to the docker use case but the command is run within a pod.
 Training is done by submitting a pod.yaml to the k8s api-server which results in the pod creation and running
-the /workspace/bert-large-fp32-training/examples/fp32_training_single_node.sh command within the pod's container.
+the /workspace/bert-large-fp32-training/quickstart/fp32_training_single_node.sh command within the pod's container.
 
 The command to run a pod is shown below:
 
 ```
-kubectl -k bert-large-fp32-training/examples/k8s/mlops/single-node apply
+kubectl -k bert-large-fp32-training/quickstart/k8s/mlops/single-node apply
 ```
 
 Within the single-node use case, the same number of kustomize processing directives are enabled as the multi-node.
@@ -334,10 +334,10 @@ kubectl logs -f $(kubectl get pods -oname|grep training|cut -c5-)
 Removing this MPIJob (and stopping training) is done by running:
 
 ```
-kubectl -k bert-large-fp32-training/examples/k8s/mlops/multi-node delete
+kubectl -k bert-large-fp32-training/quickstart/k8s/mlops/multi-node delete
 ```
 
-Remove the mpi-operator after running the example by running the following command with
+Remove the mpi-operator after running the quickstart by running the following command with
 the `mpi-operator.yaml` file that you originally deployed with:
 
 ```

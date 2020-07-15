@@ -7,7 +7,7 @@ Note that the ImageNet dataset is used in these ResNet50 v1.5 examples. To downl
 the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
 from the TensorFlow models repo.
 
-## Example Scripts
+## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
@@ -15,7 +15,7 @@ from the TensorFlow models repo.
 | [`fp32_training_1_epoch.sh`](fp32_training_1_epoch.sh) | Executes a test run that trains the model for 1 epoch and saves checkpoint files to an output directory. |
 | [`fp32_training_full.sh`](fp32_training_full.sh) | Trains the model using the full dataset and runs until convergence (90 epochs) and saves checkpoint files to an output directory. Note that this will take a considerable amount of time. |
 
-These examples can be run in different environments:
+These quick start scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
@@ -27,7 +27,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * [intel-tensorflow==2.1.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 
-Download and untar the model package and then run an [example script](#examples). 
+Download and untar the model package and then run a [quickstart script](#quick-start-scripts).
 
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
@@ -37,14 +37,14 @@ wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-
 tar -xvf resnet50v1_5_fp32_training.tar.gz
 cd resnet50v1_5_fp32_training
 
-examples/<script name>.sh
+quickstart/<script name>.sh
 ```
 
 ## Docker
 
 The ResNet50 v1.5 FP32 training model container includes the scripts
 and libraries needed to run ResNet50 v1.5 FP32 training. To run one of the model
-training examples using this container, you'll need to provide volume mounts for
+training quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
 
 ```
@@ -59,7 +59,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training \
-  /bin/bash examples/<script name>.sh
+  /bin/bash quickstart/<script name>.sh
 ```
 
 ## Kubernetes
@@ -76,7 +76,7 @@ The model package for ResNet50 v1.5 FP32 training includes a deployment that doe
 The directory tree within the model package is shown below:
 
 ```
-examples
+quickstart
 └── k8s
     └── mlops
         ├── base
@@ -88,9 +88,9 @@ The deployments use [kustomize](https://kustomize.io/) to configure deployment p
 following directories:
 
 ```
-examples/k8s/mlops/single-node/kustomization.yaml
-examples/k8s/mlops/base/kustomization.yaml
-examples/k8s/mlops/multi-node/kustomization.yaml
+quickstart/k8s/mlops/single-node/kustomization.yaml
+quickstart/k8s/mlops/base/kustomization.yaml
+quickstart/k8s/mlops/multi-node/kustomization.yaml
 ```
 
 The multi-node use case makes the following assumptions:
@@ -105,7 +105,7 @@ The parameters are configured by editing kustomize related files described in th
 
 ##### devops
 
-The k8 resources needed to run the multi-node resnet50v1-5 training example require deployment of the mpi-operator.
+The k8 resources needed to run the multi-node resnet50v1-5 training quickstart require deployment of the mpi-operator.
 See the MPI operator deployment section of the Kubernetes DevOps document
 for instructions.
 
@@ -121,7 +121,7 @@ The distributed training algorithm is handled by mpirun.
 The command to run an MPIJob is shown below:
 
 ```
-kubectl -k resnet50v1_5_fp32_training/examples/k8s/mlops/multi-node apply
+kubectl -k resnet50v1_5_fp32_training/quickstart/k8s/mlops/multi-node apply
 ```
 
 Within the multi-node use case, a number of kustomize processing directives are enabled.
@@ -171,7 +171,7 @@ the fp32_training_demo.sh command within the pod's container.
 The command to run a pod is shown below:
 
 ```
-kubectl -k resnet50v1_5_fp32_training/examples/k8s/mlops/single-node apply
+kubectl -k resnet50v1_5_fp32_training/quickstart/k8s/mlops/single-node apply
 ```
 
 Within the single-node use case, the same number of kustomize processing directives are enabled as the multi-node.
@@ -216,10 +216,10 @@ kubectl logs -f $(kubectl get pods -oname|grep training|cut -c5-)
 Removing this MPIJob (and stopping training) is done by running:
 
 ```
-kubectl -k resnet50v1_5_fp32_training/examples/k8s/mlops/multi-node delete
+kubectl -k resnet50v1_5_fp32_training/quickstart/k8s/mlops/multi-node delete
 ```
 
-Remove the mpi-operator after running the example by running the following command with
+Remove the mpi-operator after running the quickstart by running the following command with
 the `mpi-operator.yaml` file that you originally deployed with:
 
 ```

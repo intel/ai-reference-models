@@ -7,7 +7,7 @@ Note that the ImageNet dataset is used in these ResNet50 examples. To download a
 the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
 from the TensorFlow models repo.
 
-## Example Scripts
+## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
@@ -15,7 +15,7 @@ from the TensorFlow models repo.
 | [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
 | [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
 
-These examples can be run in different environments:
+These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 
@@ -26,7 +26,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * [intel-tensorflow==2.1.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 
-Download and untar the model package and then run an [example script](#examples). 
+Download and untar the model package and then run a [quickstart script](#quick-start-scripts).
 
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
@@ -36,14 +36,14 @@ wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-
 tar -xzf resnet50_fp32_inference.tar.gz
 cd resnet50_fp32_inference
 
-examples/<script name>.sh
+quickstart/<script name>.sh
 ```
 
 ## Docker
 
 The model container `model-zoo:2.1.0-resnet50-fp32-inference` includes the scripts 
 and libraries needed to run ResNet50 v1.5 FP32 training. To run one of the model
-training examples using this container, you'll need to provide volume mounts for
+training quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
 
 ```
@@ -59,7 +59,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
-  /bin/bash examples/<script name>.sh
+  /bin/bash quickstart/<script name>.sh
 ```
 
 ## Advanced Options
