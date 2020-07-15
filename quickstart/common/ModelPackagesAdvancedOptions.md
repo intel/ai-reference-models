@@ -45,9 +45,9 @@ python launch_benchmark.py \
 ### Docker
 
 Running the `launch_benchmarks.py` command in docker is similar to running
-the example scripts, where volume mounts and environment variables are set to
+the quickstart scripts, where volume mounts and environment variables are set to
 for the dataset and output directories. However, instead of having the
-container execute the example script, have it call
+container execute the quickstart script, have it call
 `python benchmarks/launch_benchmark.py` with your desired arguments. The
 snippet below is showing how to do this using the ResNet50 FP32 inference
 container, but the same process can be followed for other model usages by
@@ -89,7 +89,7 @@ run the model using docker.
 
 The example below shows the process of downloading and untarring the
 model package and then using docker to mount directories for the dataset,
-output, and the model package, and running an example script. The model
+output, and the model package, and running a quickstart script. The model
 package is being mounted to the `/workspace` directory in this example.
 Note that this example is using ResNet50 FP32 inference, but the same
 process can be used with other models by downloading a different model
@@ -113,7 +113,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -w /workspace -t \
   <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference</b></mark> \
-  /bin/bash /workspace/examples/&lt;script name&gt;.sh
+  /bin/bash /workspace/quickstart/&lt;script name&gt;.sh
 </pre>
 
 ## Running as the host user within the docker container
