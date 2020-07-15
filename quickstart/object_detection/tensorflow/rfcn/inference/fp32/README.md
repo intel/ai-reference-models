@@ -6,19 +6,20 @@ Intel-optimized TensorFlow.
 ## Dataset
 
 The [COCO validation dataset](http://cocodataset.org) is used in these
-RFCN examples. The inference examples use raw images, and the accuracy
-examples require the dataset to be converted into the TF records format.
+RFCN quickstart scripts. The inference quickstart scripts use raw images,
+and the accuracy quickstart scripts require the dataset to be converted
+into the TF records format.
 See the [COCO dataset](/datasets/coco/README.md) for instructions on
 downloading and preprocessing the COCO validation dataset.
 
-## Examples
+## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
 | [`fp32_inference.sh`](fp32_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
 | [`fp32_accuracy.sh`](fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
-These examples can be run in different environments:
+These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
@@ -52,7 +53,7 @@ from the [TensorFlow Model Garden](https://github.com/tensorflow/models) reposit
 
 Once your environment is setup, navigate back to the directory that contains the RFCN FP32 inference
 model package, set environment variables pointing to your dataset and output directories, and then run
-an example.
+a quickstart script.
 
 
 To run inference with performance metrics:
@@ -61,7 +62,7 @@ To run inference with performance metrics:
 DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
 
-examples/fp32_inference.sh
+quickstart/fp32_inference.sh
 ```
 
 To get accuracy metrics:
@@ -69,7 +70,7 @@ To get accuracy metrics:
 DATASET_DIR=<path to the COCO validation TF record directory>
 OUTPUT_DIR=<directory where log files will be written>
 
-examples/fp32_accuracy.sh
+quickstart/fp32_accuracy.sh
 ```
 
 
@@ -77,7 +78,7 @@ examples/fp32_accuracy.sh
 
 When running in docker, the RFCN FP32 inference container includes the
 libraries and the model package, which are needed to run RFCN FP32
-inference. To run the examples, you'll need to provide volume mounts for the
+inference. To run the quickstart scripts, you'll need to provide volume mounts for the
 [COCO validation dataset](/dataset/coco/README.md) and an output directory
 where log files will be written.
 
@@ -95,7 +96,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference \
-  /bin/bash examples/fp32_inference.sh
+  /bin/bash quickstart/fp32_inference.sh
 ```
 
 When the run completes, the log tail will note the average duration per step:
@@ -120,7 +121,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference \
-  /bin/bash examples/fp32_accuracy.sh
+  /bin/bash quickstart/fp32_accuracy.sh
 ```
 
 Below is a sample log file tail when running for accuracy:
