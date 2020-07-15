@@ -10,13 +10,6 @@ configMapGenerator:
 generatorOptions:
   disableNameSuffixHash: true
 vars:
-- name: DATASET_DIR
-  fieldref:
-    fieldPath: data.DATASET_DIR
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
 - name: NFS_SERVER
   fieldref:
     fieldPath: data.NFS_SERVER

@@ -4,6 +4,12 @@ varReference:
 - kind: Pod
   path: metadata/name
 - kind: Pod
+  path: spec/securityContext/runAsUser
+- kind: Pod
+  path: spec/securityContext/runAsGroup
+- kind: Pod
+  path: spec/securityContext/fsGroup
+- kind: Pod
   path: spec/containers/image
 - kind: Pod
   path: spec/containers/workingDir
