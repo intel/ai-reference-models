@@ -17,6 +17,8 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
+echo 'BERT_BASE_DIR='$BERT_BASE_DIR
+echo 'GLUE_DIR='$GLUE_DIR
 echo 'MODEL_DIR='$MODEL_DIR
 echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo 'DATASET_DIR='$DATASET_DIR
@@ -47,9 +49,6 @@ if [[ ! -d $DATASET_DIR ]]; then
   echo 'The DATASET_DIR '$DATASET_DIR' does not exist' >&2
   exit 1
 fi
-
-BERT_BASE_DIR=$DATASET_DIR/dataset/bert_large_wwm/wwm_uncased_L-24_H-1024_A-16
-GLUE_DIR=$DATASET_DIR/dataset/bert_official
 
 python benchmarks/launch_benchmark.py \
     --model-name=bert_large \

@@ -11,6 +11,20 @@ generatorOptions:
 patchesStrategicMerge:
 - mpi-job-patch.yaml
 vars:
+- name: DATASET_DIR
+  fieldref:
+    fieldPath: data.DATASET_DIR
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: GROUP_ID
+  fieldref:
+    fieldPath: data.GROUP_ID
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
 - name: MODEL_NAME
   fieldref:
     fieldPath: data.MODEL_NAME
@@ -25,6 +39,13 @@ vars:
     apiVersion: v1
     kind: ConfigMap
     name: mlops-env
+- name: MODEL_SCRIPT
+  fieldref:
+    fieldPath: data.MODEL_SCRIPT
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
 - name: NFS_MOUNT_PATH
   fieldref:
     fieldPath: data.NFS_MOUNT_PATH
@@ -35,6 +56,13 @@ vars:
 - name: REGISTRY
   fieldref:
     fieldPath: data.REGISTRY
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: USER_ID
+  fieldref:
+    fieldPath: data.USER_ID
   objref:
     apiVersion: v1
     kind: ConfigMap

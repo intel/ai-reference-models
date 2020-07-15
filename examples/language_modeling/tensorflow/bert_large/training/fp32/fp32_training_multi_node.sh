@@ -18,6 +18,8 @@
 export PYTHONPATH=$MODEL_DIR/models/language_modeling/tensorflow/bert_large/training:$PYTHONPATH
 export LD_LIBRARY_PATH=/usr/local/lib:/usr/local/lib/mpirun:$LD_LIBRARY_PATH
 
+echo 'BERT_BASE_DIR='$BERT_BASE_DIR
+echo 'GLUE_DIR='$GLUE_DIR
 echo 'MODEL_DIR='$MODEL_DIR
 echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo 'DATASET_DIR='$DATASET_DIR
@@ -54,18 +56,15 @@ if [[ ! -d $DATASET_DIR ]]; then
   exit 1
 fi
 
-BERT_BASE_DIR=$DATASET_DIR/dataset/bert_official/MRPC
-GLUE_DIR=$DATASET_DIR/dataset/bert_official
-
 mpirun -x PYTHONPATH -x LD_LIBRARY_PATH $_allow_run_as_root -mca pml ob1 -mca btl ^openib -mca btl_tcp_if_exclude lo,docker0 -np "2" -bind-to none -map-by slot \
   python3 $MODEL_DIR/models/language_modeling/tensorflow/bert_large/training/fp32/run_classifier.py \
     --task_name=MRPC \
     --do_train=true \
     --do_eval=true \
-    --data_dir=$GLUE_DIR/MRPC \
-    --vocab_file=$BERT_BASE_DIR/uncased_L-12_H-768_A-12/vocab.txt \
-    --bert_config_file=$BERT_BASE_DIR/uncased_L-12_H-768_A-12/bert_config.json \
-    --init_checkpoint=$BERT_BASE_DIR/uncased_L-12_H-768_A-12/bert_model.ckpt \
+    --data_dir=$DATASET_DIR/$GLUE_DIR/MRPC \
+    --vocab_file=$DATASET_DIR/$BERT_BASE_DIR/uncased_L-12_H-768_A-12/vocab.txt \
+    --bert_config_file=$DATASET_DIR/$BERT_BASE_DIR/uncased_L-12_H-768_A-12/bert_config.json \
+    --init_checkpoint=$DATASET_DIR/$BERT_BASE_DIR/uncased_L-12_H-768_A-12/bert_model.ckpt \
     --max_seq_length=128 \
     --train_batch_size=32 \
     --learning_rate=2e-5 \

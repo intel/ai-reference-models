@@ -64,4 +64,5 @@ mpirun -x PYTHONPATH -x LD_LIBRARY_PATH $_allow_run_as_root -mca pml ob1 -mca bt
     --intra_op_parallelism_threads 22 \
     --version 1 \
     --resnet_size 50 \
-    --data_dir=$DATASET_DIR/dataset/TF_Imagenet_FullData
+    --output_dir=$OUTPUT_DIR \
+    --data_dir=$DATASET_DIR
