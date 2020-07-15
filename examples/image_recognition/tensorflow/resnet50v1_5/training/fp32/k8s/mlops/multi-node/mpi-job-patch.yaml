@@ -9,16 +9,18 @@ spec:
         spec:
           containers:
           - name: mpi-launcher
-            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training
+            imagePullPolicy: Always
+            workingDir: $(MODEL_DIR)
+            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-$(MODEL_NAME)
             securityContext:
-              runAsUser: 0
-              runAsGroup: 0
-              fsGroup: 0
+              runAsUser: $(USER_ID)
+              runAsGroup: $(GROUP_ID)
+              fsGroup: $(GROUP_ID)
             envFrom:
             - configMapRef:
                 name: mlops-env
             command:
-            - $(MODEL_DIR)/examples/fp32_training_multi_node.sh
+            - $(MODEL_DIR)/examples/$(MODEL_SCRIPT)
             volumeMounts:
             - name: datasets
               mountPath: $(DATASET_DIR)
@@ -30,15 +32,16 @@ spec:
         spec:
           containers:
           - name: mpi-worker
-            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training
+            imagePullPolicy: Always
+            workingDir: $(MODEL_DIR)
+            image: $(REGISTRY)/model-zoo:2.1.0-image-recognition-$(MODEL_NAME)
             securityContext:
-              runAsUser: 0
-              runAsGroup: 0
-              fsGroup: 0
+              runAsUser: $(USER_ID)
+              runAsGroup: $(GROUP_ID)
+              fsGroup: $(GROUP_ID)
             envFrom:
             - configMapRef:
                 name: mlops-env
-            workingDir: /
             volumeMounts:
             - name: datasets
               mountPath: $(DATASET_DIR)
