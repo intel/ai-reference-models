@@ -2,10 +2,10 @@
 
 ## Using NFS as storage
 
-Configuring the examples to use NFS as storage requires specifying these values in the mlops.env within the tree show below:
+Configuring the quickstart to use NFS as storage requires specifying these values in the mlops.env within the tree show below:
 
 ```
-examples
+quickstart
 └── common
     └── k8s
         └── mlops
