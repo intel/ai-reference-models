@@ -31,21 +31,3 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing python-tk libsm6 libxext6 -y && \
     pip install requests
 
-
-RUN apt-get update && \
-  apt-get install -y software-properties-common
-RUN apt-get update && \
-  add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
-  apt-get install -y gcc-8 g++-8 && \
-  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 && \
-  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
-
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.3/bin/linux/amd64/kubectl && \
-  chmod +x ./kubectl && \
-  mv kubectl /usr/local/bin
-
-RUN apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
-
-RUN apt install -y openssh-server openssh-client && systemctl enable ssh
-
-RUN pip install horovod==0.19.1
