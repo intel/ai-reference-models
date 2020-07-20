@@ -144,5 +144,5 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -w /workspace -t \
   <mark><b>amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference</b></mark> \
-  /bin/bash /workspace/examples/&lt;script name&gt;.sh
+  /bin/bash /workspace/quickstart/&lt;script name&gt;.sh
 </pre>
