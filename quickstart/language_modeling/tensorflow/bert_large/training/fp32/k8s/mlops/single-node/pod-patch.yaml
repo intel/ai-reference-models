@@ -15,7 +15,7 @@ spec:
         name: mlops-env
     workingDir: $(MODEL_DIR)
     command:
-    - $(MODEL_DIR)/examples/$(MODEL_SCRIPT)
+    - $(MODEL_DIR)/quickstart/$(MODEL_SCRIPT)
     volumeMounts:
     - name: datasets
       mountPath: $(DATASET_DIR)
