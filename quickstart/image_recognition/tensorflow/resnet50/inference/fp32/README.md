@@ -58,7 +58,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-resnet50-fp32-inference \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
