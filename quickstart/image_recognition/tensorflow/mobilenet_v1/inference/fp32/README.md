@@ -1,9 +1,9 @@
-# ResNet50 v1.5 FP32 Inference
+# MobileNet V1 FP32 Inference
 
-This document has instructions for running ResNet50 v1.5 FP32 inference using
+This document has instructions for running MobileNet V1 FP32 inference using
 Intel-optimized TensorFlow.
 
-Note that the ImageNet dataset is used in these ResNet50 v1.5 examples. To download and preprocess
+Note that the ImageNet dataset is used in these MobileNet V1 examples. To download and preprocess
 the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
 from the TensorFlow models repo.
 
@@ -12,7 +12,7 @@ from the TensorFlow models repo.
 | Script name | Description |
 |-------------|-------------|
 | [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
+| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=100). |
 | [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
 
 These quickstart scripts can be run in different environments:
@@ -32,17 +32,17 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-inference.tar.gz
-tar -xzf resnet50v1_5_fp32_inference.tar.gz
-cd resnet50v1_5_fp32_inference
+wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/mobilenet-v1-fp32-inference.tar.gz
+tar -xzf mobilenet_v1_fp32_inference.tar.gz
+cd mobilenet_v1_fp32_inference
 
 quickstart/<script name>.sh
 ```
 
 ## Docker
 
-The model container `model-zoo:2.1.0-resnet50v1-5-fp32-inference` includes the scripts
-and libraries needed to run ResNet50 v1.5 FP32 inference. To run one of the model
+The model container `model-zoo:2.1.0-mobilenet-v1-fp32-inference` includes the scripts 
+and libraries needed to run MobileNet V1 FP32 inference. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
 
@@ -58,7 +58,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-inference \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-mobilenet-v1-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
