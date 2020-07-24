@@ -32,6 +32,19 @@ RUN apt-get update && \
     pip install requests
 
 
+ARG TF_MODELS_BRANCH
+ARG FETCH_PR
+ARG CODE_DIR=/tensorflow/models
+
+ENV TF_MODELS_DIR=${CODE_DIR}
+
+RUN apt-get install -y git && \
+    git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
+    ( cd ${CODE_DIR} && \
+    if [ ! -z "$FETCH_PR" ]; then git fetch origin ${FETCH_PR}; fi && \
+    git checkout ${TF_MODELS_BRANCH} )
+
+
 ARG PACKAGE_DIR=model_packages
 ARG PACKAGE_NAME
 
@@ -45,7 +58,7 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-RUN apt-get install -y unzip
+RUN apt-get install -y tar
 
 
 ENV USER_ID=0
