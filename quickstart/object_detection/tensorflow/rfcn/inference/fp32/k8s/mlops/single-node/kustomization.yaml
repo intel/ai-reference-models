@@ -1,0 +1,69 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+bases:
+- ../../../common/k8s/mlops/single-node
+configMapGenerator:
+- name: mlops-env
+  env: mlops.env
+  behavior: merge
+generatorOptions:
+  disableNameSuffixHash: true
+patchesStrategicMerge:
+- pod-patch.yaml
+vars:
+- name: DATASET_DIR
+  fieldref:
+    fieldPath: data.DATASET_DIR
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: GROUP_ID
+  fieldref:
+    fieldPath: data.GROUP_ID
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: MODEL_NAME
+  fieldref:
+    fieldPath: data.MODEL_NAME
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: MODEL_DIR
+  fieldref:
+    fieldPath: data.MODEL_DIR
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: MODEL_SCRIPT
+  fieldref:
+    fieldPath: data.MODEL_SCRIPT
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: NFS_MOUNT_PATH
+  fieldref:
+    fieldPath: data.NFS_MOUNT_PATH
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: REGISTRY
+  fieldref:
+    fieldPath: data.REGISTRY
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: USER_ID
+  fieldref:
+    fieldPath: data.USER_ID
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
