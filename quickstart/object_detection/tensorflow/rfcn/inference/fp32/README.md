@@ -24,7 +24,7 @@ These quickstart scripts can be run in different environments:
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
-### Bare Metal
+## Bare Metal
 
 To run on bare metal, [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
 to run the RFCN scripts must be installed in your environment.
@@ -74,7 +74,7 @@ quickstart/fp32_accuracy.sh
 ```
 
 
-### Docker
+## Docker
 
 When running in docker, the RFCN FP32 inference container includes the
 libraries and the model package, which are needed to run RFCN FP32
@@ -146,6 +146,87 @@ DONE (t=1.62s).
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
 Ran inference with batch size 1
 Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002841.log
+```
+
+## Kubernetes
+
+Download and untar the model training package to get the yaml and config
+files for running inference on a single node using Kubernetes.
+```
+wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz
+tar -xvf rfcn_fp32_inference.tar.gz
+```
+
+### Execution
+
+The model package includes a deployment that does 'mlops' (machine learning
+operations) on kubernetes.
+The directory tree within the model package is shown below:
+```
+quickstart/
+├── common
+│   └── k8s
+│       └── mlops
+│           ├── base
+│           └── single-node
+└── k8s
+    └── mlops
+        └── single-node
+```
+
+The deployments uses [kustomize](https://kustomize.io/) to configure
+parameters. The parameters can be customized by editing kustomize
+related files prior to deploying the single node inference job, which is
+described in the [next section](#single-node-inference).
+
+Key parameters to edit in the
+`rfcn_fp32_inference/quickstart/k8s/mlops/single-node/mlops.env` file are:
+```
+DATASET_DIR=<path to the dataset directory>
+MODEL_SCRIPT=<fp32_accuracy.sh or fp32_inference.sh>
+NFS_MOUNT_PATH=<NFS mount path>
+NFS_PATH=<NFS path>
+NFS_SERVER=<IP address for your NFS Server>
+OUTPUT_DIR=<Directory where log files will be written>
+USER_ID=<Your user ID>
+USER_NAME=<Your username>
+GROUP_ID=<Your group ID>
+GROUP_NAME=<Your group name>
+```
+
+> Note that when running inference, the `DATASET_DIR` should point to the
+> directory of raw coco images (val2017) and when running accuracy testing,
+> the `DATASET_DIR` should point to the TF records directory.
+
+#### Single-node Inference
+
+Inference is run by submitting a pod yaml file to the k8s api-server,
+which results in the pod creation and then the specified
+[quickstart script](#quick-start-scripts) is run in the pod's container.
+
+Once you have edited the `mlops.env` file with your parameters,
+deploy the inference job using the following command:
+```
+kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/single-node apply
+```
+
+Depending on what version of kustomize is being used, you may get an
+error reporting that a string was received instead of a integer. If this
+is the case, the following command can be used to remove quotes that
+are causing the issue:
+```
+kubectl kustomize rfcn-fp32-inference/quickstart/k8s/mlops/single-node | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | kubectl apply -f -
+```
+
+Once the kubernetes job has been submitted, the pod status can be
+checked using `kubectl get pods` and the logs can be viewed using
+`kubectl logs -f <pod name>`.
+
+#### Cleanup
+
+Remove the inference pod using the following command:
+```
+kubectl -k rfcn_fp32_inference/quickstart/k8s/mlops/single-node delete
 ```
 
 ### Advanced Options
