@@ -16,7 +16,7 @@ To demonstrate Bert Large inference performance with BF16 precision, this tutori
 The tutorial concludes with FP32 inference for comparison of performance and accuracy. 
 
 ##  Recommended Settings 
-In addition to TensorFlow optimizations that use the Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN), the run-time settings also significantly contribute to improved performance. 
+In addition to TensorFlow optimizations that use the [Intel® oneAPI Deep Neural Network Library (Intel® oneDNN)](https://github.com/oneapi-src/oneDNN), the run-time settings also significantly contribute to improved performance. 
 Tuning these options to optimize CPU workloads is vital to optimize performance of TensorFlow on Intel® processors. 
 Below are the set of run-time options tested empirically on BERT Large and recommended by Intel: 
 
