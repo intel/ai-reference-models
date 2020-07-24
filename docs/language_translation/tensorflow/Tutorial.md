@@ -17,7 +17,7 @@ This matrix contains weights of each element in the source sequence when produci
 
 
 ##  Recommended Settings 
-In addition to TensorFlow optimizations that use the Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) to utilize instruction sets appropriately, the runtime settings also significantly contribute to improved performance. 
+In addition to TensorFlow optimizations that use the [Intel® oneAPI Deep Neural Network Library (Intel® oneDNN)](https://github.com/oneapi-src/oneDNN) to utilize instruction sets appropriately, the runtime settings also significantly contribute to improved performance. 
 Tuning these options to optimize CPU workloads is vital to optimize performance of TensorFlow on Intel® processors. 
 Below are the set of run-time options tested empirically on Transformer-LT and recommended by Intel: 
 
@@ -60,10 +60,8 @@ os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
 os.environ["OMP_NUM_THREADS"]= <# physical cores>
-config = tf.ConfigProto()
-config.intra_op_parallelism_threads = <# physical cores>
-config.inter_op_parallelism_threads = 1
-tf.Session(config=config)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(<# physical cores>)
 ```
 
 ## Hands-on Tutorial

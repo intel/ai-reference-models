@@ -17,7 +17,7 @@ ResNet models use gate and skip logic to address issue 1 and lower the number of
 
 ##  Recommended Settings 
 
-In addition to TensorFlow optimizations that use the Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) to utilize instruction sets appropriately, runtime settings also significantly contribute to improved performance. 
+In addition to TensorFlow optimizations that use the [Intel® oneAPI Deep Neural Network Library (Intel® oneDNN)](https://github.com/oneapi-src/oneDNN) to utilize instruction sets appropriately, runtime settings also significantly contribute to improved performance. 
 Tuning these options for CPU workloads is vital to optimize performance of TensorFlow on Intel® processors. 
 Below are the set of run-time options recommended by Intel on ResNet50, ResNet101 and InceptionV3 through empirical testing. 
 
@@ -104,11 +104,9 @@ os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
 if FLAGS.num_intra_threads > 0:
   os.environ["OMP_NUM_THREADS"]= # <physical cores>
-config = tf.ConfigProto()
-config.intra_op_parallelism_threads = # <physical cores>
-config.inter_op_parallelism_threads = 1
-#config.inter_op_parallelism_threads = 2 # for ResNet101
-tf.Session(config=config)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+# tf.config.threading.set_inter_op_parallelism_threads(2) # for ResNet101
+tf.config.threading.set_intra_op_parallelism_threads(<# physical cores>)
 ```
 
 ## Hands-on Tutorial
