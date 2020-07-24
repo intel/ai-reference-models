@@ -73,10 +73,8 @@ os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
 os.environ["OMP_NUM_THREADS"]= no of physical cores 
-config = tf.ConfigProto()
-config.intra_op_parallelism_threads = no of physical cores 
-config.inter_op_parallelism_threads = 1
-tf.Session(config=config)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(<# physical cores>)
 ```
 
 
