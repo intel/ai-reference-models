@@ -51,8 +51,8 @@ export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 
 # Create empty dir and json for train/test image preprocessing, so that we don't require
 # the user to also download train/test images when all that's needed is validation images.
-EMPTY_DIR=$(pwd)/empty_dir
-EMPTY_ANNOTATIONS=${ANNOTATIONS_DIR}/empty.json
+EMPTY_DIR=${OUTPUT_DIR}/empty_dir
+EMPTY_ANNOTATIONS=${OUTPUT_DIR}/empty.json
 mkdir -p ${EMPTY_DIR}
 echo "{ \"images\": {}, \"categories\": {}}" > ${EMPTY_ANNOTATIONS}
 
