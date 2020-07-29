@@ -14,6 +14,10 @@ Prior to running the script, you must download and extract the COCO
 validation images and annotations from the
 [COCO website](https://cocodataset.org/#download).
 ```
+export DATASET_DIR=<directory where raw images/annotations will be downloaded>
+mkdir -p $DATASET_DIR
+cd $DATASET_DIR
+
 wget http://images.cocodataset.org/zips/val2017.zip
 unzip val2017.zip
 
@@ -22,8 +26,7 @@ unzip annotations_trainval2017.zip
 ```
 
 Set following environment variables are expected by the script:
-* `VAL_IMAGE_DIR`: Directory with the raw validation images (val2017)
-* `ANNOTATIONS_DIR`: Directory with the annotations files
+* `DATASET_DIR`: Parent directory of the val2017 raw images and annotations files
 * `OUTPUT_DIR`: Directory where the TF records file will be written
 
 If the script is not being run in the model zoo's container, the `TF_MODELS_DIR`
@@ -36,16 +39,14 @@ The snipped below shows how to run the coco preprocessing container,
 which mounts input and output directories and then runs the script to
 create TF records in the output directory.
 ```
-export VAL_IMAGE_DIR=<directory with the raw validation images (val2017)>
-export ANNOTATIONS_DIR=<directory with the annotations files>
+export DATASET_DIR=<Parent directory of the val2017 raw images and annotations files>
 export OUTPUT_DIR=<directory where TF records will be written>
 
 docker run \
---env VAL_IMAGE_DIR=${VAL_IMAGE_DIR} \
---env ANNOTATIONS_DIR=${ANNOTATIONS_DIR} \
+--env VAL_IMAGE_DIR=${DATASET_DIR}/val2017 \
+--env ANNOTATIONS_DIR=${DATASET_DIR}/annotations \
 --env OUTPUT_DIR=${OUTPUT_DIR} \
--v ${VAL_IMAGE_DIR}:${VAL_IMAGE_DIR} \
--v ${ANNOTATIONS_DIR}:${ANNOTATIONS_DIR} \
+-v ${DATASET_DIR}:${DATASET_DIR} \
 -v ${OUTPUT_DIR}:${OUTPUT_DIR} \
 -t amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-object-detection-preprocess-coco-val
 ```

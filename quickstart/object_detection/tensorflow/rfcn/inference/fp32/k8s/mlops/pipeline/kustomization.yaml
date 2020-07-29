@@ -1,0 +1,61 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+configMapGenerator:
+- name: mlops-env
+  env: mlops.env
+generatorOptions:
+  disableNameSuffixHash: true
+resources:
+- single_node_accuracy.yaml
+configurations:
+- mlops.yaml
+vars:
+- name: DATASET_DIR
+  fieldref:
+    fieldPath: data.DATASET_DIR
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: GROUP_ID
+  fieldref:
+    fieldPath: data.GROUP_ID
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: MODEL_NAME
+  fieldref:
+    fieldPath: data.MODEL_NAME
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: WORKFLOW_NAME
+  fieldref:
+    fieldPath: data.WORKFLOW_NAME
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: MODEL_DIR
+  fieldref:
+    fieldPath: data.MODEL_DIR
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: REGISTRY
+  fieldref:
+    fieldPath: data.REGISTRY
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
+- name: USER_ID
+  fieldref:
+    fieldPath: data.USER_ID
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
