@@ -20,3 +20,13 @@ The steps below explain how to deploy the mpi-operator on your cluster using ver
 
 For more information on deploying the mpi-operator to the k8s cluster, see the
 [documentation in the mpi-operator repo](https://github.com/kubeflow/mpi-operator#mpi-operator).
+
+## Argo Deployment
+
+Prior to running Argo workflows, the controller needs to be deployed on
+the cluster. See [Argo's Getting Started Guide](https://github.com/argoproj/argo/blob/stable/docs/getting-started.md)
+for installation instructions.
+
+Running one of the [example workflows](https://github.com/argoproj/argo/blob/stable/docs/getting-started.md#4-run-sample-workflows)
+and verifying that it succeeds is a good test to verify that the argo
+installation is working.
