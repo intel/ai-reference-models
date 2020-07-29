@@ -25,4 +25,3 @@ NFS_SERVER=0.0.0.0
 
 They should reflect values specific to your NFS implementation. NFS_PATH and NFS_SERVER are typically found in /etc/mtab 
 and are NFS server values. NFS_MOUNT_PATH is a nfs client option indicating where the exported file system is mounted at.
-
