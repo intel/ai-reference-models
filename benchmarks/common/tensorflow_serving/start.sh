@@ -81,7 +81,7 @@ MKL_IMAGE_TAG=${DOCKER}
 # Intial setup
 
 # Setup virtual env
-python3 -m virtualenv venv
+virtualenv -p python3 venv
 
 source venv/bin/activate
 pip install grpcio \
