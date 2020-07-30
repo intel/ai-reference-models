@@ -2,8 +2,9 @@
 
 This document has instructions for how to run SSD-MobileNet for the
 following modes/precisions:
-* [Int8 inference](#int8-inference-instructions)
-* [FP32 inference](#fp32-inference-instructions)
+- [SSD-MobileNet](#ssd-mobilenet)
+  - [Int8 Inference Instructions](#int8-inference-instructions)
+  - [FP32 Inference Instructions](#fp32-inference-instructions)
 
 Instructions and scripts for model training and inference
 for other precisions are coming later.
@@ -101,7 +102,7 @@ $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 4. Download the pretrained model:
 
 ```
-$ wget -O ssdmobilenet_int8_pretrained_model.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model_tr.pb
+$ wget -O ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 ```
 
 5. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -125,7 +126,7 @@ python launch_benchmark.py \
     --num-inter-threads 1 \
     --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --data-location /home/<user>/coco/output/coco_val.record \
-    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
+    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb \
     --benchmark-only \
     --batch-size 1
 ```
@@ -143,7 +144,7 @@ python launch_benchmark.py \
     --num-inter-threads 1 \
     --docker-image intel/intel-optimized-tensorflow:2.1.0 \
     --data-location /home/<user>/coco/output/coco_val.record \
-    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model.pb \
+    --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb \
     --accuracy-only \
     --batch-size 1
 ```
@@ -279,37 +280,10 @@ $ git checkout 20da786b078c85af57a4c88904f7889139739ab0
 
 The `coco_val.record` file is what we will use in this inference example.
 
-5. Download and extract the pre-trained SSD-MobileNet model from the
-[TensorFlow detection model zoo](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md#coco-trained-models).
-The downloaded .tar file includes a `frozen_inference_graph.pb` which we
-will be using when running inference.
+5. Download the pretrained model:
 
 ```
-$ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
-
-$ tar -xvf ssd_mobilenet_v1_coco_2018_01_28.tar.gz
-ssd_mobilenet_v1_coco_2018_01_28/
-ssd_mobilenet_v1_coco_2018_01_28/model.ckpt.index
-ssd_mobilenet_v1_coco_2018_01_28/checkpoint
-ssd_mobilenet_v1_coco_2018_01_28/pipeline.config
-ssd_mobilenet_v1_coco_2018_01_28/model.ckpt.data-00000-of-00001
-ssd_mobilenet_v1_coco_2018_01_28/model.ckpt.meta
-ssd_mobilenet_v1_coco_2018_01_28/saved_model/
-ssd_mobilenet_v1_coco_2018_01_28/saved_model/saved_model.pb
-ssd_mobilenet_v1_coco_2018_01_28/saved_model/variables/
-ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb
-
-$ cd ssd_mobilenet_v1_coco_2018_01_28
-
-$ ll
-total 58132
--rw-r--r--. 1 <user> <group>       77 Feb  1  2018 checkpoint
--rw-r--r--. 1 <user> <group> 29103956 Feb  1  2018 frozen_inference_graph.pb
--rw-r--r--. 1 <user> <group> 27380740 Feb  1  2018 model.ckpt.data-00000-of-00001
--rw-r--r--. 1 <user> <group>     8937 Feb  1  2018 model.ckpt.index
--rw-r--r--. 1 <user> <group>  3006546 Feb  1  2018 model.ckpt.meta
--rw-r--r--. 1 <user> <group>     4138 Feb  1  2018 pipeline.config
-drwxr-sr-x. 3 <user> <group>     4096 Feb  1  2018 saved_model
+$ wget -O ssdmobilenet_fp32_pretrained_model_combinedNMS.pb https://storage.googleapis.com/intel-optimized-tensorflow/models/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
 ```
 
 6. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -344,7 +318,7 @@ $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/coco_val.record \
-    --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --in-graph /home/<user>/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
@@ -364,7 +338,7 @@ the path to the frozen graph that you downloaded in step 5 as the
 ```
 $ python launch_benchmark.py \
     --data-location /home/<user>/coco/output/coco_val.record \
-    --in-graph /home/<user>/ssd_mobilenet_v1_coco_2018_01_28/frozen_inference_graph.pb \
+    --in-graph /home/<user>/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision fp32 \
