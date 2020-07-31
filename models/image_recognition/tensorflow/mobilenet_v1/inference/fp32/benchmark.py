@@ -139,6 +139,10 @@ if __name__ == "__main__":
       start_time = time.time()
       results = sess.run(output_tensor, {input_tensor: image_data})
       elapsed_time = time.time() - start_time
+      total_time = total_time + elapsed_time
+
       if((t+1) % 10 == 0):
         print("steps = {0}, {1} images/sec"
               "".format(t+1, batch_size/elapsed_time));
+
+    print('Average Throughput: %0.2f images/s on %d iterations'%(batch_size * steps / total_time, steps))
