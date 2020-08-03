@@ -1172,7 +1172,7 @@ function wide_deep_large_ds() {
     TCMALLOC_LIB="libtcmalloc.so.4"
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
 
-    if [[ -z "${LIBTCMALLOC}" ]]; then
+    if [[ -z $LIBTCMALLOC ]] && [[ $NOINSTALL != True ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
       apt-get install google-perftools --fix-missing -y
