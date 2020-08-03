@@ -43,7 +43,7 @@ class ModelInitializer(BaseModelInitializer):
     def run_benchmark(self):
         benchmark_script = os.path.join(self.args.intelai_models,
                                         self.args.mode, "train.py")
-        script_args_list = ["batch_size", "data_location", "steps"]
+        script_args_list = ["batch_size", "data_location", "steps", "output_dir"]
         command_prefix = self.get_command_prefix(-1)
         cmd_prefix = command_prefix + self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
