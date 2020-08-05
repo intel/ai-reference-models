@@ -1,10 +1,20 @@
+<!--- 0. Title -->
 # BERT LARGE FP32 Inference
+
+<!-- 10. Description -->
 
 This document has instructions for running
 [BERT](https://github.com/google-research/bert#what-is-bert) FP32 inference
 using Intel-optimized TensorFlow.
 
 
+
+<!--- 20. Download link -->
+## Download link
+
+[bert-large-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
 ## Datasets
 
 ### BERT Large Data
@@ -20,6 +30,8 @@ Download and unzip the BERT large uncased (whole word masking) model from the
     ```
 Set the `DATASET_DIR` to point to that directory when running bert large inference using the SQuAD data.
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -32,6 +44,8 @@ These quickstart scripts can be run the following environments:
 * [Bare metal](#bare-metal)
 * [Docker](#docker)
 
+
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your enviornment:
@@ -59,6 +73,8 @@ OUTPUT_DIR=<directory where log files will be saved>
 bash ./quickstart/<SCRIPT NAME>.sh
 ```
 
+
+!<--- 60. Docker -->
 ## Docker
 
 The bert large FP32 inference model container includes the scripts and libraries
@@ -82,4 +98,10 @@ docker run \
   model-zoo:2.1.0-language-modeling-bert-large-fp32-inference \
   /bin/bash ./quickstart/<SCRIPT NAME>.sh
 ```
+
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
 

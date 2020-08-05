@@ -1,4 +1,7 @@
+<!--- 0. Title -->
 # BERT FP32 Training
+
+<!-- 10. Description -->
 
 This document has instructions for running
 [BERT](https://github.com/google-research/bert#what-is-bert) FP32 training
@@ -9,6 +12,13 @@ should be downloaded as mentioned in the [Google bert repo](https://github.com/g
 
 Refer to google reference page for [checkpoints](https://github.com/google-research/bert#pre-trained-models).
 
+
+<!--- 20. Download link -->
+## Download link
+
+[bert-large-fp32-training.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-training.tar.gz)
+
+<!--- 30. Datasets -->
 ## Datasets
 
 ### Pretrained models
@@ -35,6 +45,8 @@ The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
 should be downloaded to the same directory. Set the `DATASET_DIR` to point to
 that directory when running bert fine tuning using the SQuAD data.
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -49,6 +61,8 @@ These quickstart scripts can be run the following environments:
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
+
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your enviornment:
@@ -115,6 +129,8 @@ MPI_NUM_PROCESSES=<number of sockets to use>
 ./quickstart/<script name>.sh
 ```
 
+
+!<--- 60. Docker -->
 ## Docker
 
 The bert FP32 training model container includes the scripts and libraries
@@ -178,6 +194,8 @@ docker run \
   /bin/bash quickstart/<script name>.sh
 ```
 
+
+<!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the bert large FP32 training package:
@@ -343,3 +361,9 @@ the `mpi-operator.yaml` file that you originally deployed with:
 ```
 kubectl delete -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.2.3/deploy/v1alpha2/mpi-operator.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
