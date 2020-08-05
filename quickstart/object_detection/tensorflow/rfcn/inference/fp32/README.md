@@ -1,8 +1,18 @@
+<!--- 0. Title -->
 # RFCN FP32 inference
+
+<!-- 10. Description -->
 
 This document has instructions for running RFCN FP32 inference using
 Intel-optimized TensorFlow.
 
+
+<!--- 20. Download link -->
+## Download link
+
+[rfcn-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
 ## Dataset
 
 The [COCO validation dataset](http://cocodataset.org) is used in these
@@ -12,6 +22,8 @@ into the TF records format.
 See the [COCO dataset](/datasets/coco/README.md) for instructions on
 downloading and preprocessing the COCO validation dataset.
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -24,6 +36,8 @@ These quickstart scripts can be run in different environments:
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
+
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
@@ -74,6 +88,8 @@ quickstart/fp32_accuracy.sh
 ```
 
 
+
+!<--- 60. Docker -->
 ## Docker
 
 When running in docker, the RFCN FP32 inference container includes the
@@ -148,6 +164,8 @@ Ran inference with batch size 1
 Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002841.log
 ```
 
+
+<!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the model training package to get the yaml and config
@@ -295,3 +313,9 @@ kubectl -k rfcn_fp32_inference/quickstart/k8s/mlops/pipeline delete
 
 See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
