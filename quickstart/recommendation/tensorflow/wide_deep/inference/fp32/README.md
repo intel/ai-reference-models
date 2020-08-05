@@ -1,8 +1,18 @@
+<!--- 0. Title -->
 # Wide & Deep FP32 inference
+
+<!-- 10. Description -->
 
 This document has instructions for running Wide & Deep FP32 inference using
 Intel-optimized TensorFlow.
 
+
+<!--- 20. Download link -->
+## Download link
+
+[wide-deep-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
 ## Dataset
 Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running 
    following python script, which is a standalone version of [census_dataset.py](https://github.com/tensorflow/models/blob/master/official/wide_deep/census_dataset.py) Please note that below program requires `requests` module to be installed. You can install is using `pip install requests`. 
@@ -14,6 +24,8 @@ Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/
    $ python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
    ```
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -25,6 +37,8 @@ These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 
+
+<!--- 50. Bare Metal -->
 ### Bare Metal
 
 1. Download and untar the Wide & Deep FP32 inference model package:
@@ -58,6 +72,8 @@ These quickstart scripts can be run in different environments:
     quickstart/fp32_inference_online.sh
     ```
 
+
+!<--- 60. Docker -->
 ### Docker
 
  When running in docker, the Wide & Deep FP32 inference container includes the model package and tensorflow model source repo,
@@ -80,3 +96,9 @@ These quickstart scripts can be run in different environments:
     amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-fp32-inference \
     /bin/bash ./quickstart/fp32_inference_online.sh
     ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+

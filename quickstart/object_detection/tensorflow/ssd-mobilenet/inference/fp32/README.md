@@ -1,8 +1,18 @@
+<!--- 0. Title -->
 # SSD-Mobilenet FP32 inference
+
+<!-- 10. Description -->
 
 This document has instructions for running SSD-Mobilenet FP32 inference using
 Intel-optimized TensorFlow.
 
+
+<!--- 20. Download link -->
+## Download link
+
+[ssd-mobilenet-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/ssd-mobilenet-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
 ## Dataset
 
 The [COCO validation dataset](http://cocodataset.org) is used in these
@@ -10,6 +20,8 @@ SSD-Mobilenet quickstart scripts. The inference and accuracy quickstart scripts 
 See the [COCO dataset](/datasets/coco/README.md) for instructions on
 downloading and preprocessing the COCO validation dataset.
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -21,6 +33,8 @@ These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 
+
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
@@ -50,6 +64,8 @@ OUTPUT_DIR=<directory where log files will be written>
 quickstart/fp32_accuracy.sh
 ```
 
+
+!<--- 60. Docker -->
 ## Docker
 
 When running in docker, the SSD-Mobilenet FP32 inference container includes the
@@ -125,3 +141,11 @@ Below is a sample log file tail when running for accuracy:
      Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
     Log file location: ${OUTPUT_DIR}/benchmark_ssd-mobilenet_inference_fp32_20200731_203756.log
     ```
+
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
+

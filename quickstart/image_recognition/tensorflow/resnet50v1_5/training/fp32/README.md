@@ -1,4 +1,7 @@
+<!--- 0. Title -->
 # ResNet50 v1.5 FP32 Training
+
+<!-- 10. Description -->
 
 This document has instructions for running ResNet50 v1.5 FP32 training
 using Intel-optimized TensorFlow.
@@ -7,6 +10,13 @@ Note that the ImageNet dataset is used in these ResNet50 v1.5 examples. To downl
 the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
 from the TensorFlow models repo.
 
+
+<!--- 20. Download link -->
+## Download link
+
+[resnet50v1-5-fp32-training.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training.tar.gz)
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -20,6 +30,8 @@ These quick start scripts can be run in different environments:
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
+
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your enviornment:
@@ -40,6 +52,8 @@ cd resnet50v1_5_fp32_training
 quickstart/<script name>.sh
 ```
 
+
+!<--- 60. Docker -->
 ## Docker
 
 The ResNet50 v1.5 FP32 training model container includes the scripts
@@ -62,6 +76,8 @@ docker run \
   /bin/bash quickstart/<script name>.sh
 ```
 
+
+<!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the ResNet50 v1.5 FP32 training package:
@@ -226,7 +242,14 @@ the `mpi-operator.yaml` file that you originally deployed with:
 kubectl delete -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.2.3/deploy/v1alpha2/mpi-operator.yaml
 ```
 
-### Advanced Options
+
+!<--- 61. Advanced Options -->
 
 See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
