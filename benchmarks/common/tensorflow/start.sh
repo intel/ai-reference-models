@@ -68,14 +68,13 @@ function _running-in-container()
 
 if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
-  apt update
-  apt full-upgrade -y
+  apt-get update -y
   # Set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
   apt-get install gcc-8 g++-8 cmake python-tk -y
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-  apt install -y libsm6 libxext6
+  apt-get install -y libsm6 libxext6
   pip install --upgrade pip
   pip install requests
 
@@ -351,7 +350,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget
+    apt-get update && apt-get install -y unzip wget
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -553,6 +552,7 @@ function minigo() {
       fi
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
+      apt-get update && apt-get install -y git
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
       pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
       if [ "${EXTERNAL_MODELS_SOURCE_DIRECTORY}" == "None" ]; then
@@ -799,6 +799,7 @@ function rfcn() {
   export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
   if [ ${NOINSTALL} != "True" ]; then
+    apt-get update && apt-get install -y git
     # install dependencies
     for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt)
     do
@@ -863,6 +864,7 @@ function ssd-resnet34() {
           old_dir=${PWD}
 
           if [ ${NOINSTALL} != "True" ]; then
+            apt-get update && apt-get install -y git
             for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
             do
               pip install $line
@@ -901,7 +903,7 @@ function ssd-resnet34() {
       elif [ ${MODE} == "training" ]; then
         if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
           if [ ${NOINSTALL} != "True" ]; then
-            apt-get update && apt-get install -y cpio
+            apt-get update && apt-get install -y cpio git
 
             # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
             cd /l_mpi
@@ -947,6 +949,7 @@ function ssd-resnet34() {
 function ssd_vgg16() {
 
     if [ ${NOINSTALL} != "True" ]; then
+        apt-get update && apt-get install -y git
         pip install opencv-python Cython
 
         if [ ${ACCURACY_ONLY} == "True" ]; then
