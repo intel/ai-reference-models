@@ -1,8 +1,18 @@
+<!--- 0. Title -->
 # Wide and Deep Large Dataset FP32 Training
+
+<!-- 10. Description -->
 
 This document has instructions for training [Wide and Deep](https://arxiv.org/pdf/1606.07792.pdf)
 using a large dataset using Intel-optimized TensorFlow.
 
+
+<!--- 20. Download link -->
+## Download link
+
+[wide-deep-large-ds-fp32-training.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz)
+
+<!--- 30. Datasets -->
 ## Dataset
 
 The large [Kaggle Display Advertising Challenge Dataset](https://www.kaggle.com/c/criteo-display-ad-challenge/data)
@@ -19,6 +29,8 @@ Download large Kaggle Display Advertising Challenge Dataset from
 The directory where you've downloaded the `train.csv` and `eval.csv`
 files should be used as the `DATASET_DIR` when running [quickstart scripts](#quick-start-scripts).
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -31,6 +43,7 @@ These quickstart scripts can be run in different environments:
 * [Docker](#docker)
 * [Kubernetes](#kubernetes)
 
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your environment:
@@ -56,6 +69,8 @@ quickstart/<script name>.sh
 The script will write a log file, checkpoints, and the saved model to
 the `OUTPUT_DIR`.
 
+
+!<--- 60. Docker -->
 ## Docker
 
 The model container used in the example below includes the scripts and
@@ -84,6 +99,8 @@ docker run \
 The script will write a log file, checkpoints, and the saved model to
 the `OUTPUT_DIR`.
 
+
+<!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the model training package to get the yaml and config
@@ -168,3 +185,9 @@ kubectl -k wide-and-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node
 
 See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+

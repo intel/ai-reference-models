@@ -1,4 +1,7 @@
+<!--- 0. Title -->
 # Transformer LT Official FP32 Inference
+
+<!-- 10. Description -->
 
 This document has instructions for running
 [Transformer Language Translation](https://arxiv.org/pdf/1706.03762.pdf)
@@ -6,6 +9,13 @@ FP32 inference using Intel-optimized TensorFlow. The original code for
 the Transformer LT model came from the
 [TensorFlow Model Garden repository](https://github.com/tensorflow/models/tree/v2.2.0/official/nlp/transformer).
 
+
+<!--- 20. Download link -->
+## Download link
+
+[transformer-lt-official-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/transformer-lt-official-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
 ## Dataset
 
 Download and preprocess the English-German dataset using the
@@ -21,6 +31,8 @@ The path to the directory with these files should be set as the
 `DATASET_DIR` environment variable when using the
 [quickstart scripts](#quick-start-scripts).
 
+
+<!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -32,6 +44,8 @@ These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 
+
+<!--- 50. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your environment:
@@ -59,6 +73,8 @@ quickstart/<script name>.sh
 If you have your own pretrained model, you can specify the path to the frozen
 graph .pb file using the `FROZEN_GRAPH` environment variable.
 
+
+!<--- 60. Docker -->
 ## Docker
 
 The model container used in the example below includes the scripts,
@@ -87,7 +103,14 @@ If you have your own pretrained model, you can specify the path to the frozen
 graph .pb file using the `FROZEN_GRAPH` environment variable and mount the
 frozen graph's directory as a volume in the container.
 
-## Advanced Options
+
+!<--- 61. Advanced Options -->
 
 See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
