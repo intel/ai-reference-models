@@ -36,8 +36,8 @@ These Jupyter notebooks help users to analyze the performance benefit from using
     -  **Virtualenv**  
        Users can use below commands to install virtualenv on Ubuntu.  
        ```
-       sudo apt update  
-       sudo apt install python3-dev python3-pip  
+       sudo apt-get update
+       sudo apt-get install python3-dev python3-pip
        sudo pip3 install -U virtualenv  # system-wide install
        ```
 
