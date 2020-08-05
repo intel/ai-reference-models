@@ -186,6 +186,11 @@ kubectl -k wide-and-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node
 See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
+!<--- 61. Advanced Options -->
+
+See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+document for more advanced use cases.
+
 <!--- 80. License -->
 ## License
 
