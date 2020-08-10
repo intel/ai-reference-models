@@ -140,6 +140,25 @@ function resnet50_or_inceptionv3(){
     docker rm -f ${CONTAINER_NAME}
 }
 
+function resnet50v1_5(){
+    # cd to image recognition tfserving scripts
+    cd ${WORKSPACE}/../../${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}
+
+    # convert pretrained model to savedmodel
+    python model_graph_to_saved_model.py --import_path ${IN_GRAPH}
+
+    CONTAINER_NAME=tfserving_${RANDOM}
+
+    # Run container
+    MKL_IMAGE_TAG=${MKL_IMAGE_TAG} CONTAINER_NAME=${CONTAINER_NAME} docker_run
+
+    # Test
+    python image_recognition_benchmark.py --batch_size ${BATCH_SIZE} --model ${MODEL_NAME}
+
+    # Clean up
+    docker rm -f ${CONTAINER_NAME}
+}
+
 function ssd_mobilenet(){
     # Install protofbuf and other requirement
 
@@ -230,6 +249,8 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "inceptionv3" ] || [ ${MODEL_NAME} == "resnet50" ] && [ ${PRECISION} == "fp32" ]; then
   resnet50_or_inceptionv3 | tee -a ${LOGFILE}
+elif [ ${MODEL_NAME} == "resnet50v1_5" ] && [ ${PRECISION} == "fp32" ]; then
+  resnet50v1_5 | tee -a ${LOGFILE}
 elif [ ${MODEL_NAME} == "ssd-mobilenet" ] && [ ${PRECISION} == "fp32" ]; then
   ssd_mobilenet | tee -a ${LOGFILE}
 elif [ ${MODEL_NAME} == "transformer_lt_official" ] && [ ${PRECISION} == "fp32" ]; then
