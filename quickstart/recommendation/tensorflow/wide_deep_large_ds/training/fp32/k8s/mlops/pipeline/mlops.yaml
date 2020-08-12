@@ -1,0 +1,25 @@
+varReference:
+- kind: Workflow
+  path: metadata/name
+- kind: Workflow
+  path: spec/templates/container/securityContext/runAsUser
+- kind: Workflow
+  path: spec/templates/container/securityContext/runAsGroup
+- kind: Workflow
+  path: spec/templates/container/securityContext/fsGroup
+- kind: Workflow
+  path: spec/entrypoint
+- kind: Workflow
+  path: spec/templates/name
+- kind: Workflow
+  path: spec/templates/container/image
+- kind: Workflow
+  path: spec/templates/container/command
+- kind: Workflow
+  path: spec/templates/container/env/value
+- kind: Workflow
+  path: spec/templates/volumes/hostPath/path
+- kind: Workflow
+  path: spec/templates/container/volumeMounts/mountPath
+- kind: Workflow
+  path: spec/templates/resource/manifest
