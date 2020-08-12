@@ -14,9 +14,9 @@ log files, checkpoint files, and the saved model will be written.
 DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs, checkpoints, and the saved model will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-and-deep-large-ds-fp32-training.tar.gz
-tar -xvf wide-and-deep-large-ds-fp32-training.tar.gz
-cd wide-and-deep-large-ds-fp32-training
+wget https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
+tar -xvf wide-deep-large-ds-fp32-training.tar.gz
+cd wide-deep-large-ds-fp32-training.tar.gz
 
 quickstart/<script name>.sh
 ```
