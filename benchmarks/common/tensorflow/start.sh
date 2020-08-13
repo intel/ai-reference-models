@@ -773,9 +773,10 @@ function resnet50() {
 function mlperf_gnmt() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
-    # install dependencies
-    pip install ${MOUNT_BENCHMARK}/tensorflow_addons*.whl --no-deps
-
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
+    fi
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
@@ -1252,8 +1253,6 @@ elif [ ${MODEL_NAME} == "facenet" ]; then
   facenet
 elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
-elif [ ${MODEL_NAME} == "gnmt" ]; then
-  gnmt
 elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
   mlperf_gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
