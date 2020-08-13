@@ -24,27 +24,39 @@ unzip gnmt_inference_data.zip
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mlperf_gnmt_fp32_pretrained_model.pb
 ```
 
-4. Please ensure you have installed the libraries listed in the
-`requirements.txt` before you start the next step.
-Clone tensorflow-addons repo
+4. Install Intel TensorFlow:
+ It's a main dependency to build TensorFlow addons repository and create a pip wheel.
 ```
-pip install intel-tensorflow==2.1.0
-git clone -b v0.5.2 https://github.com/tensorflow/addons.git
+pip install intel-tensorflow==2.3.0
+```
+
+Clone TensorFlow addons (r0.5) and apply a patch:
+
+A patch file is attached in Intel Model Zoo MLpref GNMT model scripts, it fixes TensorFlow addons (r0.5) to work with TensorFlow version 2.3,
+and prevents TensorFlow 2.0.0 to be installed by default as a required dependency.
+```
+git clone --single-branch --branch=r0.5 https://github.com/tensorflow/addons.git
 cd addons
-sed -i 's;\${PYTHON_VERSION:=python} -m pip install $QUIET_FLAG -r $REQUIREMENTS_TXT;PYTHON_VERSION=python;' configure.sh
-sh configure.sh
+git apply /home/<user>/models/models/language_translation/tensorflow/mlperf_gnmt/gnmt-v0.5.2.patch
 ```
->Note: Ubuntu systems, run `source configure.sh` 
+
+Build TensorFlow addons source code and create TensorFlow addons pip wheel:
 ```
+bash configure.sh
+
 bazel build --enable_runfiles build_pip_pkg
 bazel-bin/build_pip_pkg artifacts
+cp artifacts/tensorflow_addons-*.whl /home/<user>/models/models/language_translation/tensorflow/mlperf_gnmt
+```
+>Note: for running on bare metal, please install the `tensorflow_addons` wheel on your machine:
+```
 pip install artifacts/tensorflow_addons-*.whl
 ```
 
 5. Navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
 
-Substitute in your own `--data-location` (from step 2), `--checkpoint` pre-trained
+Substitute in your own `--data-location` (from step 2), `--in-graph` pre-trained
 model file path (from step 3).
 
 For online inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 1`):
@@ -57,6 +69,7 @@ python launch_benchmark.py \
 --batch-size 1 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
+--docker-image intel/intel-optimized-tensorflow:2.3.0
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --benchmark-only
 ```
@@ -71,6 +84,7 @@ python launch_benchmark.py \
 --batch-size 32 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
+--docker-image intel/intel-optimized-tensorflow:2.3.0
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --benchmark-only
 ```
@@ -85,6 +99,7 @@ python launch_benchmark.py \
 --batch-size 32 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
+--docker-image intel/intel-optimized-tensorflow:2.3.0
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
---accuracy_only
+--accuracy-only
 ```
