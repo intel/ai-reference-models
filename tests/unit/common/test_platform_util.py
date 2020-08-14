@@ -55,9 +55,9 @@ def test_platform_util_lscpu_parsing(platform_mock, subprocess_mock, os_mock):
     """
     platform_mock.return_value = platform_config.SYSTEM_TYPE
     os_mock.return_value = True
-    subprocess_mock.side_effect = [platform_config.LSCPU_PATH,
-                                   platform_config.LSCPU_OUTPUT]
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
     platform_util = PlatformUtil(MagicMock(verbose=True))
+    platform_util.linux_init()
     assert platform_util.num_cpu_sockets == 2
     assert platform_util.num_cores_per_socket == 28
     assert platform_util.num_threads_per_core == 2
@@ -71,8 +71,7 @@ def test_platform_util_unsupported_os(platform_mock, subprocess_mock, os_mock):
     based on the lscpu_output string provided.
     """
     os_mock.return_value = True
-    subprocess_mock.side_effect = [platform_config.LSCPU_PATH,
-                                   platform_config.LSCPU_OUTPUT]
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
     # Mac is not supported yet
     platform_mock.return_value = "Mac"
     with pytest.raises(NotImplementedError) as e:

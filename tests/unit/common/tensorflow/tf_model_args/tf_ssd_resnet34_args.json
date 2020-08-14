@@ -1,23 +1,21 @@
 [
-  { "_comment": "FP32 accuracy command",
+  { "_comment": "ssd_resnet34_fp32_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-resnet34 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only   --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssd_resnet34_bs1.pb --data-location=/dataset",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28 --accuracy-only  --data-location /dataset"},
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28 --input-size 300 --accuracy-only  --data-location /dataset"},
 
-  { "_comment": "FP32 benchmark command",
+  { "_comment": "ssd_resnet34_fp32",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-resnet34 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssd_resnet34_bs1.pb --data-location=/dataset",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28"},
-  {
-    "_comment": "FP32 Training benchmark command",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28 --input-size 300"},
+
+  { "_comment": "ssd_resnet34_fp32_training",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-resnet34 --precision=fp32 --mode=training --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=32 --socket-id=-1 --output-dir=/workspace/benchmarks/common/tensorflow/logs --num-processes=2 --num-processes-per-node=1 --num-train-steps=500 --benchmark-only --model-source-dir=/workspace/models --data-location=/dataset --num-inter-threads=1 --num-intra-threads=27 --disable-tcmalloc=True",
     "output": "mpirun -n 2 -ppn 1 -genv I_MPI_PIN_DOMAIN=socket -genv I_MPI_FABRICS=shm -genv I_MPI_ASYNC_PROGRESS=1 -genv I_MPI_ASYNC_PROGRESS_PIN=0,27 -genv OMP_NUM_THREADS=27 python /tmp/benchmark_ssd-resnet34/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py --data_dir /dataset --batch_size 32 --weight_decay 0.0001 --num_warmup_batches 20 --num_batches 500 --num_inter_threads 1 --num_intra_threads 27 --model=ssd300 --data_name coco --mkl=True --device=cpu --data_format=NCHW --variable_update=horovod --horovod_device=cpu"},
 
-  { "_comment": "INT8 accuracy command",
+  { "_comment": "ssd_resnet34_int8_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-resnet34 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only   --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssd_resnet34_bs1.pb --data-location=/dataset",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28 --accuracy-only  --data-location /dataset"},
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28 --input-size 300 --accuracy-only --data-location /dataset"},
   
-  { "_comment": "INT8 benchmark command",
+  { "_comment": "ssd_resnet34_int8",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-resnet34 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs  --benchmark-only  --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssd_resnet34_bs1.pb --data-location=/dataset",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28"}
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py --input-graph /in_graph/ssd_resnet34_bs1.pb --batch-size 1 --inter-op-parallelism-threads 1 --intra-op-parallelism-threads 28 --input-size 300"}
 ]
-
-
