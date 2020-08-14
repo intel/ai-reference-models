@@ -866,7 +866,7 @@ function ssd-resnet34() {
           old_dir=${PWD}
 
           if [ ${NOINSTALL} != "True" ]; then
-            apt-get update && apt-get install -y git
+            apt-get update && apt-get install -y git libgl1-mesa-glx libglib2.0-0
             for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
             do
               pip install $line
