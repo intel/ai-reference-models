@@ -20,7 +20,6 @@
 
 # Constants used for test mocks
 SYSTEM_TYPE = "Linux"
-LSCPU_PATH = "/usr/bin/lscpu"
 LSCPU_OUTPUT = ("Architecture:          x86_64\n"
                 "CPU(s):                112\n"
                 "Thread(s) per core:    2\n"
@@ -46,8 +45,6 @@ def set_mock_os_access(mock_os):
 
 def set_mock_lscpu_subprocess_values(mock_subprocess):
     """
-    Sets mock return values for two subprocess calls that are made in
-    platform_util, which returns the lscpu path and the lscpu output.
+    Sets mock return value for the lscpu output with platform info
     """
-    mock_subprocess.check_output.side_effect = [LSCPU_PATH,
-                                                LSCPU_OUTPUT]
+    mock_subprocess.check_output.return_value = LSCPU_OUTPUT
