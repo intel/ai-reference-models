@@ -13,7 +13,8 @@
 # limitations under the License.
 #
 
-####### USAGE #########
+#
+#     USAGE     #
 # python object_detection_benchmark.py -i <path-to-COCO-validation-images> -m <model> -p <protocol>
 
 
@@ -37,35 +38,40 @@ def check_for_link(value):
             (os.path.isfile(value) and os.stat(value).st_nlink > 1):
         raise argparse.ArgumentTypeError("{} cannot be a link.".format(value))
 
+
 def check_valid_folder(value):
     """Verifies filename exists and isn't a link"""
     if value is not None:
         if not os.path.isdir(value):
             raise argparse.ArgumentTypeError("{} does not exist or is not a directory.".
-                                    format(value))
+                                             format(value))
         check_for_link(value)
     return value
+
 
 def check_valid_model(value):
     """Verifies model name is supported"""
     if value not in ('rfcn', 'ssd-mobilenet'):
         raise argparse.ArgumentError("Model name {} does not match 'rfcn' or 'ssd-mobilenet'.".
-                                    format(value))
+                                     format(value))
     return value
+
 
 def check_valid_protocol(value):
     """Verifies protocol is supported"""
     if value not in ('rest', 'grpc'):
         raise argparse.ArgumentError("Protocol name {} does not match 'rest' or 'grpc'.".
-                                    format(value))
+                                     format(value))
     return value
+
 
 def get_random_image(image_dir):
     image_path = os.path.join(image_dir, random.choice(os.listdir(image_dir)))
     image = Image.open(image_path)
     (im_width, im_height) = image.size
-    
+
     return np.array(image.getdata()).reshape((im_height, im_width, 3)).astype(np.uint8)
+
 
 def make_request(batch_size):
     if PROTOCOL == 'rest':
@@ -85,11 +91,13 @@ def make_request(batch_size):
         request.inputs['inputs'].CopyFrom(tf.make_tensor_proto(np_images))
         return (stub, request)
 
+
 def send_request(predict_request):
     if PROTOCOL == 'rest':
         requests.post(SERVER_URL, data=predict_request)
     elif PROTOCOL == 'grpc':
         predict_request[0].Predict(predict_request[1])
+
 
 def benchmark(batch_size=1, num_iteration=20, warm_up_iteration=10):
     i = 0
@@ -111,10 +119,10 @@ def benchmark(batch_size=1, num_iteration=20, warm_up_iteration=10):
         print('Latency: %.3f ms' % (time_average * 1000))
     print('Throughput: %.3f images/sec' % (batch_size / time_average))
 
-    
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
-    ap.add_argument("-i", "--images_path", type=check_valid_folder, required=True, 
+    ap.add_argument("-i", "--images_path", type=check_valid_folder, required=True,
                     help="Path to COCO validation directory")
     ap.add_argument("-m", "--model", type=check_valid_model, required=True,
                     help="Name of model (rfcn or ssd-mobilenet)")
@@ -134,8 +142,7 @@ if __name__ == '__main__':
         SERVER_URL = 'localhost:8500'
 
     print('\n SERVER_URL: {} \n IMAGES_PATH: {}'.format(SERVER_URL, IMAGES_PATH))
-    
+
     print('\nStarting {} model benchmarking for latency on {}:'.format(MODEL.upper(), PROTOCOL.upper()))
     print('batch_size=1, num_iteration=20, warm_up_iteration=10\n')
     benchmark(batch_size=BATCH_SIZE, num_iteration=20, warm_up_iteration=10)
-    
