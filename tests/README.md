@@ -55,34 +55,34 @@ To run unit tests using python 2 and python 3:
 make unit_test
 ```
 
-## Running individual unit tests
+## Running a selection of unit tests
 
-To run individual unit tests using python 2:
+To run selected unit tests using python 2:
 
-- Run one complete test file:
+- Run one complete test directory or file:
   ```
-  tox -e py2.7-py.test -- <test_file_path>
+  TESTFILES=<test_file_path> tox -e py2.7-py.test
   ```
 - Run one test in a file:
   ```
-  tox -e py2.7-py.test -- <test_file_path>::<test_name>
+  TESTFILES=<test_file_path>::<test_name> tox -e py2.7-py.test
   ```
 - Run all tests containing a substring:
   ```
-  tox -e py2.7-py.test -- -k <substring>
+  TESTOPTS="-k <substring> --no-cov" tox -e py2.7-py.test
   ```
 
-To run individual unit tests using python 3:
+To run selected unit tests using python 3:
 
-- Run one complete test file:
+- Run one complete test directory or file:
   ```
-  tox -e py3-py.test -- <test_file_path>
+  TESTFILES=<test_file_path> tox -e py3-py.test
   ```
 - Run one test in a file:
   ```
-  tox -e py3-py.test -- <test_file_path>::<test_name>
+  TESTFILES=<test_file_path>::<test_name> tox -e py3-py.test
   ```
 - Run all tests containing a substring:
   ```
-  tox -e py3-py.test -- -k <substring>
+  TESTOPTS="-k <substring> --no-cov" tox -e py3-py.test
   ```

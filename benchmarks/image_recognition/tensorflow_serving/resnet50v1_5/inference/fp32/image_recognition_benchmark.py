@@ -29,7 +29,6 @@ import random
 
 import grpc
 import numpy as np
-import sys
 import tensorflow as tf
 import tensorflow.compat.v1 as tf_v1
 import time
