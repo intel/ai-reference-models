@@ -334,7 +334,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --benchmark-only \
-            --docker-image intel/intel-optimized-tensorflow:2.3.0
+            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
             -- infer_option=SQuAD
         ```
 
@@ -365,7 +365,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --docker-image intel/intel-optimized-tensorflow:2.3.0 \
-            --accuracy-only
+            --accuracy-only \
             -- infer_option=SQuAD
         ```
 
