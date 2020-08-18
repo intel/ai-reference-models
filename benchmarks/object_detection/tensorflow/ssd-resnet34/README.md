@@ -7,9 +7,6 @@ following modes/precisions:
 * [FP32 Training](#fp32-training-instructions)
 * [BF16 Training](#bf16-training-instructions)
 
-Instructions and scripts for model training and inference
-for other precisions are coming later.
-
 ## FP32 Inference Instructions
 
 1. Please ensure you have installed all the libraries listed in the 
@@ -110,10 +107,10 @@ $ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validatio
 
 ```
 # ssd-resnet34 300x300
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssd_resnet34_fp32_bs1_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_fp32_bs1_pretrained_model.pb
 
 # ssd-resnet34 1200x1200 
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -139,10 +136,10 @@ $ cd ../
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
 batch and online inference, or accuracy. Note that we are running
-SSD-ResNet34 with a TensorFlow 2.1.0 docker image.
+SSD-ResNet34 with a TensorFlow 2.3.0 docker image.
 
 To run for batch and online inference, use the following command,
-the path to the frozen graph that you downloaded in step 5 as 
+the path to the frozen graph that you downloaded in step 6 as 
 the `--in-graph`, and use the `--benchmark-only` flag. If you run on docker mode, you also need to provide `ssd-resnet-benchmarks` path for `volume` flag.
 By default it runs with input size 300x300, you may add `-- input-size=1200` 
 flag to run benchmark with input size 1200x1200.
@@ -160,7 +157,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only \
     -- input-size=1200
@@ -185,7 +182,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --accuracy-only 
 ```
@@ -321,14 +318,13 @@ $ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validatio
 
 ```
 # ssd-resnet34 300x300
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssd_resnet34_int8_bs1_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_bs1_pretrained_model.pb
+```
+
+If you want to download the pretrained model for `--input-size=1200`, use the command below instead.
+```
 # ssd-resnet34 1200x1200 
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd_resnet34_int8_1200x1200_pretrained_model.pb
-```
-
-If want to download the pretrained model for `--input-size=1200`, use the command below instead.
-```
-
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 ```
 
 7. Clone the [intelai/models](https://github.com/intelai/models) repo.
@@ -353,7 +349,7 @@ $ cd ../
 9. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for testing batch or online inference, or testing accuracy. Note that we are running
-SSD-ResNet34 with a TensorFlow 2.1.0 docker image.
+SSD-ResNet34 with a TensorFlow 2.3.0 docker image.
 
 To run for batch and online inference, use the following command,
 the path to the frozen graph that you downloaded in step 5 as 
@@ -374,7 +370,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only 
 ```
@@ -398,7 +394,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --accuracy-only \
     -- input-size=1200
