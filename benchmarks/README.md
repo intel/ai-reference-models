@@ -34,6 +34,7 @@ dependencies to be installed:
 | Object Detection       | TensorFlow    | [SSD-ResNet34*](https://arxiv.org/pdf/1512.02325.pdf)        | Inference | [Int8](object_detection/tensorflow/ssd-resnet34/README.md#int8-inference-instructions) [FP32](object_detection/tensorflow/ssd-resnet34/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow    | [SSD-ResNet34](https://arxiv.org/pdf/1512.02325.pdf)        | Training  | [FP32](object_detection/tensorflow/ssd-resnet34/README.md#fp32-training-instructions) [BFloat16**](object_detection/tensorflow/ssd-resnet34/README.md#bf16-training-instructions) |
 | Recommendation         | TensorFlow    | [Wide & Deep Large Dataset](https://arxiv.org/pdf/1606.07792.pdf)	| Inference | [Int8](recommendation/tensorflow/wide_deep_large_ds/README.md#int8-inference-instructions) [FP32](recommendation/tensorflow/wide_deep_large_ds/README.md#fp32-inference-instructions) |
+| Recommendation         | TensorFlow    | [Wide & Deep Large Dataset](https://arxiv.org/pdf/1606.07792.pdf)	| Training | [FP32](recommendation/tensorflow/wide_deep_large_ds/README.md#fp32-training-instructions) |
 | Recommendation         | TensorFlow    | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf)         | Inference | [FP32](recommendation/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Reinforcement          | TensorFlow    | [MiniGo](https://arxiv.org/abs/1712.01815.pdf)              | Training  | [FP32](reinforcement/tensorflow/minigo/README.md#fp32-training-instructions)|
 
