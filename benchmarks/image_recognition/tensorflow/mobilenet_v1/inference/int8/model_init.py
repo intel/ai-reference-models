@@ -56,7 +56,7 @@ class ModelInitializer(BaseModelInitializer):
                 "input_layer", "output_layer", "num_inter_threads",
                 "num_intra_threads", "warmup_steps", "steps"]
 
-        if self.args.calibration_only:
+        if hasattr(self.args, 'calibration_only') and self.args.calibration_only:
             run_script = os.path.join(
                 self.args.intelai_models, self.args.mode,
                 self.args.precision, "calibration.py")
