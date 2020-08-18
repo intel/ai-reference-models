@@ -306,7 +306,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
  3. Download and unzip the pretrained model:
   
     ```
-    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip
     unzip bert_large_checkpoints.zip
     ```
 
