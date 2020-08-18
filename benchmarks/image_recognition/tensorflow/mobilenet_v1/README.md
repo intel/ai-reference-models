@@ -211,7 +211,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mob
          --batch-size 1 \
          --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
-         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
      ```
@@ -231,7 +231,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mob
          --batch-size 100 \
          --socket-id 0 \
          --data-location /dataset/Imagenet_Validation \
-         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb
+         --in-graph /home/<user>/mobilenet_v1_1.0_224_frozen.pb \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
       ```
