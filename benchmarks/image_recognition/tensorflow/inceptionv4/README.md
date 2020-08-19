@@ -24,7 +24,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv4_int8_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv4_int8_pretrained_model.pb
    ```
 
 3. If you would like to run Inception V4 inference and test for
@@ -152,7 +152,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pretrained model:
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv4_fp32_pretrained_model.pb
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv4_fp32_pretrained_model.pb
    ```
 
 3. If you would like to run Inception V4 inference and test for

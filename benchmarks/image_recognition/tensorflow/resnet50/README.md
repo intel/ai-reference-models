@@ -26,7 +26,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_int8_pretrained_model.pb
 ```
 
 3. Clone the 
@@ -121,7 +121,7 @@ to get additional debug output or change the default output location..
 
 1. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_fp32_pretrained_model.pb
 ```
 
 2. Clone the 
