@@ -1,7 +1,0 @@
-varReference:
-- kind: PersistentVolume
-  path: spec/hostPath/path
-- kind: PersistentVolume
-  path: spec/nfs/server
-- kind: PersistentVolume
-  path: spec/nfs/path
