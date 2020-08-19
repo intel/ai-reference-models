@@ -52,7 +52,5 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --num-intra-threads 28 \
-    --num-inter-threads 1 \
     --accuracy-only
 
