@@ -42,7 +42,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ```
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mobilenetv1_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
 ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -167,7 +167,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mob
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mobilenet_v1_1.0_224_frozen.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
 ```
 
 3. Clone the [tensorflow/models](https://github.com/tensorflow/models)
