@@ -11,7 +11,7 @@ following modes/precisions:
 
     ```
     $ cd ~
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
+    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
     $ tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
     $ export TLT_DATA_LOCATION=$(pwd)/transformer_lt_official_fp32_pretrained_model/data
     $ export TLT_MODEL=$(pwd)/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb
@@ -35,7 +35,7 @@ repository:
             --precision=fp32 \
             --mode inference \
             --batch-size=1 \
-            --docker-image=<docker-image> \
+            --docker-image=intel/intel-optimized-tensorflow-serving:2.2.0 \
             --data-location $TLT_DATA_LOCATION \
             --benchmark-only
         ```
@@ -70,7 +70,7 @@ repository:
             --precision=fp32 \
             --mode inference \
             --batch-size=128 \
-            --docker-image=<docker-image> \
+            --docker-image=intel/intel-optimized-tensorflow-serving:2.2.0 \
             --data-location $TLT_DATA_LOCATION \
             --benchmark-only
         ```
