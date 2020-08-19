@@ -53,7 +53,7 @@ You can also use the helper script [download_glue_data.py](https://gist.github.c
    # Set model source dir from step 4
    $ export MODEL_SOURCE=/home/<user/bert/
    
-   $ cd intel-models/benchmarks
+   $ cd models/benchmarks
    $ python launch_benchmark.py \
      --accuracy-only \
      --checkpoint $MRPC_DIR/uncased_L-12_H-768_A-12/ \
@@ -75,7 +75,7 @@ You can also use the helper script [download_glue_data.py](https://gist.github.c
      learning-rate=2e-5 \
      num_train_epochs=3.0
    ```
-   Using `--docker-image aipg-tf/intel-optimized-tensorflow:2.0.0-mkl-py3` to run with Intel optimized TensorFlow docker container.
+   Using `--docker-image intel/intel-optimized-tensorflow:2.3.0` to run with Intel optimized TensorFlow docker container.
 
 
 6. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory. Below are examples of what the tail of your log file should look like for the different configs.

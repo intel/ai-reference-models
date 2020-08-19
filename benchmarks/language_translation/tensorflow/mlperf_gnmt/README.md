@@ -21,7 +21,7 @@ unzip gnmt_inference_data.zip
 
 3. Download the pretrained model:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/mlperf_gnmt_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mlperf_gnmt_fp32_pretrained_model.pb
 ```
 
 4. Install Intel TensorFlow:
