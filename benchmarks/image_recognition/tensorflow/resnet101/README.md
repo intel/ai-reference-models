@@ -24,7 +24,7 @@ an optimized version of the ResNet101 model code.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet101_int8_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_int8_pretrained_model.pb
 ```
 
 3. If you would like to run ResNet101 inference with real data or test for
@@ -211,7 +211,7 @@ repository
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet101_fp32_pretrained_model.pb
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_fp32_pretrained_model.pb
 ```
 
 3. Download ImageNet dataset.
