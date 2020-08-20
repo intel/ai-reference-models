@@ -17,11 +17,11 @@ When running BERT for different tasks : SQuAD, Classifiers and Pretraining setti
 
 An example setting is below.
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
+export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
 # For Classifiers
-export GLUE_DIR=/path/to/glue 
+export GLUE_DIR=/home/<user>/glue 
 #For SQuAD
-export SQUAD_DIR=/path/to/fine/tuning/SQUAD
+export SQUAD_DIR=/home/<user>/SQUAD
 ```
 
 ## BFloat16 Training Instructions
@@ -41,10 +41,8 @@ git clone https://github.com/IntelAI/models.git
 Note : Add space after `--`, for BERT-specific options.
 
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
-export SQUAD_DIR=/path/to/bert/SQuAD
-
-mkdir -p $SQUAD_DIR/output
+export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
+export SQUAD_DIR=/home/<user>/SQuAD
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -67,16 +65,19 @@ python launch_benchmark.py \
        num_train_epochs=2 \
        max_seq_length=384 \
        doc_stride=128 \
-       output_dir=$SQUAD_DIR/output \
        optimized_softmax=True \
        experimental_gelu=False \
        do_lower_case=True
 
 ```
-The dev set predictions will have been saved to a file called `predictions.json` in the output directory `$SQUAD_DIR/output`.
+The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg.
+
+The dev set predictions will be saved to a file called `predictions.json` in the output directory.
 
 ```
-python $SQUAD_DIR/evaluate-v1.1.py $SQUAD_DIR/dev-v1.1.json $SQUAD_DIR/output/predictions.json
+python $SQUAD_DIR/evaluate-v1.1.py $SQUAD_DIR/dev-v1.1.json /home/<user>/models/benchmarks/common/tensorflow/logs/predictions.json
 ```
 
 An execution with these parameters produces results in line with below scores:
@@ -85,7 +86,8 @@ An execution with these parameters produces results in line with below scores:
 Bf16: {"exact_match": 86.77388836329234, "f1": 92.98642358746287}
 FP32: {"exact_match": 86.72658467360453, "f1": 92.98046893150796}
 ```
-To run distributed training of SQuAD (e.g. one MPI process per socket) for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`.
+To run distributed training of SQuAD: for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`.
+To set `--mpi_num_processes=<num_of_sockets>`, please run `lscpu` on your machine to check the available number of sockets.
 >Note:
 >- the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes `learning rate` needs to be adjusted for convergence.
 >- `square root learning rate scaling` is used by default.
@@ -99,10 +101,8 @@ Navigate to `models/benchmarks` directory and run the following command:
   Note : Add space after ```--```, for BERT-specific options.
 
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
-export SQUAD_DIR=/path/to/bert/SQuAD
-
-mkdir -p $SQUAD_DIR/output
+export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
+export SQUAD_DIR=/home/<user>/SQuAD
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -110,7 +110,7 @@ python launch_benchmark.py \
     --mode=training \
     --framework=tensorflow \
     --batch-size=24 \ 
-    --mpi_num_processes=4 \
+    --mpi_num_processes=<num_of_sockets> \
     --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $SQUAD_DIR:$SQUAD_DIR \
@@ -126,20 +126,21 @@ python launch_benchmark.py \
        num_train_epochs=2 \
        max_seq_length=384 \
        doc_stride=128 \
-       output_dir=$SQUAD_DIR/output \
        optimized_softmax=True \
        experimental_gelu=False \
        do_lower_case=True
 ```
-Please refer to google docs for SQuAD specific arguments.
+The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg.
 
 4. **To run Classifier**
          ```train-option=Classifier```
       Download [GLUE](https://gluebenchmark.com/tasks) data by running the [script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e)
       This example code fine-tunes BERT-Base on the Microsoft Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples.
 ```
-export BERT_BASE_DIR=/path/to/bert/wwm_uncased_L-12_H-768_A-16
-export GLUE_DIR=/path/to/glue 
+export BERT_BASE_DIR=/home/<user>/wwm_uncased_L-12_H-768_A-16
+export GLUE_DIR=/home/<user>/glue 
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -161,26 +162,21 @@ python launch_benchmark.py \
        max-seq-length=128 \
        learning-rate=2e-5 \
        num-train-epochs=30 \
-       output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
        experimental_gelu=False \
        do-lower-case=True
 
 ```
+The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg.
 
-You should see output like below:
-```
-***** Eval results *****
-  eval_accuracy = 0.845588
-  eval_loss = 0.505248
-  global_step = 343
-  loss = 0.505248
-```
 
-To run distributed training of Classifier (e.g. one MPI process per socket) for better throughput, specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
+To run distributed training of Classifier: for better throughput, specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`, please run `lscpu` on your machine to check the available number of sockets.
+Note that the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
-export GLUE_DIR=/path/to/glue 
+export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
+export GLUE_DIR=/home/<user>/glue 
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -188,7 +184,7 @@ python launch_benchmark.py \
     --mode=training \
     --framework=tensorflow \
     --batch-size=32 \
-    --mpi_num_processes=4 \
+    --mpi_num_processes=<num_of_sockets> \
     --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $GLUE_DIR:$GLUE_DIR \
@@ -203,21 +199,24 @@ python launch_benchmark.py \
        max-seq-length=128 \
        learning-rate=2e-5 \
        num-train-epochs=30 \
-       output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
-       experimental_gelu=False \
+       experimental_gelu=True \
        do-lower-case=True
 
 ```
- 
+ The results file will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg.
+
+
  **5. To run** 
  ***Pre-training from scratch.*** Pre-training has two phases:
        In the first phase, the data is generated for sequential length 128. And in the second phase, sequential length 512 is used.
        Please follow instructions in [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert) for data pre-processing.
        Replace SQuAD with `Pretraining` in `--train_option` and set ```train-option=Pretraining```.
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
-export PRETRAINING_DATA_DIR=/path/to/pretraining/tf-record-diretory
+export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
+export PRETRAINING_DATA_DIR=/home/<user>/pretraining/tf-record-diretory
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -248,11 +247,11 @@ python launch_benchmark.py \
        profile=False 
 ```
 
-To run distributed training of pretraining (e.g. one MPI process per socket) for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`.
+To run distributed training of pretraining: for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`. Please run `lscpu` on your machine to check the available number of sockets.
 >Note that the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes `learning rate` needs to be adjusted for convergence. By default, the script uses `square root learning rate scaling`.
 ```
-export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
-export PRETRAINING_DATA_DIR=/path/to/pretraining/tf-record-diretory
+export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
+export PRETRAINING_DATA_DIR=/home/<user>/pretraining/tf-record-diretory
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -283,7 +282,7 @@ python launch_benchmark.py \
        profile=False 
 ```
 
->Note: for best performance, we will set num-intra-thread as follows:
+>Note: for best performance, we will set `num-intra-thread` as follows:
 >- For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
 >- For multi-instance run (mpi_num_processes>1): the value is equal to (#_of_logical_cores_per_socket - 2)
 
