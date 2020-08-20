@@ -81,7 +81,7 @@ git clone https://github.com/IntelAI/models.git
 ```
 mkdir ~/transformer_LT_german
 cd ~/transformer_LT_german
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
 tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
 ```
 Refer to the Transformer LT Official [README](/benchmarks/language_translation/tensorflow/transformer_lt_official) to get the latest location of the pretrained model.
@@ -125,7 +125,7 @@ Or, if you have your own model/data, ensure the folder structure following the s
 1. Pull the relevant Intel-optimized TensorFlow Docker image.
    [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intel/intel-optimized-tensorflow:2.1.0
+docker pull docker.io/intel/intel-optimized-tensorflow:2.3.0
 ```
 2. cd to the inference script directory in local IntelAI repo
 ```bash        
@@ -154,7 +154,7 @@ python launch_benchmark.py \
      --framework tensorflow \
      --batch-size 1 \
      --socket-id 0 \
-     --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+     --docker-image intel/intel-optimized-tensorflow:2.3.0 \
      --in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
      --data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
      -- file=newstest2014.en \
@@ -175,7 +175,7 @@ python launch_benchmark.py \
 	--framework tensorflow \
 	--batch-size 64 \
 	--socket-id 0 \
-	--docker-image intel/intel-optimized-tensorflow:2.1.0 \
+	--docker-image intel/intel-optimized-tensorflow:2.3.0 \
 	--in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
 	--data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
 	-- file=newstest2014.en \
@@ -212,10 +212,10 @@ python launch_benchmark.py \
 	--framework tensorflow \
 	--batch-size 64 \
 	--socket-id 0 \
-	--docker-image intel/intel-optimized-tensorflow:2.1.0 \
+	--docker-image intel/intel-optimized-tensorflow:2.3.0 \
 	--in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
 	--data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
-	--debug
+	--debug \
 	-- file=newstest2014.en \
 	vocab_file=vocab.txt \
 	file_out=translate.txt \
