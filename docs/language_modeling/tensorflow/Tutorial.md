@@ -92,7 +92,7 @@ The `wwm_uncased_L-24_H-1024_A-16` directory is what will be passed as the `--da
 3. Download and unzip the pre-trained model. The file is 3.4GB so it will take some time.
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip
 unzip bert_large_checkpoints.zip
 ```
 This directory will be passed as the `--checkpoint` location when running inference.
@@ -102,7 +102,7 @@ This directory will be passed as the `--checkpoint` location when running infere
 5. Pull the relevant Intel-optimized TensorFlow Docker image.
 [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+docker pull intel/intel-optimized-tensorflow:2.3.0
 ```
 
 6. Navigate to the inference script directory in local IntelAI repository.
@@ -131,7 +131,8 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    -- infer_option=SQuAD
 ```
 Console out:
 ```
@@ -139,6 +140,7 @@ Console out:
 I0424 21:14:28.002666 140184442087232 run_squad.py:1365] Processed #examples: 960
 INFO:tensorflow:prediction_loop marked as finished
 Elapsed time: ...
+throughput((num_processed_examples-threshod_examples)/Elapsedtime): ...
 Ran inference with batch size 32
 Log location outside container: /~/output/benchmark_bert_large_inference_bfloat16_20200424_210607.log
 ```
@@ -157,7 +159,8 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    -- infer_option=SQuAD
 ```
 
 Console out:
@@ -193,7 +196,8 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    -- infer_option=SQuAD
 ```
 
 2. <b>*FP32 Accuracy*</b>
@@ -211,7 +215,8 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    -- infer_option=SQuAD
 ```
 
 ### Interactive Option
@@ -231,8 +236,9 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
-    --debug
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --debug \
+    -- infer_option=SQuAD
 ```
 
 Console out:	
