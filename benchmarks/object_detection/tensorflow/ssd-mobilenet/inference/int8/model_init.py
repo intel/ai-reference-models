@@ -30,7 +30,10 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-
+        # Set the num_inter_threads and num_intra_threads
+        # if user did not provide then default value based on platform will be set
+        self.set_num_inter_intra_threads(self.args.num_inter_threads,
+                                         self.args.num_intra_threads)
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
