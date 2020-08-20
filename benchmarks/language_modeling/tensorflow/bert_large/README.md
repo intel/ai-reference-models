@@ -163,7 +163,7 @@ python launch_benchmark.py \
        num-train-epochs=30 \
        output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do-lower-case=True
 
 ```
@@ -205,7 +205,7 @@ python launch_benchmark.py \
        num-train-epochs=30 \
        output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do-lower-case=True
 
 ```
