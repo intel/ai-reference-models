@@ -20,7 +20,3 @@
     * [Image Recognition](/docs/image_recognition/tensorflow_serving/Tutorial.md) (ResNet50 and InceptionV3)
     * [Object Detection](/docs/object_detection/tensorflow_serving/Tutorial.md) (R-FCN and SSD-MobileNet)
     * [Language Translation](/docs/language_translation/tensorflow_serving/Tutorial.md) (Transformer-LT)
-* Model Quantization and Optimization
-    * [Image Recognition](/docs/image_recognition/quantization/Tutorial.md) (ResNet50, ResNet50v1.5)
-
-*Note: For model quantization and optimization tools, see [https://github.com/IntelAI/tools](https://github.com/IntelAI/tools)*.
