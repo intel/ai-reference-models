@@ -7,7 +7,8 @@ following modes/platforms:
 * [BFloat16 inference](#bfloat16-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
 
-This repo contains model for BERT Large optimized for bfloat16 and fp32 on Intel CPUs. For all fine-tuning the datasets (SQuAD, MultiNLI, MRPC etc..)  and checkpoints should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
+
+For all fine-tuning, the datasets (SQuAD, MultiNLI, MRPC etc..) and checkpoints should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
 
 Refer to google reference page for [checkpoints](https://github.com/google-research/bert#pre-trained-models).
 
@@ -26,19 +27,24 @@ export SQUAD_DIR=/path/to/fine/tuning/SQUAD
 ## BFloat16 Training Instructions
 (Experimental)
 
- 1. Download the intel-model zoo for bfloat16.
-       git clone https://github.com/IntelAI/models.git
+ 1. Clone the intelai/models repo.
+This repo has the launch script for running the model, which we will
+use in the next step.
+```
+git clone https://github.com/IntelAI/models.git
+```
  2. Download checkpoints and data for BERT from [google bert repo](https://github.com/google-research/bert).
     Keep all data under one directory ([SQuAD](https://github.com/google-research/bert#squad-11), GLUE). For training from scratch Wikipedia and BookCorpus need to be downloaded and pre-processed.
  3. **To run SQuAD** 
-    Change directory to benchmarks and run the following command.
+    Navigate to `models/benchmarks` directory and run the following command:
 
-Note : Add space after `--`, for BERT options.
+Note : Add space after `--`, for BERT-specific options.
 
 ```
-# These simplify the settings
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
 export SQUAD_DIR=/path/to/bert/SQuAD
+
+mkdir -p $SQUAD_DIR/output
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -61,16 +67,16 @@ python launch_benchmark.py \
        num_train_epochs=2 \
        max_seq_length=384 \
        doc_stride=128 \
-       output_dir=./large \
+       output_dir=$SQUAD_DIR/output \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do_lower_case=True
 
 ```
-The dev set predictions will be saved into a file called predictions.json in the output_dir:
+The dev set predictions will have been saved to a file called `predictions.json` in the output directory `$SQUAD_DIR/output`.
 
 ```
-python $SQUAD_DIR/evaluate-v1.1.py $SQUAD_DIR/dev-v1.1.json ./squad/predictions.json
+python $SQUAD_DIR/evaluate-v1.1.py $SQUAD_DIR/dev-v1.1.json $SQUAD_DIR/output/predictions.json
 ```
 
 An execution with these parameters produces results in line with below scores:
@@ -79,19 +85,24 @@ An execution with these parameters produces results in line with below scores:
 Bf16: {"exact_match": 86.77388836329234, "f1": 92.98642358746287}
 FP32: {"exact_match": 86.72658467360453, "f1": 92.98046893150796}
 ```
-To run distributed training of SQuAD (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
-For fine-tuning tasks like BERT, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers. The "--mpi_workers_sync_gradients=[True/False]" controls whether the MPI workers sync gradients. By default it is set to "False" meaning the workers are training independently and the best performing training results will be picked in the end. To enable gradients synchronization, set the "--mpi_workers_sync_gradients" to true in BERT options.
+To run distributed training of SQuAD (e.g. one MPI process per socket) for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`.
+>Note:
+>- the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes `learning rate` needs to be adjusted for convergence.
+>- `square root learning rate scaling` is used by default.
+>- for BERT fine-tuning, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers.
+>- The `--mpi_workers_sync_gradients=[True/False]` controls whether the MPI workers sync gradients.By default it is set to `False` meaning the workers are training independently and the best performing training results will be picked in the end.
+>- To enable gradients synchronization, set the `--mpi_workers_sync_gradients` to `True` in BERT-specific options.
+>- The options `optimized_softmax=True` and `experimental_gelu=True` can be set for better performance.
 
-The options optimized_softmax=True and experimental_gelu=True can be set for better performance.
-
-Change dir to bechmarks and run the following command.
+Navigate to `models/benchmarks` directory and run the following command:
  
-  Note : Add space after ```--```, for BERT options.
+  Note : Add space after ```--```, for BERT-specific options.
 
 ```
-# These simplify the settings
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
 export SQUAD_DIR=/path/to/bert/SQuAD
+
+mkdir -p $SQUAD_DIR/output
 
 python launch_benchmark.py \
     --model-name=bert_large \
@@ -115,9 +126,9 @@ python launch_benchmark.py \
        num_train_epochs=2 \
        max_seq_length=384 \
        doc_stride=128 \
-       output_dir=./large \
+       output_dir=$SQUAD_DIR/output \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do_lower_case=True
 ```
 Please refer to google docs for SQuAD specific arguments.
@@ -199,12 +210,11 @@ python launch_benchmark.py \
 
 ```
  
- **5. To run pre-training** 
- ***Pre-training from scratch.*** Pre-training has two phases.
-       In the first phase it is run with data generated for seq length 128. In the second phase for 
-       sequential length 512. This needs data to be preprocessed as discussed in original [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert).
-       Replace SQuAD with "Pretraining" in --train_option and use the right options ```train-option=Pretraining``` for Pretraining"
-As shown below
+ **5. To run** 
+ ***Pre-training from scratch.*** Pre-training has two phases:
+       In the first phase, the data is generated for sequential length 128. And in the second phase, sequential length 512 is used.
+       Please follow instructions in [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert) for data pre-processing.
+       Replace SQuAD with `Pretraining` in `--train_option` and set ```train-option=Pretraining```.
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
 export PRETRAINING_DATA_DIR=/path/to/pretraining/tf-record-diretory
@@ -234,11 +244,12 @@ python launch_benchmark.py \
        warmup-steps=10 \
        learning-rate=2e-5 \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        profile=False 
 ```
 
-To run distributed training of pretraining (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
+To run distributed training of pretraining (e.g. one MPI process per socket) for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`.
+>Note that the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes `learning rate` needs to be adjusted for convergence. By default, the script uses `square root learning rate scaling`.
 ```
 export BERT_LARGE_DIR=/path/to/bert/wwm_uncased_L-24_H-1024_A-16
 export PRETRAINING_DATA_DIR=/path/to/pretraining/tf-record-diretory
@@ -268,16 +279,16 @@ python launch_benchmark.py \
        warmup-steps=10 \
        learning-rate=2e-5 \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        profile=False 
 ```
 
-Note: for best performance, we will set num-intra-thread as follows:
-- For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
-- For multi-instance run (mpi_num_processes>1): the value is equal to (#_of_logical_cores_per_socket - 2)
+>Note: for best performance, we will set num-intra-thread as follows:
+>- For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+>- For multi-instance run (mpi_num_processes>1): the value is equal to (#_of_logical_cores_per_socket - 2)
 
 ## FP32 Training Instructions
-FP32 training instructions are the same as Bfloat16 training instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
+FP32 training instructions are the same as Bfloat16 training instructions above, except one needs to change the `--precision=bfloat16` to `--precision=fp32` in the above commands.
 
 ## BFloat16 Inference Instructions
 (Experimental)
@@ -390,4 +401,4 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
     | init_checkpoint | `model.ckpt-3649` |
 
 ## FP32 Inference Instructions
-FP32 inference instructions are the same as Bfloat16 inference instructions above, except one needs to change the "--precision=bfloat16" to "--precision=fp32" in the above commands.
+FP32 inference instructions are the same as Bfloat16 inference instructions above, except one needs to change the `--precision=bfloat16` to `--precision=fp32` in the above commands.
