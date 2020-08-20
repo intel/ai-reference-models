@@ -32,10 +32,17 @@ unzip annotations_trainval2017.zip
 1. Clone the [TensorFlow models repo](https://github.com/tensorflow/models)
    using the specified git SHA and save the directory path to the
    `TF_MODELS_DIR` environment variable.
+
+   | Model | Git SHA |
+   |-------|---------|
+   | RFCN | `1efe98bb8e8d98bbffc703a90d88df15fc2ce906` |
+   | SSD-MobileNet | `7a9934df2afdf95be9405b4e9f1f2480d748dc401` |
+   | SSD-ResNet34 | `1efe98bb8e8d98bbffc703a90d88df15fc2ce906` |
+
    ```
    git clone https://github.com/tensorflow/models.git tensorflow-models
    cd tensorflow-models
-   git checkout 1efe98bb8e8d98bbffc703a90d88df15fc2ce906
+   git checkout <Git SHA>
    export TF_MODELS_DIR=$(pwd)
    cd ..
    ```
