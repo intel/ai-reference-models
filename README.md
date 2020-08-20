@@ -31,7 +31,5 @@ We hope this structure is intuitive and helps you find what you are looking for;
 
 ![Repo Structure](repo_structure.png)
 
-*Note: For model quantization and optimization tools, see [https://github.com/IntelAI/tools](https://github.com/IntelAI/tools)*.
-
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/Contribute.md).
