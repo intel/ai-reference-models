@@ -86,7 +86,7 @@ An execution with these parameters produces results in line with below scores:
 Bf16: {"exact_match": 86.77388836329234, "f1": 92.98642358746287}
 FP32: {"exact_match": 86.72658467360453, "f1": 92.98046893150796}
 ```
-To run distributed training of SQuAD: for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`.
+To run distributed training of SQuAD: for better throughput, simply specify `--mpi_num_processes=<num_of_sockets> [--mpi_num_processes_per_socket=1]`.
 To set `--mpi_num_processes=<num_of_sockets>`, please run `lscpu` on your machine to check the available number of sockets.
 >Note:
 >- the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes `learning rate` needs to be adjusted for convergence.
@@ -94,7 +94,7 @@ To set `--mpi_num_processes=<num_of_sockets>`, please run `lscpu` on your machin
 >- for BERT fine-tuning, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers.
 >- The `--mpi_workers_sync_gradients=[True/False]` controls whether the MPI workers sync gradients.By default it is set to `False` meaning the workers are training independently and the best performing training results will be picked in the end.
 >- To enable gradients synchronization, set the `--mpi_workers_sync_gradients` to `True` in BERT-specific options.
->- The options `optimized_softmax=True` and `experimental_gelu=True` can be set for better performance.
+>- The options `optimized_softmax=True` can be set for better performance.
 
 Navigate to `models/benchmarks` directory and run the following command:
  
@@ -172,7 +172,7 @@ The results file will be written to the
 output directory is specified by the `--output-dir` arg.
 
 
-To run distributed training of Classifier: for better throughput, specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`, please run `lscpu` on your machine to check the available number of sockets.
+To run distributed training of Classifier: for better throughput, specify `--mpi_num_processes=<num_of_sockets> [--mpi_num_processes_per_socket=1]`, please run `lscpu` on your machine to check the available number of sockets.
 Note that the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 ```
 export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
@@ -247,7 +247,7 @@ python launch_benchmark.py \
        profile=False 
 ```
 
-To run distributed training of pretraining: for better throughput, simply specify `--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]`. Please run `lscpu` on your machine to check the available number of sockets.
+To run distributed training of pretraining: for better throughput, simply specify `--mpi_num_processes=<num_of_sockets> [--mpi_num_processes_per_socket=1]`. Please run `lscpu` on your machine to check the available number of sockets.
 >Note that the `global batch size` is `mpi_num_processes * train_batch_size` and sometimes `learning rate` needs to be adjusted for convergence. By default, the script uses `square root learning rate scaling`.
 ```
 export BERT_LARGE_DIR=/home/<user>/wwm_uncased_L-24_H-1024_A-16
@@ -283,8 +283,8 @@ python launch_benchmark.py \
 ```
 
 >Note: for best performance, we will set `num-intra-thread` as follows:
->- For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
->- For multi-instance run (mpi_num_processes>1): the value is equal to (#_of_logical_cores_per_socket - 2)
+>- For single instance (mpi_num_processes=1) run: the value is equal to number of logical cores per socket.
+>- For multi-instance (mpi_num_processes>1) run: the value is equal to (num_of_logical_cores_per_socket - 2)
 
 ## FP32 Training Instructions
 FP32 training instructions are the same as Bfloat16 training instructions above, except one needs to change the `--precision=bfloat16` to `--precision=fp32` in the above commands.
