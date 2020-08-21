@@ -58,7 +58,7 @@ Tuning TensorFlow Serving to take full advantage of your hardware for object det
    Refer to the [TensorFlow documentation](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/python/saved_model) for more information about SavedModels, and refer to the FP32 model READMEs for [R-FCN](/benchmarks/object_detection/tensorflow/rfcn/README.md#fp32-inference-instructions) and [SSD-MobileNet](/benchmarks/object_detection/tensorflow/ssd-mobilenet/README.md#fp32-inference-instructions) to get the latest location of the pre-trained models.
    
    Highlight and copy one of the following download links:
-   * R-FCN: `https://storage.googleapis.com/intel-optimized-tensorflow/models/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz`
+   * R-FCN: `https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz`
    * SSD-MobileNet: `http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz`
    
    Then execute the following bash commands after customizing them for the model you have chosen:
@@ -106,7 +106,7 @@ Tuning TensorFlow Serving to take full advantage of your hardware for object det
      
 4. **Install [TensorFlow Object Detection API](https://github.com/tensorflow/models/tree/master/research/object_detection)**:
    For detailed instructions, go to the installation page for [TensorFlow 1](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf1.md) or [TensorFlow 2](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/tf2.md). 
-   We have already installed the required python packages for the API. Following are the rest of the instructions for Ubuntu 16.04.
+   We have already installed the required python packages for the API. Following are the rest of the instructions for Ubuntu 18.04.
 
    4.1 Clone the tensorflow models repo into a new folder in your home directory.
    ```
