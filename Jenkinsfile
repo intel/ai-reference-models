@@ -13,10 +13,11 @@ node('skx') {
             #!/bin/bash -x
             set -e
             # don't know OS, so trying both apt-get and yum install
-            sudo apt-get install -y python3-dev || sudo yum install -y python36-devel.x86_64
+            sudo apt-get clean || sudo yum update -y
+            sudo apt-get update -y || sudo yum install -y epel-release
+            sudo apt-get install -y python3-dev python3-pip || sudo yum install -y python36-devel python36-pip
 
             # virtualenv 16.3.0 is broken do not use it
-            python2 -m pip install --no-cache-dir --user --upgrade pip==19.0.3 virtualenv!=16.3.0 tox
             python3 -m pip install --no-cache-dir --user --upgrade pip==19.0.3 virtualenv!=16.3.0 tox
             """
         }
@@ -26,7 +27,7 @@ node('skx') {
             set -e
 
             cd intel-models
-            ~/.local/bin/tox -e py2.7-flake8 -e py3-flake8
+            ~/.local/bin/tox -e py3-flake8
             """
         }
         stage('Unit tests') {
@@ -35,7 +36,7 @@ node('skx') {
             set -e
 
             cd intel-models
-            ~/.local/bin/tox -e py2.7-py.test -e py3-py.test
+            ~/.local/bin/tox -e py3-py.test
             """
         }
         // put benchmarks here later
