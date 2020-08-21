@@ -46,7 +46,7 @@ For steps 1 and 2, refer to the model READMEs for the most up-to-date pre-traine
 
 1. **Download the Model**: Download and extract the pre-trained model.
    ```
-   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv3_fp32_pretrained_model.pb
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
    ```
 
 2. **(Optional) Download Data**: If you are interested only in testing performance, not accuracy, you can skip this step and use synthetic data.
