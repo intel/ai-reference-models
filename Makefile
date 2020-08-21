@@ -37,8 +37,6 @@ venv: $(ACTIVATE)
 	@echo -n "Using "
 	@. $(ACTIVATE) && python --version
 
-venv2: venv
-
 venv3: PY_VERSION=3
 venv3: $(ACTIVATE)
 	@echo -n "Using "
@@ -49,33 +47,13 @@ tox:
 
 lint:
 	@echo "Running style check..."
-	tox -e py2.7-flake8 -e py3-flake8
-
-lint2:
-	@echo "Running style check..."
-	tox -e py2.7-flake8
-
-lint3:
-	@echo "Running style check python 3 "
 	tox -e py3-flake8
 
 unit_test:
 	@echo "Running unit tests..."
-	tox -e py2.7-py.test -e py3-py.test
-
-unit_test2:
-	@echo "Running unit tests python 2..."
-	tox -e py2.7-py.test
-
-unit_test3:
-	@echo "Running unit tests python 3..."
 	tox -e py3-py.test
 
 test: lint unit_test
-
-test2: lint2 unit_test2
-
-test3: lint3 unit_test3
 
 clean:
 	rm -rf .venv .venv3 .tox
