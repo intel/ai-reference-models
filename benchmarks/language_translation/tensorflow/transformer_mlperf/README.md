@@ -40,11 +40,11 @@ We will get the training data of it as an example:
 
 ---
 
-<sub><b id="f1">1 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.3.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.3.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a1)</sub><br/>
+<sub><b id="f1">1 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.2.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.2.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a1)</sub><br/>
 <sub><b id="f2">2 - </b> Downloading the datasets can take some time, you should see `XX% completed` updates for the datasets [↩](#a2)</sub>
 
 ---
-    
+
 3. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
 The `launch_benchmark.py` script in the `benchmarks` directory is
@@ -54,7 +54,7 @@ precision, and docker image to use, along with your path to the dataset location
 
 Transformer Language in mlperf benchmark can run with full training or
 fewer training steps. During training we can control if it will do the evaluation
-or not.  
+or not.
 
 For training with all epochs, with evaluation, and with saving checkpoints (for convergence):
 
@@ -65,7 +65,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
 ```
@@ -78,7 +78,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="No" print_iter=50
 ```
@@ -92,7 +92,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -108,7 +108,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="No" do_eval="No" print_iter=50
 ```
@@ -125,7 +125,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --verbose \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
@@ -142,7 +142,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --verbose \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
@@ -251,7 +251,7 @@ We will get the training data of it as an example:
 
 ---
 
-<sub><b id="f3">3 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.3.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.3.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a3)</sub><br/>
+<sub><b id="f3">3 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.2.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.2.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a3)</sub><br/>
 <sub><b id="f4">4 - </b> Downloading the datasets can take some time, you should see `XX% completed` updates for the datasets [↩](#a4)</sub>
 
 ---
@@ -276,7 +276,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
 ```
@@ -291,7 +291,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="No" print_iter=50
 ```
@@ -305,7 +305,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -320,7 +320,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="No" do_eval="No" print_iter=50
 ```
@@ -337,7 +337,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --mpi_num_processes=2 \
     --num-intra-threads=26 --num-inter-threads=1 \
@@ -353,7 +353,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --verbose \
     --mpi_num_processes=4 \
     --num-intra-threads=26 --num-inter-threads=1 \

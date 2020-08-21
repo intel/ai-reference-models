@@ -75,7 +75,7 @@ You can also use the helper script [download_glue_data.py](https://gist.github.c
      learning-rate=2e-5 \
      num_train_epochs=3.0
    ```
-   Using `--docker-image intel/intel-optimized-tensorflow:2.3.0` to run with Intel optimized TensorFlow docker container.
+   Using `--docker-image intel/intel-optimized-tensorflow:2.2.0` to run with Intel optimized TensorFlow docker container.
 
 
 6. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory. Below are examples of what the tail of your log file should look like for the different configs.
