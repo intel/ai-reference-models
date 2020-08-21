@@ -102,7 +102,7 @@ This directory will be passed as the `--checkpoint` location when running infere
 5. Pull the relevant Intel-optimized TensorFlow Docker image.
 [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull intel/intel-optimized-tensorflow:2.3.0
+docker pull intel/intel-optimized-tensorflow:2.2.0
 ```
 
 6. Navigate to the inference script directory in local IntelAI repository.
@@ -131,7 +131,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     -- infer_option=SQuAD
 ```
 Console out:
@@ -159,7 +159,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     -- infer_option=SQuAD
 ```
 
@@ -196,7 +196,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     -- infer_option=SQuAD
 ```
 
@@ -215,7 +215,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     -- infer_option=SQuAD
 ```
 
@@ -236,7 +236,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --debug \
     -- infer_option=SQuAD
 ```
@@ -255,6 +255,4 @@ chmod +x ./start.sh
 NOINSTALL=True BATCH_SIZE=64 ./start.sh
 ```
 
-All other flags will be defaulted to values passed in the first `launch_benchmark.py` that starts the container. [See here](/docs/general/tensorflow/LaunchBenchmark.md) to get the full list of flags. 
-	
-	
+All other flags will be defaulted to values passed in the first `launch_benchmark.py` that starts the container. [See here](/docs/general/tensorflow/LaunchBenchmark.md) to get the full list of flags.

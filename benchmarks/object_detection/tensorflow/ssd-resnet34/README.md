@@ -90,7 +90,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only \
     -- input-size=1200
@@ -115,7 +115,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --accuracy-only 
 ```
@@ -236,7 +236,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only 
 ```
@@ -260,7 +260,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --accuracy-only \
     -- input-size=1200
@@ -397,7 +397,7 @@ $ pushd $MODEL_WORK_DIR
     --num-inter-threads 1 --num-intra-threads 52 \
     --batch-size=52 --weight_decay=1e-4 \
     --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0
    ```
 
 ## BF16 Training Instructions
@@ -424,7 +424,7 @@ $ pushd $MODEL_WORK_DIR
       --batch-size=100 --weight_decay=1e-4 \
       --num_warmup_batches=20 \
       --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
-      --docker-image intel/intel-optimized-tensorflow:2.3.0
+      --docker-image intel/intel-optimized-tensorflow:2.2.0
       ```
 
    3. To run training and achieve convergence, download the backbone model from the links below, then use the following command:
@@ -450,7 +450,7 @@ $ pushd $MODEL_WORK_DIR
       --mpi_num_processes_per_socket=1 --epochs=60 \
       --checkpoint <path to output_train_directory> \
       --backbone-model <path to resnet34_backbone_trained_model> \
-      --docker-image intel/intel-optimized-tensorflow:2.3.0
+      --docker-image intel/intel-optimized-tensorflow:2.2.0
       ```
    4. To run in eval mode (to check accuracy) if checkpoints are available. Use the below command:
 
@@ -466,5 +466,5 @@ $ pushd $MODEL_WORK_DIR
       --num-intra-threads 52 --batch-size=100 --mpi_num_processes=1 \
       --mpi_num_processes_per_socket=1 --accuracy-only \
       --checkpoint <path to pretrained_checkpoints> \
-      --docker-image intel/intel-optimized-tensorflow:2.3.0
+      --docker-image intel/intel-optimized-tensorflow:2.2.0
       ```

@@ -50,7 +50,7 @@ python launch_benchmark.py \
     --mode=training \
     --framework=tensorflow \
     --batch-size=24 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $SQUAD_DIR:$SQUAD_DIR \
     -- train_option=SQuAD \
@@ -111,7 +111,7 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=24 \ 
     --mpi_num_processes=<num_of_sockets> \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $SQUAD_DIR:$SQUAD_DIR \
     -- train_option=SQuAD \
@@ -148,7 +148,7 @@ python launch_benchmark.py \
     --mode=training \
     --framework=tensorflow \
     --batch-size=32 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --volume $BERT_BASE_DIR:$BERT_BASE_DIR \
     --volume $GLUE_DIR:$GLUE_DIR \
     -- train-option=Classifier \
@@ -185,7 +185,7 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=32 \
     --mpi_num_processes=<num_of_sockets> \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $GLUE_DIR:$GLUE_DIR \
     -- train-option=Classifier \
@@ -227,7 +227,7 @@ python launch_benchmark.py \
     --socket-id=0 \
     --num-intra-threads=24 \
     --num-inter-threads=1 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $PRETRAINING_DATA_DIR:$PRETRAINING_DATA_DIR \
     -- train-option=Pretraining \
@@ -262,7 +262,7 @@ python launch_benchmark.py \
     --num-intra-threads=22 \
     --num-inter-threads=1 \
     --mpi_num_processes=4 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $PRETRAINING_DATA_DIR:$PRETRAINING_DATA_DIR \
     -- train-option=Pretraining \
@@ -344,7 +344,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
             --benchmark-only \
-            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+            --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
             -- infer_option=SQuAD
         ```
 
@@ -359,7 +359,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
-            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+            --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
             -- profile=True infer_option=SQuAD
         ```
 
@@ -374,7 +374,7 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
             --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
             --checkpoint /home/<user>/bert_large_checkpoints \
             --output-dir /home/<user>/bert-squad-output \
-            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+            --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
             --accuracy-only \
             -- infer_option=SQuAD
         ```
