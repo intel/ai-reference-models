@@ -86,7 +86,7 @@ Tuning TensorFlow Serving to take full advantage of your hardware for language t
    (refer to the [model README](/benchmarks/language_translation/tensorflow/transformer_lt_official) to get the latest location of this archive).
 
    ```
-   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
    tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
    ```
 
