@@ -30,80 +30,15 @@ converting the coco dataset to the TF records format.
 [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
-4.  Download the 2017 validation
-[COCO dataset](http://cocodataset.org/#home) and annotations:
+4. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+   Be sure to export the $DATASET_DIR and $OUTPUT_DIR environment variables. Then, rename the tf_records file and copy the annotations file:
 
 ```
-cd $MODEL_WORK_DIR
-$ mkdir val
-$ cd val
-$ wget http://images.cocodataset.org/zips/val2017.zip
-$ unzip val2017.zip
-$ cd $MODEL_WORK_DIR
-
-$ mkdir annotations
-$ cd annotations
-$ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
-$ unzip annotations_trainval2017.zip
-$ cd $MODEL_WORK_DIR
+$ mv ${OUTPUT_DIR}/coco_val.record ${OUTPUT_DIR}/validation-00000-of-00001
+$ cp -r ${DATASET_DIR}/annotations ${OUTPUT_DIR}
 ```
 
-Since we are only using the validation dataset in this example, we will
-create an empty directory and empty annotations json file to pass as the
-train and test directories in the next step.
-
-```
-$ mkdir empty_dir
-
-$ cd annotations
-$ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd $MODEL_WORK_DIR
-```
-
-5. Now that you have the raw COCO dataset, we need to convert it to the
-TF records format in order to use it with the inference script.  We will
-do this by running the `create_coco_tf_record.py` file in the TensorFlow
-models repo.
-
-Follow [instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#dependencies) to install the required dependencies (`cocoapi` and `Protobuf 3.0.0`).
-Follow the steps below to navigate to the proper directory and point the
-script to the raw COCO dataset files that you have downloaded in step 3.
-The `--output_dir` is the location where the TF record files will be
-located after the script has completed.
-
-```
-
-# We are going to use an older version of the conversion script to checkout the git commit
-$ cd tf_models
-$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
-
-$ cd research/object_detection/dataset_tools/
-$ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
-      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
-      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --output_dir="$MODEL_WORK_DIR/output"
-
-$ ll $MODEL_WORK_DIR/output
-total 1598276
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
-
-# Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
-$ cd /home/<user>/tf_models
-$ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
-```
-
-The `coco_val.record` file is what we will use in this inference example.
-```
-$ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validation-00000-of-00001
-```
-
-6. Download the pretrained model:
+5. Download the pretrained model:
 
 ```
 # ssd-resnet34 300x300
@@ -113,7 +48,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
 ```
 
-7. Clone the [intelai/models](https://github.com/intelai/models) repo.
+6. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, which we will
 use in the next step.
 
@@ -121,9 +56,8 @@ use in the next step.
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-8. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks.git) repo. This repo contains the method needed
-to run the ssd-resnet34 model. Please ensure that the `ssd-resnet-benchmarks` and `models` repos cloned in step 7 and step 8 
-are in the same folder.
+7. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks.git) repo. This repo contains the method needed
+to run the ssd-resnet34 model. Please ensure that the `ssd-resnet-benchmarks` and `models` repos are in the same folder.
 
 ```
 $ git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
@@ -132,14 +66,13 @@ $ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
 $ cd ../
 ```
 
-9. Next, navigate to the `benchmarks` directory of the
+8. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
 cloned in the previous step. SSD-ResNet34 can be run for 
-batch and online inference, or accuracy. Note that we are running
-SSD-ResNet34 with a TensorFlow 2.3.0 docker image.
+batch and online inference, or accuracy.
 
 To run for batch and online inference, use the following command,
-the path to the frozen graph that you downloaded in step 6 as 
+the path to the frozen graph that you downloaded in step 5 as 
 the `--in-graph`, and use the `--benchmark-only` flag. If you run on docker mode, you also need to provide `ssd-resnet-benchmarks` path for `volume` flag.
 By default it runs with input size 300x300, you may add `-- input-size=1200` 
 flag to run benchmark with input size 1200x1200.
@@ -164,8 +97,8 @@ $ python launch_benchmark.py \
 ```
 
 To run the accuracy test, use the following command but replace in your path to
-the tf record file that you generated in step 5 for the `--data-location`,
-the path to the frozen graph that you downloaded in step 6 as the
+the tf record file that you generated for the `--data-location`,
+the path to the frozen graph that you downloaded in step 5 as the
 `--in-graph`, and use the `--accuracy-only` flag. By default it runs with 
 input size 300x300, you may add `-- input-size=1200` flag last to run the test with 
 input size 1200x1200.
@@ -173,7 +106,7 @@ input size 1200x1200.
 ```
 # accuracy test with input size 300x300
 $ python launch_benchmark.py \
-    --data-location /home/<user>/coco/output/ \
+    --data-location ${OUTPUT_DIR} \
     --in-graph /home/<user>/ssd_resnet34_fp32_bs1_pretrained_model.pb \
     --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
@@ -187,7 +120,7 @@ $ python launch_benchmark.py \
     --accuracy-only 
 ```
 
-10. The log file is saved to the value of `--output-dir`.
+9. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when running for performance:
 
@@ -242,79 +175,14 @@ converting the coco dataset to the TF records format.
 [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
-4.  Download the 2017 validation
-[COCO dataset](http://cocodataset.org/#home) and annotations:
+4. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+   Be sure to export the $OUTPUT_DIR environment variable. Then, rename the tf_records file:
 
 ```
-cd $MODEL_WORK_DIR
-$ mkdir val
-$ cd val
-$ wget http://images.cocodataset.org/zips/val2017.zip
-$ unzip val2017.zip
-
-$ cd $MODEL_WORK_DIR
-$ mkdir annotations
-$ cd annotations
-$ wget http://images.cocodataset.org/annotations/annotations_trainval2017.zip
-$ unzip annotations_trainval2017.zip
-$ cd $MODEL_WORK_DIR
+$ mv ${OUTPUT_DIR}/coco_val.record ${OUTPUT_DIR}/validation-00000-of-00001
 ```
 
-Since we are only using the validation dataset in this example, we will
-create an empty directory and empty annotations json file to pass as the
-train and test directories in the next step.
-
-```
-$ mkdir empty_dir
-
-$ cd annotations
-$ echo "{ \"images\": {}, \"categories\": {}}" > empty.json
-$ cd $MODEL_WORK_DIR
-```
-
-5. Now that you have the raw COCO dataset, we need to convert it to the
-TF records format in order to use it with the inference script.  We will
-do this by running the `create_coco_tf_record.py` file in the TensorFlow
-models repo.
-
-Follow the steps below to navigate to the proper directory and point the
-script to the raw COCO dataset files that you have downloaded in step 2.
-The `--output_dir` is the location where the TF record files will be
-located after the script has completed.
-
-```
-
-# We are going to use an older version of the conversion script to checkout the git commit
-$ cd tf_models
-$ git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
-
-$ cd research/object_detection/dataset_tools/
-$ python create_coco_tf_record.py --logtostderr \
-      --train_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --val_image_dir="$MODEL_WORK_DIR/val/val2017" \
-      --test_image_dir="$MODEL_WORK_DIR/empty_dir" \
-      --train_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --val_annotations_file="$MODEL_WORK_DIR/annotations/annotations/instances_val2017.json" \
-      --testdev_annotations_file="$MODEL_WORK_DIR/annotations/empty.json" \
-      --output_dir="$MODEL_WORK_DIR/output"
-
-$ ll $MODEL_WORK_DIR/output
-total 1598276
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_testdev.record
--rw-rw-r--. 1 <user> <group>         0 Nov  2 21:46 coco_train.record
--rw-rw-r--. 1 <user> <group> 818336740 Nov  2 21:46 coco_val.record
-
-# Go back to the main models directory and checkout the SHA that we are using for SSD-ResNet34
-$ cd /home/<user>/tf_models
-$ git checkout f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc
-```
-
-The `coco_val.record` file is what we will use in this inference example.
-```
-$ mv /home/<user>/coco/output/coco_val.record /home/<user>/coco/output/validation-00000-of-00001
-```
-
-6. Download the pretrained model:
+5. Download the pretrained model:
 
 ```
 # ssd-resnet34 300x300
@@ -327,7 +195,7 @@ If you want to download the pretrained model for `--input-size=1200`, use the co
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 ```
 
-7. Clone the [intelai/models](https://github.com/intelai/models) repo.
+6. Clone the [intelai/models](https://github.com/intelai/models) repo.
 This repo has the launch script for running the model, which we will
 use in the next step.
 
@@ -335,9 +203,8 @@ use in the next step.
 $ git clone https://github.com/IntelAI/models.git
 ```
 
-8. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks.git) repo. This repo contains the method needed
-to run the ssd-resnet34 model. Please ensure that the `ssd-resnet-benchmarks` and `models` repos cloned in step 7 and step 8 
-are in the same folder.
+7. Clone the [tensorflow/benchmarks](https://github.com/tensorflow/benchmarks.git) repo. This repo contains the method needed
+to run the ssd-resnet34 model. Please ensure that the `ssd-resnet-benchmarks` and `models` repos are in the same folder.
 
 ```
 $ git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
@@ -346,10 +213,9 @@ $ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
 $ cd ../
 ```
 
-9. Next, navigate to the `benchmarks` directory of the
+8. Next, navigate to the `benchmarks` directory of the
 [intelai/models](https://github.com/intelai/models) repo that was just
-cloned in the previous step. SSD-ResNet34 can be run for testing batch or online inference, or testing accuracy. Note that we are running
-SSD-ResNet34 with a TensorFlow 2.3.0 docker image.
+cloned in the previous step. SSD-ResNet34 can be run for testing batch or online inference, or testing accuracy.
 
 To run for batch and online inference, use the following command,
 the path to the frozen graph that you downloaded in step 5 as 
@@ -376,8 +242,8 @@ $ python launch_benchmark.py \
 ```
 
 To run the accuracy test, use the following command but replace in your path to
-the tf record file that you generated in step 5 for the `--data-location`,
-the path to the frozen graph that you downloaded in step 6 as the
+the tf record file that you generated for the `--data-location`,
+the path to the frozen graph that you downloaded in step 5 as the
 `--in-graph`, and use the `--accuracy-only` flag. By default it runs with 
 input size 300x300, you may add `-- input-size=1200` flag to run the test with 
 input size 1200x1200.
@@ -385,7 +251,7 @@ input size 1200x1200.
 ```
 # accuracy test with input size 1200x1200
 $ python launch_benchmark.py \
-    --data-location /home/<user>/coco/output/ \
+    --data-location ${OUTPUT_DIR} \
     --in-graph /home/<user>/ssd_resnet34_int8_1200x1200_pretrained_model.pb \
     --model-source-dir /home/<user>/tf_models \
     --model-name ssd-resnet34 \
@@ -400,7 +266,7 @@ $ python launch_benchmark.py \
     -- input-size=1200
 ```
 
-10. The log file is saved to the value of `--output-dir`.
+9. The log file is saved to the value of `--output-dir`.
 
 Below is a sample log file tail when testing performance:
 
