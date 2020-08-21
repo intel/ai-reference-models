@@ -113,5 +113,5 @@ class ExamplesPerSecondHook(tf.estimator.SessionRunHook):
                           '%g', self._total_steps, elapsed_steps, current_examples_per_sec, average_examples_per_sec)
         else:
           # Current examples/sec followed by completed warmup steps
-          tf.compat.v1.logging.info('Batch [%g]:  last %g steps exp/sec = %g, completed %g/%g wamrup steps'
+          tf.compat.v1.logging.info('Batch [%g]:  last %g steps exp/sec = %g, completed %g/%g warmup steps'
                           , self._total_steps, elapsed_steps, current_examples_per_sec, self._total_steps, self._warm_steps)
