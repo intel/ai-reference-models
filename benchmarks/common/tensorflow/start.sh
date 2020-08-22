@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 #
-# -*- coding: utf-8 -*-
-#
 # Copyright (c) 2018 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +15,6 @@
 # limitations under the License.
 #
 
-#
 
 echo 'Running with parameters:'
 echo "    USE_CASE: ${USE_CASE}"
@@ -28,7 +25,7 @@ echo "    CHECKPOINT_DIRECTORY: ${CHECKPOINT_DIRECTORY}"
 echo "    BACKBONE_MODEL_DIRECTORY: ${BACKBONE_MODEL_DIRECTORY}"
 echo "    IN_GRAPH: ${IN_GRAPH}"
 echo "    MOUNT_INTELAI_MODELS_COMMON_SOURCE_DIR: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
-if [ ${DOCKER} == "True" ]; then
+if [ -n "${DOCKER}" ]; then
   echo "    Mounted volumes:"
   echo "        ${BENCHMARK_SCRIPTS} mounted on: ${MOUNT_BENCHMARK}"
   echo "        ${EXTERNAL_MODELS_SOURCE_DIRECTORY} mounted on: ${MOUNT_EXTERNAL_MODELS_SOURCE}"
@@ -53,6 +50,9 @@ echo "    NOINSTALL: ${NOINSTALL}"
 echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 echo "    MPI_NUM_PROCESSES: ${MPI_NUM_PROCESSES}"
 echo "    MPI_NUM_PEOCESSES_PER_SOCKET: ${MPI_NUM_PROCESSES_PER_SOCKET}"
+echo "    MPI_HOSTNAMES: ${MPI_HOSTNAMES}"
+echo "    PYTHON_EXE: ${PYTHON_EXE}"
+echo "    PYTHONPATH: ${PYTHONPATH}"
 
 #  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
@@ -60,16 +60,21 @@ if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   exit 1
 fi
 
+# Determines if we are running in a container by checking for .dockerenv
+function _running-in-container()
+{
+  [ -f /.dockerenv ]
+}
+
 if [[ ${NOINSTALL} != "True" ]]; then
   ## install common dependencies
-  apt update
-  apt full-upgrade -y
+  apt-get update -y
   # Set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
-  apt-get install gcc-8 g++-8 cmake python-tk numactl -y
+  apt-get install gcc-8 g++-8 cmake python-tk -y
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-  apt install -y libsm6 libxext6
+  apt-get install -y libsm6 libxext6
   pip install --upgrade pip
   pip install requests
 
@@ -79,7 +84,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
   fi
 
   if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-    #  Installing OpenMPI
+    ## Installing OpenMPI
     apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
     # Horovod Installation
     export HOROVOD_WITHOUT_PYTORCH=1
@@ -88,6 +93,18 @@ if [[ ${NOINSTALL} != "True" ]]; then
     # lock horovod==0.19.1 release commit/version
     pip install --no-cache-dir horovod==0.19.1
   fi 
+fi
+
+# If we are running in a container, call the container_init.sh files
+if _running-in-container ; then
+  # Call the framework's container_init.sh, if it exists
+  if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+     ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+  fi
+  # Call the model specific container_init.sh, if it exists
+  if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+    ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+  fi
 fi
 
 verbose_arg=""
@@ -132,9 +149,14 @@ function run_model() {
   if [ ${VERBOSE} == "True" ]; then
     echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
     echo "RUNCMD: ${CMD} " | tee -a ${LOGFILE}
-    echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+    if [[ ${BATCH_SIZE} != "-1" ]]; then
+      echo "Batch Size: ${BATCH_SIZE}" | tee -a ${LOGFILE}
+    fi
   fi
-  echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
+
+  if [[ ${BATCH_SIZE} != "-1" ]]; then
+    echo "Ran ${MODE} with batch size ${BATCH_SIZE}" | tee -a ${LOGFILE}
+  fi
 
   # if it starts with /workspace then it's not a separate mounted dir
   # so it's custom and is in same spot as LOGFILE is, otherwise it's mounted in a different place
@@ -143,7 +165,7 @@ function run_model() {
   else
     LOG_LOCATION_OUTSIDE_CONTAINER=${LOGFILE}
   fi
-  echo "Log location outside container: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
+  echo "Log file location: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
 }
 
 # basic run command with commonly used args
@@ -216,6 +238,15 @@ function bert_options() {
     fi
 
     CMD=" ${CMD} --train-option=${train_option}"
+  fi
+
+  if [[ ${MODE} == "inference" ]]; then
+    if [[ -z "${infer_option}" ]]; then
+      echo "Error: Please specify a inference option (SQuAD, Classifier, Pretraining)"
+      exit 1
+    fi
+
+    CMD=" ${CMD} --infer-option=${infer_option}"
   fi
 
   if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
@@ -319,7 +350,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get -y install wget
+    apt-get update && apt-get install -y unzip wget
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
@@ -499,7 +530,7 @@ function minigo() {
       local INTELAI_MODEL_DIR=${INTELAI_MODELS}
       local BENCHMARK_DIR=${BENCHMARK_SCRIPTS}
 
-      if [ ${DOCKER} == "True" ]; then
+      if [ -n "${DOCKER}" ]; then
         MODEL_DIR=${MOUNT_EXTERNAL_MODELS_SOURCE}
         INTELAI_MODEL_DIR=${MOUNT_INTELAI_MODELS_SOURCE}
         BENCHMARK_DIR=${MOUNT_BENCHMARK}
@@ -521,6 +552,7 @@ function minigo() {
       fi
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
+      apt-get update && apt-get install -y git
       pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
       pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
       if [ "${EXTERNAL_MODELS_SOURCE_DIRECTORY}" == "None" ]; then
@@ -741,8 +773,10 @@ function resnet50() {
 function mlperf_gnmt() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
 
-    # install dependencies
-    pip install ${MOUNT_BENCHMARK}/tensorflow_addons*.whl --no-deps
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
+    fi
 
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
@@ -767,6 +801,7 @@ function rfcn() {
   export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
   if [ ${NOINSTALL} != "True" ]; then
+    apt-get update && apt-get install -y git
     # install dependencies
     for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt)
     do
@@ -831,6 +866,7 @@ function ssd-resnet34() {
           old_dir=${PWD}
 
           if [ ${NOINSTALL} != "True" ]; then
+            apt-get update && apt-get install -y git libgl1-mesa-glx libglib2.0-0
             for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
             do
               pip install $line
@@ -869,7 +905,7 @@ function ssd-resnet34() {
       elif [ ${MODE} == "training" ]; then
         if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
           if [ ${NOINSTALL} != "True" ]; then
-            apt-get update && apt-get install -y cpio
+            apt-get update && apt-get install -y cpio git
 
             # Enter the docker mount directory /l_mpi and install the intel mpi with silent mode
             cd /l_mpi
@@ -896,6 +932,9 @@ function ssd-resnet34() {
 
           CMD="${CMD} \
           $(add_arg "--weight_decay" ${weight_decay}) \
+          $(add_arg "--epochs" ${epochs}) \
+          $(add_arg "--save_model_steps" ${save_model_steps}) \
+          $(add_arg "--timeline" ${timeline}) \
           $(add_arg "--num_warmup_batches" ${num_warmup_batches})"
           local old_pythonpath=${PYTHONPATH}
           export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
@@ -912,6 +951,7 @@ function ssd-resnet34() {
 function ssd_vgg16() {
 
     if [ ${NOINSTALL} != "True" ]; then
+        apt-get update && apt-get install -y git
         pip install opencv-python Cython
 
         if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -1091,18 +1131,14 @@ function wavenet() {
 
 # BERT base
 function bert_base() {
-    
-    echo "Bert base PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+  if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    bert_options
+    CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
     exit 1
-    # When enabled remove the above lines
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
-      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-      bert_options
-      CMD=${CMD} run_model
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
-    fi
+  fi
 }
 
 # BERT Large model
@@ -1218,8 +1254,6 @@ elif [ ${MODEL_NAME} == "facenet" ]; then
   facenet
 elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
-elif [ ${MODEL_NAME} == "gnmt" ]; then
-  gnmt
 elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
   mlperf_gnmt
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then

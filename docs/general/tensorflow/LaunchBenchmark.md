@@ -9,7 +9,7 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 
 ## How it Works
 
-1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container. 
+1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container.
    [Here](#launch_benchmarkpy-flags) is the full list of available flags. To run a model without a docker container,
    see the [bare metal instructions](#alpha-feature-running-on-bare-metal).
 2. The container's entrypoint script [`start.sh`](/benchmarks/common/tensorflow/start.sh) installs required dependencies, e.g. python packages and `numactl`, and sets the PYTHONPATH environment variable to point to the required dependencies. 
@@ -24,20 +24,20 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 * Image Recognition
     * ResNet50: [init](/benchmarks/image_recognition/tensorflow/resnet50/inference/fp32/model_init.py) | 
                 [inference](/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py) | 
-                [preprocessing](/models/image_recognition/tensorflow/resnet50/inference/preprocessing.py) 
+                [preprocessing](/models/image_recognition/tensorflow/resnet50/inference/preprocessing.py)
     * ResNet101: [init](/benchmarks/image_recognition/tensorflow/resnet101/inference/fp32/model_init.py) | 
                  [inference](/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py) | 
-                 [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py) 
+                 [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py)
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
                    [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) | 
-                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py) 
+                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py)
 * Language Translation
     * Transformer-LT: [init](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/model_init.py) | 
-                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)    
+                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)
 * Recommendation Systems
     * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
                 [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
-                [preprocessing](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py) 
+                [preprocessing](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py)
 
 ## ```launch_benchmark.py``` flags   
 
@@ -115,6 +115,10 @@ optional arguments:
                         conjunction with --accuracy-only and --mode=inference.
   --output-dir OUTPUT_DIR
                         Folder to dump output into.
+  --tf-serving-version TF_SERVING_VERSION
+                        Specify the version of tensorflow serving.
+                        If nothing is specified, it defaults to master
+                        of tensorflow serving.
   --disable-tcmalloc {True,False}
                         When TCMalloc is enabled, the google-perftools are
                         installed (if running using docker) and the LD_PRELOAD
@@ -141,6 +145,9 @@ optional arguments:
                         argument can only be used in conjunction with a
                         --docker-image.
   --debug               Launches debug mode which doesn't execute start.sh
+  --noinstall           Whether to install packages for a given model when
+                        running in docker (default --noinstall='False') or on
+                        bare metal (default --noinstall='True')
 ```
 
 ## Volume mounts
@@ -175,7 +182,7 @@ $ python launch_benchmark.py \
         --batch-size 1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.2.0 \
         --volume /home/<user>/custom_folder_1:/custom_folder_1 \
         --volume /home/<user>/custom_folder_2:/custom_folder_2
 ```
@@ -212,7 +219,7 @@ Below is an example showing how to use the `--debug` flag:
         --batch-size=1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.2.0 \
         --debug
 
    # ls
@@ -292,14 +299,14 @@ describe how that can be done using the `launch_benchmark.py` script.
 ### Prerequisites for running on bare metal
 
 Since the `launch_benchmark.py` is intended to run in an Ubuntu-based
-Docker container, running on bare metal also will only work when running
-on Ubuntu.
+Docker container, we recommend running on bare metal using Ubuntu 18.04.
 
 Before running a model, you must also install all the dependencies
-that are required to run that model.
+that are required to run that model. **(Note: the `--noinstall` 
+flag defaults to 'True' when running on bare metal.)**
 
 Basic requirements for running all models include:
- * python (If the model's README file specifies to use a python3 TensorFlow docker image, then use python 3 on bare metal, otherwise use python 2.7)
+ * python 3.6
  * [intel-tensorflow](https://github.com/tensorflow/tensorflow/blob/master/README.md#community-supported-builds)
  * python-tk
  * numactl

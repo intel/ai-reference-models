@@ -33,7 +33,7 @@ to download, process and convert the ImageNet dataset to the TF records format.
 
 2. Download the pre-trained model.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50v1_5_int8_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50v1_5_int8_pretrained_model.pb
 ```
 
 3. Clone the
@@ -47,10 +47,10 @@ $ git clone https://github.com/IntelAI/models.git
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 
-    The docker image (`intel/intel-optimized-tensorflow:2.1.0`)
+    The docker image (`intel/intel-optimized-tensorflow:2.2.0`)
     used in the commands above were built using
     [TensorFlow](https://github.com/tensorflow/tensorflow.git) master for TensorFlow
-    version 2.1.0.
+    version 2.2.0.
 
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `resnet50v1_5_int8_pretrained_model.pb` input graph file (from step 2), and the `--accuracy-only` flag.
@@ -66,7 +66,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -105,7 +105,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
@@ -164,7 +164,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id=0 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -202,7 +202,7 @@ $ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id=0 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -243,7 +243,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id=0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -280,7 +280,7 @@ $ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id=0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0
+    --docker-image intel/intel-optimized-tensorflow:2.2.0
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -310,7 +310,7 @@ to get additional debug output or change the default output location.
 1. Download the pre-trained model.
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/resnet50_v1_5_bfloat16.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_v1_5_bfloat16.pb
 ```
 
 2. Clone the [intelai/models](https://github.com/intelai/models) repository
@@ -337,7 +337,7 @@ If benchmarking uses dummy data for inference, `--data-location` flag is not req
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph resnet50_v1_bfloat16.pb \
+    --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
     --precision bfloat16 \
@@ -373,7 +373,7 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph resnet50_v1_bfloat16.pb \
+    --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
     --precision bfloat16 \
@@ -410,7 +410,7 @@ the ImageNet dataset directory from step 3 as the `--data-location`:
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph resnet50_v1_bfloat16.pb \
+    --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
     --precision bfloat16 \
@@ -444,7 +444,7 @@ except with the `--output-results` flag added:
 $ cd /home/<user>/models/benchmarks
 
 $ python launch_benchmark.py \
-    --in-graph resnet50_v1_bfloat16.pb \
+    --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
     --precision bfloat16 \
@@ -612,47 +612,25 @@ $ python launch_benchmark.py \
          --framework tensorflow \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=2 \
-         --mpi_num_processes_per_socket=2 \
+         --mpi_num_processes_per_socket=1 \
          --docker-image=intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
          -a <half the amount of cores per socket or less>
 ```
 
 You can check output trained model accuracy by setting `--eval=True` in the command. After training is over, it automatically run inference and report accuracy results.
 
-ResNet50 convergence with MLPerf target Top-1 accuracy of 75.9% can be achieved using the following set of instructions. The instructions have been tested on a 8-socket 28-core Xeon server.
+Finally, the following command runs MPI across multiple nodes on bare-metal, with 2 MPI processes per node. Each node must have passwordless ssh enabled for the user running the command below. All hosts should have these additional packages installed: (apt-get) openmpi-bin openmpi-common libopenmpi-dev, (pip) horovod==0.19.2
+
 ```
-$ cd models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet
-$ RANDOM_SEED=`date +%s`
-
-# Save the original PYTHONPATH
-$ export ORIG_PYTHONPATH="${PYTHONPATH}"
-
-# Register the model as a source root
-$ export PYTHONPATH="$(pwd):${PYTHONPATH}"
-
-# Add MLPerf source to PYTHONPATH
-$ export PYTHONPATH="$(pwd)/../:$(pwd)/../../../../../common/tensorflow/:${PYTHONPATH}"
-
-# Set path for saving checkpoints
-$ MODEL_DIR=“PATH_TO_CHECKPOINT/resnet_imagenet_${RANDOM_SEED}"
-  
-$ export OMP_NUM_THREADS=4
-$ export KMP_BLOCKTIME=1
-  
-$ mpirun --allow-run-as-root -n 32  --map-by ppr:4:socket:pe=7 python imagenet_main.py $RANDOM_SEED \
-  --data_dir PATH_TO_DATASET/imagenet_dataset --model_dir $MODEL_DIR --train_epochs 10000 \
-  --stop_threshold 0.759 --batch_size 128 --version 1 --resnet_size 50 --epochs_between_evals 4 --weight_decay 1e-4 \
-  --inter_op_parallelism_threads 2 --intra_op_parallelism_threads 4 --fine_tune --use_bfloat16
-
-# Restore the original PYTHONPATH
-export PYTHONPATH="${ORIG_PYTHONPATH}"
+$ python launch_benchmark.py \
+         --verbose \
+         --model-name=resnet50v1_5 \
+         --precision=fp32 \
+         --mode=training \
+         --framework tensorflow \
+         --noinstall \
+         --checkpoint=/home/<user>/checkpoints \
+         --data-location=/home/<user>/dataset/ImageNetData_directory \
+         --mpi_hostnames='host1,host2' \
+         --mpi_num_processes=4 2>&1
 ```
---map-by ppr:4:socket:pe=7 starts 4 mpi processes per socket and binds each of them to 7 cores
-
---fine_tune is optional. Adding this param sets base learning rate to 0.1. The default base learning rate (when —fine-tune is not set) is 0.128. Convergence with mlperf target accuracy of 75.9% has been achieved using both 0.1 and 0.128.
-
-Although --train_epochs is set to 1000, target accuracy of 75.9% can be reached in 84 epochs. --stop_threshold ensures that training will stop once target accuracy of 75.9% has been reached.
-
-For bfloat16 training, pass the param --use_bfloat16 in mpirun command (as indicated above). For FP32, do not pass this param. Other than this difference, rest of instructions remain same for convergence with bfloat16 and FP32.
-
-For running distributed training on a cluster, modify params passed to mpirun (add --host … , modify --map-by …), OMP_NUM_THREADS and model hyper parameters depending on hardware configuration of machines in the cluster

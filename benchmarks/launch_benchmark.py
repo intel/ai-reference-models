@@ -55,8 +55,12 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                                          intelai_models_common)
 
         if self.args.docker_image:
-            self.run_docker_container(benchmark_scripts, intelai_models,
-                                      intelai_models_common, env_var_dict)
+            if self.args.framework == 'tensorflow_serving':
+                self.run_bare_metal(benchmark_scripts, intelai_models,
+                                    intelai_models_common, env_var_dict)
+            elif self.args.framework == 'tensorflow':
+                self.run_docker_container(benchmark_scripts, intelai_models,
+                                          intelai_models_common, env_var_dict)
         else:
             self.run_bare_metal(benchmark_scripts, intelai_models,
                                 intelai_models_common, env_var_dict)
@@ -181,37 +185,39 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # Standard env vars
         args = self.args
         env_var_dict = {
-            "DATASET_LOCATION_VOL": args.data_location,
-            "CHECKPOINT_DIRECTORY_VOL": args.checkpoint,
+            "ACCURACY_ONLY": args.accuracy_only,
             "BACKBONE_MODEL_DIRECTORY_VOL": args.backbone_model,
+            "BATCH_SIZE": args.batch_size,
+            "BENCHMARK_ONLY": args.benchmark_only,
+            "BENCHMARK_SCRIPTS": benchmark_scripts,
+            "CHECKPOINT_DIRECTORY_VOL": args.checkpoint,
+            "DATASET_LOCATION_VOL": args.data_location,
+            "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
+            "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
+            "DISABLE_TCMALLOC": args.disable_tcmalloc,
+            "DOCKER": args.docker_image or str(args.docker_image is not None),
             "EXTERNAL_MODELS_SOURCE_DIRECTORY": args.model_source_dir,
+            "FRAMEWORK": args.framework,
             "INTELAI_MODELS": intelai_models,
             "INTELAI_MODELS_COMMON": intelai_models_common,
-            "BENCHMARK_SCRIPTS": benchmark_scripts,
-            "SOCKET_ID": args.socket_id,
-            "MODEL_NAME": args.model_name,
             "MODE": args.mode,
-            "PRECISION": args.precision,
-            "VERBOSE": args.verbose,
-            "BATCH_SIZE": args.batch_size,
-            "USE_CASE": use_case,
-            "FRAMEWORK": args.framework,
+            "MODEL_NAME": args.model_name,
+            "MPI_HOSTNAMES": args.mpi_hostnames,
+            "MPI_NUM_PROCESSES": args.mpi,
+            "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi,
+            "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",  # noqa: E501
             "NUM_CORES": args.num_cores,
             "NUM_INTER_THREADS": args.num_inter_threads,
-            "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",  # noqa: E501
             "NUM_INTRA_THREADS": args.num_intra_threads,
-            "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
             "NUM_TRAIN_STEPS": args.num_train_steps,
-            "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
-            "BENCHMARK_ONLY": args.benchmark_only,
-            "ACCURACY_ONLY": args.accuracy_only,
             "OUTPUT_RESULTS": args.output_results,
-            "DISABLE_TCMALLOC": args.disable_tcmalloc,
-            "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
-            "DOCKER": str(args.docker_image is not None),
+            "PRECISION": args.precision,
             "PYTHON_EXE": sys.executable if not args.docker_image else "python",
-            "MPI_NUM_PROCESSES": args.mpi,
-            "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi
+            "SOCKET_ID": args.socket_id,
+            "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
+            "TF_SERVING_VERSION": args.tf_serving_version,
+            "USE_CASE": use_case,
+            "VERBOSE": args.verbose
         }
 
         # Add custom model args as env vars)
@@ -247,10 +253,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # To Launch Tensorflow Serving benchmark we need only --in-graph arg.
         # It does not support checkpoint files.
         if args.framework == "tensorflow_serving":
-            if args.docker_image:
-                raise ValueError("--docker-image arg is not supported with tensorflow serving benchmarking, "
-                                 "as script automatically builds image and supplies it.")
-
             if checkpoint_path:
                 raise ValueError("--checkpoint-path arg is not supported with tensorflow serving benchmarking")
 

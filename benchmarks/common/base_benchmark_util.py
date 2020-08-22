@@ -98,6 +98,11 @@ class BaseBenchmarkUtil(object):
             dest="num_mpi", default=1)
 
         self._common_arg_parser.add_argument(
+            "--mpi_hostnames",
+            help="Specify MPI hostnames string of the form --mpi_hostnames host1,host2,host3",
+            dest="mpi_hostnames", default=None)
+
+        self._common_arg_parser.add_argument(
             "-d", "--data-location",
             help="Specify the location of the data. If this parameter is not "
                  "specified, the benchmark will use random/dummy data.",
@@ -188,6 +193,18 @@ class BaseBenchmarkUtil(object):
                  "with --accuracy-only and --mode=inference.",
             dest="output_results", action="store_true")
 
+        self._common_arg_parser.add_argument(
+            "--optimized-softmax",
+            help="Use tf.nn.softmax as opposed to basic math ops",
+            dest="optimized_softmax", choices=["True", "False"],
+            default=True)
+
+        self._common_arg_parser.add_argument(
+            "--experimental-gelu",
+            help="use tf.nn.gelu as opposed to basic math ops",
+            dest="experimental_gelu", choices=["True", "False"],
+            default=False)
+
         # Note this can't be a normal boolean flag, because we need to know when the user
         # does not explicitly set the arg value so that we can apply the appropriate
         # default value, depending on the the precision.
@@ -221,6 +238,12 @@ class BaseBenchmarkUtil(object):
             help="Folder to dump output into. The output directory will default to "
                  "'models/benchmarks/common/tensorflow/logs' if no path is specified.",
             default="/models/benchmarks/common/tensorflow/logs")
+
+        self._common_arg_parser.add_argument(
+            "--tf-serving-version",
+            help="TF serving version to run the script with"
+                 "'master' if no value is specified.",
+            default="master")
 
         # Allow for additional command line args after --
         self._common_arg_parser.add_argument(

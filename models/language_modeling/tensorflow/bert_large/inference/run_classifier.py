@@ -27,6 +27,9 @@ import tokenization
 import tensorflow as tf
 import generic_ops as bf
 
+from datetime import datetime
+from datetime import timedelta
+
 
 from absl import app
 #from absl import flags
@@ -138,6 +141,43 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 27,
 
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
+
+flags.DEFINE_string("precision", "fp32", "[Optional] TensorFlow training precision.")
+flags.DEFINE_string("frozen_graph_path", None, "path of frozen graph.")
+
+class LoggerHook(tf.estimator.SessionRunHook):
+  """ Logs runtime. """
+
+  def __init__(self, batch_size):
+    self.batch_size = batch_size
+
+  def begin(self):
+    self._step = 0
+    self._total_duration = 0
+    self._warmup = 2
+
+  def before_run(self, run_context):
+    self._start_time = datetime.now()
+
+  def after_run(self, run_context, run_values):
+    self._step += 1
+    duration = datetime.now() - self._start_time
+    ms = duration.total_seconds() * 1000.00
+    if self._step > self._warmup:
+      self._total_duration += ms
+      if self._step % 100 == 0:
+        print("Current step: %d, time in ms: %.2f" %(self._step, ms))
+    else:
+      print("Warmup step: %d, time in ms: %.2f" %(self._step, ms))
+
+  def end(self, run_context):
+    print("self._step: %d" %self._step)
+    print("Total time spent (after warmup): %.2f ms" %(self._total_duration))
+    print("Time spent per iteration (after warmup): %.2f ms" %(self._total_duration/(self._step - self._warmup)))
+    time_takes = self._total_duration / (self._step - self._warmup)
+    if self.batch_size == 1:
+      print("Latency is %.2f ms" % (time_takes))
+    print("Throughput is %.2f samples/s" % (self.batch_size * 1000 / time_takes))
 
 class InputExample(object):
   """A single training/test example for simple sequence classification."""
@@ -620,7 +660,7 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
       # I.e., 0.1 dropout
       output_layer = tf.nn.dropout(output_layer, rate=1 - (0.9))
 
-    logits = bf.matmul(output_layer, output_weights, transpose_b=True)
+    logits = tf.matmul(output_layer, output_weights, transpose_b=True)
     logits = tf.nn.bias_add(logits, output_bias)
     probabilities = bf.softmax(logits, axis=-1)
     log_probs = tf.nn.log_softmax(logits, axis=-1)
@@ -634,10 +674,25 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
 
 
 def create_model_top(bert_config, is_training, input_ids, input_mask, segment_ids,
-                     label_ids, num_labels, use_one_hot_embeddings):
+                     label_ids, num_labels, use_one_hot_embeddings, frozen_graph=None):
+
+    if frozen_graph and not is_training:
+        inputs ={'input_ids': input_ids,
+                 'input_mask': input_mask,
+                 'segment_ids': segment_ids,
+                 'label_ids': label_ids}
+
+        outputs = ['loss/Mean', 'loss/Sum', 'loss/BiasAdd', 'loss/Softmax']
+        outputs = ['{}:0'.format(name) for name in outputs]
+
+        with tf.io.gfile.GFile(frozen_graph, "rb") as f:
+            graph_def = tf.compat.v1.GraphDef()
+            graph_def.ParseFromString(f.read())
+
+        return tf.graph_util.import_graph_def(graph_def, inputs, outputs, name="")
 
     if bert_config.precision == "bfloat16" :
-      with tf.contrib.tpu.bfloat16_scope():
+      with tf.compat.v1.tpu.bfloat16_scope():
         (total_loss, per_example_loss, logits, probabilities) = create_model(
           bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
           num_labels, use_one_hot_embeddings)
@@ -651,7 +706,7 @@ def create_model_top(bert_config, is_training, input_ids, input_mask, segment_id
 
 def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings):
+                     use_one_hot_embeddings, frozen_graph):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -675,7 +730,7 @@ def model_fn_builder(bert_config, num_labels, init_checkpoint, learning_rate,
 
     (total_loss, per_example_loss, logits, probabilities) = create_model_top(
         bert_config, is_training, input_ids, input_mask, segment_ids, label_ids,
-        num_labels, use_one_hot_embeddings)
+        num_labels, use_one_hot_embeddings, frozen_graph)
 
     tvars = tf.compat.v1.trainable_variables()
     initialized_variable_names = {}
@@ -839,6 +894,8 @@ def main(_):
         "At least one of `do_train`, `do_eval` or `do_predict' must be True.")
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
+  if FLAGS.precision:
+    bert_config.precision = FLAGS.precision
 
   if FLAGS.max_seq_length > bert_config.max_position_embeddings:
     raise ValueError(
@@ -899,7 +956,8 @@ def main(_):
       num_train_steps=num_train_steps,
       num_warmup_steps=num_warmup_steps,
       use_tpu=FLAGS.use_tpu,
-      use_one_hot_embeddings=FLAGS.use_tpu)
+      use_one_hot_embeddings=FLAGS.use_tpu,
+      frozen_graph=FLAGS.frozen_graph_path)
 
   # If TPU is not available, this will fall back to normal Estimator on CPU
   # or GPU.
@@ -971,7 +1029,13 @@ def main(_):
         is_training=False,
         drop_remainder=eval_drop_remainder)
 
-    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps)
+    hooks = [LoggerHook(FLAGS.eval_batch_size)]
+    if FLAGS.profile:
+      tf.compat.v1.logging.info("***** Running prediction with profiler*****")
+      hooks = [tf.estimator.ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir,
+                                         show_memory=False)]
+
+    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps, hooks=hooks)
 
     output_eval_file = os.path.join(FLAGS.output_dir, "eval_results.txt")
     with tf.io.gfile.GFile(output_eval_file, "w") as writer:
@@ -1009,7 +1073,12 @@ def main(_):
         is_training=False,
         drop_remainder=predict_drop_remainder)
 
-    result = estimator.predict(input_fn=predict_input_fn)
+    hooks = [LoggerHook(FLAGS.predict_batch_size)]
+    if FLAGS.profile:
+      tf.compat.v1.logging.info("***** Running prediction with profiler*****")
+      hooks = [tf.estimator.ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir,
+                                         show_memory=False)]
+    result = estimator.predict(input_fn=predict_input_fn, hooks=hooks)
 
     output_predict_file = os.path.join(FLAGS.output_dir, "test_results.tsv")
     with tf.io.gfile.GFile(output_predict_file, "w") as writer:
