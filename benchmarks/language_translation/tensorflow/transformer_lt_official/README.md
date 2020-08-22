@@ -11,7 +11,7 @@ Instructions and scripts for model inference for other platforms are coming late
 1. Download and extract the frozen graph of the model and necessary data files.
 
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
+$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
 $ tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
 $ ls -l transformer_lt_official_fp32_pretrained_model/*
 transformer_lt_official_fp32_pretrained_model/graph:
@@ -52,7 +52,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
     --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \
@@ -71,7 +71,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 64 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
     --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
     --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \

@@ -84,6 +84,7 @@ def test_base_model_initializer(
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     os.environ["PYTHON_EXE"] = "python"
+    os.environ["MPI_HOSTNAMES"] = "None"
     os.environ["MPI_NUM_PROCESSES"] = "None"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 

@@ -17,7 +17,7 @@ This matrix contains weights of each element in the source sequence when produci
 
 
 ##  Recommended Settings 
-In addition to TensorFlow optimizations that use the Intel® Math Kernel Library for Deep Neural Networks (Intel® MKL-DNN) to utilize instruction sets appropriately, the runtime settings also significantly contribute to improved performance. 
+In addition to TensorFlow optimizations that use the [Intel® oneAPI Deep Neural Network Library (Intel® oneDNN)](https://github.com/oneapi-src/oneDNN) to utilize instruction sets appropriately, the runtime settings also significantly contribute to improved performance. 
 Tuning these options to optimize CPU workloads is vital to optimize performance of TensorFlow on Intel® processors. 
 Below are the set of run-time options tested empirically on Transformer-LT and recommended by Intel: 
 
@@ -60,10 +60,8 @@ os.environ["KMP_BLOCKTIME"] = "1"
 os.environ["KMP_SETTINGS"] = "1"
 os.environ["KMP_AFFINITY"]= "granularity=fine,verbose,compact,1,0"
 os.environ["OMP_NUM_THREADS"]= <# physical cores>
-config = tf.ConfigProto()
-config.intra_op_parallelism_threads = <# physical cores>
-config.inter_op_parallelism_threads = 1
-tf.Session(config=config)
+tf.config.threading.set_inter_op_parallelism_threads(1)
+tf.config.threading.set_intra_op_parallelism_threads(<# physical cores>)
 ```
 
 ## Hands-on Tutorial
@@ -83,7 +81,7 @@ git clone https://github.com/IntelAI/models.git
 ```
 mkdir ~/transformer_LT_german
 cd ~/transformer_LT_german
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
 tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
 ```
 Refer to the Transformer LT Official [README](/benchmarks/language_translation/tensorflow/transformer_lt_official) to get the latest location of the pretrained model.
@@ -127,7 +125,7 @@ Or, if you have your own model/data, ensure the folder structure following the s
 1. Pull the relevant Intel-optimized TensorFlow Docker image.
    [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intel/intel-optimized-tensorflow:2.1.0
+docker pull docker.io/intel/intel-optimized-tensorflow:2.2.0
 ```
 2. cd to the inference script directory in local IntelAI repo
 ```bash        
@@ -156,7 +154,7 @@ python launch_benchmark.py \
      --framework tensorflow \
      --batch-size 1 \
      --socket-id 0 \
-     --docker-image intel/intel-optimized-tensorflow:2.1.0 \
+     --docker-image intel/intel-optimized-tensorflow:2.2.0 \
      --in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
      --data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
      -- file=newstest2014.en \
@@ -177,7 +175,7 @@ python launch_benchmark.py \
 	--framework tensorflow \
 	--batch-size 64 \
 	--socket-id 0 \
-	--docker-image intel/intel-optimized-tensorflow:2.1.0 \
+	--docker-image intel/intel-optimized-tensorflow:2.2.0 \
 	--in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
 	--data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
 	-- file=newstest2014.en \
@@ -214,10 +212,10 @@ python launch_benchmark.py \
 	--framework tensorflow \
 	--batch-size 64 \
 	--socket-id 0 \
-	--docker-image intel/intel-optimized-tensorflow:2.1.0 \
+	--docker-image intel/intel-optimized-tensorflow:2.2.0 \
 	--in-graph ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
 	--data-location ~/transformer_LT_german/transformer_lt_official_fp32_pretrained_model/data \
-	--debug
+	--debug \
 	-- file=newstest2014.en \
 	vocab_file=vocab.txt \
 	file_out=translate.txt \

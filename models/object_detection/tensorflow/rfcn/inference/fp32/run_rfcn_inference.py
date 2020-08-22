@@ -243,7 +243,7 @@ class RFCNRunner:
               print ('Avg. Duration per Step:' + str(total_duration / 1))
           else:
             if (index % self.STEP_SIZE == 0):
-              print ('Step ' + str(index) + ': ' + str(step_duration) + ' seconds')
+              print ('Step ' + str(index) + ': ' + str(step_duration) + ' seconds', flush=True)
             if index == self.MAX_STEPS - 1:
               print ('Avg. Duration per Step:' + str(total_duration / self.MAX_STEPS))
 

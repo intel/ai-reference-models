@@ -43,6 +43,8 @@ class ModelInitializer(BaseModelInitializer):
             self.args.batch_size = 32
 
         arg_parser = ArgumentParser(description="Parse bert inference args")
+        arg_parser.add_argument('--infer-option', help=' Inference SQuAD, Pretraining or classifier',
+                                dest="infer_option", default='SQuAD')
         arg_parser.add_argument(
             "--doc-stride", dest="doc_stride", type=int, default=None)
         arg_parser.add_argument(
@@ -57,6 +59,10 @@ class ModelInitializer(BaseModelInitializer):
             "--predict-file", dest="predict_file", default="dev-v1.1.json")
         arg_parser.add_argument(
             "--init-checkpoint", dest="init_checkpoint", default="model.ckpt-3649")
+        arg_parser.add_argument(
+            "--experimental-gelu", dest="experimental_gelu", default="False")
+        arg_parser.add_argument(
+            "--optimized-softmax", dest="optimized_softmax", default="True")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -98,6 +104,8 @@ class ModelInitializer(BaseModelInitializer):
                      " --precision=" + str(self.args.precision) + \
                      " --output_dir=" + str(self.args.output_dir) + \
                      " --predict_batch_size=" + str(self.args.batch_size) + \
+                     " --experimental_gelu=" + str(self.args.experimental_gelu) + \
+                     " --optimized_softmax=" + str(self.args.optimized_softmax) + \
                      " --do_predict=True "
 
         if self.args.accuracy_only:
