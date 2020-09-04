@@ -1,11 +1,11 @@
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the model training package to get the yaml and config
-files for running inference on a single node using Kubernetes.
+Download and untar the model <mode> package to get the yaml and config
+files for running <mode> on a single node using Kubernetes.
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
-tar -xvf wide-deep-large-ds-fp32-training.tar.gz
+wget <package url>
+tar -xvf <package name>
 ```
 
 ### Execution
@@ -30,7 +30,7 @@ quickstart
 The deployments uses [kustomize](https://kustomize.io/) to configure
 parameters. The parameters can be customized by editing kustomize
 related files prior to deploying the single node or pipeline job, which
-is described in the [next section](#single-node-inference).
+is described in the [next section](#single-node-training).
 
 #### Single-node Training
 
@@ -40,7 +40,7 @@ which results in the pod creation and then the specified
 
 Prior to running the job, edit the kustomize varaibles in the mlops.env
 file. The mlops.env file for single node jobs is located at:
-`wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node/mlops.env`.
+`<package dir>/quickstart/k8s/mlops/single-node/mlops.env`.
 Key parameters to edit are:
 ```
 DATASET_DIR=<path to the dataset directory>
@@ -56,7 +56,7 @@ GROUP_ID=<Your group ID>
 Once you have edited the `mlops.env` file with your parameters,
 deploy the training job using the following command:
 ```
-kubectl -k wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node apply
+kubectl -k <package dir>/quickstart/k8s/mlops/single-node apply
 ```
 
 Depending on what version of kustomize is being used, you may get an
@@ -64,7 +64,7 @@ error reporting that a string was received instead of a integer. If this
 is the case, the following command can be used to remove quotes that
 are causing the issue:
 ```
-kubectl kustomize wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | kubectl apply -f -
+kubectl kustomize <package dir>/quickstart/k8s/mlops/single-node | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | kubectl apply -f -
 ```
 
 Once the kubernetes job has been submitted, the pod status can be
@@ -78,7 +78,7 @@ the `OUTPUT_DIR`.
 
 Clean up the model training job (delete the pod and other resources) using the following command:
 ```
-kubectl -k wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node delete
+kubectl -k <package dir>/quickstart/k8s/mlops/single-node delete
 ```
 
 #### Model Training and TF Serving Pipeline
@@ -98,7 +98,7 @@ external requests.
 
 Prior to running the job, edit the kustomize varaibles in the mlops.env
 file. The mlops.env file for single node jobs is located at:
-`wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline/mlops.env`.
+`<package dir>/quickstart/k8s/mlops/pipeline/mlops.env`.
 Key parameters to edit are:
 ```
 DATASET_DIR=<path to the dataset directory>
@@ -118,7 +118,7 @@ deploy the training job using the command below. This command will
 deploy resources to your default namespace. To use a different
 namespace, specify `-n <namespace>` as part of your command.
 ```
-kubectl -k wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline apply
+kubectl -k <package dir>/quickstart/k8s/mlops/pipeline apply
 ```
 
 Depending on what version of kustomize is being used, you may get an
@@ -126,7 +126,7 @@ error reporting that a string was received instead of a integer. If this
 is the case, the following command can be used to remove quotes that
 are causing the issue:
 ```
-kubectl kustomize wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | kubectl apply -f -
+kubectl kustomize <package dir>/quickstart/k8s/mlops/pipeline | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | kubectl apply -f -
 ```
 
 Once the kubernetes workflow has been submitted, the status can be
@@ -151,7 +151,7 @@ Run the [run_tf_serving_client.py](run_tf_serving_client.py) script with
 the `--help` flag to see the argument options:
 ```
 $ python run_wide_deep_client.py --help
-usage: wide-deep-large-ds-fp32-training/quickstart/run_tf_serving_client.py [-h]
+usage: <package dir>/quickstart/run_tf_serving_client.py [-h]
        [-s SERVER] -d DATA_FILE [-b BATCH_SIZE] [-n NUM_ITERATION] [-w WARM_UP_ITERATION]
 
 optional arguments:
@@ -177,7 +177,7 @@ optional arguments:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python wide-deep-large-ds-fp32-training/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
+   python <package dir>/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
    ```
    The script will call the served model using data from the csv file
    and output performance and accuracy metrics.
@@ -187,10 +187,5 @@ optional arguments:
 To clean up the model training/serving pipeline, delete the service,
 deployment, and other resources using the following commands:
 ```
-kubectl -k wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline delete
+kubectl -k <package dir>/quickstart/k8s/mlops/pipeline delete
 ```
-
-### Advanced Options
-
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
-document for more advanced use cases.

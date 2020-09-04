@@ -12,10 +12,9 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training.tar.gz
-tar -xvf resnet50v1_5_fp32_training.tar.gz
-cd resnet50v1_5_fp32_training
+wget <package url>
+tar -xvf <package name>
+cd <package dir>
 
 quickstart/<script name>.sh
 ```
-

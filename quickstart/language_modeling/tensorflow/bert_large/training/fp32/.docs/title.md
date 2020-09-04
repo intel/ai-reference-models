@@ -1,2 +1,2 @@
 <!--- 0. Title -->
-# BERT FP32 Training
+# <model name> <precision> <mode>

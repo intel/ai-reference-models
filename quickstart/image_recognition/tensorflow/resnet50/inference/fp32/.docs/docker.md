@@ -1,8 +1,8 @@
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-The model container `model-zoo:2.1.0-resnet50-fp32-inference` includes the scripts 
-and libraries needed to run ResNet50 FP32 inference. To run one of the model
+The model container `<docker image>` includes the scripts
+and libraries needed to run <model name> <precision> <mode>. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
 
@@ -18,7 +18,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50-fp32-inference \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
 

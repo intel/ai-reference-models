@@ -1,15 +1,15 @@
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the bert large FP32 training package:
+Download and untar the <model name> <precision> <mode> package:
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-training.tar.gz
-tar -xvf bert-large-fp32-training.tar.gz
+wget <package url>
+tar -xvf <package name>
 ```
 
 ### Execution
 
-The model package for bert large FP32 training includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
+The model package for <model name> <precision> <mode> includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
 The directory tree within the model package is shown below:
 
 ```
@@ -62,7 +62,7 @@ The distributed training algorithm is handled by mpirun.
 The command to run an MPIJob is shown below:
 
 ```
-kubectl -k bert-large-fp32-training/quickstart/k8s/mlops/multi-node apply
+kubectl -k <package dir>/quickstart/k8s/mlops/multi-node apply
 ```
 
 Within the multi-node use case, a number of kustomize processing directives are enabled.
@@ -74,7 +74,7 @@ Within the multi-node use case, a number of kustomize processing directives are 
 REGISTRY=docker.io
 DATASET_DIR=/tf_dataset
 WORKSPACE=/workspace
-MODEL_DIR=bert_larg_fp32_training
+MODEL_DIR=<package dir>
 OUTPUT_DIR=/tmp/output
 ```
 
@@ -90,7 +90,7 @@ securityContext:
 
 #### multi-node distributed training output
 
-Viewing the log output of the bert large MPIJob is done by viewing the logs of the
+Viewing the log output of the <model name> MPIJob is done by viewing the logs of the
 launcher pod. The launcher pod aggregrates output from the workerpods.
 This pod is found by filtering the list of pods for the name 'launcher'
 
@@ -108,12 +108,12 @@ kubectl logs -f $(kubectl get pods -oname|grep launch|cut -c5-)
 
 Single node training is similar to the docker use case but the command is run within a pod.
 Training is done by submitting a pod.yaml to the k8s api-server which results in the pod creation and running
-the /workspace/bert-large-fp32-training/quickstart/fp32_training_single_node.sh command within the pod's container.
+the /workspace/<package dir>/quickstart/fp32_training_single_node.sh command within the pod's container.
 
 The command to run a pod is shown below:
 
 ```
-kubectl -k bert-large-fp32-training/quickstart/k8s/mlops/single-node apply
+kubectl -k <package dir>/quickstart/k8s/mlops/single-node apply
 ```
 
 Within the single-node use case, the same number of kustomize processing directives are enabled as the multi-node.
@@ -125,7 +125,7 @@ Within the single-node use case, the same number of kustomize processing directi
 REGISTRY=docker.io
 DATASET_DIR=/tf_dataset
 WORKSPACE=/workspace
-MODEL_DIR=bert_larg_fp32_training
+MODEL_DIR=<package dir>
 OUTPUT_DIR=/tmp/output
 ```
 
@@ -141,8 +141,8 @@ securityContext:
 
 #### single-node training output
 
-Viewing the log output of the bert large
-training pod is done by filtering the list of pods for the name 'training'.
+Viewing the log output of the <model name> <mode> pod is done by
+filtering the list of pods for the name 'training'.
 
 ```
 kubectl get pods -oname|grep training|cut -c5-
@@ -159,7 +159,7 @@ kubectl logs -f $(kubectl get pods -oname|grep training|cut -c5-)
 Removing this MPIJob (and stopping training) is done by running:
 
 ```
-kubectl -k bert-large-fp32-training/quickstart/k8s/mlops/multi-node delete
+kubectl -k <package dir>/quickstart/k8s/mlops/multi-node delete
 ```
 
 Remove the mpi-operator after running the quickstart by running the following command with

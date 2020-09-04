@@ -145,5 +145,5 @@ kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/pipeline delete
 
 ### Advanced Options
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.

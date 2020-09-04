@@ -24,4 +24,3 @@ from the [Google bert repo](https://github.com/google-research/bert#squad-11).
 The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
 should be downloaded to the same directory. Set the `DATASET_DIR` to point to
 that directory when running bert fine tuning using the SQuAD data.
-

@@ -1,2 +1,2 @@
 <!--- 0. Title -->
-# Wide & Deep FP32 inference
+# <model name> <precision> <mode>

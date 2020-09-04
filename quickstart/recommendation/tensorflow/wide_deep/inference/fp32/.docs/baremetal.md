@@ -4,8 +4,8 @@
 1. Download and untar the Wide & Deep FP32 inference model package:
 
     ```
-    wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-fp32-inference.tar.gz
-    tar -xvf wide-deep-fp32-inference.tar.gz
+    wget <package url>
+    tar -xvf <package name>
     ```
 
 2. Clone `tensorflow/models` as a `tensorflow-models`
@@ -20,15 +20,13 @@
     $ git checkout wide-deep-tf2 
     ```
 
-3. Once your environment is setup, navigate back to the directory that contains the Wide & Deep FP32 inference
+3. Once your environment is setup, navigate back to the directory that contains the <model name> <precision> <mode>
    model package, set environment variables pointing to your dataset and output directories, and then run
-   a quickstart script. To run inference with performance metrics:
-
+   a quickstart script.
     ```
     DATASET_DIR=<path to the Wide & Deep dataset directory>
     OUTPUT_DIR=<directory where log files will be written>
     TF_MODEL_SOURCE_DIR=<path to tensorflow-models>
 
-    quickstart/fp32_inference_online.sh
+    quickstart/<script name>.sh
     ```
-

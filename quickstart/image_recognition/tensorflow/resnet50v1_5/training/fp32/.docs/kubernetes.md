@@ -3,13 +3,13 @@
 
 Download and untar the ResNet50 v1.5 FP32 training package:
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training.tar.gz
-tar -xvf resnet50v1-5-fp32-training.tar.gz
+wget <package url>
+tar -xvf <package name>
 ```
 
 ### Execution
 
-The model package for ResNet50 v1.5 FP32 training includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
+The model package for <model name> <precision> <mode> includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
 The directory tree within the model package is shown below:
 
 ```
@@ -62,7 +62,7 @@ The distributed training algorithm is handled by mpirun.
 The command to run an MPIJob is shown below:
 
 ```
-kubectl -k resnet50v1-5-fp32-training/quickstart/k8s/mlops/multi-node apply
+kubectl -k <package dir>/quickstart/k8s/mlops/multi-node apply
 ```
 
 Within the multi-node use case, a number of kustomize processing directives are enabled.
@@ -73,8 +73,8 @@ Within the multi-node use case, a number of kustomize processing directives are 
 ```
 REGISTRY=docker.io
 DATASET_DIR=/tf_dataset
-MODEL_DIR=ROOT/resnet50v1-5-fp32-training
-OUTPUT_DIR=ROOT/resnet50v1-5-fp32-training/output
+MODEL_DIR=ROOT/<package dir>
+OUTPUT_DIR=ROOT/<package dir>/output
 ```
 
 The mlops user may run the distributed training job with their own uid/gid permissions by editing securityContext in the mlops-job-patch.yaml file.
@@ -112,7 +112,7 @@ the fp32_training_demo.sh command within the pod's container.
 The command to run a pod is shown below:
 
 ```
-kubectl -k resnet50v1-5-fp32-training/quickstart/k8s/mlops/single-node apply
+kubectl -k <package dir>/quickstart/k8s/mlops/single-node apply
 ```
 
 Within the single-node use case, the same number of kustomize processing directives are enabled as the multi-node.
@@ -123,8 +123,8 @@ Within the single-node use case, the same number of kustomize processing directi
 ```
 REGISTRY=docker.io
 DATASET_DIR=/tf_dataset
-MODEL_DIR=ROOT/resnet50v1-5-fp32-training
-OUTPUT_DIR=ROOT/resnet50v1-5-fp32-training/output
+MODEL_DIR=ROOT/<package dir>
+OUTPUT_DIR=ROOT/<package dir>/output
 ```
 
 The mlops user may run the single-node training job with their own uid/gid permissions by editing securityContext in the pod-patch.yaml file.
@@ -157,7 +157,7 @@ kubectl logs -f $(kubectl get pods -oname|grep training|cut -c5-)
 Removing this MPIJob (and stopping training) is done by running:
 
 ```
-kubectl -k resnet50v1-5-fp32-training/quickstart/k8s/mlops/multi-node delete
+kubectl -k <package dir>/quickstart/k8s/mlops/multi-node delete
 ```
 
 Remove the mpi-operator after running the quickstart by running the following command with

@@ -16,9 +16,9 @@ that point to your dataset and an output directory.
 DATASET_DIR=<path to the test dataset directory>
 OUTPUT_DIR=<directory where the log and translation file will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/transformer-lt-official-fp32-inference.tar.gz
-tar -xzf transformer-lt-official-fp32-inference.tar.gz
-cd transformer-lt-official-fp32-inference
+wget <package url>
+tar -xzf <package name>
+cd <package dir>
 
 quickstart/<script name>.sh
 ```
