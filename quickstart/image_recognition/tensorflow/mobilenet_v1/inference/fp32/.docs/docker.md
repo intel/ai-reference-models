@@ -1,4 +1,4 @@
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 The model container `model-zoo:2.1.0-mobilenet-v1-fp32-inference` includes the scripts 
@@ -18,7 +18,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-mobilenet-v1-fp32-inference \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
 

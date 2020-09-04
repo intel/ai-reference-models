@@ -1,9 +1,9 @@
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-When running in docker, the RFCN FP32 inference container includes the
-libraries and the model package, which are needed to run RFCN FP32
-inference. To run the quickstart scripts, you'll need to provide volume mounts for the
+When running in docker, the <model name> <precision> <mode> container includes the
+libraries and the model package, which are needed to run <model name> <precision>
+<mode>. To run the quickstart scripts, you'll need to provide volume mounts for the
 [COCO validation dataset](/dataset/coco/README.md) and an output directory
 where log files will be written.
 
@@ -20,7 +20,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference \
+  <docker image> \
   /bin/bash quickstart/fp32_inference.sh
 ```
 
@@ -45,7 +45,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference \
+  <docker image> \
   /bin/bash quickstart/fp32_accuracy.sh
 ```
 

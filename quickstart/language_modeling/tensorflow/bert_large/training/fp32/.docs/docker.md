@@ -1,8 +1,8 @@
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-The bert FP32 training model container includes the scripts and libraries
-needed to run bert large FP32 fine tuning. To run one of the quickstart scripts
+The <model name> <precision> <mode> model container includes the scripts and libraries
+needed to run <model name> <precision> fine tuning. To run one of the quickstart scripts
 using this container, you'll need to provide volume mounts for the pretrained model,
 dataset, and an output directory where log and checkpoint files will be written.
 
@@ -22,7 +22,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-training \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
 
@@ -58,7 +58,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-training \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
 

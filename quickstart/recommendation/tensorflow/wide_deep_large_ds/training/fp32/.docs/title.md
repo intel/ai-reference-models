@@ -1,2 +1,2 @@
 <!--- 0. Title -->
-# Wide and Deep Large Dataset FP32 Training
+# <model name> <precision> <mode>

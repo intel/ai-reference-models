@@ -47,7 +47,7 @@ Download and untar the RFCN FP32 inference model package:
 
 ```
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz
-tar -xvf rfcn_fp32_inference.tar.gz
+tar -xvf rfcn-fp32-inference.tar.gz
 ```
 
 In addition to the general model zoo requirements, RFCN uses the object detection code from the
@@ -58,7 +58,7 @@ below and apply the patch from the RFCN FP32 inference model package to run with
 git clone https://github.com/tensorflow/models.git tensorflow-models
 cd tensorflow-models
 git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
-git apply ../rfcn_fp32_inference/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
+git apply ../rfcn-fp32-inference/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 ```
 
 You must also install the dependencies and run the protobuf compilation described in the
@@ -69,9 +69,7 @@ Once your environment is setup, navigate back to the directory that contains the
 model package, set environment variables pointing to your dataset and output directories, and then run
 a quickstart script.
 
-
 To run inference with performance metrics:
-
 ```
 DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
@@ -87,9 +85,7 @@ OUTPUT_DIR=<directory where log files will be written>
 quickstart/fp32_accuracy.sh
 ```
 
-
-
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 When running in docker, the RFCN FP32 inference container includes the
@@ -312,7 +308,7 @@ kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/pipeline delete
 
 ### Advanced Options
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->

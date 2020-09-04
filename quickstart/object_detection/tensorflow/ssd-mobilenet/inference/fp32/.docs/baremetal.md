@@ -2,29 +2,18 @@
 ## Bare Metal
 
 To run on bare metal, [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
-to run the SSD-Mobilenet scripts must be installed in your environment.
+to run the <model name> scripts must be installed in your environment.
 
-Download and untar the SSD-Mobilenet FP32 inference model package:
-
-```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/ssd-mobilenet-fp32-inference.tar.gz
-tar -xvf ssd-mobilenet-fp32-inference.tar.gz
-```
-
-To run inference with performance metrics:
-
+To run <mode>, set environment variables with the path to the dataset
+and an output directory, download and untar the <model name> <precision>
+<mode> model package, and then run a [quickstart script](#quick-start-scripts).
 ```
 DATASET_LOCATION=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
 
-quickstart/fp32_inference.sh
-```
+wget <package url>
+tar -xzf <package name>
+cd <package dir>
 
-To get accuracy metrics:
+quickstart/<script name>.sh
 ```
-DATASET_LOCATION=<path to the TF record file>
-OUTPUT_DIR=<directory where log files will be written>
-
-quickstart/fp32_accuracy.sh
-```
-

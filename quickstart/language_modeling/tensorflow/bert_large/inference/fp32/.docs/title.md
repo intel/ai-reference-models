@@ -1,2 +1,2 @@
 <!--- 0. Title -->
-# BERT LARGE FP32 Inference
+# <model name> <precision> <mode>

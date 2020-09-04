@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# BERT FP32 Training
+# BERT Large FP32 training
 
 <!-- 10. Description -->
 
@@ -11,7 +11,6 @@ For all fine-tuning the datasets (SQuAD, MultiNLI, MRPC etc..) and checkpoints
 should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
 
 Refer to google reference page for [checkpoints](https://github.com/google-research/bert#pre-trained-models).
-
 
 <!--- 20. Download link -->
 ## Download link
@@ -44,7 +43,6 @@ from the [Google bert repo](https://github.com/google-research/bert#squad-11).
 The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
 should be downloaded to the same directory. Set the `DATASET_DIR` to point to
 that directory when running bert fine tuning using the SQuAD data.
-
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -130,11 +128,11 @@ MPI_NUM_PROCESSES=<number of sockets to use>
 ```
 
 
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-The bert FP32 training model container includes the scripts and libraries
-needed to run bert large FP32 fine tuning. To run one of the quickstart scripts
+The BERT Large FP32 training model container includes the scripts and libraries
+needed to run BERT Large FP32 fine tuning. To run one of the quickstart scripts
 using this container, you'll need to provide volume mounts for the pretrained model,
 dataset, and an output directory where log and checkpoint files will be written.
 
@@ -198,7 +196,7 @@ docker run \
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the bert large FP32 training package:
+Download and untar the BERT Large FP32 training package:
 ```
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-training.tar.gz
 tar -xvf bert-large-fp32-training.tar.gz
@@ -206,7 +204,7 @@ tar -xvf bert-large-fp32-training.tar.gz
 
 ### Execution
 
-The model package for bert large FP32 training includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
+The model package for BERT Large FP32 training includes a deployment that does 'mlops' (machine learning operations) on kubernetes.
 The directory tree within the model package is shown below:
 
 ```
@@ -271,7 +269,7 @@ Within the multi-node use case, a number of kustomize processing directives are 
 REGISTRY=docker.io
 DATASET_DIR=/tf_dataset
 WORKSPACE=/workspace
-MODEL_DIR=bert_larg_fp32_training
+MODEL_DIR=bert-large-fp32-training
 OUTPUT_DIR=/tmp/output
 ```
 
@@ -287,7 +285,7 @@ securityContext:
 
 #### multi-node distributed training output
 
-Viewing the log output of the bert large MPIJob is done by viewing the logs of the
+Viewing the log output of the BERT Large MPIJob is done by viewing the logs of the
 launcher pod. The launcher pod aggregrates output from the workerpods.
 This pod is found by filtering the list of pods for the name 'launcher'
 
@@ -322,7 +320,7 @@ Within the single-node use case, the same number of kustomize processing directi
 REGISTRY=docker.io
 DATASET_DIR=/tf_dataset
 WORKSPACE=/workspace
-MODEL_DIR=bert_larg_fp32_training
+MODEL_DIR=bert-large-fp32-training
 OUTPUT_DIR=/tmp/output
 ```
 
@@ -338,8 +336,8 @@ securityContext:
 
 #### single-node training output
 
-Viewing the log output of the bert large
-training pod is done by filtering the list of pods for the name 'training'.
+Viewing the log output of the BERT Large training pod is done by
+filtering the list of pods for the name 'training'.
 
 ```
 kubectl get pods -oname|grep training|cut -c5-
