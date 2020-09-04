@@ -12,9 +12,9 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/mobilenet-v1-fp32-inference.tar.gz
-tar -xzf mobilenet_v1_fp32_inference.tar.gz
-cd mobilenet_v1_fp32_inference
+wget <package url>
+tar -xzf <package name>
+cd <package dir>
 
 quickstart/<script name>.sh
 ```

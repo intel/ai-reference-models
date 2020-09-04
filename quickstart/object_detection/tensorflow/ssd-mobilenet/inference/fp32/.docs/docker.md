@@ -1,77 +1,24 @@
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-When running in docker, the SSD-Mobilenet FP32 inference container includes the
-libraries and the model package, which are needed to run SSD-Mobilenet FP32
-inference. To run the quickstart scripts, you'll need to provide volume mounts for the
+When running in docker, the <model name> <precision> <mode> container includes the
+libraries and the model package, which are needed to run <model name> <precision>
+<mode>. To run the quickstart scripts, you'll need to provide volume mounts for the
 [COCO validation dataset](/datasets/coco/README.md) TF Record file and an output directory
 where log files will be written.
 
-To run inference with performance metrics:
+```
+DATASET_DIR=<path to the dataset (for accuracy testing only)>
+OUTPUT_DIR=<directory where log files will be written>
 
-    ```
-    DATASET_DIR=<path to the coco TF Record file>
-    OUTPUT_DIR=<directory where log files will be written>
-
-    docker run \
-    --env DATASET_LOCATION=${DATASET_LOCATION} \
-    --env OUTPUT_DIR=${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} \
-    --env https_proxy=${https_proxy} \
-    --volume ${DATASET_LOCATION}:${DATASET_LOCATION} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --privileged --init -t \
-    amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-ssd-mobilenet-fp32-inference \
-    /bin/bash quickstart/fp32_inference.sh
-    ```
-
-Below is a sample log file tail when running for inference:
-
-    ```
-    Batchsize: 1
-    Time spent per BATCH:    46.7484 ms
-    Total samples/sec:    21.3911 samples/s
-    Log file location: ${OUTPUT_DIR}/benchmark_ssd-mobilenet_inference_fp32_20200731_203206.log
-    ```
-
-To get accuracy metrics:
-    
-    ```
-    DATASET_LOCATION=<path to the coco TF record file>
-    OUTPUT_DIR=<directory where log files will be written>
-
-    docker run \
-    --env DATASET_LOCATION=${DATASET_LOCATION} \
-    --env OUTPUT_DIR=${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} \
-    --env https_proxy=${https_proxy} \
-    --volume ${DATASET_LOCATION}:${DATASET_LOCATION} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --privileged --init -t \
-    amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-ssd-mobilenet-fp32-inference \
-    /bin/bash quickstart/fp32_accuracy.sh
-    ```
-
-Below is a sample log file tail when running for accuracy:
-
-    ```
-    Running per image evaluation...
-    Evaluate annotation type *bbox*
-    DONE (t=39.59s).
-    Accumulating evaluation results...
-    DONE (t=4.17s).
-     Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.262
-     Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.417
-     Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.277
-     Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.262
-     Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
-     Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-     Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.239
-     Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.342
-     Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.362
-     Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.362
-     Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = -1.000
-     Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = -1.000
-    Log file location: ${OUTPUT_DIR}/benchmark_ssd-mobilenet_inference_fp32_20200731_203756.log
-    ```
-
+docker run \
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --privileged --init -t \
+  <docker image> \
+  /bin/bash quickstart/<script name>.sh
+```

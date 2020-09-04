@@ -1,13 +1,11 @@
 <!--- 0. Title -->
-# BERT LARGE FP32 Inference
+# BERT Large FP32 inference
 
 <!-- 10. Description -->
 
 This document has instructions for running
 [BERT](https://github.com/google-research/bert#what-is-bert) FP32 inference
 using Intel-optimized TensorFlow.
-
-
 
 <!--- 20. Download link -->
 ## Download link
@@ -18,18 +16,17 @@ using Intel-optimized TensorFlow.
 ## Datasets
 
 ### BERT Large Data
-Download and unzip the BERT large uncased (whole word masking) model from the
-    [google bert repo](https://github.com/google-research/bert#pre-trained-models).
-    Then, download the Stanford Question Answering Dataset (SQuAD) dataset file `dev-v1.1.json` into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
+Download and unzip the BERT Large uncased (whole word masking) model from the
+[google bert repo](https://github.com/google-research/bert#pre-trained-models).
+Then, download the Stanford Question Answering Dataset (SQuAD) dataset file `dev-v1.1.json` into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
 
-    ```
-    wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
-    unzip wwm_uncased_L-24_H-1024_A-16.zip
+```
+wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
+unzip wwm_uncased_L-24_H-1024_A-16.zip
 
-    wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_uncased_L-24_H-1024_A-16
-    ```
-Set the `DATASET_DIR` to point to that directory when running bert large inference using the SQuAD data.
-
+wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_uncased_L-24_H-1024_A-16
+```
+Set the `DATASET_DIR` to point to that directory when running BERT Large inference using the SQuAD data.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -60,7 +57,6 @@ package, set environment variables, and then run a quickstart script. See the
 for more details on the different options.
 
 The snippet below shows how to run a quickstart script:
-
 ```
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-inference.tar.gz
 tar -xvf bert-large-fp32-inference.tar.gz
@@ -70,15 +66,14 @@ DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where log files will be saved>
 
 # Run a script for your desired usage
-bash ./quickstart/<SCRIPT NAME>.sh
+bash ./quickstart/<script name>.sh
 ```
 
-
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-The bert large FP32 inference model container includes the scripts and libraries
-needed to run bert large FP32 inference. To run one of the quickstart scripts
+The BERT Large FP32 inference model container includes the scripts and libraries
+needed to run BERT Large FP32 inference. To run one of the quickstart scripts
 using this container, you'll need to provide volume mounts for the,
 dataset, and an output directory where log files will be written.
 
@@ -95,10 +90,9 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  model-zoo:2.1.0-language-modeling-bert-large-fp32-inference \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-inference \
   /bin/bash ./quickstart/<SCRIPT NAME>.sh
 ```
-
 
 <!--- 80. License -->
 ## License

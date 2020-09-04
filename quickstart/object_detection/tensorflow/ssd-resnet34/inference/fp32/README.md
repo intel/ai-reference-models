@@ -14,7 +14,7 @@ Use the link below to download the model package for SSD-ResNet34
 FP32 <inference>. The model package includes scripts and
 documentation need to run the model.
 
-[ssd-resnet34-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/ssd-resnet34-fp32-inference.tar.gz)
+[ssd-resnet34-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/ssd-resnet34-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -126,7 +126,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object_detection-ssd-resnet34-fp32-inference \
+  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-ssd-resnet34-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

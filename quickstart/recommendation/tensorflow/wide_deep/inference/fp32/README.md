@@ -15,15 +15,14 @@ Intel-optimized TensorFlow.
 <!--- 30. Datasets -->
 ## Dataset
 Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running 
-   following python script, which is a standalone version of [census_dataset.py](https://github.com/tensorflow/models/blob/master/official/wide_deep/census_dataset.py) Please note that below program requires `requests` module to be installed. You can install is using `pip install requests`. 
-   Dataset will be downloaded in directory provided using `--data_dir`. If you are behind proxy then you can proxy urls 
-   using `--http_proxy` and `--https_proxy` arguments.
-   ```
-   $ git clone git@github.com:IntelAI/models.git
-   $ cd models
-   $ python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
-   ```
-
+following python script, which is a standalone version of [census_dataset.py](https://github.com/tensorflow/models/blob/master/official/wide_deep/census_dataset.py) Please note that below program requires `requests` module to be installed. You can install is using `pip install requests`.
+Dataset will be downloaded in directory provided using `--data_dir`. If you are behind proxy then you can proxy urls
+using `--http_proxy` and `--https_proxy` arguments.
+```
+$ git clone git@github.com:IntelAI/models.git
+$ cd models
+$ python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
+```
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -62,40 +61,42 @@ These quickstart scripts can be run in different environments:
 
 3. Once your environment is setup, navigate back to the directory that contains the Wide & Deep FP32 inference
    model package, set environment variables pointing to your dataset and output directories, and then run
-   a quickstart script. To run inference with performance metrics:
-
+   a quickstart script.
     ```
     DATASET_DIR=<path to the Wide & Deep dataset directory>
     OUTPUT_DIR=<directory where log files will be written>
     TF_MODEL_SOURCE_DIR=<path to tensorflow-models>
 
-    quickstart/fp32_inference_online.sh
+    quickstart/<script name>.sh
     ```
 
-
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ### Docker
 
- When running in docker, the Wide & Deep FP32 inference container includes the model package and tensorflow model source repo,
-   which is needed to run inference. To run the quickstart scripts, you'll need to provide volume mounts for the dataset and 
-   an output directory where log files will be written.
+When running in docker, the Wide & Deep FP32 inference container includes the model package and TensorFlow model source repo,
+which is needed to run inference. To run the quickstart scripts, you'll need to provide volume mounts for the dataset and
+an output directory where log files will be written.
 
-    To run inference with performance metrics:
-    ```
-    DATASET_DIR=<path to the Wide & Deep dataset directory>
-    OUTPUT_DIR=<directory where log files will be written>
+```
+DATASET_DIR=<path to the Wide & Deep dataset directory>
+OUTPUT_DIR=<directory where log files will be written>
 
-    docker run \
-    --env DATASET_DIR=${DATASET_DIR} \
-    --env OUTPUT_DIR=${OUTPUT_DIR} \
-    --env http_proxy=${http_proxy} \
-    --env https_proxy=${https_proxy} \
-    --volume ${DATASET_DIR}:${DATASET_DIR} \
-    --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-    --privileged --init -t \
-    amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-fp32-inference \
-    /bin/bash ./quickstart/fp32_inference_online.sh
-    ```
+docker run \
+--env DATASET_DIR=${DATASET_DIR} \
+--env OUTPUT_DIR=${OUTPUT_DIR} \
+--env http_proxy=${http_proxy} \
+--env https_proxy=${https_proxy} \
+--volume ${DATASET_DIR}:${DATASET_DIR} \
+--volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+--privileged --init -t \
+amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-fp32-inference \
+/bin/bash quickstart/<script name>.sh
+```
+
+<!-- 61. Advanced Options -->
+
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
+document for more advanced use cases.
 
 <!--- 80. License -->
 ## License

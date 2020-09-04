@@ -48,9 +48,9 @@ testing only -- inference benchmarking uses synthetic data) and an
 DATASET_DIR=<path to the dataset (for accuracy testing only)>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/<model-precision-mode>.tar.gz
-tar -xzf <model-precision-mode>.tar.gz
-cd <model-precision-mode>
+wget <package url>
+tar -xzf <package name>
+cd <package dir>
 
 quickstart/<script name>.sh
 ```

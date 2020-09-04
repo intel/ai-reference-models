@@ -21,6 +21,6 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-<use case>-<model-precision-mode> \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```

@@ -1,9 +1,9 @@
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 The model container used in the example below includes the scripts,
-libraries, and pretrained model needed to run Transformer LT FP32
-inference. To run one of the model quickstart scripts using this
+libraries, and pretrained model needed to run <model name> <precision>
+<mode>. To run one of the model quickstart scripts using this
 container, you'll need to provide volume mounts for the dataset and an
 output directory.
 
@@ -19,7 +19,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-translation-transformer-lt-official-fp32-inference \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
 
