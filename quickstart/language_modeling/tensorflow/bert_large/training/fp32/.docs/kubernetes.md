@@ -14,9 +14,13 @@ The directory tree within the model package is shown below:
 
 ```
 quickstart
+├── common
+│   └── tensorflow
+│       └── k8s
+│           └── mlops
+│               └── base
 └── k8s
     └── mlops
-        ├── base
         ├── multi-node
         └── single-node
 ```
@@ -25,8 +29,8 @@ The deployments use [kustomize](https://kustomize.io/) to configure deployment p
 following directories:
 
 ```
+quickstart/common/tensorflow/k8s/mlops/base/kustomization.yaml
 quickstart/k8s/mlops/single-node/kustomization.yaml
-quickstart/k8s/mlops/base/kustomization.yaml
 quickstart/k8s/mlops/multi-node/kustomization.yaml
 ```
 
