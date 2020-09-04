@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# ResNet50 v1.5 FP32 Training
+# ResNet50 v1.5 FP32 training
 
 <!-- 10. Description -->
 
@@ -46,14 +46,13 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
 
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training.tar.gz
-tar -xvf resnet50v1_5_fp32_training.tar.gz
-cd resnet50v1_5_fp32_training
+tar -xvf resnet50v1-5-fp32-training.tar.gz
+cd resnet50v1-5-fp32-training
 
 quickstart/<script name>.sh
 ```
 
-
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 The ResNet50 v1.5 FP32 training model container includes the scripts
@@ -247,9 +246,9 @@ kubectl delete -f https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.2.3
 ```
 
 
-!<--- 61. Advanced Options -->
+<!-- 61. Advanced Options -->
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->

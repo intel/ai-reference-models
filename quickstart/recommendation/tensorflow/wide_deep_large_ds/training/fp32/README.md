@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# Wide and Deep Large Dataset FP32 Training
+# Wide and Deep Large Dataset FP32 training
 
 <!-- 10. Description -->
 
@@ -10,7 +10,7 @@ using a large dataset using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-training.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz)
+[wide-deep-large-ds-fp32-training.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -61,7 +61,7 @@ OUTPUT_DIR=<directory where the logs, checkpoints, and the saved model will be w
 
 wget https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
-cd wide-deep-large-ds-fp32-training.tar.gz
+cd wide-deep-large-ds-fp32-training
 
 quickstart/<script name>.sh
 ```
@@ -69,17 +69,14 @@ quickstart/<script name>.sh
 The script will write a log file, checkpoints, and the saved model to
 the `OUTPUT_DIR`.
 
-
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 The model container used in the example below includes the scripts and
-libraries needed to run Wide and Deep FP32 training. To run one of the
+libraries needed to run Wide and Deep Large Dataset FP32 training. To run one of the
 model quickstart scripts using this container, you'll need to provide
 volume mounts for the [dataset](#dataset) and an output directory where
 logs, checkpoints, and the saved model will be written.
-
-To run inference with performance metrics:
 ```
 DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs, checkpoints, and the saved model will be written>
@@ -99,14 +96,13 @@ docker run \
 The script will write a log file, checkpoints, and the saved model to
 the `OUTPUT_DIR`.
 
-
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the model training package to get the yaml and config
-files for running inference on a single node using Kubernetes.
+files for running training on a single node using Kubernetes.
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
+wget https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
 ```
 
@@ -132,7 +128,7 @@ quickstart
 The deployments uses [kustomize](https://kustomize.io/) to configure
 parameters. The parameters can be customized by editing kustomize
 related files prior to deploying the single node or pipeline job, which
-is described in the [next section](#single-node-inference).
+is described in the [next section](#single-node-training).
 
 #### Single-node Training
 
@@ -292,14 +288,9 @@ deployment, and other resources using the following commands:
 kubectl -k wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline delete
 ```
 
-### Advanced Options
+<!-- 61. Advanced Options -->
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
-document for more advanced use cases.
-
-!<--- 61. Advanced Options -->
-
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->

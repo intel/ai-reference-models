@@ -13,16 +13,14 @@ package, set environment variables, and then run a quickstart script. See the
 for more details on the different options.
 
 The snippet below shows how to run a quickstart script:
-
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-inference.tar.gz
-tar -xvf bert-large-fp32-inference.tar.gz
-cd bert-large-fp32-inference
+wget <package url>
+tar -xvf <package name>
+cd <package dir>
 
 DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where log files will be saved>
 
 # Run a script for your desired usage
-bash ./quickstart/<SCRIPT NAME>.sh
+bash ./quickstart/<script name>.sh
 ```
-

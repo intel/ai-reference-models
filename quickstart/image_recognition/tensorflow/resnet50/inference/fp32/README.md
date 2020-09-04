@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# ResNet50 FP32 Inference
+# ResNet50 FP32 inference
 
 <!-- 10. Description -->
 
@@ -45,17 +45,17 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50-fp32-inference.tar.gz
-tar -xzf resnet50_fp32_inference.tar.gz
-cd resnet50_fp32_inference
+tar -xzf resnet50-fp32-inference.tar.gz
+cd resnet50-fp32-inference
 
 quickstart/<script name>.sh
 ```
 
 
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
-The model container `model-zoo:2.1.0-resnet50-fp32-inference` includes the scripts 
+The model container `amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50-fp32-inference` includes the scripts
 and libraries needed to run ResNet50 FP32 inference. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
@@ -77,9 +77,9 @@ docker run \
 ```
 
 
-!<--- 61. Advanced Options -->
+<!-- 61. Advanced Options -->
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->

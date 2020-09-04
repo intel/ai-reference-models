@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# MobileNet V1 FP32 Inference
+# MobileNet V1 FP32 inference
 
 <!-- 10. Description -->
 This document has instructions for running MobileNet V1 FP32 inference using
@@ -43,14 +43,14 @@ DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/mobilenet-v1-fp32-inference.tar.gz
-tar -xzf mobilenet_v1_fp32_inference.tar.gz
-cd mobilenet_v1_fp32_inference
+tar -xzf mobilenet-v1-fp32-inference.tar.gz
+cd mobilenet-v1-fp32-inference
 
 quickstart/<script name>.sh
 ```
 
 
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 The model container `model-zoo:2.1.0-mobilenet-v1-fp32-inference` includes the scripts 
@@ -75,9 +75,9 @@ docker run \
 ```
 
 
-!<--- 61. Advanced Options -->
+<!-- 61. Advanced Options -->
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->

@@ -14,9 +14,9 @@ details on the different options.
 
 The snippet below shows a quickstart script running with a single instance:
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-training.tar.gz
-tar -xvf bert-large-fp32-training.tar.gz
-cd bert-large-fp32-training
+wget <package url>
+tar -xvf <package name>
+cd <package dir>
 
 CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>
@@ -52,9 +52,9 @@ installed in your environment:
 * horovod==0.19.1
 
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-training.tar.gz
-tar -xvf bert-large-fp32-training.tar.gz
-cd bert-large-fp32-training
+wget <package url>
+tar -xvf <package name>
+cd <package dir>
 
 CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>

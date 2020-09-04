@@ -1,12 +1,12 @@
 <!--- 0. Title -->
-# Transformer LT Official FP32 Inference
+# Transformer LT Official FP32 inference
 
 <!-- 10. Description -->
 
 This document has instructions for running
 [Transformer Language Translation](https://arxiv.org/pdf/1706.03762.pdf)
 FP32 inference using Intel-optimized TensorFlow. The original code for
-the Transformer LT model came from the
+the Transformer LT Official model came from the
 [TensorFlow Model Garden repository](https://github.com/tensorflow/models/tree/v2.2.0/official/nlp/transformer).
 
 
@@ -74,11 +74,11 @@ If you have your own pretrained model, you can specify the path to the frozen
 graph .pb file using the `FROZEN_GRAPH` environment variable.
 
 
-!<--- 60. Docker -->
+<!-- 60. Docker -->
 ## Docker
 
 The model container used in the example below includes the scripts,
-libraries, and pretrained model needed to run Transformer LT FP32
+libraries, and pretrained model needed to run Transformer LT Official FP32
 inference. To run one of the model quickstart scripts using this
 container, you'll need to provide volume mounts for the dataset and an
 output directory.
@@ -104,9 +104,9 @@ graph .pb file using the `FROZEN_GRAPH` environment variable and mount the
 frozen graph's directory as a volume in the container.
 
 
-!<--- 61. Advanced Options -->
+<!-- 61. Advanced Options -->
 
-See the [Advanced Options for Model Packages and Containers](ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->
