@@ -14,12 +14,13 @@ The model package includes a deployment that does 'mlops' (machine learning
 operations) on kubernetes.
 The directory tree within the model package is shown below:
 ```
-quickstart/
+quickstart
 ├── common
-│   └── k8s
-│       └── mlops
-│           ├── base
-│           └── single-node
+│   └── tensorflow
+│       └── k8s
+│           └── mlops
+│               ├── base
+│               └── single-node
 └── k8s
     └── mlops
         ├── pipeline

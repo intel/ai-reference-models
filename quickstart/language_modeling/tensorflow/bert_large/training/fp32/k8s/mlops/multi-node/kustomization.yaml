@@ -1,7 +1,7 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 bases:
-- ../../../common/k8s/mlops/multi-node
+- ../../../common/tensorflow/k8s/mlops/multi-node
 configMapGenerator:
 - name: mlops-env
   env: mlops.env
