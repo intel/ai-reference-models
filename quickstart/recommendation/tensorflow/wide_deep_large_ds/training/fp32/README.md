@@ -116,12 +116,13 @@ The model package includes a deployment that does 'mlops' (machine learning
 operations) on kubernetes.
 The directory tree within the model package is shown below:
 ```
-quickstart/
+quickstart
 ├── common
-│   └── k8s
-│       └── mlops
-│           ├── base
-│           └── single-node
+│   └── tensorflow
+│       └── k8s
+│           └── mlops
+│               ├── base
+│               └── single-node
 └── k8s
     └── mlops
         ├── pipeline
@@ -278,7 +279,7 @@ optional arguments:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
+   python wide-deep-large-ds-fp32-training/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
    ```
    The script will call the served model using data from the csv file
    and output performance and accuracy metrics.

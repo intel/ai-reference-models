@@ -172,7 +172,7 @@ Download and untar the model training package to get the yaml and config
 files for running inference on a single node using Kubernetes.
 ```
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz
-tar -xvf rfcn_fp32_inference.tar.gz
+tar -xvf rfcn-fp32-inference.tar.gz
 ```
 
 ### Execution
@@ -181,12 +181,13 @@ The model package includes a deployment that does 'mlops' (machine learning
 operations) on kubernetes.
 The directory tree within the model package is shown below:
 ```
-quickstart/
+quickstart
 ├── common
-│   └── k8s
-│       └── mlops
-│           ├── base
-│           └── single-node
+│   └── tensorflow
+│       └── k8s
+│           └── mlops
+│               ├── base
+│               └── single-node
 └── k8s
     └── mlops
         ├── pipeline
@@ -212,7 +213,7 @@ which results in the pod creation and then the specified
 
 Prior to running the job, edit the kustomize varaibles in the mlops.env
 file. The mlops.env file for single node jobs is located at:
-`rfcn_fp32_inference/quickstart/k8s/mlops/single-node/mlops.env`.
+`rfcn-fp32-inference/quickstart/k8s/mlops/single-node/mlops.env`.
 Key parameters to edit are:
 ```
 DATASET_DIR=<path to the dataset directory>
@@ -253,7 +254,7 @@ checked using `kubectl get pods` and the logs can be viewed using
 
 Remove the workflow using the following command:
 ```
-kubectl -k rfcn_fp32_inference/quickstart/k8s/mlops/single-node delete
+kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/single-node delete
 ```
 
 #### Pipeline
@@ -268,7 +269,7 @@ the TF records file.
 
 Prior to running the workflow, edit the kustomize varaibles in the mlops.env
 file. The mlops.env file for workflow is located at:
-`rfcn_fp32_inference/quickstart/k8s/mlops/pipeline/mlops.env`.
+`rfcn-fp32-inference/quickstart/k8s/mlops/pipeline/mlops.env`.
 Key parameters to edit are:
 ```
 WORKFLOW_NAME=<name for the workflow being deployed>
@@ -306,7 +307,7 @@ $ kubectl logs <pod name> main
 
 Remove the workflow using the following command:
 ```
-kubectl -k rfcn_fp32_inference/quickstart/k8s/mlops/pipeline delete
+kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/pipeline delete
 ```
 
 ### Advanced Options
