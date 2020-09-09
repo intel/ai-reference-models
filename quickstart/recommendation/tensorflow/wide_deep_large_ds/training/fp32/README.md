@@ -35,8 +35,8 @@ files should be used as the `DATASET_DIR` when running [quickstart scripts](#qui
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_training_500_steps.sh`](fp32_training_500_steps.sh) | Limits training to 500 steps for a shorter training run. |
-| [`fp32_training.sh`](fp32_training.sh) | Trains the model for 10 epochs. |
+| [`fp32_training_check_accuracy.sh`](fp32_training_check_accuracy.sh) | Trains the model for a specified number of steps (default is 500) and then compare the accuracy against the specified target accuracy. If the accuracy is not met, then script exits with error code 1. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`fp32_training.sh`](fp32_training.sh) | Trains the model for 10 epochs. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
 
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
@@ -52,12 +52,13 @@ To run on bare metal, the following prerequisites must be installed in your envi
 
 Download and untar the model package and then run a
 [quickstart script](#quick-start-scripts) with enviornment variables
-that point to the [dataset](#dataset) and an output directory where
-log files, checkpoint files, and the saved model will be written.
+that point to the [dataset](#dataset), a checkpoint directory, and an
+output directory where log files and the saved model will be written.
 
 ```
 DATASET_DIR=<path to the dataset directory>
-OUTPUT_DIR=<directory where the logs, checkpoints, and the saved model will be written>
+OUTPUT_DIR=<directory where the logs and the saved model will be written>
+CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
 
 wget https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
@@ -66,8 +67,9 @@ cd wide-deep-large-ds-fp32-training
 quickstart/<script name>.sh
 ```
 
-The script will write a log file, checkpoints, and the saved model to
-the `OUTPUT_DIR`.
+The script will write a log file and the saved model to the `OUTPUT_DIR`
+and checkpoints will be written to the `CHECKPOINT_DIR`.
+
 
 <!-- 60. Docker -->
 ## Docker
@@ -75,26 +77,29 @@ the `OUTPUT_DIR`.
 The model container used in the example below includes the scripts and
 libraries needed to run Wide and Deep Large Dataset FP32 training. To run one of the
 model quickstart scripts using this container, you'll need to provide
-volume mounts for the [dataset](#dataset) and an output directory where
-logs, checkpoints, and the saved model will be written.
+volume mounts for the [dataset](#dataset), checkpoints, and an output
+directory where logs and the saved model will be written.
 ```
 DATASET_DIR=<path to the dataset directory>
-OUTPUT_DIR=<directory where the logs, checkpoints, and the saved model will be written>
+OUTPUT_DIR=<directory where the logs and the saved model will be written>
+CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --privileged --init -t \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-large-ds-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 
-The script will write a log file, checkpoints, and the saved model to
-the `OUTPUT_DIR`.
+The script will write a log file and the saved model to the `OUTPUT_DIR`
+and checkpoints will be written to the `CHECKPOINT_DIR`.
 
 <!--- 70. Kubernetes -->
 ## Kubernetes
@@ -182,7 +187,15 @@ kubectl -k wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/single-node del
 #### Model Training and TF Serving Pipeline
 
 This pipeline runs the following steps using an Argo workflow:
-1. Model training on a single node, then export a saved model
+1. Train the model on a single node using the `fp32_training_check_accuracy.sh`
+   script. This script runs model training for a specified number of steps,
+   exports the saved model, and compares the accuacy against the value
+   specified in the `TARGET_ACCURACY` environment variable. If the model's
+   accuracy does not meet the target accuracy, this step will be retried
+   and continues training based on previous checkpoints in the specified
+   `CHECKPOINT_DIR`. If the `TARGET_ACCURACY` environment variable has
+   not been defined, then no accuracy check is done and it will continue
+   on to the next step, regardless of the model's accuracy.
 1. Deploy TensorFlow Serving containers with the saved model
 1. Create a service that exposes the TensorFlow Serving containers as a
    NodePort
@@ -200,16 +213,22 @@ file. The mlops.env file for single node jobs is located at:
 Key parameters to edit are:
 ```
 DATASET_DIR=<path to the dataset directory>
-MODEL_SCRIPT=<fp32_training.sh or another quickstart script>
+MODEL_SCRIPT=fp32_training_check_accuracy.sh
 NFS_MOUNT_PATH=<Path where the NFS directory will be mounted in the container>
 NFS_PATH=<NFS path>
 NFS_SERVER=<IP address for your NFS Server>
-OUTPUT_DIR=<Directory where logs, checkpoints, and the saved model will be written>
-REPLICAS=<Number of TF serving replicas to deploy>
-TF_SERVING_PORT=<Container port to use for TF serving>
 USER_ID=<Your user ID>
 GROUP_ID=<Your group ID>
+OUTPUT_DIR=<Directory where logs and the saved model will be written>
+CHECKPOINT_DIR=<Directory where checkpoint files will be read and written>
+TARGET_ACCURACY=<A decimal value between 0 and 1 (for example: .75)
+STEPS=<The number of training steps>
+RETRY_LIMIT=<The number of times to retry training>
+REPLICAS=<Number of TF serving replicas to deploy>
+TF_SERVING_PORT=<Container port to use for TF serving>
 ```
+> Note that the `OUTPUT_DIR` and `CHECKPOINT_DIR` paths should be on
+> your NFS mount path, so that they are accessible by all of the nodes.
 
 Once you have edited the `mlops.env` file with your parameters,
 deploy the training job using the command below. This command will
@@ -224,7 +243,7 @@ error reporting that a string was received instead of a integer. If this
 is the case, the following command can be used to remove quotes that
 are causing the issue:
 ```
-kubectl kustomize wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | kubectl apply -f -
+kubectl kustomize wide-deep-large-ds-fp32-training/quickstart/k8s/mlops/pipeline | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | sed 's/limit:.*"\([0-9]*\)"/limit: \1/g' | kubectl apply -f -
 ```
 
 Once the kubernetes workflow has been submitted, the status can be

@@ -3,8 +3,8 @@
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_training_500_steps.sh`](fp32_training_500_steps.sh) | Limits training to 500 steps for a shorter training run. |
-| [`fp32_training.sh`](fp32_training.sh) | Trains the model for 10 epochs. |
+| [`fp32_training_check_accuracy.sh`](fp32_training_check_accuracy.sh) | Trains the model for a specified number of steps (default is 500) and then compare the accuracy against the specified target accuracy. If the accuracy is not met, then script exits with error code 1. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`fp32_training.sh`](fp32_training.sh) | Trains the model for 10 epochs. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
 
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)

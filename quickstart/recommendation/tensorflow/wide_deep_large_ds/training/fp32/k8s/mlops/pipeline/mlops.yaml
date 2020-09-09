@@ -18,6 +18,8 @@ varReference:
 - kind: Workflow
   path: spec/templates/container/env/value
 - kind: Workflow
+  path: spec/templates/retryStrategy/limit
+- kind: Workflow
   path: spec/templates/volumes/hostPath/path
 - kind: Workflow
   path: spec/templates/container/volumeMounts/mountPath

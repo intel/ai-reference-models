@@ -97,3 +97,10 @@ vars:
     apiVersion: v1
     kind: ConfigMap
     name: mlops-env
+- name: RETRY_LIMIT
+  fieldref:
+    fieldPath: data.RETRY_LIMIT
+  objref:
+    apiVersion: v1
+    kind: ConfigMap
+    name: mlops-env
