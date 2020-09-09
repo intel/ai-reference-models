@@ -84,7 +84,15 @@ kubectl -k <package dir>/quickstart/k8s/mlops/single-node delete
 #### Model Training and TF Serving Pipeline
 
 This pipeline runs the following steps using an Argo workflow:
-1. Model training on a single node, then export a saved model
+1. Train the model on a single node using the `fp32_training_check_accuracy.sh`
+   script. This script runs model training for a specified number of steps,
+   exports the saved model, and compares the accuacy against the value
+   specified in the `TARGET_ACCURACY` environment variable. If the model's
+   accuracy does not meet the target accuracy, this step will be retried
+   and continues training based on previous checkpoints in the specified
+   `CHECKPOINT_DIR`. If the `TARGET_ACCURACY` environment variable has
+   not been defined, then no accuracy check is done and it will continue
+   on to the next step, regardless of the model's accuracy.
 1. Deploy TensorFlow Serving containers with the saved model
 1. Create a service that exposes the TensorFlow Serving containers as a
    NodePort
@@ -102,16 +110,22 @@ file. The mlops.env file for single node jobs is located at:
 Key parameters to edit are:
 ```
 DATASET_DIR=<path to the dataset directory>
-MODEL_SCRIPT=<fp32_training.sh or another quickstart script>
+MODEL_SCRIPT=fp32_training_check_accuracy.sh
 NFS_MOUNT_PATH=<Path where the NFS directory will be mounted in the container>
 NFS_PATH=<NFS path>
 NFS_SERVER=<IP address for your NFS Server>
-OUTPUT_DIR=<Directory where logs, checkpoints, and the saved model will be written>
-REPLICAS=<Number of TF serving replicas to deploy>
-TF_SERVING_PORT=<Container port to use for TF serving>
 USER_ID=<Your user ID>
 GROUP_ID=<Your group ID>
+OUTPUT_DIR=<Directory where logs and the saved model will be written>
+CHECKPOINT_DIR=<Directory where checkpoint files will be read and written>
+TARGET_ACCURACY=<A decimal value between 0 and 1 (for example: .75)
+STEPS=<The number of training steps>
+RETRY_LIMIT=<The number of times to retry training>
+REPLICAS=<Number of TF serving replicas to deploy>
+TF_SERVING_PORT=<Container port to use for TF serving>
 ```
+> Note that the `OUTPUT_DIR` and `CHECKPOINT_DIR` paths should be on
+> your NFS mount path, so that they are accessible by all of the nodes.
 
 Once you have edited the `mlops.env` file with your parameters,
 deploy the training job using the command below. This command will
@@ -126,7 +140,7 @@ error reporting that a string was received instead of a integer. If this
 is the case, the following command can be used to remove quotes that
 are causing the issue:
 ```
-kubectl kustomize <package dir>/quickstart/k8s/mlops/pipeline | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | kubectl apply -f -
+kubectl kustomize <package dir>/quickstart/k8s/mlops/pipeline | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | sed 's/limit:.*"\([0-9]*\)"/limit: \1/g' | kubectl apply -f -
 ```
 
 Once the kubernetes workflow has been submitted, the status can be
