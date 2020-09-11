@@ -1195,7 +1195,7 @@ function wide_deep_large_ds() {
       exit 1
     fi
     if [ ${MODE} == "training" ]; then
-      if [ ${steps} != None ]; then
+      if [[ ! -z $steps ]]; then
         CMD="${CMD} --steps=${steps}"
       fi
       if [ ${PRECISION} == "fp32" ]; then
