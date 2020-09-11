@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: wide-deep-large-ds-fp32-train-serve-wf
+  name: $(WORKFLOW_NAME)
 spec:
   entrypoint: $(MODEL_NAME)
   templates:
@@ -16,6 +16,7 @@ spec:
   - name: train-wide-deep-large-ds
     container:
       image: $(REGISTRY)/model-zoo:2.1.0-recommendation-$(MODEL_NAME)
+      imagePullPolicy: Always
       command: [$(MODEL_DIR)/quickstart/$(MODEL_SCRIPT)]
       securityContext:
         runAsUser: $(USER_ID)
@@ -36,6 +37,9 @@ spec:
         readOnly: true
       - name: users
         mountPath: $(NFS_MOUNT_PATH)
+    retryStrategy:
+      limit: $(RETRY_LIMIT)
+      retryPolicy: "OnFailure"
     volumes:
     - name: users
       persistentVolumeClaim:
@@ -46,7 +50,50 @@ spec:
   - name: wide-deep-large-ds-deployment
     resource:
       action: create
-      manifest:
+      manifest: |
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: $(MODEL_NAME)-deployment
+          ownerReferences:
+          - apiVersion: argoproj.io/v1alpha1
+            kind: Workflow
+            blockOwnerDeletion: true
+            name: "{{workflow.name}}"
+            uid: "{{workflow.uid}}"
+        spec:
+          selector:
+            matchLabels:
+              app: $(MODEL_NAME)-server
+          replicas: $(REPLICAS)
+          template:
+            metadata:
+              labels:
+                app: $(MODEL_NAME)-server
+            spec:
+              containers:
+              - name: $(MODEL_NAME)-server
+                image: intel/intel-optimized-tensorflow-serving:2.2.0
+                securityContext:
+                  runAsUser: $(USER_ID)
+                  runAsGroup: $(GROUP_ID)
+                env:
+                - name: MODEL_BASE_PATH
+                  value: $(OUTPUT_DIR)
+                - name: TF_CPP_MIN_VLOG_LEVEL
+                  value: "1"
+                envFrom:
+                - configMapRef:
+                    name: mlops-env
+                volumeMounts:
+                - name: users
+                  mountPath: $(NFS_MOUNT_PATH)
+                ports:
+                - containerPort: $(TF_SERVING_PORT)
+              volumes:
+              - name: users
+                persistentVolumeClaim:
+                  claimName: users-pvc
   - name: wide-deep-large-ds-service
     resource:
       action: create
