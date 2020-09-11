@@ -35,6 +35,14 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# Define a checkpoint arg, if CHECKPOINT_DIR was provided
+CHECKPOINT_ARG=""
+if [ ! -z "${CHECKPOINT_DIR}" ]; then
+  # If a checkpoint dir was provided, ensure that it exists, then setup the arg
+  mkdir -p ${CHECKPOINT_DIR}
+  CHECKPOINT_ARG="--checkpoint=${CHECKPOINT_DIR}"
+fi
+
 # Run wide and deep large dataset training
 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
  --model-name wide_deep_large_ds \
