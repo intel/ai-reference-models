@@ -206,9 +206,10 @@ def train_and_eval():
     test_steps = math.ceil(float(no_of_test_examples)/batch_size)
     model_type = 'WIDE_AND_DEEP'
     model_dir = path.join(args.output_dir, 'model_' + model_type + '_' + str(int(time.time())))
-    print("Saving model checkpoints to " + model_dir)
+    checkpoint_dir = args.checkpoint if args.checkpoint else model_dir
+    print("Saving model checkpoints to " + checkpoint_dir)
     export_dir = args.output_dir
-    m = build_estimator(model_type, model_dir, train_file, test_file)
+    m = build_estimator(model_type, checkpoint_dir, train_file, test_file)
     m.train(input_fn=lambda: generate_input_fn(
         train_file, batch_size, int(no_of_epochs)),steps=int(train_steps))
     print('fit done')
@@ -245,8 +246,13 @@ def get_arg_parser():
     )
     parser.add_argument(
         '--output_dir',
-        help='Full path to output directory for checkpoints and saved model',
+        help='Full path to output directory for logs and saved model',
         required=True
+    )
+    parser.add_argument(
+        '--checkpoint',
+        help='Full path to the input/output directory for checkpoints',
+        required=False
     )
     return parser
 
