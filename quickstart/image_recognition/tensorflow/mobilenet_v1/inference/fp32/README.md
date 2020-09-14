@@ -5,9 +5,10 @@
 This document has instructions for running MobileNet V1 FP32 inference using
 Intel-optimized TensorFlow.
 
-Note that the ImageNet dataset is used in these MobileNet V1 examples. To download and preprocess
-the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-from the TensorFlow models repo.
+Note that the ImageNet dataset is used in these MobileNet V1 examples.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 <!--- 20. Download link -->
 ## Download link

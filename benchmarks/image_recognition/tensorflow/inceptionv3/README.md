@@ -41,33 +41,9 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inc
 4. If you would like to run Inception V3 inference with real data or test for
 accuracy, you will need the ImageNet dataset.
 
-Register and download the
-[ImageNet dataset](http://image-net.org/download-images).
-
-Once you have the raw ImageNet dataset downloaded, we need to convert
-it to the TFRecord format. This is done using the
-[build_imagenet_data.py](https://github.com/tensorflow/models/blob/master/research/inception/inception/data/build_imagenet_data.py)
-script. There are instructions in the header of the script explaining
-its usage.
-
-After the script has completed, you should have a directory with the
-sharded dataset something like:
-
-```
-$ ll /home/<user>/datasets/ImageNet_TFRecords
--rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
--rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
--rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
-...
--rw-r--r--. 1 user 143137777 Jun 20 15:08 train-01022-of-01024
--rw-r--r--. 1 user 143315487 Jun 20 15:08 train-01023-of-01024
--rw-r--r--. 1 user  52223858 Jun 20 15:08 validation-00000-of-00128
--rw-r--r--. 1 user  51019711 Jun 20 15:08 validation-00001-of-00128
--rw-r--r--. 1 user  51520046 Jun 20 15:08 validation-00002-of-00128
-...
--rw-r--r--. 1 user  52508270 Jun 20 15:09 validation-00126-of-00128
--rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
-```
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 5. Next, navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
@@ -230,11 +206,11 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inc
 ```
 
 3. If you would like to run Inception V3 FP32 inference and test for
-accuracy, you will need the ImageNet dataset. Running for online
-and batch inference do not require the ImageNet dataset. Instructions for
-downloading the dataset and converting it to the TF Records format can
-be found in the TensorFlow documentation
-[here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
+accuracy, you will need the ImageNet dataset.
+
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 4. Navigate to the `benchmarks` directory in your local clone of
 the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
