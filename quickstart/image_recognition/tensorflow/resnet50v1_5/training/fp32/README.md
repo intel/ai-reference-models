@@ -6,10 +6,10 @@
 This document has instructions for running ResNet50 v1.5 FP32 training
 using Intel-optimized TensorFlow.
 
-Note that the ImageNet dataset is used in these ResNet50 v1.5 examples. To download and preprocess
-the ImageNet dataset, see the [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-from the TensorFlow models repo.
-
+Note that the ImageNet dataset is used in these ResNet50 v1.5 examples.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 <!--- 20. Download link -->
 ## Download link
