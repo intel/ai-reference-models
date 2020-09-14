@@ -20,16 +20,11 @@ and [training benchmark](https://github.com/mlperf/training).
 ## Int8 Inference Instructions
 
 1. Download the full ImageNet dataset and convert to the TF records format.
+   The ImageNet dataset directory location is only required to calculate the model accuracy.
 
-* Clone the tensorflow/models repository as `tensorflow-models`. This is to avoid conflict with Intel's `models` repo:
-```
-$ git clone https://github.com/tensorflow/models.git tensorflow-models
-```
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process and convert the ImageNet dataset to the TF records format.
-
-* The ImageNet dataset directory location is only required to calculate the model accuracy.
+   Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+   After running the conversion script you should have a directory with the
+   ImageNet dataset in the TF records format.
 
 2. Download the pre-trained model.
 ```
@@ -142,9 +137,9 @@ $ git clone https://github.com/IntelAI/models.git
 required (if running the model for batch or online inference, then dummy
 data will be used).
 
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process, and convert the ImageNet dataset to the TF records format.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
@@ -322,9 +317,9 @@ $ git clone https://github.com/IntelAI/models.git
 required (if running the model for batch or online inference, then dummy
 data will be used).
 
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process, and convert the ImageNet dataset to the TF records format.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
@@ -482,13 +477,9 @@ to get additional debug output or change the default output location.
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
-* Clone the tensorflow/models repository as `tensorflow-models`. This is to avoid conflict with Intel's `models` repo:
-```
-$ git clone https://github.com/tensorflow/models.git tensorflow-models
-```
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process and convert the ImageNet dataset to the TF records format.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 2. Clone the
 [intelai/models](https://github.com/intelai/models)
@@ -531,13 +522,9 @@ I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (... sec)
 
 1. Download the full ImageNet dataset and convert to the TF records format.
 
-* Clone the tensorflow/models repository:
-```
-$ git clone https://github.com/tensorflow/models.git
-```
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process and convert the ImageNet dataset to the TF records format.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 2. Clone the
 [intelai/models](https://github.com/intelai/models)

@@ -10,26 +10,9 @@ following modes/precisions:
 
     This step is required only for running accuracy, for running the model for performance we do not need to provide dataset.
 
-    Register and download the ImageNet dataset. Once you have the raw ImageNet dataset downloaded, we need to convert
-    it to the TFRecord format. The TensorFlow models repo provides
-    [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-    to download, process and convert the ImageNet dataset to the TF records format. After converting data, you should have a directory
-    with the sharded dataset something like below, we only need `validation-*` files, discard `train-*` files:
-    ```
-    $ ll /home/myuser/datasets/ImageNet_TFRecords
-    -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
-    -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
-    -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
-    ...
-    -rw-r--r--. 1 user 143137777 Jun 20 15:08 train-01022-of-01024
-    -rw-r--r--. 1 user 143315487 Jun 20 15:08 train-01023-of-01024
-    -rw-r--r--. 1 user  52223858 Jun 20 15:08 validation-00000-of-00128
-    -rw-r--r--. 1 user  51019711 Jun 20 15:08 validation-00001-of-00128
-    -rw-r--r--. 1 user  51520046 Jun 20 15:08 validation-00002-of-00128
-    ...
-    -rw-r--r--. 1 user  52508270 Jun 20 15:09 validation-00126-of-00128
-    -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
-    ```
+    Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+    After running the conversion script you should have a directory with the
+    ImageNet dataset in the TF records format.
 
 2. Download the pretrained model:
    ```
@@ -37,7 +20,7 @@ following modes/precisions:
    ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
-    and then run the model scripts for either online or batch inference or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
+    and then run the model scripts for either online or batch inference or accuracy. For --data-location in accuracy run, please use the ImageNet validation data path from step 1.
     Each model run has user configurable arguments separated from regular arguments by '--' at the end of the command.
     Unless configured, these arguments will run with default values. Below are the example codes for each use case:
 

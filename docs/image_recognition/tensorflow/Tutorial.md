@@ -137,7 +137,7 @@ b. [ResNet101](/benchmarks/image_recognition/tensorflow/resnet101) <br>
 c. [InceptionV3](/benchmarks/image_recognition/tensorflow/inceptionv3) <br>
 
 3. (optional) Download and setup a data directory that has image files in TFRecord format if you are inferring on a real dataset. 
-You can refer to [ImageNet](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data) or [Coco Dataset](http://cocodataset.org/#home) which have images converted to TFRecords, or you can run the [build_image_data.py](https://github.com/tensorflow/models/blob/f87a58cd96d45de73c9a8330a06b2ab56749a7fa/research/inception/inception/data/build_image_data.py) script to convert raw images into TFRecords.
+You can refer to [ImageNet](/datasets/imagenet) or [Coco Dataset](http://cocodataset.org/#home) which have images converted to TFRecords, or you can run the [build_image_data.py](https://github.com/tensorflow/models/blob/f87a58cd96d45de73c9a8330a06b2ab56749a7fa/research/inception/inception/data/build_image_data.py) script to convert raw images into TFRecords.
 
 4. Install [Docker](https://docs.docker.com/install/) since the tutorial runs on a Docker container.
 

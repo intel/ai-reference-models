@@ -28,10 +28,11 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
    ```
 
 3. If you would like to run Inception V4 inference and test for
-   accuracy, you will need the ImageNet dataset.  It is not necessary for batch or online inference, you have the option of using synthetic data instead.  Instructions for
-   downloading the ImageNet dataset and converting it to the TF Records
-   format and be found
-   [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
+   accuracy, you will need the ImageNet dataset.  It is not necessary for batch or online inference, you have the option of using synthetic data instead.
+
+   Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+   After running the conversion script you should have a directory with the
+   ImageNet dataset in the TF records format.
 
 4. Next, navigate to the `benchmarks` directory in your local clone of
    the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
@@ -157,10 +158,11 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 3. If you would like to run Inception V4 inference and test for
    accuracy, you will need the ImageNet dataset. Running for online
-   and batch inference do not require the ImageNet dataset.  Instructions for
-   downloading the ImageNet dataset and converting it to the TF Records
-   format and be found
-   [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
+   and batch inference do not require the ImageNet dataset.
+
+   Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+   After running the conversion script you should have a directory with the
+   ImageNet dataset in the TF records format.
 
 4. Next, navigate to the `benchmarks` directory in your local clone of
    the [intelai/models](https://github.com/IntelAI/models) repo from step 1.
