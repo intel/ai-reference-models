@@ -692,30 +692,16 @@ function mtcc() {
 
 # NCF model
 function ncf() {
-  if [[ -n "${clean}" ]]; then
-    CMD="${CMD} --clean"
-  fi
-
-  # NCF supports different datasets including ml-1m and ml-20m.
-  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
-    CMD="${CMD} --dataset=${dataset}"
-  fi
-
-  if [[ -n "${te}" && ${te} != "" ]]; then
-    CMD="${CMD} -te=${te}"
-  fi
-
-  if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
-    # For ncf, if dataset location is empty, script downloads dataset at given location.
+  if [ ${PRECISION} == "fp32" ]; then
+    # For nfc, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
-      mkdir -p ./dataset
-      CMD="${CMD} --data-location=./dataset"
+      mkdir -p /dataset
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
+      pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/ncf/inference/requirements.txt
     fi
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -1255,6 +1241,8 @@ elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
 elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
   mlperf_gnmt
+elif [ ${MODEL_NAME} == "ncf" ]; then
+  ncf
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
