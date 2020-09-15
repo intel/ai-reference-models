@@ -1,0 +1,13 @@
+varReference:
+- kind: PersistentVolume
+  path: spec/hostPath/path
+- kind: Deployment
+  path: spec/template/spec/containers/volumeMounts/mountPath
+- kind: Deployment
+  path: spec/template/spec/containers/ports/containerPort
+- kind: Deployment
+  path: spec/replicas
+- kind: Service
+  path: spec/ports/port
+- kind: Service
+  path: spec/ports/targetPort

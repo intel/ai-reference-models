@@ -1,0 +1,34 @@
+# TensorFlow Serving base deployment
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: model-deployment
+spec:
+  selector:
+    matchLabels:
+      app: model-server
+  replicas: $(REPLICAS)
+  template:
+    metadata:
+      labels:
+        app: model-server
+    spec:
+      volumes:
+      - name: models
+        persistentVolumeClaim:
+          claimName: model-pvc
+      containers:
+      - name: model-server
+        image: intel/intel-optimized-tensorflow-serving:2.2.0
+        env:
+        - name: MODEL_NAME
+          value: $(MODEL_NAME)
+        - name: MODEL_BASE_PATH
+          value: $(MODEL_BASE_PATH)
+        - name: TF_CPP_MIN_VLOG_LEVEL
+          value: "1"
+        volumeMounts:
+        - name: models
+          mountPath: $(MODEL_DIR)
+        ports:
+        - containerPort: $(MODEL_PORT)
