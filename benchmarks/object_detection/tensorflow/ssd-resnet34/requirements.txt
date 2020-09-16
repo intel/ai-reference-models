@@ -6,7 +6,7 @@ lxml
 jupyter
 matplotlib
 pycocotools
-horovod==0.19.1
+horovod==0.20.0
 tensorflow-addons==0.8.1
 opencv-python
 numpy==1.17.4
