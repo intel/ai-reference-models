@@ -606,7 +606,7 @@ $ python launch_benchmark.py \
 
 You can check output trained model accuracy by setting `--eval=True` in the command. After training is over, it automatically run inference and report accuracy results.
 
-Finally, the following command runs MPI across multiple nodes on bare-metal, with 2 MPI processes per node. Each node must have passwordless ssh enabled for the user running the command below. All hosts should have these additional packages installed: (apt-get) openmpi-bin openmpi-common libopenmpi-dev, (pip) horovod==0.19.2
+Finally, the following command runs MPI across multiple nodes on bare-metal, with 2 MPI processes per node. Each node must have passwordless ssh enabled for the user running the command below. All hosts should have these additional packages installed: (apt-get) openmpi-bin openmpi-common libopenmpi-dev, (pip) horovod==0.20.0
 
 ```
 $ python launch_benchmark.py \
