@@ -658,6 +658,23 @@ function minigo() {
     fi
   else
     echo "MODE=${MODE} PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+        exit 1
+  fi
+}
+# Mask R-CNN model
+function maskrcnn() {
+  if [ ${PRECISION} == "fp32" ]; then
+    original_dir=$(pwd)
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip3 install -r ${MOUNT_BENCHMARK}/image_segmentation/tensorflow/maskrcnn/inference/fp32/requirements.txt 
+    fi
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
+    CMD="${CMD} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
@@ -1265,6 +1282,8 @@ elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "minigo" ]; then
   minigo
+elif [ ${MODEL_NAME} == "maskrcnn" ]; then
+  maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
 elif [ ${MODEL_NAME} == "resnet101" ]; then
