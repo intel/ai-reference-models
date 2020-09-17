@@ -90,8 +90,8 @@ if [[ ${NOINSTALL} != "True" ]]; then
     export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITHOUT_MXNET=1
     export HOROVOD_WITH_TENSORFLOW=1
-    # lock horovod==0.19.1 release commit/version
-    pip install --no-cache-dir horovod==0.19.1
+    # lock horovod==0.20.0 release commit/version
+    pip install --no-cache-dir horovod==0.20.0
   fi 
 fi
 
