@@ -123,7 +123,7 @@ The script will automatically set the recommended run-time options for supported
 To run BF16 BERT distributed training for different tasks: SQuAD, Classifiers and Pretraining (e.g. one MPI process per socket) for better throughput, simply specify "--mpi_num_processes=num_of_sockets [--mpi_num_processes_per_socket=1]". 
 Note that the global batch size is mpi_num_processes * train_batch_size and sometimes learning rate needs to be adjusted for convergence. By default, the script uses square root learning rate scaling.
 For fine-tuning tasks like BERT, state-of-the-art accuracy can be achieved via parallel training without synchronizing gradients between MPI workers. The "--mpi_workers_sync_gradients=[True/False]" controls whether the MPI workers sync gradients. By default it is set to "False" meaning the workers are training independently and the best performing training results will be picked in the end. To enable gradients synchronization, set the "--mpi_workers_sync_gradients" to `True` in the BERT-specific options.
-The options `optimized_softmax=True` and `experimental_gelu=True` can also be set for better performance.
+The option `optimized_softmax=True` can also be set for better performance.
 
 
 **Run BERT SQuAD Training on Multiple Sockets**
@@ -144,7 +144,7 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=24 \
     --mpi_num_processes=4 \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $SQUAD_DIR:$SQUAD_DIR \
     -- train_option=SQuAD \
@@ -161,7 +161,7 @@ python launch_benchmark.py \
        doc_stride=128 \
        output_dir=./large \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do_lower_case=True
 ```
 
@@ -191,7 +191,9 @@ This example code fine-tunes BERT-Base on the Microsoft Research Paraphrase Corp
 wget https://gist.githubusercontent.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e/raw/17b8dd0d724281ed7c3b2aeeda662b92809aadd5/download_glue_data.py
 pip install requests # required dependency 
 python download_glue_data.py
-export GLUE_DIR=$PWD/glue_data 
+export GLUE_DIR=$PWD/glue_data
+
+export BERT_BASE_DIR=/home/<user>/wwm_uncased_L-12_H-768_A-16
 ```
 
 Console in:
@@ -204,7 +206,7 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=32 \
     --mpi_num_processes=4 \
-    --docker-image intel/intel-optimized-tensorflow:tensorflow-2.2-bf16-nightly \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $GLUE_DIR:$GLUE_DIR \
     -- train-option=Classifier \
@@ -212,18 +214,21 @@ python launch_benchmark.py \
        do-train=true \
        do-eval=true \
        data-dir=$GLUE_DIR/MRPC \
-       vocab-file=$BERT_LARGE_DIR/vocab.txt \
-       config-file=$BERT_LARGE_DIR/bert_config.json \
-       init-checkpoint=$BERT_LARGE_DIR/bert_model.ckpt \
+       vocab-file=$BERT_BASE_DIR/vocab.txt \
+       config-file=$BERT_BASE_DIR/bert_config.json \
+       init-checkpoint=$BERT_BASE_DIR/bert_model.ckpt \
        max-seq-length=128 \
        learning-rate=2e-5 \
        num-train-epochs=30 \
-       output-dir=/tmp/mrpc_output/ \
        optimized_softmax=True \
-       experimental_gelu=True \
+       experimental_gelu=False \
        do-lower-case=True
 
 ```
+The results files will be written to the
+`models/benchmarks/common/tensorflow/logs` directory, unless another
+output directory is specified by the `--output-dir` arg.
+
 Note : For BERT-specific options, add a `space` after `--`.
 
 The resulting output should be similar to the following:

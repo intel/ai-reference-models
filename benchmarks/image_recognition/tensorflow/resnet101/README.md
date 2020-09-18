@@ -85,7 +85,7 @@ $ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb
 ```
@@ -106,7 +106,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -123,7 +123,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -139,7 +139,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -156,7 +156,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --in-graph=/home/<user>/resnet101_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -250,7 +250,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/res
         --mode inference \
         --model-name resnet101 \
         --batch-size 128 \
-        --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
         --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
         --socket-id 0
     ```
@@ -277,7 +277,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/res
         --mode inference \
         --model-name resnet101 \
         --batch-size 100 \
-        --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
         --in-graph /home/<user>/trained_models/resnet101_fp32_pretrained_model.pb \
         --data-location /home/<user>/imagenet_validation_dataset \
         --accuracy-only \
