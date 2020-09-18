@@ -67,7 +67,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          --batch-size 240  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+         --docker-image intel/intel-optimized-tensorflow:2.3.0 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -83,7 +83,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          --batch-size 1  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+         --docker-image intel/intel-optimized-tensorflow:2.3.0 \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -100,7 +100,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          --batch-size 100  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+         --docker-image intel/intel-optimized-tensorflow:2.3.0 \
          --data-location /home/<user>/imagenet_validation_dataset \
          -- input_height=224 input_width=224 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
@@ -108,7 +108,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
 
     Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
     to get additional debug output or change the default output location.
-    
+
     At present no relesed docker image support the latest MobileNet Int8 inference and accuracy.
 
 4. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory,
@@ -206,7 +206,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+         --docker-image intel/intel-optimized-tensorflow:2.3.0 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
@@ -215,7 +215,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
      ```
-     
+
     * Run for batch inference (with `--batch-size 100`,
       `--checkpoint` with a path to the checkpoint file directory, and
       the `--data-location` is optional):
@@ -226,7 +226,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+         --docker-image intel/intel-optimized-tensorflow:2.3.0 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
@@ -242,7 +242,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+         --docker-image intel/intel-optimized-tensorflow:2.3.0 \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \

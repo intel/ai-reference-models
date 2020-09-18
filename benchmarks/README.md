@@ -47,6 +47,12 @@ dependencies to be installed:
 | Language Translation   | TensorFlow Serving | [Transformer_LT_Official](https://arxiv.org/pdf/1706.03762.pdf) | Inference | [FP32](language_translation/tensorflow_serving/transformer_lt_official/README.md#fp32-inference-instructions) |
 | Object Detection       | TensorFlow Serving | [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)       | Inference | [FP32](object_detection/tensorflow_serving/ssd-mobilenet/README.md#fp32-inference-instructions) |
 
+## PyTorch Use Cases
+
+| Use Case               | Framework     | Model               | Mode      | Instructions    |
+| -----------------------| --------------| ------------------- | --------- |------------------------------|
+| Recommendation      | PyTorch | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)        | Training | [BFloat16**](../models/recommendation/pytorch/dlrm/training/bf16/README.md#dlrm-mlperf-bf16-training-v07-intel-submission) |
+
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
 
 **Means the BFloat16 data type support is experimental.
