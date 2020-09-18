@@ -97,7 +97,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
-            --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords
         ```
@@ -117,7 +117,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
             --benchmark-only \
             --batch-size 1 \
             --socket-id 0 \
-            --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
             --num-intra-threads 1 --num-inter-threads 1 --num-cores 1 \
@@ -138,7 +138,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
                 --benchmark-only \
                 --batch-size 512 \
                 --socket-id 0 \
-                --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+                --docker-image intel/intel-optimized-tensorflow:2.3.0 \
                 --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
                 --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
                 --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
@@ -159,7 +159,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
                 --benchmark-only \
                 --batch-size 512 \
                 --socket-id 0 \
-                --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+                --docker-image intel/intel-optimized-tensorflow:2.3.0 \
                 --in-graph $MODEL_WORK_DIR/wide_deep_int8_pretrained_model.pb \
                 --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
                 --num-intra-threads 1 --num-inter-threads 28 --num-cores 28 \
@@ -194,7 +194,7 @@ $ popd
             --batch-size 1000 \
             --socket-id 0 \
             --accuracy-only \
-            --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords
        ```
@@ -214,7 +214,7 @@ $ popd
             --benchmark-only \
             --batch-size 1 \
             --socket-id 0 \
-            --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
             --num-intra-threads 1 --num-inter-threads 1 --num-cores 1 \
@@ -235,7 +235,7 @@ $ popd
                 --benchmark-only \
                 --batch-size 512 \
                 --socket-id 0 \
-                --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+                --docker-image intel/intel-optimized-tensorflow:2.3.0 \
                 --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
                 --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
                 --num-intra-threads 28 --num-inter-threads 1 --num-cores 28 \
@@ -255,7 +255,7 @@ $ popd
                 --benchmark-only \
                 --batch-size 512 \
                 --socket-id 0 \
-                --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+                --docker-image intel/intel-optimized-tensorflow:2.3.0 \
                 --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
                 --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
                 --num-intra-threads 1 --num-inter-threads 28 --num-cores 28 \
@@ -286,6 +286,6 @@ $ popd
            --framework tensorflow \
            --batch-size 512 \
            --data-location /root/dataset \
-           --docker-image intel/intel-optimized-tensorflow:2.2.0
+           --docker-image intel/intel-optimized-tensorflow:2.3.0
         
         ```
