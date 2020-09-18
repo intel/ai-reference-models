@@ -9,7 +9,7 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 
 ## How it Works
 
-1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container.
+1. The script [`launch_benchmark.py`](/benchmarks/launch_benchmark.py) pulls a docker image specified by the script's `--docker-image` argument and runs a container. 
    [Here](#launch_benchmarkpy-flags) is the full list of available flags. To run a model without a docker container,
    see the [bare metal instructions](#alpha-feature-running-on-bare-metal).
 2. The container's entrypoint script [`start.sh`](/benchmarks/common/tensorflow/start.sh) installs required dependencies, e.g. python packages and `numactl`, and sets the PYTHONPATH environment variable to point to the required dependencies. 
@@ -24,20 +24,20 @@ Below the general description is an [index of links](#model-scripts-for-tensorfl
 * Image Recognition
     * ResNet50: [init](/benchmarks/image_recognition/tensorflow/resnet50/inference/fp32/model_init.py) | 
                 [inference](/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py) | 
-                [preprocessing](/models/image_recognition/tensorflow/resnet50/inference/preprocessing.py)
+                [preprocessing](/models/image_recognition/tensorflow/resnet50/inference/preprocessing.py) 
     * ResNet101: [init](/benchmarks/image_recognition/tensorflow/resnet101/inference/fp32/model_init.py) | 
                  [inference](/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py) | 
-                 [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py)
+                 [preprocessing](/models/image_recognition/tensorflow/resnet101/inference/preprocessing.py) 
     * InceptionV3: [init](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/model_init.py) | 
                    [inference](/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py) | 
-                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py)
+                   [preprocessing](/models/image_recognition/tensorflow/inceptionv3/fp32/preprocessing.py) 
 * Language Translation
     * Transformer-LT: [init](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/model_init.py) | 
-                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)
+                [inference](/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py)    
 * Recommendation Systems
     * Wide and Deep: [init](/benchmarks/recommendation/tensorflow/wide_deep_large_ds/inference/fp32/model_init.py) | 
                 [inference](/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py) | 
-                [preprocessing](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py)
+                [preprocessing](/models/recommendation/tensorflow/wide_deep_large_ds/dataset/preprocess_csv_tfrecords.py) 
 
 ## ```launch_benchmark.py``` flags   
 

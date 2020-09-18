@@ -6,10 +6,10 @@ Third party programs and their corresponding required notices and/or license ter
 --------------------------------------------------------------------------------------
 1.      AITTSMD MTCNN-Tensorflow
 
-	Matterport, Inc. MaskRCNN: 
- 	Copyright (c) 2017 Matterport, Inc.
-	
-	
+	Matterport, Inc. MaskRCNN:
+	Copyright (c) 2017 Matterport, Inc.
+
+
 The MIT License (MIT)
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -29,29 +29,29 @@ The MIT License (MIT)
 	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 	THE SOFTWARE.
-	
+
 --------------------------------------------------------------------------------------
 
 2.  	ericjang draw
- 
+
 	IntelAI Tool
 	Copyright (c) 2019 Intel Corporation
 
 	LevinJ SSD-tensorflow-VOC
 	Copyright 2016 The TensorFlow Authors. All Rights Reserved.
-	
+
 	Tensorflow benchmarks
 	Copyright 2017 The TensorFlow Authors. All Rights Reserved.
-	
+
 	TensorFlow InceptionV4
 	Copyright 2016 The TensorFlow Authors.  All rights reserved.
-	
+
 	Tensorflow NCF
 	Copyright 2016 The TensorFlow Authors.  All rights reserved.
-	
+
 	TensorFlow NMT
 	Copyright 2017 Google Inc. All Rights Reserved.
-	
+
 	Apache License 2.0
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
@@ -234,4 +234,4 @@ The following third party programs have their own third party program files. The
 1. N/A: <Location>
 
 --------------------------------------------------------------------------------------
-Other names and brands may be claimed as the property of others. 
+Other names and brands may be claimed as the property of others.

@@ -57,7 +57,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location ${DATASET_DIR}/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -74,7 +74,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location ${OUTPUT_DIR}/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_int8_coco_pretrained_model.pb \
@@ -171,7 +171,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location ${DATASET_DIR}/val2017 \
     --in-graph /home/<user>/rfcn_resnet101_coco_2018_01_28/frozen_inference_graph.pb \
@@ -189,7 +189,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --model-source-dir /home/<user>/tensorflow-models \
     --data-location ${OUTPUT_DIR}/coco_val.record \
     --in-graph /home/<user>/rfcn_resnet101_coco_2018_01_28/frozen_inference_graph.pb \

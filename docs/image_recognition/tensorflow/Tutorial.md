@@ -146,7 +146,7 @@ You can refer to [ImageNet](https://github.com/tensorflow/models/tree/master/res
 1. Pull the relevant Intel-optimized TensorFlow Docker image. We'll be running the pretrained model to infer on Docker container. 
 [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intel/intel-optimized-tensorflow:2.2.0
+docker pull docker.io/intel/intel-optimized-tensorflow:2.3.0
 ```
 2. cd to the inference script directory
 ```bash        
@@ -178,7 +178,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0 
 
 *Real data*
 
@@ -192,7 +192,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0
 
 3.1.2 <b>ResNet101</b>
 
@@ -207,7 +207,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 1 \
 		--benchmark-only \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0 
 
 *Real data*
 
@@ -220,7 +220,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 1 \
 		--benchmark-only \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0
 
 3.1.3 <b>InceptionV3</b>
 
@@ -237,7 +237,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0 
 
 *Real data*
 
@@ -251,7 +251,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--batch-size 1 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0
 
 3.2. <b>*Best Batch inference*</b>(batch_size=128)
 
@@ -271,7 +271,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0 
 
 *Real data*
 
@@ -285,7 +285,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0
 
 3.2.2 <b>ResNet101</b>
 
@@ -300,7 +300,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 128 \
 		--benchmark-only \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0 
 
 *Real data*
 
@@ -313,7 +313,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for ResNet50. The 
 		--mode inference \
 		--batch-size 128 \
 		--benchmark-only \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0
 
 3.2.3 <b>InceptionV3</b>
 
@@ -330,7 +330,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0 
 
 *Real data*
 
@@ -344,7 +344,7 @@ Note: As per the recommended settings `socket-id` is set to 0 for InceptionV3. T
 		--batch-size 128 \
 		--benchmark-only \
 		--socket-id 0 \
-		--docker-image intel/intel-optimized-tensorflow:2.2.0
+		--docker-image intel/intel-optimized-tensorflow:2.3.0
 		
 
 <u>Example Output</u>
@@ -376,7 +376,7 @@ you can implement the same strategy on different use cases demoed in Step 3.
 			--mode inference \
 			--batch-size 1 \
 			--benchmark-only \
-			--docker-image intel/intel-optimized-tensorflow:2.2.0 \
+			--docker-image intel/intel-optimized-tensorflow:2.3.0 \
 			--debug 				
 	
 <u>Example Output</u>

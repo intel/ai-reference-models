@@ -55,7 +55,7 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --data-location ${OUTPUT_DIR}/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb \
     --benchmark-only \
@@ -71,7 +71,7 @@ python launch_benchmark.py \
     --precision int8 \
     --framework tensorflow \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --data-location ${OUTPUT_DIR}/coco_val.record \
     --in-graph /home/<user>/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb \
     --accuracy-only \
@@ -185,7 +185,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --benchmark-only
 ```
 
@@ -203,7 +203,7 @@ $ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.2.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
     --accuracy-only
 ```
 
