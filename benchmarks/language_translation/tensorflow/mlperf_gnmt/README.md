@@ -69,7 +69,7 @@ python launch_benchmark.py \
 --batch-size 1 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
---docker-image intel/intel-optimized-tensorflow:2.3.0
+--docker-image intel/intel-optimized-tensorflow:2.3.0 \
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --benchmark-only
 ```
@@ -84,7 +84,7 @@ python launch_benchmark.py \
 --batch-size 32 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
---docker-image intel/intel-optimized-tensorflow:2.3.0
+--docker-image intel/intel-optimized-tensorflow:2.3.0 \
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --benchmark-only
 ```
@@ -99,7 +99,7 @@ python launch_benchmark.py \
 --batch-size 32 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
---docker-image intel/intel-optimized-tensorflow:2.3.0
+--docker-image intel/intel-optimized-tensorflow:2.3.0 \
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --accuracy-only
 ```
