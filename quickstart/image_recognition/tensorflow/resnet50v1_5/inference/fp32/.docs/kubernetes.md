@@ -26,7 +26,6 @@ quickstart
 ```
 
 The multi-node serving use case makes the following assumptions:
-- the mpi-operator has been deployed on the cluster
 - the nfs share is available cluster wide
 - a saved model has been generated and saved to a nfs shared volume
 
