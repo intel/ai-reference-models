@@ -38,7 +38,7 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads()
 
         model_script = os.path.join(self.args.intelai_models,
-                self.args.mode, self.args.precision,"coco.py")
+                                    self.args.mode, self.args.precision, "coco.py")
 
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
