@@ -92,7 +92,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
 
     Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
     to get additional debug output or change the default output location.
-    
+
     At present no relesed docker image support the latest MobileNet Int8 inference and accuracy.
 
 4. The log file is saved to the `models/benchmarks/common/tensorflow/logs` directory,
@@ -199,7 +199,7 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
      ```
-     
+
     * Run for batch inference (with `--batch-size 100`,
       `--checkpoint` with a path to the checkpoint file directory, and
       the `--data-location` is optional):
