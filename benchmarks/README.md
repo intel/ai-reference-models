@@ -40,6 +40,7 @@ dependencies to be installed:
 | Recommendation         | TensorFlow    | [Wide & Deep Large Dataset](https://arxiv.org/pdf/1606.07792.pdf)	| Training | [FP32](recommendation/tensorflow/wide_deep_large_ds/README.md#fp32-training-instructions) |
 | Recommendation         | TensorFlow    | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf)         | Inference | [FP32](recommendation/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Reinforcement          | TensorFlow    | [MiniGo](https://arxiv.org/abs/1712.01815.pdf)              | Training  | [FP32](reinforcement/tensorflow/minigo/README.md#fp32-training-instructions)|
+| Text-to-Speech         | TensorFlow    | [WaveNet](https://arxiv.org/pdf/1609.03499.pdf)             | Inference | [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions) |
 
 ## TensorFlow Serving Use Cases
 
