@@ -1132,7 +1132,7 @@ function wavenet() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      pip install librosa==0.5
     fi
 
     CMD="${CMD} --checkpoint_name=${checkpoint_name} \
