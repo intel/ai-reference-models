@@ -514,6 +514,43 @@ function densenet169() {
   fi
 }
 
+# Faster R-CNN (ResNet50) model
+function faster_rcnn() {
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    original_dir=$(pwd)
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
+      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+    fi
+
+    if [ ${PRECISION} == "fp32" ]; then
+      if [ -n "${config_file}" ]; then
+        CMD="${CMD} --config_file=${config_file}"
+      fi
+
+      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        echo "Fast R-CNN requires -- config_file arg to be defined"
+        exit 1
+      fi
+
+    elif [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --number-of-steps=${number_of_steps}"
+      fi
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+    cd $original_dir
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+}
+
+
 # inceptionv4 model
 function inceptionv4() {
   # For accuracy, dataset location is required
