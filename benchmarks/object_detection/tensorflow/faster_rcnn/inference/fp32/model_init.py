@@ -55,7 +55,7 @@ class ModelInitializer (BaseModelInitializer):
             if not os.path.exists(accuracy_script):
                 raise ValueError("Unable to locate the Faster R-CNN accuracy "
                                  "script: {}".format(accuracy_script))
-            self.run_cmd = "sh {} {} {}/coco_val.record {}".format(
+            self.run_cmd = "bash {} {} {}/coco_val.record {}".format(
                 accuracy_script, self.args.input_graph,
                 self.args.data_location, self.args.model_source_dir)
         else:

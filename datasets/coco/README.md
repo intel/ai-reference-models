@@ -16,6 +16,7 @@ been tested with each model.
 
 | Model | Git Commit ID |
 |-------|---------|
+| Faster R-CNN | `7a9934df2afdf95be9405b4e9f1f2480d748dc40` |
 | RFCN | `1efe98bb8e8d98bbffc703a90d88df15fc2ce906` |
 | SSD-MobileNet | `7a9934df2afdf95be9405b4e9f1f2480d748dc40` |
 | SSD-ResNet34 | `1efe98bb8e8d98bbffc703a90d88df15fc2ce906` |
