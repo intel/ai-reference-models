@@ -1,7 +1,7 @@
 [
   { "_comment": "FP32 accuracy command",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=faster_rcnn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --accuracy-only  --verbose --checkpoint=/checkpoints         --data-location=/dataset         --in-graph=/in_graph/frozen_inference_graph.pb",
-    "output": "sh /workspace/intelai_models/inference/fp32/coco_accuracy.sh /in_graph/frozen_inference_graph.pb /dataset/coco_val.record /workspace/models"},
+    "output": "bash /workspace/intelai_models/inference/fp32/coco_accuracy.sh /in_graph/frozen_inference_graph.pb /dataset/coco_val.record /workspace/models"},
 
   { "_comment": "FP32 benchmark command",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case object_detection --precision fp32 --mode inference --model-name faster_rcnn --checkpoint /checkpoints --intelai-models . --model-source-dir . --socket-id 0 --verbose --config_file=pipeline.config",
