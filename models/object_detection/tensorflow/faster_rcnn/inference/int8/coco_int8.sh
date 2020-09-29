@@ -30,7 +30,7 @@ TF_MODEL_ROOT=$3
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/object_detection
 
-python -m object_detection/inference/infer_detections \
+python object_detection/inference/infer_detections.py \
   --input_tfrecord_paths=$TF_RECORD_FILES \
   --output_tfrecord_path=${SPLIT}_detections.tfrecord \
   --inference_graph=$FROZEN_GRAPH \
@@ -49,7 +49,7 @@ metrics_set: 'coco_detection_metrics'
 " > ${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt
 
 
-python -m object_detection/metrics/offline_eval_map_corloc \
+python object_detection/metrics/offline_eval_map_corloc.py \
   --eval_dir=${SPLIT}_eval_metrics \
   --eval_config_path=${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt \
   --input_config_path=${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt

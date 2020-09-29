@@ -18,27 +18,6 @@ for other precisions are coming later.
    git checkout tags/v1.12.0
    popd
    ```
-   For the accuracy test, a modification is required in the cloned models repo
-   due to [this issue](https://github.com/tensorflow/models/issues/5411).
-   This can be done either manually or using the command line as shown:
-
-   Open the file models/research/object_detection/metrics/offline_eval_map_corloc.py,
-   then apply the following fixes:
-   * Line 162: change `configs['eval_input_config']` to `configs['eval_input_configs']`
-   * Line 91, 92, and 95: change `input_config` to `input_config[0]`
-
-   Or using the command line:
-   ```
-   pushd models/research/object_detection
-   chmod 777 metrics
-   cd "metrics"
-   chmod 777 offline_eval_map_corloc.py
-   sed -i.bak 162s/eval_input_config/eval_input_configs/ offline_eval_map_corloc.py
-   sed -i.bak 91s/input_config/input_config[0]/ offline_eval_map_corloc.py
-   sed -i.bak 92s/input_config/input_config[0]/ offline_eval_map_corloc.py
-   sed -i.bak 95s/input_config/input_config[0]/ offline_eval_map_corloc.py
-   popd
-   ```
 
 2. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
    Be sure to export the $DATASET_DIR and $OUTPUT_DIR environment variables.
@@ -75,7 +54,7 @@ for other precisions are coming later.
      --mode inference \
      --socket-id 0 \
      --checkpoint /home/<user>/faster_rcnn_resnet50_fp32_coco \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
      -- config_file=pipeline.config
     ```
 
@@ -88,7 +67,7 @@ for other precisions are coming later.
      --mode inference \
      --precision fp32 \
      --framework tensorflow \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
      --model-source-dir /home/<user>/tensorflow/models \
      --data-location $OUTPUT_DIR \
      --in-graph /home/<user>/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
@@ -170,7 +149,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
      --mode inference \
      --socket-id 0 \
      --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
      --benchmark-only \
      -- number_of_steps=5000
     ```
@@ -185,7 +164,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
      --precision int8 \
      --framework tensorflow \
      --socket-id 0 \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.14.0 \
+     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
      --model-source-dir /home/<user>/tensorflow/models \
      --data-location ${OUTPUT_DIR}/coco_val.record \
      --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb  \
