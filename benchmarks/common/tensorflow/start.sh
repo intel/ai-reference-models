@@ -525,7 +525,15 @@ function faster_rcnn() {
       cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
       # install protoc v3.3.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+
+      # Install git so that we can apply the patch
+      apt-get update && apt-get install -y git
     fi
+
+    # Apply the patch to the tensorflow/models repo with fixes for the accuracy
+    # script and for running with python 3
+    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/faster_rcnn.patch
 
     if [ ${PRECISION} == "fp32" ]; then
       if [ -n "${config_file}" ]; then
