@@ -118,7 +118,7 @@ For steps 1 and 2, refer to the model READMEs for the most up-to-date pre-traine
            -e OMP_NUM_THREADS=$num_physical_cores \
            -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
            -e TENSORFLOW_INTRA_OP_PARALLELISM=$num_physical_cores \
-           intel/intel-optimized-tensorflow-serving:2.2.0
+           intel/intel-optimized-tensorflow-serving:2.3.0
    ```
    **Note:** For some models, playing around with these settings values can improve performance even further. 
    We recommend that you experiment with your own hardware and model if you have strict performance requirements.
