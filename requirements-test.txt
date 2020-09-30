@@ -1,6 +1,6 @@
 conditional
 flake8==3.7.5
-pytest
+pytest<=6.0.2
 pytest-cov
 pytest-xdist
 mock
