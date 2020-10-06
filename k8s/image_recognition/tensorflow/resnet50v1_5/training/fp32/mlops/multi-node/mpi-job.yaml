@@ -1,0 +1,141 @@
+apiVersion: kubeflow.org/v1alpha2
+kind: MPIJob
+metadata:
+  name: resnet50v1-5-fp32-training # {"$openapi":"MODEL_NAME"}
+spec:
+  slotsPerWorker: 1
+  cleanPodPolicy: Running
+  mpiReplicaSpecs:
+    Launcher:
+      replicas: 1
+      template:
+        spec:
+          serviceAccountName: resnet50v1-5-fp32-training # {"$openapi":"MODEL_NAME"}
+          containers:
+          - name: mpi-launcher
+            imagePullPolicy: Always
+            workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
+            image: docker.io/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+            securityContext:
+              runAsUser: 0 # {"$openapi":"USER_ID"}
+              runAsGroup: 0 # {"$openapi":"GROUP_ID"}
+              fsGroup: 0 # {"$openapi":"FS_ID"}
+            env:
+            - name: MODEL_DIR
+              value: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"} 
+            - name: DATASET_DIR
+              value: /datasets # {"$openapi":"DATASET_DIR"}
+            - name: GROUP_ID
+              value: "0" # {"$openapi":"GROUP_ID_VALUE"}
+            - name: GROUP_NAME
+              value: root # {"$openapi":"GROUP_NAME"}
+            - name: OUTPUT_DIR
+              value: /nfs/root/resnet50v1-5-fp32-training/output # {"$openapi":"OUTPUT_PATH"}
+            - name: USER_ID
+              value: "0" # {"$openapi":"USER_ID_VALUE"}
+            - name: USER_NAME
+              value: root # {"$openapi":"USER_NAME"}
+            - name: PYTHONPATH
+              value: /workspace/resnet50v1-5-fp32-training/models/image_recognition/tensorflow/resnet50v1_5/training:$PYTHONPATH # {"$openapi":"PYTHONPATH"}
+            - name: LD_LIBRARY_PATH
+              value: /usr/local/lib:/usr/local/lib/mpirun:$LD_LIBRARY_PATH
+            command:
+            - mpirun
+            args:
+            - --allow-run-as-root
+            - -np
+            - "2"
+            - -x
+            - PYTHONPATH
+            - -x
+            - LD_LIBRARY_PATH
+            - -mca
+            - pml
+            - ob1
+            - -mca
+            - btl
+            - ^openib
+            - -mca
+            - btl_tcp_if_exclude
+            - lo,docker0
+            - -bind-to
+            - none
+            - -map-by
+            - slot
+            - python3
+            - /workspace/resnet50v1-5-fp32-training/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/imagenet_main.py # {"$openapi":"MODEL_SCRIPT"}
+            - "2"
+            - --batch_size
+            - "128"
+            - --max_train_steps
+            - "5"
+            - --train_epochs
+            - "1"
+            - --epochs_between_evals
+            - "1"
+            - --inter_op_parallelism_threads
+            - "2"
+            - --intra_op_parallelism_threads
+            - "22"
+            - --version
+            - "1"
+            - --resnet_size
+            - "50"
+            - --data_dir=$(DATASET_DIR)
+            volumeMounts:
+            - name: datasets
+              mountPath: /datasets # {"$openapi":"DATASET_DIR"}
+              readOnly: true
+            - name: nfs-path
+              mountPath: /nfs # {"$openapi":"NFS_PATH"}
+          volumes:
+          - name: datasets
+            hostPath:
+              path: /datasets # {"$openapi":"DATASET_DIR"}
+          - name: nfs-path
+            nfs:
+              server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
+              path: /nfs # {"$openapi":"NFS_PATH"}
+    Worker:
+      replicas: 2 # {"$openapi":"WORKERS"}
+      template:
+        spec:
+          serviceAccountName: resnet50v1-5-fp32-training # {"$openapi":"MODEL_NAME"}
+          containers:
+          - name: mpi-worker
+            imagePullPolicy: Always
+            workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
+            image: docker.io/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+            securityContext:
+              runAsUser: 0 # {"$openapi":"USER_ID"}
+              runAsGroup: 0 # {"$openapi":"GROUP_ID"}
+              fsGroup: 0 # {"$openapi":"FS_ID"}
+            env:
+            - name: MODEL_DIR
+              value: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"} 
+            - name: DATASET_DIR
+              value: /datasets # {"$openapi":"DATASET_DIR"}
+            - name: GROUP_ID
+              value: "0" # {"$openapi":"GROUP_ID_VALUE"}
+            - name: GROUP_NAME
+              value: root # {"$openapi":"GROUP_NAME"}
+            - name: OUTPUT_DIR
+              value: /nfs/root/resnet50v1-5-fp32-training/output # {"$openapi":"OUTPUT_PATH"}
+            - name: USER_ID
+              value: "0" # {"$openapi":"USER_ID_VALUE"}
+            - name: USER_NAME
+              value: root # {"$openapi":"USER_NAME"}
+            volumeMounts:
+            - name: datasets
+              mountPath: /datasets # {"$openapi":"DATASET_DIR"}
+              readOnly: true
+            - name: nfs-path
+              mountPath: /nfs # {"$openapi":"NFS_PATH"}
+          volumes:
+          - name: datasets
+            hostPath:
+              path: /datasets # {"$openapi":"DATASET_DIR"}
+          - name: nfs-path
+            nfs:
+              server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
+              path: /nfs # {"$openapi":"NFS_PATH"}
