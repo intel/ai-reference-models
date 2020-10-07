@@ -1,8 +1,7 @@
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the model training package to get the yaml and config
-files for running multi-node inference on TensorFlow Serving using Kubernetes.
+Download and untar the ResNet50 v1.5 FP32 inference package.
 ```
 wget <package url>
 tar -xvf <package name>
@@ -10,32 +9,38 @@ tar -xvf <package name>
 
 ### Execution
 
-The model package includes a deployment that does 'mlops' (machine learning
-operations) on kubernetes.
-The relevant directory tree within the model package is shown below:
+The model package for `<model name> <precision> <mode>` includes a kubernetes serving deployment.
+The directory tree within the model package is shown below, where the serving directory is below the
+[mlops](https://en.wikipedia.org/wiki/MLOps) directory:
+
 ```
-quickstart
-├── common
-│   └── tensorflow
-│       └── k8s
-│           └── mlops
-│               └── serving
-└── k8s
-    └── mlops
-        └── serving
+resnet50v1_5/
+└── inference
+    └── fp32
+        └── mlops
+            └── serving
 ```
 
-The multi-node serving use case makes the following assumptions:
-- the nfs share is available cluster wide
-- a saved model has been generated and saved to a nfs shared volume
+#### prerequisites
 
-The parameters are configured by editing kustomize related files described in the sections below.
-The deployment uses [kustomize](https://kustomize.io/) to configure
-parameters. The parameters can be customized by editing kustomize
-related files prior to deploying the serving job, which
-is described in the [next section](#tensorflow-serving).
+Both single and multi-node deployments use [kustomize-v3.8.4](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.4) to configure deployment parameters. This archive should be downloaded, extracted and the kustomize command should be moved to a directory within your PATH. You can verify the correct version of kustomize has been installed by typing `kustomize version`. On MACOSX you would see
+
+```
+{Version:kustomize/v3.8.4 GitCommit:8285af8cf11c0b202be533e02b88e114ad61c1a9 BuildDate:2020-09-19T15:39:21Z GoOs:darwin GoArch:amd64}
+```
+
+
+The kustomization files that the kustomize command references are located withing the following directories:
+
+```
+resnet50v1_5/inference/fp32/mlops/serving/kustomization.yaml
+```
 
 #### TensorFlow Serving
+
+The multi-node serving use case makes the following assumptions:
+- the model directory is a shared volume mounted cluster wide
+- a saved model has been generated and saved under the model directory volume
 
 TensorFlow Serving is run by submitting a deployment and service yaml file to the k8s api-server,
 which results in the creation of pod replicas, each serving the model on a different node of the cluster.
@@ -47,35 +52,60 @@ cluster. Since the Kubernetes cluster being used does not have a load
 balancer, the configuration is setup for NodePort, which will allow
 external requests.
 
-Prior to running the job, edit the kustomize variables in the mlops.env
-file. 
+The parameters that can be changed within the serving resources are shown in the table[^1] below:
 
-The mlops.env file for TensorFlow Serving jobs is located at:
-`resnet50v1-5-fp32-inference/quickstart/k8s/mlops/serving/mlops.env`.
-Key parameters to edit are:
+|            NAME             |                  VALUE                   |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
+|-----------------------------|------------------------------------------|---------------|-----------------------------|-------|----------|
+| FS_ID                       | 0                                        | model-builder | owner id of mounted volumes | 1     | Yes      |
+| GROUP_ID                    | 0                                        | model-builder | process group id            | 2     | Yes      |
+| GROUP_NAME                  | root                                     | model-builder | process group name          | 1     | Yes      |
+| IMAGE_SUFFIX                |                                          | model-builder | appended to image name      | 1     | No       |
+| MODEL_BASE_NAME             | savedmodels                              | model-builder | base directory name         | 1     | Yes      |
+| MODEL_DIR                   | /models                                  | model-builder | mounted model directory     | 3     | Yes      |
+| MODEL_NAME                  | resnet50v1_5                             | model-builder | model name                  | 1     | No       |
+| MODEL_PORT                  | 8500                                     | model-builder | model container port        | 2     | Yes      |
+| MODEL_SERVICE_PORT          | 8501                                     | model-builder | model service port          | 1     | Yes      |
+| MODEL_SERVING_IMAGE_NAME    | intel/intel-optimized-tensorflow-serving | model-builder | image name                  | 1     | No       |
+| MODEL_SERVING_IMAGE_VERSION | 2.2.0                                    | model-builder | image tag                   | 1     | No       |
+| MODEL_SERVING_LABEL         | resnet50v1-5-fp32-server                 | model-builder | selector label              | 4     | No       |
+| MODEL_SERVING_NAME          | resnet50v1-5-fp32-inference              | model-builder | model serving name          | 2     | No       |
+| REGISTRY                    | docker.io                                | model-builder | image location              | 1     | No       |
+| REPLICAS                    | 3                                        | model-builder | number of replicas          | 1     | Yes      |
+| USER_ID                     | 0                                        | model-builder | process owner id            | 2     | Yes      |
+| USER_NAME                   | root                                     | model-builder | process owner name          | 1     | Yes      |
+
+[^1]: The serving parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
+
+For example to change the MODEL_SERVICE_PORT from 8500 to 9500
+
 ```
-MODEL_NAME=<Name of the model which is also the parent directory of the saved model, i.e. resnet50v1_5>
-MODEL_DIR=<Host path to mount inside the container which contains the saved model>
-MODEL_BASE_PATH=<Host path containing a directory named MODEL_NAME which contains the saved model>
-MODEL_PORT=<Container port to use for TF serving>
-MODEL_SERVICE_PORT=<Container port to use for NodePort service>
-REPLICAS=<Number of TF serving replicas to deploy>
+kustomize cfg set . MODEL_SERVICE_PORT 9500
 ```
 
-Once you have edited the `mlops.env` file with your parameters,
-deploy the training job using the command below. This command will
-deploy resources to your default namespace. To use a different
-namespace, specify `-n <namespace>` as part of your command.
+The required column that contains a 'Yes' indicates values that are often changed by the user.
+The 'No' values indicate that the default values are fine, and seldom changed. Note that the mlops user may run the
+serving process with their own uid/gid permissions by using kustomize to change the securityContext in the deployment.yaml file.
+The securityContext appears within the template section of the deployment specification. The runAsUser, runAsGroup and fsGroup members should reflect the user's UID, GID.
+
 ```
-kubectl -k resnet50v1-5-fp32-inference/quickstart/k8s/mlops/serving apply
+securityContext:
+  runAsUser: <User ID>
+  runAsGroup: <Group ID>
+  fsGroup: <Group ID>
 ```
 
-Depending on what version of kustomize is being used, you may get an
-error reporting that a string was received instead of a integer. If this
-is the case, the following command can be used to remove quotes that
-are causing the issue:
+Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+
 ```
-kubectl kustomize resnet50v1-5-fp32-inference/quickstart/k8s/mlops/serving | sed 's/port:.*"\([0-9]*\)"/port: \1/g' | sed 's/targetPort:.*"\([0-9]*\)"/targetPort: \1/g' | sed 's/replicas:.*"\([0-9]*\)"/replicas: \1/g' | sed 's/containerPort:.*"\([0-9]*\)"/containerPort: \1/g' | kubectl apply -f -
+kustomize edit set namespace $USER
+```
+
+Note: if the namespace is changed from default, it should be created prior to deployment.
+Once the user has changed parameter values they can then deploy the serving manifests by running:
+
+```
+kustomize build > serving.yaml
+kubectl apply -f serving.yaml
 ```
 
 Once the kubernetes workflow has been submitted, the status can be
@@ -153,5 +183,5 @@ run_tf_serving_client.py:
 To clean up the served model, delete the service,
 deployment, and other resources using the following commands:
 ```
-kubectl -k resnet50v1-5-fp32-inference/quickstart/k8s/mlops/serving delete
+kubectl delete -f serving.yaml
 ```

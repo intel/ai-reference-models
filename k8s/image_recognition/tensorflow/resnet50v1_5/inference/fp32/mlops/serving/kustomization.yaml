@@ -1,54 +1,6 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
-bases:
-- ../../../common/tensorflow/k8s/mlops/serving
-configMapGenerator:
-- name: mlops-env
-  env: mlops.env
-generatorOptions:
-  disableNameSuffixHash: true
-patchesStrategicMerge:
-- deployment-patch.yaml
-vars:
-- name: MODEL_BASE_PATH
-  fieldref:
-    fieldPath: data.MODEL_BASE_PATH
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
-- name: MODEL_NAME
-  fieldref:
-    fieldPath: data.MODEL_NAME
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
-- name: MODEL_DIR
-  fieldref:
-    fieldPath: data.MODEL_DIR
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
-- name: MODEL_PORT
-  fieldref:
-    fieldPath: data.MODEL_PORT
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
-- name: MODEL_SERVICE_PORT
-  fieldref:
-    fieldPath: data.MODEL_SERVICE_PORT
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
-- name: REPLICAS
-  fieldref:
-    fieldPath: data.REPLICAS
-  objref:
-    apiVersion: v1
-    kind: ConfigMap
-    name: mlops-env
+resources:
+- service.yaml
+- deployment.yaml
+namespace: default
