@@ -1061,8 +1061,12 @@ function ssd_vgg16() {
 # UNet model
 function unet() {
   if [ ${PRECISION} == "fp32" ]; then
+    if [[ ${NOINSTALL} != "True" ]]; then
+      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+    fi
+
     if [[ -z "${checkpoint_name}" ]]; then
-      echo "wavenet requires -- checkpoint_name arg to be defined"
+      echo "UNet requires -- checkpoint_name arg to be defined"
       exit 1
     fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -1348,6 +1352,8 @@ elif [ ${MODEL_NAME} == "transformer_lt_official" ]; then
   transformer_lt_official
 elif [ ${MODEL_NAME} == "transformer_mlperf" ]; then
   transformer_mlperf
+elif [ ${MODEL_NAME} == "unet" ]; then
+  unet
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
