@@ -1,0 +1,45 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: resnet50v1-5-fp32-inference # {"$openapi":"MODEL_SERVING_NAME"}
+spec:
+  selector:
+    matchLabels:
+      app: resnet50v1-5-fp32-server # {"$openapi":"MODEL_SERVING_LABEL"}
+  replicas: 3 # {"$openapi":"REPLICAS"}
+  template:
+    metadata:
+      labels:
+        app: resnet50v1-5-fp32-server # {"$openapi":"MODEL_SERVING_LABEL"}
+    spec:
+      securityContext:
+        runAsUser: 0 # {"$openapi":"USER_ID"}
+        runAsGroup: 0 # {"$openapi":"GROUP_ID"}
+        fsGroup: 0 # {"$openapi":"FS_ID"}
+      containers:
+      - name: model-server
+        image: docker.io/intel/intel-optimized-tensorflow-serving:2.2.0 # {"$openapi":"IMAGE"}
+        env:
+        - name: MODEL_NAME
+          value: resnet50v1_5 # {"$openapi":"MODEL_NAME"}
+        - name: MODEL_BASE_PATH
+          value: /models/savedmodels # {"$openapi":"MODEL_BASE_PATH"}
+        - name: TF_CPP_MIN_VLOG_LEVEL
+          value: "1"
+        - name: GROUP_ID
+          value: "0" # {"$openapi":"GROUP_ID_VALUE"}
+        - name: GROUP_NAME
+          value: root # {"$openapi":"GROUP_NAME"}
+        - name: USER_ID
+          value: "0" # {"$openapi":"USER_ID_VALUE"}
+        - name: USER_NAME
+          value: root # {"$openapi":"USER_NAME"}
+        volumeMounts:
+        - name: models
+          mountPath: /models # {"$openapi":"MODEL_DIR"}
+        ports:
+        - containerPort: 8500 # {"$openapi":"MODEL_PORT"}
+      volumes:
+      - name: models
+        hostPath:
+          path: /models # {"$openapi":"MODEL_DIR"}
