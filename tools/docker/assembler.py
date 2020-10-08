@@ -560,7 +560,6 @@ def merge_partials(header, used_partials, all_partials):
 
 def doc_contents(path):
   """
-  
   Read document and return contents
     Args:
       path (string): read partials from this directory.
@@ -575,7 +574,7 @@ def doc_contents(path):
     eprint("error reading {} exception: {}".format(path, e))
     raise e
   return contents
-  
+
 def merge_docs(docs_list):
   """Build the README.md document"""
   contents=''
@@ -673,7 +672,7 @@ def write_package(package_def):
           else:
             eprint("ERROR: Unable to find file or directory: {}".format(source))
             sys.exit(1)
-      
+
       # Grab things from the downloads list
       if "downloads" in package_def.keys():
         for item in package_def["downloads"]:
@@ -887,7 +886,7 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
 
     readme_folder = os.path.join(os.path.basename(model_dir), 'quickstart', use_case, framework,
                                    model_name, mode, precision)
-    
+
     documentation = {"name": "README.md", "uri": readme_folder, "docs": []}
     doc_partials = []
     for markdown in markdowns:
@@ -916,7 +915,7 @@ def generate_doc_text_replace_options(use_case, model_name, precision, mode):
     """
     Returns a dictionary of the default text replace options that are used for
     generating documentation. This is used as the default key/value pairs when
-    
+
     """
     # Define dictionary of keywords to replace and try to set proper
     # capitalization for common words in model names and precisions. This
@@ -948,12 +947,12 @@ def generate_doc_text_replace_options(use_case, model_name, precision, mode):
 def auto_generate_model_spec(spec_name):
     """
     Creates a new spec file for the specified model. The spec_name should be
-    formatted like modelname-precision-mode (i.e. resnet50-fp32-inference). 
-    
+    formatted like modelname-precision-mode (i.e. resnet50-fp32-inference).
+
     The spec yaml file will be written to the tools/docker/specs
     directory. If a spec file already exists with the same name, the script
     will exit with an error message.
-    
+
     This function parses the model name, precision, and mode out of the
     spec_name and then maps that to directories in the model zoo.
     """

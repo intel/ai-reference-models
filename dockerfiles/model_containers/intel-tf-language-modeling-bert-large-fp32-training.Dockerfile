@@ -69,8 +69,6 @@ ENV USER_NAME=root
 ENV GROUP_ID=0
 ENV GROUP_NAME=root
 
-#TODO this needs to be approved by SDL
-#See https://gitlab.devtools.intel.com/TensorFlow/QA/cje-tf/-/merge_requests/685#note_4718598
 RUN apt-get update && apt-get install -y gosu
 RUN echo '#!/bin/bash\n\
 USER_ID=$USER_ID\n\
