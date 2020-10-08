@@ -1,0 +1,793 @@
+#!/usr/bin/env bash
+#
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+_usage()
+{
+  echo ''
+  echo 'Usage: '
+  echo ' '$(basename $0)' ['"$(echo ${_options[@]}|sed 's/ /|/g')"']' '<subcommand>' '[<model>...]'
+  echo ''
+  echo 'where a <subcommand> is one of:'
+  echo ' '$(echo ${_commands[@]})
+  echo ''
+  echo 'and where a <model> is one of:'
+  echo ' '"${_all_models[@]}"
+  echo ''
+  echo "Examples:"
+  echo "# -- Initialize a new model specification --"
+  echo 'model-builder init-spec <modelname-precision-mode>'
+  echo ''
+  echo "# -- Create the model's archive --"
+  echo 'model-builder package '${_all_models[1]}' '${_all_models[2]}
+  echo ''
+  echo "# -- Build the model's image --"
+  echo 'model-builder build '${_all_models[4]}
+  echo ''
+  echo "# -- Generate the model's Dockerfile --"
+  echo 'model-builder generate-dockerfile '${_all_models[2]}
+  echo ''
+  echo "# -- Generate the model's Documentation --"
+  echo 'model-builder generate-documentation '${_all_models[3]}
+  echo ''
+  echo "# -- Do {generate-documentation,package,generate-dockerfile,build} --"
+  echo 'model-builder make '${_allModels[1]}
+  exit 0
+}
+
+_model_builder_onexit()
+{
+  local _dir=$(_model_builder_root)/docker
+  if (( $# > 0 )) && [[ -n $1 ]] && (( $1 != 0 )); then
+    # error handling goes here
+    echo "Error $1 occurred on $2"
+  fi
+}
+
+_model_builder_init_model_list()
+{
+  local _release=$1 _asm_images
+  if (( ${#_all_models[@]} == 0 )); then
+    _all_models+=( $(echo $(cat $(find $(_model_builder_root)/docker/specs -name '*.yml') | sed -n '/^[ \t]*dockerfiles:/,/^slice_sets/p' | grep '^.*- ["'"']" | sed 's/^.*- ["'"']"'.*{\([[:alnum:]_-]*\)}["'"']"'$/\1/g')) "all" )
+    IFS=$'\n' _all_models=( $(sort -u <<<"${_all_models[*]}") )
+    unset IFS
+  fi
+}
+
+_model_builder_root()
+{
+  echo $(dirname $(dirname $0))
+}
+
+_model_builder_completion()
+{
+  __model_builder_completion()
+  {
+    local _cur _prev _opts
+    COMPREPLY=()
+    _cur="${COMP_WORDS[COMP_CWORD]}"
+    _prev="${COMP_WORDS[COMP_CWORD-1]}"
+    _opts="$(model-builder options)"
+    case "${_prev}" in
+      -h|--help)
+        local base=${COMP_WORDS[COMP_CWORD-2]}
+        case "${base}" in
+          *)
+            return 0
+            ;;
+        esac
+        ;;
+      -q|--quiet)
+        local _options
+        if [[ $_prev == --dry-run ]]; then
+          _options="init-spec package generate-dockerfile generate-documentation build make options"
+        else
+          _options="--dry-run init-spec package generate-dockerfile generate-documentation build make options"
+        fi
+        COMPREPLY=($(compgen -W "${_options}" -- ${_cur}));
+        return 0
+        ;;
+      --dry-run)
+        local _options
+        if [[ $_prev == --quiet || $_prev == -q ]]; then
+          _options="init-spec package generate-dockerfile generate-documentation build make options"
+        else
+          _options="-q --quiet init-spec package generate-dockerfile generate-documentation build make options"
+        fi
+        COMPREPLY=($(compgen -W "${_options}" -- ${_cur}));
+        return 0
+        ;;
+      init-spec|package|generate-dockerfile|generate-documentation|build|make)
+        local _options="$(model-builder $_prev options)"
+        COMPREPLY=( $(compgen -W "${_options}" -- ${_cur}) )
+        return 0
+        ;;
+      *)
+        if (( ${#COMP_WORDS[@]} > 2 )); then
+          local _options=$(eval "${COMP_WORDS[@]:0:$((${#COMP_WORDS[@]}-1))} options")
+          COMPREPLY=( $(compgen -W "${_options}" -- ${_cur}) )
+          return 0
+        fi
+        ;;
+    esac
+    COMPREPLY=($(compgen -W "${_opts}" -- ${_cur}))  
+    return 0
+  }
+  complete -F __model_builder_completion model-builder
+}
+
+_model_builder_new_spec()
+{
+  local _args=() _asm_new_spec new_model _model_dir _model_dir_mount
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      -q|--quiet)
+        _args+=("$1")
+        ;;
+      --dry-run)
+        _args+=("$1")
+        ;;
+      *)
+        ;;
+    esac
+    shift
+  done
+  # Used for auto a new spec with the list of package files for the specified model
+
+  new_model=$1
+  echo "Auto-generating a new spec file for: $new_model"
+
+  _model_dir_mount='-v '$MODEL_DIR':/tf/models'
+  _model_dir='--model_dir=models'
+
+  _model_download=""
+  if ! [[ -z $MODEL_URL ]]; then
+    _model_download="--model_download=${MODEL_URL}"
+  fi
+
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+
+  # Note: Run as user so that the spec file isn't owned by root
+  _asm_new_spec="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) $_model_dir_mount -v $(pwd):/tf tf-tools python3 assembler.py "
+
+  _echo_command ${_asm_new_spec} \
+      --arg http_proxy=${http_proxy} \
+      --arg https_proxy=${https_proxy} \
+      --generate_new_spec=${new_model} \
+      $_model_download \
+      $_model_dir \
+      ${_args[@]}
+  popd 1>/dev/null 2>/dev/null
+}
+
+_get_images_from_log()
+{
+  # Checks the log file for the list of 'IMAGES_BUILT=' which should be
+  # formatted as a comma separated list. Returns that comma separated value
+  log_path=$1
+
+  if [[ -f ${log_path} ]]; then
+    # Find the last match for the list of images built in the output file
+    images_built=$(grep '^IMAGES_BUILT=' ${log_path} | tail -1)
+    # Strip off the "IMAGES_BUILT=" from that line to return
+    echo $(echo $images_built | sed 's/^IMAGES_BUILT=//')
+  else
+    echo ""
+  fi
+}
+
+_model_builder_build_images()
+{
+  local _abs_model_dir='' _args=() _asm_images _model_dir='' _model_dir_mount='' _model_package_folder _output_dir='' _quiet='' _temp_model_package_dir
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      --output_dir=*)
+        _output_dir=${1#*=}
+        _output_dir=${_output_dir##*/}
+        _args+=("$1") 
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1") 
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+
+  # Define default values for the variables
+  if [ -z "${MODEL_PACKAGE_DIR}" ]; then
+    MODEL_PACKAGE_DIR=../output
+  fi
+
+  if [ -z "${MODEL_WORKSPACE}" ]; then
+    MODEL_WORKSPACE=/workspace
+  fi
+  
+  # Check for the tf-tool container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  
+  # Verify that the model package directory exists
+  if [ ! -d ${MODEL_PACKAGE_DIR} ]; then
+    echo "The model package directory was not found at: ${MODEL_PACKAGE_DIR}"
+    echo "Model packages must be built before building containers"
+    exit 1
+  fi 
+  
+  # Copy model package directory to this docker folder so that it's included in
+  # the tf-tools volume mount and it'll be in the same build context (directory)
+  # that we are running from.
+  _model_package_folder="model_packages"
+  _temp_model_package_dir="$(pwd)/${_model_package_folder}/"
+  rm -rf ${_temp_model_package_dir}
+  mkdir -p ${_temp_model_package_dir}
+  cp ${MODEL_PACKAGE_DIR}/*.tar.gz ${_temp_model_package_dir}
+  
+  # Build versioned images using the assembler
+  temp_output_file=$(mktemp output.XXXXXXXXX)
+  _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py "
+  _echo_command ${_asm_images} \
+      --arg _TAG_PREFIX=${TAG_PREFIX} \
+      --arg http_proxy=${http_proxy} \
+      --arg https_proxy=${https_proxy} \
+      --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+      --arg PACKAGE_DIR=${_model_package_folder} \
+      --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
+      --repository ${LOCAL_REPO} \
+      --release versioned \
+      --build_images \
+      ${_args[@]} 2>&1 | tee $temp_output_file
+  result=$?
+  if (( $result != 0 )); then
+    echo "Warning: A non-zero error code ($result) was returned when building the 'versioned' images"
+  fi
+  tf_versioned_image_list=$(_get_images_from_log $temp_output_file)
+  rm $temp_output_file
+
+  # Build the models that require TF 1.15.2
+  temp_output_file=$(mktemp output.XXXXXXXXX)
+  _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py "
+  _echo_command ${_asm_images} \
+      --arg _TAG_PREFIX=1.15.2 \
+      --arg http_proxy=${http_proxy} \
+      --arg https_proxy=${https_proxy} \
+      --arg TENSORFLOW_TAG=1.15.2 \
+      --arg PACKAGE_DIR=${_model_package_folder} \
+      --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
+      --repository ${LOCAL_REPO} \
+      --release tf_1.15.2_containers \
+      --build_images \
+     ${_args[@]} 2>&1 | tee $temp_output_file
+  result=$?
+  if (( $result != 0 )); then
+    echo "Warning: A non-zero error code ($result) was returned when building the 'tf_1.15.2_containers' images"
+  fi
+  tf_1_15_2_image_list=$(_get_images_from_log $temp_output_file)
+  rm $temp_output_file
+
+  echo "--------------------------------------"
+  echo "Model Images:"
+
+  # Print out the images that were just built, and append to the IMAGE_LIST_FILE
+  if [[ ! -z ${tf_versioned_image_list} ]]; then
+    for i in $(echo ${tf_versioned_image_list} | sed "s/,/ /g")
+    do
+      echo $i
+      if [[ ! -z ${IMAGE_LIST_FILE} ]]; then
+        echo $i >> ${IMAGE_LIST_FILE}
+      fi
+    done
+  fi
+  if [[ ! -z ${tf_1_15_2_image_list} ]]; then
+    for i in $(echo ${tf_1_15_2_image_list} | sed "s/,/ /g")
+    do
+      echo $i
+      if [[ ! -z ${IMAGE_LIST_FILE} ]]; then
+        echo $i >> ${IMAGE_LIST_FILE}
+      fi
+    done
+  fi
+
+  # Delete the temporary copy of the model package directory
+  rm -rf ${_temp_model_package_dir}
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_build_packages()
+{
+  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      --output_dir=*)
+        _output_dir=${1#*=}
+        _output_dir=${_output_dir##*/}
+        _args+=("$1") 
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1") 
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  
+  # Call the assembler to build model packages
+  _echo_command ${_asm_dockerfiles} --release dockerfiles --build_packages ${_args[@]}
+  
+  # List output packages
+  echo "--------------------------------------"
+  echo "Model Packages:"
+  ls -1tl $_abs_model_dir/$_output_dir 
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_construct_dockerfiles()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _count _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1") 
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+  
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  
+  # Call the assembler to construct dockerfiles
+  _echo_command ${_asm_dockerfiles} --release dockerfiles --construct_dockerfiles ${_args[@]}
+  popd 1>/dev/null 2>/dev/null
+  
+  if ! [[ -d dockerfiles ]]; then
+    echo $(pwd)/dockerfiles does not exist >&2
+    exit 1
+  fi
+  # List dockerfiles
+  _count=$(ls -1 dockerfiles | grep Dockerfile | wc -l | sed 's/^[ \t]*//;s/[ \t]*$//')
+  if (( $_count > 0 )); then
+    echo "--------------------------------------"
+    echo "Category Dockerfiles:"
+    ls -1l dockerfiles | grep Dockerfile
+  fi
+  if [[ -d dockerfiles/dataset_containers ]]; then
+    echo "--------------------------------------"
+    echo "Dataset Dockerfiles:"
+    ls -1l dockerfiles/dataset_containers
+  fi
+  if [[ -d dockerfiles/model_containers ]]; then
+    echo "--------------------------------------"
+    echo "Model Dockerfiles:"
+    ls -1tl dockerfiles/model_containers
+  fi
+}
+
+_model_builder_generate_documentation()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _count _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1") 
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+  
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  
+  # Call the assembler to construct dockerfiles
+  _echo_command ${_asm_dockerfiles} --release dockerfiles --generate_documentation ${_args[@]}
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_list_images()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1")
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+  
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  
+  # Call the assembler to list the images
+  _echo_command ${_asm_dockerfiles} \
+    --release versioned \
+    --repository ${LOCAL_REPO} \
+    --list_images \
+    --arg _TAG_PREFIX=${TAG_PREFIX} \
+    --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+    ${_args[@]} 2>&1 | sort | column -c 2 -t
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_list_packages()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1")
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+  
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  
+  # Call the assembler to list the images
+  _echo_command ${_asm_dockerfiles} \
+    --release versioned \
+    --repository ${LOCAL_REPO} \
+    --list_packages \
+    --arg _TAG_PREFIX=${TAG_PREFIX} \
+    --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+    ${_args[@]} 2>&1 | sort | column -c 2 -t
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_install_completion()
+{
+  if [[ -d /usr/local/etc/bash_completion.d ]]; then
+    $0 completion > /usr/local/etc/bash_completion.d/$(basename $0)
+  fi
+}
+
+_model_builder_make()
+{
+  # generate documentation
+  _model_builder_generate_documentation $@
+  if (( $? != 0 )); then
+    echo "There was an error while generating documentation."
+    exit 1
+  fi
+
+  # build packages
+  _model_builder_build_packages $@
+  if (( $? != 0 )); then
+    echo "There was an error building model packages."
+    exit 1
+  fi
+
+  # construct dockerfiles
+  _model_builder_construct_dockerfiles $@
+  if (( $? != 0 )); then
+    echo "There was an error while constructing dockerfiles." >&2
+    exit 1
+  fi
+
+  # build images
+  MODEL_PACKAGE_DIR=${MODEL_DIR}/output _model_builder_build_images $@
+  if (( $? != 0 )); then
+    echo "There was an error while building docker images." >&2
+    exit 1
+  fi
+}
+
+_model_builder_validate_models()
+{
+  local _arg _remainingModels=()
+  _remainingModels+=( ${_all_models[@]} )
+  for _arg in "$@"; do
+    if [[ $_arg == options ]]; then
+      echo '-h --help options '${_remainingModels[@]}
+      return 1
+    elif ! [[ "${_all_models[@]}" =~ $_arg ]]; then
+      echo 'unknown option '$_arg >&2
+      _usage
+      exit 1
+    elif ! [[ "${_current_models[@]}" =~ $_arg ]]; then
+      _current_models+=( $_arg )
+    fi
+    _remainingModels=( ${_remainingModels[@]/$_arg/} )
+  done
+  return 0
+}
+
+_model_builder_build_only_tags_matching_args()
+{
+  local _arg _models=()
+  for _arg in "$@";do
+    if [[ $_arg == all ]]; then
+      continue
+    fi
+    if [[ ${_all_models[@]} =~ $_arg ]]; then
+      _models+=( ' --only_tags_matching=.*'$_arg'$' )
+    fi
+  done
+  echo ${_models[@]}
+}
+
+_main()
+{
+  local _args=() _dry_run='' _model_dir='--model_dir='$MODEL_DIR _nocache='' _only_tags_matching='' _output_dir='--output_dir=models/output' _quiet=''
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      --dry-run)
+          _dry_run=$1
+          shift
+          ;;
+      -h|--help)
+          _usage
+          exit 0
+          ;;
+      -q|--quiet)
+          _quiet=$1
+          shift
+          ;;
+      --nocache)
+          _nocache=$1
+          shift
+          ;;
+      *)
+          echo 'unknown option '$1
+          _args+=( $1 )
+          shift
+          exit 1
+          ;;
+    esac
+  done
+  case 1 in
+    $(($#==0))) 
+      _usage
+      exit 0
+      ;;
+    $(($#==1)))
+      case "$1" in 
+        commands)
+          echo ${_commands[@]}
+          ;;
+        completion)
+          type _model_builder_completion | sed '1,3d;$d'
+          ;;
+        install-completion)
+          _model_builder_install_completion
+          ;;
+        options)
+          echo ${_options[@]}' '${_commands[@]}
+          return 0
+          ;;
+        init-spec|package|generate-dockerfile|generate-documentation|build|make)
+          echo 'missing model name'
+          exit 1
+          ;;
+        images)
+          _model_builder_list_images $_model_dir --quiet
+          return 0
+          ;;
+        models)
+          echo ${_all_models[@]}
+          return 0
+          ;;
+        packages)
+          _model_builder_list_packages $_model_dir --quiet
+          return 0
+          ;;
+        run-test-suite)
+          $(_model_builder_root)/tests/model-builder-test-suite-generator && $(_model_builder_root)/tests/bin/bats $(_model_builder_root)/tests/model-builder.bats
+          return $?
+          ;;
+        *)
+          echo 'unknown option '$1
+          shift
+          exit 1
+          ;;
+      esac
+      ;;
+    $(($#>=2)))
+      case "$1" in
+        init-spec)
+          _model_builder_new_spec $_quiet $_dry_run $2
+          ;;
+        package)
+          shift
+          _model_builder_validate_models $@ || exit 0
+          _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
+          _model_builder_build_packages $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          if (( $? != 0 )); then
+            echo "There was an error building model packages."
+            exit 1
+          fi
+          ;;
+        generate-dockerfile)
+          shift
+          _model_builder_validate_models $@ || exit 0
+          _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
+          _model_builder_construct_dockerfiles $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          if (( $? != 0 )); then
+            echo "There was an error while constructing dockerfiles." >&2
+            exit 1
+          fi
+          ;;
+        generate-documentation)
+          shift
+          _model_builder_validate_models $@ || exit 0
+          _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
+          _model_builder_generate_documentation $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          if (( $? != 0 )); then
+            echo "There was an error while constructing dockerfiles." >&2
+            exit 1
+          fi
+          ;;
+        build)
+          shift
+          _model_builder_validate_models $@ || exit 0
+          _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
+          MODEL_PACKAGE_DIR=${MODEL_DIR}/output _model_builder_build_images $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run $_nocache
+          if (( $? != 0 )); then
+            echo "There was an error while building docker images." >&2
+            exit 1
+          fi
+          ;;
+        make)
+          shift
+          _model_builder_validate_models $@ || exit 0
+          _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
+          _model_builder_make $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          ;;
+        *)
+          echo 'unknown options '$@ >&2
+          exit 1
+          ;;
+      esac
+      ;;
+  esac
+}
+
+trap '_model_builder_onexit $? $LINENO' EXIT
+source $(_model_builder_root)/docker/tf_tools_utils.sh
+
+MODEL_DIR=${MODEL_DIR-$PWD}
+
+# Tag to use for the 'versioned' images
+TENSORFLOW_TAG=${TENSORFLOW_TAG-2.1.0}
+
+# Local container repo used for building images
+LOCAL_REPO=${LOCAL_REPO-model-zoo}
+
+TAG_PREFIX=${TENSORFLOW_TAG}
+_all_models=()
+_current_models=()
+_options=("-h" "--help" "-q" "--quiet" "--dry-run")
+_commands=( "options" "build" "commands" "completion" "generate-dockerfile" "generate-documentation" "images" "init-spec" "install-completion" "make" "models" "package" "packages" "run-test-suite")
+_model_builder_init_model_list dockerfiles
+
+_main $@
