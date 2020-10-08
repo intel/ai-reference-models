@@ -38,7 +38,8 @@ ARG CODE_DIR=/tensorflow/models
 
 ENV TF_MODELS_DIR=${CODE_DIR}
 
-RUN apt-get install -y git && \
+RUN apt-get update && \
+    apt-get install -y git && \
     git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
     ( cd ${CODE_DIR} && \
     if [ ! -z "$FETCH_PR" ]; then git fetch origin ${FETCH_PR}; fi && \
@@ -64,7 +65,9 @@ RUN cd ${TF_MODELS_DIR}/research && \
 
 RUN apt-get update && \
     apt-get install -y libgl1-mesa-glx libglib2.0-0
+
 RUN pip install opencv-python
+
 RUN pip install tensorflow-addons==0.8.1
 
 ARG TF_BENCHMARKS_BRANCH
@@ -96,8 +99,6 @@ ENV USER_NAME=root
 ENV GROUP_ID=0
 ENV GROUP_NAME=root
 
-#TODO this needs to be approved by SDL
-#See https://gitlab.devtools.intel.com/TensorFlow/QA/cje-tf/-/merge_requests/685#note_4718598
 RUN apt-get update && apt-get install -y gosu
 RUN echo '#!/bin/bash\n\
 USER_ID=$USER_ID\n\
