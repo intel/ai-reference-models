@@ -1,0 +1,121 @@
+header: |
+    # Copyright (c) 2020 Intel Corporation
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #    http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+    # ============================================================================
+    #
+    # THIS IS A GENERATED DOCKERFILE.
+    #
+    # This file was assembled from multiple pieces, whose use is documented
+    # throughout. Please refer to the TensorFlow dockerfiles documentation
+    # for more information.
+
+# A combinatorial explosion of Docker images and Dockerfiles.
+# Each "release" defines all of the ways to combine related but separate chunks
+# of functionality ("slices") by listing all of the "slice sets" to use when
+# building.
+releases:
+    # The coco container needs TF 1.15.2, so build it separately
+    tf_1.15.2_containers:
+        tag_specs:
+            - "{_TAG_PREFIX}{intel-tf}{object-detection}{preprocess-coco-val}"
+
+    versioned:
+        tag_specs:
+            - "{_TAG_PREFIX}{intel-tf}{object-detection}"
+            - "{_TAG_PREFIX}{intel-tf}{image-recognition}"
+            - "{_TAG_PREFIX}{intel-tf}{language-modeling}"
+            - "{_TAG_PREFIX}{intel-tf}{language-translation}"
+
+    dockerfiles:
+        is_dockerfiles: true
+        upload_images: false
+        tag_specs:
+            - "{intel-tf}{object-detection}"
+            - "{intel-tf}{object-detection}{preprocess-coco-val}"
+            - "{intel-tf}{image-recognition}"
+            - "{intel-tf}{language-modeling}"
+            - "{intel-tf}{language-translation}"
+
+slice_sets:
+
+    intel-tf:
+        - add_to_name: ""
+          dockerfile_exclusive_name: "intel-tf"
+          partials:
+              - tensorflow/tensorflow-base
+          args:
+              - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
+
+    mpi-horovod:
+        - add_to_name: ""
+          partials:
+              - gcc-8
+              - kubectl-1.18.3
+              - openmpi-2.1.1-8
+              - openssh-7.6
+              - horovod-0.19.1
+    
+    object-detection:
+        - add_to_name: "-object-detection"
+          partials:
+              - common
+              - tensorflow/model-source
+              - object_detection/pip_installs
+              - object_detection/protoc
+
+    image-recognition:
+        - add_to_name: "-image-recognition"
+          partials:
+              - common
+
+    image-segmentation:
+        - add_to_name: "-image-segmentation"
+          partials:
+              - common
+
+    language-modeling:
+        - add_to_name: "-language-modeling"
+          partials:
+              - common
+
+    recommendation:
+        - add_to_name: "-recommendation"
+          partials:
+              - common
+    
+    text-to-speech:
+        - add_to_name: "-text-to-speech"
+          partials:
+              - common
+
+    language-translation:
+        - add_to_name: "-language-translation"
+          partials:
+              - common
+
+    preprocess-coco-val:
+        - add_to_name: "-preprocess-coco-val"
+          dockerfile_subdirectory: "dataset_containers"
+          partials:
+               - model_package
+               - datasets/execute_preprocess_coco_val
+               - entrypoint
+          args:
+               - TF_MODELS_BRANCH=1efe98bb8e8d98bbffc703a90d88df15fc2ce906
+               - PACKAGE_NAME=preprocess-coco-val
+               - TENSORFLOW_TAG=1.15.2
+          files:
+               - source: datasets/coco
+                 destination: scripts
+
