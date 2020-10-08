@@ -1,0 +1,74 @@
+releases:
+  dockerfiles:
+    tag_specs:
+    - '{intel-tf}{object-detection}{faster-rcnn-fp32-inference}'
+  tf_1.15.2_containers:
+    tag_specs:
+    - '{_TAG_PREFIX}{intel-tf}{object-detection}{faster-rcnn-fp32-inference}'
+slice_sets:
+  faster-rcnn-fp32-inference:
+  - add_to_name: -faster-rcnn-fp32-inference
+    args:
+    - PACKAGE_NAME=faster-rcnn-fp32-inference
+    - TF_MODELS_BRANCH=tags/v1.12.0
+    dockerfile_subdirectory: model_containers
+    documentation:
+      docs:
+      - name: Title
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/title.md
+      - name: Description
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/description.md
+      - name: Download link
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/download.md
+      - name: Datasets
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/datasets.md
+      - name: Quick Start Scripts
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/quickstart.md
+      - name: Bare Metal
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/baremetal.md
+      - name: Docker
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/docker.md
+      - name: License
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32/.docs/license.md
+      name: README.md
+      text_replace:
+        <docker image>: 'amr-registry.caas.intel.com/aipg-tf/model-zoo-ci:239-ci-build-1.15.2-object-detection-faster-rcnn-fp32-inference'
+        <mode>: inference
+        <model name>: Faster R-CNN
+        <package dir>: faster-rcnn-fp32-inference
+        <package name>: faster-rcnn-fp32-inference.tar.gz
+        <package url>: 'https://ubit-artifactory-or.intel.com/artifactory/aipg-local/aipg-tf/modular-zoo-model-package-generator/239/faster-rcnn-fp32-inference.tar.gz'
+        <precision>: FP32
+        <use case>: object_detection
+      uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32
+    downloads:
+    - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+      destination: faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: benchmarks/object_detection/__init__.py
+      source: benchmarks/object_detection/__init__.py
+    - destination: benchmarks/object_detection/tensorflow/__init__.py
+      source: benchmarks/object_detection/tensorflow/__init__.py
+    - destination: benchmarks/object_detection/tensorflow/faster_rcnn/README.md
+      source: benchmarks/object_detection/tensorflow/faster_rcnn/README.md
+    - destination: benchmarks/object_detection/tensorflow/faster_rcnn/__init__.py
+      source: benchmarks/object_detection/tensorflow/faster_rcnn/__init__.py
+    - destination: benchmarks/object_detection/tensorflow/faster_rcnn/inference/__init__.py
+      source: benchmarks/object_detection/tensorflow/faster_rcnn/inference/__init__.py
+    - destination: benchmarks/object_detection/tensorflow/faster_rcnn/inference/fp32
+      source: benchmarks/object_detection/tensorflow/faster_rcnn/inference/fp32
+    - destination: models/common
+      source: models/common
+    - destination: models/object_detection/tensorflow/faster_rcnn/inference/fp32
+      source: models/object_detection/tensorflow/faster_rcnn/inference/fp32
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32
+    partials:
+    - model_package
+    - entrypoint
