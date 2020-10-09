@@ -34,11 +34,12 @@ if [ -z "${TF_MODELS_DIR}" ]; then
 fi
 
 # Untar pretrained model files
-pretrained_model_dir="pretrained_model/rfcn_resnet101_coco_2018_01_28"
+pretrained_model_dir="${OUTPUT_DIR}/pretrained_model/rfcn_resnet101_coco_2018_01_28"
 if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+  mkdir -p ${OUTPUT_DIR}/pretrained_model
+  tar -C ${OUTPUT_DIR}/pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
 fi
-FROZEN_GRAPH="$(pwd)/${pretrained_model_dir}/frozen_inference_graph.pb"
+FROZEN_GRAPH="${pretrained_model_dir}/frozen_inference_graph.pb"
 
 python benchmarks/launch_benchmark.py \
     --model-name rfcn \
