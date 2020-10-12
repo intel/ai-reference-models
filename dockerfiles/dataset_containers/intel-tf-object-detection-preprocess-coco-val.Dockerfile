@@ -42,7 +42,7 @@ RUN apt-get update && \
     apt-get install -y git && \
     git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
     ( cd ${CODE_DIR} && \
-    if [ ! -z "$FETCH_PR" ]; then git fetch origin ${FETCH_PR}; fi && \
+    if [ ! -z "${FETCH_PR}" ]; then git fetch origin ${FETCH_PR}; fi && \
     git checkout ${TF_MODELS_BRANCH} )
 
 
