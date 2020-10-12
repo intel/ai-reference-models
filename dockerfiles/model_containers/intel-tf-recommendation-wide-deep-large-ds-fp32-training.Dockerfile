@@ -31,7 +31,6 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing python-tk libsm6 libxext6 -y && \
     pip install requests
 
-RUN apt-get install google-perftools -y
 
 ARG PACKAGE_DIR=model_packages
 ARG PACKAGE_NAME
