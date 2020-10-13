@@ -25,13 +25,13 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_LOCATION}
 
-if [ -z "${DATASET_LOCATION}" ]; then
-  echo "The required environment variable DATASET_LOCATION has not been set"
+if [ -z "${DATASET_DIR}" ]; then
+  echo "The required environment variable DATASET_DIR has not been set"
   exit 1
 fi
 
-if [ ! -f "${DATASET_LOCATION}" ]; then
-  echo "The DATASET_LOCATION '${DATASET_LOCATION}' does not exist"
+if [ ! -f "${DATASET_DIR}" ]; then
+  echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
   exit 1
 fi
 
@@ -44,7 +44,7 @@ fi
 FROZEN_GRAPH="$(pwd)/${pretrained_model}"
 
 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --data-location ${DATASET_LOCATION} \
+    --data-location ${DATASET_DIR} \
     --in-graph ${FROZEN_GRAPH} \
     --output-dir ${OUTPUT_DIR} \
     --model-name ssd-mobilenet \
