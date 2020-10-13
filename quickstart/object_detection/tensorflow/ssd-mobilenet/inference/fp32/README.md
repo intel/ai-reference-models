@@ -44,7 +44,7 @@ To run inference, set environment variables with the path to the dataset
 and an output directory, download and untar the SSD-MobileNet FP32
 inference model package, and then run a [quickstart script](#quick-start-scripts).
 ```
-DATASET_LOCATION=<path to the coco tf record file>
+DATASET_DIR=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
 
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/ssd-mobilenet-fp32-inference.tar.gz
