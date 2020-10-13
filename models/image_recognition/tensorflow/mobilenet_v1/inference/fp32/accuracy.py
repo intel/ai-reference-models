@@ -55,44 +55,49 @@ def load_graph(model_file):
     graph_def = tf.compat.v1.GraphDef()
 
     import os
+
     file_ext = os.path.splitext(model_file)[1]
 
     with open(model_file, "rb") as f:
-        if file_ext == '.pbtxt':
+        if file_ext == ".pbtxt":
             text_format.Merge(f.read(), graph_def)
         else:
             graph_def.ParseFromString(f.read())
     with graph.as_default():
-        tf.import_graph_def(graph_def, name='')
+        tf.import_graph_def(graph_def, name="")
 
     return graph
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--input_graph", default=None,
-                        help="graph/model to be executed")
-    parser.add_argument("--data_location", default=None,
-                        help="full path to the validation data")
-    parser.add_argument("--input_height", default=None,
-                        type=int, help="input height")
-    parser.add_argument("--input_width", default=None,
-                        type=int, help="input width")
-    parser.add_argument("--batch_size", default=32,
-                        type=int, help="batch size")
-    parser.add_argument("--input_layer", default="input",
-                        help="name of input layer")
-    parser.add_argument("--output_layer",
-                        default="MobilenetV1/Predictions/Reshape_1",
-                        help="name of output layer")
     parser.add_argument(
-        '--num_inter_threads',
-        help='number threads across operators',
-        type=int, default=1)
+        "--input_graph", default=None, help="graph/model to be executed"
+    )
     parser.add_argument(
-        '--num_intra_threads',
-        help='number threads for an operator',
-        type=int, default=1)
+        "--data_location", default=None, help="full path to the validation data"
+    )
+    parser.add_argument("--input_height", default=None, type=int, help="input height")
+    parser.add_argument("--input_width", default=None, type=int, help="input width")
+    parser.add_argument("--batch_size", default=32, type=int, help="batch size")
+    parser.add_argument("--input_layer", default="input", help="name of input layer")
+    parser.add_argument(
+        "--output_layer",
+        default="MobilenetV1/Predictions/Reshape_1",
+        help="name of output layer",
+    )
+    parser.add_argument(
+        "--num_inter_threads",
+        help="number threads across operators",
+        type=int,
+        default=1,
+    )
+    parser.add_argument(
+        "--num_intra_threads",
+        help="number threads for an operator",
+        type=int,
+        default=1,
+    )
     args = parser.parse_args()
 
     if args.input_graph:
@@ -115,15 +120,19 @@ if __name__ == "__main__":
     data_location = args.data_location
     dataset = datasets.ImagenetData(data_location)
     preprocessor = dataset.get_image_preprocessor()(
-        input_height, input_width, batch_size,
+        input_height,
+        input_width,
+        batch_size,
         1,  # device count
         tf.float32,  # data_type for input fed to the graph
         train=False,  # doing inference
-        resize_method='bilinear')
+        resize_method="bilinear",
+    )
 
     with tf.compat.v1.get_default_graph().as_default():
-        images, labels = preprocessor.minibatch(dataset, subset='validation',
-                         use_datasets=True, cache_data=False)
+        images, labels = preprocessor.minibatch(
+            dataset, subset="validation", use_datasets=True, cache_data=False
+        )
     graph = load_graph(model_file)
     input_tensor = graph.get_tensor_by_name(input_layer + ":0")
     output_tensor = graph.get_tensor_by_name(output_layer + ":0")
@@ -134,8 +143,9 @@ if __name__ == "__main__":
 
     total_accuracy1, total_accuracy5 = (0.0, 0.0)
     num_processed_images = 0
-    num_remaining_images = dataset.num_examples_per_epoch(subset='validation') \
-                           - num_processed_images
+    num_remaining_images = (
+        dataset.num_examples_per_epoch(subset="validation") - num_processed_images
+    )
     with tf.compat.v1.Session() as sess:
         sess_graph = tf.compat.v1.Session(graph=graph, config=config)
         while num_remaining_images >= batch_size:
@@ -145,22 +155,38 @@ if __name__ == "__main__":
             num_remaining_images -= batch_size
             start_time = time.time()
             # Compute inference on the preprocessed data
-            predictions = sess_graph.run(output_tensor,
-                                         {input_tensor: np_images})
+            predictions = sess_graph.run(output_tensor, {input_tensor: np_images})
             elapsed_time = time.time() - start_time
             accuracy1 = tf.reduce_sum(
-                input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
-                                       targets=tf.constant(np_labels), k=1), tf.float32))
+                input_tensor=tf.cast(
+                    tf.nn.in_top_k(
+                        predictions=tf.constant(predictions),
+                        targets=tf.constant(np_labels),
+                        k=1,
+                    ),
+                    tf.float32,
+                )
+            )
 
             accuracy5 = tf.reduce_sum(
-                input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
-                                       targets=tf.constant(np_labels), k=5), tf.float32))
+                input_tensor=tf.cast(
+                    tf.nn.in_top_k(
+                        predictions=tf.constant(predictions),
+                        targets=tf.constant(np_labels),
+                        k=5,
+                    ),
+                    tf.float32,
+                )
+            )
             np_accuracy1, np_accuracy5 = sess.run([accuracy1, accuracy5])
             total_accuracy1 += np_accuracy1
             total_accuracy5 += np_accuracy5
             print("Iteration time: %0.4f ms" % elapsed_time)
             print(
-                "Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
+                "Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)"
                 % (
-                num_processed_images, total_accuracy1 / num_processed_images,
-                total_accuracy5 / num_processed_images))
+                    num_processed_images,
+                    total_accuracy1 / num_processed_images,
+                    total_accuracy5 / num_processed_images,
+                )
+            )

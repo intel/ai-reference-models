@@ -35,22 +35,24 @@ class ModelInitializer(BaseModelInitializer):
             self.args.batch_size = 128
 
         # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path)
 
         # set num_inter_threads and num_intra_threads (override inter threads to 2)
         self.set_num_inter_intra_threads(num_inter_threads=2)
 
-        script_name = "accuracy.py" if self.args.accuracy_only \
-            else "benchmark.py"
+        script_name = "accuracy.py" if self.args.accuracy_only else "benchmark.py"
         script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            script_name)
+            self.args.intelai_models, self.args.mode, self.args.precision, script_name
+        )
         self.command_prefix = "{} {}".format(self.python_exe, script_path)
 
         if self.args.socket_id != -1:
             self.command_prefix = "numactl --cpunodebind={} -l {}".format(
-                str(self.args.socket_id), self.command_prefix)
+                str(self.args.socket_id), self.command_prefix
+            )
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
@@ -59,19 +61,36 @@ class ModelInitializer(BaseModelInitializer):
         if not self.args.accuracy_only:
             # add args for the benchmark script
             script_args_list = [
-                "input_graph", "input_height", "input_width", "batch_size",
-                "input_layer", "output_layer", "num_inter_threads",
-                "num_intra_threads", "warmup_steps", "steps"]
+                "input_graph",
+                "input_height",
+                "input_width",
+                "batch_size",
+                "input_layer",
+                "output_layer",
+                "num_inter_threads",
+                "num_intra_threads",
+                "warmup_steps",
+                "steps",
+            ]
             self.command_prefix = self.add_args_to_command(
-                self.command_prefix, script_args_list)
+                self.command_prefix, script_args_list
+            )
         else:
             # add args for the accuracy script
             script_args_list = [
-                "input_graph", "data_location", "input_height", "input_width",
-                "batch_size", "input_layer", "output_layer",
-                "num_inter_threads", "num_intra_threads"]
+                "input_graph",
+                "data_location",
+                "input_height",
+                "input_width",
+                "batch_size",
+                "input_layer",
+                "output_layer",
+                "num_inter_threads",
+                "num_intra_threads",
+            ]
             self.command_prefix = self.add_args_to_command(
-                self.command_prefix, script_args_list)
+                self.command_prefix, script_args_list
+            )
 
     def parse_args(self):
         if self.custom_args is None:
@@ -79,27 +98,43 @@ class ModelInitializer(BaseModelInitializer):
 
         parser = argparse.ArgumentParser()
         parser.add_argument(
-            "--input_height", default=224,
-            dest='input_height', type=int, help="input height")
+            "--input_height",
+            default=224,
+            dest="input_height",
+            type=int,
+            help="input height",
+        )
         parser.add_argument(
-            "--input_width", default=224,
-            dest='input_width', type=int, help="input width")
+            "--input_width",
+            default=224,
+            dest="input_width",
+            type=int,
+            help="input width",
+        )
         parser.add_argument(
-            "--warmup_steps", dest="warmup_steps",
+            "--warmup_steps",
+            dest="warmup_steps",
             help="number of warmup steps",
-            type=int, default=10)
+            type=int,
+            default=10,
+        )
         parser.add_argument(
-            "--steps", dest="steps",
-            help="number of steps",
-            type=int, default=50)
+            "--steps", dest="steps", help="number of steps", type=int, default=50
+        )
         parser.add_argument(
-            "--input_layer", dest="input_layer",
+            "--input_layer",
+            dest="input_layer",
             help="name of input layer",
-            type=str, default="input")
+            type=str,
+            default="input",
+        )
         parser.add_argument(
-            "--output_layer", dest="output_layer",
+            "--output_layer",
+            dest="output_layer",
             help="name of output layer",
-            type=str, default="MobilenetV1/Predictions/Reshape_1")
+            type=str,
+            default="MobilenetV1/Predictions/Reshape_1",
+        )
 
         self.args = parser.parse_args(self.custom_args, namespace=self.args)
 

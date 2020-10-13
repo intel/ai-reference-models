@@ -36,25 +36,27 @@ from tensorflow_serving.apis import prediction_service_pb2_grpc
 from util import preprocess_image
 
 # The image URL is the location of the image we should send to the server
-IMAGE_URL = 'https://tensorflow.org/images/blogs/serving/cat.jpg'
+IMAGE_URL = "https://tensorflow.org/images/blogs/serving/cat.jpg"
 
-tf_v1.app.flags.DEFINE_string('server', 'localhost:8500', 'PredictionService host:port')
-tf_v1.app.flags.DEFINE_string('image', '', 'path to image in JPEG format')
-tf_v1.app.flags.DEFINE_string('model', 'resnet50', 'Name of model (resnet50 or Inceptionv3).')
+tf_v1.app.flags.DEFINE_string("server", "localhost:8500", "PredictionService host:port")
+tf_v1.app.flags.DEFINE_string("image", "", "path to image in JPEG format")
+tf_v1.app.flags.DEFINE_string(
+    "model", "resnet50", "Name of model (resnet50 or Inceptionv3)."
+)
 FLAGS = tf_v1.app.flags.FLAGS
 
 
 def main(_):
-    if FLAGS.model == 'resnet50':
+    if FLAGS.model == "resnet50":
         image_size = 224
-    elif FLAGS.model == 'inceptionv3':
+    elif FLAGS.model == "inceptionv3":
         image_size = 299
     else:
-        print('Please specify model as either resnet50 or Inceptionv3.')
+        print("Please specify model as either resnet50 or Inceptionv3.")
         sys.exit(-1)
 
     if FLAGS.image:
-        with open(FLAGS.image, 'rb') as f:
+        with open(FLAGS.image, "rb") as f:
             data = f.read()
     else:
         # Download the image URL if a path is not provided as input
@@ -66,20 +68,23 @@ def main(_):
     stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
     request = predict_pb2.PredictRequest()
     request.model_spec.name = FLAGS.model
-    request.model_spec.signature_name = 'serving_default'
-    image_data = tf.reshape(preprocess_image(data, FLAGS.model, image_size), [1, image_size, image_size, 3])
+    request.model_spec.signature_name = "serving_default"
+    image_data = tf.reshape(
+        preprocess_image(data, FLAGS.model, image_size), [1, image_size, image_size, 3]
+    )
 
     # Run the graph
     with tf_v1.Session() as sess:
         sess.run(tf_v1.global_variables_initializer())
-        image_data = (sess.run(image_data))
+        image_data = sess.run(image_data)
 
-    request.inputs['input'].CopyFrom(
-        tf.make_tensor_proto(image_data, shape=[1, image_size, image_size, 3]))
+    request.inputs["input"].CopyFrom(
+        tf.make_tensor_proto(image_data, shape=[1, image_size, image_size, 3])
+    )
     result = stub.Predict(request)
-    print('Predicted class: ', str(np.argmax(result.outputs['predict'].float_val)))
+    print("Predicted class: ", str(np.argmax(result.outputs["predict"].float_val)))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tf_v1.disable_eager_execution()
     tf_v1.app.run()

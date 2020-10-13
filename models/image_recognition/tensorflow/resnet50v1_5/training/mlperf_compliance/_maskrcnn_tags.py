@@ -30,7 +30,7 @@ RPN_PRE_NMS_TOP_N_TEST = "rpn_pre_nms_top_n_test"
 RPN_POST_NMS_TOP_N_TRAIN = "rpn_post_nms_top_n_train"
 RPN_POST_NMS_TOP_N_TEST = "rpn_post_nms_top_n_test"
 
-#Global batch size during training
+# Global batch size during training
 GLOBAL_BATCH_SIZE = "global_batch_size"
 
 # Batch size during eval

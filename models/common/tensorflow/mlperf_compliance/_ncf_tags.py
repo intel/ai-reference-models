@@ -57,4 +57,3 @@ MODEL_HP_MF_DIM = "model_hp_mf_dim"
 
 # The sizes of the fully connected layers in the dense section of the model.
 MODEL_HP_MLP_LAYER_SIZES = "model_hp_mlp_layer_sizes"
-

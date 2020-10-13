@@ -53,12 +53,12 @@ def catch_stdout():
 
 @pytest.fixture
 def mock_json(patch):
-    return patch('json')
+    return patch("json")
 
 
 @pytest.fixture
 def mock_glob(patch):
-    return patch('glob.glob')
+    return patch("glob.glob")
 
 
 # Example args and output strings for testing mocks
@@ -67,19 +67,25 @@ test_framework = "tensorflow"
 test_mode = "inference"
 test_precision = "fp32"
 test_docker_image = "foo"
-example_req_args = ["--model-name", test_model_name,
-                    "--framework", test_framework,
-                    "--mode", test_mode,
-                    "--precision", test_precision,
-                    "--docker-image", test_docker_image]
+example_req_args = [
+    "--model-name",
+    test_model_name,
+    "--framework",
+    test_framework,
+    "--mode",
+    test_mode,
+    "--precision",
+    test_precision,
+    "--docker-image",
+    test_docker_image,
+]
 
 
 @patch("common.platform_util.os")
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("os.system")
-def test_base_model_initializer(
-        mock_system, mock_subprocess, mock_platform, mock_os):
+def test_base_model_initializer(mock_system, mock_subprocess, mock_platform, mock_os):
     # Setup base model init with test settings
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
@@ -156,14 +162,19 @@ def test_set_kmp_vars_config_json_does_not_exists():
     os.environ["PYTHON_EXE"] = "python"
     base_model_init = BaseModelInitializer(args, [], platform_util)
 
-    config_file_path = '/test/foo/config.json'
+    config_file_path = "/test/foo/config.json"
 
     with catch_stdout() as caught_output:
         base_model_init.set_kmp_vars(config_file_path)
         output = caught_output.getvalue()
 
-    assert "Warning: File {} does not exist and \
-            cannot be used to set KMP environment variables".format(config_file_path) == output.strip()
+    assert (
+        "Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(
+            config_file_path
+        )
+        == output.strip()
+    )
 
 
 def test_set_kmp_vars_config_json_exists(mock_json):
@@ -179,10 +190,10 @@ def test_set_kmp_vars_config_json_exists(mock_json):
     base_model_init.set_kmp_vars(config_file_path)
 
 
-@pytest.mark.parametrize('precision', ['int8'])
+@pytest.mark.parametrize("precision", ["int8"])
 def test_command_prefix_tcmalloc_int8(precision, mock_glob):
-    """ For Int8 models, TCMalloc should be enabled by default and models should include
-     LD_PRELOAD in the command prefix, unless disable_tcmalloc=True is set """
+    """For Int8 models, TCMalloc should be enabled by default and models should include
+    LD_PRELOAD in the command prefix, unless disable_tcmalloc=True is set"""
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
@@ -213,10 +224,10 @@ def test_command_prefix_tcmalloc_int8(precision, mock_glob):
     assert "numactl" not in command_prefix
 
 
-@pytest.mark.parametrize('precision', ['fp32'])
+@pytest.mark.parametrize("precision", ["fp32"])
 def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
-    """ FP32 models should have TC Malloc disabled by default, but models should
-    include LD_PRELOAD in the command prefix if disable_tcmalloc=False is explicitly set. """
+    """FP32 models should have TC Malloc disabled by default, but models should
+    include LD_PRELOAD in the command prefix if disable_tcmalloc=False is explicitly set."""
     platform_util = MagicMock()
     args = MagicMock(verbose=True, model_name=test_model_name)
     test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
@@ -253,11 +264,15 @@ def test_multi_instance_train_prefix():
     args.num_processes = 2
     args.num_processes_per_node = 1
     base_model_init = BaseModelInitializer(args, [], platform_util)
-    command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test"])
+    command = base_model_init.get_multi_instance_train_prefix(
+        option_list=["--genv:test"]
+    )
     assert command == "mpirun -n 2 -ppn 1 --genv test "
 
     args.num_processes = None
     args.num_processes_per_node = None
     base_model_init = BaseModelInitializer(args, [], platform_util)
-    command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test", "--genv:test2"])
+    command = base_model_init.get_multi_instance_train_prefix(
+        option_list=["--genv:test", "--genv:test2"]
+    )
     assert command == "mpirun --genv test --genv test2 "

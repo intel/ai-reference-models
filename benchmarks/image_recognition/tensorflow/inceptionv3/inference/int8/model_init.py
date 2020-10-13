@@ -37,49 +37,72 @@ class ModelInitializer(BaseModelInitializer):
         # Set the num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
         # Set env vars, if they haven't already been set
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads, overwrite_existing=True)
+        set_env_var(
+            "OMP_NUM_THREADS", self.args.num_intra_threads, overwrite_existing=True
+        )
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument(
-            "--warmup-steps", dest="warmup_steps",
+            "--warmup-steps",
+            dest="warmup_steps",
             help="number of warmup steps",
-            type=int, default=10)
+            type=int,
+            default=10,
+        )
         parser.add_argument(
-            "--steps", dest="steps",
-            help="number of steps",
-            type=int, default=50)
+            "--steps", dest="steps", help="number of steps", type=int, default=50
+        )
         parser.add_argument(
-            '--kmp-blocktime', dest='kmp_blocktime',
-            help='number of kmp block time',
-            type=int, default=1)
+            "--kmp-blocktime",
+            dest="kmp_blocktime",
+            help="number of kmp block time",
+            type=int,
+            default=1,
+        )
         parser.add_argument(
             "--calibration-only",
             help="Calibrate the accuracy.",
-            dest="calibration_only", action="store_true")
+            dest="calibration_only",
+            action="store_true",
+        )
 
-        self.args = parser.parse_args(self.custom_args,
-                                      namespace=self.args)
+        self.args = parser.parse_args(self.custom_args, namespace=self.args)
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
     def run_benchmark(self):
-        benchmark_script = os.path.join(self.args.intelai_models,
-                                        self.args.precision, "benchmark.py")
+        benchmark_script = os.path.join(
+            self.args.intelai_models, self.args.precision, "benchmark.py"
+        )
         script_args_list = [
-            "input_graph", "batch_size",
+            "input_graph",
+            "batch_size",
             # "data_location",    # comment it out for now since start.sh added data-location=/dataset
-            "num_inter_threads", "num_intra_threads",
-            "data_num_inter_threads", "data_num_intra_threads",
-            "warmup_steps", "steps"]
+            "num_inter_threads",
+            "num_intra_threads",
+            "data_num_inter_threads",
+            "data_num_intra_threads",
+            "warmup_steps",
+            "steps",
+        ]
 
-        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        cmd_prefix = (
+            self.get_command_prefix(self.args.socket_id)
+            + self.python_exe
+            + " "
+            + benchmark_script
+        )
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         # add num_cores
-        num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
+        num_cores = (
+            self.platform_util.num_cores_per_socket
+            if self.args.num_cores == -1
             else self.args.num_cores
+        )
         cmd += " --num_cores=" + str(num_cores)
         # workaround the --data-location problem
         if self.args.data_location and os.listdir(self.args.data_location):
@@ -87,27 +110,43 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(cmd)
 
     def run_accuracy(self):
-        accuracy_script = os.path.join(self.args.intelai_models,
-                                       self.args.precision, "accuracy.py")
+        accuracy_script = os.path.join(
+            self.args.intelai_models, self.args.precision, "accuracy.py"
+        )
         script_args_list = [
-            "input_graph", "data_location",
+            "input_graph",
+            "data_location",
             "batch_size",
-            "num_inter_threads", "num_intra_threads"]
+            "num_inter_threads",
+            "num_intra_threads",
+        ]
 
-        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + accuracy_script
+        cmd_prefix = (
+            self.get_command_prefix(self.args.socket_id)
+            + self.python_exe
+            + " "
+            + accuracy_script
+        )
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 
     def run_calibration(self):
-        calibration_script = os.path.join(self.args.intelai_models,
-                                          self.args.precision, "calibration.py")
+        calibration_script = os.path.join(
+            self.args.intelai_models, self.args.precision, "calibration.py"
+        )
         script_args_list = [
-            "input_graph", "data_location",
+            "input_graph",
+            "data_location",
             "batch_size",
-            "num_inter_threads", "num_intra_threads"]
-        cmd_prefix = self.get_command_prefix(self.args.socket_id) + \
-            self.python_exe + " " + calibration_script
+            "num_inter_threads",
+            "num_intra_threads",
+        ]
+        cmd_prefix = (
+            self.get_command_prefix(self.args.socket_id)
+            + self.python_exe
+            + " "
+            + calibration_script
+        )
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)
 

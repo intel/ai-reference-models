@@ -20,12 +20,14 @@
 
 # Constants used for test mocks
 SYSTEM_TYPE = "Linux"
-LSCPU_OUTPUT = ("Architecture:          x86_64\n"
-                "CPU(s):                112\n"
-                "Thread(s) per core:    2\n"
-                "Core(s) per socket:    28\n"
-                "Socket(s):             2\n"
-                "NUMA node(s):          2\n")
+LSCPU_OUTPUT = (
+    "Architecture:          x86_64\n"
+    "CPU(s):                112\n"
+    "Thread(s) per core:    2\n"
+    "Core(s) per socket:    28\n"
+    "Socket(s):             2\n"
+    "NUMA node(s):          2\n"
+)
 
 
 def set_mock_system_type(mock_platform):

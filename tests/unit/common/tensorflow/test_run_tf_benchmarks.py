@@ -78,18 +78,35 @@ test_arg_values = parse_model_args_file()
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("common.base_model_init.BaseModelInitializer.run_command")
-def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os,
-                       mock_glob, mock_remove, mock_chdir, mock_stat, mock_path_exists,
-                       mock_is_file, mock_is_dir, mock_listdir, mock_rmtree, mock_mkdir,
-                       test_args, expected_cmd, comment):
+def test_run_benchmark(
+    mock_run_command,
+    mock_subprocess,
+    mock_platform,
+    mock_os,
+    mock_glob,
+    mock_remove,
+    mock_chdir,
+    mock_stat,
+    mock_path_exists,
+    mock_is_file,
+    mock_is_dir,
+    mock_listdir,
+    mock_rmtree,
+    mock_mkdir,
+    test_args,
+    expected_cmd,
+    comment,
+):
     """
     Runs through executing the specified run_tf_benchmarks.py command from the
     test_args and verifying that the model_init file calls run_command with
     the expected_cmd string.
     """
-    if comment in ["tf_ssd_resnet34_args.json :: ssd_resnet34_fp32_training",
-                   "tf_gnmt_args.json :: gnmt_fp32_throughput",
-                   "tf_gnmt_args.json :: gnmt_fp32_latency"]:
+    if comment in [
+        "tf_ssd_resnet34_args.json :: ssd_resnet34_fp32_training",
+        "tf_gnmt_args.json :: gnmt_fp32_throughput",
+        "tf_gnmt_args.json :: gnmt_fp32_latency",
+    ]:
         pytest.skip()
 
     print("****** Running The {} test ******".format(comment))
@@ -108,8 +125,12 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os
     platform_config.set_mock_system_type(mock_platform)
     platform_config.set_mock_os_access(mock_os)
     platform_config.set_mock_lscpu_subprocess_values(mock_subprocess)
-    test_args = re.sub(" +", " ", test_args)        # get rid of extra spaces in the test_args string
-    expected_cmd = re.sub(" +", " ", expected_cmd)  # get rid of extra spaces in the expected_cmd string
+    test_args = re.sub(
+        " +", " ", test_args
+    )  # get rid of extra spaces in the test_args string
+    expected_cmd = re.sub(
+        " +", " ", expected_cmd
+    )  # get rid of extra spaces in the expected_cmd string
     test_arg_list = test_args.split(" ")
     with patch.object(sys, "argv", test_arg_list):
         model_benchmark = ModelBenchmarkUtil()
@@ -118,7 +139,10 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os
     call_args = mock_run_command.call_args_list[0][0][0]
     # python3 argparse parses things in different order than python2
     # we'll check that the args are all there though
-    for actual_arg, expected_arg in zip(sorted(call_args.split()), sorted(expected_cmd.split())):
+    for actual_arg, expected_arg in zip(
+        sorted(call_args.split()), sorted(expected_cmd.split())
+    ):
         # use fnmatch in case we have file names with wildcards (like timestamps in output files)
-        assert fnmatch.fnmatch(actual_arg, expected_arg), \
-            "Expected: {}\nActual: {}".format(expected_cmd, call_args)
+        assert fnmatch.fnmatch(
+            actual_arg, expected_arg
+        ), "Expected: {}\nActual: {}".format(expected_cmd, call_args)

@@ -18,7 +18,9 @@
 
 #
 
-from image_recognition.tensorflow.inceptionv4.inference.inceptionv4_model_init import InceptionV4ModelInitializer
+from image_recognition.tensorflow.inceptionv4.inference.inceptionv4_model_init import (
+    InceptionV4ModelInitializer,
+)
 
 
 class ModelInitializer(InceptionV4ModelInitializer):

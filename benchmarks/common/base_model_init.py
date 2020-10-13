@@ -38,7 +38,6 @@ def set_env_var(env_var, value, overwrite_existing=False):
 
 
 class BaseModelInitializer(object):
-
     def __init__(self, args, custom_args=[], platform_util=None):
         self.args = args
         self.custom_args = custom_args
@@ -58,39 +57,73 @@ class BaseModelInitializer(object):
             raise ValueError("Did not find any platform info.")
 
         # use case: bare-metal with openmpi, horovod and multi-node
-        if os.environ["MPI_HOSTNAMES"] != "None" and ("DOCKER" not in os.environ or os.environ["DOCKER"] == "False"):
+        if os.environ["MPI_HOSTNAMES"] != "None" and (
+            "DOCKER" not in os.environ or os.environ["DOCKER"] == "False"
+        ):
             if os.environ["MPI_NUM_PROCESSES"] != "None":
                 try:
                     # slots per host calculation using MPI_NUM_PROCESSES and number of hosts
                     host_names = os.environ["MPI_HOSTNAMES"]
-                    number_of_hosts = len(host_names.split(','))
-                    slots_per_host = int(int(os.environ["MPI_NUM_PROCESSES"]) / number_of_hosts)
-                    host_names = ",".join([host + ":" + str(slots_per_host) for host in host_names.split(',')])
+                    number_of_hosts = len(host_names.split(","))
+                    slots_per_host = int(
+                        int(os.environ["MPI_NUM_PROCESSES"]) / number_of_hosts
+                    )
+                    host_names = ",".join(
+                        [
+                            host + ":" + str(slots_per_host)
+                            for host in host_names.split(",")
+                        ]
+                    )
                     # see the [examples](https://horovod.readthedocs.io/en/latest/mpirun.html) for the mca flags
-                    self.python_exe = "mpirun " + " -x LD_LIBRARY_PATH " + " -x PYTHONPATH " \
-                        + " --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] + " -H " + host_names \
-                        + " -mca pml ob1 -mca btl ^openib -mca btl_tcp_if_exclude " \
-                          "lo,docker0 --bind-to none --map-by slot " \
-                        + self.python_exe
+                    self.python_exe = (
+                        "mpirun "
+                        + " -x LD_LIBRARY_PATH "
+                        + " -x PYTHONPATH "
+                        + " --allow-run-as-root -n "
+                        + os.environ["MPI_NUM_PROCESSES"]
+                        + " -H "
+                        + host_names
+                        + " -mca pml ob1 -mca btl ^openib -mca btl_tcp_if_exclude "
+                        "lo,docker0 --bind-to none --map-by slot " + self.python_exe
+                    )
                 except Exception as exception:
-                    raise ValueError("Caught exception calculating slots per host {}".format(str(exception)))
+                    raise ValueError(
+                        "Caught exception calculating slots per host {}".format(
+                            str(exception)
+                        )
+                    )
             else:
-                raise ValueError("MPI_NUM_PROCESSES is required for MPI_HOSTNAMES and will be split evenly across the "
-                                 "hosts.")
+                raise ValueError(
+                    "MPI_NUM_PROCESSES is required for MPI_HOSTNAMES and will be split evenly across the "
+                    "hosts."
+                )
         # use case: docker with openmpi, single-node, multi-instance
         elif os.environ["MPI_NUM_PROCESSES"] != "None":
             if os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] == "1":
                 # Map by socket using OpenMPI by default (PPS=1).
-                self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] \
-                    + " --map-by socket " + self.python_exe
+                self.python_exe = (
+                    "mpirun --allow-run-as-root -n "
+                    + os.environ["MPI_NUM_PROCESSES"]
+                    + " --map-by socket "
+                    + self.python_exe
+                )
             else:
                 # number of processes per socket (pps)
                 pps = int(os.environ["MPI_NUM_PROCESSES_PER_SOCKET"])
                 split_a_socket = str(platform_util.num_cores_per_socket // pps)
                 # Launch pps MPI processes over one socket
-                self.python_exe = "mpirun --allow-run-as-root -n " + os.environ["MPI_NUM_PROCESSES"] \
-                    + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " \
-                    + split_a_socket + " " + self.python_exe
+                self.python_exe = (
+                    "mpirun --allow-run-as-root -n "
+                    + os.environ["MPI_NUM_PROCESSES"]
+                    + " --map-by ppr:"
+                    + str(pps)
+                    + ":socket:pe="
+                    + split_a_socket
+                    + " --cpus-per-proc "
+                    + split_a_socket
+                    + " "
+                    + self.python_exe
+                )
 
     def run_command(self, cmd):
         """
@@ -126,8 +159,10 @@ class BaseModelInitializer(object):
                 command += "LD_PRELOAD={} ".format(matches[0])
             else:
                 # Unable to find the TCMalloc library file
-                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
-                      "so the LD_PRELOAD environment variable will not be set.")
+                print(
+                    "Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
+                    "so the LD_PRELOAD environment variable will not be set."
+                )
 
         if socket_id != -1 and numactl:
             command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
@@ -146,10 +181,13 @@ class BaseModelInitializer(object):
                 continue
             if arg_value and (arg in arg_list):
                 command = "{cmd} --{param}={value}".format(
-                    cmd=command, param=arg, value=arg_value)
+                    cmd=command, param=arg, value=arg_value
+                )
         return command
 
-    def set_num_inter_intra_threads(self, num_inter_threads=None, num_intra_threads=None):
+    def set_num_inter_intra_threads(
+        self, num_inter_threads=None, num_intra_threads=None
+    ):
         """
         Sets default values for self.args.num_inter_threads and
         self.args.num_intra_threads, only if they are not already set.
@@ -183,9 +221,11 @@ class BaseModelInitializer(object):
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
-                self.args.num_intra_threads = \
-                    self.platform_util.num_cores_per_socket \
-                    if self.args.num_cores == -1 else self.args.num_cores
+                self.args.num_intra_threads = (
+                    self.platform_util.num_cores_per_socket
+                    if self.args.num_cores == -1
+                    else self.args.num_cores
+                )
         else:
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = self.platform_util.num_cpu_sockets
@@ -193,25 +233,33 @@ class BaseModelInitializer(object):
                     self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
                 if self.args.num_cores == -1:
-                    self.args.num_intra_threads = \
-                        int(self.platform_util.num_cores_per_socket *
-                            self.platform_util.num_cpu_sockets)
+                    self.args.num_intra_threads = int(
+                        self.platform_util.num_cores_per_socket
+                        * self.platform_util.num_cpu_sockets
+                    )
                     if os.environ["MPI_NUM_PROCESSES"] != "None":
-                        self.args.num_intra_threads = self.platform_util.num_cores_per_socket - 2
+                        self.args.num_intra_threads = (
+                            self.platform_util.num_cores_per_socket - 2
+                        )
                 else:
                     self.args.num_intra_threads = self.args.num_cores
 
         if self.args.verbose:
-            print("num_inter_threads: {}\nnum_intra_threads: {}".format(
-                self.args.num_inter_threads, self.args.num_intra_threads))
+            print(
+                "num_inter_threads: {}\nnum_intra_threads: {}".format(
+                    self.args.num_inter_threads, self.args.num_intra_threads
+                )
+            )
 
-    def set_kmp_vars(self, config_file_path, kmp_settings=None, kmp_blocktime=None, kmp_affinity=None):
+    def set_kmp_vars(
+        self, config_file_path, kmp_settings=None, kmp_blocktime=None, kmp_affinity=None
+    ):
         """
         Sets KMP_* environment variables to the specified value, if the environment variable has not already been set.
         The default values in the json file are the best known settings for the model.
         """
         if os.path.exists(config_file_path):
-            with open(config_file_path, 'r') as config:
+            with open(config_file_path, "r") as config:
                 config_object = json.load(config)
 
             # First sets default from config file
@@ -220,8 +268,12 @@ class BaseModelInitializer(object):
                     set_env_var(env, config_object[param][env])
 
         else:
-            print("Warning: File {} does not exist and \
-            cannot be used to set KMP environment variables".format(config_file_path))
+            print(
+                "Warning: File {} does not exist and \
+            cannot be used to set KMP environment variables".format(
+                    config_file_path
+                )
+            )
 
         # Override user provided envs
         if kmp_settings:

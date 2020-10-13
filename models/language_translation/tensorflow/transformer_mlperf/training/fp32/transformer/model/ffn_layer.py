@@ -24,70 +24,73 @@ from mlperf_compliance import mlperf_log
 
 
 class FeedFowardNetwork(tf.compat.v1.layers.Layer):
-  """Fully connected feedforward network."""
+    """Fully connected feedforward network."""
 
-  def __init__(self, hidden_size, filter_size, relu_dropout, train):
-    super(FeedFowardNetwork, self).__init__()
-    self.hidden_size = hidden_size
-    self.filter_size = filter_size
-    self.relu_dropout = relu_dropout
-    self.train = train
+    def __init__(self, hidden_size, filter_size, relu_dropout, train):
+        super(FeedFowardNetwork, self).__init__()
+        self.hidden_size = hidden_size
+        self.filter_size = filter_size
+        self.relu_dropout = relu_dropout
+        self.train = train
 
-    use_bias = True
-    self.filter_dense_layer = tf.compat.v1.layers.Dense(
-        filter_size, use_bias=use_bias, activation=tf.nn.relu, name="filter_layer")
-    self.output_dense_layer = tf.compat.v1.layers.Dense(
-        hidden_size, use_bias=use_bias, name="output_layer")
-
-    mlperf_log.transformer_print(
-        key=mlperf_log.MODEL_HP_FFN_FILTER_DENSE,
-        value={
-          "filter_size": filter_size,
-          "use_bias": use_bias,
-          "activation": mlperf_log.RELU
-        })
-    mlperf_log.transformer_print(
-        key=mlperf_log.MODEL_HP_FFN_OUTPUT_DENSE,
-        value={
-          "hidden_size": hidden_size,
-          "use_bias": use_bias
-        })
-
-  def call(self, x, padding=None):
-    # Retrieve dynamically known shapes
-    batch_size = tf.shape(input=x)[0]
-    length = tf.shape(input=x)[1]
-
-    if padding is not None:
-      with tf.compat.v1.name_scope("remove_padding"):
-        # Flatten padding to [batch_size*length]
-        pad_mask = tf.reshape(padding, [-1])
-
-        nonpad_ids = tf.cast(tf.compat.v1.where(pad_mask < 1e-9), dtype=tf.int32)
-
-        # Reshape x to [batch_size*length, hidden_size] to remove padding
-        x = tf.reshape(x, [-1, self.hidden_size])
-        x = tf.gather_nd(x, indices=nonpad_ids)
-
-        # Reshape x from 2 dimensions to 3 dimensions.
-        x.set_shape([None, self.hidden_size])
-        x = tf.expand_dims(x, axis=0)
-
-    output = self.filter_dense_layer(x)
-    if self.train:
-      mlperf_log.transformer_print(
-          key=mlperf_log.MODEL_HP_RELU_DROPOUT, value=self.relu_dropout)
-      output = tf.nn.dropout(output, 1 - (1.0 - self.relu_dropout))
-    output = self.output_dense_layer(output)
-
-    if padding is not None:
-      with tf.compat.v1.name_scope("re_add_padding"):
-        output = tf.squeeze(output, axis=0)
-        output = tf.scatter_nd(
-            indices=nonpad_ids,
-            updates=output,
-            shape=[batch_size * length, self.hidden_size]
+        use_bias = True
+        self.filter_dense_layer = tf.compat.v1.layers.Dense(
+            filter_size, use_bias=use_bias, activation=tf.nn.relu, name="filter_layer"
         )
-        output = tf.reshape(output, [batch_size, length, self.hidden_size])
-    return output
+        self.output_dense_layer = tf.compat.v1.layers.Dense(
+            hidden_size, use_bias=use_bias, name="output_layer"
+        )
 
+        mlperf_log.transformer_print(
+            key=mlperf_log.MODEL_HP_FFN_FILTER_DENSE,
+            value={
+                "filter_size": filter_size,
+                "use_bias": use_bias,
+                "activation": mlperf_log.RELU,
+            },
+        )
+        mlperf_log.transformer_print(
+            key=mlperf_log.MODEL_HP_FFN_OUTPUT_DENSE,
+            value={"hidden_size": hidden_size, "use_bias": use_bias},
+        )
+
+    def call(self, x, padding=None):
+        # Retrieve dynamically known shapes
+        batch_size = tf.shape(input=x)[0]
+        length = tf.shape(input=x)[1]
+
+        if padding is not None:
+            with tf.compat.v1.name_scope("remove_padding"):
+                # Flatten padding to [batch_size*length]
+                pad_mask = tf.reshape(padding, [-1])
+
+                nonpad_ids = tf.cast(
+                    tf.compat.v1.where(pad_mask < 1e-9), dtype=tf.int32
+                )
+
+                # Reshape x to [batch_size*length, hidden_size] to remove padding
+                x = tf.reshape(x, [-1, self.hidden_size])
+                x = tf.gather_nd(x, indices=nonpad_ids)
+
+                # Reshape x from 2 dimensions to 3 dimensions.
+                x.set_shape([None, self.hidden_size])
+                x = tf.expand_dims(x, axis=0)
+
+        output = self.filter_dense_layer(x)
+        if self.train:
+            mlperf_log.transformer_print(
+                key=mlperf_log.MODEL_HP_RELU_DROPOUT, value=self.relu_dropout
+            )
+            output = tf.nn.dropout(output, 1 - (1.0 - self.relu_dropout))
+        output = self.output_dense_layer(output)
+
+        if padding is not None:
+            with tf.compat.v1.name_scope("re_add_padding"):
+                output = tf.squeeze(output, axis=0)
+                output = tf.scatter_nd(
+                    indices=nonpad_ids,
+                    updates=output,
+                    shape=[batch_size * length, self.hidden_size],
+                )
+                output = tf.reshape(output, [batch_size, length, self.hidden_size])
+        return output

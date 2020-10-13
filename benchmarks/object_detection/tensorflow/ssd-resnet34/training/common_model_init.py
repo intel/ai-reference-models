@@ -29,39 +29,71 @@ from common.base_model_init import set_env_var
 
 def run_training_checks(args):
     if not args.data_location:
-        sys.exit("Please provide a path to the data directory via the '--data-location' flag.")
+        sys.exit(
+            "Please provide a path to the data directory via the '--data-location' flag."
+        )
 
 
 class SSDResnet34ModelInitializer(BaseModelInitializer):
-
     def __init__(self, args, custom_args, platform_util):
-        super(SSDResnet34ModelInitializer, self).__init__(args, custom_args, platform_util)
+        super(SSDResnet34ModelInitializer, self).__init__(
+            args, custom_args, platform_util
+        )
 
         run_training_checks(self.args)
         # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path)
 
         self.set_num_inter_intra_threads()
 
         # Train parameter parser
         parser = argparse.ArgumentParser(description="process custom_args")
-        parser.add_argument('--weight_decay', type=float, default=5e-4)
-        parser.add_argument('--num_warmup_batches', type=int, default=0)
-        parser.add_argument('--num_train_steps', type=int, default=500, help='number of training batches')
-        parser.add_argument('--num_inter_threads', type=int, default=1, help='number of inter-threads')
-        parser.add_argument('--num_intra_threads', type=int, default=28, help='number of intra-threads')
-        parser.add_argument('--epochs', dest="epochs", type=int, default=60,
-                            help='number of training epochs. Pass 0 to train based on number of train_steps instead of number of epochs')  # noqa: E501
-        parser.add_argument('--save_model_steps', dest="save_model_steps", type=int, default=10000,
-                            help='number of steps at which the model is periodically saved.')
-        parser.add_argument('--timeline', dest="timeline", default=None, help='Trace filename for timeline')
+        parser.add_argument("--weight_decay", type=float, default=5e-4)
+        parser.add_argument("--num_warmup_batches", type=int, default=0)
+        parser.add_argument(
+            "--num_train_steps",
+            type=int,
+            default=500,
+            help="number of training batches",
+        )
+        parser.add_argument(
+            "--num_inter_threads", type=int, default=1, help="number of inter-threads"
+        )
+        parser.add_argument(
+            "--num_intra_threads", type=int, default=28, help="number of intra-threads"
+        )
+        parser.add_argument(
+            "--epochs",
+            dest="epochs",
+            type=int,
+            default=60,
+            help="number of training epochs. Pass 0 to train based on number of train_steps instead of number of epochs",
+        )  # noqa: E501
+        parser.add_argument(
+            "--save_model_steps",
+            dest="save_model_steps",
+            type=int,
+            default=10000,
+            help="number of steps at which the model is periodically saved.",
+        )
+        parser.add_argument(
+            "--timeline",
+            dest="timeline",
+            default=None,
+            help="Trace filename for timeline",
+        )
 
         self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
         omp_num_threads = platform_util.num_cores_per_socket
 
-        set_env_var("OMP_NUM_THREADS", omp_num_threads if self.args.num_cores == -1 else self.args.num_cores)
+        set_env_var(
+            "OMP_NUM_THREADS",
+            omp_num_threads if self.args.num_cores == -1 else self.args.num_cores,
+        )
 
         cmd_args = " --data_dir {0}".format(self.args.data_location)
         cmd_args += " --batch_size {0}".format(self.args.batch_size)
@@ -71,23 +103,27 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
 
-        if (self.args.timeline is not None):
-            cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.timeline)
+        if self.args.timeline is not None:
+            cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(
+                self.args.timeline
+            )
 
-        if (self.args.accuracy_only):
+        if self.args.accuracy_only:
             # eval run arguments
             cmd_args += " --train_dir={0}".format(self.args.checkpoint)
             cmd_args += " --eval=true"
             cmd_args += " --num_eval_epochs=1"
             cmd_args += " --print_training_accuracy=True"
-        elif (self.args.backbone_model is None):
+        elif self.args.backbone_model is None:
             # benchmarking run arguments
             cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
             cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
             cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
         else:
             # convergence training arguments
-            cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
+            cmd_args += " --backbone_model_path={0}".format(
+                os.path.join(self.args.backbone_model, "model.ckpt-28152")
+            )
             cmd_args += " --optimizer=momentum"
             cmd_args += " --weight_decay={0}".format(self.args.weight_decay)
             cmd_args += " --momentum=0.9"
@@ -101,8 +137,10 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
 
         self.cmd = "{} ".format(self.python_exe)
 
-        self.training_script_dir = os.path.join('/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks')
-        training_script = os.path.join(self.training_script_dir, 'tf_cnn_benchmarks.py')
+        self.training_script_dir = os.path.join(
+            "/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
+        )
+        training_script = os.path.join(self.training_script_dir, "tf_cnn_benchmarks.py")
 
         self.cmd = self.cmd + training_script + cmd_args
 

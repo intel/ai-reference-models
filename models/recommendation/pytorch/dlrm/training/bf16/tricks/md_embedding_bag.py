@@ -18,7 +18,7 @@ import torch.nn as nn
 
 
 def md_solver(n, alpha, d0=None, B=None, round_dim=True, k=None):
-    '''
+    """
     An external facing function call for mixed-dimension assignment
     with the alpha power temperature heuristic
     Inputs:
@@ -28,7 +28,7 @@ def md_solver(n, alpha, d0=None, B=None, round_dim=True, k=None):
     B -- (torch.FloatTensor); Scalar, parameter budget for embedding layer
     round_dim -- (bool); flag for rounding dims to nearest pow of 2
     k -- (torch.LongTensor) ; Vector of average number of queries per inference
-    '''
+    """
     n, indices = torch.sort(n)
     k = k[indices] if k is not None else torch.ones(len(n))
     d = alpha_power_rule(n.type(torch.float) / k, alpha, d0=d0, B=B)
@@ -53,7 +53,7 @@ def alpha_power_rule(n, alpha, d0=None, B=None):
             d[i] = d0
         else:
             d[i] = 1 if d[i] < 1 else d[i]
-    return (torch.round(d).type(torch.long))
+    return torch.round(d).type(torch.long)
 
 
 def pow_2_round(dims):
@@ -64,7 +64,8 @@ class PrEmbeddingBag(nn.Module):
     def __init__(self, num_embeddings, embedding_dim, base_dim):
         super(PrEmbeddingBag, self).__init__()
         self.embs = nn.EmbeddingBag(
-            num_embeddings, embedding_dim, mode="sum", sparse=True)
+            num_embeddings, embedding_dim, mode="sum", sparse=True
+        )
         torch.nn.init.xavier_uniform_(self.embs.weight)
         if embedding_dim < base_dim:
             self.proj = nn.Linear(embedding_dim, base_dim, bias=False)
@@ -77,5 +78,6 @@ class PrEmbeddingBag(nn.Module):
             )
 
     def forward(self, input, offsets=None, per_sample_weights=None):
-        return self.proj(self.embs(
-            input, offsets=offsets, per_sample_weights=per_sample_weights))
+        return self.proj(
+            self.embs(input, offsets=offsets, per_sample_weights=per_sample_weights)
+        )

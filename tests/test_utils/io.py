@@ -34,5 +34,8 @@ def parse_json_files(json_dir_path):
             data = json.load(f)
             for x in data:
                 values.append(
-                    tuple((x['input'], x['output'], model_file + " :: " + x['_comment'])))
+                    tuple(
+                        (x["input"], x["output"], model_file + " :: " + x["_comment"])
+                    )
+                )
     return values

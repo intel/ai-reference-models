@@ -15,12 +15,9 @@ ext_modules = [
     Extension(
         "data_utils_cython",
         ["data_utils_cython.pyx"],
-        extra_compile_args=['-O3'],
-        extra_link_args=['-O3'],
+        extra_compile_args=["-O3"],
+        extra_link_args=["-O3"],
     )
 ]
 
-setup(
-    name='data_utils_cython',
-    ext_modules=cythonize(ext_modules)
-)
+setup(name="data_utils_cython", ext_modules=cythonize(ext_modules))

@@ -32,21 +32,31 @@ class ModelInitializer(BaseModelInitializer):
 
     def run_inference_sanity_checks(self, args, custom_args):
         if args.batch_size != -1 and args.batch_size != 1:
-            sys.exit("R-FCN inference supports 'batch-size=1' " +
-                     "only, please modify via the '--batch_size' flag.")
+            sys.exit(
+                "R-FCN inference supports 'batch-size=1' "
+                + "only, please modify via the '--batch_size' flag."
+            )
 
     def __init__(self, args, custom_args, platform_util):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
         self.accuracy_script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            self.accuracy_script)
+            self.args.intelai_models,
+            self.args.mode,
+            self.args.precision,
+            self.accuracy_script,
+        )
         self.benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode,
-            self.args.precision, "run_rfcn_inference.py")
+            self.args.intelai_models,
+            self.args.mode,
+            self.args.precision,
+            "run_rfcn_inference.py",
+        )
 
         # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path)
 
         # Set num_inter_threads and num_intra_threads
@@ -54,23 +64,32 @@ class ModelInitializer(BaseModelInitializer):
 
         self.run_inference_sanity_checks(self.args, self.custom_args)
         self.parse_custom_args()
-        self.research_dir = os.path.join(self.args.model_source_dir,
-                                         "research")
+        self.research_dir = os.path.join(self.args.model_source_dir, "research")
 
     def parse_custom_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
             mutex_group = parser.add_mutually_exclusive_group()
-            mutex_group.add_argument("-x", "--number_of_steps",
-                                     help="Run for n number of steps",
-                                     type=int, default=None)
             mutex_group.add_argument(
-                "-v", "--visualize",
+                "-x",
+                "--number_of_steps",
+                help="Run for n number of steps",
+                type=int,
+                default=None,
+            )
+            mutex_group.add_argument(
+                "-v",
+                "--visualize",
                 help="Whether to visualize the output image",
-                action="store_true")
-            parser.add_argument("-q", "--split",
-                                help="Location of accuracy data",
-                                type=str, default=None)
+                action="store_true",
+            )
+            parser.add_argument(
+                "-q",
+                "--split",
+                help="Location of accuracy data",
+                type=str,
+                default=None,
+            )
             self.args = parser.parse_args(self.custom_args, namespace=self.args)
         else:
             raise ValueError("Custom parameters are missing...")
@@ -112,28 +131,33 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.number_of_steps:
             command += ("-x", "{}".format(self.args.number_of_steps))
         if self.args.visualize:
-            command += ("-v")
+            command += "-v"
         if self.args.data_location:
             command += ("-d", self.args.data_location)
         self.run_command(" ".join(command))
 
     def run_accuracy_command(self):
         if not os.path.exists(self.accuracy_script_path):
-            raise ValueError("Unable to locate the R-FCN accuracy script: "
-                             "{}".format(self.accuracy_script_path))
+            raise ValueError(
+                "Unable to locate the R-FCN accuracy script: "
+                "{}".format(self.accuracy_script_path)
+            )
         command = "FROZEN_GRAPH=" + self.args.input_graph
 
-        if self.args.data_location and os.path.exists(
-                self.args.data_location):
+        if self.args.data_location and os.path.exists(self.args.data_location):
             if os.path.isdir(self.args.data_location):
                 # For directories, create a comma separated list of all the TF record files
                 tf_records_files = []
                 for file in os.listdir(self.args.data_location):
                     if ".record" in file:
-                        tf_records_files.append(os.path.join(self.args.data_location, file))
+                        tf_records_files.append(
+                            os.path.join(self.args.data_location, file)
+                        )
                 if len(tf_records_files) == 0:
-                    print("ERROR: No TF records files were found in "
-                          "the data location: {}".format(self.args.data_location))
+                    print(
+                        "ERROR: No TF records files were found in "
+                        "the data location: {}".format(self.args.data_location)
+                    )
                     sys.exit(1)
                 command += " TF_RECORD_FILES=" + ",".join(tf_records_files)
             else:
@@ -142,15 +166,16 @@ class ModelInitializer(BaseModelInitializer):
         else:
             raise ValueError(
                 "Unable to locate the coco data record file at {}".format(
-                    self.args.tf_record_file))
+                    self.args.tf_record_file
+                )
+            )
 
         if self.args.split:
             command += " SPLIT=" + self.args.split
         else:
             raise ValueError("Must specify SPLIT parameter")
 
-        command += " TF_MODELS_ROOT={}".format(
-            self.args.model_source_dir)
+        command += " TF_MODELS_ROOT={}".format(self.args.model_source_dir)
 
         command += " " + self.accuracy_script_path
         self.run_command(command)

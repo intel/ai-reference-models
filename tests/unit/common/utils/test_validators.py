@@ -24,10 +24,17 @@ from argparse import ArgumentTypeError
 import pytest
 from mock import MagicMock
 
-from common.utils.validators import (check_for_link, check_no_spaces, check_positive_number,
-                                     check_positive_number_or_equal_to_negative_one, check_valid_filename,
-                                     check_valid_folder, check_valid_file_or_dir, check_volume_mount,
-                                     check_shm_size)
+from common.utils.validators import (
+    check_for_link,
+    check_no_spaces,
+    check_positive_number,
+    check_positive_number_or_equal_to_negative_one,
+    check_valid_filename,
+    check_valid_folder,
+    check_valid_file_or_dir,
+    check_volume_mount,
+    check_shm_size,
+)
 
 
 @pytest.fixture()
@@ -112,7 +119,7 @@ def test_check_for_link_folder():
 
 def test_check_no_spaces():
     with pytest.raises(ArgumentTypeError):
-        check_no_spaces('foo bar')
+        check_no_spaces("foo bar")
 
 
 def test_check_positive_number():
@@ -132,7 +139,7 @@ def test_check_valid_filename(mock_link, mock_isfile):
 
 def test_check_valid_filename_bad():
     with pytest.raises(ArgumentTypeError):
-        check_valid_filename('3245jlnsdfnsfd234ofds')
+        check_valid_filename("3245jlnsdfnsfd234ofds")
 
 
 def test_check_valid_folder(mock_link):
@@ -142,7 +149,7 @@ def test_check_valid_folder(mock_link):
 
 def test_check_valid_folder_bad():
     with pytest.raises(ArgumentTypeError):
-        check_valid_folder('3245jlnsdfnsfd234ofds')
+        check_valid_folder("3245jlnsdfnsfd234ofds")
 
 
 def test_check_valid_file_or_dir(mock_link, mock_exists):
@@ -152,24 +159,21 @@ def test_check_valid_file_or_dir(mock_link, mock_exists):
 
 def test_check_valid_file_or_dir_bad():
     with pytest.raises(ArgumentTypeError):
-        check_valid_file_or_dir('3245jlnsdfnsfd234ofds')
+        check_valid_file_or_dir("3245jlnsdfnsfd234ofds")
 
 
 def test_check_invalid_shm_size():
     with pytest.raises(ArgumentTypeError):
-        check_shm_size('-g123ff')
+        check_shm_size("-g123ff")
 
 
 def test_check_valid_shm_size():
-    assert check_shm_size('500g') == '500g'
-    assert check_shm_size('64m') == '64m'
-    assert check_shm_size('1024k') == '1024k'
+    assert check_shm_size("500g") == "500g"
+    assert check_shm_size("64m") == "64m"
+    assert check_shm_size("1024k") == "1024k"
 
 
-@pytest.mark.parametrize("volume_mount_str",
-                         ["foo",
-                          "foo:foo:foo:foo",
-                          "foo,foo"])
+@pytest.mark.parametrize("volume_mount_str", ["foo", "foo:foo:foo:foo", "foo,foo"])
 def test_bad_volume_mount_strings(volume_mount_str):
     with pytest.raises(ArgumentTypeError):
         check_volume_mount(volume_mount_str)

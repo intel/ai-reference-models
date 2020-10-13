@@ -44,9 +44,16 @@ test_tfserving_framework = "tensorflow_serving"
 
 @pytest.fixture
 def mock_platform_util(patch):
-    return patch("common.base_benchmark_util.platform_util.PlatformUtil",
-                 MagicMock(num_cpu_sockets=1, num_cores_per_socket=1, num_threads_per_core=1, num_local_cpus=1,
-                           num_numa_nodes=1))
+    return patch(
+        "common.base_benchmark_util.platform_util.PlatformUtil",
+        MagicMock(
+            num_cpu_sockets=1,
+            num_cores_per_socket=1,
+            num_threads_per_core=1,
+            num_local_cpus=1,
+            num_numa_nodes=1,
+        ),
+    )
 
 
 @pytest.fixture
@@ -97,42 +104,59 @@ def mock_stat(patch):
 
 
 @pytest.fixture(autouse=True)
-def launch_benchmark(mock_platform_util, request, mock_isdir, mock_isfile, mock_islink, mock_stat, mock_path_exists):
+def launch_benchmark(
+    mock_platform_util,
+    request,
+    mock_isdir,
+    mock_isfile,
+    mock_islink,
+    mock_stat,
+    mock_path_exists,
+):
     """sets up launch_benchmark obj for every test case and handles catching errors if we wanna test that
-       To catch errors called when running launch_benchmark, use something like:
-           ['catch_error', SystemExit, [{args}], {error_message}] in parametrize
-       where args are args to pass to the benchmark creation and error_message is an optional error message to check for
-       otherwise just pass in the req args you'd like to run with via []
-       catch_error_override_all_params will not use any example_req_args when creating benchmark
+    To catch errors called when running launch_benchmark, use something like:
+        ['catch_error', SystemExit, [{args}], {error_message}] in parametrize
+    where args are args to pass to the benchmark creation and error_message is an optional error message to check for
+    otherwise just pass in the req args you'd like to run with via []
+    catch_error_override_all_params will not use any example_req_args when creating benchmark
 
-       Sample request.params:
-       ['catch_error', SystemExit, []]
-       ['catch_error_override_all_params', SystemExit, []]
-       ['catch_error', SystemExit, ['--framework', 'foo'], "The specified framework is not supported"]]
-       """
+    Sample request.params:
+    ['catch_error', SystemExit, []]
+    ['catch_error_override_all_params', SystemExit, []]
+    ['catch_error', SystemExit, ['--framework', 'foo'], "The specified framework is not supported"]]
+    """
     catch_error = False
     error = None
-    error_message = ''
+    error_message = ""
 
     # deleting from this sometimes so need to redeclare it, probably can do that differently...
-    example_req_args = ["--model-name", test_model_name,
-                        "--framework", test_framework,
-                        "--mode", test_mode,
-                        "--precision", test_precision,
-                        "--docker-image", test_docker_image,
-                        "--batch-size", test_batch_size,
-                        "--num-cores", test_num_cores]
+    example_req_args = [
+        "--model-name",
+        test_model_name,
+        "--framework",
+        test_framework,
+        "--mode",
+        test_mode,
+        "--precision",
+        test_precision,
+        "--docker-image",
+        test_docker_image,
+        "--batch-size",
+        test_batch_size,
+        "--num-cores",
+        test_num_cores,
+    ]
 
-    if hasattr(request, 'param'):
-        if 'catch_error' in request.param[0]:
+    if hasattr(request, "param"):
+        if "catch_error" in request.param[0]:
             catch_error = True
             error = request.param[1]
-            if request.param[0] != 'catch_error_override_all_params':
+            if request.param[0] != "catch_error_override_all_params":
                 # TODO: make more efficient! Want to get rid of any example_req_args that exist in request.param[2]
                 # using safe deletion from the back
                 for idx in range(len(example_req_args) - 1, -1, -1):
                     arg = example_req_args[idx]
-                    if not arg.startswith('--'):
+                    if not arg.startswith("--"):
                         continue
                     if arg in request.param[2]:
                         # flags are always followed by their value in example_req_args, so delete both arg and its value
@@ -141,7 +165,7 @@ def launch_benchmark(mock_platform_util, request, mock_isdir, mock_isfile, mock_
                 req_args = request.param[2] + example_req_args
             else:
                 req_args = request.param[2]
-            error_message = request.param[3] if len(request.param) == 4 else ''
+            error_message = request.param[3] if len(request.param) == 4 else ""
         else:
             # add extra arguments to the default ones when calling LaunchBenchmark
             req_args = request.param + example_req_args
@@ -149,7 +173,7 @@ def launch_benchmark(mock_platform_util, request, mock_isdir, mock_isfile, mock_
         # only use default arguments when calling LaunchBenchmark
         req_args = example_req_args
 
-    with mock_patch.object(sys, "argv", ['run_tf_benchmark.py'] + req_args):
+    with mock_patch.object(sys, "argv", ["run_tf_benchmark.py"] + req_args):
         with conditional(catch_error, pytest.raises(error)) as e:
             obj = LaunchBenchmark(mock_platform_util)
             if error_message:
@@ -169,7 +193,7 @@ def test_launch_benchmark_parse_args(launch_benchmark):
     assert launch_benchmark.unknown_args == []
 
 
-@pytest.mark.parametrize('launch_benchmark', [["--test", "foo"]], indirect=True)
+@pytest.mark.parametrize("launch_benchmark", [["--test", "foo"]], indirect=True)
 def test_launch_benchmark_parse_unknown_args(launch_benchmark):
     """
     Checks parsing of unknown args
@@ -177,37 +201,82 @@ def test_launch_benchmark_parse_unknown_args(launch_benchmark):
     assert launch_benchmark.unknown_args == ["--test"]
 
 
-@pytest.mark.parametrize('launch_benchmark', [['catch_error_override_all_params', SystemExit, []],
-                                              ['catch_error', SystemExit, ['--framework', 'foo'],
-                                                  "The specified framework is not supported"],
-                                              ['catch_error', SystemExit, ['--docker-image', 'test '],
-                                                  "docker image string should not have whitespace(s)"],
-                                              ['catch_error', ValueError, ["--model-name", test_model_name,
-                                                                           "--framework", test_framework,
-                                                                           "--mode", "training",
-                                                                           "--precision", test_precision,
-                                                                           "--docker-image", test_docker_image,
-                                                                           "--benchmark-only",
-                                                                           "--output-results"],
-                                                  "--output-results can only be used when running "
-                                                  "inference with a dataset"],
-                                              ['catch_error', ValueError, ["--model-name", test_model_name,
-                                                                           "--framework", test_framework,
-                                                                           "--mode", "training",
-                                                                           "--precision", test_precision,
-                                                                           "--docker-image", test_docker_image,
-                                                                           "--accuracy-only",
-                                                                           "--output-results"],
-                                                  "--output-results can only be used when running "
-                                                  "inference with a dataset"],
-                                              ['catch_error_override_all_params', SystemExit,
-                                               ["--model-name", test_model_name,
-                                                "--framework", test_framework,
-                                                "--mode", test_mode,
-                                                "--precision", test_precision,
-                                                "--volume", "~:test"],
-                                                  "Volume mounts can only be used when running in a docker container"]
-                                              ], indirect=True)
+@pytest.mark.parametrize(
+    "launch_benchmark",
+    [
+        ["catch_error_override_all_params", SystemExit, []],
+        [
+            "catch_error",
+            SystemExit,
+            ["--framework", "foo"],
+            "The specified framework is not supported",
+        ],
+        [
+            "catch_error",
+            SystemExit,
+            ["--docker-image", "test "],
+            "docker image string should not have whitespace(s)",
+        ],
+        [
+            "catch_error",
+            ValueError,
+            [
+                "--model-name",
+                test_model_name,
+                "--framework",
+                test_framework,
+                "--mode",
+                "training",
+                "--precision",
+                test_precision,
+                "--docker-image",
+                test_docker_image,
+                "--benchmark-only",
+                "--output-results",
+            ],
+            "--output-results can only be used when running "
+            "inference with a dataset",
+        ],
+        [
+            "catch_error",
+            ValueError,
+            [
+                "--model-name",
+                test_model_name,
+                "--framework",
+                test_framework,
+                "--mode",
+                "training",
+                "--precision",
+                test_precision,
+                "--docker-image",
+                test_docker_image,
+                "--accuracy-only",
+                "--output-results",
+            ],
+            "--output-results can only be used when running "
+            "inference with a dataset",
+        ],
+        [
+            "catch_error_override_all_params",
+            SystemExit,
+            [
+                "--model-name",
+                test_model_name,
+                "--framework",
+                test_framework,
+                "--mode",
+                test_mode,
+                "--precision",
+                test_precision,
+                "--volume",
+                "~:test",
+            ],
+            "Volume mounts can only be used when running in a docker container",
+        ],
+    ],
+    indirect=True,
+)
 def test_launch_benchmark_parse_bad_args(launch_benchmark):
     """
     Checks for failures with no args or bad args
@@ -215,15 +284,30 @@ def test_launch_benchmark_parse_bad_args(launch_benchmark):
     pass
 
 
-@pytest.mark.parametrize('launch_benchmark', [["--model-name", test_model_name,
-                                               "--framework", test_framework,
-                                               "--mode", "training",
-                                               "--precision", test_precision,
-                                               "--docker-image", test_docker_image,
-                                               "--data-location", ".",
-                                               "--benchmark-only",
-                                               "--output-results"]])
-def test_output_results_with_accuracy(launch_benchmark, mock_system_platform, mock_os, mock_subprocess):
+@pytest.mark.parametrize(
+    "launch_benchmark",
+    [
+        [
+            "--model-name",
+            test_model_name,
+            "--framework",
+            test_framework,
+            "--mode",
+            "training",
+            "--precision",
+            test_precision,
+            "--docker-image",
+            test_docker_image,
+            "--data-location",
+            ".",
+            "--benchmark-only",
+            "--output-results",
+        ]
+    ],
+)
+def test_output_results_with_accuracy(
+    launch_benchmark, mock_system_platform, mock_os, mock_subprocess
+):
     """
     Tests that the launch script validation passes when running accuracy with output
     """
@@ -258,12 +342,18 @@ def test_bare_metal(launch_benchmark, mock_popen):
 
 
 @pytest.mark.skip
-@pytest.mark.parametrize('launch_benchmark', [["--in-graph", test_input_graph]], indirect=True)
+@pytest.mark.parametrize(
+    "launch_benchmark", [["--in-graph", test_input_graph]], indirect=True
+)
 def test_launch_benchmark_tensorflow_serving_framework(launch_benchmark, mock_popen):
     """
     Tests that the launch script works for tensorflow serving framework
     """
-    test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b", "MPI_NUM_PROCESSES": "None"}
+    test_env_vars = {
+        "TEST_ENV_VAR_1": "a",
+        "TEST_ENV_VAR_2": "b",
+        "MPI_NUM_PROCESSES": "None",
+    }
     # Override framework and docker image.
     launch_benchmark.args.framework = test_tfserving_framework
     launch_benchmark.args.docker_image = None
@@ -285,7 +375,7 @@ def test_launch_benchmark_tensorflow_serving_framework(launch_benchmark, mock_po
 
 def test_help(mock_platform_util, capsys):
     """ Tests `launch_benchmark.py --help` output and ensures there is no error """
-    with mock_patch.object(sys, 'argv', ["launch_benchmark.py", "--help"]):
+    with mock_patch.object(sys, "argv", ["launch_benchmark.py", "--help"]):
         with pytest.raises(SystemExit) as e:
             LaunchBenchmark(mock_platform_util)
         assert e.value.code == 0
@@ -319,9 +409,12 @@ def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen):
         assert "--volume {}".format(custom_volume) in docker_run_cmd
 
 
-@pytest.mark.parametrize("precision,expected_disable_tcmalloc", [["int8", "False"],
-                                                                 ["fp32", "True"]])
-def test_disable_tcmalloc(launch_benchmark, mock_popen, precision, expected_disable_tcmalloc):
+@pytest.mark.parametrize(
+    "precision,expected_disable_tcmalloc", [["int8", "False"], ["fp32", "True"]]
+)
+def test_disable_tcmalloc(
+    launch_benchmark, mock_popen, precision, expected_disable_tcmalloc
+):
     launch_benchmark.args.precision = precision
     launch_benchmark.main()
     assert mock_popen.called

@@ -35,7 +35,7 @@ THREADS_PER_CORE_STR_ = "Thread(s) per core"
 LOGICAL_CPUS_STR_ = "CPU(s)"
 
 
-class CPUInfo():
+class CPUInfo:
     """CPU information class."""
 
     def __init__(self):
@@ -54,7 +54,9 @@ class CPUInfo():
         :rtype: List[List[str, Any]]
         """
         args = ["lscpu", "--parse=CPU,Core,Socket,Node"]
-        process_lscpu = subprocess.check_output(args, universal_newlines=True).split("\n")
+        process_lscpu = subprocess.check_output(args, universal_newlines=True).split(
+            "\n"
+        )
 
         # Get information about core, node, socket and cpu
         bind_info = []
@@ -93,13 +95,15 @@ class CPUInfo():
 
                 # Add core info
                 if cpu_id == core_id:
-                    core_info.update({
-                        core_id: {
-                            "cpu_id": cpu_id,
-                            "node_id": node_id,
-                            "socket_id": socket_id,
-                        },
-                    })
+                    core_info.update(
+                        {
+                            core_id: {
+                                "cpu_id": cpu_id,
+                                "node_id": node_id,
+                                "socket_id": socket_id,
+                            },
+                        }
+                    )
                 else:
                     # Add information about Hyper Threading
                     core_info[core_id]["ht_cpu_id"] = cpu_id
@@ -175,10 +179,10 @@ class CPUInfo():
 
 
 class PlatformUtil:
-    '''
+    """
     This module implements a platform utility that exposes functions that
     detects platform information.
-    '''
+    """
 
     def __init__(self, args):
         self.args = args
@@ -201,13 +205,14 @@ class PlatformUtil:
     def linux_init(self):
         lscpu_cmd = "lscpu"
         try:
-            lscpu_output = subprocess.check_output([lscpu_cmd],
-                                                   stderr=subprocess.STDOUT)
+            lscpu_output = subprocess.check_output(
+                [lscpu_cmd], stderr=subprocess.STDOUT
+            )
             # handle python2 vs 3 (bytes vs str type)
             if isinstance(lscpu_output, bytes):
-                lscpu_output = lscpu_output.decode('utf-8')
+                lscpu_output = lscpu_output.decode("utf-8")
 
-            cpu_info = lscpu_output.split('\n')
+            cpu_info = lscpu_output.split("\n")
 
         except Exception as e:
             print("Problem getting CPU info: {}".format(e))

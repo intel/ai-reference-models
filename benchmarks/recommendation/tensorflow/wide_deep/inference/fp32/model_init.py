@@ -25,8 +25,8 @@ from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
-    '''Add code here to detect the environment and set necessary variables
-    before launching the model'''
+    """Add code here to detect the environment and set necessary variables
+    before launching the model"""
 
     def __init__(self, args, custom_args, platform_util):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
@@ -45,15 +45,21 @@ class ModelInitializer(BaseModelInitializer):
             if args.verbose:
                 print("Running Wide_Deep model Inference in Throughput mode")
 
-        executable = os.path.join(args.mode, args.precision,
-                                  "wide_deep_inference.py")
+        executable = os.path.join(args.mode, args.precision, "wide_deep_inference.py")
 
-        self.run_cmd = " OMP_NUM_THREADS=1" + \
-                       " numactl --cpunodebind=0 --membind=0 " + \
-                       self.python_exe + " " + executable + \
-                       " --data_dir=" + self.args.data_location + \
-                       " --model_dir=" + self.args.checkpoint + \
-                       " --batch_size=" + str(self.args.batch_size)
+        self.run_cmd = (
+            " OMP_NUM_THREADS=1"
+            + " numactl --cpunodebind=0 --membind=0 "
+            + self.python_exe
+            + " "
+            + executable
+            + " --data_dir="
+            + self.args.data_location
+            + " --model_dir="
+            + self.args.checkpoint
+            + " --batch_size="
+            + str(self.args.batch_size)
+        )
 
     def run(self):
         original_dir = os.getcwd()

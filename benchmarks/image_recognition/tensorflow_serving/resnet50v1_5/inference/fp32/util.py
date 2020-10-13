@@ -34,12 +34,14 @@ def preprocess_image(image_buffer, model, image_size):
     image = tf.image.central_crop(image, central_fraction=0.875)
     # Resize the image to image_size x image_size.
     image = tf.expand_dims(image, 0)
-    image = tf.image.resize_bilinear(image, [image_size, image_size], align_corners=False)
+    image = tf.image.resize_bilinear(
+        image, [image_size, image_size], align_corners=False
+    )
     image = tf.squeeze(image, [0])
-    if model in ['resnet50', 'resnet50v1_5']:
+    if model in ["resnet50", "resnet50v1_5"]:
         # For ResNet50, rescale to [0, 256]
         image = tf.multiply(image, 256.0)
-    elif model == 'Inceptionv3':
+    elif model == "Inceptionv3":
         # For InceptionV3, rescale to [-1, 1]
         image = tf.subtract(image, 0.5)
         image = tf.multiply(image, 2.0)
@@ -49,13 +51,11 @@ def preprocess_image(image_buffer, model, image_size):
 def parse_example_proto(example_serialized):
     # Dense features in Example proto.
     feature_map = {
-        'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
-                                            default_value=''),
-        'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
-                                                default_value=-1),
+        "image/encoded": tf.FixedLenFeature([], dtype=tf.string, default_value=""),
+        "image/class/label": tf.FixedLenFeature([1], dtype=tf.int64, default_value=-1),
     }
 
     features = tf.parse_single_example(example_serialized, feature_map)
-    label = tf.cast(features['image/class/label'], dtype=tf.int32)
+    label = tf.cast(features["image/class/label"], dtype=tf.int32)
 
-    return features['image/encoded'], label
+    return features["image/encoded"], label

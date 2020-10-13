@@ -34,10 +34,14 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-        self.cmd = self.get_command_prefix(self.args.socket_id) + "{} ".format(self.python_exe)
+        self.cmd = self.get_command_prefix(self.args.socket_id) + "{} ".format(
+            self.python_exe
+        )
 
         # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path)
 
         if self.args.batch_size == -1:
@@ -51,56 +55,91 @@ class ModelInitializer(BaseModelInitializer):
         self.parse_args()
 
         if self.args.benchmark_only:
-            run_script = os.path.join(self.args.intelai_models,
-                                      self.args.mode, self.args.precision,
-                                      "benchmark.py")
+            run_script = os.path.join(
+                self.args.intelai_models,
+                self.args.mode,
+                self.args.precision,
+                "benchmark.py",
+            )
 
             script_args_list = [
-                "input_graph", "input_height", "input_width", "batch_size",
-                "input_layer", "output_layer", "num_inter_threads",
-                "num_intra_threads", "warmup_steps", "steps"]
+                "input_graph",
+                "input_height",
+                "input_width",
+                "batch_size",
+                "input_layer",
+                "output_layer",
+                "num_inter_threads",
+                "num_intra_threads",
+                "warmup_steps",
+                "steps",
+            ]
 
         elif self.args.accuracy_only:
-            run_script = os.path.join(self.args.intelai_models,
-                                      self.args.mode, self.args.precision,
-                                      "accuracy.py")
+            run_script = os.path.join(
+                self.args.intelai_models,
+                self.args.mode,
+                self.args.precision,
+                "accuracy.py",
+            )
 
             script_args_list = [
-                "input_graph", "data_location", "input_height", "input_width",
-                "batch_size", "input_layer", "output_layer",
-                "num_inter_threads", "num_intra_threads"]
+                "input_graph",
+                "data_location",
+                "input_height",
+                "input_width",
+                "batch_size",
+                "input_layer",
+                "output_layer",
+                "num_inter_threads",
+                "num_intra_threads",
+            ]
 
-        self.cmd = self.add_args_to_command(self.cmd + run_script,
-                                            script_args_list)
+        self.cmd = self.add_args_to_command(self.cmd + run_script, script_args_list)
 
     def parse_args(self):
         if self.custom_args:
             parser = argparse.ArgumentParser()
             parser.add_argument(
-                "--input_height", default=224,
-                dest='input_height', type=int, help="input height")
+                "--input_height",
+                default=224,
+                dest="input_height",
+                type=int,
+                help="input height",
+            )
             parser.add_argument(
-                "--input_width", default=224,
-                dest='input_width', type=int, help="input width")
+                "--input_width",
+                default=224,
+                dest="input_width",
+                type=int,
+                help="input width",
+            )
             parser.add_argument(
-                '--warmup_steps', dest='warmup_steps',
-                help='number of warmup steps',
-                type=int, default=20)
+                "--warmup_steps",
+                dest="warmup_steps",
+                help="number of warmup steps",
+                type=int,
+                default=20,
+            )
             parser.add_argument(
-                '--steps', dest='steps',
-                help='number of steps',
-                type=int, default=100)
+                "--steps", dest="steps", help="number of steps", type=int, default=100
+            )
             parser.add_argument(
-                '--input_layer', dest='input_layer',
-                help='name of input layer',
-                type=str, default="input")
+                "--input_layer",
+                dest="input_layer",
+                help="name of input layer",
+                type=str,
+                default="input",
+            )
             parser.add_argument(
-                '--output_layer', dest='output_layer',
-                help='name of output layer',
-                type=str, default="densenet169/predictions/Reshape_1")
+                "--output_layer",
+                dest="output_layer",
+                help="name of output layer",
+                type=str,
+                default="densenet169/predictions/Reshape_1",
+            )
 
-            self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
+            self.args = parser.parse_args(self.custom_args, namespace=self.args)
 
     def run(self):
         if self.cmd:

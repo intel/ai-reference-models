@@ -45,47 +45,73 @@ class ModelInitializer(BaseModelInitializer):
         # set num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
 
-        arg_parser = ArgumentParser(description='Parse args')
+        arg_parser = ArgumentParser(description="Parse args")
 
-        arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
-                                type=int, default=10,
-                                help="number of warmup steps")
-        arg_parser.add_argument("--steps", dest='steps',
-                                type=int, default=50,
-                                help="number of steps")
         arg_parser.add_argument(
-            '--kmp-blocktime', dest='kmp_blocktime',
-            help='number of kmp block time',
-            type=int, default=1)
+            "--warmup-steps",
+            dest="warmup_steps",
+            type=int,
+            default=10,
+            help="number of warmup steps",
+        )
+        arg_parser.add_argument(
+            "--steps", dest="steps", type=int, default=50, help="number of steps"
+        )
+        arg_parser.add_argument(
+            "--kmp-blocktime",
+            dest="kmp_blocktime",
+            help="number of kmp block time",
+            type=int,
+            default=1,
+        )
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode,
-            "eval_image_classifier_inference.py")
+            self.args.intelai_models,
+            self.args.mode,
+            "eval_image_classifier_inference.py",
+        )
 
-        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
-            self.python_exe + " " + benchmark_script
+        self.benchmark_command = (
+            self.get_command_prefix(args.socket_id)
+            + self.python_exe
+            + " "
+            + benchmark_script
+        )
 
-        self.benchmark_command = \
-            self.benchmark_command + \
-            " --input-graph=" + self.args.input_graph + \
-            " --num-inter-threads=" + str(self.args.num_inter_threads) + \
-            " --num-intra-threads=" + str(self.args.num_intra_threads) + \
-            " --batch-size=" + str(self.args.batch_size) + \
-            " --warmup-steps=" + str(self.args.warmup_steps) + \
-            " --steps=" + str(self.args.steps)
+        self.benchmark_command = (
+            self.benchmark_command
+            + " --input-graph="
+            + self.args.input_graph
+            + " --num-inter-threads="
+            + str(self.args.num_inter_threads)
+            + " --num-intra-threads="
+            + str(self.args.num_intra_threads)
+            + " --batch-size="
+            + str(self.args.batch_size)
+            + " --warmup-steps="
+            + str(self.args.warmup_steps)
+            + " --steps="
+            + str(self.args.steps)
+        )
 
         if self.args.data_num_inter_threads:
-            self.benchmark_command += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)
+            self.benchmark_command += " --data-num-inter-threads=" + str(
+                self.args.data_num_inter_threads
+            )
         if self.args.data_num_intra_threads:
-            self.benchmark_command += " --data-num-intra-threads=" + str(self.args.data_num_intra_threads)
+            self.benchmark_command += " --data-num-intra-threads=" + str(
+                self.args.data_num_intra_threads
+            )
 
         # need to add data-num-inter-threads, data-num-intra-thread to the args list once
         # they are ready from common interface
@@ -94,8 +120,7 @@ class ModelInitializer(BaseModelInitializer):
 
         # if the data location directory is not empty, then include the arg
         if self.args.data_location and os.listdir(self.args.data_location):
-            self.benchmark_command += " --data-location=" + \
-                                      self.args.data_location
+            self.benchmark_command += " --data-location=" + self.args.data_location
         if self.args.accuracy_only:
             self.benchmark_command += " --accuracy-only"
 

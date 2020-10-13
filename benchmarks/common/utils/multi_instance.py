@@ -34,7 +34,7 @@ def buckets(array, bucket_size):
     """
     bucket_size_list = []
     for i in range(0, len(array), bucket_size):
-        bucket_size_list.append(array[i:i + bucket_size])
+        bucket_size_list.append(array[i : i + bucket_size])
 
     return bucket_size_list
 
@@ -68,9 +68,12 @@ class InferencePrefix:
         single_instance_params = self._platform_single_instance_args()
 
         # Current workload parameters
-        default_cores_per_instance = self._cpu_information.cores_per_socket * self.sockets
+        default_cores_per_instance = (
+            self._cpu_information.cores_per_socket * self.sockets
+        )
         workload_params = {
-            "cores_per_instance": self._cores_per_instance or default_cores_per_instance,
+            "cores_per_instance": self._cores_per_instance
+            or default_cores_per_instance,
             "instance": self._instances if self._instances != 0 else 1,
             "sockets": self.sockets,
         }
@@ -89,8 +92,10 @@ class InferencePrefix:
         else:
             sockets = self._sockets
             if sockets > self._cpu_information.sockets:
-                raise Exception("The specified number of sockets is greater "
-                                "than the number of server available sockets.")
+                raise Exception(
+                    "The specified number of sockets is greater "
+                    "than the number of server available sockets."
+                )
 
         return sockets
 
@@ -104,10 +109,14 @@ class InferencePrefix:
         """
         if self._cores_per_instance > 0:
             if self._cores_per_instance > self._cpu_information.cores_per_socket:
-                raise Exception("Cores assigned to one instance is greater than amount of cores on one socket.")
+                raise Exception(
+                    "Cores assigned to one instance is greater than amount of cores on one socket."
+                )
 
-            cores_per_socket = self._cpu_information.cores_per_socket - \
-                self._cpu_information.cores_per_socket % self._cores_per_instance
+            cores_per_socket = (
+                self._cpu_information.cores_per_socket
+                - self._cpu_information.cores_per_socket % self._cores_per_instance
+            )
         else:
             cores_per_socket = self._cpu_information.cores_per_socket
 
@@ -132,9 +141,11 @@ class InferencePrefix:
         """
         if self._instances > 0:
             if self._instances % self.sockets != 0:
-                raise Exception("Instances could not be distributed equally between sockets. "
-                                "Amount of instances should be divisible by socket amount. "
-                                "{} % {} != 0".format(self._instances, self.sockets))
+                raise Exception(
+                    "Instances could not be distributed equally between sockets. "
+                    "Amount of instances should be divisible by socket amount. "
+                    "{} % {} != 0".format(self._instances, self.sockets)
+                )
 
             instances = int(self._instances / self.sockets)
         elif self._cores_per_instance > 0:
@@ -167,19 +178,26 @@ class InferencePrefix:
         """
         if not self.is_basic_configuration:
             if self._cores_per_instance > 0:
-                if self._cores_per_instance * self.instances_per_socket > self.cores_per_socket:
-                    raise Exception("Total cores used on one socket > cores available on one socket. "
-                                    "{} * {} > {}".format(
-                                        self._cores_per_instance,
-                                        self.instances_per_socket,
-                                        self.cores_per_socket,
-                                    ))
+                if (
+                    self._cores_per_instance * self.instances_per_socket
+                    > self.cores_per_socket
+                ):
+                    raise Exception(
+                        "Total cores used on one socket > cores available on one socket. "
+                        "{} * {} > {}".format(
+                            self._cores_per_instance,
+                            self.instances_per_socket,
+                            self.cores_per_socket,
+                        )
+                    )
 
                 cores_per_instance = self._cores_per_instance
             else:
                 instances_per_socket = self.instances_per_socket
                 if self.cores_per_socket % instances_per_socket != 0:
-                    raise Exception("Amount of cores per socket should be divisible by amount of instances per socket.")
+                    raise Exception(
+                        "Amount of cores per socket should be divisible by amount of instances per socket."
+                    )
 
                 cores_per_instance = self.cores_per_socket // instances_per_socket
 
@@ -232,9 +250,11 @@ class InferencePrefix:
 
         bucketed_cores = {}
         for node_id in range(self.sockets):
-            socket_cores = membind_info[node_id][:self.cores_per_socket]
+            socket_cores = membind_info[node_id][: self.cores_per_socket]
             instance_buckets = buckets(socket_cores, cores_per_instance)
-            bucketed_cores.update({str(node_id): instance_buckets[0:self.instances_per_socket]})
+            bucketed_cores.update(
+                {str(node_id): instance_buckets[0 : self.instances_per_socket]}
+            )
 
         return bucketed_cores
 
@@ -252,8 +272,10 @@ class InferencePrefix:
                     cores = instance_config[0].get("cpu_id")
                     ht_cores = instance_config[0].get("ht_cpu_id", None)
                 else:
-                    cores = "{first}-{last}".format(first=instance_config[0].get("cpu_id"),
-                                                    last=instance_config[-1].get("cpu_id"))
+                    cores = "{first}-{last}".format(
+                        first=instance_config[0].get("cpu_id"),
+                        last=instance_config[-1].get("cpu_id"),
+                    )
 
                     first_ht = instance_config[0].get("ht_cpu_id", None)
                     last_ht = instance_config[-1].get("ht_cpu_id", None)
@@ -263,8 +285,12 @@ class InferencePrefix:
                         ht_cores = "{first}-{last}".format(first=first_ht, last=last_ht)
 
                 cores_range = self.get_cores_range(cores, ht_cores, use_ht)
-                instance_binding.append({"cores_range": cores_range,
-                                         "socket_id": instance_config[0].get("socket_id")})
+                instance_binding.append(
+                    {
+                        "cores_range": cores_range,
+                        "socket_id": instance_config[0].get("socket_id"),
+                    }
+                )
 
         return instance_binding
 
@@ -280,9 +306,11 @@ class InferencePrefix:
 
         commands_array = []
         for instance in self.generate_multi_instance_ranges(use_ht):
-            numa_cmd = ["numactl",
-                        "--membind={}".format(instance.get("socket_id")),
-                        "--physcpubind={}".format(instance.get("cores_range"))]
+            numa_cmd = [
+                "numactl",
+                "--membind={}".format(instance.get("socket_id")),
+                "--physcpubind={}".format(instance.get("cores_range")),
+            ]
 
             commands_array.append(numa_cmd + command)
 

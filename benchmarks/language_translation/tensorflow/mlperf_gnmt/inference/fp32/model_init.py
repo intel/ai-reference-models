@@ -32,12 +32,13 @@ class ModelInitializer(BaseModelInitializer):
         self.cmd = self.get_command_prefix(self.args.socket_id)
 
         if self.args.socket_id != -1 and self.args.num_cores != -1:
-            self.cmd += "--physcpubind=0-" + \
-                        (str(self.args.num_cores - 1)) + " "
+            self.cmd += "--physcpubind=0-" + (str(self.args.num_cores - 1)) + " "
         self.cmd += "{} ".format(self.python_exe)
 
         # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path)
 
         # use default batch size if -1
@@ -51,20 +52,35 @@ class ModelInitializer(BaseModelInitializer):
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
         src_vocab_file = os.path.join(self.args.data_location, "vocab.bpe.32000.en")
         tgt_vocab_file = os.path.join(self.args.data_location, "vocab.bpe.32000.de")
-        inference_input_file = os.path.join(self.args.data_location, "newstest2014.tok.bpe.32000.en")
-        inference_ref_file = os.path.join(self.args.data_location, "newstest2014.tok.bpe.32000.de")
+        inference_input_file = os.path.join(
+            self.args.data_location, "newstest2014.tok.bpe.32000.en"
+        )
+        inference_ref_file = os.path.join(
+            self.args.data_location, "newstest2014.tok.bpe.32000.de"
+        )
 
-        cmd_args = " --in_graph=" + self.args.input_graph + \
-                   " --batch_size=" + str(self.args.batch_size) + \
-                   " --num_inter_threads=" + str(self.args.num_inter_threads) + \
-                   " --num_intra_threads=" + str(self.args.num_intra_threads) + \
-                   " --src_vocab_file=" + src_vocab_file + \
-                   " --tgt_vocab_file=" + tgt_vocab_file + \
-                   " --inference_input_file=" + inference_input_file + \
-                   " --inference_ref_file=" + inference_ref_file
+        cmd_args = (
+            " --in_graph="
+            + self.args.input_graph
+            + " --batch_size="
+            + str(self.args.batch_size)
+            + " --num_inter_threads="
+            + str(self.args.num_inter_threads)
+            + " --num_intra_threads="
+            + str(self.args.num_intra_threads)
+            + " --src_vocab_file="
+            + src_vocab_file
+            + " --tgt_vocab_file="
+            + tgt_vocab_file
+            + " --inference_input_file="
+            + inference_input_file
+            + " --inference_ref_file="
+            + inference_ref_file
+        )
 
-        run_script = os.path.join(self.args.intelai_models,
-                                  self.args.precision, "run_inference.py")
+        run_script = os.path.join(
+            self.args.intelai_models, self.args.precision, "run_inference.py"
+        )
 
         self.cmd = self.cmd + run_script + cmd_args
 

@@ -40,10 +40,12 @@ from util import preprocess_image, parse_example_proto
 
 tf_v1.disable_eager_execution()
 
-tf_v1.app.flags.DEFINE_string('server', 'localhost:8500', 'PredictionService host:port')
-tf_v1.app.flags.DEFINE_integer('batch_size', 1, 'Batch size to use')
-tf_v1.app.flags.DEFINE_string('data_dir', '', 'path to images in TF records format')
-tf_v1.app.flags.DEFINE_string('model', 'resnet50', 'Name of model (resnet50 or inceptionv3).')
+tf_v1.app.flags.DEFINE_string("server", "localhost:8500", "PredictionService host:port")
+tf_v1.app.flags.DEFINE_integer("batch_size", 1, "Batch size to use")
+tf_v1.app.flags.DEFINE_string("data_dir", "", "path to images in TF records format")
+tf_v1.app.flags.DEFINE_string(
+    "model", "resnet50", "Name of model (resnet50 or inceptionv3)."
+)
 FLAGS = tf_v1.app.flags.FLAGS
 
 
@@ -55,23 +57,29 @@ def sample_images(image_size):
 
     sample_file = random.choice(os.listdir(FLAGS.data_dir))
     dataset = tf.data.TFRecordDataset(os.path.join(FLAGS.data_dir, sample_file))
-    dataset = dataset.map(lambda x: parse_example_proto(x)).shuffle(True).batch(FLAGS.batch_size)
+    dataset = (
+        dataset.map(lambda x: parse_example_proto(x))
+        .shuffle(True)
+        .batch(FLAGS.batch_size)
+    )
     iterator = dataset.make_one_shot_iterator()
     next_element = iterator.get_next()
     with tf.Session() as sess:
         images, labels = sess.run(next_element)
-        images = np.array([sess.run(preprocess_image(x, FLAGS.model, image_size)) for x in images])
+        images = np.array(
+            [sess.run(preprocess_image(x, FLAGS.model, image_size)) for x in images]
+        )
 
     return images
 
 
 def main(_):
-    if FLAGS.model == 'resnet50':
+    if FLAGS.model == "resnet50":
         image_size = 224
-    elif FLAGS.model == 'inceptionv3':
+    elif FLAGS.model == "inceptionv3":
         image_size = 299
     else:
-        print('Please specify model as either resnet50 or inceptionv3.')
+        print("Please specify model as either resnet50 or inceptionv3.")
         sys.exit(-1)
 
     channel = grpc.insecure_channel(FLAGS.server)
@@ -85,35 +93,40 @@ def main(_):
         if FLAGS.data_dir:
             image_np = sample_images(image_size)
         else:
-            image_np = np.random.rand(FLAGS.batch_size, image_size, image_size, 3).astype(np.float32)
-            if FLAGS.model == 'resnet50':
+            image_np = np.random.rand(
+                FLAGS.batch_size, image_size, image_size, 3
+            ).astype(np.float32)
+            if FLAGS.model == "resnet50":
                 # For ResNet50, rescale to [0, 256]
                 image_np *= 256.0
-            elif FLAGS.model == 'inceptionv3':
+            elif FLAGS.model == "inceptionv3":
                 # For InceptionV3, rescale to [-1, 1]
                 image_np = (image_np - 0.5) * 2.0
 
         request = predict_pb2.PredictRequest()
         request.model_spec.name = FLAGS.model
-        request.model_spec.signature_name = 'serving_default'
-        request.inputs['input'].CopyFrom(
-            tf.make_tensor_proto(image_np, shape=[FLAGS.batch_size, image_size, image_size, 3]))
+        request.model_spec.signature_name = "serving_default"
+        request.inputs["input"].CopyFrom(
+            tf.make_tensor_proto(
+                image_np, shape=[FLAGS.batch_size, image_size, image_size, 3]
+            )
+        )
         start_time = time.time()
         stub.Predict(request, 10.0)  # 10 secs timeout
         time_consume = time.time() - start_time
-        print('Iteration %d: %.3f sec' % (i, time_consume))
+        print("Iteration %d: %.3f sec" % (i, time_consume))
         if i > warm_up_iteration:
             total_time += time_consume
 
     time_average = total_time / (num_iteration - warm_up_iteration)
-    print('Average time: %.3f sec' % (time_average))
+    print("Average time: %.3f sec" % (time_average))
 
-    print('Batch size = %d' % FLAGS.batch_size)
-    if (FLAGS.batch_size == 1):
-        print('Latency: %.3f ms' % (time_average * 1000))
+    print("Batch size = %d" % FLAGS.batch_size)
+    if FLAGS.batch_size == 1:
+        print("Latency: %.3f ms" % (time_average * 1000))
 
-    print('Throughput: %.3f images/sec' % (FLAGS.batch_size / time_average))
+    print("Throughput: %.3f images/sec" % (FLAGS.batch_size / time_average))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     tf_v1.app.run()

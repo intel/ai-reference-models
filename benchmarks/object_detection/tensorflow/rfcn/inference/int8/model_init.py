@@ -38,15 +38,23 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
         self.perf_script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            self.RFCN_PERF_SCRIPT)
+            self.args.intelai_models,
+            self.args.mode,
+            self.args.precision,
+            self.RFCN_PERF_SCRIPT,
+        )
         self.accuracy_script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            self.RFCN_ACCURACY_SCRIPT)
+            self.args.intelai_models,
+            self.args.mode,
+            self.args.precision,
+            self.RFCN_ACCURACY_SCRIPT,
+        )
 
         # remove intelai models path, so that imports don't conflict
-        if "MOUNT_BENCHMARK" in os.environ and \
-                os.environ["MOUNT_BENCHMARK"] in sys.path:
+        if (
+            "MOUNT_BENCHMARK" in os.environ
+            and os.environ["MOUNT_BENCHMARK"] in sys.path
+        ):
             sys.path.remove(os.environ["MOUNT_BENCHMARK"])
         if self.args.intelai_models in sys.path:
             sys.path.remove(self.args.intelai_models)
@@ -54,7 +62,9 @@ class ModelInitializer(BaseModelInitializer):
         self.parse_args()
 
         # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        config_file_path = os.path.join(
+            os.path.dirname(os.path.realpath(__file__)), "config.json"
+        )
         self.set_kmp_vars(config_file_path)
 
         # Set num_inter_threads and num_intra_threads
@@ -64,28 +74,47 @@ class ModelInitializer(BaseModelInitializer):
         if self.custom_args:
             parser = argparse.ArgumentParser()
             mutex_group = parser.add_mutually_exclusive_group()
-            mutex_group.add_argument("-x", "--number_of_steps",
-                                     help="Run for n number of steps",
-                                     type=int, default=None)
             mutex_group.add_argument(
-                "-v", "--visualize",
+                "-x",
+                "--number_of_steps",
+                help="Run for n number of steps",
+                type=int,
+                default=None,
+            )
+            mutex_group.add_argument(
+                "-v",
+                "--visualize",
                 help="Whether to visualize the output image",
-                action="store_true")
+                action="store_true",
+            )
             parser.add_argument(
-                "-t", "--timeline",
+                "-t",
+                "--timeline",
                 help="Output file name for TF timeline",
-                type=str, default=None)
-            parser.add_argument("-e", "--evaluate_tensor",
-                                help="Full tensor name to evaluate",
-                                type=str, default=None)
-            parser.add_argument("-p", "--print_accuracy",
-                                help="Print accuracy results",
-                                action="store_true")
-            parser.add_argument("-q", "--split",
-                                help="Location of accuracy data",
-                                type=str, default=None)
-            self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
+                type=str,
+                default=None,
+            )
+            parser.add_argument(
+                "-e",
+                "--evaluate_tensor",
+                help="Full tensor name to evaluate",
+                type=str,
+                default=None,
+            )
+            parser.add_argument(
+                "-p",
+                "--print_accuracy",
+                help="Print accuracy results",
+                action="store_true",
+            )
+            parser.add_argument(
+                "-q",
+                "--split",
+                help="Location of accuracy data",
+                type=str,
+                default=None,
+            )
+            self.args = parser.parse_args(self.custom_args, namespace=self.args)
             self.validate_args()
         else:
             raise ValueError("Custom parameters are missing...")
@@ -94,20 +123,30 @@ class ModelInitializer(BaseModelInitializer):
         if not (self.args.batch_size == -1 or self.args.batch_size == 1):
             raise ValueError(
                 "Batch Size specified: {}. R-FCN inference only supports "
-                "batch size = 1".format(self.args.batch_size))
+                "batch size = 1".format(self.args.batch_size)
+            )
 
         if not os.path.exists(self.perf_script_path):
-            raise ValueError("Unable to locate the R-FCN perf script: {}".
-                             format(self.perf_script_path))
+            raise ValueError(
+                "Unable to locate the R-FCN perf script: {}".format(
+                    self.perf_script_path
+                )
+            )
 
         if not os.path.exists(self.accuracy_script_path):
-            raise ValueError("Unable to locate the R-FCN accuracy script: "
-                             "{}".format(self.accuracy_script_path))
+            raise ValueError(
+                "Unable to locate the R-FCN accuracy script: "
+                "{}".format(self.accuracy_script_path)
+            )
 
         if not self.args.model_source_dir or not os.path.isdir(
-                self.args.model_source_dir):
-            raise ValueError("Unable to locate TensorFlow models at {}".
-                             format(self.args.model_source_dir))
+            self.args.model_source_dir
+        ):
+            raise ValueError(
+                "Unable to locate TensorFlow models at {}".format(
+                    self.args.model_source_dir
+                )
+            )
 
     def run_perf_command(self):
         # Get the command previx, but numactl is added later in run_perf_command()
@@ -146,7 +185,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.number_of_steps:
             self.command += ("-x", "{}".format(self.args.number_of_steps))
         if self.args.visualize:
-            self.command += ("-v")
+            self.command += "-v"
         if self.args.timeline:
             self.command += ("-t", self.args.timeline)
         if self.args.data_location:
@@ -154,7 +193,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.evaluate_tensor:
             self.command += ("-e", self.args.evaluate_tensor)
         if self.args.print_accuracy:
-            self.command += ("-p")
+            self.command += "-p"
         self.run_command(" ".join(self.command))
 
     def run_accuracy_command(self):
@@ -162,21 +201,21 @@ class ModelInitializer(BaseModelInitializer):
         self.command = self.get_command_prefix(self.args.socket_id, numactl=False)
         self.command += "FROZEN_GRAPH=" + self.args.input_graph
 
-        if self.args.data_location and os.path.exists(
-                self.args.data_location):
+        if self.args.data_location and os.path.exists(self.args.data_location):
             self.command += " TF_RECORD_FILE=" + self.args.data_location
         else:
             raise ValueError(
                 "Unable to locate the coco data record file at {}".format(
-                    self.args.tf_record_file))
+                    self.args.tf_record_file
+                )
+            )
 
         if self.args.split:
             self.command += " SPLIT=" + self.args.split
         else:
             raise ValueError("Must specify SPLIT parameter")
 
-        self.command += " TF_MODELS_ROOT={}".format(
-            self.args.model_source_dir)
+        self.command += " TF_MODELS_ROOT={}".format(self.args.model_source_dir)
 
         self.command += " " + self.accuracy_script_path
         self.run_command(self.command)
