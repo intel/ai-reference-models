@@ -42,12 +42,12 @@ RUN apt-get update && \
     apt-get install -y git && \
     git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
     ( cd ${CODE_DIR} && \
-    if [ ! -z "$FETCH_PR" ]; then git fetch origin ${FETCH_PR}; fi && \
+    if [ ! -z "${FETCH_PR}" ]; then git fetch origin ${FETCH_PR}; fi && \
     git checkout ${TF_MODELS_BRANCH} )
 
 
 # Note pycocotools has to be install after the other requirements
-RUN pip install numpy==1.17.4 Cython contextlib2 pillow>=6.2. lxml jupyter matplotlib && \
+RUN pip install numpy==1.17.4 Cython contextlib2 pillow>=7.1.0 lxml jupyter matplotlib && \
     pip install pycocotools
 
 
