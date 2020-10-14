@@ -1,42 +1,52 @@
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the model training package to get the yaml and config
-files for running inference on a single node using Kubernetes.
+Download and untar the RFCN FP32 inference package.
 ```
 wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz
 tar -xvf rfcn-fp32-inference.tar.gz
 ```
 
-### Execution
+The model package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
+The directory tree within the model package is shown below, where single and pipeline directories are below the
+[mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
-The model package includes a deployment that does 'mlops' (machine learning
-operations) on kubernetes.
-The directory tree within the model package is shown below:
 ```
-quickstart
-├── common
-│   └── tensorflow
-│       └── k8s
-│           └── mlops
-│               ├── base
-│               └── single-node
-└── k8s
-    └── mlops
-        ├── pipeline
-        └── single-node
+rfcn/
+└── inference
+    └── fp32
+        └── mlops
+            ├── pipeline
+            └── single-node
 ```
 
-The `pipeline` job can be used to preprocess the coco dataset to get a
+
+The `pipeline` example can be used to preprocess the coco dataset to get a
 TF records file and then run an RFCN FP32 accuracy test using an
-[argo workflow](https://github.com/argoproj/argo). The `single-node`
-uses a single pod to run inference to get performance metrics (using raw
-images from the coco dataset) or test accuracy (when you already have
-the TF records file on NFS).
+[argo workflow](https://github.com/argoproj/argo). Deployment of argo needs to be done by devops.
+
+The `single-node` example uses a single pod to run inference to get performance metrics (using raw
+images from the coco dataset) or test accuracy (when you already have the TF records file on NFS).
 
 The deployments use [kustomize](https://kustomize.io/) to configure
-parameters. The parameters can be customized by editing kustomize
-related files prior to deploying the job to kubernetes.
+parameters. The parameters can be set by running kustomize commands
+prior to deploying the job to kubernetes.
+
+#### Prerequisites
+
+Both single and pipeline deployments use [kustomize-v3.8.4](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.4) to configure deployment parameters. This archive should be downloaded, extracted and the kustomize command should be moved to a directory within your PATH. You can verify the correct version of kustomize has been installed by typing `kustomize version`. On MACOSX you would see
+
+```
+{Version:kustomize/v3.8.4 GitCommit:8285af8cf11c0b202be533e02b88e114ad61c1a9 BuildDate:2020-09-19T15:39:21Z GoOs:darwin GoArch:amd64}
+```
+
+
+The kustomization files that the kustomize command references are located withing the following directories:
+
+```
+rfcn-fp32-inference/fp32/mlops/single-node/kustomization.yaml
+rfcn-fp32-inference/fp32/mlops/pipeline/kustomization.yaml
+```
 
 #### Single-node Inference
 
@@ -44,50 +54,85 @@ Inference is run by submitting a pod yaml file to the k8s api-server,
 which results in the pod creation and then the specified
 [quickstart script](#quick-start-scripts) is run in the pod's container.
 
-Prior to running the job, edit the kustomize varaibles in the mlops.env
-file. The mlops.env file for single node jobs is located at:
-`rfcn-fp32-inference/quickstart/k8s/mlops/single-node/mlops.env`.
-Key parameters to edit are:
-```
-DATASET_DIR=<path to the dataset directory>
-MODEL_SCRIPT=<fp32_accuracy.sh or fp32_inference.sh>
-NFS_MOUNT_PATH=<NFS mount path>
-NFS_PATH=<NFS path>
-NFS_SERVER=<IP address for your NFS Server>
-OUTPUT_DIR=<Directory where log files will be written>
-USER_ID=<Your user ID>
-USER_NAME=<Your username>
-GROUP_ID=<Your group ID>
-GROUP_NAME=<Your group name>
-```
+The parameters that can be changed within the single-node deployment are shown in the table[^1] below:
+
+|     NAME     |             VALUE              |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
+|--------------|--------------------------------|---------------|-----------------------------|-------|----------|
+| DATASET_DIR  | /datasets                      | model-builder | input dataset directory     | 3     | Yes      |
+| FS_ID        | 0                              | model-builder | owner id of mounted volumes | 1     | Yes      |
+| GROUP_ID     | 0                              | model-builder | process group id            | 2     | Yes      |
+| GROUP_NAME   | root                           | model-builder | process group name          | 1     | Yes      |
+| IMAGE_SUFFIX |                                | model-builder | appended to image name      | 1     | No       |
+| MODEL_DIR    | /workspace/rfcn-fp32-inference | model-builder | container model directory   | 3     | No       |
+| MODEL_NAME   | rfcn-fp32-inference            | model-builder | name use-case               | 5     | No       |
+| MODEL_SCRIPT | fp32_inference                 | model-builder | model script name           | 5     | No       |
+| NFS_PATH     | /nfs                           | model-builder | nfs path                    | 3     | Yes      |
+| NFS_SERVER   | 0.0.0.0                        | model-builder | nfs server                  | 1     | Yes      |
+| OUTPUT_DIR   | output                         | model-builder | output dir basename         | 1     | Yes      |
+| REGISTRY     | docker.io                      | model-builder | image location              | 1     | No       |
+| USER_ID      | 0                              | model-builder | process owner id            | 2     | Yes      |
+| USER_NAME    | root                           | model-builder | process owner name          | 2     | Yes      |
 
 > Note that when running inference, the `DATASET_DIR` should point to the
 > directory of raw coco images (val2017) and when running accuracy testing,
 > the `DATASET_DIR` should point to the TF records directory.
 
-Once you have edited the `mlops.env` file with your parameters,
-deploy the inference job using the following command:
+[^1]: The single-node parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
+
+For example to change the NFS_SERVER IP address to 10.35.215.25 the user would run:
+
 ```
-kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/single-node apply
+kustomize cfg set . NFS_SERVER 10.35.215.25
 ```
 
-Depending on what version of kustomize is being used, you may get an
-error reporting that a string was received instead of a integer. If this
-is the case, the following command can be used to remove quotes that
-are causing the issue:
+The required column that contains a 'Yes' indicates which values should be changed by the user.
+The 'No' values indicate that the default values are fine. Note that the mlops user should run the
+inference process with their own uid/gid permissions by using kustomize to change the securityContext in the pod.yaml file.
+This is done by running the following:
+
 ```
-kubectl kustomize rfcn-fp32-inference/quickstart/k8s/mlops/single-node | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | kubectl apply -f -
+kustomize cfg set . FS_ID <Group ID>
+kustomize cfg set . GROUP_ID <Group ID>
+kustomize cfg set . GROUP_NAME <Group Name>
+kustomize cfg set . USER_ID <User ID>
+kustomize cfg set . USER_NAME <User Name>
 ```
 
-Once the kubernetes job has been submitted, the pod status can be
-checked using `kubectl get pods` and the logs can be viewed using
-`kubectl logs -f <pod name>`.
+Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
 
-##### Cleanup
-
-Remove the workflow using the following command:
 ```
-kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/single-node delete
+kustomize edit set namespace $USER
+```
+
+This will tell kubernetes to deploy the resources within the specified namespace. Note: this namespace should be created prior to deployment.
+Once the user has changed parameter values they can then deploy the single-node job by running:
+
+```
+kustomize build > single-node.yaml
+kubectl apply -f single-node.yaml
+```
+
+##### single-node inference output
+
+Viewing the log output of the resnet50v1_5 Pod is done by viewing the logs of the
+inference pod. This pod is found by filtering the list of pods for the name 'inference'
+
+```
+kubectl get pods -oname|grep inference|cut -c5-
+```
+
+This can be combined with the kubectl logs subcommand to tail the output of the inference job
+
+```
+kubectl logs -f $(kubectl get pods -oname|grep inference|cut -c5-)
+```
+
+##### single-node inference cleanup
+
+Removing the pod and related resources is done by running:
+
+```
+kubectl delete -f single-node.yaml
 ```
 
 #### Pipeline
@@ -100,30 +145,65 @@ The [COCO validation 2017 dataset and annotations](https://cocodataset.org/#down
 need to be downloaded to a directory on nfs. These will be used to create
 the TF records file.
 
-Prior to running the workflow, edit the kustomize varaibles in the mlops.env
-file. The mlops.env file for workflow is located at:
-`rfcn-fp32-inference/quickstart/k8s/mlops/pipeline/mlops.env`.
-Key parameters to edit are:
+The parameters that can be changed within the pipeline are shown in the table[^2] below:
+
+|       NAME        |             VALUE              |    SET BY     |          DESCRIPTION           | COUNT | REQUIRED |
+|-------------------|--------------------------------|---------------|--------------------------------|-------|----------|
+| DATASET_DIR       | /datasets                      | model-builder | input dataset directory        | 6     | Yes      |
+| FS_ID             | 0                              | model-builder | owner id of mounted volumes    | 2     | Yes      |
+| GROUP_ID          | 0                              | model-builder | process group id               | 4     | Yes      |
+| GROUP_NAME        | root                           | model-builder | process group name             | 2     | Yes      |
+| IMAGE_SUFFIX      |                                | model-builder | appended to image name         | 2     | No       |
+| MODEL_DIR         | /workspace/rfcn-fp32-inference | model-builder | container model directory      | 2     | No       |
+| MODEL_NAME        | rfcn-fp32-inference            | model-builder | name use-case                  | 7     | No       |
+| MODEL_SCRIPT      | fp32_accuracy.sh               | model-builder | model script name              | 5     | No       |
+| NFS_PATH          | /nfs                           | model-builder | nfs path                       | 6     | Yes      |
+| NFS_SERVER        | 0.0.0.0                        | model-builder | nfs server                     | 2     | Yes      |
+| OUTPUT_DIR        | output                         | model-builder | output dir basename            | 2     | Yes      |
+| PREPROCESS_DIR    | /workspace/preprocess-coco-val | model-builder | container preprocess directory | 2     | No       |
+| PREPROCESS_NAME   | preprocess-coco-val            | model-builder | preprocess image part          | 1     | No       |
+| PREPROCESS_SCRIPT | preprocess_coco_val.sh         | model-builder | preprocess script              | 5     | No       |
+| REGISTRY          | docker.io                      | model-builder | image location                 | 2     | No       |
+| USER_ID           | 0                              | model-builder | process owner id               | 4     | Yes      |
+| USER_NAME         | root                           | model-builder | process owner name             | 4     | Yes      |
+
+
+[^2]: The pipeline parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
+
+For example to change the NFS_SERVER IP address to 10.35.215.25 the user would run:
+
 ```
-WORKFLOW_NAME=<name for the workflow being deployed>
-DATASET_DIR=<path to directory where the raw val2017 images and annotations are located>
-OUTPUT_DIR=<Directory where log files will be written>
-USER_ID=<Your user ID>
-GROUP_ID=<Your group ID>
+kustomize cfg set . NFS_SERVER 10.35.215.25
 ```
 
-Once you have edited the `mlops.env` file with your parameters,
-deploy the workflow using the following command:
+The required column that contains a 'Yes' indicates which values should be changed by the user.
+The 'No' values indicate that the default values are fine. Note that the mlops user should run the
+argo workflow[^3] with their own uid/gid permissions by using kustomize to change the securityContext in the single_node_accuracy.yaml file.
+
+This is done by running the following:
+
 ```
-kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/workflow apply
+kustomize cfg set . FS_ID <Group ID>
+kustomize cfg set . GROUP_ID <Group ID>
+kustomize cfg set . GROUP_NAME <Group Name>
+kustomize cfg set . USER_ID <User ID>
+kustomize cfg set . USER_NAME <User Name>
 ```
 
-Depending on what version of kustomize is being used, you may get an
-error reporting that a string was received instead of a integer. If this
-is the case, the following command can be used to remove quotes that
-are causing the issue:
+[^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issue [2239](https://github.com/argoproj/argo/issues/2239). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
+
+Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+
 ```
-kubectl kustomize rfcn-fp32-inference/quickstart/k8s/mlops/workflow | sed 's/runAsUser:.*"\([0-9]*\)"/runAsUser: \1/g' | sed 's/runAsGroup:.*"\([0-9]*\)"/runAsGroup: \1/g' | sed 's/fsGroup:.*"\([0-9]*\)"/fsGroup: \1/g' | kubectl apply -f -
+kustomize edit set namespace $USER
+```
+
+This will tell kubernetes to deploy the resources within the specified namespace. Note: this namespace should be created prior to deployment.
+Once the user has changed parameter values they can then deploy the workflow by running:
+
+```
+kustomize build > pipeline.yaml
+kubectl apply -f pipeline.yaml
 ```
 
 Once the job has been submitted, the status and logs can be viewed using
@@ -138,9 +218,9 @@ $ kubectl logs <pod name> main
 
 ##### Cleanup
 
-Remove the workflow using the following command:
+Remove the workflow and related resources using the following command:
 ```
-kubectl -k rfcn-fp32-inference/quickstart/k8s/mlops/pipeline delete
+kubectl delete -f pipeline.yaml
 ```
 
 ### Advanced Options

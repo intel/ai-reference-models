@@ -85,17 +85,17 @@ For example to change the NFS_SERVER IP address to 10.35.215.25 the user would r
 ```
 kustomize cfg set . NFS_SERVER 10.35.215.25
 ```
-
-The required column that contains a 'Yes' indicates which values should be changed by the user. 
-The 'No' values indicate that the default values are fine. Note that the mlops user should run the 
-distributed training job with their own uid/gid permissions by using kustomize to change the securityContext in the mpi-job.yaml file.
-The securityContext appears within the Launcher and Worker sections. The runAsUser, runAsGroup and fsGroup members should reflect the user's UID, GID.
+The required column that contains a 'Yes' indicates which values should be changed by the user.
+The 'No' values indicate that the default values are fine. Note that the mlops user should run the
+inference process with their own uid/gid permissions by using kustomize to change the securityContext in the pod.yaml file.
+This is done by running the following:
 
 ```
-securityContext:
-  runAsUser: <User ID>
-  runAsGroup: <Group ID>
-  fsGroup: <Group ID>
+kustomize cfg set . FS_ID <Group ID>
+kustomize cfg set . GROUP_ID <Group ID>
+kustomize cfg set . GROUP_NAME <Group Name>
+kustomize cfg set . USER_ID <User ID>
+kustomize cfg set . USER_NAME <User Name>
 ```
 
 Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
@@ -127,6 +127,9 @@ This can be combined with the kubectl logs subcommand to tail the output of the 
 ```
 kubectl logs -f $(kubectl get pods -oname|grep launch|cut -c5-)
 ```
+
+Note that the mpirun parameter -output-filename causes a segfault when attempting to write to the $OUTPUT_DIR that is 
+NFS mounted when the securityContext has been changed to run as the user's UID/GID.
 
 ##### multi-node training cleanup
 
@@ -169,23 +172,17 @@ For example to change the NFS_SERVER IP address to 10.35.215.25 the user would r
 kustomize cfg set . NFS_SERVER 10.35.215.25
 ```
 
-The required column that contains a 'Yes' indicates which values should be changed by the user. 
-The 'No' values indicate that the default values are fine. Note that the mlops user should run the 
-single-node training job with their own uid/gid permissions by using kustomize to change the securityContext in the pod.yaml file.
-The securityContext appears within the Launcher and Worker sections. The runAsUser, runAsGroup and fsGroup members should reflect the user's UID, GID.
+The required column that contains a 'Yes' indicates which values should be changed by the user.
+The 'No' values indicate that the default values are fine. Note that the mlops user should run the
+inference process with their own uid/gid permissions by using kustomize to change the securityContext in the pod.yaml file.
+This is done by running the following:
 
 ```
-securityContext:
-  runAsUser: <User ID>
-  runAsGroup: <Group ID>
-  fsGroup: <Group ID>
-```
-
-If the user's id, gid were 205, 551 respectively, the user would run:
-
-```
-kustomize cfg set . USER_ID 205
-kustomize cfg set . GROUP_ID 551
+kustomize cfg set . FS_ID <Group ID>
+kustomize cfg set . GROUP_ID <Group ID>
+kustomize cfg set . GROUP_NAME <Group Name>
+kustomize cfg set . USER_ID <User ID>
+kustomize cfg set . USER_NAME <User Name>
 ```
 
 Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
