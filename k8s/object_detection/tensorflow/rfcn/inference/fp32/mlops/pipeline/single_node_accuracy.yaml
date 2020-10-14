@@ -1,67 +1,106 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Workflow
 metadata:
-  name: $(WORKFLOW_NAME)
+  name: rfcn-fp32-inference-wf # {"$openapi":"WORKFLOW_NAME"}
 spec:
-  entrypoint: $(MODEL_NAME)
-  volumeClaimTemplates:
-  - metadata:
-      name: rfcn-pvc
-    spec:
-      accessModes: [ "ReadWriteOnce" ]
-      resources:
-        requests:
-          storage: 6Gi
-      storageClassName: local-path
+  entrypoint: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
   templates:
-  - name: $(MODEL_NAME)
+  - name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
     steps:
     - - name: preprocess-coco
         template: preprocess-coco
     - - name: rfcn-fp32-accuracy
         template: rfcn-fp32-accuracy
-    securityContext:
-      runAsUser: $(USER_ID)
-      runAsGroup: $(GROUP_ID)
-      fsGroup: $(GROUP_ID)
   - name: preprocess-coco
+    securityContext:
+      runAsUser: 0 # {"$openapi":"USER_ID"}
+      runAsGroup: 0 # {"$openapi":"GROUP_ID"}
+      fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: $(REGISTRY)/model-zoo:1.15.2-object-detection-preprocess-coco-val
-      command: ["/workspace/preprocess-coco-val/scripts/preprocess_coco_val.sh"]
-      envFrom:
-       - configMapRef:
-           name: mlops-env
+      image: docker.io/model-zoo:1.15.2-object-detection-preprocess-coco-val # {"$openapi":"PREPROCESS_IMAGE"}
+      command: # {"$openapi":"PREPROCESS_COMMAND"}
+      - /workspace/preprocess-coco-val/scripts/preprocess_coco_val.sh # {"$openapi":"PREPROCESS_COMMAND"}
       env:
       - name: VAL_IMAGE_DIR
-        value: $(DATASET_DIR)/val2017
+        value: /datasets/val2017 # {"$openapi":"VAL_IMAGE_DIR"}
       - name: ANNOTATIONS_DIR
-        value: $(DATASET_DIR)/annotations
+        value: /datasets/annotations # {"$openapi":"ANNOTATIONS_DIR"}
       - name: OUTPUT_DIR
-        value: /mnt/vol/tf_records
+        value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
+      - name: GROUP_ID
+        value: "0" # {"$openapi":"GROUP_ID_VALUE"}
+      - name: GROUP_NAME
+        value: root # {"$openapi":"GROUP_NAME"}
+      - name: USER_ID
+        value: "0" # {"$openapi":"USER_ID_VALUE"}
+      - name: USER_NAME
+        value: root # {"$openapi":"USER_NAME"}
       volumeMounts:
-      - name: rfcn-pvc
-        mountPath: /mnt/vol
+      - name: nfs-path
+        mountPath: /nfs # {"$openapi":"NFS_PATH"}
       - name: coco-raw-data
-        mountPath: $(DATASET_DIR)
+        mountPath: /datasets # {"$openapi":"DATASET_DIR"}
         readOnly: true
+      - name: mlops-scripts
+        mountPath: /workspace/preprocess-coco-val/scripts/preprocess_coco_val.sh # {"$openapi":"PREPROCESS_COMMAND"}
+        subPath: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
     volumes:
-      - name: coco-raw-data
-        hostPath:
-          path: $(DATASET_DIR)
+    - name: coco-raw-data
+      hostPath:
+        path: /datasets # {"$openapi":"DATASET_DIR"}
+    - name: nfs-path
+      nfs:
+        server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
+        path: /nfs # {"$openapi":"NFS_PATH"}
+    - name: mlops-scripts
+      configMap:
+        name: mlops-scripts-rfcn-fp32-inference # {"$openapi":"MODEL_CONFIGMAP_NAME"}
+        defaultMode: 0770
+        items:
+        - key: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
+          path: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
   - name: rfcn-fp32-accuracy
+    securityContext:
+      runAsUser: 0 # {"$openapi":"USER_ID"}
+      runAsGroup: 0 # {"$openapi":"GROUP_ID"}
+      fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: $(REGISTRY)/model-zoo:2.1.0-object-detection-$(MODEL_NAME)
-      command: [$(MODEL_DIR)/quickstart/fp32_accuracy.sh]
-      envFrom:
-      - configMapRef:
-          name: mlops-env
+      image: docker.io/model-zoo:2.1.0-object-detection-rfcn-fp32-inference # {"$openapi":"IMAGE"}
+      imagePullPolicy: Always
+      command: # {"$openapi":"MODEL_COMMAND"}
+      - /workspace/rfcn-fp32-inference/quickstart/fp32_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
       env:
+      - name: MODELS_DIR
+        value: /workspace/rfcn-fp32-inference # {"$openapi":"MODELS_DIR"}
       - name: VAL_IMAGE_DIR
-        value: /dataset/raw_images
+        value: /datasets/val2017 # {"$openapi":"VAL_IMAGE_DIR"}
       - name: DATASET_DIR
-        value: /mnt/vol/tf_records
+        value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
       - name: OUTPUT_DIR
-        value: /mnt/vol
+        value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
+      - name: GROUP_ID
+        value: "0" # {"$openapi":"GROUP_ID_VALUE"}
+      - name: GROUP_NAME
+        value: root # {"$openapi":"GROUP_NAME"}
+      - name: USER_ID
+        value: "0" # {"$openapi":"USER_ID_VALUE"}
+      - name: USER_NAME
+        value: root # {"$openapi":"USER_NAME"}
       volumeMounts:
-      - name: rfcn-pvc
-        mountPath: /mnt/vol
+      - name: nfs-path
+        mountPath: /nfs # {"$openapi":"NFS_PATH"}
+      - name: mlops-scripts
+        mountPath: /workspace/rfcn-fp32-inference/quickstart/fp32_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
+        subPath: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
+    volumes:
+    - name: nfs-path
+      nfs:
+        server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
+        path: /nfs # {"$openapi":"NFS_PATH"}
+    - name: mlops-scripts
+      configMap:
+        name: mlops-scripts-rfcn-fp32-inference # {"$openapi":"MODEL_CONFIGMAP_NAME"}
+        defaultMode: 0770
+        items:
+        - key: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
+          path: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
