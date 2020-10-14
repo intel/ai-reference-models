@@ -11,7 +11,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * numpy==1.17.4
 * Cython
 * contextlib2
-* pillow>=6.2.2
+* pillow>=7.1.0
 * lxml
 * jupyter
 * matplotlib
