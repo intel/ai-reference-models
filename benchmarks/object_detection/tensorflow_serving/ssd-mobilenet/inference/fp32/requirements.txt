@@ -9,6 +9,6 @@ Cython
 contextlib2
 jupyter
 matplotlib
-pillow
+pillow>=7.1.0
 lxml
 absl-py

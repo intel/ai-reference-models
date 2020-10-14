@@ -47,7 +47,7 @@ RUN apt-get update && \
 
 
 # Note pycocotools has to be install after the other requirements
-RUN pip install numpy==1.17.4 Cython contextlib2 pillow>=6.2. lxml jupyter matplotlib && \
+RUN pip install numpy==1.17.4 Cython contextlib2 pillow>=7.1.0 lxml jupyter matplotlib && \
     pip install pycocotools
 
 
@@ -70,7 +70,7 @@ ARG MODEL_WORKSPACE
 
 # ${MODEL_WORKSPACE} and below needs to be owned by root:root rather than the current UID:GID
 # this allows the default user (root) to work in k8s single-node, multi-node
-RUN umask 002 && mkdir ${MODEL_WORKSPACE} && chgrp root ${MODEL_WORKSPACE} && chmod g+s+w,o+s+r ${MODEL_WORKSPACE}
+RUN umask 002 && mkdir -p ${MODEL_WORKSPACE} && chgrp root ${MODEL_WORKSPACE} && chmod g+s+w,o+s+r ${MODEL_WORKSPACE}
 ADD --chown=0:0 ${PACKAGE_DIR}/${PACKAGE_NAME}.tar.gz ${MODEL_WORKSPACE}
 RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chmod -R g+s+w ${MODEL_WORKSPACE}/${PACKAGE_NAME} && find ${MODEL_WORKSPACE}/${PACKAGE_NAME} -type d | xargs chmod o+r+x 
 
