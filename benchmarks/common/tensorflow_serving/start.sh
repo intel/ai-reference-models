@@ -164,7 +164,7 @@ function ssd_mobilenet(){
 
     pip install Cython \
                 contextlib2 \
-                pillow \
+                pillow>=7.1.0 \
                 lxml \
                 absl-py \
                 tf_slim
