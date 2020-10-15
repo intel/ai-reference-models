@@ -8,7 +8,7 @@ To run <mode>, set environment variables with the path to the dataset
 and an output directory, download and untar the <model name> <precision>
 <mode> model package, and then run a [quickstart script](#quick-start-scripts).
 ```
-DATASET_LOCATION=<path to the coco tf record file>
+DATASET_DIR=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
 
 wget <package url>
