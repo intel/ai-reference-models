@@ -1,10 +1,14 @@
-
 ENV USER_ID=0
+
 ENV USER_NAME=root
+
 ENV GROUP_ID=0
+
 ENV GROUP_NAME=root
 
-RUN apt-get update && apt-get install -y gosu
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y gosu
+
 RUN echo '#!/bin/bash\n\
 USER_ID=$USER_ID\n\
 USER_NAME=$USER_NAME\n\
@@ -18,5 +22,7 @@ if [[ $USER_NAME != root ]]; then\n\
 fi\n\
 exec /usr/sbin/gosu $USER_NAME:$GROUP_NAME "$@"\n '\
 >> /tmp/entrypoint.sh
+
 RUN chmod u+x,g+x /tmp/entrypoint.sh
+
 ENTRYPOINT ["/tmp/entrypoint.sh"]

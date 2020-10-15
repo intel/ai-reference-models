@@ -20,14 +20,16 @@
 # for more information.
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
+
 ARG TENSORFLOW_TAG
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing python-tk libsm6 libxext6 -y && \
+    apt-get install --no-install-recommends --fix-missing -y \
+        libsm6 \
+        libxext6 \
+        python-tk && \
     pip install requests
-
