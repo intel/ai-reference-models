@@ -161,13 +161,13 @@ function resnet50v1_5(){
 
 function ssd_mobilenet(){
     # Install protofbuf and other requirement
-
-    pip install Cython \
-                contextlib2 \
-                pillow>=7.1.0 \
-                lxml \
-                absl-py \
-                tf_slim
+    pip install \
+        Cython \
+        absl-py \
+        contextlib2 \
+        lxml \
+        pillow>=7.1.0 \
+        tf_slim
 
     cd ${WORKSPACE}
     rm -rf tensorflow-models
