@@ -1,13 +1,14 @@
-RUN pip install pycocotools \
-                numpy==1.16.0 \
-                scipy==1.2.0 \
-                Pillow \
-                cython \
-                matplotlib \
-                scikit-image \
-                tensorflow>=1.3.0 \
-                keras==2.0.8 \
-                opencv-python \
-                h5py \
-                imgaug \
-                IPython[all]
+RUN pip install \
+        IPython[all] \
+        Pillow \
+        cython \
+        h5py \
+        imgaug \
+        keras==2.0.8 \
+        matplotlib \
+        numpy==1.16.0 \
+        opencv-python \
+        pycocotools \
+        scikit-image \
+        scipy==1.2.0 \
+        tensorflow>=1.3.0

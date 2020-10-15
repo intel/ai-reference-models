@@ -1,4 +1,10 @@
 # Note pycocotools has to be install after the other requirements
-RUN pip install numpy==1.17.4 Cython contextlib2 pillow>=7.1.0 lxml jupyter matplotlib && \
+RUN pip install \
+        Cython \
+        contextlib2 \
+        jupyter \
+        lxml \
+        matplotlib \
+        numpy==1.17.4 \
+        pillow>=7.1.0 && \
     pip install pycocotools
-
