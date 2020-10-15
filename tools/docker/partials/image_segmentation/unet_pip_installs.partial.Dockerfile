@@ -1,5 +1,5 @@
-RUN pip install click \
-                numpy==1.16.1 \
-                Pillow==5.3.0 \
-                matplotlib
-
+RUN pip install \
+        Pillow==5.3.0 \
+        click \
+        matplotlib \
+        numpy==1.16.1
