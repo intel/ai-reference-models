@@ -51,22 +51,23 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow](https://pypi.org/project/intel-tensorflow/)
-* numactl
 * git
 * libgl1-mesa-glx
 * libglib2.0-0
-* numpy==1.17.4
+* numactl
+* wget
+* [intel-tensorflow](https://pypi.org/project/intel-tensorflow/)
 * Cython
 * contextlib2
-* pillow>=7.1.0
-* lxml
-* jupyter
-* matplotlib
-* pycocotools
 * horovod==0.19.1
-* tensorflow-addons==0.8.1
+* jupyter
+* lxml
+* matplotlib
+* numpy==1.17.4
 * opencv-python
+* pillow>=7.1.0
+* pycocotools
+* tensorflow-addons==0.8.1
 
 The [TensorFlow models](https://github.com/tensorflow/models) and
 [benchmarks](https://github.com/tensorflow/benchmarks) repos are used by

@@ -3,16 +3,18 @@
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/)
+* git
 * numactl
+* wget
+* [Protobuf Compilation](https://github.com/tensorflow/models/blob/v1.12.0/research/object_detection/g3doc/installation.md#protobuf-compilation)
+* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/)
 * Cython
 * contextlib2
-* pillow>=7.1.0
-* lxml
 * jupyter
+* lxml
 * matplotlib
+* pillow>=7.1.0
 * pycocotools
-* [Protobuf Compilation](https://github.com/tensorflow/models/blob/v1.12.0/research/object_detection/g3doc/installation.md#protobuf-compilation)
 
 Clone the [TensorFlow Model Garden](https://github.com/tensorflow/models)
 repository using the specified tag, and save the path to the `TF_MODELS_DIR`

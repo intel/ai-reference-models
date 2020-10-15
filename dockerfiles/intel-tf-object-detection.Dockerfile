@@ -20,45 +20,58 @@
 # for more information.
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
+
 ARG TENSORFLOW_TAG
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing python-tk libsm6 libxext6 -y && \
+    apt-get install --no-install-recommends --fix-missing -y \
+        libsm6 \
+        libxext6 \
+        python-tk && \
     pip install requests
 
-
 ARG TF_MODELS_BRANCH
+
 ARG FETCH_PR
+
 ARG CODE_DIR=/tensorflow/models
 
 ENV TF_MODELS_DIR=${CODE_DIR}
 
 RUN apt-get update && \
-    apt-get install -y git && \
+    apt-get install --no-install-recommends --fix-missing -y git && \
     git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
     ( cd ${CODE_DIR} && \
     if [ ! -z "${FETCH_PR}" ]; then git fetch origin ${FETCH_PR}; fi && \
     git checkout ${TF_MODELS_BRANCH} )
 
-
 # Note pycocotools has to be install after the other requirements
-RUN pip install numpy==1.17.4 Cython contextlib2 pillow>=7.1.0 lxml jupyter matplotlib && \
+RUN pip install \
+        Cython \
+        contextlib2 \
+        jupyter \
+        lxml \
+        matplotlib \
+        numpy==1.17.4 \
+        pillow>=7.1.0 && \
     pip install pycocotools
-
 
 ARG TF_MODELS_DIR=/tensorflow/models
 
 # Downloads protoc and runs it for object detection
 RUN cd ${TF_MODELS_DIR}/research && \
-    apt-get install -y wget unzip && \
+    apt-get install --no-install-recommends --fix-missing -y \
+        unzip \
+        wget && \
     wget --quiet -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip && \
     unzip -o protobuf.zip && \
     rm protobuf.zip && \
     ./bin/protoc object_detection/protos/*.proto --python_out=. && \
-    apt-get remove -y wget unzip
-
+    apt-get remove -y \
+        unzip \
+        wget && \
+    apt-get autoremove -y
