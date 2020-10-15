@@ -145,7 +145,7 @@ Single node training is similar to the docker use case but the command is run wi
 Training is done by submitting a pod.yaml to the k8s api-server which results in the pod creation and running 
 the fp32_training_demo.sh command within the pod's container.
 
-The parameters that can be changed within the MPIJob are shown in the table[^2] below:
+The parameters that can be changed within the pod are shown in the table[^2] below:
 
 |     NAME     |                 VALUE                 |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
 |--------------|---------------------------------------|---------------|-----------------------------|-------|----------|
