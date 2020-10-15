@@ -1,1 +1,1 @@
-RUN apt-get install -y tar
+RUN apt-get install --no-install-recommends --fix-missing -y tar

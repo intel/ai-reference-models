@@ -1,1 +1,1 @@
-RUN apt-get install google-perftools -y
+RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
