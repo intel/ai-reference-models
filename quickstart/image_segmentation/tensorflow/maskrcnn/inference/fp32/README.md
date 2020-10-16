@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[maskrcnn-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/maskrcnn-fp32-inference.tar.gz)
+[maskrcnn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/maskrcnn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets and Pretrained Model
@@ -74,7 +74,7 @@ DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 MODEL_SRC_DIR=<path to the Mask RCNN models repo>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/maskrcnn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/maskrcnn-fp32-inference.tar.gz
 tar -xzf maskrcnn-fp32-inference.tar.gz
 cd maskrcnn-fp32-inference
 

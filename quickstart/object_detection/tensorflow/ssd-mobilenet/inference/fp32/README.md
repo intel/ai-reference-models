@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-mobilenet-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/ssd-mobilenet-fp32-inference.tar.gz)
+[ssd-mobilenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/ssd-mobilenet-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -47,7 +47,7 @@ inference model package, and then run a [quickstart script](#quick-start-scripts
 DATASET_DIR=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/ssd-mobilenet-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/ssd-mobilenet-fp32-inference.tar.gz
 tar -xzf ssd-mobilenet-fp32-inference.tar.gz
 cd ssd-mobilenet-fp32-inference
 

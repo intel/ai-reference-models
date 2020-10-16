@@ -19,7 +19,7 @@ Otherwise `DATASET_DIR` needs to be set:
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/<model-precision-mode>.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/<model-precision-mode>.tar.gz
 tar -xzf <model-precision-mode>.tar.gz
 cd <model-precision-mode>
 
