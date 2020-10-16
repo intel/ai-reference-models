@@ -18,6 +18,6 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  <image name> \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```

@@ -78,8 +78,10 @@ quickstart/<script name>.sh
 <!--- 60. Docker -->
 ## Docker
 
-The model container `amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-recommendation-ncf-fp32-inference` includes the scripts and libraries needed to run NCF FP32 inference. To run one of the quickstart scripts 
-using this container, you'll need to provide volume mounts for the dataset and an output directory.
+The model container includes the scripts and libraries needed to run
+NCF FP32 inference. To run one of the quickstart scripts
+using this container, you'll need to provide volume mounts for the dataset
+and an output directory.
 
 ```
 DATASET_DIR=<path to the dataset>
@@ -96,7 +98,6 @@ docker run \
   amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-recommendation-ncf-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
-
 
 <!--- 80. License -->
 ## License
