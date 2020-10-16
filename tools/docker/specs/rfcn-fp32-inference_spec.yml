@@ -20,6 +20,7 @@ slice_sets:
           documentation:
               name: README.md
               uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32
+              k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32
               text_replace:
                 <model name>: RFCN
                 <precision>: FP32
@@ -29,6 +30,9 @@ slice_sets:
                 <package name>: rfcn-fp32-inference.tar.gz
                 <package dir>: rfcn-fp32-inference
                 <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-object-detection-rfcn-fp32-inference
+                <k8s package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference-k8s.tar.gz
+                <k8s package name>: rfcn-fp32-inference-k8s.tar.gz
+                <k8s package dir>: rfcn-fp32-inference-k8s
               docs:
                   - name: Title
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/title.md
@@ -46,9 +50,12 @@ slice_sets:
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/docker.md
                   - name: License link
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/license.md
+                  - name: Kubernetes
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/kubernetes.md
           args:
               - TF_MODELS_BRANCH=6c21084503b27a9ab118e1db25f79957d5ef540b
               - PACKAGE_NAME=rfcn-fp32-inference
+              - K8S_PACKAGE_NAME=rfcn-fp32-inference-k8s
           files:
               - source: benchmarks/common
                 destination: benchmarks/common
@@ -73,6 +80,7 @@ slice_sets:
               - source: models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
                 destination: models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
               - source: quickstart/object_detection/tensorflow/rfcn/inference/fp32
+                k8s_source: k8s/object_detection/tensorflow/rfcn/inference/fp32
                 destination: quickstart
               - source: quickstart/common
                 destination: quickstart/common
