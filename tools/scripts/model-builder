@@ -160,6 +160,9 @@ _model_builder_new_spec()
   done
   # Used for auto a new spec with the list of package files for the specified model
 
+  # Check for the tf-tool container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+
   new_model=$1
   echo "Auto-generating a new spec file for: $new_model"
 
