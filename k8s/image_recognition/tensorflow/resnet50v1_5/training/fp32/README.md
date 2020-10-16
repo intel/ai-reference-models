@@ -3,13 +3,13 @@
 
 Download and untar the ResNet50 v1.5 FP32 training package:
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training-k8s.tar.gz
+tar -xvf resnet50v1-5-fp32-training-k8s.tar.gz
 ```
 
 ### Execution
 
-The model package for `<model name> <precision> <mode>` includes single and multi-node kubernetes deployments.
+The model package for `ResNet50 v1.5 FP32 training` includes single and multi-node kubernetes deployments.
 The directory tree within the model package is shown below, where single and multi-node directories are below the 
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -32,8 +32,8 @@ Both single and multi-node deployments use [kustomize-v3.8.4](https://github.com
 The kustomization files that the kustomize command references are located withing the following directories:
 
 ```
-<k8s package dir>/quickstart/mlops/single-node/kustomization.yaml
-<k8s package dir>/quickstart/mlops/multi-node/kustomization.yaml
+resnet50v1-5-fp32-training-k8s/quickstart/mlops/single-node/kustomization.yaml
+resnet50v1-5-fp32-training-k8s/quickstart/mlops/multi-node/kustomization.yaml
 ```
 
 #### multi-node distributed training
@@ -60,7 +60,7 @@ The distributed training algorithm is handled by mpirun.
 Make sure you are inside the multi-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/multi-node
+cd resnet50v1-5-fp32-training-k8s/quickstart/mlops/multi-node
 ```
 
 The parameters that can be changed within the MPIJob are shown in the table[^1] below:
@@ -153,10 +153,10 @@ the fp32_training_demo.sh command within the pod's container.
 Make sure you are inside the single-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/single-node
+cd resnet50v1-5-fp32-training-k8s/quickstart/mlops/single-node
 ```
 
-The parameters that can be changed within the pod are shown in the table[^2] below:
+The parameters that can be changed within the MPIJob are shown in the table[^2] below:
 
 |     NAME     |                 VALUE                 |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
 |--------------|---------------------------------------|---------------|-----------------------------|-------|----------|
@@ -232,3 +232,4 @@ Removing the pod and related resources is done by running:
 ```
 kubectl delete -f single-node.yaml
 ```
+

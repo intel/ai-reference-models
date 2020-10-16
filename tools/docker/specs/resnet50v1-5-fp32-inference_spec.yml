@@ -10,6 +10,7 @@ slice_sets:
     - add_to_name: "-resnet50v1-5-fp32-inference"
       args:
         - PACKAGE_NAME=resnet50v1-5-fp32-inference
+        - K8S_PACKAGE_NAME=resnet50v1-5-fp32-inference-k8s
       dockerfile_subdirectory: "model_containers"
       downloads:
         #TODO: Please remove this line if security review fails and rebuild the Dockerfile(s) and container(s).
@@ -38,22 +39,28 @@ slice_sets:
           source: models/image_recognition/tensorflow/resnet50v1_5/inference
         - destination: quickstart/common
           source: quickstart/common
+          k8s_source: k8s/common
         - destination: quickstart
           source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32
+          k8s_source: k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
       partials:
         - model_package
         - entrypoint
       documentation:
         name: README.md
         uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32
+        k8s_uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
         text_replace:
           <model name>: ResNet50 v1.5
           <precision>: FP32
           <mode>: inference
           <use case>: image_recognition
           <package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-inference.tar.gz
+          <k8s package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-inference-k8s.tar.gz
           <package name>: resnet50v1-5-fp32-inference.tar.gz
+          <k8s package name>: resnet50v1-5-fp32-inference-k8s.tar.gz
           <package dir>: resnet50v1-5-fp32-inference
+          <k8s package dir>: resnet50v1-5-fp32-inference-k8s
           <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-inference
         docs:
         - name: Title
@@ -64,6 +71,7 @@ slice_sets:
           uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/download.md
         - name: Quick Start Scripts
           uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/quickstart.md
+          k8s_uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/quickstart.md
         - name: Bare Metal
           uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/baremetal.md
         - name: Docker
@@ -72,3 +80,5 @@ slice_sets:
           uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/advancedoptions.md
         - name: License link
           uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/license.md
+        - name: Kubernetes
+          k8s_uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/kubernetes.md

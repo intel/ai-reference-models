@@ -40,10 +40,13 @@ _usage()
   echo "# -- Generate the model's Dockerfile --"
   echo 'model-builder generate-dockerfile '${_all_models[2]}
   echo ''
+  echo "# -- Create the model's k8s package --"
+  echo 'model-builder package-k8s '${_all_k8s[1]}
+  echo ''
   echo "# -- Generate the model's Documentation --"
   echo 'model-builder generate-documentation '${_all_models[3]}
   echo ''
-  echo "# -- Do {generate-documentation,package,generate-dockerfile,build} --"
+  echo "# -- Do {generate-documentation,package,package-k8s,generate-dockerfile,build} --"
   echo 'model-builder make '${_allModels[1]}
   exit 0
 }
@@ -63,6 +66,11 @@ _model_builder_init_model_list()
   if (( ${#_all_models[@]} == 0 )); then
     _all_models+=( $(echo $(cat $(find $(_model_builder_root)/docker/specs -name '*.yml') | sed -n '/^[ \t]*dockerfiles:/,/^slice_sets/p' | grep '^.*- ["'"']" | sed 's/^.*- ["'"']"'.*{\([[:alnum:]_-]*\)}["'"']"'$/\1/g')) "all" )
     IFS=$'\n' _all_models=( $(sort -u <<<"${_all_models[*]}") )
+    unset IFS
+  fi
+  if (( ${#_all_k8s[@]} == 0 )); then
+    _all_k8s+=( $(echo $(cat $(find $(_model_builder_root)/docker/specs -name '*.yml') | grep '<k8s package name>' | sed 's/^[ \t]*<k8s package name>: //g' | sed 's/-k8s.tar.gz//g')) "all" )
+    IFS=$'\n' _all_k8s=( $(sort -u <<<"${_all_k8s[*]}") )
     unset IFS
   fi
 }
@@ -370,7 +378,56 @@ _model_builder_build_packages()
   # List output packages
   echo "--------------------------------------"
   echo "Model Packages:"
-  ls -1tl $_abs_model_dir/$_output_dir 
+  ls -1tl $_abs_model_dir/$_output_dir | grep -v k8s
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_build_k8s_packages()
+{
+  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir")
+        ;;
+      --output_dir=*)
+        _output_dir=${1#*=}
+        _output_dir=${_output_dir##*/}
+        _args+=("$1")
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1")
+        ;;
+      *)
+        _args+=("$1")
+        ;;
+    esac
+    shift
+  done
+
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+
+  # Call the assembler to build k8s packages
+  _echo_command ${_asm_dockerfiles} --release dockerfiles --build_k8s_packages ${_args[@]}
+
+  # List output packages
+  echo "--------------------------------------"
+  echo "K8S Packages:"
+  ls -1tl $_abs_model_dir/$_output_dir | grep k8s
   popd 1>/dev/null 2>/dev/null
 }
 
@@ -564,6 +621,51 @@ _model_builder_list_packages()
   popd 1>/dev/null 2>/dev/null
 }
 
+_model_builder_list_k8s()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _quiet=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e '-h prints help info\n'\
+        'options prints more detail about the flags\n'
+        return 0
+        ;;
+      -q|--quiet)
+        _quiet=$1
+        _args+=("$1")
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir")
+        ;;
+      *)
+        _args+=("$1")
+        ;;
+    esac
+    shift
+  done
+
+  # Check for the tf-tools container and build it if it doesn't exist
+  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+
+  # Call the assembler to list the images
+  _echo_command ${_asm_dockerfiles} \
+    --release versioned \
+    --repository ${LOCAL_REPO} \
+    --list_k8s \
+    --arg _TAG_PREFIX=${TAG_PREFIX} \
+    --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+    ${_args[@]} 2>&1 | sort | column -c 2 -t
+  popd 1>/dev/null 2>/dev/null
+}
+
 _model_builder_install_completion()
 {
   if [[ -d /usr/local/etc/bash_completion.d ]]; then
@@ -580,10 +682,17 @@ _model_builder_make()
     exit 1
   fi
 
-  # build packages
+  # build model packages
   _model_builder_build_packages $@
   if (( $? != 0 )); then
     echo "There was an error building model packages."
+    exit 1
+  fi
+
+  # build k8s packages
+  _model_builder_build_k8s_packages $@
+  if (( $? != 0 )); then
+    echo "There was an error building k8s packages."
     exit 1
   fi
 
@@ -622,6 +731,26 @@ _model_builder_validate_models()
   return 0
 }
 
+_model_builder_validate_k8s()
+{
+  local _arg _remainingModels=()
+  _remainingModels+=( ${_all_k8s[@]} )
+  for _arg in "$@"; do
+    if [[ $_arg == options ]]; then
+      echo '-h --help options '${_remainingModels[@]}
+      return 1
+    elif ! [[ "${_all_k8s[@]}" =~ $_arg ]]; then
+      echo 'unknown option '$_arg >&2
+      _usage
+      exit 1
+    elif ! [[ "${_current_k8s[@]}" =~ $_arg ]]; then
+      _current_k8s+=( $_arg )
+    fi
+    _remainingModels=( ${_remainingModels[@]/$_arg/} )
+  done
+  return 0
+}
+
 _model_builder_build_only_tags_matching_args()
 {
   local _arg _models=()
@@ -630,6 +759,20 @@ _model_builder_build_only_tags_matching_args()
       continue
     fi
     if [[ ${_all_models[@]} =~ $_arg ]]; then
+      _models+=( ' --only_tags_matching=.*'$_arg'$' )
+    fi
+  done
+  echo ${_models[@]}
+}
+
+_model_builder_build_only_tags_matching_args_k8s()
+{
+  local _arg _models=()
+  for _arg in "$@";do
+    if [[ $_arg == all ]]; then
+      continue
+    fi
+    if [[ ${_all_k8s[@]} =~ $_arg ]]; then
       _models+=( ' --only_tags_matching=.*'$_arg'$' )
     fi
   done
@@ -685,7 +828,7 @@ _main()
           echo ${_options[@]}' '${_commands[@]}
           return 0
           ;;
-        init-spec|package|generate-dockerfile|generate-documentation|build|make)
+        init-spec|package|package-k8s|generate-dockerfile|generate-documentation|build|make)
           echo 'missing model name'
           exit 1
           ;;
@@ -697,8 +840,16 @@ _main()
           echo ${_all_models[@]}
           return 0
           ;;
+        k8s)
+          echo ${_all_k8s[@]}
+          return 0
+          ;;
         packages)
           _model_builder_list_packages $_model_dir --quiet
+          return 0
+          ;;
+        packages-k8s)
+          _model_builder_list_k8s $_model_dir --quiet
           return 0
           ;;
         run-test-suite)
@@ -724,6 +875,16 @@ _main()
           _model_builder_build_packages $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
           if (( $? != 0 )); then
             echo "There was an error building model packages."
+            exit 1
+          fi
+          ;;
+        package-k8s)
+          shift
+          _model_builder_validate_k8s $@ || exit 0
+          _only_tags_matching="$(_model_builder_build_only_tags_matching_args_k8s $@)"
+          _model_builder_build_k8s_packages $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          if (( $? != 0 )); then
+            echo "There was an error building k8s packages."
             exit 1
           fi
           ;;
@@ -786,8 +947,10 @@ LOCAL_REPO=${LOCAL_REPO-model-zoo}
 TAG_PREFIX=${TENSORFLOW_TAG}
 _all_models=()
 _current_models=()
+_all_k8s=()
+_current_k8s=()
 _options=("-h" "--help" "-q" "--quiet" "--dry-run")
-_commands=( "options" "build" "commands" "completion" "generate-dockerfile" "generate-documentation" "images" "init-spec" "install-completion" "make" "models" "package" "packages" "run-test-suite")
+_commands=( "options" "build" "commands" "completion" "generate-dockerfile" "generate-documentation" "images" "init-spec" "install-completion" "make" "models" "package" "package-k8s" "packages" "packages-k8s" "run-test-suite")
 _model_builder_init_model_list dockerfiles
 
 _main $@

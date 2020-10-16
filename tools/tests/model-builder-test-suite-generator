@@ -90,6 +90,26 @@ done
 
 echo ''  >> $(dirname $0)/model-builder.bats
 echo '#' >> $(dirname $0)/model-builder.bats
+echo '# *** tests for k8s package ***' >> $(dirname $0)/model-builder.bats
+echo '#' >> $(dirname $0)/model-builder.bats
+echo ''  >> $(dirname $0)/model-builder.bats
+_package_names=$(mktemp /tmp/package_names.XXXXXXXXXX)
+model-builder packages-k8s 2>&1 > $_package_names
+for model in "${MODELS[@]}"; do
+  package_path=$(cat $_package_names | grep '^.*'$model'-k8s.tar.gz$' | awk '{print $2}' || exit 0)
+  if [[ -n $package_path ]]; then
+    package=${package_path##*/}
+    echo $'@test "validate package-k8s for '$model$' creates '$package$'" {
+      run model-builder -q package-k8s '$model$'
+      (( $status == 0 ))
+      [[ "${lines[@]}" =~ '$package$' ]]
+      (( $(last_modified '$package_path$') <= 50 ))
+    }' >> $(dirname $0)/model-builder.bats
+  fi
+done
+
+echo ''  >> $(dirname $0)/model-builder.bats
+echo '#' >> $(dirname $0)/model-builder.bats
 echo '# *** tests for build ***' >> $(dirname $0)/model-builder.bats
 echo '#' >> $(dirname $0)/model-builder.bats
 echo ''  >> $(dirname $0)/model-builder.bats
@@ -105,3 +125,4 @@ for model in "${MODELS[@]}"; do
     }' >> $(dirname $0)/model-builder.bats
   fi
 done
+
