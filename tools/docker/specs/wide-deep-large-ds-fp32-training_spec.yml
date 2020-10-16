@@ -48,7 +48,7 @@ slice_sets:
         <model name>: Wide and Deep Large Dataset
         <precision>: FP32
         <use case>: recommendation
-        <package url>: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/wide-deep-large-ds-fp32-training.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/wide-deep-large-ds-fp32-training.tar.gz
         <package name>: wide-deep-large-ds-fp32-training.tar.gz
         <package dir>: wide-deep-large-ds-fp32-training
         <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-large-ds-fp32-training

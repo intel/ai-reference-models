@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[faster-rcnn-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/aipg-local/aipg-tf/modular-zoo-model-package-generator/239/faster-rcnn-fp32-inference.tar.gz)
+[faster-rcnn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/faster-rcnn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -69,7 +69,7 @@ for the path to your `DATASET_DIR` (where the coco TF records file is
 located) and an `OUTPUT_DIR` where log files will be written, then run a
 [quickstart script](#quick-start-scripts).
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/aipg-local/aipg-tf/modular-zoo-model-package-generator/239/faster-rcnn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/faster-rcnn-fp32-inference.tar.gz
 tar -xzf faster-rcnn-fp32-inference.tar.gz
 cd faster-rcnn-fp32-inference
 
