@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz)
+[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/rfcn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -45,7 +45,7 @@ to run the RFCN scripts must be installed in your environment.
 Download and untar the RFCN FP32 inference model package:
 
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/rfcn-fp32-inference.tar.gz
 tar -xvf rfcn-fp32-inference.tar.gz
 ```
 
