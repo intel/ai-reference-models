@@ -1275,7 +1275,7 @@ def main(argv):
               for k, v in text_replace.items():
                 documentation['contents'] = documentation['contents'].replace(k, v)
               f.write(documentation['contents'])
-        if 'k8s_contents' in documentation:
+        if all(key in documentation for key in ('k8s_contents', 'k8s_uri')):
             readme = os.path.join(documentation['k8s_uri'], documentation['name'])
             with open(readme, 'w', encoding="utf-8") as f:
                 for k, v in text_replace.items():
