@@ -24,10 +24,10 @@ slice_sets:
                 <precision>: FP32
                 <mode>: training
                 <use case>: image_recognition
-                <package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training.tar.gz
+                <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-training.tar.gz
                 <package name>: resnet50v1-5-fp32-training.tar.gz
                 <package dir>: resnet50v1-5-fp32-training
-                <k8s package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training-k8s.tar.gz
+                <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-training-k8s.tar.gz
                 <k8s package name>: resnet50v1-5-fp32-training-k8s.tar.gz
                 <k8s package dir>: resnet50v1-5-fp32-training-k8s
                 <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training

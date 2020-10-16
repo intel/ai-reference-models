@@ -3,7 +3,7 @@
 
 Download and untar the ResNet50 v1.5 FP32 training package:
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-fp32-training-k8s.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-training-k8s.tar.gz
 tar -xvf resnet50v1-5-fp32-training-k8s.tar.gz
 ```
 

@@ -3,7 +3,7 @@
 
 Download and untar the RFCN FP32 inference package.
 ```
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference-k8s.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/rfcn-fp32-inference-k8s.tar.gz
 tar -xvf rfcn-fp32-inference-k8s.tar.gz
 ```
 

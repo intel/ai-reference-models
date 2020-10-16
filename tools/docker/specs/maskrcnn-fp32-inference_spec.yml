@@ -36,7 +36,7 @@ slice_sets:
         <model name>: Mask R-CNN
         <package dir>: maskrcnn-fp32-inference
         <package name>: maskrcnn-fp32-inference.tar.gz
-        <package url>: 'https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/maskrcnn-fp32-inference.tar.gz'
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/maskrcnn-fp32-inference.tar.gz'
         <precision>: FP32
         <use case>: image_segmentation
       uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32
