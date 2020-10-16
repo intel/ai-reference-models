@@ -88,6 +88,9 @@ flags.DEFINE_boolean(
     'build_packages', False, 'Do not build packages', short_name='z')
 
 flags.DEFINE_boolean(
+    'build_k8s_packages', False, 'Do not build k8s packages', short_name='f')
+
+flags.DEFINE_boolean(
     'construct_dockerfiles', False, 'Do not build Dockerfiles', short_name='d')
 
 flags.DEFINE_boolean(
@@ -106,7 +109,10 @@ flags.DEFINE_boolean(
     'list_images', False, 'Do not list images that would be built', short_name='c')
 
 flags.DEFINE_boolean(
-    'list_packages', False, 'Do not list packages that would be built')
+    'list_packages', False, 'Do not list model packages that would be built')
+
+flags.DEFINE_boolean(
+    'list_k8s', False, 'Do not list k8s packages that would be built')
 
 flags.DEFINE_string(
     'run_tests_path', None,
@@ -146,7 +152,7 @@ flags.DEFINE_string(
 
 flags.DEFINE_string(
     'output_dir',
-    'output', 'Path to an output directory for model packages.'
+    'output', 'Path to an output directory for model and k8s packages.'
     ' Will be created if it doesn\'t exist.')
 
 flags.DEFINE_string(
@@ -248,6 +254,8 @@ slice_sets:
               type: string
             uri:
               type: string
+            k8s_uri:
+              type: string
             text_replace:
               type: dict
             docs:
@@ -258,6 +266,8 @@ slice_sets:
                   name:
                     type: string
                   uri:
+                    type: string
+                  k8s_uri:
                     type: string
         test_runtime:
           type: string
@@ -279,6 +289,8 @@ slice_sets:
             type: dict
             schema:
               source:
+                type: string
+              k8s_source:
                 type: string
               destination:
                 type: string
@@ -523,7 +535,9 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             documentation = slices[len(slices)-1]['documentation']
             docs_list = gather_slice_list_items([documentation], 'docs')
             documentation_contents = merge_docs(docs_list)
-            documentation.update({ 'contents': documentation_contents })
+            documentation_k8s_contents = merge_docs(docs_list, 'k8s')
+            documentation.update({ 'contents': documentation_contents,
+                                   'k8s_contents': documentation_k8s_contents })
         else:
             docs_list = []
         files_list = gather_slice_list_items(slices, 'files')
@@ -575,13 +589,17 @@ def doc_contents(path):
     raise e
   return contents
 
-def merge_docs(docs_list):
+def merge_docs(docs_list, package_type='model'):
   """Build the README.md document"""
   contents=''
   for doc in docs_list:
-      name=doc['name']
-      uri=doc['uri']
-      contents+='\n'.join([doc_contents(uri) + '\n'])
+      uri = ''
+      if package_type == 'model' and 'uri' in doc:
+        uri = doc['uri']
+      elif package_type == 'k8s' and 'k8s_uri' in doc:
+        uri = doc['k8s_uri']
+      if uri:
+        contents += '\n'.join([doc_contents(uri) + '\n'])
   return contents
 
 def upload_in_background(hub_repository, dock, image, tag):
@@ -635,6 +653,39 @@ def get_package_name(package_def):
       return cli_args["PACKAGE_NAME"]
   return None
 
+def get_k8s_name(package_def):
+  if "cli_args" in package_def:
+    cli_args = package_def["cli_args"]
+    if "K8S_PACKAGE_NAME" in cli_args:
+      return cli_args["K8S_PACKAGE_NAME"]
+  return None
+
+def get_file(source, destination):
+    if os.path.isdir(source):
+        if not os.path.isdir(os.path.dirname(destination)):
+            os.makedirs(os.path.dirname(destination))
+        copy_tree(source, destination)
+        eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
+        doc_partials_dir = os.path.join(destination, ".docs")
+        if os.path.isdir(doc_partials_dir):
+            shutil.rmtree(doc_partials_dir, ignore_errors=True)
+    elif os.path.isfile(source):
+        # Ensure that the directories exist first, otherwise the file copy will fail
+        if not os.path.isdir(os.path.dirname(destination)):
+            os.makedirs(os.path.dirname(destination))
+        shutil.copy(source, destination)
+        eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
+    else:
+        eprint("ERROR: Unable to find file or directory: {}".format(source))
+        sys.exit(1)
+
+def get_download(source, destination):
+    # Ensure that the directories exist first, otherwise the file copy will fail
+    if not os.path.isdir(os.path.dirname(destination)):
+        os.makedirs(os.path.dirname(destination))
+    urllib.request.urlretrieve(source, destination)
+    eprint("Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
+
 def write_package(package_def):
   output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
   if not os.path.isdir(output_dir):
@@ -655,34 +706,13 @@ def write_package(package_def):
         for item in package_def["files"]:
           source = os.path.join(model_dir, item["source"])
           destination = os.path.join(temp_dir, item["destination"])
-          if os.path.isdir(source):
-            if not os.path.isdir(os.path.dirname(destination)):
-              os.makedirs(os.path.dirname(destination))
-            copy_tree(source, destination)
-            eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
-            doc_partials_dir = os.path.join(destination, ".docs")
-            if os.path.isdir(doc_partials_dir):
-              shutil.rmtree(doc_partials_dir, ignore_errors=True)
-          elif os.path.isfile(source):
-            # Ensure that the directories exist first, otherwise the file copy will fail
-            if not os.path.isdir(os.path.dirname(destination)):
-              os.makedirs(os.path.dirname(destination))
-            shutil.copy(source, destination)
-            eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
-          else:
-            eprint("ERROR: Unable to find file or directory: {}".format(source))
-            sys.exit(1)
-
+          get_file(source, destination)
       # Grab things from the downloads list
       if "downloads" in package_def.keys():
         for item in package_def["downloads"]:
           source = item["source"]
           destination = os.path.join(temp_dir, item["destination"])
-          # Ensure that the directories exist first, otherwise the file copy will fail
-          if not os.path.isdir(os.path.dirname(destination)):
-            os.makedirs(os.path.dirname(destination))
-          urllib.request.urlretrieve(source, destination)
-          eprint("Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
+          get_download(source, destination)
       # Write tar file
       eprint("Writing {} to {}".format(temp_dir, tar_file), quiet=FLAGS.quiet)
       with tarfile.open(tar_file, "w:gz") as tar:
@@ -690,6 +720,42 @@ def write_package(package_def):
     finally:
       eprint("Deleting temp directory: {}".format(temp_dir), quiet=FLAGS.quiet)
       shutil.rmtree(temp_dir)
+
+
+def write_k8s_package(package_def):
+    output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
+    if not os.path.isdir(output_dir):
+        eprint(">> Creating directory: {}".format(output_dir), quiet=FLAGS.quiet)
+        os.mkdir(output_dir)
+
+    package = get_k8s_name(package_def)
+    if package != None:
+        tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
+        eprint("> Creating k8s package: {}".format(tar_file), quiet=FLAGS.quiet)
+
+        try:
+            temp_dir = tempfile.mkdtemp()
+
+            # Grab things from the files list
+            model_dir = os.path.join(os.getcwd(), FLAGS.model_dir)
+            if "files" in package_def.keys():
+                for item in [f for f in package_def["files"] if 'k8s_source' in f]:
+                    source = os.path.join(model_dir, item["k8s_source"])
+                    destination = os.path.join(temp_dir, item["destination"])
+                    get_file(source, destination)
+            # Grab things from the downloads list
+            if "downloads" in package_def.keys():
+                for item in package_def["downloads"]:
+                    source = item["source"]
+                    destination = os.path.join(temp_dir, item["destination"])
+                    get_download(source, destination)
+            # Write tar file
+            eprint("Writing {} to {}".format(temp_dir, tar_file), quiet=FLAGS.quiet)
+            with tarfile.open(tar_file, "w:gz") as tar:
+                tar.add(temp_dir, arcname=package)
+        finally:
+            eprint("Deleting temp directory: {}".format(temp_dir), quiet=FLAGS.quiet)
+            shutil.rmtree(temp_dir)
 
 def update_spec(a, b):
     """Merge two dictionary specs into one, recursing through any embedded dicts."""
@@ -1113,6 +1179,21 @@ def main(argv):
               eprint('{} {}'.format(target,tar_file))
     sys.exit(0)
 
+  if FLAGS.list_k8s:
+    for tag, tag_defs in all_tags.items():
+      for tag_def in tag_defs:
+        #eprint(tag_def)
+        #sys.exit(0)
+        if 'tag_spec' in tag_def:
+          lst = re.findall('{([^{}]*)}',tag_def['tag_spec'])
+          if lst is not None and len(lst) > 0:
+            target = lst[len(lst)-1]
+            package = get_k8s_name(tag_def)
+            if package != None:
+              tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
+              eprint('{} {}'.format(target,tar_file))
+    sys.exit(0)
+
   # Empty Dockerfile directory if building new Dockerfiles
   if FLAGS.construct_dockerfiles and not FLAGS.only_tags_matching:
     eprint('> Emptying Dockerfile dir "{}"'.format(FLAGS.dockerfile_dir), quiet=FLAGS.quiet)
@@ -1165,9 +1246,13 @@ def main(argv):
               FLAGS.only_tags_matching), quiet=FLAGS.quiet)
           continue
 
-      # Write packages to the output_dir
+      # Write model packages to the output_dir
       if FLAGS.build_packages:
         write_package(tag_def)
+
+      # Write k8s packages to the output_dir
+      if FLAGS.build_k8s_packages:
+        write_k8s_package(tag_def)
 
       # Write releases marked "is_dockerfiles" into the Dockerfile directory
       if FLAGS.construct_dockerfiles and tag_def['is_dockerfiles']:
@@ -1190,6 +1275,12 @@ def main(argv):
               for k, v in text_replace.items():
                 documentation['contents'] = documentation['contents'].replace(k, v)
               f.write(documentation['contents'])
+        if 'k8s_contents' in documentation:
+            readme = os.path.join(documentation['k8s_uri'], documentation['name'])
+            with open(readme, 'w', encoding="utf-8") as f:
+                for k, v in text_replace.items():
+                    documentation['k8s_contents'] = documentation['k8s_contents'].replace(k, v)
+                f.write(documentation['k8s_contents'])
 
       # Don't build any images for dockerfile-only releases
       if not FLAGS.build_images:

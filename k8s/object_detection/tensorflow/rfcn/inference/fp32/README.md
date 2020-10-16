@@ -3,11 +3,11 @@
 
 Download and untar the RFCN FP32 inference package.
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/rfcn-fp32-inference-k8s.tar.gz
+tar -xvf rfcn-fp32-inference-k8s.tar.gz
 ```
 
-The model package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
+The model package for `RFCN FP32 inference` includes single-node and pipeline kubernetes deployments.
 The directory tree within the model package is shown below, where single and pipeline directories are below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -44,8 +44,8 @@ You can verify the correct version of kustomize has been installed by typing `ku
 The kustomization files that the kustomize command references are located withing the following directories:
 
 ```
-<k8s package dir>/quickstart/mlops/single-node/kustomization.yaml
-<k8s package dir>/quickstart/mlops/pipeline/kustomization.yaml
+rfcn-fp32-inference-k8s/quickstart/mlops/single-node/kustomization.yaml
+rfcn-fp32-inference-k8s/quickstart/mlops/pipeline/kustomization.yaml
 ```
 
 #### Single-node Inference
@@ -57,7 +57,7 @@ which results in the pod creation and then the specified
 Make sure you are inside the single-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/single-node
+cd rfcn-fp32-inference-k8s/quickstart/mlops/single-node
 ```
 
 The parameters that can be changed within the single-node deployment are shown in the table[^1] below:
@@ -154,7 +154,7 @@ the TF records file.
 Make sure you are inside the pipeline directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/pipeline
+cd rfcn-fp32-inference-k8s/quickstart/mlops/pipeline
 ```
 
 The parameters that can be changed within the pipeline are shown in the table[^2] below:
@@ -239,3 +239,4 @@ kubectl delete -f pipeline.yaml
 
 See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
