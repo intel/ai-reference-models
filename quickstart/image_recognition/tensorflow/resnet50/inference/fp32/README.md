@@ -14,7 +14,7 @@ ImageNet dataset in the TF records format.
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50-fp32-inference.tar.gz)
+[resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50-fp32-inference.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -44,7 +44,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50-fp32-inference.tar.gz
 cd resnet50-fp32-inference
 

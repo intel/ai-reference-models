@@ -47,7 +47,7 @@ slice_sets:
         <model name>: BERT Large
         <precision>: FP32
         <use case>: language_modeling
-        <package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/bert-large-fp32-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/bert-large-fp32-inference.tar.gz
         <package name>: bert-large-fp32-inference.tar.gz
         <package dir>: bert-large-fp32-inference
         <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-inference

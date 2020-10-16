@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-fp32-inference.tar.gz)
+[wide-deep-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/wide-deep-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -43,7 +43,7 @@ These quickstart scripts can be run in different environments:
 1. Download and untar the Wide & Deep FP32 inference model package:
 
     ```
-    wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/wide-deep-fp32-inference.tar.gz
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/wide-deep-fp32-inference.tar.gz
     tar -xvf wide-deep-fp32-inference.tar.gz
     ```
 
