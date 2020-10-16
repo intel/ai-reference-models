@@ -156,7 +156,7 @@ Make sure you are inside the single-node directory:
 cd resnet50v1-5-fp32-training-k8s/quickstart/mlops/single-node
 ```
 
-The parameters that can be changed within the MPIJob are shown in the table[^2] below:
+The parameters that can be changed within the pod are shown in the table[^2] below:
 
 |     NAME     |                 VALUE                 |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
 |--------------|---------------------------------------|---------------|-----------------------------|-------|----------|
