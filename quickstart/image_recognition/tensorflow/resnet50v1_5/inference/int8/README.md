@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50v1-5-int8-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-int8-inference.tar.gz)
+[resnet50v1-5-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -55,7 +55,7 @@ Otherwise `DATASET_DIR` needs to be set:
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/resnet50v1-5-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-int8-inference.tar.gz
 tar -xzf resnet50v1-5-int8-inference.tar.gz
 cd resnet50v1-5-int8-inference
 

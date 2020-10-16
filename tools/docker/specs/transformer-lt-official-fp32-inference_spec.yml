@@ -50,7 +50,7 @@ slice_sets:
         <model name>: Transformer LT Official
         <precision>: FP32
         <use case>: language_translation
-        <package url>: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/transformer-lt-official-fp32-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/transformer-lt-official-fp32-inference.tar.gz
         <package name>: transformer-lt-official-fp32-inference.tar.gz
         <package dir>: transformer-lt-official-fp32-inference
         <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-translation-transformer-lt-official-fp32-inference
