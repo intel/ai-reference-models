@@ -41,6 +41,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
+* git
 * numactl
 * wget
 * [Protobuf Compilation](https://github.com/tensorflow/models/blob/v1.12.0/research/object_detection/g3doc/installation.md#protobuf-compilation)
@@ -103,7 +104,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo-ci:290-ci-build-1.15.2-object-detection-faster-rcnn-int8-inference \
+  intel/object-detection:tf-1.15.2-imz-2.0.0-faster-rcnn-int8-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

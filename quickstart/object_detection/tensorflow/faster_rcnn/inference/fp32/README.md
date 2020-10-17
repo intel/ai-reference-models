@@ -99,7 +99,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo-ci:239-ci-build-1.15.2-object-detection-faster-rcnn-fp32-inference \
+  intel/object-detection:tf-1.15.2-imz-2.0.0-faster-rcnn-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
