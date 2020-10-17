@@ -53,7 +53,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/transformer-lt-official-fp32-inference.tar.gz
         <package name>: transformer-lt-official-fp32-inference.tar.gz
         <package dir>: transformer-lt-official-fp32-inference
-        <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-translation-transformer-lt-official-fp32-inference
+        <docker image>: intel/language-translation:tf-2.3.0-imz-2.0.0-transformer-lt-official-fp32-inference
       docs:
       - name: Title
         uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/title.md
