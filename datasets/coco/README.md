@@ -107,7 +107,7 @@ format.
    --env OUTPUT_DIR=${OUTPUT_DIR} \
    -v ${DATASET_DIR}:${DATASET_DIR} \
    -v ${OUTPUT_DIR}:${OUTPUT_DIR} \
-   -t amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-object-detection-preprocess-coco-val
+   -t intel/object-detection:tf-1.15.2-imz-2.0.0-preprocess-coco-val
    ```
 
    After the script completes, the `OUTPUT_DIR` will have a TF records file

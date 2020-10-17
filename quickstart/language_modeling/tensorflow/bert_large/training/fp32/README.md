@@ -149,7 +149,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-training \
+  intel/language-modeling:tf-2.3.0-imz-2.0.0-bert-large-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 
@@ -185,7 +185,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-language-modeling-bert-large-fp32-training \
+  intel/language-modeling:tf-2.3.0-imz-2.0.0-bert-large-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 
