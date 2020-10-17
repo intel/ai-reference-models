@@ -57,7 +57,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/wide-deep-fp32-inference.tar.gz
         <package name>: wide-deep-fp32-inference.tar.gz
         <package dir>: wide-deep-fp32-inference
-        <docker image>: amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-fp32-inference
+        <docker image>: intel/recommendation:tf-2.3.0-imz-2.0.0-wide-deep-fp32-inference
       docs:
       - name: Title
         uri: models/quickstart/recommendation/tensorflow/wide_deep/inference/fp32/.docs/title.md

@@ -95,7 +95,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-recommendation-ncf-fp32-inference \
+  intel/recommendation:tf-1.15.2-imz-2.0.0-ncf-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
