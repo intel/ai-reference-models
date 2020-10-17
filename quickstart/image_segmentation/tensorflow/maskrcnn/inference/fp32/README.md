@@ -104,7 +104,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${MODEL_SRC_DIR}:${MODEL_SRC_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-image-segmentation-maskrcnn-fp32-inference \
+  intel/image-segmentation:tf-1.15.2-imz-2.0.0-maskrcnn-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

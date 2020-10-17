@@ -93,7 +93,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo:2.1.0-recommendation-wide-deep-large-ds-fp32-training \
+  intel/recommendation:tf-2.3.0-imz-2.0.0-wide-deep-large-ds-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 
