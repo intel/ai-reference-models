@@ -20,7 +20,7 @@ As part of Jenkins CICD the following steps will be included for MRs and general
    used to generate a Dockerfile, build a container and package the model. The generator will enumerate over the set of models
    and generate a set of tests for each model. These tests validate model-builder subcommands and are appended to model-builder.bats.
    Currently, the automated tests cover model-builder subcommands: generate-dockerfile, generate-documentation, build, and package.
-   Additional tests related to model creation (model-builder init-spec) and model deployment (docker, k8s) will be added over time.
+   Additional tests related to model creation (model-builder init-spec) and model deployment (docker) will be added over time.
 
    These tests look like:
 
