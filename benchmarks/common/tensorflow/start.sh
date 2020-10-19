@@ -448,20 +448,6 @@ function add_calibration_arg() {
   echo "${calibration_arg}"
 }
 
-# 3D UNet model
-function 3d_unet() {
-  if [[ ${PRECISION} == "fp32" ]] && [[ ${MODE} == "inference" ]]; then
-    if [[ ${NOINSTALL} != "True" ]]; then
-      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
-    fi
-    export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "${PRECISION} ${MODE} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
 #BERT model
 function bert() {
    if [ ${PRECISION} == "fp32" ]; then
@@ -1308,9 +1294,7 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "3d_unet" ]; then
-  3d_unet
-elif [ ${MODEL_NAME} == "bert" ]; then
+if [ ${MODEL_NAME} == "bert" ]; then
   bert
 elif [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan
