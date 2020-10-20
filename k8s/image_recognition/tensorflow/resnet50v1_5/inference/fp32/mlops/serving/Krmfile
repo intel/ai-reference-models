@@ -39,7 +39,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: MODEL_SERVING_IMAGE_VERSION
-          value: 2.2.0
+          value: 2.3.0
           isSet: true
           setBy: model-builder
     io.k8s.cli.setters.REGISTRY:

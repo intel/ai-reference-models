@@ -9,7 +9,7 @@ spec:
     fsGroup: $(GROUP_ID)
   containers:
   - name: single-node
-    image: $(REGISTRY)/model-zoo:2.1.0-language-modeling-$(MODEL_NAME)
+    image: $(REGISTRY)/model-zoo:2.3.0-language-modeling-$(MODEL_NAME)
     envFrom:
     - configMapRef:
         name: mlops-env
