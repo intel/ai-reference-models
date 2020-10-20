@@ -11,7 +11,7 @@ spec:
           - name: mpi-launcher
             imagePullPolicy: Always
             workingDir: $(MODEL_DIR)
-            image: $(REGISTRY)/model-zoo:2.1.0-language-modeling-$(MODEL_NAME)
+            image: $(REGISTRY)/model-zoo:2.3.0-language-modeling-$(MODEL_NAME)
             securityContext:
               runAsUser: $(USER_ID)
               runAsGroup: $(GROUP_ID)
@@ -34,7 +34,7 @@ spec:
           - name: mpi-worker
             imagePullPolicy: Always
             workingDir: $(MODEL_DIR)
-            image: $(REGISTRY)/model-zoo:2.1.0-language-modeling-$(MODEL_NAME)
+            image: $(REGISTRY)/model-zoo:2.3.0-language-modeling-$(MODEL_NAME)
             securityContext:
               runAsUser: $(USER_ID)
               runAsGroup: $(GROUP_ID)

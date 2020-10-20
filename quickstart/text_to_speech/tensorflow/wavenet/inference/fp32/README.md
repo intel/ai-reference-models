@@ -63,8 +63,8 @@ quickstart/fp32_inference.sh
 <!--- 60. Docker -->
 ## Docker
 
-The model container intel/text-to-speech:tf-1.15.2-imz-2.0.0-wavenet-fp32-inference includes the scripts and libraries needed to run
-WaveNet FP32 inference. To run one of the quickstart scripts
+The model container intel/text-to-speech:tf-1.15.2-imz-2.0.0-wavenet-fp32-inference includes the scripts and libraries needed to run 
+WaveNet FP32 inference. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the output directory.
 
 ```

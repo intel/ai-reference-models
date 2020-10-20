@@ -65,7 +65,7 @@ spec:
       runAsGroup: 0 # {"$openapi":"GROUP_ID"}
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: docker.io/model-zoo:2.1.0-object-detection-rfcn-fp32-inference # {"$openapi":"IMAGE"}
+      image: docker.io/model-zoo:2.3.0-object-detection-rfcn-fp32-inference # {"$openapi":"IMAGE"}
       imagePullPolicy: Always
       command: # {"$openapi":"MODEL_COMMAND"}
       - /workspace/rfcn-fp32-inference/quickstart/fp32_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
