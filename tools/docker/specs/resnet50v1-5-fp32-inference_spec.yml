@@ -12,7 +12,6 @@ slice_sets:
         - PACKAGE_NAME=resnet50v1-5-fp32-inference
       dockerfile_subdirectory: "model_containers"
       downloads:
-        #TODO: Please remove this line if security review fails and rebuild the Dockerfile(s) and container(s).
         - source: https://zenodo.org/record/2535873/files/resnet50_v1.pb
           destination: resnet50_v1.pb
       files:
