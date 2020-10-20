@@ -63,7 +63,6 @@ RUN pip install \
         pycocotools \
         scikit-image \
         scipy==1.2.0 \
-        tensorflow>=1.3.0
 
 ENV USER_ID=0
 
