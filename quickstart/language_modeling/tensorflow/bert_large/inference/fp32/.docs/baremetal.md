@@ -3,7 +3,7 @@
 
 To run on bare metal, the following prerequisites must be installed in your enviornment:
 * Python 3
-* [intel-tensorflow==2.1.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * git
 
