@@ -37,7 +37,7 @@ fi
 
 # Check for MODEL_SRC_DIR 
 if [ -z ${MODEL_SRC_DIR} ]; then
-    echo "Please set MODEL_SRC_DIR." >&2
+    echo "Please set MODEL_SRC_DIR to the location where the MaskRCNN repository has been cloned." >&2
     exit 1
 fi
 
