@@ -439,92 +439,92 @@ last_modified()
 # *** tests for build ***
 #
 
-@test "validate build image for bert-large-fp32-inference creates model-zoo:2.1.0-language-modeling-bert-large-fp32-inference" {
+@test "validate build image for bert-large-fp32-inference creates model-zoo:2.3.0-language-modeling-bert-large-fp32-inference" {
       run model-builder -q --nocache build bert-large-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ bert-large-fp32-inference ]]
     }
-@test "validate build image for bert-large-fp32-training creates model-zoo:2.1.0-language-modeling-bert-large-fp32-training" {
+@test "validate build image for bert-large-fp32-training creates model-zoo:2.3.0-language-modeling-bert-large-fp32-training" {
       run model-builder -q --nocache build bert-large-fp32-training
       (( $status == 0 ))
       [[ "${lines[@]}" =~ bert-large-fp32-training ]]
     }
-@test "validate build image for image-recognition creates model-zoo:2.1.0-image-recognition" {
+@test "validate build image for image-recognition creates model-zoo:2.3.0-image-recognition" {
       run model-builder -q --nocache build image-recognition
       (( $status == 0 ))
       [[ "${lines[@]}" =~ image-recognition ]]
     }
-@test "validate build image for language-modeling creates model-zoo:2.1.0-language-modeling" {
+@test "validate build image for language-modeling creates model-zoo:2.3.0-language-modeling" {
       run model-builder -q --nocache build language-modeling
       (( $status == 0 ))
       [[ "${lines[@]}" =~ language-modeling ]]
     }
-@test "validate build image for language-translation creates model-zoo:2.1.0-language-translation" {
+@test "validate build image for language-translation creates model-zoo:2.3.0-language-translation" {
       run model-builder -q --nocache build language-translation
       (( $status == 0 ))
       [[ "${lines[@]}" =~ language-translation ]]
     }
-@test "validate build image for mobilenet-v1-fp32-inference creates model-zoo:2.1.0-image-recognition-mobilenet-v1-fp32-inference" {
+@test "validate build image for mobilenet-v1-fp32-inference creates model-zoo:2.3.0-image-recognition-mobilenet-v1-fp32-inference" {
       run model-builder -q --nocache build mobilenet-v1-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ mobilenet-v1-fp32-inference ]]
     }
-@test "validate build image for object-detection creates model-zoo:2.1.0-object-detection" {
+@test "validate build image for object-detection creates model-zoo:2.3.0-object-detection" {
       run model-builder -q --nocache build object-detection
       (( $status == 0 ))
       [[ "${lines[@]}" =~ object-detection ]]
     }
-@test "validate build image for resnet50-fp32-inference creates model-zoo:2.1.0-image-recognition-resnet50-fp32-inference" {
+@test "validate build image for resnet50-fp32-inference creates model-zoo:2.3.0-image-recognition-resnet50-fp32-inference" {
       run model-builder -q --nocache build resnet50-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ resnet50-fp32-inference ]]
     }
-@test "validate build image for resnet50v1-5-fp32-inference creates model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-inference" {
+@test "validate build image for resnet50v1-5-fp32-inference creates model-zoo:2.3.0-image-recognition-resnet50v1-5-fp32-inference" {
       run model-builder -q --nocache build resnet50v1-5-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ resnet50v1-5-fp32-inference ]]
     }
-@test "validate build image for resnet50v1-5-fp32-training creates model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training" {
+@test "validate build image for resnet50v1-5-fp32-training creates model-zoo:2.3.0-image-recognition-resnet50v1-5-fp32-training" {
       run model-builder -q --nocache build resnet50v1-5-fp32-training
       (( $status == 0 ))
       [[ "${lines[@]}" =~ resnet50v1-5-fp32-training ]]
     }
-@test "validate build image for resnet50v1-5-int8-inference creates model-zoo:2.1.0-image-recognition-resnet50v1-5-int8-inference" {
+@test "validate build image for resnet50v1-5-int8-inference creates model-zoo:2.3.0-image-recognition-resnet50v1-5-int8-inference" {
       run model-builder -q --nocache build resnet50v1-5-int8-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ resnet50v1-5-int8-inference ]]
     }
-@test "validate build image for rfcn-fp32-inference creates model-zoo:2.1.0-object-detection-rfcn-fp32-inference" {
+@test "validate build image for rfcn-fp32-inference creates model-zoo:2.3.0-object-detection-rfcn-fp32-inference" {
       run model-builder -q --nocache build rfcn-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ rfcn-fp32-inference ]]
     }
-@test "validate build image for ssd-mobilenet-fp32-inference creates model-zoo:2.1.0-object-detection-ssd-mobilenet-fp32-inference" {
+@test "validate build image for ssd-mobilenet-fp32-inference creates model-zoo:2.3.0-object-detection-ssd-mobilenet-fp32-inference" {
       run model-builder -q --nocache build ssd-mobilenet-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ ssd-mobilenet-fp32-inference ]]
     }
-@test "validate build image for ssd-resnet34-fp32-inference creates model-zoo:2.1.0-object-detection-ssd-resnet34-fp32-inference" {
+@test "validate build image for ssd-resnet34-fp32-inference creates model-zoo:2.3.0-object-detection-ssd-resnet34-fp32-inference" {
       run model-builder -q --nocache build ssd-resnet34-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ ssd-resnet34-fp32-inference ]]
     }
-@test "validate build image for ssd-resnet34-int8-inference creates model-zoo:2.1.0-object-detection-ssd-resnet34-int8-inference" {
+@test "validate build image for ssd-resnet34-int8-inference creates model-zoo:2.3.0-object-detection-ssd-resnet34-int8-inference" {
       run model-builder -q --nocache build ssd-resnet34-int8-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ ssd-resnet34-int8-inference ]]
     }
-@test "validate build image for transformer-lt-official-fp32-inference creates model-zoo:2.1.0-language-translation-transformer-lt-official-fp32-inference" {
+@test "validate build image for transformer-lt-official-fp32-inference creates model-zoo:2.3.0-language-translation-transformer-lt-official-fp32-inference" {
       run model-builder -q --nocache build transformer-lt-official-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ transformer-lt-official-fp32-inference ]]
     }
-@test "validate build image for wide-deep-fp32-inference creates model-zoo:2.1.0-recommendation-wide-deep-fp32-inference" {
+@test "validate build image for wide-deep-fp32-inference creates model-zoo:2.3.0-recommendation-wide-deep-fp32-inference" {
       run model-builder -q --nocache build wide-deep-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ wide-deep-fp32-inference ]]
     }
-@test "validate build image for wide-deep-large-ds-fp32-training creates model-zoo:2.1.0-recommendation-wide-deep-large-ds-fp32-training" {
+@test "validate build image for wide-deep-large-ds-fp32-training creates model-zoo:2.3.0-recommendation-wide-deep-large-ds-fp32-training" {
       run model-builder -q --nocache build wide-deep-large-ds-fp32-training
       (( $status == 0 ))
       [[ "${lines[@]}" =~ wide-deep-large-ds-fp32-training ]]

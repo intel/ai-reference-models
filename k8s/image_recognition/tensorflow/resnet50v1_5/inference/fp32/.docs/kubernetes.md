@@ -70,7 +70,7 @@ The parameters that can be changed within the serving resources are shown in the
 | MODEL_PORT                  | 8500                                     | model-builder | model container port        | 2     | Yes      |
 | MODEL_SERVICE_PORT          | 8501                                     | model-builder | model service port          | 1     | Yes      |
 | MODEL_SERVING_IMAGE_NAME    | intel/intel-optimized-tensorflow-serving | model-builder | image name                  | 1     | No       |
-| MODEL_SERVING_IMAGE_VERSION | 2.2.0                                    | model-builder | image tag                   | 1     | No       |
+| MODEL_SERVING_IMAGE_VERSION | 2.3.0                                    | model-builder | image tag                   | 1     | No       |
 | MODEL_SERVING_LABEL         | resnet50v1-5-fp32-server                 | model-builder | selector label              | 4     | No       |
 | MODEL_SERVING_NAME          | resnet50v1-5-fp32-inference              | model-builder | model serving name          | 2     | No       |
 | REGISTRY                    | docker.io                                | model-builder | image location              | 1     | No       |

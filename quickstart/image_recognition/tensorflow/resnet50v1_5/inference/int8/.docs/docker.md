@@ -1,7 +1,7 @@
 <!--- 60. Docker -->
 ## Docker
 
-The model container includes the scripts and libraries needed to run 
+The model container `<docker image>` includes the scripts and libraries needed to run
 <model name> <precision> <mode>. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
 and an output directory.
@@ -24,6 +24,6 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/<use case>:tf-<tf_version>-imz-<imz_version>-<model-precision-mode> \
+  <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
