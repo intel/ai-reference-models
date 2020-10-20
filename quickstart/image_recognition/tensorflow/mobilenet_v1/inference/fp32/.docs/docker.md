@@ -1,7 +1,7 @@
 <!-- 60. Docker -->
 ## Docker
 
-The model container `model-zoo:2.1.0-mobilenet-v1-fp32-inference` includes the scripts 
+The model container `<docker image>` includes the scripts
 and libraries needed to run MobileNet V1 FP32 inference. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.

@@ -15,7 +15,7 @@ spec:
           - name: mpi-launcher
             imagePullPolicy: Always
             workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
-            image: docker.io/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+            image: docker.io/model-zoo:2.3.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
               runAsUser: 0 # {"$openapi":"USER_ID"}
               runAsGroup: 0 # {"$openapi":"GROUP_ID"}
@@ -105,7 +105,7 @@ spec:
           - name: mpi-worker
             imagePullPolicy: Always
             workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
-            image: docker.io/model-zoo:2.1.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+            image: docker.io/model-zoo:2.3.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
               runAsUser: 0 # {"$openapi":"USER_ID"}
               runAsGroup: 0 # {"$openapi":"GROUP_ID"}
