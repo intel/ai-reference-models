@@ -13,16 +13,11 @@ If you want to disable the use of TCMalloc, set `--disable-tcmalloc=True`
 when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 1. Download the full ImageNet dataset and convert to the TF records format.
+The ImageNet dataset directory location is only required to calculate the model accuracy.
 
-* Clone the tensorflow/models repository as tensorflow-models. This is to avoid conflict with Intel's `models` repo:
-```
-$ git clone https://github.com/tensorflow/models.git tensorflow-models
-``` 
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process and convert the ImageNet dataset to the TF records format.
-
-* The ImageNet dataset directory location is only required to calculate the model accuracy.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 2. Download the pre-trained model.
 ```
@@ -135,9 +130,9 @@ $ git clone https://github.com/IntelAI/models.git
 required (if running for batch or online inference performance, then dummy
 data will be used).
 
-The TensorFlow models repo provides
-[scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-to download, process, and convert the ImageNet dataset to the TF records format.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance.
 The optimized ResNet50 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and

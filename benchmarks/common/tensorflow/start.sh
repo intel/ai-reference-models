@@ -90,8 +90,8 @@ if [[ ${NOINSTALL} != "True" ]]; then
     export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITHOUT_MXNET=1
     export HOROVOD_WITH_TENSORFLOW=1
-    # lock horovod==0.19.1 release commit/version
-    pip install --no-cache-dir horovod==0.19.1
+    # lock horovod==0.20.0 release commit/version
+    pip install --no-cache-dir horovod==0.20.0
   fi 
 fi
 
@@ -500,6 +500,51 @@ function densenet169() {
   fi
 }
 
+# Faster R-CNN (ResNet50) model
+function faster_rcnn() {
+    export PYTHONPATH=$PYTHONPATH:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:${MOUNT_EXTERNAL_MODELS_SOURCE}/research/slim
+    original_dir=$(pwd)
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
+      cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
+      # install protoc v3.3.0, if necessary, then compile protoc files
+      install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
+
+      # Install git so that we can apply the patch
+      apt-get update && apt-get install -y git
+    fi
+
+    # Apply the patch to the tensorflow/models repo with fixes for the accuracy
+    # script and for running with python 3
+    cd ${MOUNT_EXTERNAL_MODELS_SOURCE}
+    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/faster_rcnn.patch
+
+    if [ ${PRECISION} == "fp32" ]; then
+      if [ -n "${config_file}" ]; then
+        CMD="${CMD} --config_file=${config_file}"
+      fi
+
+      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        echo "Fast R-CNN requires -- config_file arg to be defined"
+        exit 1
+      fi
+
+    elif [ ${PRECISION} == "int8" ]; then
+      number_of_steps_arg=""
+      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --number-of-steps=${number_of_steps}"
+      fi
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+    cd $original_dir
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+}
+
+
 # inceptionv4 model
 function inceptionv4() {
   # For accuracy, dataset location is required
@@ -644,6 +689,23 @@ function minigo() {
     fi
   else
     echo "MODE=${MODE} PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+        exit 1
+  fi
+}
+# Mask R-CNN model
+function maskrcnn() {
+  if [ ${PRECISION} == "fp32" ]; then
+    original_dir=$(pwd)
+
+    if [ ${NOINSTALL} != "True" ]; then
+      # install dependencies
+      pip3 install -r ${MOUNT_BENCHMARK}/image_segmentation/tensorflow/maskrcnn/inference/fp32/requirements.txt 
+    fi
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
+    CMD="${CMD} --data-location=${DATASET_LOCATION}"
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
   fi
 }
@@ -692,30 +754,16 @@ function mtcc() {
 
 # NCF model
 function ncf() {
-  if [[ -n "${clean}" ]]; then
-    CMD="${CMD} --clean"
-  fi
-
-  # NCF supports different datasets including ml-1m and ml-20m.
-  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
-    CMD="${CMD} --dataset=${dataset}"
-  fi
-
-  if [[ -n "${te}" && ${te} != "" ]]; then
-    CMD="${CMD} -te=${te}"
-  fi
-
-  if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
-    # For ncf, if dataset location is empty, script downloads dataset at given location.
+  if [ ${PRECISION} == "fp32" ]; then
+    # For nfc, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
-      mkdir -p ./dataset
-      CMD="${CMD} --data-location=./dataset"
+      mkdir -p /dataset
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/official/requirements.txt
+      pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/ncf/inference/requirements.txt
     fi
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -999,8 +1047,12 @@ function ssd_vgg16() {
 # UNet model
 function unet() {
   if [ ${PRECISION} == "fp32" ]; then
+    if [[ ${NOINSTALL} != "True" ]]; then
+      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+    fi
+
     if [[ -z "${checkpoint_name}" ]]; then
-      echo "wavenet requires -- checkpoint_name arg to be defined"
+      echo "UNet requires -- checkpoint_name arg to be defined"
       exit 1
     fi
     if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -1116,7 +1168,7 @@ function wavenet() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      pip install librosa==0.5
     fi
 
     CMD="${CMD} --checkpoint_name=${checkpoint_name} \
@@ -1177,7 +1229,7 @@ function wide_deep_large_ds() {
     TCMALLOC_LIB="libtcmalloc.so.4"
     LIBTCMALLOC="$(ldconfig -p | grep $TCMALLOC_LIB | tr ' ' '\n' | grep /)"
 
-    if [[ -z "${LIBTCMALLOC}" ]]; then
+    if [[ -z $LIBTCMALLOC ]] && [[ $NOINSTALL != True ]]; then
       echo "libtcmalloc.so.4 not found, trying to install"
       apt-get update
       apt-get install google-perftools --fix-missing -y
@@ -1196,7 +1248,7 @@ function wide_deep_large_ds() {
       exit 1
     fi
     if [ ${MODE} == "training" ]; then
-      if [ ${steps} != None ]; then
+      if [[ ! -z $steps ]]; then
         CMD="${CMD} --steps=${steps}"
       fi
       if [ ${PRECISION} == "fp32" ]; then
@@ -1256,12 +1308,16 @@ elif [ ${MODEL_NAME} == "faster_rcnn" ]; then
   faster_rcnn
 elif [ ${MODEL_NAME} == "mlperf_gnmt" ]; then
   mlperf_gnmt
+elif [ ${MODEL_NAME} == "ncf" ]; then
+  ncf
 elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
 elif [ ${MODEL_NAME} == "minigo" ]; then
   minigo
+elif [ ${MODEL_NAME} == "maskrcnn" ]; then
+  maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
 elif [ ${MODEL_NAME} == "resnet101" ]; then
@@ -1280,6 +1336,8 @@ elif [ ${MODEL_NAME} == "transformer_lt_official" ]; then
   transformer_lt_official
 elif [ ${MODEL_NAME} == "transformer_mlperf" ]; then
   transformer_mlperf
+elif [ ${MODEL_NAME} == "unet" ]; then
+  unet
 elif [ ${MODEL_NAME} == "wavenet" ]; then
   wavenet
 elif [ ${MODEL_NAME} == "wide_deep" ]; then
