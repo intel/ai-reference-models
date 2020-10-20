@@ -29,14 +29,28 @@
 #
 # NOTE: This pre-processes the validation images only
 
+# If the DATASET_DIR is set, then ensure it exists and set paths for the images and annotations
+if [[ ! -z "${DATASET_DIR}" ]]; then
+  if [[ ! -d "${DATASET_DIR}" ]]; then
+    echo "ERROR: The specified DATASET_DIR ($DATASET_DIR) does not exist."
+    exit 1
+  fi
 
-# Verify that the dataset directory exists
-if [[ ! -d "${DATASET_DIR}" ]]; then
-  echo "ERROR: The DATASET_DIR (${DATASET_DIR}) does not exist. This var needs to point to the directory of raw images and annotations. "
+  VAL_IMAGE_DIR=${DATASET_DIR}/val2017
+  ANNOTATIONS_DIR=${DATASET_DIR}/annotations
 fi
 
-VAL_IMAGE_DIR=${DATASET_DIR}/val2017
-ANNOTATIONS_DIR=${DATASET_DIR}/annotations
+# Verify that the a directory exists for the raw validation images
+if [[ ! -d "${VAL_IMAGE_DIR}" ]]; then
+  echo "ERROR: The VAL_IMAGE_DIR (${VAL_IMAGE_DIR}) does not exist. This var needs to point to the raw coco validation images."
+  exit 1
+fi
+
+# Verify that the a directory exists for the annotations
+if [[ ! -d "${ANNOTATIONS_DIR}" ]]; then
+  echo "ERROR: The ANNOTATIONS_DIR (${ANNOTATIONS_DIR}) does not exist. This var needs to point to the coco annotations directory."
+  exit 1
+fi
 
 # Verify that we have the path to the tensorflow/models code
 if [[ ! -d "${TF_MODELS_DIR}" ]]; then
@@ -44,15 +58,16 @@ if [[ ! -d "${TF_MODELS_DIR}" ]]; then
   exit 1
 fi
 
-# Verify that the output dir is set
-if [ -z "${OUTPUT_DIR}" ]; then
-  echo "The required environment variable OUTPUT_DIR has not been set"
-  exit 1
-fi
-
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
+# Checkout the specified branch for the tensorflow/models code
+if [[ ! -z "${TF_MODELS_BRANCH}" ]]; then
+  cd ${TF_MODELS_DIR}
+  git checkout ${TF_MODELS_BRANCH}
+fi
+
+# Set the PYTHONPATH
 cd ${TF_MODELS_DIR}/research
 export PYTHONPATH=$PYTHONPATH:`pwd`:`pwd`/slim
 

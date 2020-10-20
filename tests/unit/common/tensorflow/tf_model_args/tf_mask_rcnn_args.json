@@ -1,0 +1,9 @@
+[
+  { "_comment": "FP32 benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=maskrcnn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0  --benchmark-only --verbose --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/coco.py evaluate  --dataset=/dataset --num_inter_threads 1 --num_intra_threads 28 --nw 5 --nb 50 --model=coco --infbs 1"},
+
+  { "_comment": "FP32 benchmark with --num-inter-threads 4 --num-intra-threads 16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=maskrcnn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0  --benchmark-only --verbose --data-location=/dataset --num-inter-threads 4 --num-intra-threads 16",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/coco.py evaluate  --dataset=/dataset --num_inter_threads 4 --num_intra_threads 16 --nw 5 --nb 50 --model=coco --infbs 1"}
+]

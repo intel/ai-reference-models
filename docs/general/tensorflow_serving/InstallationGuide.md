@@ -39,7 +39,7 @@ We will break down the installation into 2 steps:
 ### Step 1: Pull or build TensorFlow Serving Docker image.
 The recommended way to use TensorFlow Serving is with Docker images. The easiest way to get an image is to pull the latest version from Docker Hub.
 ```
-$ docker pull intel/intel-optimized-tensorflow-serving:2.2.0
+$ docker pull intel/intel-optimized-tensorflow-serving:2.3.0
 ```
 
 * Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 
@@ -61,8 +61,8 @@ You can build the docker images using [this script](/benchmarks/common/tensorflo
 	docker build \
 	    -f Dockerfile.devel-mkl \
 	    --build-arg TF_SERVING_BUILD_OPTIONS="--config=mkl" \
-	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="2.2.0" \
-	    -t intel/intel-optimized-tensorflow-serving:2.2.0-devel .
+	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="2.3.0" \
+	    -t intel/intel-optimized-tensorflow-serving:2.3.0-devel .
 	```
 * Next, using `Dockerfile.mkl`, build a serving image which is a light-weight image without any development tools in it. `Dockerfile.mkl` will build a serving image by copying Intel optimized libraries and ModelServer from the development image built in the previous step - `tensorflow/serving:latest-devel-mkl `
 	```
@@ -70,8 +70,8 @@ You can build the docker images using [this script](/benchmarks/common/tensorflo
 	docker build \
 	    -f Dockerfile.mkl \
 	    --build-arg TF_SERVING_BUILD_OPTIONS="--config=mkl" \
-	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="2.2.0" \
-	    -t intel/intel-optimized-tensorflow-serving:2.2.0 .
+	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="2.3.0" \
+	    -t intel/intel-optimized-tensorflow-serving:2.3.0 .
 	```
 
 	**NOTE 1**: Docker build commands require a `.` path argument at the end; see [docker examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
@@ -84,8 +84,8 @@ You can build the docker images using [this script](/benchmarks/common/tensorflo
 	```
 	docker images
 	REPOSITORY                                 TAG                 IMAGE ID            CREATED             SIZE
-	intel/intel-optimized-tensorflow-serving   2.2.0               d33c8d849aa3        7 minutes ago       520MB
-	intel/intel-optimized-tensorflow-serving   2.2.0-devel         a2e69840d5cc        8 minutes ago       5.21GB
+	intel/intel-optimized-tensorflow-serving   2.3.0               d33c8d849aa3        7 minutes ago       520MB
+	intel/intel-optimized-tensorflow-serving   2.3.0-devel         a2e69840d5cc        8 minutes ago       5.21GB
 	ubuntu                                     18.04               20bb25d32758        13 days ago         87.5MB
 	hello-world                                latest              fce289e99eb9        5 weeks ago         1.84kB
 	```
@@ -104,7 +104,7 @@ Let us test the server by serving a simple oneDNN version of half_plus_two model
 	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `$TEST_DATA/saved_model_half_plus_two_mkl` on the container `/models/half_plus_two`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
-	* with `intel/intel-optimized-tensorflow-serving:2.2.0` docker image
+	* with `intel/intel-optimized-tensorflow-serving:2.3.0` docker image
 	```
 	docker run \
 	  -d \
@@ -112,7 +112,7 @@ Let us test the server by serving a simple oneDNN version of half_plus_two model
 	  --name tfserving_half_plus_two \
 	  -v $TEST_DATA/saved_model_half_plus_two_mkl:/models/half_plus_two \
 	  -e MODEL_NAME=half_plus_two \
-	  intel/intel-optimized-tensorflow-serving:2.2.0
+	  intel/intel-optimized-tensorflow-serving:2.3.0
 	```
 
 * Query the model using the predict API:
@@ -163,7 +163,7 @@ Let us test the server by serving a simple oneDNN version of half_plus_two model
 	  -v $TEST_DATA/saved_model_half_plus_two_mkl:/models/half_plus_two \
 	  -e MODEL_NAME=half_plus_two \
 	  -e MKLDNN_VERBOSE=1 \
-	  intel/intel-optimized-tensorflow-serving:2.2.0
+	  intel/intel-optimized-tensorflow-serving:2.3.0
 	```  
 	 Query the model using the predict API as before:
     ```
@@ -220,7 +220,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
-	* with `intel/intel-optimized-tensorflow-serving:2.2.0` docker image
+	* with `intel/intel-optimized-tensorflow-serving:2.3.0` docker image
 	```
 	docker run \
 	  -d \
@@ -228,7 +228,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	  --name=tfserving_resnet_restapi \
 	  -v "/tmp/resnet:/models/resnet" \
 	  -e MODEL_NAME=resnet \
-	  intel/intel-optimized-tensorflow-serving:2.2.0
+	  intel/intel-optimized-tensorflow-serving:2.3.0
 	```
 * If you don't already have them, install the prerequisites for running the python client code
 	```
@@ -260,7 +260,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
-	* with `intel/intel-optimized-tensorflow-serving:2.2.0` docker image
+	* with `intel/intel-optimized-tensorflow-serving:2.3.0` docker image
  	```
     docker run \
 	  -d \
@@ -268,7 +268,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	  --name=tfserving_resnet_grpc \
 	  -v "/tmp/resnet:/models/resnet" \
 	  -e MODEL_NAME=resnet \
-	  intel/intel-optimized-tensorflow-serving:2.2.0
+	  intel/intel-optimized-tensorflow-serving:2.3.0
 	```
 * You will need a few python packages in order to run the client, we recommend installing them in a virtual environment. 
 	```

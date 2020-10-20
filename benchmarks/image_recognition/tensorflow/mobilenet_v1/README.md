@@ -20,26 +20,10 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
     This step is required only for running accuracy, for running benchmark we do not need to provide dataset.
 
-    Register and download the ImageNet dataset. Once you have the raw ImageNet dataset downloaded, we need to convert
-    it to the TFRecord format. The TensorFlow models repo provides
-    [scripts and instructions](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data)
-    to download, process and convert the ImageNet dataset to the TF records format. After converting data, you should have a directory
-    with the sharded dataset something like below, we only need `validation-*` files, discard `train-*` files:
-    ```
-    $ ll /home/myuser/datasets/ImageNet_TFRecords
-    -rw-r--r--. 1 user 143009929 Jun 20 14:53 train-00000-of-01024
-    -rw-r--r--. 1 user 144699468 Jun 20 14:53 train-00001-of-01024
-    -rw-r--r--. 1 user 138428833 Jun 20 14:53 train-00002-of-01024
-    ...
-    -rw-r--r--. 1 user 143137777 Jun 20 15:08 train-01022-of-01024
-    -rw-r--r--. 1 user 143315487 Jun 20 15:08 train-01023-of-01024
-    -rw-r--r--. 1 user  52223858 Jun 20 15:08 validation-00000-of-00128
-    -rw-r--r--. 1 user  51019711 Jun 20 15:08 validation-00001-of-00128
-    -rw-r--r--. 1 user  51520046 Jun 20 15:08 validation-00002-of-00128
-    ...
-    -rw-r--r--. 1 user  52508270 Jun 20 15:09 validation-00126-of-00128
-    -rw-r--r--. 1 user  55292089 Jun 20 15:09 validation-00127-of-00128
-    ```
+    Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+    After running the conversion script you should have a directory with the
+    ImageNet dataset in the TF records format.
+
 2. Download the pre-trained model.
 ```
 $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
@@ -161,9 +145,9 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
    used when running online or batch inference. If no dataset is provided when running
    online or batch inference, synthetic data will be used.
 
-   Download the ImageNet dataset and convert it to the TF records format
-   using the instructions
-   [here](https://github.com/tensorflow/models/tree/master/research/slim#an-automated-script-for-processing-imagenet-data).
+   Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+   After running the conversion script you should have a directory with the
+   ImageNet dataset in the TF records format.
 
 2. Download the pre-trained model.
 ```

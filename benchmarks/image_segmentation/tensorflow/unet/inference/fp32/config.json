@@ -1,0 +1,7 @@
+{
+    "optimization_parameters": {
+        "KMP_AFFINITY": "granularity=fine, compact",
+        "KMP_BLOCKTIME": 1,
+        "KMP_SETTINGS": 1
+    }
+}
