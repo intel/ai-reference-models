@@ -84,6 +84,7 @@ slice_sets:
                 k8s_source: k8s/object_detection/tensorflow/rfcn/inference/fp32
                 destination: quickstart
               - source: quickstart/common
+                k8s_source: k8s/common
                 destination: quickstart/common
           downloads:
               - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
