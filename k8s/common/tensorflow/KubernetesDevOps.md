@@ -8,10 +8,10 @@ The steps below explain how to deploy the mpi-operator on your cluster using ver
 
 1. Download the `mpi-operator.yaml` file
    ```
-   curl -o mpi-operator.yaml https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.2.3/deploy/v1alpha2/mpi-operator.yaml
+   curl -o mpi-operator.yaml https://github.com/kubeflow/mpi-operator/blob/v0.2.3/deploy/v1/mpi-operator.yaml
    ```
 
-2. Change line #199 from `image: mpioperator/mpi-operator:latest` to `image: mpioperator/mpi-operator:v0.2.3`
+2. Change line #189 from `image: mpioperator/mpi-operator:latest` to `image: mpioperator/mpi-operator:v0.2.3`
 
 3. Deploy the operator
    ```
