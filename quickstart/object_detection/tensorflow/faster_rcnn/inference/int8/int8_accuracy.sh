@@ -56,7 +56,8 @@ if [[ ! -f ${PRETRAINED_MODEL} ]]; then
   exit 1
 fi
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name faster_rcnn \
   --mode inference \
   --precision int8 \
@@ -66,4 +67,5 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --in-graph ${PRETRAINED_MODEL} \
   --socket-id 0 \
-  --accuracy-only
+  --accuracy-only \
+  $@

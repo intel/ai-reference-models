@@ -45,7 +45,8 @@ if [ ! -f "${PRETRAINED_MODEL}" ]; then
   exit 1
 fi
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --precision fp32 \
   --model-name 3d_unet \
   --mode inference \
@@ -53,4 +54,5 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --in-graph ${PRETRAINED_MODEL} \
   --data-location ${DATASET_DIR} \
   --batch-size 1 \
-  --socket-id 0
+  --socket-id 0 \
+  $@

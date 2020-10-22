@@ -35,7 +35,8 @@ fi
 
 MODEL_FILE="$(pwd)/mobilenet_v1_1.0_224_frozen.pb"
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
          --model-name=mobilenet_v1 \
          --precision=fp32 \
          --mode=inference \
@@ -44,4 +45,5 @@ python benchmarks/launch_benchmark.py \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
          --accuracy-only \
-         --batch-size=100
+         --batch-size=100 \
+         $@
