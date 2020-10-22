@@ -63,7 +63,8 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --checkpoint ${CHECKPOINT_DIR} \
       --model-source-dir ${TF_WAVENET_DIR} \
       --model-name wavenet \
@@ -73,5 +74,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --precision fp32 \
       --mode inference \
       --output-dir ${OUTPUT_DIR} \
+      $@ \
       -- checkpoint_name=model.ckpt-99 sample=8510
 

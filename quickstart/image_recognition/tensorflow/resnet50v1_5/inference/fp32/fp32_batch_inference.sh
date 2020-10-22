@@ -35,7 +35,8 @@ fi
 
 MODEL_FILE="$(pwd)/resnet50_v1.pb"
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=fp32 \
          --mode=inference \
@@ -44,4 +45,5 @@ python benchmarks/launch_benchmark.py \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=128 \
-         --socket-id 0
+         --socket-id 0 \
+         $@

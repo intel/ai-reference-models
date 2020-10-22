@@ -68,7 +68,8 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --checkpoint ${CHECKPOINT_DIR} \
       --data-location ${DATASET_DIR} \
       --model-source-dir ${TF_MODELS_DIR} \
@@ -78,4 +79,5 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --framework tensorflow \
       --precision fp32 \
       --mode inference \
-      --output-dir ${OUTPUT_DIR}
+      --output-dir ${OUTPUT_DIR} \
+      $@

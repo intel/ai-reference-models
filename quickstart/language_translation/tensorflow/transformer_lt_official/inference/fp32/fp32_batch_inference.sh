@@ -51,7 +51,8 @@ EN_DATA_FILE=${EN_DATA_FILE-newstest2014.en}
 DE_DATA_FILE=${DE_DATA_FILE-newstest2014.de}
 VOCAB_FILE=${VOCAB_FILE-vocab.txt}
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name transformer_lt_official \
   --precision fp32 \
   --mode inference \
@@ -61,6 +62,7 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --in-graph ${FROZEN_GRAPH} \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
+  $@ \
   -- file=${EN_DATA_FILE} \
   file_out=translate.txt \
   reference=${DE_DATA_FILE} \
