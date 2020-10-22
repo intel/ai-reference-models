@@ -59,8 +59,10 @@ fi
 # Set default number of steps
 STEPS=${STEPS:-500}
 
+
 # Run wide and deep large ds training while saving output to a temp file
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
  --model-name wide_deep_large_ds \
  --precision fp32 \
  --mode training  \
@@ -69,6 +71,7 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
  --data-location $DATASET_DIR \
  $CHECKPOINT_ARG \
  --output-dir $OUTPUT_DIR \
+ $@ \
  -- steps=$STEPS
 
 # If a target accuracy has been specified, find the accuracy from the log file

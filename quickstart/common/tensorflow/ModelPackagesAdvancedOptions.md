@@ -5,11 +5,19 @@
 Model packages include example scripts that provide an easy way to get started
 with various use cases such as running batch inference, getting accuracy metrics,
 or training a model. These script typically have options to configure a path for
-the dataset and an output directory. More advance control to change parameters
-like the model's batch size or the number of steps will require calling the
-`launch_benchmark.py` script directly. See the
-[launch benchmarks documentation](LaunchBenchmark.md) for information on
-the available arguments.
+the dataset and an output directory. All quickstart scripts include 
+a --dry-run option which will just echo to the terminal the call to launch_benchmark.py 
+including its arguments. The --dry-run argument will be passed down to launch_benchmark.py
+which will also echo the call to the model including its arguments. In general, quickstart scripts 
+allow additional arguments to be passed to launch_benchmark.py and/or the underlying model script.
+For example, quickstart scripts can be called with '--verbose' which will be passed to 
+launch_benchmark.py or '--verbose -- steps=10' which will pass the verbose option to 
+launch_benchmark.py and steps=10 to the underlying model script. Calling a 
+quickstart script with '--help' will return all launch_benchmark.py options. 
+Note: __replacing__ existing arguments or __deleting__ arguments within the quickstart script
+isn't possible by calling the quickstart quick with additional arguments. For these types of cases
+the user can add --dry-run and copy the echo'd result, making the needed edits. See the 
+[launch benchmarks documentation](LaunchBenchmark.md) for information on the available arguments. 
 
 Below are instructions for calling the `launch_benchmark.py` script with
 bare metal and docker.

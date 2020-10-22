@@ -35,7 +35,8 @@ fi
 
 MODEL_FILE="$(pwd)/mobilenet_v1_1.0_224_frozen.pb"
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
          --model-name=mobilenet_v1 \
          --precision=fp32 \
          --mode=inference \
@@ -45,5 +46,6 @@ python benchmarks/launch_benchmark.py \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=100 \
          --socket-id 0 \
+         $@ \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"

@@ -63,7 +63,8 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --model-name unet \
       --precision fp32 \
       --mode inference \
@@ -73,5 +74,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --socket-id 0 \
       --checkpoint ${CHECKPOINT_DIR} \
       --model-source-dir ${TF_UNET_DIR} \
+      $@ \
       -- checkpoint_name=model.ckpt
 

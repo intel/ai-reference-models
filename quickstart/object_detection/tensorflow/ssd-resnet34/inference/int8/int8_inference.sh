@@ -42,7 +42,8 @@ fi
 export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}/research
 export PYTHONPATH=${PYTHONPATH}:${TF_BENCHMARKS_DIR}/scripts/tf_cnn_benchmarks
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --in-graph ${MODEL_DIR}/pretrained_models/ssd_resnet34_int8_bs1_pretrained_model.pb \
     --model-source-dir ${TF_MODELS_DIR} \
     --model-name ssd-resnet34 \
@@ -51,4 +52,5 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --batch-size 1 \
-    --benchmark-only
+    --benchmark-only \
+    $@

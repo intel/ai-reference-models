@@ -43,7 +43,8 @@ if [ ! -f "${pretrained_model}" ]; then
 fi
 FROZEN_GRAPH="$(pwd)/${pretrained_model}"
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
     --in-graph ${FROZEN_GRAPH} \
     --output-dir ${OUTPUT_DIR} \
@@ -52,5 +53,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --accuracy-only
+    --accuracy-only \
+    $@
 

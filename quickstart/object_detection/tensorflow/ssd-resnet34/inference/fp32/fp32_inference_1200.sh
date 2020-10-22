@@ -27,14 +27,16 @@ mkdir -p ${OUTPUT_DIR}
 
 FROZEN_GRAPH=${FROZEN_GRAPH-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb"}
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
---in-graph $FROZEN_GRAPH \
---model-source-dir $TF_MODELS_DIR \
---model-name ssd-resnet34 \
---framework tensorflow \
---precision fp32 \
---mode inference \
---socket-id 0 \
---batch-size 1 \
---benchmark-only \
--- input-size=1200
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+    --in-graph $FROZEN_GRAPH \
+    --model-source-dir $TF_MODELS_DIR \
+    --model-name ssd-resnet34 \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --socket-id 0 \
+    --batch-size 1 \
+    --benchmark-only \
+    $@ \
+    -- input-size=1200
