@@ -35,7 +35,8 @@ fi
 
 MODEL_FILE="$(pwd)/resnet50_int8_pretrained_model.pb"
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
          --model-name=resnet50 \
          --precision=int8 \
          --mode=inference \
@@ -46,5 +47,6 @@ python benchmarks/launch_benchmark.py \
          --batch-size=128 \
 	 --benchmark-only \
          --socket-id 0 \
+         $@ \
 	 -- warmup_steps=50 steps=500
 
