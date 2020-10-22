@@ -53,7 +53,8 @@ fi
 export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}/research
 export PYTHONPATH=${PYTHONPATH}:${TF_BENCHMARKS_DIR}/scripts/tf_cnn_benchmarks
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
     --in-graph ${MODEL_DIR}/pretrained_models/ssd_resnet34_int8_1200x1200_pretrained_model.pb \
     --model-source-dir ${TF_MODELS_DIR} \
@@ -64,4 +65,5 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --socket-id 0 \
     --batch-size 1 \
     --accuracy-only \
+    $@ \
     -- input-size=1200

@@ -50,13 +50,15 @@ if [[ ! -d $DATASET_DIR ]]; then
   exit 1
 fi
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
     --model-name=bert_large \
     --precision=fp32 \
     --mode=training \
     --framework=tensorflow \
     --batch-size=32 \
     --output-dir=$OUTPUT_DIR \
+    $@ \
     -- train-option=Classifier \
        task-name=MRPC \
        do-train=true \

@@ -41,7 +41,8 @@ if [ ! -d "${pretrained_model_dir}" ]; then
 fi
 FROZEN_GRAPH="${pretrained_model_dir}/frozen_inference_graph.pb"
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision fp32 \
@@ -52,5 +53,6 @@ python benchmarks/launch_benchmark.py \
     --output-dir ${OUTPUT_DIR} \
     --batch-size 1 \
     --benchmark-only \
+    $@ \
     -- number_of_steps=500
 

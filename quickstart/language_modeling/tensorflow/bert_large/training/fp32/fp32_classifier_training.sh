@@ -56,26 +56,28 @@ if [[ -n $MPI_NUM_PROCESSES ]]; then
   mpi_num_proc_arg="--mpi_num_processes=${MPI_NUM_PROCESSES}"
 fi
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
---model-name=bert_large \
---precision=fp32 \
---mode=training \
---framework=tensorflow \
---batch-size=32 \
-${mpi_num_proc_arg} \
---output-dir=$OUTPUT_DIR \
--- train-option=Classifier \
-task-name=MRPC \
-do-train=true \
-do-eval=true \
-data-dir=$DATASET_DIR/MRPC \
-vocab-file=$CHECKPOINT_DIR/vocab.txt \
-config-file=$CHECKPOINT_DIR/bert_config.json \
-init-checkpoint=$CHECKPOINT_DIR/bert_model.ckpt \
-max-seq-length=128 \
-learning-rate=2e-5 \
-num-train-epochs=30 \
-optimized_softmax=True \
-experimental_gelu=False \
-do-lower-case=True
-
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  --model-name=bert_large \
+  --precision=fp32 \
+  --mode=training \
+  --framework=tensorflow \
+  --batch-size=32 \
+  ${mpi_num_proc_arg} \
+  --output-dir=$OUTPUT_DIR \
+  $@ \
+  -- train-option=Classifier \
+  task-name=MRPC \
+  do-train=true \
+  do-eval=true \
+  data-dir=$DATASET_DIR/MRPC \
+  vocab-file=$CHECKPOINT_DIR/vocab.txt \
+  config-file=$CHECKPOINT_DIR/bert_config.json \
+  init-checkpoint=$CHECKPOINT_DIR/bert_model.ckpt \
+  max-seq-length=128 \
+  learning-rate=2e-5 \
+  num-train-epochs=30 \
+  optimized_softmax=True \
+  experimental_gelu=False \
+  do-lower-case=True
+  

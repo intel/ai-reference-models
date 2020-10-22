@@ -53,6 +53,7 @@ echo "    MPI_NUM_PEOCESSES_PER_SOCKET: ${MPI_NUM_PROCESSES_PER_SOCKET}"
 echo "    MPI_HOSTNAMES: ${MPI_HOSTNAMES}"
 echo "    PYTHON_EXE: ${PYTHON_EXE}"
 echo "    PYTHONPATH: ${PYTHONPATH}"
+echo "    DRY_RUN: ${DRY_RUN}"
 
 #  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
@@ -144,7 +145,13 @@ function run_model() {
   cd ${MOUNT_BENCHMARK}
 
   # Start benchmarking
-  eval ${CMD} 2>&1 | tee ${LOGFILE}
+  if [[ -z $DRY_RUN ]]; then
+    echo "Log output location: ${LOGFILE}"
+    eval ${CMD} 2>&1 | tee ${LOGFILE}
+  else
+    echo ${CMD}
+    return
+  fi
 
   if [ ${VERBOSE} == "True" ]; then
     echo "PYTHONPATH: ${PYTHONPATH}" | tee -a ${LOGFILE}
@@ -1305,7 +1312,6 @@ function wide_deep_large_ds() {
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
-echo "Log output location: ${LOGFILE}"
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "3d_unet" ]; then

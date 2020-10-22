@@ -38,7 +38,8 @@ fi
 
 MODEL_FILE="${MODEL_DIR}/pretrained_model/resnet50v1_5_int8_pretrained_model.pb"
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --in-graph ${MODEL_FILE} \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -48,5 +49,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --output-dir ${OUTPUT_DIR} \
     ${DATASET_OPTION} \
     --benchmark-only \
+    $@ \
     -- warmup_steps=50 steps=500
 

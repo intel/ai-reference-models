@@ -41,8 +41,8 @@ if [ ! -f "${MODEL_FILE}" ]; then
     exit 1
 fi
 
-
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
     --in-graph ${MODEL_FILE} \
     --model-name resnet50v1_5 \
@@ -51,5 +51,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --output-dir ${OUTPUT_DIR} \
-    --accuracy-only
+    --accuracy-only \
+    $@
 

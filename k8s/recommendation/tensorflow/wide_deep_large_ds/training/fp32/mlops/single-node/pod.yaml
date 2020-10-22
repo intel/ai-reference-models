@@ -11,8 +11,9 @@ spec:
   containers:
   - name: single-node
     image: docker.io/model-zoo:2.3.0-recommendation-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
+    imagePullPolicy: Always
     workingDir: /workspace/wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_DIR"}
-    command: # {"$openapi":"COMMAND"}
+    command:
     - /workspace/wide-deep-large-ds-fp32-training/quickstart/fp32_training.sh # {"$openapi":"COMMAND"}
     env:
     - name: DATASET_DIR

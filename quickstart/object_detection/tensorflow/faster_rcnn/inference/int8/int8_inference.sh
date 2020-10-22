@@ -56,7 +56,8 @@ if [[ ! -f ${PRETRAINED_MODEL} ]]; then
   exit 1
 fi
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --model-source-dir ${TF_MODELS_DIR} \
@@ -67,5 +68,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --socket-id 0 \
   --in-graph ${PRETRAINED_MODEL} \
   --benchmark-only \
+  $@ \
   -- number_of_steps=5000
 
