@@ -30,7 +30,7 @@ ENV USE_DAAL4PY_SKLEARN YES
 
 ENV MODIN_ENGINE ray
 
-ARG CENSUS_DATA_URL=https://rapidsai-data.s3.us-east-2.amazonaws.com/datasets/ipums_education2income_1970-2010.csv.gz
+ARG CENSUS_DATA_URL=https://storage.googleapis.com/intel-optimized-tensorflow/datasets/ipums_education2income_1970-2010.csv.gz
 
 RUN ( apt-get update -y && apt-get autoclean -y && apt-get autoremove -y ) || \
     ( yum update -y && yum clean all -y )
