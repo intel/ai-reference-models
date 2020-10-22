@@ -30,6 +30,8 @@ ENV USE_DAAL4PY_SKLEARN YES
 
 ENV MODIN_ENGINE ray
 
+ARG CENSUS_DATA_URL=https://rapidsai-data.s3.us-east-2.amazonaws.com/datasets/ipums_education2income_1970-2010.csv.gz
+
 RUN ( apt-get update -y && apt-get autoclean -y && apt-get autoremove -y ) || \
     ( yum update -y && yum clean all -y )
 
@@ -48,3 +50,10 @@ RUN sed -i.bak '/include_webui/ s/^#*/#/' /opt/conda/lib/python3.7/site-packages
 
 # Test the final container
 RUN python -c "import modin.pandas"
+
+# Download the dataset
+RUN wget --quiet ${CENSUS_DATA_URL} -O ipums_education2income_1970-2010.csv.gz
+
+# Run the workflow
+COPY ./censue_modin.py .
+# python censue_modin.py
