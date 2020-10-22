@@ -33,7 +33,8 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-python benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python benchmarks/launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=fp32 \
          --mode=training \
@@ -41,5 +42,6 @@ python benchmarks/launch_benchmark.py \
          --checkpoint ${OUTPUT_DIR} \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
-         --noinstall
+         --noinstall \
+         $@
 

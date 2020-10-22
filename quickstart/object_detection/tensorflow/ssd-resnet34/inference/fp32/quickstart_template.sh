@@ -36,4 +36,5 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 # TODO: Fill in the launch_benchmark.py command with the recommended args
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py ...
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py ... $@

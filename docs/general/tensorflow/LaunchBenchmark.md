@@ -148,6 +148,8 @@ optional arguments:
   --noinstall           Whether to install packages for a given model when
                         running in docker (default --noinstall='False') or on
                         bare metal (default --noinstall='True')
+  --dry-run             Shows the call to the model without actually running
+                        it
 ```
 
 ## Volume mounts

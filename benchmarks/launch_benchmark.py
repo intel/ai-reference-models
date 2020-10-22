@@ -101,6 +101,11 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                  "(default --noinstall='False') or on bare metal (default --noinstall='True')",
             dest="noinstall", action="store_true", default=None)
 
+        arg_parser.add_argument(
+            "--dry-run",
+            help="Shows the call to the model without actually running it",
+            dest="dry_run", action="store_true", default=None)
+
         return arg_parser.parse_known_args()
 
     def validate_args(self):
@@ -196,6 +201,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "DISABLE_TCMALLOC": args.disable_tcmalloc,
             "DOCKER": args.docker_image or str(args.docker_image is not None),
+            "DRY_RUN": str(args.dry_run) if args.dry_run is not None else "",
             "EXTERNAL_MODELS_SOURCE_DIRECTORY": args.model_source_dir,
             "FRAMEWORK": args.framework,
             "INTELAI_MODELS": intelai_models,
@@ -216,7 +222,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "SOCKET_ID": args.socket_id,
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "TF_SERVING_VERSION": args.tf_serving_version,
-            "USE_CASE": use_case,
+            "USE_CASE": str(use_case),
             "VERBOSE": args.verbose
         }
 

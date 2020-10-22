@@ -56,7 +56,8 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+source "$(dirname $0)/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name=bert_large \
     --precision=fp32 \
     --mode=inference \
@@ -65,6 +66,7 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
     --checkpoint ${CHECKPOINT_DIR} \
     --output-dir ${OUTPUT_DIR} \
+    $@ \
     -- infer_option=SQuAD \
        profile=True
 
