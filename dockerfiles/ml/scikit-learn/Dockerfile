@@ -27,19 +27,19 @@ ARG INTEL_PYTHON_TAG=latest
 FROM intelpython/intelpython3_core:${INTEL_PYTHON_TAG}
 
 ENV USE_DAAL4PY_SKLEARN YES
+
 ENV MODIN_ENGINE ray
 
 RUN ( apt-get update -y && apt-get autoclean -y && apt-get autoremove -y ) || \
     ( yum update -y && yum clean all -y )
 
-RUN python -m pip install 'ray<=0.8.7'
+RUN python3 -m pip install \
+    modin \
+    ray
 
-RUN conda config --add channels intel && \
-    conda config --add channels intel/label/oneapibeta && \
-    conda install -y -q \
-        scikit-learn \
-        modin \
+RUN conda install -y -q \
         daal4py \
+        scikit-learn \
         threadpoolctl && \
     conda clean -y --all
 
