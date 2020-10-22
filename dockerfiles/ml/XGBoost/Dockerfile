@@ -31,4 +31,5 @@ RUN ( apt-get update -y && apt-get autoclean -y && apt-get autoremove -y ) || \
 
 RUN conda config --add channels intel \
     && conda install  -y -q xgboost \
+    && conda install -y -q tensorflow \
     && conda clean --all
