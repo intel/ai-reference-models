@@ -114,7 +114,7 @@ echo '# *** tests for build ***' >> $(dirname $0)/model-builder.bats
 echo '#' >> $(dirname $0)/model-builder.bats
 echo ''  >> $(dirname $0)/model-builder.bats
 _image_names=$(mktemp /tmp/image_names.XXXXXXXXXX)
-model-builder images > $_image_names
+model-builder images  -r versioned -r tf_1.15.2_containers > $_image_names
 for model in "${MODELS[@]}"; do
   image_name=$(cat $_image_names | grep '^.*'$model'$' | awk '{print $2}' || exit 0)
   if [[ -n $image_name ]]; then
@@ -125,4 +125,17 @@ for model in "${MODELS[@]}"; do
     }' >> $(dirname $0)/model-builder.bats
   fi
 done
+
+model-builder images -r ml > $_image_names
+for model in "${MODELS[@]}"; do
+  image_name=$(cat $_image_names | grep '^.*'$model'$' | awk '{print $2}' || exit 0)
+  if [[ -n $image_name ]]; then
+    echo $'@test "validate build image for '$model$' creates '$image_name$'" {
+      run model-builder -q --nocache build -r ml '$model$'
+      (( $status == 0 ))
+      [[ "${lines[@]}" =~ '$model$' ]]
+    }' >> $(dirname $0)/model-builder.bats
+  fi
+done
+
 
