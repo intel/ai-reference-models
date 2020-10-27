@@ -33,6 +33,11 @@ and for local testing.
      constructs the dockerfile, and builds the docker image for the
      specified model. The model specified should be one of the models
      listed from `model-builder models`.
+   * `model-builder build -r <release group> <model>`: Builds the docker
+     container for the specified model. If no `--release-group` or `-r`
+     argument is provided, the model builder defaults to use the
+     TensorFlow release groups. Release groups are defined in the model
+     spec yml files.
    * `model-builder init-spec <new model>`: Creates a new spec file for
      the specified model. See the [section below](#steps-to-add-a-new-model-spec)
      for full instructions on using this command.

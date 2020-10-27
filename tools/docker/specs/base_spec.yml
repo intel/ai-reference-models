@@ -57,6 +57,13 @@ slice_sets:
           args:
               - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
 
+    ubuntu:
+        - add_to_name: ""
+          partials:
+              - ubuntu-base
+          args:
+              - UBUNTU_VERSION=20.04
+
     mpi-horovod:
         - add_to_name: ""
           partials:
@@ -119,3 +126,11 @@ slice_sets:
                - source: datasets/coco
                  destination: scripts
 
+    intel-python:
+        - add_to_name: ""
+          partials:
+              - miniconda
+              - intel-python
+          args:
+              - PY_VERSION=3
+              - INTEL_PY_BUILD=2020.2
