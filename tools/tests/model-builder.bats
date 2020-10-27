@@ -225,6 +225,18 @@ last_modified()
 @test "validate generate-dockerfile for ssd-mobilenet-fp32-inference creates intel-tf-object-detection-ssd-mobilenet-fp32-inference.Dockerfile" {
     run model-builder -q generate-dockerfile ssd-mobilenet-fp32-inference
     (( $status == 0 ))
+    [[ "${lines[@]}" =~ scikit-learn.Dockerfile ]]
+    (( $(last_modified dockerfiles/ml/scikit-learn/scikit-learn.Dockerfile) <= 50 ))
+  }
+@test "validate generate-dockerfile for scikit-learn-census creates scikit-learn-census.Dockerfile" {
+    run model-builder -q generate-dockerfile scikit-learn-census
+    (( $status == 0 ))
+    [[ "${lines[@]}" =~ scikit-learn-census.Dockerfile ]]
+    (( $(last_modified dockerfiles/ml/scikit-learn/scikit-learn-census.Dockerfile) <= 50 ))
+  }
+@test "validate generate-dockerfile for ssd-mobilenet-fp32-inference creates intel-tf-object-detection-ssd-mobilenet-fp32-inference.Dockerfile" {
+    run model-builder -q generate-dockerfile ssd-mobilenet-fp32-inference
+    (( $status == 0 ))
     [[ "${lines[@]}" =~ intel-tf-object-detection-ssd-mobilenet-fp32-inference.Dockerfile ]]
     (( $(last_modified dockerfiles/model_containers/intel-tf-object-detection-ssd-mobilenet-fp32-inference.Dockerfile) <= 50 ))
   }
