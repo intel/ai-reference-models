@@ -35,7 +35,7 @@ _usage()
   echo 'model-builder package '${_all_models[1]}' '${_all_models[2]}
   echo ''
   echo "# -- Build the model's image --"
-  echo 'model-builder build '${_all_models[4]}
+  echo 'model-builder build -r <release group> '${_all_models[4]}
   echo ''
   echo "# -- Generate the model's Dockerfile --"
   echo 'model-builder generate-dockerfile '${_all_models[2]}
@@ -257,70 +257,78 @@ _model_builder_build_images()
   rm -rf ${_temp_model_package_dir}
   mkdir -p ${_temp_model_package_dir}
   cp ${MODEL_PACKAGE_DIR}/*.tar.gz ${_temp_model_package_dir}
-  
-  # Build versioned images using the assembler
-  temp_output_file=$(mktemp output.XXXXXXXXX)
-  _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py "
-  _echo_command ${_asm_images} \
-      --arg _TAG_PREFIX=${TAG_PREFIX} \
-      --arg http_proxy=${http_proxy} \
-      --arg https_proxy=${https_proxy} \
-      --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
-      --arg PACKAGE_DIR=${_model_package_folder} \
-      --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-      --repository ${LOCAL_REPO} \
-      --release versioned \
-      --build_images \
-      ${_args[@]} 2>&1 | tee $temp_output_file
-  result=$?
-  if (( $result != 0 )); then
-    echo "Warning: A non-zero error code ($result) was returned when building the 'versioned' images"
-  fi
-  tf_versioned_image_list=$(_get_images_from_log $temp_output_file)
-  rm $temp_output_file
 
-  # Build the models that require TF 1.15.2
-  temp_output_file=$(mktemp output.XXXXXXXXX)
-  _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py "
-  _echo_command ${_asm_images} \
-      --arg _TAG_PREFIX=1.15.2 \
-      --arg http_proxy=${http_proxy} \
-      --arg https_proxy=${https_proxy} \
-      --arg TENSORFLOW_TAG=1.15.2 \
-      --arg PACKAGE_DIR=${_model_package_folder} \
-      --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-      --repository ${LOCAL_REPO} \
-      --release tf_1.15.2_containers \
-      --build_images \
-     ${_args[@]} 2>&1 | tee $temp_output_file
-  result=$?
-  if (( $result != 0 )); then
-    echo "Warning: A non-zero error code ($result) was returned when building the 'tf_1.15.2_containers' images"
-  fi
-  tf_1_15_2_image_list=$(_get_images_from_log $temp_output_file)
-  rm $temp_output_file
+  for release_group in "${_release_groups[@]}"
+  do
+
+    temp_output_file=$(mktemp output.XXXXXXXXX)
+    _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py "
+
+    if [[ ${release_group} == "versioned" ]]; then
+      # Build versioned images using the assembler
+      _echo_command ${_asm_images} \
+        --arg _TAG_PREFIX=${TAG_PREFIX} \
+        --arg http_proxy=${http_proxy} \
+        --arg https_proxy=${https_proxy} \
+        --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+        --arg PACKAGE_DIR=${_model_package_folder} \
+        --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
+        --repository ${LOCAL_REPO} \
+        --release ${release_group} \
+        --build_images \
+        ${_args[@]} 2>&1 | tee $temp_output_file
+    elif [[ ${release_group} == "tf_1.15.2_containers" ]]; then
+      _echo_command ${_asm_images} \
+        --arg _TAG_PREFIX=1.15.2 \
+        --arg http_proxy=${http_proxy} \
+        --arg https_proxy=${https_proxy} \
+        --arg TENSORFLOW_TAG=1.15.2 \
+        --arg PACKAGE_DIR=${_model_package_folder} \
+        --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
+        --repository ${LOCAL_REPO} \
+        --release ${release_group} \
+        --build_images \
+       ${_args[@]} 2>&1 | tee $temp_output_file
+    else
+      _echo_command ${_asm_images} \
+        --arg http_proxy=${http_proxy} \
+        --arg https_proxy=${https_proxy} \
+        --arg PACKAGE_DIR=${_model_package_folder} \
+        --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
+        --repository ${LOCAL_REPO} \
+        --release ${release_group} \
+        --build_images \
+       ${_args[@]} 2>&1 | tee $temp_output_file
+    fi
+
+    result=$?
+    if (( $result != 0 )); then
+      echo "Warning: A non-zero error code ($result) was returned when building the '$release_group' images"
+    fi
+    log_image_lists+=($(_get_images_from_log $temp_output_file))
+    rm $temp_output_file
+  done
 
   echo "--------------------------------------"
-  echo "Model Images:"
 
   # Print out the images that were just built, and append to the IMAGE_LIST_FILE
-  if [[ ! -z ${tf_versioned_image_list} ]]; then
-    for i in $(echo ${tf_versioned_image_list} | sed "s/,/ /g")
+  count=0
+  for log_image_list in "${log_image_lists[@]}"
+  do
+    for i in $(echo ${log_image_list} | sed "s/,/ /g")
     do
       echo $i
+      count=$(($count+1))
       if [[ ! -z ${IMAGE_LIST_FILE} ]]; then
         echo $i >> ${IMAGE_LIST_FILE}
       fi
     done
-  fi
-  if [[ ! -z ${tf_1_15_2_image_list} ]]; then
-    for i in $(echo ${tf_1_15_2_image_list} | sed "s/,/ /g")
-    do
-      echo $i
-      if [[ ! -z ${IMAGE_LIST_FILE} ]]; then
-        echo $i >> ${IMAGE_LIST_FILE}
-      fi
-    done
+  done
+
+  if [[ ${count} == 0 ]]; then
+    echo ""
+    echo "No containers were built for release group(s): ${_release_groups[@]} "
+    echo "Check the log output above for errors and ensure that you have the proper --release-group and build names specified."
   fi
 
   # Delete the temporary copy of the model package directory
@@ -436,6 +444,12 @@ _model_builder_construct_dockerfiles()
     echo "Model Dockerfiles:"
     ls -1tl dockerfiles/model_containers
   fi
+  if [[ -d dockerfiles/ml ]]; then
+    echo "--------------------------------------"
+    echo "ML Dockerfiles:"
+    ls -1tl dockerfiles/ml/scikit-learn
+    ls -1tl dockerfiles/ml/XGBoost
+  fi
 }
 
 _model_builder_generate_documentation()
@@ -472,7 +486,7 @@ _model_builder_generate_documentation()
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
   
-  # Call the assembler to construct dockerfiles
+  # Call the assembler to generate documentation
   _echo_command ${_asm_dockerfiles} --release dockerfiles --generate_documentation ${_args[@]}
   popd 1>/dev/null 2>/dev/null
 }
@@ -512,14 +526,39 @@ _model_builder_list_images()
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
   
   # Call the assembler to list the images
-  _echo_command ${_asm_dockerfiles} \
-    --release versioned \
-    --repository ${LOCAL_REPO} \
-    --list_images \
-    --arg _TAG_PREFIX=${TAG_PREFIX} \
-    --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
-    ${_args[@]} 2>&1 | sort | column -c 2 -t
-  popd 1>/dev/null 2>/dev/null
+  for release_group in "${_release_groups[@]}"
+  do
+    echo ""
+    echo "Release Group: ${release_group}"
+    echo "---------------------------------------"
+    if [[ ${release_group} == "versioned" ]]; then
+      _echo_command ${_asm_dockerfiles} \
+        --release ${release_group} \
+        --repository ${LOCAL_REPO} \
+        --list_images \
+        --arg _TAG_PREFIX=${TAG_PREFIX} \
+        --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+        ${_args[@]} 2>&1 | sort | column -c 2 -t
+      popd 1>/dev/null 2>/dev/null
+    elif [[ ${release_group} == "tf_1.15.2_containers" ]]; then
+      _echo_command ${_asm_dockerfiles} \
+        --release ${release_group} \
+        --repository ${LOCAL_REPO} \
+        --list_images \
+        --arg _TAG_PREFIX=1.15.2 \
+        --arg TENSORFLOW_TAG=1.15.2 \
+        ${_args[@]} 2>&1 | sort | column -c 2 -t
+      popd 1>/dev/null 2>/dev/null
+    else
+      _echo_command ${_asm_dockerfiles} \
+        --release ${release_group} \
+        --repository ${LOCAL_REPO} \
+        --list_images \
+        --arg _TAG_PREFIX=${TAG_PREFIX} \
+        ${_args[@]} 2>&1 | sort | column -c 2 -t
+      popd 1>/dev/null 2>/dev/null
+    fi
+  done
 }
 
 _model_builder_list_packages()
@@ -609,6 +648,7 @@ _model_builder_validate_models()
 {
   local _arg _remainingModels=()
   _remainingModels+=( ${_all_models[@]} )
+
   for _arg in "$@"; do
     if [[ $_arg == options ]]; then
       echo '-h --help options '${_remainingModels[@]}
@@ -622,6 +662,12 @@ _model_builder_validate_models()
     fi
     _remainingModels=( ${_remainingModels[@]/$_arg/} )
   done
+
+  if [[ ${#_current_models[@]} == 0 ]]; then
+    echo 'missing model name'
+    exit 1
+  fi
+
   return 0
 }
 
@@ -668,6 +714,7 @@ _main()
           ;;
     esac
   done
+
   case 1 in
     $(($#==0))) 
       _usage
@@ -693,6 +740,11 @@ _main()
           exit 1
           ;;
         images)
+          # If no release groups were set, use the default
+          if [[ -z ${_release_groups} ]]; then
+            _release_groups=(${DEFAULT_RELEASE_GROUPS[@]})
+          fi
+
           _model_builder_list_images $_model_dir --quiet
           return 0
           ;;
@@ -716,12 +768,35 @@ _main()
       esac
       ;;
     $(($#>=2)))
-      case "$1" in
+      subcommand=$1
+      shift
+      if [[ ${subcommand} == "make" || ${subcommand} == "build" || ${subcommand} == "images" ]]; then
+        # Loops to parse release group as subcommand options (since there can
+        # be more than one) and adds them to the _release_groups array.
+        while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+          case "$1" in
+            -r|--release-group)
+            shift
+            _release_groups+=($1)
+            shift
+            ;;
+          *)
+            # break out of the loop once we are done parsing release groups
+            break
+          esac
+        done
+
+        # If no release groups were set, use the default
+        if [[ -z ${_release_groups} ]]; then
+          _release_groups=(${DEFAULT_RELEASE_GROUPS[@]})
+        fi
+      fi
+
+      case "${subcommand}" in
         init-spec)
-          _model_builder_new_spec $_quiet $_dry_run $2
+          _model_builder_new_spec $_quiet $_dry_run $1
           ;;
         package)
-          shift
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
           _model_builder_build_packages $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
@@ -731,7 +806,6 @@ _main()
           fi
           ;;
         generate-dockerfile)
-          shift
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
           _model_builder_construct_dockerfiles $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
@@ -741,7 +815,6 @@ _main()
           fi
           ;;
         generate-documentation)
-          shift
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
           _model_builder_generate_documentation $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
@@ -750,8 +823,11 @@ _main()
             exit 1
           fi
           ;;
+        images)
+          _model_builder_list_images $_model_dir --quiet
+          return 0
+          ;;
         build)
-          shift
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
           MODEL_PACKAGE_DIR=${MODEL_DIR}/output _model_builder_build_images $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run $_nocache
@@ -761,13 +837,12 @@ _main()
           fi
           ;;
         make)
-          shift
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
           _model_builder_make $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
           ;;
         *)
-          echo 'unknown options '$@ >&2
+          echo 'unknown options ${subcommand} '$@ >&2
           exit 1
           ;;
       esac
@@ -786,10 +861,13 @@ TENSORFLOW_TAG=${TENSORFLOW_TAG-2.3.0}
 # Local container repo used for building images
 LOCAL_REPO=${LOCAL_REPO-model-zoo}
 
+# If no release group arg is specified, use the TF release groups
+DEFAULT_RELEASE_GROUPS=("versioned" "tf_1.15.2_containers")
+
 TAG_PREFIX=${TENSORFLOW_TAG}
 _all_models=()
 _current_models=()
-_options=("-h" "--help" "-q" "--quiet" "--dry-run")
+_options=("-h" "--help" "-q" "--quiet" "--dry-run" "--release-group" "-r")
 _commands=( "options" "build" "commands" "completion" "generate-dockerfile" "generate-documentation" "images" "init-spec" "install-completion" "make" "models" "package" "packages" "run-test-suite")
 _model_builder_init_model_list dockerfiles
 

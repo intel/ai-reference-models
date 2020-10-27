@@ -82,6 +82,31 @@ the generated README.md will have the values filled in:
 # SSD-ResNet34 FP32 inference
 ```
 
+## Release Group
+
+The `--release-group <group name>` (or `-r`) flag to the `model-builder` script
+refers to the `releases` section in the spec yml files and is passed to
+the [assembler.py](/tools/docker/assembler.py) `release` flag by the
+model-builder. For example, the ResNet50 v1.5 spec yml lists it using
+the `versioned` and `dockerfiles` release groups
+[here](/tools/docker/specs/resnet50v1-5-fp32-inference_spec.yml#L1-L7).
+Containers in a release group are built together since they use a common
+set of build arguments (such as the framework version and tag prefix).
+The `dockerfiles` release group will always be used when constructing
+dockerfiles.
+
+The `--release-group` (or `-r`) flag applies to the following model-builder subcommands:
+* make (e.g. `model-builder -r versioned make resnet50-fp32-inference`) - for the `build` step only
+* build (e.g `model-builder -r ml build xgboost`)
+* images (e.g `model-builder -r versioned images` or `model-builder -r ml images`)
+
+Multiple release group flags can be listed to have the command apply to
+multiple groups. For example: `model-builder build -r versioned -r tf_1.15.2_containers all`.
+
+> If no `--release-group <group name>` (or `-r`) flag is passed to the
+> `model-builder`, the default behavior will be to use the TensorFlow
+> release groups.
+
 ## Under the hood of the subcommands
 
 ### Building packages

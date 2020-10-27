@@ -1,0 +1,16 @@
+releases:
+  dockerfiles:
+    tag_specs:
+    - '{ubuntu}{intel-python}{xgboost}'
+  ml:
+    tag_specs:
+    - '{ubuntu}{intel-python}{xgboost}'
+slice_sets:
+  xgboost:
+  - add_to_name: xgboost
+    args:
+    - UBUNTU_VERSION=20.04
+    dockerfile_subdirectory: ml/XGBoost
+    partials:
+    - ml/xgboost
+    - tensorflow/conda-install-tensorflow
