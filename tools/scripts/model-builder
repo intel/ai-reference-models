@@ -671,6 +671,14 @@ _model_builder_validate_models()
   return 0
 }
 
+  if [[ ${#_current_models[@]} == 0 ]]; then
+    echo 'missing model name'
+    exit 1
+  fi
+
+  return 0
+}
+
 _model_builder_build_only_tags_matching_args()
 {
   local _arg _models=()
