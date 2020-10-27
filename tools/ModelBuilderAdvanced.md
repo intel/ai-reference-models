@@ -96,9 +96,9 @@ The `dockerfiles` release group will always be used when constructing
 dockerfiles.
 
 The `--release-group` (or `-r`) flag applies to the following model-builder subcommands:
-* make (e.g. `model-builder -r versioned make resnet50-fp32-inference`) - for the `build` step only
-* build (e.g `model-builder -r ml build xgboost`)
-* images (e.g `model-builder -r versioned images` or `model-builder -r ml images`)
+* make (e.g. `model-builder make -r versioned resnet50-fp32-inference`) - for the `build` step only
+* build (e.g `model-builder build -r ml xgboost`)
+* images (e.g `model-builder images -r versioned` or `model-builder images -r ml`)
 
 Multiple release group flags can be listed to have the command apply to
 multiple groups. For example: `model-builder build -r versioned -r tf_1.15.2_containers all`.
