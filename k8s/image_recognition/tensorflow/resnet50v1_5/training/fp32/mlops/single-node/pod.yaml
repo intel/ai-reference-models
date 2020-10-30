@@ -10,7 +10,7 @@ spec:
     fsGroup: 0 # {"$openapi":"FS_ID"}
   containers:
   - name: single-node
-    image: docker.io/model-zoo:2.3.0-image-recognition-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+    image: docker.io/intel/image-recognition:tf-2.3.0-imz-2.0.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
     workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
     command: # {"$openapi":"COMMAND"}
     - /workspace/resnet50v1-5-fp32-training/quickstart/fp32_training_demo.sh # {"$openapi":"COMMAND"}

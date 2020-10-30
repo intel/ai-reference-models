@@ -675,11 +675,13 @@ def get_file(source, destination):
     if os.path.isdir(source):
         if not os.path.isdir(os.path.dirname(destination)):
             os.makedirs(os.path.dirname(destination))
-        copy_tree(source, destination)
+        file_list = copy_tree(source, destination)
         eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
         doc_partials_dir = os.path.join(destination, ".docs")
         if os.path.isdir(doc_partials_dir):
             shutil.rmtree(doc_partials_dir, ignore_errors=True)
+        for gitignore in [f for f in file_list if '.gitignore' in f]:
+            os.remove(gitignore)
     elif os.path.isfile(source):
         # Ensure that the directories exist first, otherwise the file copy will fail
         if not os.path.isdir(os.path.dirname(destination)):
