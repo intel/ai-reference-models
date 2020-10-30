@@ -1,15 +1,26 @@
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_training_single_node.sh`](mlops/single-node/fp32_training_single_node.sh) | This script is used by the single node Kubernetes job to run bert classifier inference. |
+
+These quickstart scripts can be run in the following environment:
+* [Kubernetes](#kubernetes)
+
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the <model name> <precision> <mode> package:
+Download and untar the BERT Large FP32 training package:
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/bert-large-fp32-training-k8s.tar.gz
+tar -xvf bert-large-fp32-training-k8s.tar.gz
 ```
 
 ### Execution
 
-The kubernetes package for `<model name> <precision> <mode>` includes single and multi-node kubernetes deployments.
+The kubernetes package for `BERT Large FP32 training` includes single and multi-node kubernetes deployments.
 The directory tree within the kubernetes package is shown below, where single and multi-node directories are below the 
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -32,8 +43,8 @@ Both single and multi-node deployments use [kustomize-v3.8.4](https://github.com
 The kustomization files that the kustomize command references are located withing the following directories:
 
 ```
-<k8s package dir>/quickstart/mlops/single-node/kustomization.yaml
-<k8s package dir>/quickstart/mlops/multi-node/kustomization.yaml
+bert-large-fp32-training-k8s/quickstart/mlops/single-node/kustomization.yaml
+bert-large-fp32-training-k8s/quickstart/mlops/multi-node/kustomization.yaml
 ```
 
 #### multi-node distributed training
@@ -45,11 +56,11 @@ The multi-node use case makes the following assumptions:
 
 ##### [devops](https://en.wikipedia.org/wiki/DevOps)
 
-The k8 resources needed to run the multi-node <k8s package dir> quickstart require deployment of the mpi-operator.
+The k8 resources needed to run the multi-node bert-large-fp32-training-k8s quickstart require deployment of the mpi-operator.
 See the [MPI operator deployment](/k8s/common/tensorflow/KubernetesDevOps.md#mpi-operator-deployment) section of the Kubernetes DevOps document for instructions.
 
 Once these resources have been deployed, the mlops user then has a choice 
-of running <k8s package dir> multi-node (distributed training) or single-node. 
+of running bert-large-fp32-training-k8s multi-node (distributed training) or single-node. 
 
 ##### [mlops](https://en.wikipedia.org/wiki/MLOps)
 
@@ -60,7 +71,7 @@ The distributed training algorithm is handled by mpirun.
 Make sure you are inside the multi-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/multi-node
+cd bert-large-fp32-training-k8s/quickstart/mlops/multi-node
 ```
 
 The parameters that can be changed within the MPIJob are shown in the table[^1] below:
@@ -156,7 +167,7 @@ the quickstart script within the pod's container.
 Make sure you are inside the single-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/single-node
+cd bert-large-fp32-training-k8s/quickstart/mlops/single-node
 ```
 
 The parameters that can be changed within the pod are shown in the table[^2] below:
@@ -237,3 +248,4 @@ Removing the pod and related resources is done by running:
 ```
 kubectl delete -f single-node.yaml
 ```
+

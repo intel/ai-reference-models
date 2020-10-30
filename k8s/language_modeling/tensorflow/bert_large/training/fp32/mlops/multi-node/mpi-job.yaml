@@ -15,7 +15,7 @@ spec:
           - name: mpi-launcher
             imagePullPolicy: Always
             workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
-            image: docker.io/model-zoo:2.3.0-language-modeling-bert-large-fp32-training # {"$openapi":"IMAGE"}
+            image: docker.io/intel/language-modeling:tf-2.3.0-imz-2.0.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
               runAsUser: 0 # {"$openapi":"USER_ID"}
               runAsGroup: 0 # {"$openapi":"GROUP_ID"}
@@ -108,7 +108,7 @@ spec:
           - name: mpi-worker
             imagePullPolicy: Always
             workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
-            image: docker.io/model-zoo:2.3.0-language-modeling-bert-large-fp32-training # {"$openapi":"IMAGE"}
+            image: docker.io/intel/language-modeling:tf-2.3.0-imz-2.0.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
               runAsUser: 0 # {"$openapi":"USER_ID"}
               runAsGroup: 0 # {"$openapi":"GROUP_ID"}
