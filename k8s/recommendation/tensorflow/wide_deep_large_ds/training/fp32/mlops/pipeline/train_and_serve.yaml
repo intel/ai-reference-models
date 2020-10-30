@@ -43,7 +43,7 @@ spec:
       runAsGroup: 0 # {"$openapi":"GROUP_ID"}
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: docker.io/model-zoo:2.3.0-recommendation-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
+      image: docker.io/intel/recommendation:tf-2.3.0-imz-2.0.0-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
       imagePullPolicy: Always
       workingDir: /workspace/wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_DIR"}
       command: # {"$openapi":"MODEL_COMMAND"}
