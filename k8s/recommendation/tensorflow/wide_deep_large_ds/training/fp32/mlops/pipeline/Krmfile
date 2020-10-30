@@ -92,7 +92,7 @@ openAPI:
       x-k8s-cli:
         substitution:
           name: IMAGE
-          pattern: ${REGISTRY}/model-zoo:2.3.0-recommendation-${MODEL_NAME}${IMAGE_SUFFIX}
+          pattern: ${REGISTRY}/intel/recommendation:tf-2.3.0-imz-2.0.0-${MODEL_NAME}${IMAGE_SUFFIX}
           values:
           - marker: ${REGISTRY}
             ref: '#/definitions/io.k8s.cli.setters.REGISTRY'

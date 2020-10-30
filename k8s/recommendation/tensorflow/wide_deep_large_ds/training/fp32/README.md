@@ -1,16 +1,28 @@
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_training_check_accuracy.sh`](mlops/pipeline/fp32_training_check_accuracy.sh) | Trains the model for a specified number of steps (default is 500) and then compare the accuracy against the specified target accuracy. If the accuracy is not met, then script exits with error code 1. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`fp32_training.sh`](mlops/single-node/fp32_training.sh) | Trains the model for 10 epochs. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`run_tf_serving_client.py`](run_tf_serving_client.py) | Runs gRPC client for multi-node batch and online inference. |
+
+These quickstart scripts can be run in the following environment:
+* [Kubernetes](#kubernetes)
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the model <mode> package to get the yaml and config
-files for running <mode> on a single node using Kubernetes.
+Download and untar the model training package to get the yaml and config
+files for running training on a single node using Kubernetes.
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
+tar -xvf wide-deep-large-ds-fp32-training-k8s.tar.gz
 ```
 
 ### Execution
 
-The kubernetes package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
+The kubernetes package for `Wide and Deep Large Dataset FP32 training` includes single-node and pipeline kubernetes deployments.
 The directory tree within the kubernetes package is shown below, where single-node and pipeline directories are below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -33,8 +45,8 @@ Both single-node and pipeline deployments use [kustomize-v3.8.4](https://github.
 The kustomization files that the kustomize command references are located withing the following directories:
 
 ```
-<k8s package name>/quickstart/mlops/pipeline/kustomization.yaml
-<k8s package name>/quickstart/mlops/single-node/kustomization.yaml
+wide-deep-large-ds-fp32-training-k8s.tar.gz/quickstart/mlops/pipeline/kustomization.yaml
+wide-deep-large-ds-fp32-training-k8s.tar.gz/quickstart/mlops/single-node/kustomization.yaml
 ```
 
 #### Single-node Training
@@ -46,7 +58,7 @@ the quick start script command within the pod's container.
 Make sure you are inside the single-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/single-node
+cd wide-deep-large-ds-fp32-training-k8s/quickstart/mlops/single-node
 ```
 
 The parameters that can be changed within the pod are shown in the table[^1] below:
@@ -156,7 +168,7 @@ external requests.
 Make sure you are inside the pipeline directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/pipeline
+cd wide-deep-large-ds-fp32-training-k8s/quickstart/mlops/pipeline
 ```
 
 The parameters that can be changed within the pipeline are shown in the table[^2] below:
@@ -249,7 +261,7 @@ Run the [run_tf_serving_client.py](run_tf_serving_client.py) script with
 the `--help` flag to see the argument options:
 ```
 $ python run_wide_deep_client.py --help
-usage: <k8s package dir>/quickstart/run_tf_serving_client.py [-h]
+usage: wide-deep-large-ds-fp32-training-k8s/quickstart/run_tf_serving_client.py [-h]
        [-s SERVER] -d DATA_FILE [-b BATCH_SIZE] [-n NUM_ITERATION] [-w WARM_UP_ITERATION]
 
 optional arguments:
@@ -275,7 +287,7 @@ optional arguments:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python <k8s package dir>/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
+   python wide-deep-large-ds-fp32-training-k8s/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
    ```
    The script will call the served model using data from the csv file
    and output performance and accuracy metrics.
@@ -287,3 +299,4 @@ deployment, and other resources using the following commands:
 ```
 kubectl delete -f pipeline.yaml
 ```
+

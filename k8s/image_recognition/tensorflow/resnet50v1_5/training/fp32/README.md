@@ -45,11 +45,11 @@ The multi-node use case makes the following assumptions:
 
 ##### [devops](https://en.wikipedia.org/wiki/DevOps)
 
-The k8 resources needed to run the multi-node resnet50v1-5 training quickstart require deployment of the mpi-operator.
-See the MPI operator deployment section of the Kubernetes DevOps document for instructions.
+The k8 resources needed to run the multi-node resnet50v1-5-fp32-training-k8s quickstart require deployment of the mpi-operator.
+See the [MPI operator deployment](/k8s/common/tensorflow/KubernetesDevOps.md#mpi-operator-deployment) section of the Kubernetes DevOps document for instructions.
 
 Once these resources have been deployed, the mlops user then has a choice 
-of running resnet50v1-5 multi-node (distributed training) or single-node. 
+of running resnet50v1-5-fp32-training-k8s multi-node (distributed training) or single-node. 
 
 ##### [mlops](https://en.wikipedia.org/wiki/MLOps)
 
