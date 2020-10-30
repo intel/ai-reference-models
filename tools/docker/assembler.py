@@ -616,6 +616,17 @@ def mkdir_p(path):
     if e.errno != errno.EEXIST:
       raise
 
+def delete_dockerfiles(dir_path):
+  """Recursively, list a directory content and delete Dockerfiles if exist."""
+  for afile in os.listdir(dir_path):
+    file_path = os.path.join(dir_path, afile)
+    try:
+      if os.path.isfile(file_path) and file_path.endswith(".Dockerfile"):
+        os.unlink(file_path)
+      elif os.path.isdir(file_path):
+        delete_dockerfiles(file_path)
+    except Exception as e:
+      print(e)
 
 def gather_existing_partials(partial_path):
   """Find and read all available partials.
@@ -1197,15 +1208,7 @@ def main(argv):
   # Empty Dockerfile directory if building new Dockerfiles
   if FLAGS.construct_dockerfiles and not FLAGS.only_tags_matching:
     eprint('> Emptying Dockerfile dir "{}"'.format(FLAGS.dockerfile_dir), quiet=FLAGS.quiet)
-    for afile in os.listdir(FLAGS.dockerfile_dir):
-      file_path = os.path.join(FLAGS.dockerfile_dir, afile)
-      try:
-        if os.path.isfile(file_path):
-          os.unlink(file_path)
-        elif os.path.isdir(file_path) and file_path != 'models/dockerfiles/ml':
-          shutil.rmtree(file_path)
-      except Exception as e:
-        print(e)
+    delete_dockerfiles(FLAGS.dockerfile_dir)
 
   # Set up Docker helper
   dock = docker.from_env()
