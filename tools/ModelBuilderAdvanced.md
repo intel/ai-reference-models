@@ -111,11 +111,11 @@ multiple groups. For example: `model-builder build -r versioned -r tf_1.15.2_con
 
 ### Building packages
 
-The model-builder command will build packages by calling docker run on the tf-tools container passing
+The model-builder command will build packages by calling docker run on the imz-tf-tools container passing
 in arguments to assembler.py. This internal call looks like the following:
 
 ```
-docker run --rm -u 503:20 -v <path-to-models-repo>/tools/docker:/tf -v $PWD:/tf/models tf-tools python3 assembler.py --release dockerfiles --build_packages --model_dir=models --output_dir=models/output
+docker run --rm -u 503:20 -v <path-to-models-repo>/tools/docker:/tf -v $PWD:/tf/models imz-tf-tools python3 assembler.py --release dockerfiles --build_packages --model_dir=models --output_dir=models/output
 ```
 
 For single targets such as `bert-large-fp32-training` the model-builder adds an argument:
@@ -126,11 +126,11 @@ For single targets such as `bert-large-fp32-training` the model-builder adds an 
 
 ### Constructing Dockerfiles
 
-The model-builder command will construct Dockerfiles by calling docker run on the tf-tools container passing
+The model-builder command will construct Dockerfiles by calling docker run on the imz-tf-tools container passing
 in arguments to assembler.py. This internal call looks like the following:
 
 ```
-docker run --rm -u 503:20 -v <path-to-models-repo>/tools/docker:/tf -v <path-to-models-repo>/dockerfiles:/tf/dockerfiles tf-tools python3 assembler.py --release dockerfiles --construct_dockerfiles
+docker run --rm -u 503:20 -v <path-to-models-repo>/tools/docker:/tf -v <path-to-models-repo>/dockerfiles:/tf/dockerfiles imz-tf-tools python3 assembler.py --release dockerfiles --construct_dockerfiles
 ```
 
 For single targets such as `bert-large-fp32-training` the model-builder adds an argument:
@@ -141,11 +141,11 @@ For single targets such as `bert-large-fp32-training` the model-builder adds an 
 
 ### Building images
 
-The model-builder command will build images by calling docker run on the tf-tools container passing
+The model-builder command will build images by calling docker run on the imz-tf-tools container passing
 in arguments to assembler.py. This internal call looks like the following:
 
 ```
-docker run --rm -v <path-to-models-repo>/tools/docker:/tf -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py --arg _TAG_PREFIX=2.3.0 --arg http_proxy= --arg https_proxy= --arg TENSORFLOW_TAG=2.3.0 --arg PACKAGE_DIR=model_packages --arg MODEL_WORKSPACE=/workspace --repository model-zoo --release versioned --build_images --only_tags_matching=.*bert-large-fp32-training$ --quiet
+docker run --rm -v <path-to-models-repo>/tools/docker:/tf -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py --arg _TAG_PREFIX=2.3.0 --arg http_proxy= --arg https_proxy= --arg TENSORFLOW_TAG=2.3.0 --arg PACKAGE_DIR=model_packages --arg MODEL_WORKSPACE=/workspace --repository model-zoo --release versioned --build_images --only_tags_matching=.*bert-large-fp32-training$ --quiet
 ```
 
 For single targets such as `bert-large-fp32-training` the model-builder adds an argument:

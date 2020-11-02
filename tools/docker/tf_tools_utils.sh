@@ -15,10 +15,10 @@
 # limitations under the License.
 #
 
-# This script contains utility functions for working with TensorFlow's tf-tools
+# This script contains utility functions for working with TensorFlow's imz-tf-tools
 # environment, which we use for constructing Dockerfiles out of partials and 
-# building images. It allows for checking if a tf-tools container already exists
-# and building the tf-tools container if necessary.
+# building images. It allows for checking if a imz-tf-tools container already exists
+# and building the imz-tf-tools container if necessary.
 
 _onexit()
 {
@@ -37,7 +37,7 @@ _echo_command()
   fi
 }
 
-_check-for-tf-tools()
+_check-for-imz-tf-tools()
 {
   local _quiet=''
   if (( $# > 0 )); then
@@ -49,8 +49,8 @@ _check-for-tf-tools()
          ;;
     esac
   fi
-  test -z $_quiet && echo '> Checking for tf-tools:latest container' >&2
-  docker inspect --format '{{index .RepoTags 0 }}' tf-tools:latest 2>/dev/null 1>/dev/null
+  test -z $_quiet && echo '> Checking for imz-tf-tools:latest container' >&2
+  docker inspect --format '{{index .RepoTags 0 }}' imz-tf-tools:latest 2>/dev/null 1>/dev/null
 }
 
 _addText()
@@ -59,7 +59,7 @@ _addText()
    sed -i "" -e "/^$line$/a"$'\\\n'"$newText"$'\n' "$file"
 }
 
-_build-tf-tools()
+_build-imz-tf-tools()
 {
   local _dir _quiet='' _proxy_build
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
@@ -82,13 +82,13 @@ _build-tf-tools()
   if [[ -n $http_proxy && -n $https_proxy && -n $no_proxy ]]; then
     _proxy_build=' --build-arg HTTPS_PROXY='$https_proxy' --build-arg HTTP_PROXY='$http_proxy' --build-arg NO_PROXY='$no_proxy
   fi
-  test -z $_quiet && echo '> Building tf-tools docker image' >&2
+  test -z $_quiet && echo '> Building imz-tf-tools docker image' >&2
   cat <<DOCKERIGNORE >.dockerignore
 *
 !bashrc
 DOCKERIGNORE
   pushd $_dir 2>/dev/null 1>/dev/null
-  docker build $_quiet $_proxy_build --tag tf-tools:latest -f tools.Dockerfile . && echo '> Build successful' >&2
+  docker build $_quiet $_proxy_build --tag imz-tf-tools:latest -f tools.Dockerfile . && echo '> Build successful' >&2
   rm -f .dockerignore
   popd 2>/dev/null 1>/dev/null
 }
