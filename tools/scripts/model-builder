@@ -161,7 +161,7 @@ _model_builder_new_spec()
   # Used for auto a new spec with the list of package files for the specified model
 
   # Check for the tf-tool container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
 
   new_model=$1
   echo "Auto-generating a new spec file for: $new_model"
@@ -177,7 +177,7 @@ _model_builder_new_spec()
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
 
   # Note: Run as user so that the spec file isn't owned by root
-  _asm_new_spec="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) $_model_dir_mount -v $(pwd):/tf tf-tools python3 assembler.py "
+  _asm_new_spec="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) $_model_dir_mount -v $(pwd):/tf imz-tf-tools python3 assembler.py "
 
   _echo_command ${_asm_new_spec} \
       --arg http_proxy=${http_proxy} \
@@ -248,7 +248,7 @@ _model_builder_build_images()
   fi
   
   # Check for the tf-tool container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
   
   # Verify that the model package directory exists
   if [ ! -d ${MODEL_PACKAGE_DIR} ]; then
@@ -258,7 +258,7 @@ _model_builder_build_images()
   fi 
   
   # Copy model package directory to this docker folder so that it's included in
-  # the tf-tools volume mount and it'll be in the same build context (directory)
+  # the imz-tf-tools volume mount and it'll be in the same build context (directory)
   # that we are running from.
   _model_package_folder="model_packages"
   _temp_model_package_dir="$(pwd)/${_model_package_folder}/"
@@ -270,7 +270,7 @@ _model_builder_build_images()
   do
 
     temp_output_file=$(mktemp output.XXXXXXXXX)
-    _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock tf-tools python3 assembler.py "
+    _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py "
 
     if [[ ${release_group} == "versioned" ]]; then
       # Build versioned images using the assembler
@@ -377,11 +377,11 @@ _model_builder_build_packages()
     shift
   done
 
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
   
   # Call the assembler to build model packages
   _echo_command ${_asm_dockerfiles} --release dockerfiles --build_packages ${_args[@]}
@@ -426,11 +426,11 @@ _model_builder_build_k8s_packages()
     shift
   done
 
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
 
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
 
   # Call the assembler to build k8s packages
   _echo_command ${_asm_dockerfiles} --release dockerfiles --build_k8s_packages ${_args[@]}
@@ -470,11 +470,11 @@ _model_builder_construct_dockerfiles()
     shift
   done
   
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
   
   # Call the assembler to construct dockerfiles
   _echo_command ${_asm_dockerfiles} --release dockerfiles --construct_dockerfiles ${_args[@]}
@@ -537,11 +537,11 @@ _model_builder_generate_documentation()
     shift
   done
   
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
   
   # Call the assembler to generate documentation
   _echo_command ${_asm_dockerfiles} --release dockerfiles --generate_documentation ${_args[@]}
@@ -576,11 +576,11 @@ _model_builder_list_images()
     shift
   done
   
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
   
   # Call the assembler to list the images
   for release_group in "${_release_groups[@]}"
@@ -646,11 +646,11 @@ _model_builder_list_packages()
     shift
   done
   
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
   
   # Call the assembler to list the images
   _echo_command ${_asm_dockerfiles} \
@@ -691,11 +691,11 @@ _model_builder_list_k8s()
     shift
   done
 
-  # Check for the tf-tools container and build it if it doesn't exist
-  _check-for-tf-tools $_quiet || _build-tf-tools $(_model_builder_root)/docker
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
 
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
 
   # Call the assembler to list the images
   _echo_command ${_asm_dockerfiles} \

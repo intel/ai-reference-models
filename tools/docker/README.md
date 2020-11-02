@@ -2,9 +2,9 @@
 
 This directory contains [partials](partials) for constructing Dockerfiles for
 various use cases in the model zoo. It uses a modified assembler (copied from the
-[TensorFlow repo](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/dockerfiles)). 
-front-ended with a cli `model-builder` that runs the assembler in a `tf-tools` image. The model-builder cli 
-will build the tf-tools image using and the tools.Dockerfile (copied from [TensorFlow repo](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/dockerfiles/tools.Dockerfile)) if `tf-tools` image is not found.
+[TensorFlow repo](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/dockerfiles)).
+front-ended with a cli `model-builder` that runs the assembler in a `imz-tf-tools` image. The model-builder cli
+will build the imz-tf-tools image using and the tools.Dockerfile (copied from [TensorFlow repo](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/tools/dockerfiles/tools.Dockerfile)) if `imz-tf-tools` image is not found.
 
 ## specs/ directory
 
