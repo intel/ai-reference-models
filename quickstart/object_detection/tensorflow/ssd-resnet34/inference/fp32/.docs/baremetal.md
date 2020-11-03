@@ -3,10 +3,12 @@
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
+* build-essential
 * git
 * libgl1-mesa-glx
 * libglib2.0-0
 * numactl
+* python3-dev
 * wget
 * [intel-tensorflow](https://pypi.org/project/intel-tensorflow/)
 * Cython

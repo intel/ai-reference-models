@@ -67,19 +67,25 @@ slice_sets:
     mpi-horovod:
         - add_to_name: ""
           partials:
+              - python-build
               - gcc-8
               - kubectl-1.18.3
               - openmpi-2.1.1-8
               - openssh-7.6
-              - horovod-0.19.1
+              - horovod
+          args:
+              - PY_VERSION=3.7
     
     object-detection:
         - add_to_name: "-object-detection"
           partials:
               - common
+              - python-build
               - tensorflow/model-source
               - object_detection/pip_installs
               - object_detection/protoc
+          args:
+              - PY_VERSION=3.7
 
     image-recognition:
         - add_to_name: "-image-recognition"
