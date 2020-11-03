@@ -34,6 +34,13 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
+ARG PY_VERSION=3
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing \
+        build-essential \
+        python${PY_VERSION}-dev
+
 ARG TF_MODELS_BRANCH
 
 ARG FETCH_PR

@@ -1,8 +1,9 @@
 RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing -y software-properties-common
+    apt-get install --no-install-recommends --fix-missing -y \
+    python3-apt \
+    software-properties-common
 
 RUN apt-get update && \
-    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
     apt-get install --no-install-recommends --fix-missing -y \
         gcc-8 \
         g++-8 && \
