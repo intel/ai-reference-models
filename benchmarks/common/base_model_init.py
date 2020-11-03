@@ -129,7 +129,8 @@ class BaseModelInitializer(object):
                 print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
                       "so the LD_PRELOAD environment variable will not be set.")
 
-        if socket_id != -1 and numactl:
+        num_numas = self.platform_util.num_numa_nodes
+        if num_numas and socket_id != -1 and numactl:
             command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
 
         return command
