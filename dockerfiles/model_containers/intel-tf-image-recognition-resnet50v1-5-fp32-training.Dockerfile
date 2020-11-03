@@ -34,16 +34,27 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing -y software-properties-common
+ARG PY_VERSION=3
 
 RUN apt-get update && \
-    add-apt-repository -y ppa:ubuntu-toolchain-r/test && \
+    apt-get install -y --no-install-recommends --fix-missing \
+        build-essential \
+        python${PY_VERSION}-dev
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y \
+    python3-apt \
+    software-properties-common
+
+RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         gcc-8 \
         g++-8 && \
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 8 && \
   update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-8 8
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing curl
 
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.18.3/bin/linux/amd64/kubectl && \
     chmod +x ./kubectl && \
@@ -62,7 +73,19 @@ RUN apt-get install --no-install-recommends --fix-missing -y \
     systemd && \
     systemctl enable ssh
 
-RUN pip install horovod==0.19.1
+ENV HOROVOD_WITHOUT_MXNET=1 \
+    HOROVOD_WITHOUT_PYTORCH=1 \
+    HOROVOD_WITH_TENSORFLOW=1
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing \
+    cmake \
+    git
+
+# Please see this issue: https://github.com/horovod/horovod/issues/2355
+# TODO: When a release come out that includes this commit (possibly 0.20.4 or newwer)
+# replace the line with: pip install horovod>0.20.3
+RUN pip install git+https://github.com/horovod/horovod.git@bb4e4cf7
 
 ARG PACKAGE_DIR=model_packages
 

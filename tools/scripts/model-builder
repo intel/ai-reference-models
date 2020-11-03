@@ -857,7 +857,7 @@ source $(_model_builder_root)/docker/tf_tools_utils.sh
 MODEL_DIR=${MODEL_DIR-$PWD}
 
 # Tag to use for the 'versioned' images
-TENSORFLOW_TAG=${TENSORFLOW_TAG-2.3.0}
+TENSORFLOW_TAG=${TENSORFLOW_TAG:=2.3.0-ubuntu-20.04}
 
 # Local container repo used for building images
 LOCAL_REPO=${LOCAL_REPO-model-zoo}
