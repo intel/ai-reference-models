@@ -118,8 +118,8 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "-n", "--num-cores",
-            help="Specify the number of cores to use. If the parameter is not"
-                 " specified or is -1, all cores will be used.",
+            help="Specify the number of physical cores to use. If the parameter is not"
+                 " specified or is -1, all physical cores will be used.",
             dest="num_cores", type=int, default=-1)
 
         self._common_arg_parser.add_argument(
@@ -257,16 +257,16 @@ class BaseBenchmarkUtil(object):
         num_numas = self._platform_util.num_numa_nodes
         args = self.args
         if not -1 <= args.socket_id < num_numas:
-            raise ValueError("Socket id must be within NUMA number range: "
+            if num_numas > 0:
+                raise ValueError("Socket id must be within NUMA number range: "
                              "[0, {}].".format(num_numas - 1))
+            else:
+                print("Warning: There are no NUMA nodes on your system and a socket id has "
+                      "been specified, a socket id can't be used so default to using all sockets")
 
-        # check number of cores
-        num_logical_cores_per_socket = \
-            self._platform_util.num_cores_per_socket * \
-            self._platform_util.num_threads_per_core
         # if a socket_id is specified, only count cores from one socket
-        system_num_cores = num_logical_cores_per_socket if \
-            args.socket_id != -1 else num_logical_cores_per_socket * \
+        system_num_cores = self._platform_util.num_cores_per_socket if \
+            num_numas and args.socket_id != -1 else self._platform_util.num_cores_per_socket * \
             self._platform_util.num_cpu_sockets
         num_cores = args.num_cores
 
