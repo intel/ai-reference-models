@@ -66,7 +66,7 @@ RUN pip install \
         opencv-python \
         pycocotools \
         scikit-image \
-        scipy==1.2.0 \
+        scipy==1.2.0 && \
     apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         git \
