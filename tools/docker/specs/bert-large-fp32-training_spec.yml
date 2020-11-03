@@ -13,6 +13,7 @@ slice_sets:
         - add_to_name: "-bert-large-fp32-training"
           dockerfile_subdirectory: "model_containers"
           partials:
+              - python-build
               - model_package
               - entrypoint
           documentation:
