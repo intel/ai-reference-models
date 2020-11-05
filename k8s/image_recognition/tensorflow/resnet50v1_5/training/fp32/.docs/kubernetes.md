@@ -9,7 +9,7 @@ tar -xvf <k8s package name>
 
 ### Execution
 
-The model package for `<model name> <precision> <mode>` includes single and multi-node kubernetes deployments.
+The Kubernetes* package for `<model name> <precision> <mode>` includes single and multi-node kubernetes deployments.
 The directory tree within the model package is shown below, where single and multi-node directories are below the 
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 

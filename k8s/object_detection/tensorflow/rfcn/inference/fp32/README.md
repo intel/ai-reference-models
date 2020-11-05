@@ -1,3 +1,39 @@
+<!--- 0. Title -->
+# RFCN FP32 inference
+
+<!-- 10. Description -->
+
+This document has instructions for running RFCN FP32 inference using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+<!--- 20. Download link -->
+## Download link
+
+[rfcn-fp32-inference-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/rfcn-fp32-inference-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Dataset
+
+The [COCO validation dataset](http://cocodataset.org) is used in these
+RFCN quickstart scripts. The inference quickstart scripts use raw images,
+and the accuracy quickstart scripts require the dataset to be converted
+into the TF records format.
+See the [COCO dataset](/datasets/coco/README.md) for instructions on
+downloading and preprocessing the COCO validation dataset.
+
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_inference.sh`](mlops/single-node/fp32_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`fp32_accuracy.sh`](mlops/pipeline/fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
+
+These quickstart scripts can be run in the following environment:
+* [Kubernetes](#kubernetes)
+
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
@@ -7,7 +43,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/rfc
 tar -xvf rfcn-fp32-inference-k8s.tar.gz
 ```
 
-The model package for `RFCN FP32 inference` includes single-node and pipeline kubernetes deployments.
+The Kubernetes* package for `RFCN FP32 inference` includes single-node and pipeline kubernetes deployments.
 The directory tree within the model package is shown below, where single and pipeline directories are below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -239,4 +275,9 @@ kubectl delete -f pipeline.yaml
 
 See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
 

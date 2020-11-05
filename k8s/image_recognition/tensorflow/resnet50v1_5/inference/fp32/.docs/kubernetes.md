@@ -9,7 +9,7 @@ tar -xvf <k8s package name>
 
 ### Execution
 
-The model package for `<model name> <precision> <mode>` includes a kubernetes serving deployment.
+The Kubernetes* package for `<model name> <precision> <mode>` includes a kubernetes serving deployment.
 The directory tree within the model package is shown below, where the serving directory is below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -89,13 +89,14 @@ kustomize cfg set . MODEL_SERVICE_PORT 9500
 The required column that contains a 'Yes' indicates values that are often changed by the user.
 The 'No' values indicate that the default values are fine, and seldom changed. Note that the mlops user may run the
 serving process with their own uid/gid permissions by using kustomize to change the securityContext in the deployment.yaml file.
-The securityContext appears within the template section of the deployment specification. The runAsUser, runAsGroup and fsGroup members should reflect the user's UID, GID.
+This is done by running the following:
 
 ```
-securityContext:
-  runAsUser: <User ID>
-  runAsGroup: <Group ID>
-  fsGroup: <Group ID>
+kustomize cfg set . FS_ID <Group ID>
+kustomize cfg set . GROUP_ID <Group ID>
+kustomize cfg set . GROUP_NAME <Group Name>
+kustomize cfg set . USER_ID <User ID>
+kustomize cfg set . USER_NAME <User Name>
 ```
 
 Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
