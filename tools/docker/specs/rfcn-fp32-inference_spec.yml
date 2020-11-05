@@ -37,22 +37,28 @@ slice_sets:
               docs:
                   - name: Title
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/title.md
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/title.md
                   - name: Description
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/description.md
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/description.md
                   - name: Download link
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/download.md
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/download.md
                   - name: Datasets
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/datasets.md
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/datasets.md
                   - name: Quick Start Scripts
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/quickstart.md
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/quickstart.md
                   - name: Bare Metal
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/baremetal.md
                   - name: Docker
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/docker.md
-                  - name: License link
-                    uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/license.md
                   - name: Kubernetes
                     k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/kubernetes.md
+                  - name: License link
+                    uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/license.md
+                    k8s_uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/license.md
           args:
               - TF_MODELS_BRANCH=6c21084503b27a9ab118e1db25f79957d5ef540b
               - PACKAGE_NAME=rfcn-fp32-inference

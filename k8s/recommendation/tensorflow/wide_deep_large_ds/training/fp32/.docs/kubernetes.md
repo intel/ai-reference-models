@@ -10,7 +10,7 @@ tar -xvf <k8s package name>
 
 ### Execution
 
-The kubernetes package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
+The Kubernetes* package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
 The directory tree within the kubernetes package is shown below, where single-node and pipeline directories are below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 

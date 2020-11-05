@@ -7,7 +7,7 @@ wget <k8s package url>
 tar -xvf <k8s package name>
 ```
 
-The model package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
+The Kubernetes* package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
 The directory tree within the model package is shown below, where single and pipeline directories are below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 

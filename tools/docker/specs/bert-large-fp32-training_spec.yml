@@ -35,12 +35,16 @@ slice_sets:
               docs:
                   - name: Title
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
+                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
                   - name: Description
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/description.md
+                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/description.md
                   - name: Download link
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/download.md
+                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/download.md
                   - name: Datasets
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/datasets.md
+                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/datasets.md
                   - name: Quick Start Scripts
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/quickstart.md
                     k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/quickstart.md
@@ -48,10 +52,11 @@ slice_sets:
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/baremetal.md
                   - name: Docker
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/docker.md
-                  - name: License link
-                    uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/license.md
                   - name: Kubernetes
                     k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/kubernetes.md
+                  - name: License link
+                    uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/license.md
+                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/license.md
           args:
               - PACKAGE_NAME=bert-large-fp32-training
               - K8S_PACKAGE_NAME=bert-large-fp32-training-k8s
