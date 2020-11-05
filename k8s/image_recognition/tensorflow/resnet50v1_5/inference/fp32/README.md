@@ -1,3 +1,27 @@
+<!--- 0. Title -->
+# ResNet50 v1.5 FP32 inference
+
+<!-- 10. Description -->
+
+This document has instructions for running ResNet50 v1.5 FP32 inference using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+
+
+<!--- 20. Download link -->
+## Download link
+
+[resnet50v1-5-fp32-inference-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-inference-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Dataset
+
+OPTIONAL: The ImageNet dataset can be used in these ResNet50 v1.5 Kubernetes examples.
+You can download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+
+
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
@@ -21,7 +45,7 @@ tar -xvf resnet50v1-5-fp32-inference-k8s.tar.gz
 
 ### Execution
 
-The model package for `ResNet50 v1.5 FP32 inference` includes a kubernetes serving deployment.
+The Kubernetes* package for `ResNet50 v1.5 FP32 inference` includes a kubernetes serving deployment.
 The directory tree within the model package is shown below, where the serving directory is below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -101,13 +125,14 @@ kustomize cfg set . MODEL_SERVICE_PORT 9500
 The required column that contains a 'Yes' indicates values that are often changed by the user.
 The 'No' values indicate that the default values are fine, and seldom changed. Note that the mlops user may run the
 serving process with their own uid/gid permissions by using kustomize to change the securityContext in the deployment.yaml file.
-The securityContext appears within the template section of the deployment specification. The runAsUser, runAsGroup and fsGroup members should reflect the user's UID, GID.
+This is done by running the following:
 
 ```
-securityContext:
-  runAsUser: <User ID>
-  runAsGroup: <Group ID>
-  fsGroup: <Group ID>
+kustomize cfg set . FS_ID <Group ID>
+kustomize cfg set . GROUP_ID <Group ID>
+kustomize cfg set . GROUP_NAME <Group Name>
+kustomize cfg set . USER_ID <User ID>
+kustomize cfg set . USER_NAME <User Name>
 ```
 
 Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
@@ -201,4 +226,9 @@ deployment, and other resources using the following commands:
 ```
 kubectl delete -f serving.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
 

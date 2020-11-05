@@ -1,3 +1,26 @@
+<!--- 0. Title -->
+# ResNet50 v1.5 FP32 training
+
+<!-- 10. Description -->
+
+This document has instructions for running ResNet50 v1.5 FP32 training using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+
+
+<!--- 20. Download link -->
+## Download link
+
+[resnet50v1-5-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-training-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Dataset
+
+The ImageNet dataset is used in these ResNet50 v1.5 Kubernetes examples.
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
@@ -9,7 +32,7 @@ tar -xvf resnet50v1-5-fp32-training-k8s.tar.gz
 
 ### Execution
 
-The model package for `ResNet50 v1.5 FP32 training` includes single and multi-node kubernetes deployments.
+The Kubernetes* package for `ResNet50 v1.5 FP32 training` includes single and multi-node kubernetes deployments.
 The directory tree within the model package is shown below, where single and multi-node directories are below the 
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -232,4 +255,9 @@ Removing the pod and related resources is done by running:
 ```
 kubectl delete -f single-node.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
 

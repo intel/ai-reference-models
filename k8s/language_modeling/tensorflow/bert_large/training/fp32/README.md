@@ -1,3 +1,50 @@
+<!--- 0. Title -->
+# BERT Large FP32 training
+
+<!-- 10. Description -->
+
+This document has instructions for running [BERT](https://github.com/google-research/bert#what-is-bert) FP32 training using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+For all fine-tuning the datasets (SQuAD, MultiNLI, MRPC etc..) and checkpoints
+should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
+
+Refer to google reference page for [checkpoints](https://github.com/google-research/bert#pre-trained-models).
+
+
+
+<!--- 20. Download link -->
+## Download link
+
+[bert-large-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/bert-large-fp32-training-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Datasets
+
+### Pretrained models
+
+Download and extract checkpoints the bert pretrained model from the
+[google bert repo](https://github.com/google-research/bert#pre-trained-models).
+The extracted directory should be set to the `CHECKPOINT_DIR` environment
+variable when running the quickstart scripts.
+
+For training from scratch, Wikipedia and BookCorpus need to be downloaded
+and pre-processed.
+
+### GLUE data
+
+[GLUE data](https://gluebenchmark.com/tasks) is used when running BERT
+classification training. Download and unpack the GLUE data by running
+[this script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e).
+
+### SQuAD data
+
+The Stanford Question Answering Dataset (SQuAD) dataset files can be downloaded
+from the [Google bert repo](https://github.com/google-research/bert#squad-11).
+The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
+should be downloaded to the same directory. Set the `DATASET_DIR` to point to
+that directory when running bert fine tuning using the SQuAD data.
+
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
@@ -20,7 +67,7 @@ tar -xvf bert-large-fp32-training-k8s.tar.gz
 
 ### Execution
 
-The kubernetes package for `BERT Large FP32 training` includes single and multi-node kubernetes deployments.
+The Kubernetes* package for `BERT Large FP32 training` includes single and multi-node kubernetes deployments.
 The directory tree within the kubernetes package is shown below, where single and multi-node directories are below the 
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -248,4 +295,9 @@ Removing the pod and related resources is done by running:
 ```
 kubectl delete -f single-node.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
 
