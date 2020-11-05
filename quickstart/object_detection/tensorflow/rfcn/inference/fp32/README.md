@@ -61,7 +61,7 @@ git apply ../rfcn-fp32-inference/models/object_detection/tensorflow/rfcn/inferen
 ```
 
 You must also install the dependencies and run the protobuf compilation described in the
-[object detection installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
+[object detection installation instructions](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
 from the [TensorFlow Model Garden](https://github.com/tensorflow/models) repository.
 
 Once your environment is setup, navigate back to the directory that contains the RFCN FP32 inference
@@ -72,6 +72,7 @@ To run inference with performance metrics:
 ```
 DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
+TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 quickstart/fp32_inference.sh
 ```
@@ -80,6 +81,7 @@ To get accuracy metrics:
 ```
 DATASET_DIR=<path to the COCO validation TF record directory>
 OUTPUT_DIR=<directory where log files will be written>
+TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 quickstart/fp32_accuracy.sh
 ```
