@@ -1,17 +1,11 @@
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
-To run on bare metal, [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
-to run the <model name> scripts must be installed in your environment.
-
-Download and untar the <model name> <precision> inference model package:
-
-```
-wget <package url>
-tar -xvf <package name>
-```
-
-In addition to the general model zoo requirements, <model name> uses the object detection code from the
+To run on bare metal, the following prerequisites must be installed in your environment:
+* Python 3
+* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* numactl
+* <model name> uses the object detection code from the
 [TensorFlow Model Garden](https://github.com/tensorflow/models). Clone this repo with the SHA specified
 below and apply the patch from the <model name> <precision> <mode> model package to run with TF2.
 
@@ -26,9 +20,16 @@ You must also install the dependencies and run the protobuf compilation describe
 [object detection installation instructions](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
 from the [TensorFlow Model Garden](https://github.com/tensorflow/models) repository.
 
-Once your environment is setup, navigate back to the directory that contains the <model name> <precision> <mode>
-model package, set environment variables pointing to your dataset and output directories, and then run
-a quickstart script.
+
+After installing the prerequisites, download and untar the model package.
+```
+wget <package url>
+tar -xzf <package name>
+```
+
+Set environment variables for the TensorFlow Model Garden directory to `TF_MODELS_DIR`, the path to your `DATASET_DIR` and an
+`OUTPUT_DIR` where log files will be written, then run a 
+[quickstart script](#quick-start-scripts).
 
 To run inference with performance metrics:
 ```
@@ -36,7 +37,8 @@ DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
-quickstart/fp32_inference.sh
+cd <package name>
+quickstart/int8_inference.sh
 ```
 
 To get accuracy metrics:
@@ -45,5 +47,6 @@ DATASET_DIR=<path to the COCO validation TF record directory>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
-quickstart/fp32_accuracy.sh
+cd <package name>
+quickstart/int8_accuracy.sh
 ```
