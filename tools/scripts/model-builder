@@ -31,55 +31,116 @@ _usage()
   echo "# -- Initialize a new model specification --"
   echo 'model-builder init-spec <modelname-precision-mode>'
   echo ''
-  echo "# -- Create the model's archive --"
-  echo 'model-builder package '${_all_models[1]}' '${_all_models[2]}
+  echo "# -- List models in the default release groups --"
+  echo 'model-builder models'
   echo ''
-  echo "# -- Build the model's image --"
-  echo 'model-builder build -r <release group> '${_all_models[4]}
+  echo "# -- Create two model packages --"
+  echo 'model-builder package <modelname> <modelname>'
   echo ''
-  echo "# -- Generate the model's Dockerfile --"
-  echo 'model-builder generate-dockerfile '${_all_models[2]}
+  echo "# -- Build a model's image with verbose enabled --"
+  echo "# -- The --verbose option will show internal calls to docker run and additional debug output --"
+  echo 'model-builder --verbose build -r <release group> <modelname>'
   echo ''
-  echo "# -- Create the model's k8s package --"
-  echo 'model-builder package-k8s '${_all_k8s[1]}
+  echo "# -- View the internal call to docker run when generating a model's Dockerfile --"
+  echo "# -- Adding --dry-run and --verbose will show the docker call but not execute it --"
+  echo 'model-builder --dry-run --verbose generate-dockerfile <modelname>'
   echo ''
-  echo "# -- Generate the model's Documentation --"
-  echo 'model-builder generate-documentation '${_all_models[3]}
+  echo "# -- Create a model's k8s package --"
+  echo 'model-builder package-k8s <modelname>'
   echo ''
-  echo "# -- Do {generate-documentation,package,package-k8s,generate-dockerfile,build} --"
-  echo 'model-builder make '${_allModels[1]}
+  echo "# -- Generate a model's Documentation --"
+  echo 'model-builder generate-documentation <modelname>'
+  echo ''
+  echo "# -- Do {generate-documentation,package,package-k8s,generate-dockerfile,build} for several models--"
+  echo 'model-builder make <modelname> <modelname>'
   exit 0
 }
 
+#
+# Called at exit to clean up temp files and show source of error if one has occured
+#
 _model_builder_onexit()
 {
   local _dir=$(_model_builder_root)/docker
+  if [[ -f $_all_specs ]]; then
+    echo ${_tmp_files[@]} | xargs rm -f
+  fi
   if (( $# > 0 )) && [[ -n $1 ]] && (( $1 != 0 )); then
     # error handling goes here
     echo "Error $1 occurred on $2"
   fi
 }
 
-_model_builder_init_model_list()
+#
+# Called by _model_builder_init_lists to create functions that hold memoized info from the specifications.
+# Called within xargs to extract specification info in parallel.
+#
+_model_builder_generator ()
 {
-  local _release=$1 _asm_images
-  if (( ${#_all_models[@]} == 0 )); then
-    _all_models+=( $(echo $(cat $(find $(_model_builder_root)/docker/specs -name '*.yml') | sed -n '/^[ \t]*dockerfiles:/,/^slice_sets/p' | grep '^.*- ["'"']" | sed 's/^.*- ["'"']"'.*{\([[:alnum:]_-]*\)}["'"']"'$/\1/g')) "all" )
-    IFS=$'\n' _all_models=( $(sort -u <<<"${_all_models[*]}") )
-    unset IFS
-  fi
-  if (( ${#_all_k8s[@]} == 0 )); then
-    _all_k8s+=( $(echo $(cat $(find $(_model_builder_root)/docker/specs -name '*.yml') | grep '<k8s package name>' | sed 's/^[ \t]*<k8s package name>: //g' | sed 's/-k8s.tar.gz//g')) "all" )
-    IFS=$'\n' _all_k8s=( $(sort -u <<<"${_all_k8s[*]}") )
-    unset IFS
+  local _release=$1
+  eval $'__model_builder_'$_release$'_models() { echo $(cat '$_all_specs$' | sed -n \'/^[ \\t]*\'$_release\':/ {n;n;p;}\' | grep \'^.*- [\"\'\"\']\" | sed \'s/^.*- [\"\'\"\']\"\'.*{\\([[:alnum:]_-]*\\)}[\"\'\"\']\"\'$/\\1/g\' | sort | uniq); }'
+  eval "_model_builder_"$_release"_models() { echo $(__model_builder_"$_release"_models); }"
+  eval "type _model_builder_"$_release"_models" | sed '1d' > /tmp/'_model_builder_'$_release'_models'
+}
+
+_model_builder_set_current_models()
+{
+  for _i in "${_current_releases[@]}"; do
+    _current_models+=( ${_all_models["$_i"]} )
+  done
+}
+
+#
+# Called at start to initialize global vars from the specifications
+#
+_model_builder_init_lists()
+{
+  local _asm_images _file _generator _i _ii _parallel _release=$1
+  if (( ${#_all_releases[@]} == 0 )) && (( ${#_all_models[*]} == 0 )) && (( ${#_all_k8s[@]} == 0 )); then
+    _all_specs=$(mktemp /tmp/$(basename $0)_specs.XXXXXXXXX)
+    _tmp_files+=($_all_specs)
+    cat $(find $(_model_builder_root)/docker/specs -name '*.yml') > $_all_specs
+
+    eval $'__model_builder_releases_function() { [[ -d $(_model_builder_root)/docker/specs ]] && echo $(cat $_all_specs | sed -n \'/^releases:/,/^slice_sets:/p\'|egrep -v \'^releases:|^slice_sets:|^[ \\t]*tag_specs:|^[ \\t]*- \'| sed \'s/#.*$//\' | sed \'/^[ \\t]*$/d\'  | sed \'s/:$//\' | sed \'/^.*:.*$/d\'| sed -e \'s/^[[:space:]]*//\' | sort | uniq); }'
+    eval "_model_builder_releases_function() { echo $(__model_builder_releases_function); }"
+    _all_releases+=( $(_model_builder_releases_function) )
+    _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+
+    _generator=$(mktemp /tmp/model-builder-generator.XXXXXXXXX)
+    _tmp_files+=($_generator)
+    echo '#!/usr/bin/env bash' > $_generator
+    echo '_all_specs='$_all_specs >> $_generator
+    type _model_builder_generator | sed '1d' >> $_generator
+    echo '_model_builder_generator $1' >> $_generator
+    chmod +x $_generator
+    _parallel=${#_all_releases[@]}
+    echo ${_all_releases[@]} | xargs -n1 -P${#_all_releases[@]} $_generator
+    for _i in "${_all_releases[@]}"; do
+      _file='/tmp/_model_builder_'$_i'_models'
+      eval "source $_file"
+      _tmp_files+=($_file)
+      _ii="$(eval $'\"_model_builder_'$_i$'_models\"')"
+      _all_models["$_i"]=$_ii
+    done
+    _model_builder_set_current_models
+
+    eval $'__model_builder_k8s_function() { [[ -d $(_model_builder_root)/docker/specs ]] && echo $(cat $_all_specs | grep \'<k8s package name>\' | sed \'s/^[ \\t]*<k8s package name>: //g\' | sed \'s/-k8s.tar.gz//g\' | sort | uniq); }'
+    eval "_model_builder_k8s_function() { echo $(__model_builder_k8s_function); }"
+    _all_k8s+=( $(_model_builder_k8s_function) )
   fi
 }
 
+#
+# Outputs the root directory of the model-builder repo
+#
 _model_builder_root()
 {
   echo $(dirname $(dirname $0))
 }
 
+#
+# Outputs completion logic used for bash completion
+#
 _model_builder_completion()
 {
   __model_builder_completion()
@@ -88,17 +149,17 @@ _model_builder_completion()
     COMPREPLY=()
     _cur="${COMP_WORDS[COMP_CWORD]}"
     _prev="${COMP_WORDS[COMP_CWORD-1]}"
-    _opts="$(model-builder options)"
+    _opts="$(_model_builder_options_function)"
     case "${_prev}" in
       -h|--help)
-        local base=${COMP_WORDS[COMP_CWORD-2]}
-        case "${base}" in
+        local _base=${COMP_WORDS[COMP_CWORD-2]}
+        case "${_base}" in
           *)
             return 0
             ;;
         esac
         ;;
-      -q|--quiet)
+      --verbose)
         local _options
         if [[ $_prev == --dry-run ]]; then
           _options="init-spec package generate-dockerfile generate-documentation build make options"
@@ -110,10 +171,10 @@ _model_builder_completion()
         ;;
       --dry-run)
         local _options
-        if [[ $_prev == --quiet || $_prev == -q ]]; then
+        if [[ $_prev == --verbose ]]; then
           _options="init-spec package generate-dockerfile generate-documentation build make options"
         else
-          _options="-q --quiet init-spec package generate-dockerfile generate-documentation build make options"
+          _options="--verbose init-spec package generate-dockerfile generate-documentation build make options"
         fi
         COMPREPLY=($(compgen -W "${_options}" -- ${_cur}));
         return 0
@@ -143,11 +204,10 @@ _model_builder_new_spec()
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
+        echo -e 'Creates a new specification based on the model arguments\n'
         return 0
         ;;
-      -q|--quiet)
+      --verbose)
         _args+=("$1")
         ;;
       --dry-run)
@@ -189,7 +249,7 @@ _model_builder_new_spec()
   popd 1>/dev/null 2>/dev/null
 }
 
-_get_images_from_log()
+_model_builder_get_images_from_log()
 {
   # Checks the log file for the list of 'IMAGES_BUILT=' which should be
   # formatted as a comma separated list. Returns that comma separated value
@@ -207,14 +267,13 @@ _get_images_from_log()
 
 _model_builder_build_images()
 {
-  local _abs_model_dir='' _args=() _asm_images _model_dir='' _model_dir_mount='' _model_package_folder _output_dir='' _quiet='' _temp_model_package_dir
+  local _abs_model_dir='' _args=() _asm_images _log_image_lists=() _model_dir='' _model_dir_mount='' _model_package_folder _output_dir='' _verbose='' _temp_model_package_dir _release_args=() _release_group
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
-        return 0
+        echo -e 'Builds the container images from release groups and model(s) provided as input\n'
+        exit 0
         ;;
       --model_dir=*)
         _abs_model_dir=${1#*=}
@@ -227,9 +286,11 @@ _model_builder_build_images()
         _output_dir=${_output_dir##*/}
         _args+=("$1") 
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
         _args+=("$1") 
+        ;;
+      -r|--release-group)
         ;;
       *)
         _args+=("$1") 
@@ -266,54 +327,38 @@ _model_builder_build_images()
   mkdir -p ${_temp_model_package_dir}
   cp ${MODEL_PACKAGE_DIR}/*.tar.gz ${_temp_model_package_dir}
 
-  for release_group in "${_release_groups[@]}"
+  _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py "
+
+  for _release_group in "${_current_releases[@]}"
   do
-
     temp_output_file=$(mktemp output.XXXXXXXXX)
-    _asm_images="docker run --rm $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py "
-
-    if [[ ${release_group} == "versioned" ]]; then
-      # Build versioned images using the assembler
-      _echo_command ${_asm_images} \
-        --arg _TAG_PREFIX=${TAG_PREFIX} \
-        --arg http_proxy=${http_proxy} \
-        --arg https_proxy=${https_proxy} \
-        --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
-        --arg PACKAGE_DIR=${_model_package_folder} \
-        --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-        --repository ${LOCAL_REPO} \
-        --release ${release_group} \
-        --build_images \
-        ${_args[@]} 2>&1 | tee $temp_output_file
-    elif [[ ${release_group} == "tf_1.15.2_containers" ]]; then
-      _echo_command ${_asm_images} \
-        --arg _TAG_PREFIX=1.15.2 \
-        --arg http_proxy=${http_proxy} \
-        --arg https_proxy=${https_proxy} \
-        --arg TENSORFLOW_TAG=1.15.2 \
-        --arg PACKAGE_DIR=${_model_package_folder} \
-        --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-        --repository ${LOCAL_REPO} \
-        --release ${release_group} \
-        --build_images \
-       ${_args[@]} 2>&1 | tee $temp_output_file
-    else
-      _echo_command ${_asm_images} \
-        --arg http_proxy=${http_proxy} \
-        --arg https_proxy=${https_proxy} \
-        --arg PACKAGE_DIR=${_model_package_folder} \
-        --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-        --repository ${LOCAL_REPO} \
-        --release ${release_group} \
-        --build_images \
-       ${_args[@]} 2>&1 | tee $temp_output_file
-    fi
+    case "$_release_group" in
+      versioned)
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        ;;
+      tf_1.15.2_containers)
+        _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
+        ;;
+      *)
+        _release_args=()
+        ;;
+    esac
+    _echo_command ${_asm_images} \
+      --arg http_proxy=${http_proxy} \
+      --arg https_proxy=${https_proxy} \
+      --arg PACKAGE_DIR=${_model_package_folder} \
+      --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
+      --repository ${LOCAL_REPO} \
+      --release ${_release_group} \
+      --build_images \
+      ${_release_args[@]} \
+      ${_args[@]} 2>&1 | tee $temp_output_file
 
     result=$?
     if (( $result != 0 )); then
-      echo "Warning: A non-zero error code ($result) was returned when building the '$release_group' images"
+      echo "Warning: A non-zero error code ($result) was returned when building the '$_release_group' images"
     fi
-    log_image_lists+=($(_get_images_from_log $temp_output_file))
+    _log_image_lists+=($(_model_builder_get_images_from_log $temp_output_file))
     rm $temp_output_file
   done
 
@@ -321,9 +366,9 @@ _model_builder_build_images()
 
   # Print out the images that were just built, and append to the IMAGE_LIST_FILE
   count=0
-  for log_image_list in "${log_image_lists[@]}"
+  for _log_image_list in "${_log_image_lists[@]}"
   do
-    for i in $(echo ${log_image_list} | sed "s/,/ /g")
+    for i in $(echo ${_log_image_list} | sed "s/,/ /g")
     do
       echo $i
       count=$(($count+1))
@@ -335,7 +380,7 @@ _model_builder_build_images()
 
   if [[ ${count} == 0 ]]; then
     echo ""
-    echo "No containers were built for release group(s): ${_release_groups[@]} "
+    echo "No containers were built for release group(s): ${_current_releases[@]} "
     echo "Check the log output above for errors and ensure that you have the proper --release-group and build names specified."
   fi
 
@@ -346,13 +391,12 @@ _model_builder_build_images()
 
 _model_builder_build_packages()
 {
-  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _verbose=''
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
+        echo -e 'Builds the model packages from release groups and model(s) provided as input\n'
         return 0
         ;;
       --model_dir=*)
@@ -366,9 +410,11 @@ _model_builder_build_packages()
         _output_dir=${_output_dir##*/}
         _args+=("$1") 
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
         _args+=("$1") 
+        ;;
+      -r|--release-group)
         ;;
       *)
         _args+=("$1") 
@@ -395,13 +441,12 @@ _model_builder_build_packages()
 
 _model_builder_build_k8s_packages()
 {
-  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _verbose=''
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
+        echo -e 'Builds the k8 packages from release groups and model(s) provided as input\n'
         return 0
         ;;
       --model_dir=*)
@@ -415,9 +460,11 @@ _model_builder_build_k8s_packages()
         _output_dir=${_output_dir##*/}
         _args+=("$1")
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
         _args+=("$1")
+        ;;
+      -r|--release-group)
         ;;
       *)
         _args+=("$1")
@@ -444,13 +491,12 @@ _model_builder_build_k8s_packages()
 
 _model_builder_construct_dockerfiles()
 {
-  local _abs_model_dir _args=() _asm_dockerfiles _count _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  local _abs_model_dir _args=() _asm_dockerfiles _count _dry_run='' _model_dir='' _model_dir_mount='' _output_dir='' _verbose=''
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
+        echo -e 'Builds the dockerfiles from release groups and model(s) provided as input\n'
         return 0
         ;;
       --model_dir=*)
@@ -459,9 +505,11 @@ _model_builder_construct_dockerfiles()
         _model_dir='--model_dir=models'
         _args+=("$_model_dir") 
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
         _args+=("$1") 
+        ;;
+      -r|--release-group)
         ;;
       *)
         _args+=("$1") 
@@ -511,13 +559,12 @@ _model_builder_construct_dockerfiles()
 
 _model_builder_generate_documentation()
 {
-  local _abs_model_dir _args=() _asm_dockerfiles _count _model_dir='' _model_dir_mount='' _output_dir='' _quiet=''
+  local _abs_model_dir _args=() _asm_dockerfiles _count _model_dir='' _model_dir_mount='' _output_dir='' _verbose=''
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
+        echo -e 'Builds a README.md file using the doc partials from release groups and model(s) provided as input\n'
         return 0
         ;;
       --model_dir=*)
@@ -526,9 +573,11 @@ _model_builder_generate_documentation()
         _model_dir='--model_dir=models'
         _args+=("$_model_dir") 
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
         _args+=("$1") 
+        ;;
+      -r|--release-group)
         ;;
       *)
         _args+=("$1") 
@@ -548,89 +597,34 @@ _model_builder_generate_documentation()
   popd 1>/dev/null 2>/dev/null
 }
 
-_model_builder_list_images()
+_model_builder_list_commands()
 {
-  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _quiet=''
-  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
-        return 0
-        ;;
-      -q|--quiet)
-        _quiet=$1
-        _args+=("$1")
-        ;;
-      --model_dir=*)
-        _abs_model_dir=${1#*=}
-        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
-        _model_dir='--model_dir=models'
-        _args+=("$_model_dir") 
+        echo -e 'List all subcommands within model-builder\n'
+        exit 0
         ;;
       *)
-        _args+=("$1") 
         ;;
     esac
     shift
   done
-  
-  # Check for the imz-tf-tools container and build it if it doesn't exist
-  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
-  
-  # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
-  
-  # Call the assembler to list the images
-  for release_group in "${_release_groups[@]}"
-  do
-    echo ""
-    echo "Release Group: ${release_group}"
-    echo "---------------------------------------"
-    if [[ ${release_group} == "versioned" ]]; then
-      _echo_command ${_asm_dockerfiles} \
-        --release ${release_group} \
-        --repository ${LOCAL_REPO} \
-        --list_images \
-        --arg _TAG_PREFIX=${TAG_PREFIX} \
-        --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
-        ${_args[@]} 2>&1 | sort | column -c 2 -t
-      popd 1>/dev/null 2>/dev/null
-    elif [[ ${release_group} == "tf_1.15.2_containers" ]]; then
-      _echo_command ${_asm_dockerfiles} \
-        --release ${release_group} \
-        --repository ${LOCAL_REPO} \
-        --list_images \
-        --arg _TAG_PREFIX=1.15.2 \
-        --arg TENSORFLOW_TAG=1.15.2 \
-        ${_args[@]} 2>&1 | sort | column -c 2 -t
-      popd 1>/dev/null 2>/dev/null
-    else
-      _echo_command ${_asm_dockerfiles} \
-        --release ${release_group} \
-        --repository ${LOCAL_REPO} \
-        --list_images \
-        --arg _TAG_PREFIX=${TAG_PREFIX} \
-        ${_args[@]} 2>&1 | sort | column -c 2 -t
-      popd 1>/dev/null 2>/dev/null
-    fi
-  done
+  echo ${_commands[@]}
 }
 
-_model_builder_list_packages()
+_model_builder_list_images()
 {
-  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _quiet=''
+  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _verbose='' _release_args=() _release_group
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
-        return 0
+        echo -e 'List the images that would be built for the passed in release(s) or the default releases ('"${DEFAULT_RELEASE_GROUPS[@]}"').\n'
+        exit 0
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
         _args+=("$1")
         ;;
       --model_dir=*)
@@ -638,6 +632,8 @@ _model_builder_list_packages()
         _model_dir_mount='-v '$_abs_model_dir':/tf/models'
         _model_dir='--model_dir=models'
         _args+=("$_model_dir") 
+        ;;
+      -r|--release-group)
         ;;
       *)
         _args+=("$1") 
@@ -652,30 +648,161 @@ _model_builder_list_packages()
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
   
+  if (( ${#_current_releases[@]} > 1 )); then
+    echo ""
+  fi
+
   # Call the assembler to list the images
-  _echo_command ${_asm_dockerfiles} \
-    --release versioned \
-    --repository ${LOCAL_REPO} \
-    --list_packages \
-    --arg _TAG_PREFIX=${TAG_PREFIX} \
-    --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
-    ${_args[@]} 2>&1 | sort | column -c 2 -t
+  for _release_group in "${_current_releases[@]}"
+  do
+    if (( ${#_current_releases[@]} > 1 )); then
+      echo "Release Group: ${_release_group}"
+      echo "---------------------------------------"
+    fi
+    case "$_release_group" in 
+      versioned)
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        ;;
+      tf_1.15.2_containers)
+        _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
+        ;;
+      *)
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}")
+        ;;
+    esac
+    _echo_command ${_asm_dockerfiles} \
+      --release ${_release_group} \
+      --repository ${LOCAL_REPO} \
+      --list_images \
+      ${_release_args[@]} \
+      ${_args[@]} 2>&1 | sort | column -c 2 -t
+    if (( ${#_current_releases[@]} > 1 )); then
+      echo ""
+    fi
+  done
   popd 1>/dev/null 2>/dev/null
 }
 
 _model_builder_list_k8s()
 {
-  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _quiet=''
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e 'List all k8s models\n'
+        exit 0
+        ;;
+      *)
+        ;;
+    esac
+    shift
+  done
+  echo ${_all_k8s[@]}
+}
+
+_model_builder_list_models()
+{
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e 'List all models within the specified release group(s) or all models in the default release groups: '${DEFAULT_RELEASE_GROUPS[@]}'\n'
+        exit 0
+        ;;
+      *)
+        ;;
+    esac
+    shift
+  done
+  echo ${_current_models[@]}
+}
+
+_model_builder_list_packages()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _verbose=''
   pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
-        echo -e '-h prints help info\n'\
-        'options prints more detail about the flags\n'
-        return 0
+        echo -e 'List the packages that would be built for the passed in release(s) or the default release (dockerfiles).\n'
+        exit 0
         ;;
-      -q|--quiet)
-        _quiet=$1
+      --verbose)
+        _verbose=$1
+        _args+=("$1")
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      -r|--release-group)
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+  
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _check-for-imz-tf-tools $_quiet || _build-imz-tf-tools $(_model_builder_root)/docker
+  
+  # Note: Run as user so that the dockerfiles have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
+
+  if [[ ${#_current_releases[@]} == 0 ]]; then
+    _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+  fi
+
+  if (( ${#_current_releases[@]} > 1 )); then
+    echo ""
+  fi
+
+  # Call the assembler to list the packages
+  for _release_group in "${_current_releases[@]}"
+  do
+    if (( ${#_current_releases[@]} > 1 )); then
+      echo "Release Group: ${_release_group}"
+      echo "---------------------------------------"
+    fi
+    case "$_release_group" in
+      versioned)
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        ;;
+      tf_1.15.2_containers)
+        _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
+        ;;
+      *)
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}")
+        ;;
+    esac
+    # Call the assembler to list packages
+    _echo_command ${_asm_dockerfiles} \
+      --release ${_release_group} \
+      --repository ${LOCAL_REPO} \
+      --list_packages \
+      --arg _TAG_PREFIX=${TAG_PREFIX} \
+      --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
+      ${_args[@]} 2>&1 | sort | column -c 2 -t
+    if (( ${#_current_releases[@]} > 1 )); then
+      echo ""
+    fi
+  done
+  popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_list_packages_k8s()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _model_dir='' _model_dir_mount='' _verbose=''
+  pushd $(_model_builder_root)/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e 'List the k8 packages that would be built for the default release (dockerfiles).\n'
+        exit 0
+        ;;
+      --verbose)
+        _verbose=$1
         _args+=("$1")
         ;;
       --model_dir=*)
@@ -697,15 +824,31 @@ _model_builder_list_k8s()
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
 
-  # Call the assembler to list the images
+  # Call the assembler to list k8s
   _echo_command ${_asm_dockerfiles} \
-    --release versioned \
+    --release dockerfiles \
     --repository ${LOCAL_REPO} \
     --list_k8s \
     --arg _TAG_PREFIX=${TAG_PREFIX} \
     --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
     ${_args[@]} 2>&1 | sort | column -c 2 -t
   popd 1>/dev/null 2>/dev/null
+}
+
+_model_builder_list_releases()
+{
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e 'List all releases within the specifications\n'
+        exit 0
+        ;;
+      *)
+        ;;
+    esac
+    shift
+  done
+  echo ${_all_releases[@]}
 }
 
 _model_builder_install_completion()
@@ -720,21 +863,21 @@ _model_builder_make()
   # generate documentation
   _model_builder_generate_documentation $@
   if (( $? != 0 )); then
-    echo "There was an error while generating documentation."
+    echo "There was an error while generating documentation." >&2
     exit 1
   fi
 
   # build model packages
   _model_builder_build_packages $@
   if (( $? != 0 )); then
-    echo "There was an error building model packages."
+    echo "There was an error building model packages." >&2
     exit 1
   fi
 
   # build k8s packages
   _model_builder_build_k8s_packages $@
   if (( $? != 0 )); then
-    echo "There was an error building k8s packages."
+    echo "There was an error building k8s packages." >&2
     exit 1
   fi
 
@@ -753,30 +896,139 @@ _model_builder_make()
   fi
 }
 
-_model_builder_validate_models()
+_model_builder_validate_args()
 {
-  local _arg _remainingModels=()
-  _remainingModels+=( ${_all_models[@]} )
-
+  local _arg
   for _arg in "$@"; do
     if [[ $_arg == options ]]; then
-      echo '-h --help options '${_remainingModels[@]}
+      echo '-h --help options '
       return 1
-    elif ! [[ "${_all_models[@]}" =~ $_arg ]]; then
+    fi
+  done
+  return 0
+}
+
+_model_builder_validate_models()
+{
+  local _arg _i _remaining_models=()
+  _remaining_models+=( ${_current_models[@]} )
+
+  for _arg in "$@"; do
+    if [[ $_arg == -h ]] || [[ $_arg == --help ]]; then
+      return 0
+    elif [[ $_arg == options ]]; then
+      echo '-h --help options '${_remaining_models[@]}
+      return 1
+    elif ! [[ "${_current_models[@]}" =~ $_arg ]]; then
       echo 'unknown option '$_arg >&2
       _usage
       exit 1
-    elif ! [[ "${_current_models[@]}" =~ $_arg ]]; then
-      _current_models+=( $_arg )
+    elif ! [[ "${_selected_models[@]}" =~ $_arg ]]; then
+      _selected_models+=( $_arg )
+      _remaining_models=( ${_remaining_models[@]/$_arg/} )
     fi
-    _remainingModels=( ${_remainingModels[@]/$_arg/} )
   done
 
-  if [[ ${#_current_models[@]} == 0 ]]; then
-    echo 'missing model name'
+  if [[ ${#_selected_models[@]} == 0 ]]; then
+    echo 'missing model name' >&2
     exit 1
   fi
 
+  return 0
+}
+
+_model_builder_validate_release_groups()
+{
+  local _arg _args=($@) _first_release_group=true _end_of_index _index _remaining_releases=() _remaining_models=()
+  _remaining_releases+=( ${_all_releases[@]} )
+  _remaining_models+=( ${_current_models[@]} )
+
+  for _index in "${!_args[@]}"; do
+    _arg=${_args[$_index]}
+    if [[ $_arg == -h ]] || [[ $_arg == --help ]]; then
+      break
+    fi
+    if [[ $_arg == options ]]; then
+      echo '-h --help -r --release-group options '
+      return 1
+    fi
+    if [[ $_arg == --release-group ]] || [[ $_arg == -r ]]; then
+      _end_of_index=$(( ${#_args[@]} - 2 ))
+      if [[ $_first_release_group == true ]]; then
+        _current_releases=()
+        _current_models=()
+        _remaining_models=()
+        _first_release_group=false
+      fi
+      if [[ $_arg == ${@: -2:1} ]] && [[ options == ${@: -1:1} ]] && (( $_index == $_end_of_index )); then
+        echo ${_remaining_releases[@]}
+        return 1
+      fi
+      continue
+    fi
+    if ! [[ "${_all_releases[@]}" =~ $_arg ]]; then
+      echo '_model_builder_validate_release_groups unknown option '$_arg >&2
+      _usage
+      exit 1
+    fi
+    if [[ "${_all_releases[@]}" =~ $_arg ]] && ! [[ "${_current_releases[@]}" =~ $_arg ]]; then
+      _current_releases+=( $_arg )
+      _remaining_releases=( ${_remaining_releases[@]/$_arg/} )
+      for _i in "${_current_releases[@]}"; do
+        _current_models+=( ${_all_models["$_i"]} )
+      done
+      _remaining_models+=( ${_current_models[@]} )
+    fi
+  done
+
+  return 0
+}
+
+_model_builder_validate_release_groups_and_models()
+{
+  local _arg _args=($@) _first_release_group=true _i _index _remaining_releases=() _remaining_models=()
+  _remaining_releases+=( ${_all_releases[@]} )
+  _remaining_models+=( ${_current_models[@]} )
+
+  for _index in "${!_args[@]}"; do
+    _arg=${_args[$_index]}
+    if [[ $_arg == -h ]] || [[ $_arg == --help ]]; then
+      break
+    elif [[ $_arg == options ]]; then
+      echo '-h --help -r --release-group options '${_remaining_models[@]}
+      return 1
+    fi
+    if [[ $_arg == --release-group ]] || [[ $_arg == -r ]]; then
+      if [[ $_first_release_group == true ]]; then
+        _current_releases=()
+        _current_models=()
+        _remaining_models=()
+        _first_release_group=false
+      fi
+      if [[ $_arg == ${@: -2:1} ]] && (( $_index == ${#_args[@]} - 2 )); then
+        echo ${_remaining_releases[@]}
+        return 1
+      fi
+      continue
+    fi
+    if ! [[ "${_all_releases[@]}" =~ $_arg ]] && ! [[ "${_current_models[@]}" =~ $_arg ]]; then
+      echo '_model_builder_validate_release_groups_and_models unknown option '$_arg >&2
+      _usage
+      exit 1
+    fi
+    if [[ "${_all_releases[@]}" =~ $_arg ]] && ! [[ "${_current_releases[@]}" =~ $_arg ]]; then
+      _current_releases+=( $_arg )
+      _remaining_releases=( ${_remaining_releases[@]/$_arg/} )
+      for _i in "${_current_releases[@]}"; do
+        _current_models+=( ${_all_models["$_i"]} )
+      done
+      _remaining_models+=( ${_current_models[@]} )
+    fi
+    if [[ "${_current_models[@]}" =~ $_arg ]] && ! [[ "${_selected_models[@]}" =~ $_arg ]]; then
+      _selected_models+=( $_arg )
+      _remaining_models=( ${_remaining_models[@]/$_arg/} )
+    fi
+  done
   return 0
 }
 
@@ -785,7 +1037,9 @@ _model_builder_validate_k8s()
   local _arg _remainingModels=()
   _remainingModels+=( ${_all_k8s[@]} )
   for _arg in "$@"; do
-    if [[ $_arg == options ]]; then
+    if [[ $_arg == -h ]] || [[ $_arg == --help ]]; then
+      break
+    elif [[ $_arg == options ]]; then
       echo '-h --help options '${_remainingModels[@]}
       return 1
     elif ! [[ "${_all_k8s[@]}" =~ $_arg ]]; then
@@ -804,11 +1058,8 @@ _model_builder_build_only_tags_matching_args()
 {
   local _arg _models=()
   for _arg in "$@";do
-    if [[ $_arg == all ]]; then
-      continue
-    fi
-    if [[ ${_all_models[@]} =~ $_arg ]]; then
-      _models+=( ' --only_tags_matching=.*'$_arg'$' )
+    if [[ ${_current_models[@]} =~ $_arg ]]; then
+      _models+=( ' --only_tags_matching=^.*'$_arg'$' )
     fi
   done
   echo ${_models[@]}
@@ -818,9 +1069,6 @@ _model_builder_build_only_tags_matching_args_k8s()
 {
   local _arg _models=()
   for _arg in "$@";do
-    if [[ $_arg == all ]]; then
-      continue
-    fi
     if [[ ${_all_k8s[@]} =~ $_arg ]]; then
       _models+=( ' --only_tags_matching=.*'$_arg'$' )
     fi
@@ -828,9 +1076,22 @@ _model_builder_build_only_tags_matching_args_k8s()
   echo ${_models[@]}
 }
 
+_model_builder_export() 
+{
+  local _name=$1 _exportable=''
+  declare -n _assoc=$2
+  echo 'declare -A '$_name
+  _exportable+=$_name'=('
+  for _key in "${!_assoc[@]}"; do
+    _exportable+=$'["'$_key$'"]="'${_assoc[$_key]}$'" '
+  done
+  _exportable+=')'
+  echo "$_exportable"
+}
+
 _main()
 {
-  local _args=() _dry_run='' _model_dir='--model_dir='$MODEL_DIR _nocache='' _only_tags_matching='' _output_dir='--output_dir=models/output' _quiet=''
+  local _args=() _dry_run='' _model_dir='--model_dir='$MODEL_DIR _nocache='' _only_tags_matching='' _output_dir='--output_dir=models/output' _verbose='' _subcommand
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       --dry-run)
@@ -841,8 +1102,8 @@ _main()
           _usage
           exit 0
           ;;
-      -q|--quiet)
-          _quiet=$1
+      --verbose)
+          _verbose=$1
           shift
           ;;
       --nocache)
@@ -850,7 +1111,7 @@ _main()
           shift
           ;;
       *)
-          echo 'unknown option '$1
+          echo '_main unknown option '$1
           _args+=( $1 )
           shift
           exit 1
@@ -866,10 +1127,17 @@ _main()
     $(($#==1)))
       case "$1" in 
         commands)
-          echo ${_commands[@]}
+          _model_builder_list_commands $@
           ;;
         completion)
-          type _model_builder_completion | sed '1,3d;$d'
+          eval $'__model_builder_options_function() { echo ${_options[@]}\' \'${_commands[@]}; }'
+          eval "_model_builder_options_function() { echo $(__model_builder_options_function); }"
+          type _model_builder_options_function | sed '1d'
+          _model_builder_export '_all_models' _all_models
+          echo $'_all_releases=('$(_model_builder_releases_function)$')'
+          echo $'_current_releases=('${DEFAULT_RELEASE_GROUPS[@]}$')'
+          echo $'_all_k8s+=('$(_model_builder_k8s_function)$')'
+          type _model_builder_completion | sed '1,3d;$d' | sed '1s/    function //' | sed '2,$s/    //'
           ;;
         install-completion)
           _model_builder_install_completion
@@ -883,28 +1151,37 @@ _main()
           exit 1
           ;;
         images)
-          # If no release groups were set, use the default
-          if [[ -z ${_release_groups} ]]; then
-            _release_groups=(${DEFAULT_RELEASE_GROUPS[@]})
-          fi
-
-          _model_builder_list_images $_model_dir --quiet
+          _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+          _model_builder_set_current_models
+          _model_builder_list_images $_model_dir $_verbose
           return 0
           ;;
         models)
-          echo ${_all_models[@]}
+          _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+          _model_builder_set_current_models
+          _model_builder_list_models $@
           return 0
           ;;
         k8s)
-          echo ${_all_k8s[@]}
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
+          _model_builder_list_k8s $@
           return 0
           ;;
         packages)
-          _model_builder_list_packages $_model_dir --quiet
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
+          _model_builder_list_packages $_model_dir $_verbose
           return 0
           ;;
         packages-k8s)
-          _model_builder_list_k8s $_model_dir --quiet
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
+          _model_builder_list_packages_k8s $_model_dir $_verbose
+          return 0
+          ;;
+        releases)
+          _model_builder_list_releases $@
           return 0
           ;;
         run-test-suite)
@@ -912,97 +1189,128 @@ _main()
           return $?
           ;;
         *)
-          echo 'unknown option '$1
+          echo '_main unknown option '$1
           shift
           exit 1
           ;;
       esac
       ;;
     $(($#>=2)))
-      subcommand=$1
+      _subcommand=$1
       shift
-      if [[ ${subcommand} == "make" || ${subcommand} == "build" || ${subcommand} == "images" ]]; then
-        # Loops to parse release group as subcommand options (since there can
-        # be more than one) and adds them to the _release_groups array.
-        while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-          case "$1" in
-            -r|--release-group)
-            shift
-            _release_groups+=($1)
-            shift
-            ;;
-          *)
-            # break out of the loop once we are done parsing release groups
-            break
-          esac
-        done
-
-        # If no release groups were set, use the default
-        if [[ -z ${_release_groups} ]]; then
-          _release_groups=(${DEFAULT_RELEASE_GROUPS[@]})
-        fi
-      fi
-
-      case "${subcommand}" in
+      case "$_subcommand" in
+        commands)
+          _model_builder_validate_args $@ || exit 0
+          _model_builder_list_commands $@
+          return 0
+          ;;
+        k8s)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
+          _model_builder_validate_args $@ || exit 0
+          _model_builder_list_k8s $@
+          return 0
+          ;;
         init-spec)
-          _model_builder_new_spec $_quiet $_dry_run $1
+          _model_builder_new_spec $_verbose $_dry_run $1
           ;;
         package)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
-          _model_builder_build_packages $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          _model_builder_build_packages $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
             echo "There was an error building model packages."
             exit 1
           fi
           ;;
         package-k8s)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
           _model_builder_validate_k8s $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args_k8s $@)"
-          _model_builder_build_k8s_packages $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          _model_builder_build_k8s_packages $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
             echo "There was an error building k8s packages."
             exit 1
           fi
           ;;
         generate-dockerfile)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
-          _model_builder_construct_dockerfiles $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          _model_builder_construct_dockerfiles $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
             echo "There was an error while constructing dockerfiles." >&2
             exit 1
           fi
           ;;
         generate-documentation)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
           _model_builder_validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
-          _model_builder_generate_documentation $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          _model_builder_generate_documentation $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
             echo "There was an error while constructing dockerfiles." >&2
             exit 1
           fi
           ;;
         images)
-          _model_builder_list_images $_model_dir --quiet
+          _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+          _model_builder_set_current_models
+          _model_builder_validate_release_groups $@ || exit 0
+          _model_builder_list_images $_model_dir $_verbose $_dry_run $@
+          return 0
+          ;;
+        models)
+          _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+          _model_builder_set_current_models
+          _model_builder_validate_release_groups $@ || exit 0
+          _model_builder_list_models $@
+          return 0
+          ;;
+        packages)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
+          _model_builder_validate_release_groups $@ || exit 0
+          _model_builder_list_packages $_model_dir $_verbose $_dry_run $@
+          return 0
+          ;;
+        packages-k8s)
+          _current_releases=(dockerfiles)
+          _model_builder_set_current_models
+          _model_builder_validate_k8s $@ || exit 0
+          _model_builder_list_packages_k8s $_model_dir $_verbose $@
           return 0
           ;;
         build)
-          _model_builder_validate_models $@ || exit 0
+          _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+          _model_builder_set_current_models
+          _model_builder_validate_release_groups_and_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
-          MODEL_PACKAGE_DIR=${MODEL_DIR}/output _model_builder_build_images $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run $_nocache
+          MODEL_PACKAGE_DIR=${MODEL_DIR}/output _model_builder_build_images $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $_nocache $@
           if (( $? != 0 )); then
             echo "There was an error while building docker images." >&2
             exit 1
           fi
           ;;
         make)
-          _model_builder_validate_models $@ || exit 0
+          _current_releases=(${DEFAULT_RELEASE_GROUPS[@]})
+          _model_builder_set_current_models
+          _model_builder_validate_release_groups_and_models $@ || exit 0
           _only_tags_matching="$(_model_builder_build_only_tags_matching_args $@)"
-          _model_builder_make $_model_dir $_output_dir $_only_tags_matching $_quiet $_dry_run
+          _model_builder_make $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
+          ;;
+        releases)
+          _model_builder_validate_args $@ || exit 0
+          _model_builder_list_releases $@
+          return 0
           ;;
         *)
-          echo 'unknown options ${subcommand} '$@ >&2
+          echo 'unknown options '$1' '$@ >&2
           exit 1
           ;;
       esac
@@ -1025,12 +1333,16 @@ LOCAL_REPO=${LOCAL_REPO-model-zoo}
 DEFAULT_RELEASE_GROUPS=("versioned" "tf_1.15.2_containers")
 
 TAG_PREFIX=${TENSORFLOW_TAG}
-_all_models=()
-_current_models=()
+_options=("-h" "--help" "--verbose" "--dry-run")
+_commands=("options" "build" "commands" "completion" "generate-dockerfile" "generate-documentation" "images" "init-spec" "install-completion" "k8s" "make" "models" "package" "package-k8s" "packages" "packages-k8s" "releases" "run-test-suite")
+_tmp_files=()
+_all_specs=''
 _all_k8s=()
+declare -A _all_models
+_all_releases=()
 _current_k8s=()
-_options=("-h" "--help" "-q" "--quiet" "--dry-run" "--release-group" "-r")
-_commands=( "options" "build" "commands" "completion" "generate-dockerfile" "generate-documentation" "images" "init-spec" "install-completion" "make" "models" "package" "package-k8s" "packages" "packages-k8s" "run-test-suite")
-_model_builder_init_model_list dockerfiles
-
+_current_models=()
+_current_releases=()
+_selected_models=()
+_model_builder_init_lists
 _main $@

@@ -29,7 +29,7 @@ _onexit()
 
 _echo_command()
 {
-  if ! [[ $@ =~ --quiet ]] && ! [[ $@ =~ -q ]]; then
+  if [[ $@ =~ --verbose ]]; then
     echo $@
   fi
   if ! [[ $@ =~ --dry-run ]]; then
@@ -39,17 +39,17 @@ _echo_command()
 
 _check-for-imz-tf-tools()
 {
-  local _quiet=''
+  local _verbose=''
   if (( $# > 0 )); then
     case "$1" in 
-      -q|--quiet)
-         _quiet='true'
+      --verbose)
+         _verbose='true'
          ;;
       *)
          ;;
     esac
   fi
-  test -z $_quiet && echo '> Checking for imz-tf-tools:latest container' >&2
+  [[ -n $_verbose ]] && echo '> Checking for imz-tf-tools:latest container' >&2
   docker inspect --format '{{index .RepoTags 0 }}' imz-tf-tools:latest 2>/dev/null 1>/dev/null
 }
 
