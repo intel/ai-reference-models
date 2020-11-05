@@ -4,6 +4,22 @@ This document provides details and information on more advanced usages
 of the [model-builder script](/tools/scripts/model-builder). For
 basic usage instructions, see the [README.md](README.md) file.
 
+## Global Options
+
+Running `model-builder options` or `model-builder --help` will show the global options
+
+```
+-h --help --verbose --dry-run
+```
+
+### --verbose
+
+This global option will output the internal call to docker run as well as debug output from assembler.py (which is invoked within docker).
+
+### --dry-run
+
+This global option will output what model-builder will execute. Paired with --verbose, it will show just the docker run calls that would occur.
+
 ## Custom Settings
 
 There are environment variables that can be set prior to running the
