@@ -6,5 +6,5 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy==1.17.4 \
-        pillow>=7.1.0 && \
+        'pillow>=7.1.0' && \
     pip install pycocotools
