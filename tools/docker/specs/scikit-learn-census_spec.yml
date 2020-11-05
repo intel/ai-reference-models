@@ -21,7 +21,7 @@ slice_sets:
     - model_package
     - ml/test-scikit-learn
     files:
-    - source:  dockerfiles/ml/scikit-learn/censue_modin.py
+    - source:  dockerfiles/ml/scikit-learn/census_modin.py
       destination: censue_monin.py
     downloads:
     - source: https://storage.googleapis.com/intel-optimized-tensorflow/datasets/ipums_education2income_1970-2010.csv.gz
