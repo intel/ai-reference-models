@@ -91,8 +91,10 @@ if [[ ${NOINSTALL} != "True" ]]; then
     export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITHOUT_MXNET=1
     export HOROVOD_WITH_TENSORFLOW=1
-    # lock horovod==0.20.0 release commit/version
-    pip install --no-cache-dir horovod==0.20.0
+    # Please see this issue: https://github.com/horovod/horovod/issues/2355
+    # TODO: When a release come out that includes this commit (possibly 0.20.4 or newwer)
+    # replace the line with: pip install horovod>0.20.3
+    pip install git+https://github.com/horovod/horovod.git@bb4e4cf7
   fi 
 fi
 
