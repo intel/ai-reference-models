@@ -1,0 +1,42 @@
+From 260c07b1c960f5cc67bb42c4e0f67eab47e91092 Mon Sep 17 00:00:00 2001
+From: ltsai1 <louie.tsai@intel.com>
+Date: Fri, 10 Jul 2020 10:45:15 -0700
+Subject: [PATCH] wide_deep infer fp32
+
+---
+ .../wide_deep/inference/fp32/wide_deep_inference.py      | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/models/recommendation/tensorflow/wide_deep/inference/fp32/wide_deep_inference.py b/models/recommendation/tensorflow/wide_deep/inference/fp32/wide_deep_inference.py
+index 85f1c3bd..01398d4d 100644
+--- a/models/recommendation/tensorflow/wide_deep/inference/fp32/wide_deep_inference.py
++++ b/models/recommendation/tensorflow/wide_deep/inference/fp32/wide_deep_inference.py
+@@ -44,6 +44,7 @@ import time
+ import tensorflow as tf  # pylint: disable=g-bad-import-order
+ from official.utils.arg_parsers import parsers
+ from official.utils.logs import hooks_helper
++tf.compat.v1.disable_eager_execution()
+ 
+ _CSV_COLUMNS = [
+     'age', 'workclass', 'fnlwgt', 'education', 'education_num',
+@@ -219,10 +220,16 @@ def main(argv):
+         flags.hooks, batch_size=flags.batch_size,
+         tensors_to_log={'average_loss': loss_prefix + 'head/truediv',
+                         'loss': loss_prefix + 'head/weighted_loss/Sum'})
++    import sys
++    sys.path.append(os.environ['ProfileUtilsRoot'])
++    from profile_utils import ConfigFile, tfProfileHook
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config('wide_deep infer fp32')
++    hooks = [tfProfileHook(save_steps=1, json_fname=config.json_fname)]
+ 
+     inference_start = time.time()
+     # Train and evaluate the model every `flags.epochs_between_evals` epochs.
+-    results = model.evaluate(input_fn=eval_input_fn)
++    results = model.evaluate(input_fn=eval_input_fn, hooks=hooks)
+ 
+     # Display evaluation metrics
+     print('-' * 60)
+-- 
+2.22.1
+

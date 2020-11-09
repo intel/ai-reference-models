@@ -2,9 +2,11 @@ import configparser
 import tensorflow as tf
 import json
 from tensorflow.python.client import timeline
-import os
+import os, fnmatch
 import psutil
 import subprocess
+import tensorflow.estimator
+from tensorflow.python.training import training_util
 try:
     from git import Repo
     has_git = True
@@ -59,6 +61,49 @@ class tfSession(tf.compat.v1.Session):
         self.many_runs_timeline.save(fname)
 
 
+class tfProfileHook(tf.estimator.ProfilerHook):
+    def __init__(self, save_steps=None, save_secs=None, output_dir="", json_fname="", timeline_count=10):
+        self._output_tag = "blah-{}"
+        self._output_dir = output_dir
+        self._timer = tf.estimator.SecondOrStepTimer(every_secs=save_secs,
+                                                     every_steps=save_steps)
+        self._atomic_counter = 0
+        self.many_runs_timeline = TimeLiner()
+        self.timeline_count = timeline_count
+        import os
+        ProfileUtilsRoot = os.environ['ProfileUtilsRoot']
+        self.json_fname = ProfileUtilsRoot + "/../" + json_fname
+        if output_dir == "":
+            output_dir = ProfileUtilsRoot + "/../"
+
+    def begin(self):
+        self._next_step = None
+        self._global_step_tensor = training_util.get_global_step()
+
+        if self._global_step_tensor is None:
+            raise RuntimeError("Global step should be created to use ProfilerHook.")
+
+    def before_run(self, run_context):
+        self._request_summary = (self._next_step is None or self._timer.should_trigger_for_step(self._next_step))
+        requests = {}
+        opts = tf.compat.v1.RunOptions(trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+        return tf.estimator.SessionRunArgs(requests, options=opts)
+
+    def after_run(self, run_context, run_values):
+
+        global_step = self._atomic_counter + 1
+        self._atomic_counter = self._atomic_counter + 1
+        self._next_step = global_step + 1
+
+        self.many_runs_timeline.update_timeline_from_runmeta(run_values.run_metadata)
+        if self._atomic_counter == self.timeline_count:
+            self.many_runs_timeline.save(self.json_fname)
+
+    def end(self, session):
+        if self._atomic_counter < self.timeline_count:
+            self.many_runs_timeline.save(self.json_fname)
+
+
 class TensorflowUtils:
 
     def is_mkl_enabled(self):
@@ -78,16 +123,21 @@ class GitOps:
             self.repo = Repo(repopath)
         return
 
-    def find_commit_with_keyword(self, keyword, search_commits_depth=10):
+    def find_commit_with_keyword(self, keyword, search_commits_depth=5):
         ret = False
+        repo = Repo(self.repopath)
         if has_git is False:
             return ret
-        if not self.repo.bare:
-            commits = list(self.repo.iter_commits())[:search_commits_depth]
-            for commit in commits:
-                if commit.summary.find(keyword) != -1:
-                    ret = True
-                    return ret
+        if not repo.bare:
+            try:
+                commits = list(repo.iter_commits())[:search_commits_depth]
+                for commit in commits:
+                    if commit.summary.find(keyword) != -1:
+                        ret = True
+                        return ret
+            except:
+                print("EXCEPTION : Find commit %s ", keyword)
+                pass
         return ret
 
 
@@ -121,13 +171,41 @@ class PlatformUtils:
         self.svmem = svmem
 
 
+class CommonUtils:
+
+    def __init_(self):
+        return
+
+    def found_files_in_folder(self, pattern, path):
+        listOfFiles = os.listdir(path)
+        foundfiles = []
+        founpaths = []
+        for f in listOfFiles:
+            if fnmatch.fnmatch(f, pattern):
+                foundfiles.append(f)
+                founpaths.append( path+os.sep+f)
+        return foundfiles, founpaths
+
+    def found_files_in_folders(self, pattern, paths):
+        foundfiles = []
+        foundpaths = []
+        for path in paths:
+            files ,paths = self.found_files_in_folder(pattern, path)
+            foundfiles += files
+            foundpaths += paths
+        return foundfiles, foundpaths
+
+
 class ConfigFile:
 
     def __init__(self, confpath='profiling/topo.ini'):
-        self.benchmark_only = True
         self.configpath = confpath
         self.wget = ''
+        self.data_download = ''
+        self.data_location = ''
+        self.preprocessing = ''
         self.in_graph = ''
+        self.checkpoint = ''
         self.tf_util = TensorflowUtils()
         self.json_fname = ''
         if self.tf_util.is_mkl_enabled() is True:
@@ -137,21 +215,57 @@ class ConfigFile:
         self.patches = ''
         self.patched = False
         self.patches_keyword = ''
+        self.throughput_keyword = ''
+        self.throughput_index = -1
 
     def read_section(self):
         config = configparser.ConfigParser()
         config.read(self.configpath)
         return config.sections()
 
+    def convert_configs_to_pd_dataframe(self):
+
+        config = configparser.ConfigParser()
+        config.read(self.configpath)
+        import pandas as pd
+        import numpy as np
+
+        index_list = []
+        data_list = []
+        columns_list = ['benchmark','model-name', 'mode', 'precision','patches','json-fname']
+        for section in config.sections():
+            index_list.append(section)
+            data = []
+            data.append(section)
+            data.append(config.get(section, columns_list[1]))
+            data.append(config.get(section, columns_list[2]))
+            data.append(config.get(section, columns_list[3]))
+            data.append(config.get(section, columns_list[4]))
+            data.append(config.get(section, columns_list[5]))
+            data_list.append(data)
+        df = pd.DataFrame(data_list, columns = columns_list)
+
+        df_types = df.groupby([ columns_list[1],  columns_list[2]]).filter(lambda x: len(x) >= 2)
+
+        df_types_obj = df_types.groupby([ columns_list[1],  columns_list[2]])
+
+        return df, df_types, df_types_obj
+
     def read_value_from_section(self, topo_name, key):
         config = configparser.ConfigParser()
         config.read(self.configpath)
-        for each_section in config.sections():
-            if each_section == topo_name:
-                for each_key, each_val in config.items(each_section):
-                    if each_key == key:
-                        return each_val
-        return None
+        string_val = config.get(topo_name, key)
+        return string_val
+
+    def write_value_from_section(self, topo_name, key, val):
+        config = configparser.ConfigParser()
+        config.read(self.configpath)
+        config.set(topo_name, key, val)
+
+        # save to a file
+        with open(self.configpath, 'w') as configfile:
+             config.write(configfile)
+        return
 
     def read_config(self, topo_name):
         configs = []
@@ -161,20 +275,43 @@ class ConfigFile:
             if each_section == topo_name:
                 for each_key, each_val in config.items(each_section):
                     key = '--' + each_key
-                    if each_key == 'data-location':
-                        if each_val is not None:
-                            self.benchmark_only = False
-                    elif each_key == 'throughput-keyword':
+                    #if each_key == 'data-location':
+                    #    if each_val is not None:
+                    #        self.benchmark_only = False
+                    if each_key == 'throughput-keyword':
                         if each_val is not None:
                             self.throughput_keyword = each_val
+                    elif each_key == 'throughput-index':
+                        if each_val is not None:
+                            self.throughput_index = each_val
                     elif each_key == 'wget':
                         if each_val is not None:
                             self.wget = each_val
+                    elif each_key == 'data-download':
+                        if each_val is not None:
+                            self.data_download = each_val
+                    elif each_key == 'preprocessing':
+                        if each_val is not None:
+                            self.preprocessing = each_val
+                    elif each_key == 'data-location':
+                        if each_val is not None:
+                            if each_val != '':
+                                print("data-location : ", each_val)
+                                configs.append(key)
+                                configs.append(each_val)
+                                self.data_location = each_val
                     elif each_key == 'in-graph':
                         if each_val != '':
                             configs.append(key)
                             configs.append(each_val)
-                        self.in_graph = each_val
+                            self.in_graph = each_val
+                        self.checkpoint = 'NA'
+                    elif each_key == 'checkpoint':
+                        if each_val != '':
+                            configs.append(key)
+                            configs.append(each_val)
+                            self.checkpoint = each_val
+                        self.in_graph = 'NA'
                     elif each_key == 'json-fname':
                         if each_val is not None:
                             self.json_fname = self.json_fname + each_val
@@ -186,14 +323,17 @@ class ConfigFile:
                             keyword = " ".join(val)
                             self.patches_keyword = keyword
                     else:
-                        configs.append(key)
-                        configs.append(each_val)
+                        if each_val[0] == '=':
+                                configs.append(key+each_val)
+                        else:
+                                configs.append(key)
+                                configs.append(each_val)
 
         return configs
 
     def get_parameters(
             self, topo_name, configvals, batch_size=1, thread_number=1,
-            socket_number=1, num_inter_threads=0, num_intra_threads=0):
+            socket_number=1, num_inter_threads=0, num_intra_threads=0, accuracy_only=False):
         benchmark_argvs = []
         benchmark_argvs = benchmark_argvs + configvals
         benchmark_argvs.append('--framework')
@@ -201,7 +341,9 @@ class ConfigFile:
         if batch_size > 0:
             benchmark_argvs.append('--batch-size')
             benchmark_argvs.append(str(batch_size))
-        if self.benchmark_only is True:
+        if accuracy_only is True:
+            benchmark_argvs.append('--accuracy-only')
+        else:
             benchmark_argvs.append('--benchmark-only')
 
         if num_inter_threads > 0:
@@ -225,6 +367,37 @@ class ConfigFile:
             benchmark_argvs.append('0')
 
         return benchmark_argvs
+   
+    def uncompress_file(self, filepath, pretrainfd='pretrained', current_path='./'):
+        import shutil
+        uncompress_path = filepath
+        full_filename = filepath.split(os.sep)[-1]
+
+        file_ext = full_filename.split('.')[-1]
+        filename = full_filename.split('.')[0]
+        cmd = ''
+        if file_ext == 'zip':
+            cmd = "unzip " + filepath
+        elif file_ext == 'gz':
+            cmd = "tar -xzvf  " + filepath
+        if cmd != '':
+            os.system(cmd)
+            if os.path.exists(pretrainfd + os.sep + filename) is False:
+                shutil.move(filename, pretrainfd)
+            uncompress_path = filepath.split('.')[0]
+
+        return uncompress_path
+
+    def download_dataset(self, datasetfd='dataset', current_path='./'):
+        import shutil
+        cmd = self.data_download
+        filename = self.wget.split('/')[-1]
+        dataset_path = current_path + os.sep + datasetfd
+        if os.path.exists(dataset_path) is True:
+            return dataset_path
+        os.system(cmd)
+        print('Downloaded the model in:', dataset_path)
+        return dataset_path
 
     def download_pretrained_model(self, pretrainfd='pretrained', current_path='./'):
         import shutil
@@ -283,37 +456,6 @@ class PerfPresenter:
         self.showAbsNumber = showAbsNumber
         pass
 
-    def read_throughput(self, topo_name, filepath):
-        print(topo_name)
-        if topo_name == 'resnet50':
-            return self.read_resnet50_throughput(filepath)
-        if topo_name == 'wide_deep':
-            return self.read_wide_deep_throughput(filepath)
-
-    def read_resnet50_throughput(self, filepath):
-        print('in resnet50')
-        with open(filepath) as (fp):
-            line = fp.readline()
-            while line:
-                line = fp.readline()
-                if line.find('Throughput') != -1:
-                    print(line)
-                    number = line.split(' ')[1]
-                    print(number)
-                    return number
-
-    def read_wide_deep_throughput(self, filepath):
-        print('in wide deep')
-        with open(filepath) as (fp):
-            line = fp.readline()
-            while line:
-                line = fp.readline()
-                if line.find('Throughput') != -1:
-                    print(line)
-                    number = line.split(' ')[3]
-                    print(number)
-                    return number
-
     def autolabel(self, ax, rects):
         """Attach a text label above each bar in *rects*, displaying its height."""
         for rect in rects:
@@ -370,7 +512,7 @@ class PerfPresenter:
         if Type == 'training':
             fnames = ['mkl', 'elapsed_time']
         else:
-            fnames = ['mkl', 'elapsed_time', 'throughput']
+            fnames = ['mkl', 'elapsed_time', 'throughput', 'accuracy']
         if os.path.isfile(filename):
             print('file exists')
         else:
@@ -379,16 +521,28 @@ class PerfPresenter:
                 writer = csv.DictWriter(f, fieldnames=fnames)
                 writer.writeheader()
 
-    def log_infer_perfcsv(self, elapsed_time, throughput, filename):
+    def get_diff_from_csv_filenames(self, x, y):
+        x_split=x.split('_')
+        y_split=y.split('_')
+        if len(x_split) != len(y_split):
+            print("ERROR! can't two files have different formats")
+            return '',''
+        for i in range(len(x_split)):
+            if x_split[i] !=  y_split[i]:
+                break
+        return x_split[i], y_split[i]
+
+    def log_infer_perfcsv(self, elapsed_time, throughput, accuracy ,filename):
         import csv
         f = open(filename, 'a')
         with f:
-            fnames = ['mkl', 'elapsed_time', 'throughput']
+            fnames = ['mkl', 'elapsed_time', 'throughput', 'accuracy']
             writer = csv.DictWriter(f, fieldnames=fnames)
             writer.writerow(
                 {'mkl': self.tf_util.is_mkl_enabled(),
                  'elapsed_time': elapsed_time,
-                 'throughput': throughput})
+                 'throughput': throughput,
+                 'accuracy': accuracy})
 
     def log_train_perfcsv(self, elapsed_time, filename):
         import csv
@@ -460,6 +614,46 @@ class PerfPresenter:
         fig.tight_layout()
         plt.show()
 
+    def plot_perf_graph_v2(self, ylabel, xlabel, means_list, stddev_list, filepath_list, label_list,title='stock TF vs Intel TF'):
+        import matplotlib.pyplot as plt
+        import numpy as np
+        labels = [xlabel]
+        x = np.arange(len(labels))
+        width = 0.35
+        fig, ax = plt.subplots()
+
+        rects_list = []
+        for i in range(len(filepath_list)):
+            number = means_list[i]
+            stddev = stddev_list[i]
+            filepath = filepath_list[i]
+            label = label_list[i]
+            rects = ax.bar(x - width / 2 + width*i, number, width, yerr=stddev, label=label )
+            rects_list.append(rects)
+
+        ax.set_ylabel(ylabel)
+        ax.set_title(title)
+        ax.set_xticks(x)
+        ax.set_xticklabels(labels)
+        ax.legend()
+
+        def autolabel(rects):
+            """Attach a text label above each bar in *rects*, displaying its height."""
+            for rect in rects:
+                height = rect.get_height()
+                ax.annotate(
+                    '{}'.format(height),
+                    xy=(rect.get_x() + rect.get_width() / 2, height),
+                    xytext=(0, 3),
+                    textcoords='offset points',
+                    ha='center',
+                    va='bottom')
+
+        for i in range(len(rects_list)):
+            autolabel(rects_list[i])
+        fig.tight_layout()
+        plt.show()
+
     def draw_perf_diag_from_csv(self, filepath, framename, y_axis_name, title):
         if self.showAbsNumber is False:
             return
@@ -488,6 +682,51 @@ class PerfPresenter:
         intel_stdev.append(float(stdev1 / mean1))
         self.plot_perf_graph(y_axis_name, title, stock_ratio_means, intel_ratio_means, stock_stdev, intel_stdev)
 
+    def draw_perf_diag_from_csvs(self, filepath_list,label_list ,framename, y_axis_name, x_axis_name, title, analyze_mkl=True):
+        if self.showAbsNumber is False:
+            return
+        means_list = []
+        stddev_list = []
+        for filepath in filepath_list:
+            means = []
+            stdev = []
+            mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(filepath, framename)
+            if analyze_mkl == True:
+                means.append(float(mean1))
+                stdev.append(float(stdev1))
+            else:
+                means.append(float(mean2))
+                stdev.append(float(stdev2))
+            means_list.append(means)
+            stddev_list.append(stdev)
+        self.plot_perf_graph_v2(y_axis_name, x_axis_name, means_list, stddev_list, filepath_list, label_list,title=title)
+
+    def draw_perf_ratio_diag_from_csvs(self, filepath_list,label_list ,framename, y_axis_name, x_axis_name, title, analyze_mkl=True):
+        means_list = []
+        stddev_list = []
+        dividend = 0
+        for filepath in filepath_list:
+            means = []
+            stdev = []
+            ratio_means = []
+            ratio_stddev = []
+            mean1, mean2, len1, len2, stdev1, stdev2 = self.read_number_from_csv(filepath, framename)
+            if analyze_mkl == True:
+                means.append(float(mean1))
+                stdev.append(0)
+                if dividend == 0:
+                    dividend = mean1
+                ratio_means.append(float(mean1 / dividend))
+            else:
+                means.append(float(mean2))
+                stdev.append(0)
+                if dividend == 0:
+                    dividend = mean2
+                ratio_means.append(float(mean2 / dividend))
+            means_list.append(ratio_means)
+            stddev_list.append(stdev)
+        self.plot_perf_graph_v2(y_axis_name, x_axis_name, means_list, stddev_list, filepath_list, label_list,title=title)
+
     def parse_stdout(self, output, keyword):
         output = str(output)
         output = output.split("\n")
@@ -497,17 +736,45 @@ class PerfPresenter:
                 return l
         return None
 
-    def read_throughput(self, filepath, keyword='Throughput'):
+    def read_throughput(self, filepath, keyword='Throughput', index=1):
         with open(filepath) as (fp):
             line = fp.readline()
             while line:
                 line = fp.readline()
                 if line.find(keyword) != -1:
                     print(line)
-                    number = line.split(' ')[1]
+                    number = line.split(' ')[index]
                     print(number)
                     return number
         return None
+
+    def read_accuracy(self, filepath, keyword='accuracy', index=-2):
+        accuracy=[]
+        with open(filepath) as (fp):
+            line = fp.readline()
+            while line:
+                line = fp.readline()
+                if line.find(keyword) != -1:
+                    number = line.split(' ')[index]
+                    number = number.strip(',')
+                    number = number.strip('(')
+                    number = number.strip(')')
+                    accuracy.append(float(number))
+        return accuracy
+
+    def read_iteration_time(self, filepath, keyword='Iteration', index=-2):
+        iteration=[]
+        with open(filepath) as (fp):
+            line = fp.readline()
+            while line:
+                line = fp.readline()
+                if line.find(keyword) != -1:
+                    number = line.split(' ')[index]
+                    number = number.strip(',')
+                    number = number.strip('(')
+                    number = number.strip(')')
+                    iteration.append(float(number))
+        return iteration
 
 
 class TFTimelinePresenter:
@@ -656,6 +923,22 @@ class TFTimelinePresenter:
         merged.to_csv(merged_filepath, index=False)
         return ret
 
+    def merge_two_csv_files_v2(self, merged_filepath, a, b, tags=['stock','intel']):
+        merged = a.merge(b, on='op')
+        merged['speedup'] = merged['elapsed_time_mkl_x'] / merged['elapsed_time_mkl_y']
+        merged = merged.rename(columns={"elapsed_time_mkl_x": tags[0], "elapsed_time_mkl_y": tags[1]})
+        if merged['mkl_op_x'] is True:
+            merged['mkl_op'] = True
+        merged['mkl_op'] = merged['mkl_op_x'] + merged['mkl_op_y']
+        merged = merged.drop(columns=['speedup_x', 'speedup_y'])
+        merged = merged.drop(columns=['mkl_op_x', 'mkl_op_y'])
+        if self.showAbsNumber is False:
+            ret = merged.drop(columns=['elapsed_time_mkl_x', 'elapsed_time_mkl_y'])
+        else:
+            ret = merged
+        merged.to_csv(merged_filepath, index=False)
+        return ret
+
     def compare_bar_pie_charts(self, chart_type):
         import matplotlib.pyplot as plt
         import matplotlib.image as img
@@ -675,7 +958,7 @@ class TFTimelinePresenter:
             ax[index].imshow(image)
             index = index + 1
 
-    def plot_compare_bar_charts(self, fpath):
+    def plot_compare_bar_charts(self, fpath, tags=['stock','intel']):
         if self.showAbsNumber is False:
             return
         import numpy as np
@@ -683,117 +966,255 @@ class TFTimelinePresenter:
         import csv
         reader = csv.DictReader(open(fpath))
         xlabels = []
-        stock_means = []
-        intel_means = []
+        a_means = []
+        b_means = []
         item_name = reader.fieldnames[0]
         a_name = reader.fieldnames[1]
         b_name = reader.fieldnames[2]
 
-        if a_name.find('mkl') != -1:
-            intel_name = a_name
-            stock_name = b_name
-        else:
-            intel_name = b_name
-            stock_name = a_name
-
         for row in reader:
             if row['op'] != 'unknown':
                 xlabels.append(row[item_name] + "_(mkl-" + str(row['mkl_op']) + ')')
-                intel_means.append(float(row[intel_name]))
-                stock_means.append(float(row[stock_name]))
+                b_means.append(float(row[b_name]))
+                a_means.append(float(row[a_name]))
 
         N = len(xlabels)
         ind = np.arange(N)
         width = 0.35
         fig = plt.figure(figsize=(18, 15))
         ax = fig.add_subplot(111)
-        rects1 = ax.bar(ind, stock_means, width, color='orange')
-        rects2 = ax.bar(ind + width, intel_means, width, color='royalblue')
-        ax.set_ylabel('Elpased Time (ms)')
-        ax.set_title('TF Ops Performance Comparison ')
+        rects1 = ax.bar(ind, a_means, width, color='orange')
+        rects2 = ax.bar(ind + width, b_means, width, color='royalblue')
+        ax.set_ylabel('Elpased Time (ms)', fontsize=20)
+        ax.set_title('TF Ops Performance Comparison ', fontdict={'fontsize': 28})
         ax.set_xticks(ind + width / 2)
         ax.set_xticklabels(xlabels, rotation=45, rotation_mode="anchor")
-        ax.legend((rects1[0], rects2[0]), ['stock', 'intel'], fontsize=20)
+        ax.legend((rects1[0], rects2[0]), [tags[0], tags[1]], fontsize=20)
         filename = 'compared_tf_op_duration_bar.png'
         plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
         plt.show()
 
-    def plot_compare_ratio_bar_charts(self, fpath):
+    def plot_compare_ratio_bar_charts(self, fpath, tags=['stock','intel']):
         import numpy as np
         import matplotlib.pyplot as plt
         import csv
         reader = csv.DictReader(open(fpath))
         xlabels = []
-        stock_means = []
-        intel_means = []
+        b_xlabels = []
+        c_xlabels = []
+        a_means = []
+        b_means = []
+        c_means = []
         item_name = reader.fieldnames[0]
         c_name = reader.fieldnames[3]
         for row in reader:
             if row['op'] != 'unknown':
-                xlabels.append(row[item_name] + "_(mkl-" + str(row['mkl_op']) + ')')
-                intel_means.append(float(row[c_name]))
-                stock_means.append(1)
-
+                if str(row['mkl_op']) == 'True':
+                    #xlabels.append(row[item_name] + "_(mkl-" + str(row['mkl_op']) + ')')
+                    b_xlabels.append(row[item_name])
+                    b_means.append(float(row[c_name]))
+                    a_means.append(1)
+                else:
+                    c_xlabels.append(row[item_name])
+                    c_means.append(float(row[c_name]))
+                    a_means.append(1)
+        xlabels = b_xlabels + c_xlabels
+        b_N = len(b_xlabels)
+        c_N = len(c_xlabels)
         N = len(xlabels)
+        b_ind = np.arange(b_N)
         ind = np.arange(N)
+        c_ind = ind[b_N:]
         width = 0.35
         fig = plt.figure(figsize=(18, 15))
         ax = fig.add_subplot(111)
-        rects2 = ax.bar(ind + width / 2, intel_means, width, color='royalblue')
-        ax.set_ylabel('Speedup')
-        ax.set_title('TF Ops Performance Comparison ')
+        rects2 = ax.bar(b_ind + width / 2, b_means, width, color='royalblue')
+        rects3 = ax.bar(c_ind + width / 2 , c_means, width, color='orange')
+        rects = rects2 + rects3
+        ax.set_ylabel('Speedup',  fontsize=20)
+        ax.set_title('TF Ops Performance Comparison ', fontdict={'fontsize': 28})
         ax.set_xticks(ind + width / 2)
         ax.set_xticklabels(xlabels, rotation=45, rotation_mode="anchor")
-        ax.legend([rects2[0]], ['intel'], fontsize=20)
+        ax.legend([rects[0]],[tags[1]], fontsize=20)
         plt.axhline(y=1, linewidth=4, color='r')
         filename = 'compared_tf_op_duration_ratio_bar.png'
         plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
         plt.show()
 
-    def plot_compare_pie_charts(self, fpath):
+    def plot_compare_pie_charts(self, fpath, tags=['stock','intel']):
         import matplotlib.pyplot as plt
         import csv
+        import matplotlib as mpl
+        mpl.rcParams['font.size'] = 9.0
         reader = csv.DictReader(open(fpath))
         xlabels = []
-        stock_means = []
-        intel_means = []
+        a_means = []
+        b_means = []
         item_name = reader.fieldnames[0]
         a_name = reader.fieldnames[1]
         b_name = reader.fieldnames[2]
 
-        if a_name.find('mkl') != -1:
-            intel_name = a_name
-            stock_name = b_name
-        else:
-            intel_name = b_name
-            stock_name = a_name
-
         for row in reader:
             if row['op'] != 'unknown':
                 xlabels.append(row[item_name])
-                intel_means.append(float(row[intel_name]))
-                stock_means.append(float(row[stock_name]))
+                b_means.append(float(row[b_name]))
+                a_means.append(float(row[a_name]))
 
         fig = plt.figure(figsize=(18, 15))
 
         ax1 = fig.add_axes([0, 0, .5, .5], aspect=1)
         wedges, texts, autotexts = ax1.pie(
-            stock_means, autopct='%1.1f%%',
-            textprops=dict(color="w"), radius=1.2)
-
-        ax1.set_title('Stock Tensorflow ')
+            a_means, autopct='%1.1f%%',
+            textprops=dict(color="w",  fontsize=18), radius=1.2)
+        ax1.set_title(tags[0], fontdict={'fontsize': 28})
 
         ax2 = fig.add_axes([.5, .0, .5, .5], aspect=1)
         wedges, texts, autotexts = ax2.pie(
-            intel_means, autopct='%1.1f%%',
-            textprops=dict(color="w"), radius=1.2)
-        ax2.set_title('Intel Tensorflow ')
-        ax2.legend(
+            b_means, autopct='%1.1f%%',
+            textprops=dict(color="w", fontsize=18), radius=1.2)
+        ax2.set_title(tags[1], fontdict={'fontsize': 28})
+
+        box = ax2.legend(
             wedges,
             xlabels,
             title="TF Ops",
             loc="center left",
-            bbox_to_anchor=(1, 0, 0.5, 1))
+            bbox_to_anchor=(1, 0, 0.5, 1),
+            fontsize=20)
+        box.get_title().set_fontsize(20)
         filename = 'compared_tf_op_duration_pie.png'
         plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
         plt.show()
+
+
+class oneDNNLog:
+
+    def __init_(self):
+        self.filename = ''
+        self.data = None
+        self.exec_data = None
+        return
+
+    def load_log(self, log):
+        self.filename = log
+
+        data = self.load_log_dnnl(log)
+        count = data['time'].count()
+
+        if count == 0:
+            data = self.load_log_mkldnn(log)
+            count = data['time'].count()
+
+        exec_data = data[data['exec'] == 'exec']
+        self.data = data
+        self.exec_data = exec_data
+        return
+
+    def load_log_dnnl(self, log):
+        import pandas as pd
+        # dnnl_verbose,exec,cpu,convolution,jit:avx2,forward_inference,src_f32::blocked:abcd:f0 wei_f32::blocked:Acdb8a:f0 bia_f32::blocked:a:f0 dst_f32::blocked:aBcd8b:f0,,alg:convolution_direct,mb1_ic3oc96_ih227oh55kh11sh4dh0ph0_iw227ow55kw11sw4dw0pw0,1.21704
+        data = pd.read_csv(log, names=[ 'dnnl_verbose','exec','arch','type', 'jit', 'pass', 'fmt', 'opt', 'alg', 'shape', 'time'])
+        return data
+
+    def load_log_mkldnn(self, log):
+        import pandas as pd
+        #mkldnn_verbose,exec,convolution,jit:avx512_common,forward_training,fsrc:nChw16c fwei:OIhw16i16o fbia:undef fdst:nChw16c,alg:convolution_direct,mb100_ic128oc32_ih7oh7kh3sh1dh0ph1_iw7ow7kw3sw1dw0pw1,0.201904
+        print("load_log_mkldnn")
+        data = pd.read_csv(log, names=[ 'mkldnn_verbose','exec','type', 'jit', 'pass', 'fmt', 'alg', 'shape', 'time'])
+        return data
+
+
+class oneDNNUtils:
+
+    def __init_(self):
+        self.topk=50
+        self.logx=True 
+        self.figsize=(10,10)
+        import matplotlib.pyplot as plt
+        fig = plt.figure(figsize=(18, 15))
+        self.ax = fig.add_subplot(111)
+        return
+
+    def breakdown(self, data, Group, Type):
+        import matplotlib.pyplot as plt
+        import pandas as pd
+        import numpy as np
+        fig = plt.figure(figsize=(18, 15))
+        ax = fig.add_subplot(111)
+        figsize=(10,10)
+        topk=50
+        if Type == "time":
+            print()
+            print(' breakdown:',Group)
+            if data['time'].dtypes != np.dtype('float64'):
+                 data['time'] = data['time'].astype(float)
+            time = data.groupby(Group)['time'].sum().sort_values().head(topk)
+            print(time)
+            title=Group + "Time Breakdown"
+            time[:topk].plot.pie(
+                ax=ax, title=title, figsize=figsize, logx=True, textprops=dict(fontsize=18),autopct='%1.1f%%')
+            ax.figure.savefig(title)
+        elif Type == "count":
+            print()
+            count = data[Group].value_counts().head(topk)
+            print(count)
+            title=Group+"Count Breakdown"
+            count[:topk].plot.bar(
+                ax=ax, title=title, figsize=figsize, logx=False, rot=45)
+            ax.figure.savefig(title)
+        return
+
+    def stats_comp(self, name, Type,onednn_log1, onednn_log2, n=50, tags=['run1', 'run2']):
+        import pandas as pd
+        import matplotlib.pyplot as plt
+        import numpy as np
+        fig = plt.figure(figsize=(18, 15))
+        ax = fig.add_subplot(111)
+        figsize=(10,10)
+        topk=50
+        column_name = tags[1]+'/'+tags[0]
+        
+        d1 = onednn_log1.exec_data
+        log1 = onednn_log1.filename
+        d2 = onednn_log2.exec_data
+        log2 = onednn_log2.filename
+        print(name, 'stats:')
+        if Type == "count":
+            jitstat = pd.concat((d1[name].value_counts(), d2[name].value_counts()), axis=1, sort=True)
+            jitstat.columns = ('1-' + log1, '2-' + log2)
+            jitstat[column_name] = jitstat.iloc[:, 1] / jitstat.iloc[:, 0]
+            jitstat_count = jitstat.sort_values('1-' + log1, ascending=False).head(n)
+            #print(jitstat_count)
+        elif Type == "time":
+            if d1['time'].dtypes != np.dtype('float64'):
+                 d1['time'] = d1['time'].astype(float)
+            if d2['time'].dtypes != np.dtype('float64'):
+                 d2['time'] = d2['time'].astype(float)
+            jitstat = pd.concat((d1.groupby(name)['time'].sum(), d2.groupby(name)['time'].sum()), axis=1, sort=True)
+            jitstat.columns = ('1-' + log1, '2-' + log2)
+            jitstat[column_name ] = jitstat.iloc[:, 1] / jitstat.iloc[:, 0]
+            jitstat_time = jitstat.sort_values('1-' + log1, ascending=False).head(n)
+            #print(jitstat_time)
+            title=name + column_name +" Time Comparison"
+            jitstat_compare = jitstat_time.drop(columns=['1-' + log1, '2-' + log2])
+            jitstat_compare[:topk].plot.bar(
+                ax=ax, title=title, figsize=figsize, logx=False, rot=45)
+            filename = name + " Time Comparison"
+            ax.figure.savefig(filename)
+        return
+
+    def parse_raw_output_to_csv(self, filepath, csvpath='mkldnn_log.csv', keyword='dnnl_verbose'):
+        #filepath = 'Iliad.txt'
+        import csv
+
+        with open(csvpath, "w") as file:
+            with open(filepath) as fp:
+                line = fp.readline()
+                cnt = 1
+                while line:
+                    if line.find(keyword) != -1:
+                        file.write(line)
+                        #print("Line {}: {}".format(cnt, line.strip()))
+                    line = fp.readline()
+                    cnt += 1
+        return csvpath
