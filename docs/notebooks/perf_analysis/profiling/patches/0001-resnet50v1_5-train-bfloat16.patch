@@ -1,0 +1,51 @@
+From 368e8a60fc11eb3198171f4e15163b42fa51277a Mon Sep 17 00:00:00 2001
+From: ltsai1 <louie.tsai@intel.com>
+Date: Mon, 17 Aug 2020 12:40:48 -0700
+Subject: [PATCH] resnet50v1_5 train bfloat16
+
+---
+ .../training/mlperf_resnet/resnet_run_loop.py        | 12 ++++++++++--
+ 1 file changed, 10 insertions(+), 2 deletions(-)
+
+diff --git a/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/resnet_run_loop.py b/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/resnet_run_loop.py
+index 1af8e77e..7c5f4ecb 100644
+--- a/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/resnet_run_loop.py
++++ b/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/resnet_run_loop.py
+@@ -36,6 +36,7 @@ from mlperf_utils.export import export
+ from mlperf_utils.logs import hooks_helper
+ from mlperf_utils.logs import logger
+ from mlperf_utils.misc import model_helpers
++tf.compat.v1.disable_eager_execution()
+ 
+ global is_mpi
+ try:
+@@ -583,6 +584,13 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
+       at_end=True,
+       formatter=formatter)
+ 
++    import sys
++    sys.path.append(os.environ['ProfileUtilsRoot'])
++    from profile_utils import ConfigFile, tfProfileHook
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config('resnet50v1_5 train bfloat16')
++    profile_hook = [tfProfileHook(save_steps=1, json_fname=config.json_fname)]
++
+     print('Starting a training cycle.')
+ 
+     def input_fn_train():
+@@ -605,10 +613,10 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
+       else:
+           train_steps = steps_per_eval_per_worker
+ 
+-      classifier.train(input_fn=input_fn_train, hooks=train_hooks + [compliance_hook],
++      classifier.train(input_fn=input_fn_train, hooks=train_hooks + profile_hook + [compliance_hook],
+               steps=train_steps)
+     else:
+-      classifier.train(input_fn=input_fn_train, hooks=train_hooks + [compliance_hook], max_steps=flags.max_train_steps)
++      classifier.train(input_fn=input_fn_train, hooks=train_hooks + profile_hook + [compliance_hook], max_steps=flags.max_train_steps)
+ 
+     #train_examples = int(_log_cache.pop()[_NUM_EXAMPLES_NAME])
+     #mlperf_log.resnet_print(key=mlperf_log.INPUT_SIZE, value=train_examples)
+-- 
+2.22.1
+
