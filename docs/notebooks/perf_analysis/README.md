@@ -1,12 +1,18 @@
 # Introduction
 ## Jupyter Notebooks 
  
-These Jupyter notebooks help users to analyze the performance benefit from using Intel Optimizations for Tensorflow with the oneDNN library.
+These Jupyter notebooks help users to analyze the performance benefit from using Intel® Optimizations for TensorFlow* with the oneDNN library.  
+There are two different analysis type.  
+* For the "stock vs. Intel Tensorflow" analysis type, users can understand the performance benefit between stock and Intel Tensorflow.  
+* For the "fp32 vs. bf16 vs. int8"  analysis type, users can understand the performance benefit among different data types on Intel Tensorflow.
+  
 
-| Notebook | Notes|
-| ------ | ------ |
-| benchmark_perf_comparison.ipynb | Compare performance between Stock and Intel Tensorflow among different models  |
-| benchmark_perf_timeline_analysis.ipynb | Analyze the performance benefit from oneDNN among different layers by using Tensorflow Timeline |
+| Analysis Type | Notebook | Notes|
+| ------ | ------ | ------ |
+|stock vs. Intel Tensorflow | 1. [benchmark_perf_comparison](benchmark_perf_comparison.ipynb)  | Compare performance between Stock and Intel Tensorflow among different models  |
+|^| 2. [benchmark_perf_timeline_analysis](benchmark_perf_timeline_analysis.ipynb) | Analyze the performance benefit from oneDNN among different layers by using Tensorflow Timeline |  
+|fp32 vs. bf16 vs. int8 | 1. [benchmark_data_types_perf_comparison](benchmark_data_types_perf_comparison.ipynb) | Compare Model Zoo benchmark performance among different data types on Intel Optimizations for  Tensorflow  |
+|^| 2.[benchmark_data_types_perf_timeline_analysis](benchmark_data_types_perf_timeline_analysis.ipynb) | Analyze the bf16/int8 data type performance benefit from oneDNN among different layers by using Tensorflow Timeline |  
 
 ## Miscellaneous Files
 
@@ -148,16 +154,25 @@ These Jupyter notebooks help users to analyze the performance benefit from using
 
 ## How to Run
 
-1. Clone the Intel Model Zoo: `$git clone https://gitlab.devtools.intel.com/intelai/models.git`
+1. Clone the Intel Model Zoo: `$git clone https://github.com/IntelAI/models.git`
 2. Launch Jupyter notebook: `$jupyter notebook --ip=0.0.0.0`
 
 > NOTE: Users don't need to apply step 2 on DevCloud Environment.
 
 3. Follow the instructions to open the URL with the token in your browser
 4. Browse to the `models/docs/notebooks/perf_analysis` folder
-5. Click the `benchmark_perf_comparison.ipynb` or `benchmark_perf_timeline_analysis.ipynb` file
-6. Change your Jupyter notebook kernel to either "stock-tensorflow" or "intel-tensorflow" (highlighted in the diagram below)
-    <br><img src="images/jupyter_kernels.png" width="300" height="300"><br>
-7. Run through every cell of the notebook one by one
+5. Click the 1st notebook file like `benchmark_perf_comparison.ipynb` or `benchmark_data_types_perf_comparison` from an analysis type.
 
-> NOTE: In order to compare between stock and Intel-optimized TF results in section "Analyze TF Timeline results among Stock and Intel Tensorflow", users need to run all cells before the comparison section with both stock-tensorflow and intel-tensorflow kernels.
+> Note: For "stock v.s. Intel Tensorflow" analysis type, please change your Jupyter notebook kernel to either "stock-tensorflow" or "intel-tensorflow" (highlighted in the diagram below)
+    <br><img src="images/jupyter_kernels.png" width="300" height="300"><br>  
+    
+> Note: For "fp32 vs. bf16 vs. int8" analysis type, please select "intel-tensorflow" as your Jupyter notebook kernel.
+
+6. Run through every cell of the notebook one by one
+
+> NOTE: For "stock vs. Intel Tensorflow" analysis type, in order to compare between stock and Intel-optimized TF results in section "Analyze TF Timeline results among Stock and Intel Tensorflow", users need to run all cells before the comparison section with both stock-tensorflow and intel-tensorflow kernels. 
+
+7. Click the 2nd notebook file like `benchmark_perf_timeline_analysis.ipynb` or `benchmark_data_types_perf_timeline_analysis` from an analysis type.
+8. Run through every cell of the notebook one by one to get the analysis result.  
+
+> NOTE: There is no requirement for the Jupyter kernel when users run the 2nd notebook to analysis performance in detail.
