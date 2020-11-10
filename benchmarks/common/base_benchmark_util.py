@@ -259,7 +259,7 @@ class BaseBenchmarkUtil(object):
         if not -1 <= args.socket_id < num_numas:
             if num_numas > 0:
                 raise ValueError("Socket id must be within NUMA number range: "
-                             "[0, {}].".format(num_numas - 1))
+                                 "[0, {}].".format(num_numas - 1))
             else:
                 print("Warning: There are no NUMA nodes on your system and a socket id has "
                       "been specified, a socket id can't be used so default to using all sockets")
