@@ -78,7 +78,7 @@ RUN venv-intel-tf/bin/python -m ipykernel install --user --name=intel-tensorflow
 
 EXPOSE 8888
 
-ARG LISTEN_IP=localhost
+ENV LISTEN_IP=localhost
 
 # Run Jupyter notebook
-CMD ["jupyter", "notebook", "--port=8888", "--no-browser", "--ip=${LISTEN_IP}", "--allow-root"]
+CMD jupyter notebook --port=8888 --no-browser --ip=${LISTEN_IP} --allow-root
