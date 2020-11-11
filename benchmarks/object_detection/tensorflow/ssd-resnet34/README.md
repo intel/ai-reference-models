@@ -385,18 +385,29 @@ $ pushd $MODEL_WORK_DIR
 
    To run for training, use the following command.
 
+   > Note: for best performance, use the same value for the arguments num-cores and num-intra-thread as follows:
+   >   For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+   >   For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
+   >   If the `--num-cores` or `--num-intra-threads` args are not specified, these args will be calculated based on
+   >   the number of logical cores on your system.
+
    ```bash
    $ cd $MODEL_WORK_DIR/models/benchmarks/
    
     $ python3 launch_benchmark.py \
     --data-location /path/to/coco-dataset \
     --model-source-dir $MODEL_WORK_DIR/tf_models \
-    --model-name ssd-resnet34 --framework tensorflow \
+    --model-name ssd-resnet34 \
+    --framework tensorflow \
     --precision fp32 --mode training \
-    --num-train-steps 100 --num-cores 52 \
-    --num-inter-threads 1 --num-intra-threads 52 \
-    --batch-size=52 --weight_decay=1e-4 \
-    --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+    --num-train-steps 100 \
+    --num-cores 52 \
+    --num-inter-threads 1 \
+    --num-intra-threads 52 \
+    --batch-size=100 \
+    --weight_decay=1e-4 \
+    --mpi_num_processes=1 \
+    --mpi_num_processes_per_socket=1 \
     --docker-image intel/intel-optimized-tensorflow:2.3.0
    ```
 
@@ -408,22 +419,30 @@ $ pushd $MODEL_WORK_DIR
    2. Next, navigate to the benchmarks directory of the intelai/models repository that was cloned earlier.
       Use the below command to test performance by training the model for a limited number of steps:
 
-      Note: for best performance, use the same value for the arguments num-cores and num-intra-thread as follows:
-        For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
-        For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
+      > Note: for best performance, use the same value for the arguments num-cores and num-intra-thread as follows:
+      >   For single instance run (mpi_num_processes=1): the value is equal to number of logical cores per socket.
+      >   For multi-instance run (mpi_num_processes > 1): the value is equal to (#_of_logical_cores_per_socket - 2).
+      >   If the `--num-cores` or `--num-intra-threads` args are not specified, these args will be calculated based on
+      >   the number of logical cores on your system.
 
       ```bash
       $ cd $MODEL_WORK_DIR/models/benchmarks/
       $ python3 launch_benchmark.py \
       --data-location <path to coco_training_dataset> \
       --model-source-dir <path to tf_models> \
-      --model-name ssd-resnet34 --framework tensorflow \
-      --precision bfloat16 --mode training \
-      --num-train-steps 100 --num-cores 52 \
-      --num-inter-threads 1 --num-intra-threads 52 \
-      --batch-size=100 --weight_decay=1e-4 \
+      --model-name ssd-resnet34 \
+      --framework tensorflow \
+      --precision bfloat16 \
+      --mode training \
+      --num-train-steps 100 \
+      --num-cores 52 \
+      --num-inter-threads 1 \
+      --num-intra-threads 52 \
+      --batch-size=100 \
+      --weight_decay=1e-4 \
       --num_warmup_batches=20 \
-      --mpi_num_processes=1 --mpi_num_processes_per_socket=1 \
+      --mpi_num_processes=1 \
+      --mpi_num_processes_per_socket=1 \
       --docker-image intel/intel-optimized-tensorflow:2.3.0
       ```
 
