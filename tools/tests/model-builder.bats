@@ -352,11 +352,6 @@ last_modified()
 # *** tests for build ***
 #
 
-@test "validate build image for 3d-unet-fp32-inference creates model-zoo:1.15.2-image-segmentation-3d-unet-fp32-inference" {
-      run model-builder -q --nocache build 3d-unet-fp32-inference
-      (( $status == 0 ))
-      [[ "${lines[@]}" =~ 3d-unet-fp32-inference ]]
-    }
 @test "validate build image for bert-large-fp32-inference creates model-zoo:2.3.0-language-modeling-bert-large-fp32-inference" {
       run model-builder -q --nocache build bert-large-fp32-inference
       (( $status == 0 ))
@@ -472,7 +467,7 @@ last_modified()
       (( $status == 0 ))
       [[ "${lines[@]}" =~ transformer-lt-official-fp32-inference ]]
     }
-@test "validate build image for unet-fp32-inference creates model-zoo:1.15.2-image-segmentation-3d-unet-fp32-inference model-zoo:1.15.2-image-segmentation-unet-fp32-inference" {
+@test "validate build image for unet-fp32-inference creates model-zoo:1.15.2-image-segmentation-unet-fp32-inference model-zoo:1.15.2-image-segmentation-unet-fp32-inference" {
       run model-builder -q --nocache build unet-fp32-inference
       (( $status == 0 ))
       [[ "${lines[@]}" =~ unet-fp32-inference ]]
