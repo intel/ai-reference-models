@@ -40,6 +40,7 @@ _usage()
   echo "# -- Generate the model's Dockerfile --"
   echo 'model-builder generate-dockerfile '${_all_models[2]}
   echo ''
+  echo ''
   echo "# -- Generate the model's Documentation --"
   echo 'model-builder generate-documentation '${_all_models[3]}
   echo ''
@@ -381,7 +382,7 @@ _model_builder_build_packages()
   # List output packages
   echo "--------------------------------------"
   echo "Model Packages:"
-  ls -1tl $_abs_model_dir/$_output_dir 
+  ls -1tl $_abs_model_dir/$_output_dir
   popd 1>/dev/null 2>/dev/null
 }
 
@@ -622,7 +623,7 @@ _model_builder_make()
     exit 1
   fi
 
-  # build packages
+  # build model packages
   _model_builder_build_packages $@
   if (( $? != 0 )); then
     echo "There was an error building model packages."
@@ -662,14 +663,6 @@ _model_builder_validate_models()
     fi
     _remainingModels=( ${_remainingModels[@]/$_arg/} )
   done
-
-  if [[ ${#_current_models[@]} == 0 ]]; then
-    echo 'missing model name'
-    exit 1
-  fi
-
-  return 0
-}
 
   if [[ ${#_current_models[@]} == 0 ]]; then
     echo 'missing model name'
