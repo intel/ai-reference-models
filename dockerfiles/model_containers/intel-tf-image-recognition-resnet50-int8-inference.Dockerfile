@@ -40,6 +40,7 @@ ARG PACKAGE_NAME
 
 ARG MODEL_WORKSPACE
 
+# ${MODEL_WORKSPACE} and below needs to be owned by root:root rather than the current UID:GID
 RUN umask 002 && mkdir -p ${MODEL_WORKSPACE} && chgrp root ${MODEL_WORKSPACE} && chmod g+s+w,o+s+r ${MODEL_WORKSPACE}
 
 ADD --chown=0:0 ${PACKAGE_DIR}/${PACKAGE_NAME}.tar.gz ${MODEL_WORKSPACE}
