@@ -42,15 +42,13 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        self.set_num_inter_intra_threads()
-
         # Train parameter parser
         parser = argparse.ArgumentParser(description="process custom_args")
         parser.add_argument('--weight_decay', type=float, default=5e-4)
         parser.add_argument('--num_warmup_batches', type=int, default=0)
         parser.add_argument('--num_train_steps', type=int, default=500, help='number of training batches')
         parser.add_argument('--num_inter_threads', type=int, default=1, help='number of inter-threads')
-        parser.add_argument('--num_intra_threads', type=int, default=28, help='number of intra-threads')
+        parser.add_argument('--num_intra_threads', type=int, default=-1, help='number of intra-threads')
         parser.add_argument('--epochs', dest="epochs", type=int, default=60,
                             help='number of training epochs. Pass 0 to train based on number of train_steps instead of number of epochs')  # noqa: E501
         parser.add_argument('--save_model_steps', dest="save_model_steps", type=int, default=10000,
@@ -58,6 +56,28 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         parser.add_argument('--timeline', dest="timeline", default=None, help='Trace filename for timeline')
 
         self.args = parser.parse_args(self.custom_args, namespace=self.args)
+
+        # Calculate num cores and num intra threads, if the values weren't provided.
+        # For a single instance run, use the number of logical cores per socket
+        # for multi instance, use the number of logical cores per socket - 2
+        # Note that most models use the number of physical cores for these values,
+        # but this model performs better with using logical cores.
+        if not self.args.num_cores or not self.args.num_intra_threads:
+            num_logical_cores_per_socket = \
+                platform_util.num_cores_per_socket * platform_util.num_threads_per_core
+
+            cores_to_use = num_logical_cores_per_socket \
+                if not os.environ["MPI_NUM_PROCESSES"] or int(os.environ["MPI_NUM_PROCESSES"]) <= 1 else \
+                num_logical_cores_per_socket - 2
+
+            if not self.args.num_cores or self.args.num_cores == -1:
+                self.args.num_cores = cores_to_use
+
+            if not self.args.num_intra_threads or self.args.self.args.num_intra_threads == -1:
+                self.args.num_intra_threads = cores_to_use
+
+        if not self.args.num_inter_threads:
+            self.args.num_inter_threads = 1
 
         omp_num_threads = platform_util.num_cores_per_socket
 
