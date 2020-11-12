@@ -81,7 +81,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-segmentation:tf-1.15.2-imz-2.0.0-unet-fp32-inference \
+  intel/image-segmentation:tf-1.15.2-imz-2.1.0-unet-fp32-inference \
   /bin/bash quickstart/fp32_inference.sh
 ```
 
