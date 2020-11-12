@@ -65,7 +65,7 @@ quickstart/<script name>.sh
 <!--- 60. Docker -->
 ## Docker
 
-The model container `intel/image-recognition:tf-2.3.0-imz-2.0.0-resnet50v1-5-int8-inference` includes the scripts and libraries needed to run
+The model container `intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-int8-inference` includes the scripts and libraries needed to run
 ResNet50 v1.5 Int8 inference. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
 and an output directory.
@@ -88,7 +88,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.3.0-imz-2.0.0-resnet50v1-5-int8-inference \
+  intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-int8-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
