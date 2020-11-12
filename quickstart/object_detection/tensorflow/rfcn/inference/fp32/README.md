@@ -108,7 +108,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.0.0-rfcn-fp32-inference \
+  intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-fp32-inference \
   /bin/bash quickstart/fp32_inference.sh
 ```
 
@@ -133,7 +133,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.0.0-rfcn-fp32-inference \
+  intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-fp32-inference \
   /bin/bash quickstart/fp32_accuracy.sh
 ```
 
