@@ -25,10 +25,10 @@ slice_sets:
                 <model name>: BERT Large
                 <precision>: FP32
                 <use case>: language_modeling
-                <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/bert-large-fp32-training.tar.gz
+                <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training.tar.gz
                 <package name>: bert-large-fp32-training.tar.gz
                 <package dir>: bert-large-fp32-training
-                <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/bert-large-fp32-training-k8s.tar.gz
+                <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training-k8s.tar.gz
                 <k8s package name>: bert-large-fp32-training-k8s.tar.gz
                 <k8s package dir>: bert-large-fp32-training-k8s
                 <docker image>: intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-fp32-training
