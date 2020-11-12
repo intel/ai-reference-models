@@ -36,7 +36,7 @@ slice_sets:
         <model name>: MobileNet V1
         <package dir>: mobilenet-v1-int8-inference
         <package name>: mobilenet-v1-int8-inference.tar.gz
-        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/mobilenet-v1-int8-inference.tar.gz'
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mobilenet-v1-int8-inference.tar.gz'
         <precision>: Int8
         <use case>: image_recognition
       uri: models/quickstart/image_recognition/tensorflow/mobilenet_v1/inference/int8

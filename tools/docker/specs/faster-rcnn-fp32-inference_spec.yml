@@ -37,7 +37,7 @@ slice_sets:
         <model name>: Faster R-CNN
         <package dir>: faster-rcnn-fp32-inference
         <package name>: faster-rcnn-fp32-inference.tar.gz
-        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/faster-rcnn-fp32-inference.tar.gz'
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/faster-rcnn-fp32-inference.tar.gz'
         <precision>: FP32
         <use case>: object_detection
       uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/fp32
