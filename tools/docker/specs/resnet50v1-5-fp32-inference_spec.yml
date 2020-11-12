@@ -54,8 +54,8 @@ slice_sets:
           <precision>: FP32
           <mode>: inference
           <use case>: image_recognition
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-inference.tar.gz
-          <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/resnet50v1-5-fp32-inference-k8s.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-fp32-inference.tar.gz
+          <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-fp32-inference-k8s.tar.gz
           <package name>: resnet50v1-5-fp32-inference.tar.gz
           <k8s package name>: resnet50v1-5-fp32-inference-k8s.tar.gz
           <package dir>: resnet50v1-5-fp32-inference
