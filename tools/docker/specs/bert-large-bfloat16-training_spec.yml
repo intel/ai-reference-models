@@ -31,7 +31,7 @@ slice_sets:
         uri: models/quickstart/language_modeling/tensorflow/bert_large/training/bfloat16/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: 'intel/language-modeling:tf-2.3.0-imz-2.0.0-bert-large-bfloat16-training'
+        <docker image>: 'intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-bfloat16-training'
         <mode>: training
         <model name>: BERT Large
         <package dir>: bert-large-bfloat16-training

@@ -58,7 +58,7 @@ slice_sets:
         <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_0_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
         <k8s package name>: wide-deep-large-ds-fp32-training-k8s.tar.gz
         <k8s package dir>: wide-deep-large-ds-fp32-training-k8s
-        <docker image>: intel/recommendation:tf-2.3.0-imz-2.0.0-wide-deep-large-ds-fp32-training
+        <docker image>: intel/recommendation:tf-2.3.0-imz-2.1.0-wide-deep-large-ds-fp32-training
       docs:
       - name: Title
         uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/title.md
