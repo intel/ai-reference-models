@@ -76,46 +76,24 @@ slice_sets:
           args:
               - PY_VERSION=3.7
     
-    object-detection:
-        - add_to_name: "-object-detection"
+    intel-python:
+        - add_to_name: ""
           partials:
-              - common
-              - python-build
-              - tensorflow/model-source
-              - object_detection/pip_installs
-              - object_detection/protoc
+              - miniconda
+              - intel-python
           args:
-              - PY_VERSION=3.7
+              - PY_VERSION=3
+              - INTEL_PY_BUILD=2020.2
 
     image-recognition:
         - add_to_name: "-image-recognition"
           partials:
               - common
-
-    image-segmentation:
-        - add_to_name: "-image-segmentation"
-          partials:
-              - common
-
-    language-modeling:
-        - add_to_name: "-language-modeling"
-          partials:
-              - common
-
-    recommendation:
-        - add_to_name: "-recommendation"
-          partials:
-              - common
-    
-    text-to-speech:
-        - add_to_name: "-text-to-speech"
-          partials:
-              - common
-
-    language-translation:
-        - add_to_name: "-language-translation"
-          partials:
-              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
 
     preprocess-coco-val:
         - add_to_name: "-preprocess-coco-val"
@@ -131,12 +109,73 @@ slice_sets:
           files:
                - source: datasets/coco
                  destination: scripts
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
 
-    intel-python:
-        - add_to_name: ""
+    image-segmentation:
+        - add_to_name: "-image-segmentation"
           partials:
-              - miniconda
-              - intel-python
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    language-modeling:
+        - add_to_name: "-language-modeling"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    language-translation:
+        - add_to_name: "-language-translation"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    object-detection:
+        - add_to_name: "-object-detection"
+          partials:
+              - common
+              - python-build
+              - tensorflow/model-source
+              - object_detection/pip_installs
+              - object_detection/protoc
           args:
-              - PY_VERSION=3
-              - INTEL_PY_BUILD=2020.2
+              - PY_VERSION=3.7
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    recommendation:
+        - add_to_name: "-recommendation"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    text-to-speech:
+        - add_to_name: "-text-to-speech"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
