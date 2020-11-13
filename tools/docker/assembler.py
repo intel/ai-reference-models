@@ -879,8 +879,6 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
         uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/baremetal.md
       - name: Docker
         uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/docker.md
-      - name: Kubernetes
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/kubernetes.md
       - name: License link
         uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/license.md
     """
