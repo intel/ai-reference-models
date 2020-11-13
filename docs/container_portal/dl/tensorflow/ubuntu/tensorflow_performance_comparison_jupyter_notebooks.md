@@ -9,7 +9,7 @@ docker pull intel/intel-optimized-tensorflow:2.3.0-ubuntu-20.04-jupyter-performa
 
 ## Description
 This is a container with Jupyter* notebooks and pre-installed environments for analyzing the performance benefit from using Intel® Optimizations for TensorFlow* with Intel® oneAPI Deep Neural Network Library (Intel® oneDNN).
-There are two different analysis types:"
+There are two different analysis types:
 * For the "Stock vs. Intel® Optimizations for TensorFlow*" analysis type, users can understand the performance benefit between stock and Intel® Optimizations for TensorFlow* 
 * For the "FP32 vs. BFloat16 vs. Int8"  analysis type, users can understand the performance benefit among different data types on Intel® Optimizations for TensorFlow*
 
@@ -52,7 +52,7 @@ There are two different analysis types:"
 5. Click the 2nd notebook file (`benchmark_perf_timeline_analysis.ipynb` or `benchmark_data_types_perf_timeline_analysis`) from an analysis type.
 6. Run through every cell of the notebook one by one to get the analysis result.
 
-   > NOTE: There is no requirement for the Jupyter* kernel when users run the 2nd notebook to analysis performance in detail.
+   > NOTE: There is no requirement for the Jupyter* kernel when users run the 2nd notebook to analyze performance in detail.
 
 ## Documentation and Sources
 
