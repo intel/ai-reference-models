@@ -103,7 +103,7 @@ and checkpoints will be written to the `CHECKPOINT_DIR`.
 
 <!-- 61. Advanced Options -->
 
-See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
+See the [Advanced Options for Model Packages and Containers](/quickstart/common/tensorflow/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
 
 <!--- 80. License -->
