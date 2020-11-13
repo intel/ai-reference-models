@@ -7,4 +7,3 @@
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
-* [Kubernetes](#kubernetes)
