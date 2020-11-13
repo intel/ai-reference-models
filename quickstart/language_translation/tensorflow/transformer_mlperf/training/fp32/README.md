@@ -125,7 +125,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-modeling:tf-2.3.0-imz-2.1.0-language-translation-transformer-mlperf-fp32-training \
+  intel/language-translation:tf-2.3.0-imz-2.1.0-transformer-mlperf-fp32-training \
   /bin/bash quickstart/<script name>
 ```
 
