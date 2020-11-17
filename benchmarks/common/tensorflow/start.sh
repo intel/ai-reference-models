@@ -733,7 +733,7 @@ function maskrcnn() {
 
 # mobilenet_v1 model
 function mobilenet_v1() {
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
     CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
     $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) \
     $(add_arg "--input_layer" ${input_layer}) $(add_arg "--output_layer" ${output_layer})"

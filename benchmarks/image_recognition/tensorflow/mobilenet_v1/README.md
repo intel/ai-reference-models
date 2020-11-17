@@ -4,6 +4,7 @@ This document has instructions for how to run MobileNet V1 for the
 following modes/precisions:
 * [Int8 inference](#int8-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
+* [BFloat16 inference](#bfloat16-inference-instructions)
 
 Instructions and scripts for model training are coming
 later.
@@ -279,3 +280,16 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
      Ran inference with batch size 100
      Log location outside container: {--output-dir value}/benchmark_mobilenet_v1_inference_fp32_20190110_211648.log
      ```
+
+# BFloat16 Inference Instructions
+
+MobileNet v1 BFloat16 inference depends on Auto-Mixed-Precision to convert graph from FP32 to BFloat16 online.
+Before evaluating MobileNet v1 BFloat16 inference, please set the following environment variables:
+
+```
+export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE=BiasAdd \
+export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE=Softmax \
+export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=BiasAdd,Softmax
+```
+
+The instructions are the same as FP32 inference instructions above, except one needs to change the `--precision=fp32` to `--precision=bfloat16` in the above commands.
