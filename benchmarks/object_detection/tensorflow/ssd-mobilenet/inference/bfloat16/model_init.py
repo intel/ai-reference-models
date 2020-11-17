@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,15 +16,13 @@
 # limitations under the License.
 #
 
-#
-
 import os
 
 from common.base_model_init import BaseModelInitializer, set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
-    # SSD-MobileNet Int8 inference model initialization
+    # SSD-MobileNet BFloat16 inference model initialization
     args = None
     custom_args = []
 
@@ -51,6 +49,7 @@ class ModelInitializer(BaseModelInitializer):
         self.command_prefix += " -w 200"
         self.command_prefix += " -a {0}".format(self.args.num_intra_threads)
         self.command_prefix += " -e {0}".format(self.args.num_inter_threads)
+        self.command_prefix += " -p {0}".format(self.args.precision)
         if self.args.data_location:
             self.command_prefix += " -d {0}".format(self.args.data_location)
 
