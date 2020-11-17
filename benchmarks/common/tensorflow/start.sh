@@ -777,10 +777,24 @@ function mtcc() {
 
 # NCF model
 function ncf() {
-  if [ ${PRECISION} == "fp32" ]; then
-    # For nfc, if dataset location is empty, script downloads dataset at given location.
+  if [[ -n "${clean}" ]]; then
+    CMD="${CMD} --clean"
+  fi
+
+  # NCF supports different datasets including ml-1m and ml-20m.
+  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
+    CMD="${CMD} --dataset=${dataset}"
+  fi
+
+  if [[ -n "${te}" && ${te} != "" ]]; then
+    CMD="${CMD} -te=${te}"
+  fi
+
+  if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
+    # For ncf, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
-      mkdir -p /dataset
+      mkdir -p ./dataset
+      CMD="${CMD} --data-location=./dataset"
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
