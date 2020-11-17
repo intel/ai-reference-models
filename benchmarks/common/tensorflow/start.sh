@@ -903,7 +903,7 @@ function rfcn() {
 
 # SSD-MobileNet model
 function ssd_mobilenet() {
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
     if [ ${BATCH_SIZE} != "-1" ]; then
       echo "Warning: SSD-MobileNet FP32 inference script does not use the batch_size arg"
     fi

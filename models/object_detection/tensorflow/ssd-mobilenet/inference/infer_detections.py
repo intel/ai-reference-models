@@ -20,6 +20,7 @@
 from __future__ import division
 
 import tensorflow as tf
+from tensorflow.core.protobuf import rewriter_config_pb2
 from tensorflow.python.data.experimental import parallel_interleave
 from tensorflow.python.data.experimental import map_and_batch
 from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
@@ -121,6 +122,10 @@ class model_infer:
                             help='For accuracy measurement only.',
                             dest='warmup_iter', default=200, type=int)
 
+    arg_parser.add_argument('-p', "--precision",
+                            help='Specify the model precision to use: fp32 or bfloat16',
+                            dest='precision', default='fp32', choices=['fp32', 'bfloat16'])
+
     # parse the arguments
     self.args = arg_parser.parse_args()
 
@@ -128,6 +133,8 @@ class model_infer:
     self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
     self.config.use_per_session_threads = 1
+    if self.args.precision == 'bfloat16':
+      self.config.graph_options.rewrite_options.auto_mixed_precision_mkl = rewriter_config_pb2.RewriterConfig.ON
 
     self.input_layer = 'image_tensor'
     self.output_layers = ['num_detections', 'detection_boxes', 'detection_scores', 'detection_classes']
