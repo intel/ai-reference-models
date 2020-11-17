@@ -86,7 +86,8 @@ ${PYTHON} export_classifier.py \
           --bert_config_file=$BERT_BASE_DIR/bert_config.json \
           --output_dir=${OUTPUT_DIR} \
           --precision=fp32 \
-          --saved_model=true
+          --saved_model=true \
+          --experimental_gelu=True # Disable this flag if your TenorFlow doesn't support
 ```
 
 ## Inference
