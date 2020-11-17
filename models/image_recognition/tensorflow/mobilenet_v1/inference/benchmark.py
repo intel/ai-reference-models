@@ -44,6 +44,7 @@ import numpy as np
 
 from google.protobuf import text_format
 import tensorflow as tf
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 def load_graph(model_file):
   graph = tf.Graph()
@@ -87,6 +88,8 @@ if __name__ == "__main__":
   parser.add_argument("--warmup_steps", type=int, default=10,
                       help="number of warmup steps")
   parser.add_argument("--steps", type=int, default=50, help="number of steps")
+  parser.add_argument("--precision", choices=["fp32", "bfloat16"], default="fp32",
+                      help="Specify the model precision to use: fp32 or bfloat16")
   args = parser.parse_args()
 
   if args.input_graph:
@@ -112,6 +115,8 @@ if __name__ == "__main__":
   config = tf.compat.v1.ConfigProto()
   config.inter_op_parallelism_threads = num_inter_threads
   config.intra_op_parallelism_threads = num_intra_threads
+  if args.precision == 'bfloat16':
+    config.graph_options.rewrite_options.auto_mixed_precision_mkl = rewriter_config_pb2.RewriterConfig.ON
 
   with tf.compat.v1.Session(graph=graph, config=config) as sess:
     input_shape = [batch_size, input_height, input_width, 3]
