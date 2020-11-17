@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,8 +16,6 @@
 # limitations under the License.
 #
 
-#
-
 import argparse
 import os
 from common.base_model_init import BaseModelInitializer
@@ -25,7 +23,7 @@ from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
-    """ Model initializer for MobileNet V1 FP32 inference """
+    """ Model initializer for MobileNet V1 BFloat16 inference """
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)

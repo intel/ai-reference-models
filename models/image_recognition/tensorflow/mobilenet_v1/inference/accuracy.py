@@ -44,6 +44,7 @@ import numpy as np
 
 from google.protobuf import text_format
 import tensorflow as tf
+from tensorflow.core.protobuf import rewriter_config_pb2
 import accuracy_preprocessing as preprocessing
 import accuracy_datasets as datasets
 
@@ -93,6 +94,10 @@ if __name__ == "__main__":
         '--num_intra_threads',
         help='number threads for an operator',
         type=int, default=1)
+    parser.add_argument(
+        '--precision',
+        help='Specify the model precision to use: fp32 or bfloat16',
+        choices=['fp32', 'bfloat16'], default='fp32')
     args = parser.parse_args()
 
     if args.input_graph:
@@ -131,6 +136,8 @@ if __name__ == "__main__":
     config = tf.compat.v1.ConfigProto()
     config.inter_op_parallelism_threads = num_inter_threads
     config.intra_op_parallelism_threads = num_intra_threads
+    if args.precision == 'bfloat16':
+      config.graph_options.rewrite_options.auto_mixed_precision_mkl = rewriter_config_pb2.RewriterConfig.ON
 
     total_accuracy1, total_accuracy5 = (0.0, 0.0)
     num_processed_images = 0
