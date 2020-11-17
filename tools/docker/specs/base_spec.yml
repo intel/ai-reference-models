@@ -64,6 +64,11 @@ slice_sets:
           args:
               - UBUNTU_VERSION=20.04
 
+    pytorch:
+        - add_to_name: "pytorch"
+          partials:
+              - pytorch/pytorch-base
+
     mpi-horovod:
         - add_to_name: ""
           partials:
