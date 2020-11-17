@@ -113,7 +113,7 @@ class ModelInitializer(BaseModelInitializer):
                 " --do_eval=" + str(self.args.do_eval) + eoo + \
                 " --vocab_file=" + str(self.args.vocab_file) + eoo + \
                 " --data_dir=" + str(self.args.data_dir) + eoo + \
-                " --eval_batch_size=" + str(self.args.batch_size)
+                " --eval_batch_size=" + str(self.args.batch_size) + \
                 " --experimental_gelu=" + str(self.args.experimental_gelu)
 
         if self.args.accuracy_only:
