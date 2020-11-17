@@ -50,6 +50,7 @@ class ClassifierExporter:
     use_one_hot_embeddings = False
 
     bert_config = BertConfig.from_json_file(bert_config)
+    bert_config.experimental_gelu = FLAGS.experimental_gelu
     if FLAGS.precision:
       bert_config.precision = FLAGS.precision
 
