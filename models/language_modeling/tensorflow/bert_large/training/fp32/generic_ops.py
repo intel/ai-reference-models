@@ -87,7 +87,7 @@ def gelu(x):
     `x` with the GELU activation applied.
   """
   if _use_experimental_gelu :
-    return tf.nn.gelu(x)
+    return tf.nn.gelu(features=x, approximate=True)
   else:
     x = i_cast(x)
     cdf = 0.5 * (1.0 + tf.tanh(
