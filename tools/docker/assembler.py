@@ -88,6 +88,9 @@ flags.DEFINE_boolean(
     'build_packages', False, 'Do not build packages', short_name='z')
 
 flags.DEFINE_boolean(
+    'build_k8s_packages', False, 'Do not build k8s packages', short_name='f')
+
+flags.DEFINE_boolean(
     'construct_dockerfiles', False, 'Do not build Dockerfiles', short_name='d')
 
 flags.DEFINE_boolean(
@@ -106,7 +109,10 @@ flags.DEFINE_boolean(
     'list_images', False, 'Do not list images that would be built', short_name='c')
 
 flags.DEFINE_boolean(
-    'list_packages', False, 'Do not list packages that would be built')
+    'list_packages', False, 'Do not list model packages that would be built')
+
+flags.DEFINE_boolean(
+    'list_k8s', False, 'Do not list k8s packages that would be built')
 
 flags.DEFINE_string(
     'run_tests_path', None,
@@ -146,7 +152,7 @@ flags.DEFINE_string(
 
 flags.DEFINE_string(
     'output_dir',
-    'output', 'Path to an output directory for model packages.'
+    'output', 'Path to an output directory for model and k8s packages.'
     ' Will be created if it doesn\'t exist.')
 
 flags.DEFINE_string(
@@ -206,9 +212,8 @@ flags.DEFINE_string(
     'pretrained model.')
 
 flags.DEFINE_boolean(
-    'quiet', False,
-    'quiet mode',
-    short_name='q')
+    'verbose', False,
+    'verbose mode')
 
 
 # Schema to verify the contents of merged spec yaml with Cerberus.
@@ -248,6 +253,8 @@ slice_sets:
               type: string
             uri:
               type: string
+            k8s_uri:
+              type: string
             text_replace:
               type: dict
             docs:
@@ -258,6 +265,8 @@ slice_sets:
                   name:
                     type: string
                   uri:
+                    type: string
+                  k8s_uri:
                     type: string
         test_runtime:
           type: string
@@ -279,6 +288,8 @@ slice_sets:
             type: dict
             schema:
               source:
+                type: string
+              k8s_source:
                 type: string
               destination:
                 type: string
@@ -381,10 +392,10 @@ class TfDockerTagValidator(cerberus.Validator):
 
 
 def eprint(*args, **kwargs):
-  if "quiet" in kwargs.keys():
-    quiet = kwargs["quiet"]
-    del kwargs["quiet"]
-    if quiet != True:
+  if "verbose" in kwargs.keys():
+    verbose = kwargs["verbose"]
+    del kwargs["verbose"]
+    if verbose == True:
       print(*args, file=sys.stderr, flush=True, **kwargs)
   else:
       print(*args, file=sys.stderr, flush=True, **kwargs)
@@ -504,7 +515,7 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
   for name, release in spec['releases'].items():
     for tag_spec in release['tag_specs']:
       if enabled_releases and name not in enabled_releases:
-        eprint(('> Skipping release {}'.format(name)), quiet=FLAGS.quiet)
+        eprint(('> Skipping release {}'.format(name)), verbose=FLAGS.verbose)
         continue
 
       used_slice_sets, required_cli_args = get_slice_sets_and_required_args(
@@ -523,7 +534,9 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             documentation = slices[len(slices)-1]['documentation']
             docs_list = gather_slice_list_items([documentation], 'docs')
             documentation_contents = merge_docs(docs_list)
-            documentation.update({ 'contents': documentation_contents })
+            documentation_k8s_contents = merge_docs(docs_list, 'k8s')
+            documentation.update({ 'contents': documentation_contents,
+                                   'k8s_contents': documentation_k8s_contents })
         else:
             docs_list = []
         files_list = gather_slice_list_items(slices, 'files')
@@ -575,19 +588,23 @@ def doc_contents(path):
     raise e
   return contents
 
-def merge_docs(docs_list):
+def merge_docs(docs_list, package_type='model'):
   """Build the README.md document"""
   contents=''
   for doc in docs_list:
-      name=doc['name']
-      uri=doc['uri']
-      contents+='\n'.join([doc_contents(uri) + '\n'])
+      uri = ''
+      if package_type == 'model' and 'uri' in doc:
+        uri = doc['uri']
+      elif package_type == 'k8s' and 'k8s_uri' in doc:
+        uri = doc['k8s_uri']
+      if uri:
+        contents += '\n'.join([doc_contents(uri) + '\n'])
   return contents
 
 def upload_in_background(hub_repository, dock, image, tag):
   """Upload a docker image (to be used by multiprocessing)."""
   image.tag(hub_repository, tag=tag)
-  eprint(dock.images.push(hub_repository, tag=tag), quiet=FLAGS.quiet)
+  eprint(dock.images.push(hub_repository, tag=tag), verbose=FLAGS.verbose)
 
 
 def mkdir_p(path):
@@ -626,7 +643,7 @@ def gather_existing_partials(partial_path):
       fullpath = os.path.join(path, name)
       if '.partial.Dockerfile' not in fullpath:
         eprint(('> Probably not a problem: skipping {}, which is not a '
-                'partial.').format(fullpath), quiet=FLAGS.quiet)
+                'partial.').format(fullpath), verbose=FLAGS.verbose)
         continue
       # partial_dir/foo/bar.partial.Dockerfile -> foo/bar
       simple_name = fullpath[len(partial_path) + 1:-len('.partial.dockerfile')]
@@ -646,16 +663,51 @@ def get_package_name(package_def):
       return cli_args["PACKAGE_NAME"]
   return None
 
+def get_k8s_name(package_def):
+  if "cli_args" in package_def:
+    cli_args = package_def["cli_args"]
+    if "K8S_PACKAGE_NAME" in cli_args:
+      return cli_args["K8S_PACKAGE_NAME"]
+  return None
+
+def get_file(source, destination):
+    if os.path.isdir(source):
+        if not os.path.isdir(os.path.dirname(destination)):
+            os.makedirs(os.path.dirname(destination))
+        file_list = copy_tree(source, destination)
+        eprint("> Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
+        doc_partials_dir = os.path.join(destination, ".docs")
+        if os.path.isdir(doc_partials_dir):
+            shutil.rmtree(doc_partials_dir, ignore_errors=True)
+        for gitignore in [f for f in file_list if '.gitignore' in f]:
+            os.remove(gitignore)
+    elif os.path.isfile(source):
+        # Ensure that the directories exist first, otherwise the file copy will fail
+        if not os.path.isdir(os.path.dirname(destination)):
+            os.makedirs(os.path.dirname(destination))
+        shutil.copy(source, destination)
+        eprint("> Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
+    else:
+        eprint("ERROR: Unable to find file or directory: {}".format(source))
+        sys.exit(1)
+
+def get_download(source, destination):
+    # Ensure that the directories exist first, otherwise the file copy will fail
+    if not os.path.isdir(os.path.dirname(destination)):
+        os.makedirs(os.path.dirname(destination))
+    urllib.request.urlretrieve(source, destination)
+    eprint("Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
+
 def write_package(package_def):
   output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
   if not os.path.isdir(output_dir):
-      eprint(">> Creating directory: {}".format(output_dir), quiet=FLAGS.quiet)
+      eprint(">> Creating directory: {}".format(output_dir), verbose=FLAGS.verbose)
       os.mkdir(output_dir)
 
   package = get_package_name(package_def)
   if package != None:
     tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
-    eprint("> Creating package: {}".format(tar_file), quiet=FLAGS.quiet)
+    eprint("> Creating package: {}".format(tar_file), verbose=FLAGS.verbose)
 
     try:
       temp_dir = tempfile.mkdtemp()
@@ -666,41 +718,56 @@ def write_package(package_def):
         for item in package_def["files"]:
           source = os.path.join(model_dir, item["source"])
           destination = os.path.join(temp_dir, item["destination"])
-          if os.path.isdir(source):
-            if not os.path.isdir(os.path.dirname(destination)):
-              os.makedirs(os.path.dirname(destination))
-            copy_tree(source, destination)
-            eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
-            doc_partials_dir = os.path.join(destination, ".docs")
-            if os.path.isdir(doc_partials_dir):
-              shutil.rmtree(doc_partials_dir, ignore_errors=True)
-          elif os.path.isfile(source):
-            # Ensure that the directories exist first, otherwise the file copy will fail
-            if not os.path.isdir(os.path.dirname(destination)):
-              os.makedirs(os.path.dirname(destination))
-            shutil.copy(source, destination)
-            eprint("> Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
-          else:
-            eprint("ERROR: Unable to find file or directory: {}".format(source))
-            sys.exit(1)
-
+          get_file(source, destination)
       # Grab things from the downloads list
       if "downloads" in package_def.keys():
         for item in package_def["downloads"]:
           source = item["source"]
           destination = os.path.join(temp_dir, item["destination"])
-          # Ensure that the directories exist first, otherwise the file copy will fail
-          if not os.path.isdir(os.path.dirname(destination)):
-            os.makedirs(os.path.dirname(destination))
-          urllib.request.urlretrieve(source, destination)
-          eprint("Copied {} to {}".format(source, destination), quiet=FLAGS.quiet)
+          get_download(source, destination)
       # Write tar file
-      eprint("Writing {} to {}".format(temp_dir, tar_file), quiet=FLAGS.quiet)
+      eprint("Writing {} to {}".format(temp_dir, tar_file), verbose=FLAGS.verbose)
       with tarfile.open(tar_file, "w:gz") as tar:
         tar.add(temp_dir, arcname=package)
     finally:
-      eprint("Deleting temp directory: {}".format(temp_dir), quiet=FLAGS.quiet)
+      eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
       shutil.rmtree(temp_dir)
+
+
+def write_k8s_package(package_def):
+    output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
+    if not os.path.isdir(output_dir):
+        eprint(">> Creating directory: {}".format(output_dir), verbose=FLAGS.verbose)
+        os.mkdir(output_dir)
+
+    package = get_k8s_name(package_def)
+    if package != None:
+        tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
+        eprint("> Creating k8s package: {}".format(tar_file), verbose=FLAGS.verbose)
+
+        try:
+            temp_dir = tempfile.mkdtemp()
+
+            # Grab things from the files list
+            model_dir = os.path.join(os.getcwd(), FLAGS.model_dir)
+            if "files" in package_def.keys():
+                for item in [f for f in package_def["files"] if 'k8s_source' in f]:
+                    source = os.path.join(model_dir, item["k8s_source"])
+                    destination = os.path.join(temp_dir, item["destination"])
+                    get_file(source, destination)
+            # Grab things from the downloads list
+            if "downloads" in package_def.keys():
+                for item in package_def["downloads"]:
+                    source = item["source"]
+                    destination = os.path.join(temp_dir, item["destination"])
+                    get_download(source, destination)
+            # Write tar file
+            eprint("Writing {} to {}".format(temp_dir, tar_file), verbose=FLAGS.verbose)
+            with tarfile.open(tar_file, "w:gz") as tar:
+                tar.add(temp_dir, arcname=package)
+        finally:
+            eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
+            shutil.rmtree(temp_dir)
 
 def update_spec(a, b):
     """Merge two dictionary specs into one, recursing through any embedded dicts."""
@@ -837,7 +904,7 @@ def auto_generate_package_file_list(framework, use_case, model_name, precision, 
         shutil.copyfile("./{}".format(template_script), os.path.join(
             quickstart_folder_full_path, template_script))
         eprint("Added a template for a quickstart script at: {}\n".format(
-            os.path.join(quickstart_folder, template_script)), quiet=FLAGS.quiet)
+            os.path.join(quickstart_folder, template_script)), verbose=FLAGS.verbose)
     model_package_files.append({'source': quickstart_folder,
                                 'destination': 'quickstart'})
 
@@ -879,6 +946,8 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
         uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/baremetal.md
       - name: Docker
         uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/docker.md
+      - name: Kubernetes
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/kubernetes.md
       - name: License link
         uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/license.md
     """
@@ -890,7 +959,7 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
     docs_folder_full_path = os.path.join(model_dir, docs_folder)
     if os.path.exists(docs_folder_full_path) == False:
       shutil.copytree("./docs", docs_folder_full_path)
-      eprint("> Copied {} to {}".format("./docs", docs_folder_full_path), quiet=FLAGS.quiet)
+      eprint("> Copied {} to {}".format("./docs", docs_folder_full_path), verbose=FLAGS.verbose)
     markdowns = os.listdir(docs_folder_full_path)
 
     readme_folder = os.path.join(os.path.basename(model_dir), 'quickstart', use_case, framework,
@@ -990,7 +1059,7 @@ def auto_generate_model_spec(spec_name):
     use_case_dashes = zoo_use_case.replace('_', '-')
 
     eprint('\nUse case: {}\nFramework: {}\nModel name: {}\nMode: {}\nPrecision: {}\n'.format(
-        use_case_dashes, framework, model_name, mode, precision), quiet=FLAGS.quiet)
+        use_case_dashes, framework, model_name, mode, precision), verbose=FLAGS.verbose)
 
     # grab at copy of the model spec template and edit it for this model
     model_spec = model_spec_template.copy()
@@ -1028,7 +1097,7 @@ def auto_generate_model_spec(spec_name):
         yaml.dump(model_spec, f)
 
     # print out info for the user to see the spec and file name
-    eprint(yaml.dump(model_spec), quiet=FLAGS.quiet)
+    eprint(yaml.dump(model_spec), verbose=FLAGS.verbose)
     eprint("Wrote the spec file to your directory at "
            "tools/docker/specs/{}\nPlease edit the file if additional "
            "files, partials, or downloads are needed.\n".format(spec_file_name))
@@ -1122,9 +1191,24 @@ def main(argv):
               eprint('{} {}'.format(target,tar_file))
     sys.exit(0)
 
+  if FLAGS.list_k8s:
+    for tag, tag_defs in all_tags.items():
+      for tag_def in tag_defs:
+        #eprint(tag_def)
+        #sys.exit(0)
+        if 'tag_spec' in tag_def:
+          lst = re.findall('{([^{}]*)}',tag_def['tag_spec'])
+          if lst is not None and len(lst) > 0:
+            target = lst[len(lst)-1]
+            package = get_k8s_name(tag_def)
+            if package != None:
+              tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
+              eprint('{} {}'.format(target,tar_file))
+    sys.exit(0)
+
   # Empty Dockerfile directory if building new Dockerfiles
   if FLAGS.construct_dockerfiles and not FLAGS.only_tags_matching:
-    eprint('> Emptying Dockerfile dir "{}"'.format(FLAGS.dockerfile_dir), quiet=FLAGS.quiet)
+    eprint('> Emptying Dockerfile dir "{}"'.format(FLAGS.dockerfile_dir), verbose=FLAGS.verbose)
     delete_dockerfiles(FLAGS.dockerfile_dir)
 
   # Set up Docker helper
@@ -1153,29 +1237,33 @@ def main(argv):
   succeeded_tags = []
   for tag, tag_defs in all_tags.items():
     for tag_def in tag_defs:
-      eprint('> Working on {}'.format(tag), quiet=FLAGS.quiet)
+      eprint('> Working on {}'.format(tag), verbose=FLAGS.verbose)
 
       if FLAGS.exclude_tags_matching and re.match(FLAGS.exclude_tags_matching,
                                                   tag):
         eprint('>> Excluded due to match against "{}".'.format(
-            FLAGS.exclude_tags_matching), quiet=FLAGS.quiet)
+            FLAGS.exclude_tags_matching), verbose=FLAGS.verbose)
         continue
 
       if FLAGS.only_tags_matching and not [x for x in FLAGS.only_tags_matching if re.match(x, tag)]:
           eprint('>> Excluded due to failure to match against "{}".'.format(
-              FLAGS.only_tags_matching), quiet=FLAGS.quiet)
+              FLAGS.only_tags_matching), verbose=FLAGS.verbose)
           continue
 
-      # Write packages to the output_dir
+      # Write model packages to the output_dir
       if FLAGS.build_packages:
         write_package(tag_def)
+
+      # Write k8s packages to the output_dir
+      if FLAGS.build_k8s_packages:
+        write_k8s_package(tag_def)
 
       # Write releases marked "is_dockerfiles" into the Dockerfile directory
       if FLAGS.construct_dockerfiles and tag_def['is_dockerfiles']:
         path = os.path.join(FLAGS.dockerfile_dir,
                             tag_def['dockerfile_subdirectory'],
                             tag + '.Dockerfile')
-        eprint('>> Writing {}...'.format(path), quiet=FLAGS.quiet)
+        eprint('>> Writing {}...'.format(path), verbose=FLAGS.verbose)
         if not FLAGS.dry_run:
           mkdir_p(os.path.dirname(path))
           with open(path, 'w') as f:
@@ -1191,6 +1279,12 @@ def main(argv):
               for k, v in text_replace.items():
                 documentation['contents'] = documentation['contents'].replace(k, v)
               f.write(documentation['contents'])
+        if all(key in documentation for key in ('k8s_contents', 'k8s_uri')):
+            readme = os.path.join(documentation['k8s_uri'], documentation['name'])
+            with open(readme, 'w', encoding="utf-8") as f:
+                for k, v in text_replace.items():
+                    documentation['k8s_contents'] = documentation['k8s_contents'].replace(k, v)
+                f.write(documentation['k8s_contents'])
 
       # Don't build any images for dockerfile-only releases
       if not FLAGS.build_images:
@@ -1210,12 +1304,12 @@ def main(argv):
       if not FLAGS.dry_run:
         with open(dockerfile, 'w') as f:
           f.write(tag_def['dockerfile_contents'])
-      eprint('>> (Temporary) writing {}...'.format(dockerfile), quiet=FLAGS.quiet)
+      eprint('>> (Temporary) writing {}...'.format(dockerfile), verbose=FLAGS.verbose)
 
       repo_tag = '{}:{}'.format(FLAGS.repository, tag)
-      eprint('>> Building {} using build args:'.format(repo_tag), quiet=FLAGS.quiet)
+      eprint('>> Building {} using build args:'.format(repo_tag), verbose=FLAGS.verbose)
       for arg, value in tag_def['cli_args'].items():
-        eprint('>>> {}={}'.format(arg, value), quiet=FLAGS.quiet)
+        eprint('>>> {}={}'.format(arg, value), verbose=FLAGS.verbose)
 
       # Note that we are NOT using cache_from, which appears to limit
       # available cache layers to those from explicitly specified layers. Many
@@ -1225,12 +1319,13 @@ def main(argv):
       image, logs = None, []
       if not FLAGS.dry_run:
         try:
+          quiet = True if FLAGS.verbose == False else False
           # Use low level APIClient in order to stream log output
           resp = dock.api.build(
               timeout=FLAGS.hub_timeout,
               path='.',
               nocache=FLAGS.nocache,
-              quiet=FLAGS.quiet,
+              quiet=quiet,
               dockerfile=dockerfile,
               buildargs=tag_def['cli_args'],
               tag=repo_tag)
@@ -1243,7 +1338,7 @@ def main(argv):
               output = next(resp).decode('utf-8')
               json_output = json.loads(output.strip('\r\n'))
               if 'stream' in json_output:
-                eprint(json_output['stream'], end='', quiet=FLAGS.quiet)
+                eprint(json_output['stream'], end='', verbose=FLAGS.verbose)
                 match = re.search(r'(^Successfully built |sha256:)([0-9a-f]+)$',
                                   json_output['stream'])
                 if match:
@@ -1252,7 +1347,7 @@ def main(argv):
                 # collect all log lines into the logs object
                 logs.append(json_output)
             except StopIteration:
-              eprint(('Docker image build complete.'), quiet=FLAGS.quiet)
+              eprint(('Docker image build complete.'), verbose=FLAGS.verbose)
               break
             except ValueError:
               eprint('> Error parsing from docker image build: {}'.format(output))
@@ -1268,9 +1363,9 @@ def main(argv):
           # multiprocessing support to track failures properly.
           if FLAGS.run_tests_path:
             if not tag_def['tests']:
-              eprint(('>>> No tests to run.'), quiet=FLAGS.quiet)
+              eprint(('>>> No tests to run.'), verbose=FLAGS.verbose)
             for test in tag_def['tests']:
-              eprint(('>> Testing {}...'.format(test)), quiet=FLAGS.quiet)
+              eprint(('>> Testing {}...'.format(test)), verbose=FLAGS.verbose)
               container, = dock.containers.run(
                   image,
                   '/tests/' + test,
@@ -1292,10 +1387,10 @@ def main(argv):
               err = container.logs(stdout=False, stderr=True)
               container.remove()
               if out:
-                eprint('>>> Output stdout:', quiet=FLAGS.quiet)
-                eprint(out.decode('utf-8'), quiet=FLAGS.quiet)
+                eprint('>>> Output stdout:', verbose=FLAGS.verbose)
+                eprint(out.decode('utf-8'), verbose=FLAGS.verbose)
               else:
-                eprint('>>> No test standard out.', quiet=FLAGS.quiet)
+                eprint('>>> No test standard out.', verbose=FLAGS.verbose)
               if err:
                 eprint('>>> Output stderr:')
                 eprint(err.decode('utf-8'))
@@ -1310,7 +1405,7 @@ def main(argv):
                   eprint('>> ABORTING due to --stop_on_failure!')
                   exit(1)
               else:
-                eprint('>> Tests look good!', quiet=FLAGS.quiet)
+                eprint('>> Tests look good!', verbose=FLAGS.verbose)
 
         except docker.errors.BuildError as e:
           eprint('>> {} failed to build with message: "{}"'.format(
@@ -1336,7 +1431,7 @@ def main(argv):
         if tag_failed:
           continue
 
-        eprint('>> Uploading to {}:{}'.format(FLAGS.hub_repository, tag), quiet=FLAGS.quiet)
+        eprint('>> Uploading to {}:{}'.format(FLAGS.hub_repository, tag), verbose=FLAGS.verbose)
         if not FLAGS.dry_run:
           p = multiprocessing.Process(
               target=upload_in_background,
@@ -1353,10 +1448,10 @@ def main(argv):
     exit(1)
 
   eprint('> Writing built{} tags to standard out.'.format(
-      ' and tested' if FLAGS.run_tests_path else ''), quiet=FLAGS.quiet)
+      ' and tested' if FLAGS.run_tests_path else ''), verbose=FLAGS.verbose)
   images_built_var = os.environ.get("IMAGES_BUILT", "")
   for tag in succeeded_tags:
-    eprint('{}:{}'.format(FLAGS.repository, tag), quiet=FLAGS.quiet)
+    eprint('{}:{}'.format(FLAGS.repository, tag), verbose=FLAGS.verbose)
     images_built_var = tag if not images_built_var else "{},{}".format(images_built_var, tag)
 
   # Update the env var of images built
