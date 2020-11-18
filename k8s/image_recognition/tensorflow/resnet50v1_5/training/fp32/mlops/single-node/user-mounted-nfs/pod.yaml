@@ -14,19 +14,9 @@ spec:
     workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
     command: # {"$openapi":"COMMAND"}
     - /workspace/resnet50v1-5-fp32-training/quickstart/fp32_training_demo.sh # {"$openapi":"COMMAND"}
-    env:
-    - name: DATASET_DIR
-      value: /datasets # {"$openapi":"DATASET_DIR"}
-    - name: GROUP_ID
-      value: "0" # {"$openapi":"GROUP_ID_VALUE"}
-    - name: GROUP_NAME
-      value: root # {"$openapi":"GROUP_NAME"}
-    - name: OUTPUT_DIR
-      value: /nfs/root/resnet50v1-5-fp32-training/output # {"$openapi":"OUTPUT_PATH"}
-    - name: USER_ID
-      value: "0" # {"$openapi":"USER_ID_VALUE"}
-    - name: USER_NAME
-      value: root # {"$openapi":"USER_NAME"}
+    envFrom:
+    - configMapRef:
+        name: resnet50v1-5-fp32-training # {"$openapi":"MODEL_NAME"}
     volumeMounts:
     - name: datasets
       mountPath: /datasets # {"$openapi":"DATASET_DIR"}
