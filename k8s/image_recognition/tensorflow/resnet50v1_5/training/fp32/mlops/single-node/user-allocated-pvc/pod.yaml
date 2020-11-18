@@ -12,8 +12,25 @@ spec:
   - name: single-node
     image: docker.io/intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
     workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
-    command: # {"$openapi":"COMMAND"}
-    - /workspace/resnet50v1-5-fp32-training/quickstart/fp32_training_demo.sh # {"$openapi":"COMMAND"}
+    command:
+    - python
+    args: # {"$openapi":"COMMAND"}
+    - /workspace/resnet50v1-5-fp32-training/benchmarks/launch_benchmark.py # {"$openapi":"COMMAND"}
+    - --model-name=resnet50v1_5
+    - --precision=fp32
+    - --mode=training
+    - --framework
+    - tensorflow
+    - --batch-size
+    - "16"
+    - --checkpoint
+    - $(OUTPUT_DIR)
+    - --data-location=$(DATASET_DIR)
+    - --noinstall
+    - --
+    - steps=50
+    - train_epochs=1
+    - epochs_between_evals=1
     envFrom:
     - configMapRef:
         name: resnet50v1-5-fp32-training # {"$openapi":"MODEL_NAME"}
@@ -23,9 +40,6 @@ spec:
       readOnly: true
     - name: pvc-path
       mountPath: /pvc # {"$openapi":"PVC_PATH"}
-    - name: mlops-scripts
-      mountPath: /workspace/resnet50v1-5-fp32-training/quickstart/fp32_training_demo.sh # {"$openapi":"COMMAND"}
-      subPath: fp32_training_demo.sh # {"$openapi":"MODEL_SCRIPT"}
   volumes:
   - name: datasets
     hostPath:
@@ -33,11 +47,4 @@ spec:
   - name: pvc-path
     persistentVolumeClaim:
       claimName: workdisk # {"$openapi":"PVC_NAME"}
-  - name: mlops-scripts
-    configMap:
-      name: mlops-scripts
-      defaultMode: 0770
-      items:
-      - key: fp32_training_demo.sh # {"$openapi":"MODEL_SCRIPT"}
-        path: fp32_training_demo.sh # {"$openapi":"MODEL_SCRIPT"}
   restartPolicy: OnFailure
