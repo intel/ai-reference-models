@@ -1450,13 +1450,14 @@ def main(argv):
   eprint('> Writing built{} tags to standard out.'.format(
       ' and tested' if FLAGS.run_tests_path else ''), verbose=FLAGS.verbose)
   images_built_var = os.environ.get("IMAGES_BUILT", "")
-  for tag in succeeded_tags:
-    eprint('{}:{}'.format(FLAGS.repository, tag), verbose=FLAGS.verbose)
-    images_built_var = tag if not images_built_var else "{},{}".format(images_built_var, tag)
+  if not FLAGS.dry_run:
+    for tag in succeeded_tags:
+      eprint('{}:{}'.format(FLAGS.repository, tag), verbose=FLAGS.verbose)
+      images_built_var = tag if not images_built_var else "{},{}".format(images_built_var, tag)
 
-  # Update the env var of images built
-  if FLAGS.build_images and images_built_var:
-    print("IMAGES_BUILT={}".format(images_built_var))
+    # Update the env var of images built
+    if FLAGS.build_images and images_built_var:
+      print("IMAGES_BUILT={}".format(images_built_var))
 
 
 if __name__ == '__main__':
