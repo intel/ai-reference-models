@@ -87,7 +87,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: MODEL_SCRIPT
-          value: fp32_training.sh
+          value: launch_benchmark.py
           isSet: true
           setBy: model-builder
     io.k8s.cli.setters.NFS_PATH:
@@ -108,16 +108,6 @@ openAPI:
           isSet: true
           required: true
           setBy: model-builder
-    io.k8s.cli.substitutions.COMMAND:
-      x-k8s-cli:
-        substitution:
-          name: COMMAND
-          pattern: ${MODEL_DIR}/quickstart/${MODEL_SCRIPT}
-          values:
-          - marker: ${MODEL_DIR}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
-          - marker: ${MODEL_SCRIPT}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_SCRIPT'
     io.k8s.cli.setters.IMAGE_SUFFIX:
       description: appended to image name
       x-k8s-cli:
@@ -178,3 +168,13 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
+    io.k8s.cli.substitutions.COMMAND:
+      x-k8s-cli:
+        substitution:
+          name: COMMAND
+          pattern: ${MODEL_DIR}/benchmarks/${MODEL_SCRIPT}
+          values:
+          - marker: ${MODEL_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
+          - marker: ${MODEL_SCRIPT}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_SCRIPT'

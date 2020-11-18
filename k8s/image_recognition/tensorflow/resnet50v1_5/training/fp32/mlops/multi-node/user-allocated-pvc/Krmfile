@@ -140,15 +140,6 @@ openAPI:
           isSet: true
           required: true
           setBy: model-builder
-    io.k8s.cli.setters.PV_NAME:
-      description: pv name
-      x-k8s-cli:
-        setter:
-          name: PV_NAME
-          value: workdisk
-          isSet: true
-          required: true
-          setBy: model-builder
     io.k8s.cli.setters.REGISTRY:
       description: image location
       x-k8s-cli:
