@@ -19,6 +19,20 @@ openAPI:
           isSet: true
           required: true
           setBy: model-builder
+    io.k8s.cli.substitutions.OUTPUT_PATH:
+      x-k8s-cli:
+        substitution:
+          name: OUTPUT_PATH
+          pattern: ${PVC_PATH}/${USER_NAME}/${MODEL_NAME}/${OUTPUT_DIR}
+          values:
+          - marker: ${PVC_PATH}
+            ref: '#/definitions/io.k8s.cli.setters.PVC_PATH'
+          - marker: ${USER_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
+          - marker: ${MODEL_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
+          - marker: ${OUTPUT_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.OUTPUT_DIR'
     io.k8s.cli.setters.DATASET_DIR:
       description: input dataset directory
       x-k8s-cli:
@@ -58,6 +72,14 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
+    io.k8s.cli.substitutions.FS_ID_VALUE:
+      x-k8s-cli:
+        substitution:
+          name: FS_ID_VALUE
+          pattern: "${FS_ID}"
+          values:
+          - marker: ${FS_ID}
+            ref: '#/definitions/io.k8s.cli.setters.FS_ID'
     io.k8s.cli.setters.REGISTRY:
       description: image location
       x-k8s-cli:
@@ -101,32 +123,6 @@ openAPI:
           name: MODEL_DIR
           value: /workspace/resnet50v1-5-fp32-training
           setBy: model-builder
-    io.k8s.cli.setters.NFS_PATH:
-      description: nfs path
-      x-k8s-cli:
-        setter:
-          name: NFS_PATH
-          value: /nfs
-          isSet: true
-          required: true
-          setBy: model-builder
-    io.k8s.cli.setters.NFS_SERVER:
-      description: nfs server
-      x-k8s-cli:
-        setter:
-          name: NFS_SERVER
-          value: 0.0.0.0
-          isSet: true
-          required: true
-          setBy: model-builder
-    io.k8s.cli.substitutions.PYTHONPATH:
-      x-k8s-cli:
-        substitution:
-          name: PYTHONPATH
-          pattern: ${MODEL_DIR}/models/image_recognition/tensorflow/resnet50v1_5/training:$PYTHONPATH
-          values:
-          - marker: ${MODEL_DIR}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
     io.k8s.cli.substitutions.MODEL_SCRIPT:
       x-k8s-cli:
         substitution:
@@ -170,17 +166,21 @@ openAPI:
           value: "2"
           isSet: true
           setBy: model-builder
-    io.k8s.cli.substitutions.OUTPUT_PATH:
+    io.k8s.cli.setters.PVC_NAME:
+      description: pvc name
       x-k8s-cli:
-        substitution:
-          name: OUTPUT_PATH
-          pattern: ${NFS_PATH}/${USER_NAME}/${MODEL_NAME}/${OUTPUT_DIR}
-          values:
-          - marker: ${NFS_PATH}
-            ref: '#/definitions/io.k8s.cli.setters.NFS_PATH'
-          - marker: ${USER_NAME}
-            ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
-          - marker: ${MODEL_NAME}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
-          - marker: ${OUTPUT_DIR}
-            ref: '#/definitions/io.k8s.cli.setters.OUTPUT_DIR'
+        setter:
+          name: PVC_NAME
+          value: pvc-name
+          isSet: true
+          required: true
+          setBy: model-builder
+    io.k8s.cli.setters.PVC_PATH:
+      description: pvc path
+      x-k8s-cli:
+        setter:
+          name: PVC_PATH
+          value: /pvc
+          isSet: true
+          required: true
+          setBy: model-builder
