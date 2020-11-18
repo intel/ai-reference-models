@@ -1311,9 +1311,6 @@ function wide_deep_large_ds() {
       if [ "${kmp_block_time}" != None ] ; then
         CMD="${CMD} --kmp_block_time=${kmp_block_time}"
       fi
-      if [ "${kmp_affinity}" != None ]; then
-        CMD="${CMD} --kmp_affinity=${kmp_affinity}"
-      fi
       if [ "${kmp_settings}" != None ]; then
         CMD="${CMD} --kmp_settings=${kmp_settings}"
       fi
