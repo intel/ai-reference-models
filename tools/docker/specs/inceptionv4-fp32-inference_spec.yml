@@ -1,0 +1,75 @@
+releases:
+  dockerfiles:
+    tag_specs:
+    - '{intel-tf}{image-recognition}{inceptionv4-fp32-inference}'
+  versioned:
+    tag_specs:
+    - '{_TAG_PREFIX}{intel-tf}{image-recognition}{inceptionv4-fp32-inference}'
+slice_sets:
+  inceptionv4-fp32-inference:
+  - add_to_name: -inceptionv4-fp32-inference
+    args:
+    - PACKAGE_NAME=inceptionv4-fp32-inference
+    dockerfile_subdirectory: model_containers
+    documentation:
+      docs:
+      - name: Title
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/title.md
+      - name: Description
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/description.md
+      - name: Download link
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/download.md
+      - name: Datasets
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/datasets.md
+      - name: Quick Start Scripts
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/quickstart.md
+      - name: Bare Metal
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/baremetal.md
+      - name: Docker
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/docker.md
+      - name: License
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32/.docs/license.md
+      name: README.md
+      text_replace:
+        <docker image>: intel/image-recognition:tf-2.3.0-imz-2.1.0-inceptionv4-fp32-inference
+        <mode>: inference
+        <model name>: Inception V4
+        <package dir>: inceptionv4-fp32-inference
+        <package name>: inceptionv4-fp32-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/inceptionv4-fp32-inference.tar.gz
+        <precision>: FP32
+        <use case>: image_recognition
+      uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32
+    downloads:
+    - destination: inceptionv4_fp32_pretrained_model.pb
+      source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv4_fp32_pretrained_model.pb
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/image_recognition/__init__.py
+      source: benchmarks/image_recognition/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/__init__.py
+      source: benchmarks/image_recognition/tensorflow/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/inceptionv4/README.md
+      source: benchmarks/image_recognition/tensorflow/inceptionv4/README.md
+    - destination: benchmarks/image_recognition/tensorflow/inceptionv4/__init__.py
+      source: benchmarks/image_recognition/tensorflow/inceptionv4/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/inceptionv4/inference/__init__.py
+      source: benchmarks/image_recognition/tensorflow/inceptionv4/inference/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/inceptionv4/inference/fp32
+      source: benchmarks/image_recognition/tensorflow/inceptionv4/inference/fp32
+    - destination: benchmarks/image_recognition/tensorflow/inceptionv4/inference
+      source: benchmarks/image_recognition/tensorflow/inceptionv4/inference
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: models/common
+      source: models/common
+    - destination: models/image_recognition/tensorflow/inceptionv4/inference
+      source: models/image_recognition/tensorflow/inceptionv4/inference
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/image_recognition/tensorflow/inceptionv4/inference/fp32
+    partials:
+    - model_package
+    - entrypoint
