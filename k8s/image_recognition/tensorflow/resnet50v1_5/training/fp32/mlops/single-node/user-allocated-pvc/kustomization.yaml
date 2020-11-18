@@ -4,8 +4,4 @@ resources:
 - service-account.yaml
 - config-map.yaml
 - pod.yaml
-configMapGenerator:
-- files:
-  - fp32_training_demo.sh
-  name: mlops-scripts
 namespace: default

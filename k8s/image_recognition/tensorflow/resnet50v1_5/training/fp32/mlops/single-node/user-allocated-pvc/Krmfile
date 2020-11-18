@@ -123,14 +123,6 @@ openAPI:
           name: MODEL_DIR
           value: /workspace/resnet50v1-5-fp32-training
           setBy: model-builder
-    io.k8s.cli.substitutions.MODEL_SCRIPT:
-      x-k8s-cli:
-        substitution:
-          name: MODEL_SCRIPT
-          pattern: ${MODEL_DIR}/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/imagenet_main.py
-          values:
-          - marker: ${MODEL_DIR}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
     io.k8s.cli.setters.IMAGE_SUFFIX:
       description: appended to image name
       x-k8s-cli:
@@ -171,7 +163,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: PVC_NAME
-          value: pvc-name
+          value: workdisk
           isSet: true
           required: true
           setBy: model-builder
@@ -184,3 +176,21 @@ openAPI:
           isSet: true
           required: true
           setBy: model-builder
+    io.k8s.cli.setters.MODEL_SCRIPT:
+      description: model script name
+      x-k8s-cli:
+        setter:
+          name: MODEL_SCRIPT
+          value: launch_benchmark.py
+          isSet: true
+          setBy: model-builder
+    io.k8s.cli.substitutions.COMMAND:
+      x-k8s-cli:
+        substitution:
+          name: COMMAND
+          pattern: ${MODEL_DIR}/benchmarks/${MODEL_SCRIPT}
+          values:
+          - marker: ${MODEL_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
+          - marker: ${MODEL_SCRIPT}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_SCRIPT'
