@@ -13,12 +13,29 @@ and for local testing.
 
 **Setup steps**
 
-1. Add the model-builder directory to your `PATH`:
+1. You can either install model-builder to a directory in your PATH, update your PATH to include where model-builder is located 
+   within the model repository under tools/scripts or call model-builder using the complete path name. 
+   Model-builder will check to make sure the model repository directories are accessible.
+
+   Either:
+
    ```
-   export PATH=${PWD}/tools/scripts:$PATH
+   $ install tools/scripts/model-builder /usr/local/bin
    ```
-   > If you do not add this directory to your `PATH`, you will need to
-   > provide the full path when calling the `model-builder`.
+
+   or
+
+   ```
+   $ export PATH=$PWD/tools/scripts:$PATH
+   ```
+
+   or
+
+   ```
+   $ export MODELS_REPO=$HOME/src/models
+   $ $MODELS_REPO/tools/scripts/model-builder
+   ```
+
 
 2. Navigate to the `models` repo to execute the `model-builder`. Use the
    `--help` flag to see a list of all the options.
