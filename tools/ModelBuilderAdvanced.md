@@ -18,7 +18,7 @@ This global option will output the internal call to docker run as well as debug 
 
 ### --dry-run
 
-This global option will output what model-builder will execute. Paired with --verbose, it will show just the docker run calls that would occur.
+This global option will output what model-builder will execute; it shows just the docker run calls that would occur.
 
 ## Custom Settings
 
@@ -169,3 +169,38 @@ For single targets such as `bert-large-fp32-training` the model-builder adds an 
 ```
 --only_tags_matching=.*bert-large-fp32-training$
 ```
+
+### Running test-suites
+
+The model-builder's run-test-suit subcommand will generate tests for one or more subcommands where each subcommand can be given one or more release-groups and one or more models.
+The syntax is shown below:
+
+```
+model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|package|package-k8s] --release-group <release-group> <model> ...
+```
+
+The run-test-suite subcommand generates test cases using syntax compatible with [bats-core](https://github.com/bats-core/bats-core). After generation, it calls bats providing the generated script. Several examples with output are shown below
+
+1. `model-builder run-test-suite --command generate-documentation --command generate-dockerfile --release-group versioned resnet50-fp32-inference resnet50-int8-inference`
+
+```
+ ✓ validate generate-documentation for resnet50-fp32-inference in release-group versioned creates quickstart/image_recognition/tensorflow/resnet50/inference/fp32/README.md
+ ✓ validate generate-documentation for resnet50-int8-inference in release-group versioned creates quickstart/image_recognition/tensorflow/resnet50/inference/int8/README.md
+ ✓ validate generate-dockerfile for resnet50-fp32-inference in release-group versioned creates intel-tf-image-recognition-resnet50-fp32-inference.Dockerfile
+ ✓ validate generate-dockerfile for resnet50-int8-inference in release-group versioned creates intel-tf-image-recognition-resnet50-int8-inference.Dockerfile
+
+4 tests, 0 failures
+```
+
+2. `model-builder run-test-suite -c package-k8s`
+
+```
+ ✓ validate package-k8s for bert-large-fp32-training in release-group dockerfiles creates bert-large-fp32-training-k8s.tar.gz
+ ✓ validate package-k8s for resnet50v1-5-fp32-inference in release-group dockerfiles creates resnet50v1-5-fp32-inference-k8s.tar.gz
+ ✓ validate package-k8s for resnet50v1-5-fp32-training in release-group dockerfiles creates resnet50v1-5-fp32-training-k8s.tar.gz
+ ✓ validate package-k8s for rfcn-fp32-inference in release-group dockerfiles creates rfcn-fp32-inference-k8s.tar.gz
+ ✓ validate package-k8s for wide-deep-large-ds-fp32-training in release-group dockerfiles creates wide-deep-large-ds-fp32-training-k8s.tar.gz
+
+5 tests, 0 failures
+```
+

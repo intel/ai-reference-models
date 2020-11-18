@@ -25,11 +25,6 @@ header: |
 # of functionality ("slices") by listing all of the "slice sets" to use when
 # building.
 releases:
-    # The coco container needs TF 1.15.2, so build it separately
-    tf_1.15.2_containers:
-        tag_specs:
-            - "{_TAG_PREFIX}{intel-tf}{object-detection}{preprocess-coco-val}"
-
     versioned:
         tag_specs:
             - "{_TAG_PREFIX}{intel-tf}{object-detection}"
@@ -42,7 +37,6 @@ releases:
         upload_images: false
         tag_specs:
             - "{intel-tf}{object-detection}"
-            - "{intel-tf}{object-detection}{preprocess-coco-val}"
             - "{intel-tf}{image-recognition}"
             - "{intel-tf}{language-modeling}"
             - "{intel-tf}{language-translation}"
@@ -95,25 +89,6 @@ slice_sets:
           partials:
               - common
           files:
-               - source: LICENSE
-                 destination: licenses/LICENSE
-               - source: third_party
-                 destination: licenses/third_party
-
-    preprocess-coco-val:
-        - add_to_name: "-preprocess-coco-val"
-          dockerfile_subdirectory: "dataset_containers"
-          partials:
-               - model_package
-               - datasets/execute_preprocess_coco_val
-               - entrypoint
-          args:
-               - TF_MODELS_BRANCH=1efe98bb8e8d98bbffc703a90d88df15fc2ce906
-               - PACKAGE_NAME=preprocess-coco-val
-               - TENSORFLOW_TAG=1.15.2
-          files:
-               - source: datasets/coco
-                 destination: scripts
                - source: LICENSE
                  destination: licenses/LICENSE
                - source: third_party
