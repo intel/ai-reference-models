@@ -16,6 +16,7 @@ slice_sets:
     args:
     - UBUNTU_VERSION=20.04
     - PACKAGE_NAME=scikit-learn-census
+    - MINICONDA_VERSION=4.7.12
     dockerfile_subdirectory: ml/scikit-learn
     partials:
     - model_package
