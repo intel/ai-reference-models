@@ -12,7 +12,7 @@ Detailed information on mlperf Benchmark can be found in [mlperf/training](https
 <!--- 20. Download link -->
 ## Download link
 
-[transformer_mlperf-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer_mlperf-fp32-training.tar.gz)
+[transformer-mlperf-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer-mlperf-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -30,13 +30,13 @@ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
 
 For the training dataset, download and untar the model package.    
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer_mlperf-fp32-training.tar.gz
-tar -xzf transformer_mlperf-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer-mlperf-fp32-training.tar.gz
+tar -xzf transformer-mlperf-fp32-training.tar.gz
 
-export PYTHONPATH=$PYTHONPATH:/home/<user>/transformer_mlperf-fp32-training/models/common/tensorflow
+export PYTHONPATH=$PYTHONPATH:/home/<user>/transformer-mlperf-fp32-training/models/common/tensorflow
 export DATASET_DIR=/home/<user>/transformer_data
     
-cd /home/<user>/transformer_mlperf-fp32-training/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer
+cd /home/<user>/transformer-mlperf-fp32-training/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer
 python data_download.py --data_dir=$DATASET_DIR
 ```
 
@@ -77,9 +77,9 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer_mlperf-fp32-training.tar.gz
-tar -xzf transformer_mlperf-fp32-training.tar.gz
-cd transformer_mlperf-fp32-training
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer-mlperf-fp32-training.tar.gz
+tar -xzf transformer-mlperf-fp32-training.tar.gz
+cd transformer-mlperf-fp32-training
 
 quickstart/fp32_training.sh (or quickstart/fp32_training_demo.sh)
 ```
@@ -101,7 +101,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-cd transformer_mlperf-fp32-training
+cd transformer-mlperf-fp32-training
 quickstart/fp32_training_mpirun.sh
 ```
 
