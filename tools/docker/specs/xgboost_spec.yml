@@ -10,7 +10,7 @@ slice_sets:
   - add_to_name: xgboost
     args:
     - UBUNTU_VERSION=20.04
+    - MINICONDA_VERSION=4.7.12
     dockerfile_subdirectory: ml/XGBoost
     partials:
     - ml/xgboost
-    - tensorflow/conda-install-tensorflow
