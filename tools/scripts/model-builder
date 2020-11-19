@@ -72,7 +72,6 @@ _usage()
 _model_builder._onexit()
 {
   if [[ -f $_all_specs ]]; then
-    echo 'Removing '"${_tmp_files[@]}" >>/tmp/out
     echo ${_tmp_files[@]} | xargs rm -rf
   fi
   if (( $# > 0 )) && [[ -n $1 ]] && (( $1 != 0 )); then
