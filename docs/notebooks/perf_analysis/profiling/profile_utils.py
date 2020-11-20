@@ -217,11 +217,33 @@ class ConfigFile:
         self.patches_keyword = ''
         self.throughput_keyword = ''
         self.throughput_index = -1
+        self.mkl_only = True
+        self.support_accuracy = False
 
     def read_section(self):
         config = configparser.ConfigParser()
         config.read(self.configpath)
         return config.sections()
+
+    def read_supported_section(self, on_mkl=False, accuracy_only=False):
+        config = configparser.ConfigParser()
+        config.read(self.configpath)
+        supported_sections = []
+        for each_section in config.sections():
+            is_supported = True
+            for each_key, each_val in config.items(each_section):
+                if each_key == 'mkl-only':
+                    if each_val is not None:
+                        if eval(each_val) is True and on_mkl is False:
+                            is_supported = False
+                if each_key == 'support-accuracy':
+                    if each_val is not None:
+                        if eval(each_val) is False and accuracy_only is True:
+                            is_supported = False
+            if is_supported is True:
+                supported_sections.append(each_section)
+
+        return supported_sections
 
     def convert_configs_to_pd_dataframe(self):
 
@@ -322,10 +344,17 @@ class ConfigFile:
                             val = val.split('-')[1:]
                             keyword = " ".join(val)
                             self.patches_keyword = keyword
+                    elif each_key == 'mkl-only':
+                        if len(each_val) != 0 :
+                            self.mkl_only = eval(each_val)
+                    elif each_key == 'support-accuracy':
+                        if len(each_val) != 0 :
+                            self.support_accuracy = eval(each_val)
                     else:
-                        if each_val[0] == '=':
+                        if len(each_val) != 0 :
+                            if each_val[0] == '=':
                                 configs.append(key+each_val)
-                        else:
+                            else:
                                 configs.append(key)
                                 configs.append(each_val)
 
@@ -923,20 +952,42 @@ class TFTimelinePresenter:
         merged.to_csv(merged_filepath, index=False)
         return ret
 
-    def merge_two_csv_files_v2(self, merged_filepath, a, b, tags=['stock','intel']):
+    def create_csv_among_extra_common_ops(self, extra, common, fpath, tag1, tag2):
+        import pandas as pd
+        extra = extra.rename(columns={extra.columns.values[1]: tag1})
+        extra = extra.drop(columns=['speedup'])
+        common_time = common[common.columns.values[1]].sum(axis=0)
+        append_op = 'Common ops with '+tag2
+        to_append = [append_op, common_time, True]
+        series = pd.Series(to_append, index = extra.columns)
+        extra = extra.append(series, ignore_index=True)
+        extra.to_csv(fpath, index=False)
+        return extra
+
+    def merge_two_csv_files_v2(self, merged_filepaths, a, b, tags=['stock','intel']):
         merged = a.merge(b, on='op')
-        merged['speedup'] = merged['elapsed_time_mkl_x'] / merged['elapsed_time_mkl_y']
-        merged = merged.rename(columns={"elapsed_time_mkl_x": tags[0], "elapsed_time_mkl_y": tags[1]})
-        if merged['mkl_op_x'] is True:
+        extra_a = a[~a.op.isin(merged.op)]
+        common_a = a[a.op.isin(merged.op)]
+        extra_b = b[~b.op.isin(merged.op)]
+        common_b = b[b.op.isin(merged.op)]
+        merged['speedup'] = merged.iloc[:,1] / merged.iloc[:,4]
+        merged = merged.rename(columns={merged.columns.values[1]: tags[0], merged.columns.values[4]: tags[1]})
+        if merged.iloc[:,3] is True:
             merged['mkl_op'] = True
-        merged['mkl_op'] = merged['mkl_op_x'] + merged['mkl_op_y']
-        merged = merged.drop(columns=['speedup_x', 'speedup_y'])
-        merged = merged.drop(columns=['mkl_op_x', 'mkl_op_y'])
+        merged['mkl_op'] = merged.iloc[:,3] + merged.iloc[:,6]
+        merged = merged.drop(columns=[merged.columns.values[2], merged.columns.values[3], merged.columns.values[5], merged.columns.values[6]])
         if self.showAbsNumber is False:
-            ret = merged.drop(columns=['elapsed_time_mkl_x', 'elapsed_time_mkl_y'])
+            ret = merged.drop(columns=[merged.columns.values[1], merged.columns.values[4]])
         else:
             ret = merged
-        merged.to_csv(merged_filepath, index=False)
+        merged.to_csv(merged_filepaths[0], index=False)
+
+        fpath = merged_filepaths[1]
+        self.create_csv_among_extra_common_ops(extra_a, common_a, fpath, tags[0], tags[1])
+
+        fpath = merged_filepaths[2]
+        self.create_csv_among_extra_common_ops(extra_b, common_b, fpath, tags[1], tags[0])
+
         return ret
 
     def compare_bar_pie_charts(self, chart_type):
@@ -958,7 +1009,7 @@ class TFTimelinePresenter:
             ax[index].imshow(image)
             index = index + 1
 
-    def plot_compare_bar_charts(self, fpath, tags=['stock','intel']):
+    def plot_compare_bar_charts(self, fpath, tags=['stock','intel'], num_hotspots=20):
         if self.showAbsNumber is False:
             return
         import numpy as np
@@ -971,12 +1022,13 @@ class TFTimelinePresenter:
         item_name = reader.fieldnames[0]
         a_name = reader.fieldnames[1]
         b_name = reader.fieldnames[2]
-
+        index = 0
         for row in reader:
-            if row['op'] != 'unknown':
+            if row['op'] != 'unknown' and index < num_hotspots:
                 xlabels.append(row[item_name] + "_(mkl-" + str(row['mkl_op']) + ')')
                 b_means.append(float(row[b_name]))
                 a_means.append(float(row[a_name]))
+                index = index + 1
 
         N = len(xlabels)
         ind = np.arange(N)
@@ -994,7 +1046,7 @@ class TFTimelinePresenter:
         plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
         plt.show()
 
-    def plot_compare_ratio_bar_charts(self, fpath, tags=['stock','intel']):
+    def plot_compare_ratio_bar_charts(self, fpath, tags=['stock','intel'], num_hotspots=20, max_speedup=100):
         import numpy as np
         import matplotlib.pyplot as plt
         import csv
@@ -1007,17 +1059,25 @@ class TFTimelinePresenter:
         c_means = []
         item_name = reader.fieldnames[0]
         c_name = reader.fieldnames[3]
+        index = 0
         for row in reader:
-            if row['op'] != 'unknown':
+            if row['op'] != 'unknown' and index < num_hotspots:
+
+                if float(row[c_name]) > max_speedup:
+                   speedup_val = max_speedup
+                else:
+                   speedup_val = float(row[c_name])
+
                 if str(row['mkl_op']) == 'True':
                     #xlabels.append(row[item_name] + "_(mkl-" + str(row['mkl_op']) + ')')
                     b_xlabels.append(row[item_name])
-                    b_means.append(float(row[c_name]))
+                    b_means.append(speedup_val)
                     a_means.append(1)
                 else:
                     c_xlabels.append(row[item_name])
-                    c_means.append(float(row[c_name]))
+                    c_means.append(speedup_val)
                     a_means.append(1)
+                index = index + 1
         xlabels = b_xlabels + c_xlabels
         b_N = len(b_xlabels)
         c_N = len(c_xlabels)
@@ -1038,6 +1098,42 @@ class TFTimelinePresenter:
         ax.legend([rects[0]],[tags[1]], fontsize=20)
         plt.axhline(y=1, linewidth=4, color='r')
         filename = 'compared_tf_op_duration_ratio_bar.png'
+        plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
+        plt.show()
+
+    def plot_pie_chart(self, fpath, tag):
+        import matplotlib.pyplot as plt
+        import csv
+        import matplotlib as mpl
+        mpl.rcParams['font.size'] = 9.0
+        reader = csv.DictReader(open(fpath))
+        xlabels = []
+        a_means = []
+        item_name = reader.fieldnames[0]
+        a_name = reader.fieldnames[1]
+
+        for row in reader:
+            if row['op'] != 'unknown':
+                xlabels.append(row[item_name])
+                a_means.append(float(row[a_name]))
+
+        fig = plt.figure(figsize=(18, 15))
+
+        ax1 = fig.add_axes([0, 0, .5, .5], aspect=1)
+        wedges, texts, autotexts = ax1.pie(
+            a_means, autopct='%1.1f%%',
+            textprops=dict(color="w",  fontsize=18), radius=1.2)
+        ax1.set_title(tag, fontdict={'fontsize': 28})
+
+        box = ax1.legend(
+            wedges,
+            xlabels,
+            title="TF Ops",
+            loc="center left",
+            bbox_to_anchor=(1, 0, 0.5, 1),
+            fontsize=20)
+        box.get_title().set_fontsize(20)
+        filename = 'tf_op_duration_pie.png'
         plt.savefig(filename, bbox_inches='tight', pad_inches=0.1)
         plt.show()
 
