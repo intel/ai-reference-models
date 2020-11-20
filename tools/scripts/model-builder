@@ -29,7 +29,7 @@ _usage()
   echo ''
   echo "Examples:"
   echo "# -- Initialize a new model specification --"
-  echo 'model-builder init-spec <modelname-precision-mode>'
+  echo 'model-builder init-spec <modelname-precision-mode> <framework>'
   echo ''
   echo "# -- List all release groups --"
   echo 'model-builder releases'
@@ -684,7 +684,7 @@ _model_builder._echo_command()
 #
 _model_builder.init_spec()
 {
-  local _args=() _asm_new_spec new_model _model_dir _model_dir_mount
+  local _args=() _asm_new_spec new_model _model_dir _model_dir_mount framework
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -708,6 +708,7 @@ _model_builder.init_spec()
   _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
 
   new_model=$1
+  framework=$2
   echo "Auto-generating a new spec file for: $new_model"
 
   _model_dir_mount='-v '$MODEL_DIR':/tf/models'
@@ -727,6 +728,7 @@ _model_builder.init_spec()
       --arg http_proxy=${http_proxy} \
       --arg https_proxy=${https_proxy} \
       --generate_new_spec=${new_model} \
+      --framework=${framework} \
       $_model_download \
       $_model_dir \
       ${_args[@]}
@@ -845,6 +847,7 @@ _model_builder.build()
       --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
       --repository ${LOCAL_REPO} \
       --release ${_release_group} \
+      ${TEST_DIR:+"--run_tests_path" "$TEST_DIR"} \
       --build_images \
       ${_release_args[@]} \
       ${_args[@]} 2>&1 | tee $temp_output_file
@@ -2386,6 +2389,13 @@ _model_builder_main()
           _model_builder._validate_models $@ || exit 0
           _only_tags_matching="$(_model_builder._build_only_tags_matching_args $@)"
           _model_builder.make $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
+          ;;
+      esac
+      ;;
+    $(($#>=2)))
+      case "$1" in
+        init-spec)
+          _model_builder_new_spec $_quiet $_dry_run $2 ${3:-"tensorflow"}
           ;;
         models)
           _current_releases=(${_all_releases[@]})

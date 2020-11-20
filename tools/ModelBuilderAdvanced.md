@@ -34,6 +34,8 @@ packages and containers.
 | `TAG_PREFIX` | `${TENSORFLOW_TAG}` | Prefix used for the image tags (typically this will be the TF version) |
 | `MODEL_WORKSPACE` | `/workspace` | Location where the model package will be extracted in the model container |
 | `IMAGE_LIST_FILE` | None | Specify a file path where the list of built image/tags will be written. This is used by automated build scripts. |
+| `TEST_DIR` | None | Specify the root directory for testing docker partials. See run\_tests\_path argument to assembler for more details |
+
 
 You can set these environment variables to customize the model-builder
 settings. For example:
