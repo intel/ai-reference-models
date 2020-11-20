@@ -1,0 +1,82 @@
+releases:
+  dockerfiles:
+    tag_specs:
+    - '{ubuntu}{intel-python}{pytorch-conda}{ipex-conda}{torch_ccl-conda}{dlrm-bf16-training}'
+  versioned:
+    tag_specs:
+    - '{ubuntu}{intel-python}{pytorch-conda}{ipex-conda}{torch_ccl-conda}{dlrm-bf16-training}'
+slice_sets:
+  pytorch-conda:
+  - add_to_name: "pytorch"
+    partials:
+    - pytorch/pytorch-conda
+    tests:
+    - pytorch/import-torch.sh 
+  ipex-conda:
+  - add_to_name: ""
+    partials:
+    - pytorch/ipex-conda
+    tests:
+    - pytorch/import-ipex.sh
+  torch_ccl-conda:
+  - add_to_name: ""
+    args:
+    - PYTHON_VERSION=3.7
+    partials:
+    - pytorch/torchccl-conda
+    tests:
+    - pytorch/import-torchccl.sh
+  dlrm-bf16-training:
+  - add_to_name: -dlrm-bf16-training
+    args:
+    - PACKAGE_NAME=dlrm-bf16-training
+    dockerfile_subdirectory: pytorch 
+    documentation:
+      docs:
+      - name: Title
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/title.md
+      - name: Description
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/description.md
+      - name: Datasets
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/datasets.md
+      - name: Quick Start Scripts
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/quickstart.md
+      - name: Bare Metal
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/baremetal.md
+      - name: Docker
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/docker.md
+      - name: License
+        uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16/.docs/license.md
+      name: README.md
+      text_replace:
+        <docker image>: ''
+        <mode>: training
+        <model name>: Dlrm
+        <package dir>: dlrm-bf16-training
+        <package name>: dlrm-bf16-training.tar.gz
+        <package url>: ''
+        <precision>: bf16
+        <use case>: recommendation
+      uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16
+    downloads: []
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: benchmarks/recommendation/__init__.py
+      source: benchmarks/recommendation/__init__.py
+    - destination: benchmarks/recommendation/pytorch/dlrm/README.md
+      source: benchmarks/recommendation/pytorch/dlrm/README.md
+    - destination: benchmarks/recommendation/pytorch/dlrm/training/bf16
+      source: benchmarks/recommendation/pytorch/dlrm/training/bf16
+    - destination: models/common
+      source: models/common
+    - destination: models/recommendation/pytorch/dlrm/training/bf16
+      source: models/recommendation/pytorch/dlrm/training/bf16
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/recommendation/pytorch/dlrm/training/bf16
+    partials:
+    - recommendation/dlrm
