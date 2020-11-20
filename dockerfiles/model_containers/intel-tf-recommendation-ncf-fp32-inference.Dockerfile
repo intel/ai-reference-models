@@ -55,7 +55,8 @@ RUN pip install \
         kaggle==1.3.9 \
         numpy==1.16.1 \
         oauth2client==4.1.2 \
-        pandas psutil==5.4.3 \
+        pandas \
+        psutil==5.6.6 \
         py-cpuinfo==3.3.0 \
         typing
 

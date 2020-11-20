@@ -31,7 +31,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
 * numactl
 * numpy==1.16.1
-* Pillow==5.3.0
+* Pillow>=7.1.0
 * matplotlib
 * click
 * Clone the [tf_unet](https://github.com/jakeret/tf_unet) repository,
