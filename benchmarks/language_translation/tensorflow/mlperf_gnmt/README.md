@@ -50,7 +50,7 @@ cp artifacts/tensorflow_addons-*.whl /home/<user>/models/models/language_transla
 ```
 >Note: for running on bare metal, please install the `tensorflow_addons` wheel on your machine:
 ```
-pip install artifacts/tensorflow_addons-*.whl
+pip install artifacts/tensorflow_addons-*.whl --no-deps
 ```
 
 5. Navigate to the `benchmarks` directory in your local clone of
