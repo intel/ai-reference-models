@@ -12,3 +12,4 @@ matplotlib
 pillow>=7.1.0
 lxml
 absl-py
+notebook>=6.1.5
