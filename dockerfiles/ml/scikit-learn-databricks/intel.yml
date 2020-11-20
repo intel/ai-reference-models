@@ -1,0 +1,17 @@
+name: intel
+channels:
+  - intel
+  - defaults
+dependencies:
+  - intel::numpy=1.18.5
+  - intel::python=3.7.7
+  - intel::scikit-learn=0.23.1
+  - intel::scipy=1.4.1
+  - intel::tensorflow=2.2.0
+  - ipykernel=5.1.4
+  - ipython=7.12.0
+  - pandas=1.0.1
+  - pip=20.0.2
+  - six=1.14.0
+  - pip:
+    - pyarrow==0.15.1
