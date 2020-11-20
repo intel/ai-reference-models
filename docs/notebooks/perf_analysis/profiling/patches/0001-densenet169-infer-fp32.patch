@@ -28,7 +28,7 @@ index f984fdec..76023315 100644
    num_intra_threads = args.num_intra_threads
  
 +  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
-+  configf.read_config('densenet169 infer int8')
++  configf.read_config('densenet169 infer fp32')
 +  infer_many_runs_timeline = TimeLiner()
 +  infer_run_metadata = tf.compat.v1.RunMetadata()
 +
