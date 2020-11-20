@@ -10,3 +10,4 @@ horovod==0.20.0
 tensorflow-addons==0.8.1
 opencv-python
 numpy==1.17.4
+notebook>=6.1.5
