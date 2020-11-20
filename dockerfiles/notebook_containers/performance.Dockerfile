@@ -23,6 +23,7 @@ RUN apt-get -y update && \
         python3-pip \
         git \
         wget \
+        unzip \
         numactl
 
 RUN pip3 -q install pip --upgrade && \
