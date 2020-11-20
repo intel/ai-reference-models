@@ -4,14 +4,14 @@
 ## Pull Command
 
 ```
-docker pull intel/intel-optimized-pytorch:pytorch-1.5.1-3-ipex-latest
+docker pull intel/intel-optimized-pytorch:1.5.0-rc3-ipex-latest
 ```
 
 ## Tags & Pull Commands for Other Versions
 
 | OS  | Target | Version | Size | Updated | Pull Command |
 | --- | ------ | ------- | ---- | ------- | ------------ |
-| ubuntu:20.04 |        | ipex-latest-pytorch-1.5.1-3 | 708.77MB |         | `docker pull intel/intel-optimized-pytorch:pytorch-1.5.1-3-ipex-latest` |
+| ubuntu:20.04 |        | 1.5.0-rc3-ipex-latest | 708.77MB |         | `docker pull intel/intel-optimized-pytorch:1.5.0-rc3-ipex-latest` |
 
 ## Description
 Intel® Extensions for PyTorch extends the original PyTorch framework by creating extensions that optimize performance of Deep Learning models. This container contains PyTorch v1.5.1, Intel® Extensions for Pytorch and, IPEX version 0.2.
