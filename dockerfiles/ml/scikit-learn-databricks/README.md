@@ -3,7 +3,12 @@ Here you can find Docker file for Scikit-learn
 
 It's based on Scikit-learn and TensorFlow conda packages from Intel channel
 
+To build the container try this:
+```
+docker build -f scikit-learn-databricks.Dockerfile . -t intel/intel-optimized-ml:tf-2.2.0-imz-2.1.1-scikit-learn
+```
+
 To run the workflow try this:
 ```
-$ docker run -it amr-registry.caas.intel.com/aipg-tf/model-zoo:databricks bash
+$ docker run -it intel/intel-optimized-ml:tf-2.2.0-imz-2.1.1-scikit-learn bash
 ```
