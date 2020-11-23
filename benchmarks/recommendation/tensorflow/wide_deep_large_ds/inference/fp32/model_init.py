@@ -29,6 +29,7 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
     def parse_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument("--num_omp_threads", dest='num_omp_threads',
