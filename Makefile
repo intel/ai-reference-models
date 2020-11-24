@@ -22,7 +22,7 @@ ACTIVATE="$(VIRTUALENV_DIR)/bin/activate"
 
 .PHONY: venv
 
-all: venv
+all: venv lint unit_test
 
 # we need to update pip and setuptools because venv versions aren't latest
 # need to prepend $(ACTIVATE) everywhere because all make calls are in subshells
