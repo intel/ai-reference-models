@@ -56,10 +56,11 @@ class CPUInfo():
         args = ["lscpu", "--parse=CPU,Core,Socket,Node"]
         process_lscpu = subprocess.check_output(args, universal_newlines=True).split("\n")
 
-        # Get information about core, node, socket and cpu
+        # Get information about core, node, socket and cpu. On a machine with no NUMA nodes, the last column is empty
+        # so regex also check for empty string on the last column
         bind_info = []
         for line in process_lscpu:
-            pattern = r"^([\d]+,[\d]+,[\d]+,[\d]+)"
+            pattern = r"^([\d]+,[\d]+,[\d]+,$|[\d]+)"
             regex_out = re.search(pattern, line)
             if regex_out:
                 bind_info.append(regex_out.group(1).strip().split(","))
@@ -85,7 +86,11 @@ class CPUInfo():
                 cpu_id = int(entry[0])
                 core_id = int(entry[1])
                 node_id = int(entry[2])
-                socket_id = int(entry[3])
+                # On a machine where there is no NUMA nodes, entry[3] could be empty, so set socket_id = -1
+                if entry[3] != "":
+                    socket_id = int(entry[3])
+                else:
+                    socket_id = -1
 
                 # Skip nodes other than current node number
                 if node_number != node_id:
