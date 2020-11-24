@@ -1,0 +1,22 @@
+[
+    [{
+        "cpu_id": 0,
+        "node_id": 0,
+        "socket_id": -1
+    }],
+    [{
+        "cpu_id": 1,
+        "node_id": 1,
+        "socket_id": -1
+    }],
+    [{
+        "cpu_id": 2,
+        "node_id": 2,
+        "socket_id": -1
+    }],
+    [{
+        "cpu_id": 3,
+        "node_id": 3,
+        "socket_id": -1
+    }]
+]
