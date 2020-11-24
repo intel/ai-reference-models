@@ -60,7 +60,7 @@ class CPUInfo():
         # so regex also check for empty string on the last column
         bind_info = []
         for line in process_lscpu:
-            pattern = r"^([\d]+,[\d]+,[\d]+,$|[\d]+)"
+            pattern = r"^([\d]+,[\d]+,[\d]+,([\d]+|$))"
             regex_out = re.search(pattern, line)
             if regex_out:
                 bind_info.append(regex_out.group(1).strip().split(","))
