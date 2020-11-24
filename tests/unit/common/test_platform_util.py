@@ -117,3 +117,21 @@ def test_cpu_info_binding_information(subprocess_mock):
         expected_value = json.load(json_data)
 
     assert generated_value == expected_value
+
+
+def test_cpu_info_binding_information_no_numa(subprocess_mock):
+    """
+    Verifies that cpu_info binding_information property gives us the proper values
+    that we expect based on the lscpu_output string provided.
+    """
+    subprocess_mock.return_value = (
+        '# The following is the parsable format, which can be fed to other\n'
+        '# programs. Each different item in every column has an unique ID\n'
+        '# starting from zero.\n# CPU,Core,Socket,Node\n0,0,0,\n1,1,1,\n'
+        '2,2,2,\n3,3,3,\n')
+    generated_value = CPUInfo().binding_information
+    tests_data_dir = os.path.dirname(os.path.abspath(__file__))
+    with open(os.path.join(tests_data_dir, "utils", "files", "sorted_membind_info_no_numa.json")) as json_data:
+        expected_value = json.load(json_data)
+
+    assert generated_value == expected_value
