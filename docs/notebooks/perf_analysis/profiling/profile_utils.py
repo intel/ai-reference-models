@@ -1,3 +1,4 @@
+import sys
 import configparser
 import tensorflow as tf
 import json
@@ -151,23 +152,26 @@ class PlatformUtils:
 
     def dump_platform_info(self):
         # let's print CPU information
+        file_dir = os.path.dirname(os.path.abspath(__file__))
+        platform_util_path = os.path.join(file_dir, '../../../../benchmarks/common')
+        sys.path.insert(0, platform_util_path)
+        import platform_util
+        cpu_info = platform_util.CPUInfo()
         print("=" * 20, "CPU Info", "=" * 20)
         # number of cores
-        print("Physical cores:", psutil.cpu_count(logical=False))
-        print("Total cores:", psutil.cpu_count(logical=True))
+        print("Physical cores per socket:", cpu_info.cores_per_socket)
+        print("Total physical cores:", cpu_info.cores)
         # CPU frequencies
         cpufreq = psutil.cpu_freq()
         print("Max Frequency:", cpufreq.max)
         print("Min Frequency:", cpufreq.min)
-        cpu_socket_count = int(subprocess.check_output(
-            'cat /proc/cpuinfo | grep "physical id" | sort -u | wc -l', shell=True))
-        print("Socket Number:", cpu_socket_count)
+        print("Socket Number:", cpu_info.sockets)
         print("=" * 20, "Memory Information", "=" * 20)
         # get the memory details
         svmem = psutil.virtual_memory()
         print("Total: ", int(svmem.total / (1024 ** 3)), "GB")
         self.cpufreq = cpufreq
-        self.cpu_socket_count = cpu_socket_count
+        self.cpu_socket_count = cpu_info.sockets
         self.svmem = svmem
 
 
