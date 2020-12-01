@@ -89,7 +89,7 @@ index 56d8c88..72e34ea 100644
  import tensorflow as tf
  
 -from tensorflow.contrib.all_reduce.python import all_reduce
-+from tensorflow.python.distribute import all_reduce
++from tensorflow.python.distribute.v1 import all_reduce
 +#from tensorflow.contrib.all_reduce.python import all_reduce
  from tensorflow.python.framework import device as pydev
  from tensorflow.python.framework import ops
