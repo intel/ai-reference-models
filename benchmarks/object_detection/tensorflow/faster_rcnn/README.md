@@ -19,7 +19,7 @@ for other precisions are coming later.
    popd
    ```
 
-2. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+2. Download and preprocess the COCO validation images using the [instructions here](https://github.com/IntelAI/models/blob/master/datasets/coco/README.md).
    Be sure to export the $DATASET_DIR and $OUTPUT_DIR environment variables.
    The `coco_val.record` file will be used in the following inference examples.
 
