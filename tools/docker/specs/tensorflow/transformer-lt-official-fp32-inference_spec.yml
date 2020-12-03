@@ -1,0 +1,72 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{_TAG_PREFIX}{intel-tf}{language-translation}{transformer-lt-official-fp32-inference}'
+slice_sets:
+  transformer-lt-official-fp32-inference:
+  - add_to_name: -transformer-lt-official-fp32-inference
+    args:
+    - PACKAGE_NAME=transformer-lt-official-fp32-inference
+    dockerfile_subdirectory: model_containers
+    downloads:
+    - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/transformer_lt_official_fp32_pretrained_model.tar.gz
+      destination: transformer_lt_official_fp32_pretrained_model.tar.gz
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/language_translation/__init__.py
+      source: benchmarks/language_translation/__init__.py
+    - destination: benchmarks/language_translation/tensorflow/__init__.py
+      source: benchmarks/language_translation/tensorflow/__init__.py
+    - destination: benchmarks/language_translation/tensorflow/transformer_lt_official/README.md
+      source: benchmarks/language_translation/tensorflow/transformer_lt_official/README.md
+    - destination: benchmarks/language_translation/tensorflow/transformer_lt_official/__init__.py
+      source: benchmarks/language_translation/tensorflow/transformer_lt_official/__init__.py
+    - destination: benchmarks/language_translation/tensorflow/transformer_lt_official/inference/__init__.py
+      source: benchmarks/language_translation/tensorflow/transformer_lt_official/inference/__init__.py
+    - destination: benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32
+      source: benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: models/common
+      source: models/common
+    - destination: models/language_translation/tensorflow/transformer_lt_official/inference/fp32
+      source: models/language_translation/tensorflow/transformer_lt_official/inference/fp32
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32
+    partials:
+    - model_package
+    - language_translation/transformer_lt_pip_installs
+    documentation:
+      name: README.md
+      uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32
+      text_replace:
+        <mode>: inference
+        <model name>: Transformer LT Official
+        <precision>: FP32
+        <use case>: language_translation
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer-lt-official-fp32-inference.tar.gz
+        <package name>: transformer-lt-official-fp32-inference.tar.gz
+        <package dir>: transformer-lt-official-fp32-inference
+        <docker image>: intel/language-translation:tf-2.3.0-imz-2.1.0-transformer-lt-official-fp32-inference
+      docs:
+      - name: Title
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/title.md
+      - name: Description
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/description.md
+      - name: Download link
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/download.md
+      - name: Datasets
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/datasets.md
+      - name: Quick Start Scripts
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/quickstart.md
+      - name: Bare Metal
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/baremetal.md
+      - name: Docker
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/docker.md
+      - name: Advanced Options
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/advancedoptions.md
+      - name: License link
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/fp32/.docs/license.md

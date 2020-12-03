@@ -45,20 +45,24 @@ and for local testing.
    ```
 
    Common `model-builder` commands are:
-   * `model-builder models`: See a list the available models
-   * `model-builder make <model>`: Builds the model package tar file,
+   * `model-builder frameworks`: See a list of available frameworks
+   * `model-builder models -f <framework>`: See a list the available models
+   * `model-builder make -f <framework> <model>`: Builds the model package tar file,
      constructs the dockerfile, and builds the docker image for the
      specified model. The model specified should be one of the models
-     listed from `model-builder models`.
-   * `model-builder build -r <release group> <model>`: Builds the docker
-     container for the specified model. If no `--release-group` or `-r`
+     listed from `model-builder models -f <framework>`.
+   * `model-builder build -f <framework> <model>`: Builds the docker
+     container for the specified model. If no `--framework` or `-f`
      argument is provided, the model builder defaults to use the
-     TensorFlow release groups. Release groups are defined in the model
-     spec yml files.
-   * `model-builder init-spec <new model>`: Creates a new spec file for
-     the specified model. See the [section below](#steps-to-add-a-new-model-spec)
-     for full instructions on using this command.
-
+     the `tensorflow` framework.
+   * `model-builder init-spec -f <framework> <new model> <optional use case>`:
+     Creates a new spec file for the specified model. See the
+     [section below](#steps-to-add-a-new-model-spec) for full
+     instructions on using this command. If no `--framework` or `-f` arg
+     is provided, `tensorflow` will be used. Providing a `<use case>` is
+     optional and is only used in the case where the model does not already
+     exist in the repo, and you want the model-builder to create the
+     model's directories for you.
 
 For details on the model-builder script see the
 [model builder advanced documentation](ModelBuilderAdvanced.md).
@@ -88,10 +92,15 @@ using these steps.
    omitted if there is no pretrained model that needs to be included
    in the model package.
    ```
-   MODEL_URL=<gcloud url> model-builder init-spec <spec name>
+   MODEL_URL=<gcloud url> model-builder init-spec -f <framework> <spec name> <optional use case>
    ```
 
-   Example for inception v4 FP32 inference:
+   > Note that if no `--framework` or `-f` is specifed, the `tensorflow`
+   > framework will be used. The framework specified here will determine
+   > which [spec folder](/tools/docker/specs) the yml will be added to
+   > (for example: tensorflow, pytorch, or ml).
+
+   Example to init-spec for TensorFlow inception v4 FP32 inference:
    ```
     MODEL_URL=https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/inceptionv4_fp32_pretrained_model.pb model-builder init-spec inceptionv4-fp32-inference
    ```
@@ -102,8 +111,22 @@ using these steps.
    [model zoo repo](https://gitlab.devtools.intel.com/intelai/models)
    except with underscores changed to dashes.
 
+   If the model does not already exist in the model zoo repo, you can
+   provide the <use case> arg, and you will be prompted with a question
+   asking if you'd like the model-builder to create the directories for
+   you like:
+   ```
+   $ model-builder init-spec -f pytorch inceptionv3-fp32-inference image_recognition
+
+   Auto-generating a new spec file for: inceptionv3-fp32-inference
+   Using use case 'image_recognition' if the model's directories don't already exist
+
+   The directory "models/models/image_recognition/pytorch/inceptionv3/inference/fp32" does not exist.
+   Do you want the model-builder to create it? [y/N]
+   ```
+
    When the `model-builder init-spec` command is run, it will create a yaml
-   file in [tools/docker/specs folder](docker/specs)
+   file in [`tools/docker/specs/<framework>` folder](docker/specs)
    named `<spec name>_spec.yml`. If you have not already created
    [quickstart scripts](https://gitlab.devtools.intel.com/intelai/models/-/tree/develop/quickstart)
    for your model, the `init-spec` command also adds a quickstart template
@@ -123,7 +146,7 @@ using these steps.
 
 2. Test the new spec file by running the `model-builder make` command:
    ```
-   model-builder make <spec name>
+   model-builder make -f <framework> <spec name>
    ```
    After this command runs, you'll have:
    * A model README.md in your `quickstart/<use_case>/tensorflow/<model>/<mode>/<precision>/`
@@ -137,4 +160,4 @@ using these steps.
      running the model in a container).
 
 3. When the model spec yaml is complete, create an MR that adds
-   the new file to the repo.
+   the new files to the repo.

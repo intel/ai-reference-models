@@ -1,16 +1,16 @@
 <!--- 0. Title -->
-# Inception V3 Int8 inference
+# ResNet101 FP32 inference
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running Inception V3 Int8 inference using
+This document has instructions for running ResNet101 FP32 inference using
 Intel-optimized TensorFlow.
 
 <!--- 20. Download link -->
 ## Download link
 
-[inceptionv3-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/inceptionv3-int8-inference.tar.gz)
+[resnet101-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet101-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -19,16 +19,16 @@ Download and preprocess the ImageNet dataset using the [instructions here](/data
 After running the conversion script you should have a directory with the
 ImageNet dataset in the TF records format.
 
-Set the `DATASET_DIR` to point to this directory when running Inception V3.
+Set the `DATASET_DIR` to point to this directory when running ResNet101.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| [`int8_online_inference.sh`](int8_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`int8_batch_inference.sh`](int8_batch_inference.sh) | Runs batch inference (batch_size=128). |
-| [`int8_accuracy.sh`](int8_accuracy.sh) | Measures the model accuracy (batch_size=100). |
+| [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
+| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
+| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
 
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
@@ -51,9 +51,9 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/inceptionv3-int8-inference.tar.gz
-tar -xzf inceptionv3-int8-inference.tar.gz
-cd inceptionv3-int8-inference
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet101-fp32-inference.tar.gz
+tar -xzf resnet101-fp32-inference.tar.gz
+cd resnet101-fp32-inference
 
 quickstart/<script name>.sh
 ```
@@ -62,7 +62,7 @@ quickstart/<script name>.sh
 ## Docker
 
 The model container includes the scripts and libraries needed to run 
-Inception V3 Int8 inference. To run one of the quickstart scripts 
+ResNet101 FP32 inference. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
 and an output directory.
 
@@ -78,7 +78,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.3.0-imz-2.1.0-inceptionv3-int8-inference \
+  intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet101-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
