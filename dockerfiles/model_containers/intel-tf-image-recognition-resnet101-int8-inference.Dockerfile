@@ -19,10 +19,20 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG PYTORCH_IMAGE="intel/intel-optimized-pytorch"
-ARG PYTORCH_TAG
+ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-FROM ${PYTORCH_IMAGE}:${PYTORCH_TAG}
+ARG TENSORFLOW_TAG
+
+FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y \
+        libsm6 \
+        libxext6 \
+        python-tk && \
+    pip install requests
 
 ARG PACKAGE_DIR=model_packages
 
