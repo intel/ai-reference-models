@@ -200,6 +200,13 @@ flags.DEFINE_string(
     'includes a directory for the framework.')
 
 flags.DEFINE_string(
+    'use_case',
+    '',
+    'Name of the use_case for when generating a new spec. This is used in the '
+    'case where the model\'s folders don\'t already exist, so the directory '
+    'structure cannot be used to infer the use case.')
+
+flags.DEFINE_string(
     'generate_new_spec',
     None,
     'Used to auto generate a spec with model package files. Specify the name '
@@ -329,8 +336,7 @@ releases:
 model_spec_template = {
     'releases':
         {
-            'versioned': {'tag_specs': []},
-            'dockerfiles': {'tag_specs': []}
+            'versioned': {'tag_specs': []}
         },
     'slice_sets': {}
 }
@@ -417,6 +423,9 @@ def aggregate_all_slice_combinations(spec, slice_set_names):
 def build_name_from_slices(format_string, slices, args, is_dockerfile=False):
   """Build the tag name (cpu-devel...) from a list of slices."""
   name_formatter = copy.deepcopy(args)
+  # don't include the tag prefix in the dockerfile name
+  if is_dockerfile:
+    name_formatter['_TAG_PREFIX'] = ''
   name_formatter.update({s['set_name']: s['add_to_name'] for s in slices})
   name_formatter.update({
       s['set_name']: s['dockerfile_exclusive_name']
@@ -525,8 +534,10 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
       for slices in slice_combos:
 
         tag_args = gather_tag_args(slices, cli_args, required_cli_args)
-        tag_name = build_name_from_slices(tag_spec, slices, tag_args,
-                                          release['is_dockerfiles'])
+        tag_name = build_name_from_slices(
+            tag_spec, slices, tag_args, is_dockerfile=False)
+        dockerfile_tag_name = build_name_from_slices(
+            tag_spec, slices, tag_args, is_dockerfile=True)
         used_partials = gather_slice_list_items(slices, 'partials')
         used_tests = gather_slice_list_items(slices, 'tests')
         documentation = {}
@@ -561,6 +572,7 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             'files': files_list,
             'downloads': downloads_list,
             'documentation': documentation,
+            'dockerfile_tag_name': dockerfile_tag_name,
         })
 
   return tag_data
@@ -615,17 +627,23 @@ def mkdir_p(path):
     if e.errno != errno.EEXIST:
       raise
 
-def delete_dockerfiles(dir_path):
-  """Recursively, list a directory content and delete Dockerfiles if exist."""
-  for afile in os.listdir(dir_path):
-    file_path = os.path.join(dir_path, afile)
-    try:
-      if os.path.isfile(file_path) and file_path.endswith(".Dockerfile"):
-        os.unlink(file_path)
-      elif os.path.isdir(file_path):
-        delete_dockerfiles(file_path)
-    except Exception as e:
-      print(e)
+
+def delete_dockerfiles(all_tags, dir_path):
+    """ Delete dockerfiles based on the directory and specs """
+    for tag, tag_defs in all_tags.items():
+        for tag_def in tag_defs:
+            if tag_def['is_dockerfiles']:
+                path = os.path.join(dir_path,
+                                    tag_def['dockerfile_subdirectory'],
+                                    tag + '.Dockerfile')
+                try:
+                    if os.path.exists(path):
+                      eprint('> Deleting {}'.format(path), verbose=FLAGS.verbose)
+                      os.unlink(path)
+                except Exception as e:
+                    print('Error while deleting dockerfile: {}'.format(path))
+                    print(e)
+
 
 def gather_existing_partials(partial_path):
   """Find and read all available partials.
@@ -698,7 +716,7 @@ def get_download(source, destination):
     urllib.request.urlretrieve(source, destination)
     eprint("Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
 
-def write_package(package_def):
+def write_package(package_def, succeeded_packages, failed_packages):
   output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
   if not os.path.isdir(output_dir):
       eprint(">> Creating directory: {}".format(output_dir), verbose=FLAGS.verbose)
@@ -729,12 +747,17 @@ def write_package(package_def):
       eprint("Writing {} to {}".format(temp_dir, tar_file), verbose=FLAGS.verbose)
       with tarfile.open(tar_file, "w:gz") as tar:
         tar.add(temp_dir, arcname=package)
+      succeeded_packages.append(tar_file)
+    except Exception as e:
+      failed_packages.append(tar_file)
+      eprint("Error when writing package: {}".format(tar_file))
+      eprint(e)
     finally:
       eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
       shutil.rmtree(temp_dir)
 
 
-def write_k8s_package(package_def):
+def write_k8s_package(package_def, succeeded_packages, failed_packages):
     output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
     if not os.path.isdir(output_dir):
         eprint(">> Creating directory: {}".format(output_dir), verbose=FLAGS.verbose)
@@ -765,9 +788,30 @@ def write_k8s_package(package_def):
             eprint("Writing {} to {}".format(temp_dir, tar_file), verbose=FLAGS.verbose)
             with tarfile.open(tar_file, "w:gz") as tar:
                 tar.add(temp_dir, arcname=package)
+            succeeded_packages.append(tar_file)
+        except Exception as e:
+            failed_packages.append(tar_file)
+            eprint("Error when writing package: {}".format(tar_file))
+            eprint(e)
         finally:
             eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
             shutil.rmtree(temp_dir)
+
+
+def read_spec_files(spec_dir, tag_spec):
+    """ Recursively read the spec files into one dict, used for everything """
+    for spec_file in os.listdir(spec_dir):
+        if os.path.isdir(os.path.join(spec_dir, spec_file)):
+            tag_spec = read_spec_files(os.path.join(spec_dir, spec_file), tag_spec)
+        else:
+            with open(os.path.join(spec_dir, spec_file), 'r') as spec_file:
+                try:
+                    spec_contents = yaml.safe_load(spec_file)
+                    update_spec(tag_spec, spec_contents)
+                except Exception as e:
+                    eprint("exception in {}: {}".format(spec_file, e))
+                    raise e
+    return tag_spec
 
 def update_spec(a, b):
     """Merge two dictionary specs into one, recursing through any embedded dicts."""
@@ -775,7 +819,7 @@ def update_spec(a, b):
         if isinstance(v, dict):
             a[k] = update_spec(a.get(k, {}), v)
         elif isinstance(v, list) and k in a:
-            if isinstance(v[0], dict):
+            if len(v) > 0 and isinstance(v[0], dict):
                 # If a list of dicts is detected for an existing key, reject it
                 # This is a duplicate slice set
                 eprint('Duplicate slice set found for {}'.format(k))
@@ -794,39 +838,68 @@ def update_spec(a, b):
 
 def get_use_case_directory(framework, model_name, precision, mode):
     """
-    Searches the model zoo repo to find a matching model/precision/mode to get
-    the use case directory.
+    Searches the model zoo repo to find a matching model to get the use case
+    directory.
     Returns the use case string and the model name string, since sometimes the
     model name used in the model zoo will be slightly different than the model
     name in the spec since the spec always uses dashes and the model zoo
     sometimes has underscores.
     """
     zoo_model_name = model_name
-    search_path = os.path.join(os.getcwd(), FLAGS.model_dir, 'benchmarks', '*',
-                               framework, zoo_model_name, mode, precision)
+    search_path = os.path.join(os.getcwd(), FLAGS.model_dir, '*', '*',
+                               framework, zoo_model_name)
     matches = glob.glob(search_path)
 
-    if len(matches) > 1:
-        sys.exit('Found multiple directory matches in the model repo for '
-                 '{}'.format(search_path))
-    elif len(matches) == 0:
+    if len(matches) == 0:
         # try replacing - with _ in the model name, and search again
         zoo_model_name = zoo_model_name.replace('-', '_')
         original_search_path = search_path
-        search_path = os.path.join(os.getcwd(), FLAGS.model_dir, 'benchmarks',
-                                   '*',
-                                   framework, zoo_model_name, mode, precision)
+        search_path = os.path.join(os.getcwd(), FLAGS.model_dir, '*', '*',
+                                   framework, zoo_model_name)
         matches = glob.glob(search_path)
 
         if len(matches) == 0:
-            sys.exit('No matching model directory was found for found for {} '
-                     'or {}'.format(original_search_path, search_path))
+            folders_searched = original_search_path.lstrip("{}/".format(os.getcwd()))
+            if original_search_path != search_path:
+                folders_searched += " or {}".format(search_path.lstrip("{}/".format(os.getcwd())))
+            sys.exit('\nNo matching model directory was found for found for {}. \n'
+                     'If the model does not exist yet, provide the use case arg '
+                     'when calling the model-builder.\nFor example: '
+                     'model-builder init-spec -f {} {}-{}-{} <use case>'.
+                     format(folders_searched, framework, model_name, precision, mode))
 
     # use the directory path to find use case (which should be right after framework)
     dir_list = matches[0].split('/')
     use_case = dir_list[dir_list.index(framework) - 1]
 
     return use_case, zoo_model_name
+
+
+def get_model_name_directory(framework, model_name):
+    """ Attempts to find existing directories for the specified model """
+
+    search_model_name = model_name
+    search_path = os.path.join(os.getcwd(), FLAGS.model_dir, '*',
+                               '*', framework, search_model_name)
+    matches = glob.glob(search_path)
+
+    if len(matches) == 0:
+        search_model_name = model_name.replace('-', '_')
+        search_path = os.path.join(os.getcwd(), FLAGS.model_dir, '*',
+                                   '*', framework, search_model_name)
+        matches = glob.glob(search_path)
+
+    if len(matches) > 0:
+        return search_model_name
+
+    # If no model name was found for this framework, check if other frameworks
+    # have used this model
+    if framework != "*":
+        zoo_model_name = get_model_name_directory("*", model_name)
+    else:
+        zoo_model_name = ""
+
+    return zoo_model_name
 
 
 def auto_generate_package_file_list(framework, use_case, model_name, precision, mode):
@@ -848,30 +921,39 @@ def auto_generate_package_file_list(framework, use_case, model_name, precision, 
 
     # common directories/files
     model_package_files = [
-        {'source': 'benchmarks/common', 'destination': 'benchmarks/common'},
-        {'source': 'benchmarks/launch_benchmark.py', 'destination': 'benchmarks/launch_benchmark.py'},
         {'source': 'models/common', 'destination': 'models/common'},
         {'source': 'quickstart/common', 'destination': 'quickstart/common'}
     ]
 
+    if framework == "tensorflow":
+        model_package_files += [
+            {'source': 'benchmarks/common',
+             'destination': 'benchmarks/common'},
+            {'source': 'benchmarks/launch_benchmark.py',
+             'destination': 'benchmarks/launch_benchmark.py'}
+        ]
+
     # benchmarks folder and the README.md
     benchmarks_folder = os.path.join('benchmarks', use_case, framework,
                                     model_name, mode, precision)
-    model_package_files.append({'source': benchmarks_folder,
-                                'destination': benchmarks_folder})
+    if os.path.exists(benchmarks_folder):
+        model_package_files.append({'source': benchmarks_folder,
+                                    'destination': benchmarks_folder})
     model_readme = os.path.join('benchmarks', use_case, framework,
                                 model_name, 'README.md')
-    model_package_files.append({'source': model_readme,
-                                'destination': model_readme})
+    if os.path.exists(model_readme):
+        model_package_files.append({'source': model_readme,
+                                    'destination': model_readme})
 
-    # __init__.py files in teh benchmarks directory
+    # __init__.py files in the benchmarks directory
     path = 'benchmarks'
-    for folder in [use_case, framework, model_name, mode]:
-        init_file_path = os.path.join(model_dir, path, folder, '__init__.py')
-        if os.path.exists(init_file_path):
-            model_package_files.append({'source': os.path.join(path, folder, '__init__.py'),
-                                        'destination': os.path.join(path, folder, '__init__.py')})
-        path = os.path.join(path, folder)
+    if os.path.exists(benchmarks_folder):
+        for folder in [use_case, framework, model_name, mode]:
+            init_file_path = os.path.join(model_dir, path, folder, '__init__.py')
+            if os.path.exists(init_file_path):
+                model_package_files.append({'source': os.path.join(path, folder, '__init__.py'),
+                                            'destination': os.path.join(path, folder, '__init__.py')})
+            path = os.path.join(path, folder)
 
     # models directory folders (these don't exist for every model - check before appending)
     model_folder = os.path.join('models', use_case, framework, model_name,
@@ -1035,7 +1117,10 @@ def auto_generate_model_spec(spec_name):
     spec_name and then maps that to directories in the model zoo.
     """
     # check if spec file for this model/precision/mode already exists
-    spec_file_name = '{}_spec.yml'.format(spec_name)
+    if FLAGS.framework == "tensorflow":
+        spec_file_name = '{}_spec.yml'.format(spec_name)
+    else:
+        spec_file_name = '{}-{}_spec.yml'.format(FLAGS.framework, spec_name)
     spec_file_path = os.path.join(FLAGS.spec_dir, spec_file_name)
     if os.path.isfile(spec_file_path):
         sys.exit('The spec file already exists: {}'.format(spec_file_name))
@@ -1055,7 +1140,38 @@ def auto_generate_model_spec(spec_name):
     mode = matched_groups[2]
     framework = FLAGS.framework
 
-    zoo_use_case, zoo_model_name = get_use_case_directory(framework, model_name, precision, mode)
+    if not FLAGS.use_case:
+        zoo_use_case, zoo_model_name = get_use_case_directory(framework, model_name, precision, mode)
+    else:
+        zoo_use_case = FLAGS.use_case
+
+        # Look for the model name directory (which might be slightly different
+        # than the model_name from the spec name, due to dashes vs underscores)
+        zoo_model_name = get_model_name_directory(framework, model_name)
+
+        # If we have no precedent for the model name directory, then use the
+        # model_name as it is from the spec name
+        if not zoo_model_name:
+            zoo_model_name = model_name
+
+    # Create directories if they don't already exist. For TF, we want
+    # the `benchmarks` and `models` folder, but for pytorch and other
+    # frameworks, just create directories fin the models folder for now
+    directories = ["models"]
+    if framework == "tensorflow":
+        directories += ["benchmarks"]
+
+    for dir in directories:
+        dir_path = os.path.join(FLAGS.model_dir, dir, zoo_use_case,
+                                framework, zoo_model_name, mode, precision)
+        if not os.path.exists(dir_path):
+            eprint('\nThe directory \"{}\" does not exist.'.format(dir_path))
+            user_response = input('Do you want the model-builder to create it? [y/N] ')
+
+            if user_response.lower() == "y":
+                os.makedirs(dir_path)
+                eprint("Created directory: {}".format(dir_path))
+
     use_case_dashes = zoo_use_case.replace('_', '-')
 
     eprint('\nUse case: {}\nFramework: {}\nModel name: {}\nMode: {}\nPrecision: {}\n'.format(
@@ -1063,10 +1179,13 @@ def auto_generate_model_spec(spec_name):
 
     # grab at copy of the model spec template and edit it for this model
     model_spec = model_spec_template.copy()
-    model_spec['releases']['versioned']['tag_specs'] = \
-        ['{_TAG_PREFIX}{intel-tf}{' + use_case_dashes + '}{' + spec_name + '}']
-    model_spec['releases']['dockerfiles']['tag_specs'] = \
-        ['{intel-tf}{' + use_case_dashes + '}{' + spec_name + '}']
+
+    if framework == "tensorflow":
+        model_spec['releases']['versioned']['tag_specs'] = \
+            ['{_TAG_PREFIX}{intel-tf}{' + use_case_dashes + '}{' + spec_name + '}']
+    else:
+        model_spec['releases']['versioned']['tag_specs'] = \
+            ['{_TAG_PREFIX}{' + framework + '}{' + spec_name + '}']
 
     # grab a copy of the slice set template and edit it for this model
     model_slice_set = slice_set_template.copy()
@@ -1098,7 +1217,7 @@ def auto_generate_model_spec(spec_name):
 
     # print out info for the user to see the spec and file name
     eprint(yaml.dump(model_spec), verbose=FLAGS.verbose)
-    eprint("Wrote the spec file to your directory at "
+    eprint("\nWrote the spec file to your directory at "
            "tools/docker/specs/{}\nPlease edit the file if additional "
            "files, partials, or downloads are needed.\n".format(spec_file_name))
 
@@ -1129,15 +1248,7 @@ def main(argv):
     sys.exit(0)
 
   # Read the spec files into one dict, used for everything
-  tag_spec = {}
-  for spec_file in os.listdir(FLAGS.spec_dir):
-    with open(os.path.join(FLAGS.spec_dir, spec_file), 'r') as spec_file:
-        try:
-            spec_contents = yaml.safe_load(spec_file)
-            update_spec(tag_spec, spec_contents)
-        except Exception as e:
-            eprint("exception in {}: {}".format(spec_file, e))
-            raise e
+  tag_spec = read_spec_files(FLAGS.spec_dir, {})
 
   # Get existing partial contents
   partials = gather_existing_partials(FLAGS.partial_dir)
@@ -1150,6 +1261,10 @@ def main(argv):
     eprint(yaml.dump(v.errors, indent=2))
     exit(1)
   tag_spec = v.normalized(tag_spec)
+
+  # characters for underlining headers
+  underlined = '\033[4m'
+  end_underline = '\033[0m'
 
   # Assemble tags and images used to build them
   all_tags = assemble_tags(tag_spec, FLAGS.arg, FLAGS.release, partials)
@@ -1175,7 +1290,7 @@ def main(argv):
           if lst is not None and len(lst) > 0:
             target = lst[len(lst)-1]
             image = '{}:{}'.format(FLAGS.repository, tag)
-            eprint('{} {}'.format(target,image))
+            eprint('{} {} {}'.format(tag_def['release'], target,image))
     sys.exit(0)
 
   if FLAGS.list_packages:
@@ -1188,7 +1303,7 @@ def main(argv):
             package = get_package_name(tag_def)
             if package != None:
               tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
-              eprint('{} {}'.format(target,tar_file))
+              eprint('{} {}'.format(target, tar_file))
     sys.exit(0)
 
   if FLAGS.list_k8s:
@@ -1208,8 +1323,7 @@ def main(argv):
 
   # Empty Dockerfile directory if building new Dockerfiles
   if FLAGS.construct_dockerfiles and not FLAGS.only_tags_matching:
-    eprint('> Emptying Dockerfile dir "{}"'.format(FLAGS.dockerfile_dir), verbose=FLAGS.verbose)
-    delete_dockerfiles(FLAGS.dockerfile_dir)
+    delete_dockerfiles(all_tags, FLAGS.dockerfile_dir)
 
   # Set up Docker helper
   dock = docker.from_env()
@@ -1235,6 +1349,13 @@ def main(argv):
   # of its Dockerfile, its build arg list, etc.
   failed_tags = []
   succeeded_tags = []
+  failed_dockerfiles = []
+  succeeded_dockerfiles = []
+  failed_docs = []
+  succeeded_docs = []
+  failed_packages = []
+  succeeded_packages = []
+
   for tag, tag_defs in all_tags.items():
     for tag_def in tag_defs:
       eprint('> Working on {}'.format(tag), verbose=FLAGS.verbose)
@@ -1252,22 +1373,26 @@ def main(argv):
 
       # Write model packages to the output_dir
       if FLAGS.build_packages:
-        write_package(tag_def)
+        write_package(tag_def, succeeded_packages, failed_packages)
 
       # Write k8s packages to the output_dir
       if FLAGS.build_k8s_packages:
-        write_k8s_package(tag_def)
+        write_k8s_package(tag_def, succeeded_packages, failed_packages)
 
       # Write releases marked "is_dockerfiles" into the Dockerfile directory
       if FLAGS.construct_dockerfiles and tag_def['is_dockerfiles']:
         path = os.path.join(FLAGS.dockerfile_dir,
                             tag_def['dockerfile_subdirectory'],
-                            tag + '.Dockerfile')
+                            tag_def['dockerfile_tag_name'] + '.Dockerfile')
         eprint('>> Writing {}...'.format(path), verbose=FLAGS.verbose)
         if not FLAGS.dry_run:
           mkdir_p(os.path.dirname(path))
           with open(path, 'w') as f:
             f.write(tag_def['dockerfile_contents'])
+          if os.path.exists(path):
+              succeeded_dockerfiles.append(os.path.relpath(path, FLAGS.dockerfile_dir))
+          else:
+              failed_dockerfiles.append(os.path.relpath(path, FLAGS.dockerfile_dir))
 
       if FLAGS.generate_documentation:
         documentation = tag_def['documentation']
@@ -1275,16 +1400,30 @@ def main(argv):
             if 'text_replace' in tag_def['documentation'] else {}
         if 'contents' in documentation:
             readme = os.path.join(documentation['uri'], documentation['name'])
-            with open(readme, 'w', encoding="utf-8") as f:
-              for k, v in text_replace.items():
-                documentation['contents'] = documentation['contents'].replace(k, v)
-              f.write(documentation['contents'])
+            eprint('>> Writing {}...'.format(readme), verbose=FLAGS.verbose)
+            try:
+              with open(readme, 'w', encoding="utf-8") as f:
+                for k, v in text_replace.items():
+                  documentation['contents'] = documentation['contents'].replace(k, v)
+                f.write(documentation['contents'])
+              succeeded_docs.append(readme)
+            except Exception as e:
+              eprint("Error while writing documentation for {}".format(tag))
+              eprint(e)
+              failed_docs.append(readme)
         if all(key in documentation for key in ('k8s_contents', 'k8s_uri')):
             readme = os.path.join(documentation['k8s_uri'], documentation['name'])
-            with open(readme, 'w', encoding="utf-8") as f:
+            eprint('>> Writing {}...'.format(readme), verbose=FLAGS.verbose)
+            try:
+              with open(readme, 'w', encoding="utf-8") as f:
                 for k, v in text_replace.items():
                     documentation['k8s_contents'] = documentation['k8s_contents'].replace(k, v)
                 f.write(documentation['k8s_contents'])
+              succeeded_docs.append(readme)
+            except Exception as e:
+              eprint("Error while writing k8s docs for {}".format(tag))
+              eprint(e)
+              failed_docs.append(readme)
 
       # Don't build any images for dockerfile-only releases
       if not FLAGS.build_images:
@@ -1446,6 +1585,44 @@ def main(argv):
         '> Some tags failed to build or failed testing, check scrollback for '
         'errors: {}'.format(','.join(failed_tags)))
     exit(1)
+
+  release_group_str = ""
+  if FLAGS.release:
+      release_group_str = "(release group: {})".format(", ".join(FLAGS.release))
+
+  # Print failed/succeeded dockerfiles
+  if failed_dockerfiles:
+    failed_dockerfiles.sort()
+    eprint('Some dockerfiles failed to be written {}. Scroll up to check for '
+           'errors: {}'.format(release_group_str, ','.join(failed_dockerfiles)))
+
+  if succeeded_dockerfiles:
+    succeeded_dockerfiles.sort()
+    eprint('{}Dockerfiles written {}:{}'.format(underlined, release_group_str, end_underline))
+    eprint("\n".join(succeeded_dockerfiles))
+
+  # Print failed/succeeded documentation files
+  if failed_docs:
+    failed_docs.sort()
+    eprint('Some documentation failed to be written {}. Scroll up to check for '
+           'errors. Docs failed for: {}'.format(release_group_str, ', '.join(failed_docs)))
+
+  if succeeded_docs:
+    succeeded_docs.sort()
+    eprint('{}Documentation files written {}:{}'.format(underlined, release_group_str,
+                                                  end_underline))
+    eprint("\n".join(succeeded_docs))
+
+  # Print failed/succeeded packages
+  if failed_packages:
+    failed_packages.sort()
+    eprint('Some packages failed to be written {}. Scroll up to check for '
+           'errors. Docs failed for: {}'.format(release_group_str, ', '.join(failed_packages)))
+
+  if succeeded_packages:
+    succeeded_packages.sort()
+    eprint('{}Packages written {}:{}'.format(underlined, release_group_str, end_underline))
+    eprint("\n".join(succeeded_packages))
 
   eprint('> Writing built{} tags to standard out.'.format(
       ' and tested' if FLAGS.run_tests_path else ''), verbose=FLAGS.verbose)

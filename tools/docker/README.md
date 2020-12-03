@@ -10,6 +10,22 @@ will build the imz-tf-tools image using and the tools.Dockerfile (copied from [T
 
 The [specs](specs) directory contains model manifests that are parsed by the model-builder 
 when creating model packages, constructing model dockerfiles and building model images.
+This directory is organized by framework. The `model-builder` commands like `init-spec`,
+`models`, `make`, `build`, `generate-documentation`, etc have a `--framework` (or `-f`)
+argument that specifies which framework folder the specs will be used from.
+
+```
+tools/docker/specs/
+├── ml
+│   ├── scikit-learn-census_spec.yml
+│   └── ...
+├── pytorch
+│   ├── pytorch-resnet50-bf16-inference_spec.yml
+│   └── ...
+└── tensorflow
+    ├── bert-large-bfloat16-inference_spec.yml
+    └── ...
+```
 
 ## partials/ directory 
 
@@ -32,7 +48,7 @@ dependencies common to each deep learning category are added on top of that, and
 then finally the model package is added on top of that.
 
 For example, to build the ResNet50v1.5 FP32 training container, the 
-[resnet50v1-5-fp32-training_spec](specs/resnet50v1-5-fp32-training_spec.yml)
+[resnet50v1-5-fp32-training_spec](specs/tensorflow/resnet50v1-5-fp32-training_spec.yml)
 shows that it is constructed by using the Intel TensorFlow base, image recognition,
 and the ResNet50 v1.5 FP32 training package.
 
@@ -60,10 +76,6 @@ releases:
     versioned:
         tag_specs:
             - "{_TAG_PREFIX}{intel-tf}{language-modeling}<mark><b>{mpi-horovod}</b></mark>{bert-large-fp32-training}"
-
-    dockerfiles:
-        tag_specs:
-            - "{intel-tf}{language-modeling}<mark><b>{mpi-horovod}</b></mark>{bert-large-fp32-training}"
 </pre>
 
 The `versioned` release group means that it will be built with the
@@ -78,7 +90,7 @@ deep learning category, if it's the first of its kind being added. The category
 partials would contain installs and setup that is common to models in that category.
 For example, the object detection category partials install `pycoco` tools and run
 protoc on the object detection scripts from the TensorFlow models repo. Those
-partials are also used in the [base_spec.yml](specs/base_spec.yml) to defined a "category
+partials are also used in the [base_spec.yml](specs/tensorflow/base_spec.yml) to defined a "category
 container".
 
 Once there are partials added for the category you are using, the model
@@ -88,7 +100,7 @@ This partial simply adds the model package .tar.gz file to the predefined `${MOD
 container (which also extracts the tar) and sets the working directory to that
 package location.
 
-Finally, either update the [base_spec.yml](specs/base_spec.yml) or add a new model-specific 
+Finally, either update the [base_spec.yml](specs/tensorflow/base_spec.yml) or add a new model-specific
 spec file to add slice sets for the partials that you have added. The spec file also defines 
 build args for things like the name of the model package. Once slice sets have been added, 
 update `releases:` section at the top of the file to specify which slice sets to put together 

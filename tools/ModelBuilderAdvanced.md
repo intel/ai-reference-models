@@ -98,30 +98,42 @@ the generated README.md will have the values filled in:
 # SSD-ResNet34 FP32 inference
 ```
 
-## Release Group
+## Framework argument
 
-The `--release-group <group name>` (or `-r`) flag to the `model-builder` script
-refers to the `releases` section in the spec yml files and is passed to
-the [assembler.py](/tools/docker/assembler.py) `release` flag by the
-model-builder. For example, the ResNet50 v1.5 spec yml lists it using
-the `versioned` and `dockerfiles` release groups
-[here](/tools/docker/specs/resnet50v1-5-fp32-inference_spec.yml#L1-L7).
-Containers in a release group are built together since they use a common
-set of build arguments (such as the framework version and tag prefix).
-The `dockerfiles` release group will always be used when constructing
-dockerfiles.
+The `--framework <framework>` (or `-f`) flag to the `model-builder` script
+refers the names fo the folders in the [specs folder](/tools/docker/specs):
+```
+tools/docker/specs/
+├── ml
+├── pytorch
+└── tensorflow
+```
 
-The `--release-group` (or `-r`) flag applies to the following model-builder subcommands:
-* make (e.g. `model-builder make -r versioned resnet50-fp32-inference`) - for the `build` step only
-* build (e.g `model-builder build -r ml xgboost`)
-* images (e.g `model-builder images -r versioned` or `model-builder images -r ml`)
+See a list of the available frameworks using:
+```
+$ model-builder frameworks
+ml pytorch tensorflow
+```
 
-Multiple release group flags can be listed to have the command apply to
-multiple groups. For example: `model-builder build -r versioned -r tf_1.15.2_containers all`.
+The model-builder script uses this value for the `--spec_dir` and `--framework`
+args when calling the [assembler.py](/tools/docker/assembler.py).
 
-> If no `--release-group <group name>` (or `-r`) flag is passed to the
-> `model-builder`, the default behavior will be to use the TensorFlow
-> release groups.
+The `--framework` (or `-f`) flag applies to the following model-builder subcommands:
+* build (e.g `model-builder build -f ml xgboost`)
+* generate-dockerfile (e.g. `model-builder generate-dockerfile -f ml`)
+* generate-documentation (e.g. `model-builder generate-documentation -f tensorflow`)
+* images (e.g `model-builder images -f pytorch` or `model-builder images -f ml`)
+* init-spec (e.g. `model-builder init-spec -f tensorflow inceptionv4-fp32-inference`)
+* make (e.g. `model-builder make -f pytorch pytorch-resnet50-bf16-inference`)
+* models (e.g. `model-builder models -f pytorch`)
+* package (e.g. `model-builder package -f pytorch pytorch-resnet50-bf16-inference`)
+* packages (e.g. `model-builder packages -f tensorflow`)
+* package-k8s (e.g. `model-builder package-k8s -f tensorflow bert-large-fp32-training`)
+* packages-k8s (e.g. `model-builder packages-k8s -f tensorflow`)
+* run-test-suite (e.g. `model-builder run-test-suite -c generate-dockerfile -f pytorch`)
+
+> If no `--framework <framework>` (or `-f`) flag is passed to the
+> `model-builder`, the default behavior will be to use `tensorflow`.
 
 ## Under the hood of the subcommands
 
