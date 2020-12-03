@@ -1,0 +1,69 @@
+releases:
+  tf_1.15.2_containers:
+    tag_specs:
+    - '{_TAG_PREFIX}{intel-tf}{image-segmentation}{maskrcnn-fp32-inference}'
+slice_sets:
+  maskrcnn-fp32-inference:
+  - add_to_name: -maskrcnn-fp32-inference
+    args:
+    - PACKAGE_NAME=maskrcnn-fp32-inference
+    dockerfile_subdirectory: model_containers
+    documentation:
+      docs:
+      - name: Title
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/title.md
+      - name: Description
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/description.md
+      - name: Download link
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/download.md
+      - name: Datasets
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/datasets.md
+      - name: Quick Start Scripts
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/quickstart.md
+      - name: Bare Metal
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/baremetal.md
+      - name: Docker
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/docker.md
+      - name: License
+        uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32/.docs/license.md
+      name: README.md
+      text_replace:
+        <docker image>: 'intel/image-segmentation:tf-1.15.2-imz-2.1.0-maskrcnn-fp32-inference'
+        <mode>: inference
+        <model name>: Mask R-CNN
+        <package dir>: maskrcnn-fp32-inference
+        <package name>: maskrcnn-fp32-inference.tar.gz
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/maskrcnn-fp32-inference.tar.gz'
+        <precision>: FP32
+        <use case>: image_segmentation
+      uri: models/quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32
+    downloads: []
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/image_segmentation/__init__.py
+      source: benchmarks/image_segmentation/__init__.py
+    - destination: benchmarks/image_segmentation/tensorflow/__init__.py
+      source: benchmarks/image_segmentation/tensorflow/__init__.py
+    - destination: benchmarks/image_segmentation/tensorflow/maskrcnn/README.md
+      source: benchmarks/image_segmentation/tensorflow/maskrcnn/README.md
+    - destination: benchmarks/image_segmentation/tensorflow/maskrcnn/__init__.py
+      source: benchmarks/image_segmentation/tensorflow/maskrcnn/__init__.py
+    - destination: benchmarks/image_segmentation/tensorflow/maskrcnn/inference/__init__.py
+      source: benchmarks/image_segmentation/tensorflow/maskrcnn/inference/__init__.py
+    - destination: benchmarks/image_segmentation/tensorflow/maskrcnn/inference/fp32
+      source: benchmarks/image_segmentation/tensorflow/maskrcnn/inference/fp32
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: models/common
+      source: models/common
+    - destination: models/image_segmentation/tensorflow/maskrcnn/inference/fp32
+      source: models/image_segmentation/tensorflow/maskrcnn/inference/fp32
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/image_segmentation/tensorflow/maskrcnn/inference/fp32
+    partials:
+    - model_package
+    - image_segmentation/maskrcnn_pip_installs
+    - entrypoint
