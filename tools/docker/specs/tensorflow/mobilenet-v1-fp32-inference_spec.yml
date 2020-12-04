@@ -30,8 +30,8 @@ slice_sets:
       source: benchmarks/launch_benchmark.py
     - destination: models/common
       source: models/common
-    - destination: models/image_recognition/tensorflow/mobilenet_v1/inference/fp32
-      source: models/image_recognition/tensorflow/mobilenet_v1/inference/fp32
+    - destination: models/image_recognition/tensorflow/mobilenet_v1/inference
+      source: models/image_recognition/tensorflow/mobilenet_v1/inference
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
