@@ -30,8 +30,8 @@ slice_sets:
       source: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/fp32
     - destination: models/common
       source: models/common
-    - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/fp32
-      source: models/object_detection/tensorflow/ssd-mobilenet/inference/fp32
+    - destination: models/object_detection/tensorflow/ssd-mobilenet/inference
+      source: models/object_detection/tensorflow/ssd-mobilenet/inference
     - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
       source: models/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
     - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_detection_evaluator.py
