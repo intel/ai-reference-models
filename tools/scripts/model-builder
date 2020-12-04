@@ -234,9 +234,11 @@ _model_builder._init()
   declare -g -r LOCAL_REPO=${LOCAL_REPO-model-zoo}
   declare -g -r TAG_PREFIX=${TENSORFLOW_TAG}
   # If no framework folder is specified, use tensorflow
-  declare -g DEFAULT_FRAMEWORK="tensorflow"
+  declare -g -r DEFAULT_FRAMEWORK="tensorflow"
   declare -g _current_framework=${DEFAULT_FRAMEWORK}
 
+  _model_builder._root 1>/dev/null
+  declare -g -r _g_root=$(_model_builder._root)
   declare -g -r _g_options=("-h" "--help" "--verbose" "--dry-run")
   declare -g _g_commands=($(echo $(cat $0|grep '^_model_builder\.[^_]\([a-zA-Z0-9_]*\)[ \t]*('|sed 's/_model_builder\.\([a-zA-Z0-9_]*\)[ \t]*()/\1/'|tr '_' '-'|sort)))
   declare -g _g_commands_case_statement="$(_model_builder._join '|' ${_g_commands[@]})"
@@ -376,9 +378,7 @@ _model_builder._subcommand_show_frameworks()
               _current_framework=$s
               _model_builder._remove_item _remaining_frameworks $s
               _model_builder._set_current_models
-              if (( ${#_remaining_frameworks[@]} == 0 )); then
-                _show_framework_options=false
-              fi
+              _show_framework_options=false
             fi
             ;;
         esac
@@ -429,11 +429,9 @@ _model_builder._subcommand_show_frameworks_and_models()
               _current_framework=$s
               _model_builder._remove_item _remaining_frameworks $s
               _model_builder._set_current_models
-              if (( ${#_remaining_frameworks[@]} == 0 )); then
-                _show_framework_options=false
-              fi
+              _show_framework_options=false
             fi
-            if [[ "${_remaining_frameworks[@]}" =~ $s ]] && ! [[ "${_selected_frameworks[@]}" =~ $s ]]; then
+            if [[ "${_remaining_models[@]}" =~ $s ]] && ! [[ "${_selected_models[@]}" =~ $s ]]; then
               _show_framework_options=false
               _selected_models+=( $s )
               _model_builder._remove_item _remaining_models $s
@@ -501,10 +499,8 @@ _model_builder._subcommand_show_commands_frameworks_and_models()
               _current_framework=$s
               _model_builder._remove_item _remaining_frameworks $s
               _model_builder._set_current_models
-              if (( ${#_remaining_frameworks[@]} == 0 )); then
-                _show_command_options=false
-                _show_framework_options=false
-              fi
+              _show_command_options=false
+              _show_framework_options=false
             fi
             if [[ "${_remaining_models[@]}" =~ $s ]] && ! [[ "${_selected_models[@]}" =~ $s ]]; then
               _show_command_options=false
@@ -582,29 +578,29 @@ _model_builder._completion()
       return
       ;;
     build|make)
-      _current_framework=${DEFAULT_FRAMEWORK}
-      _remaining_frameworks=(${DEFAULT_FRAMEWORK[@]})
+      _current_framework=$DEFAULT_FRAMEWORK
+      _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_frameworks_and_models $_subcommand
       return
       ;;
     images)
-      _current_framework=${DEFAULT_FRAMEWORK}
-      _remaining_frameworks=(${DEFAULT_FRAMEWORK[@]})
+      _current_framework=$DEFAULT_FRAMEWORK
+      _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_frameworks $_subcommand
       return
       ;;
     generate-dockerfile|generate-documentation|k8s|package|package-k8s)
-      _current_framework=${DEFAULT_FRAMEWORK}
-      _remaining_frameworks=( ${_current_framework[@]} )
+      _current_framework=$DEFAULT_FRAMEWORK
+      _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_frameworks_and_models $_subcommand
       return
       ;;
     models|packages|packages-k8s)
-      _current_framework=${DEFAULT_FRAMEWORK}
-      _remaining_frameworks=( ${_current_framework[@]} )
+      _current_framework=$DEFAULT_FRAMEWORK
+      _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_frameworks $_subcommand
       return
@@ -612,8 +608,8 @@ _model_builder._completion()
     run-test-suite)
       _current_commands=(${_all_commands[@]})
       _remaining_commands=(${_current_commands[@]})
-      _current_framework=${DEFAULT_FRAMEWORK}
-      _remaining_frameworks=(${_current_framework[@]})
+      _current_framework=$DEFAULT_FRAMEWORK
+      _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_commands_frameworks_and_models $_subcommand
       return
@@ -722,7 +718,7 @@ _model_builder.init_spec()
   # Used for auto a new spec with the list of package files for the specified model
 
   # Check for the tf-tool container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
 
   _new_model=$1
   _use_case=$2
@@ -742,7 +738,7 @@ _model_builder.init_spec()
     _use_case="--use_case=${_use_case}"
   fi
 
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
 
   # Note: Run as user so that the spec file isn't owned by root
   _asm_new_spec="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) $_model_dir_mount -v $(pwd):/tf -it imz-tf-tools python3 assembler.py "
@@ -784,9 +780,10 @@ _model_builder_get_images_from_log()
 #
 _model_builder.build()
 {
-  local _abs_model_dir='' _args=() _asm_images _dry_run=false _log_image_lists=() _model_dir='' _model_dir_mount='' _model_package_folder 
-  local _output_dir='' _release_args=() _framework _temp_model_package_dir _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  local _abs_model_dir='' _args=() _asm_images _count _dry_run=false _log_image_lists=() _model_dir='' 
+  local _model_dir_mount='' _model_package_folder _output_dir='' _release_args=() _release_group 
+  local _temp_model_package_dir _verbose='' 
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -831,7 +828,7 @@ _model_builder.build()
   fi
   
   # Check for the tf-tool container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
   
   # Verify that the model package directory exists
   if [ ! -d ${MODEL_PACKAGE_DIR} ]; then
@@ -847,7 +844,10 @@ _model_builder.build()
   _temp_model_package_dir="$(pwd)/${_model_package_folder}/"
   rm -rf ${_temp_model_package_dir}
   mkdir -p ${_temp_model_package_dir}
-  cp ${MODEL_PACKAGE_DIR}/*.tar.gz ${_temp_model_package_dir}
+  _count=$(ls ${MODEL_PACKAGE_DIR}/*.tar.gz 2>/dev/null | wc -l)
+  if (( $_count > 0 )); then
+    cp ${MODEL_PACKAGE_DIR}/*.tar.gz ${_temp_model_package_dir}
+  fi
 
   _asm_images="docker run --rm $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py "
 
@@ -924,7 +924,7 @@ _model_builder.build()
 _model_builder.package()
 {
   local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _output_dir='' _release_args=() _framework _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -960,7 +960,7 @@ _model_builder.package()
   done
 
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -998,7 +998,7 @@ _model_builder.package()
 _model_builder.package_k8s()
 {
   local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _output_dir='' _release_args=() _framework _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -1034,7 +1034,7 @@ _model_builder.package_k8s()
   done
 
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
 
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -1072,7 +1072,7 @@ _model_builder.package_k8s()
 _model_builder.generate_dockerfile()
 {
   local _abs_model_dir _args=() _asm_dockerfiles _count _dry_run=false _model_dir='' _model_dir_mount='' _output_dir='' _release_args=() _framework _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -1103,7 +1103,7 @@ _model_builder.generate_dockerfile()
   done
   
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -1147,7 +1147,7 @@ _model_builder.generate_dockerfile()
 _model_builder.generate_documentation()
 {
   local _abs_model_dir _args=() _asm_dockerfiles _count _model_dir='' _model_dir_mount='' _output_dir='' _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -1177,7 +1177,7 @@ _model_builder.generate_documentation()
   done
   
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
 
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -1228,7 +1228,7 @@ _model_builder.commands()
 _model_builder.images()
 {
   local _abs_model_dir _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _release_args=() _framework _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -1259,7 +1259,7 @@ _model_builder.images()
   done
   
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -1338,7 +1338,7 @@ _model_builder.models()
 _model_builder.packages()
 {
   local _abs_model_dir _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -1369,7 +1369,7 @@ _model_builder.packages()
   done
   
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
   
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -1396,7 +1396,7 @@ _model_builder.packages()
 _model_builder.packages_k8s()
 {
   local _abs_model_dir _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _verbose=''
-  pushd $(_model_builder._root)/docker 1>/dev/null 2>/dev/null
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -1427,7 +1427,7 @@ _model_builder.packages_k8s()
   done
 
   # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $(_model_builder._root)/docker
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
 
   # Note: Run as user so that the dockerfiles have the right permissions
   _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
@@ -1558,11 +1558,11 @@ _model_builder._tests.build()
     esac
     shift
   done
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '# *** tests for build ***' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo '# *** tests for build ***' >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
   _image_names=$(mktemp /tmp/image_names.XXXXXXXXXX)
   _tmp_files+=($_image_names)
   model-builder images -f $_framework > $_image_names
@@ -1573,7 +1573,7 @@ _model_builder._tests.build()
   run model-builder build -f '$_framework$' '$_model$'
   (( $status == 0 ))
   [[ "${lines[@]}" =~ '$_model$' ]]
-}' >> $(_model_builder._root)'/tests/model-builder.bats'
+}' >> $_g_root'/tests/model-builder.bats'
     fi
   done
 }
@@ -1583,7 +1583,7 @@ _model_builder._tests.build()
 #
 _model_builder._tests.generate_documentation()
 {
-  local _docdir _image_name _image_names _mode _model _precision _prefix _framework='' _suffix
+  local _docdir _framework='' _image_name _image_names _mode _model _precision _prefix _suffix
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       --arg)
@@ -1604,24 +1604,25 @@ _model_builder._tests.generate_documentation()
     esac
     shift
   done
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '# *** tests for generate-documentation ***' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo '# *** tests for generate-documentation ***' >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
   for _model in "$@"; do
     _prefix=${_model%-*-*}
     _suffix=${_model/${_prefix}-/}
     _prefix=${_prefix//-/[_-]}
     _precision=${_suffix%-*}
     _mode=${_suffix#*-}
-    _docdir=$(find quickstart -type d | grep '/'$_prefix'/' | grep $_mode | grep $_precision'$')
+    _docdir=$(find quickstart -type d | grep '/'$_framework'/'$_prefix'/' | grep $_mode | grep $_precision'$')
     if [[ -n $_docdir ]]; then
       _readme=$_docdir/README.md
       echo $'@test "validate generate-documentation for '$_model$' in framework '$_framework$' creates '$_readme$'" {
   run model-builder generate-documentation -f '$_framework$' '$_model$'
   (( $status == 0 ))
+  [[ -f '$_readme$' ]]
   (( $(last_modified '$_readme$') <= 50 ))
-}' >> $(_model_builder._root)'/tests/model-builder.bats'
+}' >> $_g_root'/tests/model-builder.bats'
     fi
   done
 }
@@ -1631,7 +1632,7 @@ _model_builder._tests.generate_documentation()
 #
 _model_builder._tests.generate_dockerfile()
 {
-  local _dockerfile_path _dockerfile _model _framework
+  local _dockerfile_path _dockerfile _path_length _model _framework _result _results _subdir
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       --arg)
@@ -1652,20 +1653,48 @@ _model_builder._tests.generate_dockerfile()
     esac
     shift
   done
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '# *** tests for generate-dockerfile ***' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
+  case "$_framework" in
+    tensorflow)
+      _subdir='{model_containers,dataset_containers}'
+      ;;
+    *)
+      _subdir=$_framework
+      ;;
+  esac
+  echo ''  >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo '# *** tests for generate-dockerfile ***' >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
   for _model in "$@"; do
-    _dockerfile_path=$(find dockerfiles -name '*'$_model'.Dockerfile')
-    _dockerfile=${_dockerfile_path##*/}
-    echo $'@test "validate generate-dockerfile for '$_model$' in framework '$_framework$' creates '$_dockerfile$'" {
+    _results=( $(find $(eval "echo dockerfiles/$_subdir") -name '*'$_model'.Dockerfile') )
+    case ${#_results[@]} in 
+      0)
+        _dockerfile_path=''
+        ;;
+      1)
+       _dockerfile_path=${_results[0]}
+       ;;
+      *)
+       # disambiguate between intel-tf-image-segmentation-3d-unet-fp32-inference.Dockerfile and intel-tf-image-segmentation-unet-fp32-inference.Dockerfile
+       _path_length=${#_results[0]}
+       _dockerfile_path=${_results[0]}
+       for _result in "${_results[@]}"; do
+         if (( ${#_result} < $_path_length )); then
+           _dockerfile_path=$_result
+         fi
+       done
+       ;;
+    esac
+    if [[ -n $_dockerfile_path ]]; then
+      _dockerfile=${_dockerfile_path##*/}
+      echo $'@test "validate generate-dockerfile for '$_model$' in framework '$_framework$' creates '$_dockerfile$'" {
   run model-builder generate-dockerfile -f '$_framework$' '$_model$'
   (( $status == 0 ))
   [[ "${lines[@]}" =~ '$_dockerfile$' ]]
   (( $(last_modified '$_dockerfile_path$') <= 50 ))
-}' >> $(_model_builder._root)'/tests/model-builder.bats'
+}' >> $_g_root'/tests/model-builder.bats'
+   fi
  done
 }
 
@@ -1695,11 +1724,11 @@ _model_builder._tests.package()
     esac
     shift
   done
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '# *** tests for package ***' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo '# *** tests for package ***' >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
   _package_names=$(mktemp /tmp/package_names.XXXXXXXXXX)
   _tmp_files+=($_package_names)
   model-builder packages -f $_framework 2>&1 > $_package_names
@@ -1712,7 +1741,7 @@ _model_builder._tests.package()
   (( $status == 0 ))
   [[ "${lines[@]}" =~ '$_package$' ]]
   (( $(last_modified '$_package_path$') <= 50 ))
-}' >> $(_model_builder._root)'/tests/model-builder.bats'
+}' >> $_g_root'/tests/model-builder.bats'
     fi
   done
 }
@@ -1740,11 +1769,11 @@ _model_builder._tests.package_k8s()
     esac
     shift
   done
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '# *** tests for k8s package ***' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo '#' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo ''  >> $(_model_builder._root)'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo '# *** tests for k8s package ***' >> $_g_root'/tests/model-builder.bats'
+  echo '#' >> $_g_root'/tests/model-builder.bats'
+  echo ''  >> $_g_root'/tests/model-builder.bats'
   _package_names=$(mktemp /tmp/package_names.XXXXXXXXXX)
   _tmp_files+=($_package_names)
   model-builder packages-k8s -f $_framework 2>&1 > $_package_names
@@ -1757,7 +1786,7 @@ _model_builder._tests.package_k8s()
   (( $status == 0 ))
   [[ "${lines[@]}" =~ '$_package$' ]]
   (( $(last_modified '$_package_path$') <= 50 ))
-}' >> $(_model_builder._root)'/tests/model-builder.bats'
+}' >> $_g_root'/tests/model-builder.bats'
     fi
   done
 }
@@ -1800,11 +1829,11 @@ _model_builder.run_test_suite()
     esac
     shift
   done
-  rm -f $(_model_builder._root)'/tests/model-builder.bats'
-  type setup | sed '1d' >> $(_model_builder._root)'/tests/model-builder.bats'
-  type teardown | sed '1d' >> $(_model_builder._root)'/tests/model-builder.bats'
-  type last_modified | sed '1d' >> $(_model_builder._root)'/tests/model-builder.bats'
-  echo 'pushd '$(dirname $(_model_builder._root)) >> $(_model_builder._root)'/tests/model-builder.bats'
+  rm -f $_g_root'/tests/model-builder.bats'
+  type setup | sed '1d' >> $_g_root'/tests/model-builder.bats'
+  type teardown | sed '1d' >> $_g_root'/tests/model-builder.bats'
+  type last_modified | sed '1d' >> $_g_root'/tests/model-builder.bats'
+  echo 'pushd '$(dirname $_g_root) >> $_g_root'/tests/model-builder.bats'
 
   for _command in "${_current_commands[@]}"
   do
@@ -1887,8 +1916,8 @@ _model_builder.run_test_suite()
   done
 
   _model_builder._echo_command \
-    $(_model_builder._root)/tests/bin/bats \
-    $(_model_builder._root)/tests/model-builder.bats \
+    $_g_root/tests/bin/bats \
+    $_g_root/tests/model-builder.bats \
     ${_args[@]} \
     $_dry_run
 
@@ -2161,11 +2190,12 @@ _model_builder._validate_k8s()
 
 #
 # Filters input models as only those in _current_models[@] and returns one or more
-#  --only_tags_matching=^.*<model>$'
+#  ' --only_tags_matching=^.*<model>$ --exclude_tags_matching=^.*<model>$'
 #
 _model_builder._build_only_tags_matching_args()
 {
-  local _arg _models=()
+  local _arg _curent_models_count _exclude_model _excluded_models=() _exclude_models=() _key _models=()
+  declare -A _models_map
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -c|--command)
@@ -2182,21 +2212,38 @@ _model_builder._build_only_tags_matching_args()
     esac
     shift
   done
+  _current_models_count=${#_current_models[@]}
   for _arg in "$@";do
     if [[ ${_current_models[@]} =~ $_arg ]]; then
-      _models+=( ' --only_tags_matching=^.*'$_arg'$' )
+      _models+=(' --only_tags_matching=^.*'$_arg'$')
+      _key=X${_arg//-/_}
+      _models_map[$_key]="true"
+      _exclude_models=(${_current_models[@]//*$_arg} $_arg)
+      if (( $_current_models_count != ${#_exclude_models[@]} )); then
+        _exclude_models=(${_current_models[@]} ${_exclude_models[@]})
+        if (( ${#_exclude_models[@]} > 0 )); then
+          _excluded_models=($(printf "%s\n" "${_exclude_models[@]}" | sort | uniq -u))
+        fi
+      fi
     fi
   done
-  echo ${_models[@]}
+  _exclude_models=()
+  for _exclude_model in "${_excluded_models[@]}"; do
+    _key=X${_exclude_model//-/_}
+    if [[ -z ${_models_map[$_key]} ]]; then
+      _exclude_models+=(' --exclude_tags_matching=^.*'$_exclude_model'$')
+    fi
+  done
+  echo ${_exclude_models[@]} ${_models[@]} 
 }
 
 #
 # Filters input models as only those in _all_k8s[@] and returns one or more
-#  --only_tags_matching=^.*<model>$'
+#  ' --only_tags_matching=^.*<model>$ --exclude_tags_matching=^.*<model>$'
 #
 _model_builder._build_only_tags_matching_args_k8s()
 {
-  local _arg _models=()
+  local _arg _all_k8s_count _exclude_model _excluded_models=() _exclude_models=() _models=()
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       -h|--help)
@@ -2210,12 +2257,23 @@ _model_builder._build_only_tags_matching_args_k8s()
     esac
     shift
   done
+  _all_k8s_count=${#_all_k8s[@]}
   for _arg in "$@";do
     if [[ ${_all_k8s[@]} =~ $_arg ]]; then
       _models+=( ' --only_tags_matching=^.*'$_arg'$' )
+      _exclude_models=(${_all_k8s[@]//*$_arg} $_arg)
+      if (( $_all_k8s_count != ${#_exclude_models[@]} )); then
+        _exclude_models=(${_all_k8s[@]} ${_exclude_models[@]})
+        if (( ${#_exclude_models[@]} > 0 )); then
+          _exclude_models=($(printf "%s\n" "${_exclude_models[@]}" | sort | uniq -u))
+          for _exclude_model in "${_exclude_models[@]}"; do
+            _excluded_models+=(' --exclude_tags_matching=^.*'$_exclude_model'$')
+          done
+        fi
+      fi
     fi
   done
-  echo ${_models[@]}
+  echo ${_excluded_models[@]} ${_models[@]} 
 }
 
 #
