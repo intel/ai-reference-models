@@ -63,10 +63,6 @@ slice_sets:
       source: benchmarks/launch_benchmark.py
     - destination: benchmarks/recommendation/__init__.py
       source: benchmarks/recommendation/__init__.py
-    - destination: benchmarks/recommendation/pytorch/dlrm/README.md
-      source: benchmarks/recommendation/pytorch/dlrm/README.md
-    - destination: benchmarks/recommendation/pytorch/dlrm/training/bf16
-      source: benchmarks/recommendation/pytorch/dlrm/training/bf16
     - destination: models/common
       source: models/common
     - destination: models/recommendation/pytorch/dlrm/training/bf16
