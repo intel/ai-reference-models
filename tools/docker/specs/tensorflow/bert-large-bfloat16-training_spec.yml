@@ -1,7 +1,7 @@
 releases:
   versioned:
     tag_specs:
-    - '{_TAG_PREFIX}{intel-tf}{language-modeling}{bert-large-bfloat16-training}'
+    - '{_TAG_PREFIX}{intel-tf}{language-modeling}{mpi-horovod}{bert-large-bfloat16-training}'
 slice_sets:
   bert-large-bfloat16-training:
   - add_to_name: -bert-large-bfloat16-training
