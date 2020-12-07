@@ -3,8 +3,8 @@
 
 Download and untar the ResNet50 v1.5 FP32 training package:
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget <package url>
+tar -xvf <package name>
 ```
 
 #### Prerequisites
@@ -43,11 +43,11 @@ The multi-node use cases (user-allocated-pvc, user-mounted-nfs) make the followi
 
 ##### [Devops](https://en.wikipedia.org/wiki/DevOps)
 
-The k8 resources needed to run the multi-node <k8s package dir> quickstart require deployment of an mpi-operator.
+The k8 resources needed to run the multi-node <package dir> quickstart require deployment of an mpi-operator.
 See the [MPI Operator deployment](/k8s/common/tensorflow/KubernetesDevOps.md#mpi-operator-deployment) section of the Kubernetes DevOps document for instructions.
 
 Once these resources have been deployed, the mlops user then has a choice 
-of running <k8s package dir> multi-node (distributed training) or single-node. 
+of running <package dir> multi-node (distributed training) or single-node. 
 
 ##### [Mlops](https://en.wikipedia.org/wiki/MLOps)
 

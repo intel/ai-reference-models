@@ -3,8 +3,8 @@
 
 Download and untar the ResNet50 v1.5 FP32 inference package.
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget <package url>
+tar -xvf <package name>
 ```
 
 ### Execution
@@ -31,7 +31,7 @@ Both single and multi-node deployments use [kustomize-v3.8.4](https://github.com
 The kustomization files that the kustomize command references are located withing the following directory:
 
 ```
-<k8s package dir>/quickstart/mlops/serving/kustomization.yaml
+<package dir>/quickstart/mlops/serving/kustomization.yaml
 ```
 
 #### TensorFlow Serving
@@ -53,7 +53,7 @@ external requests.
 Make sure you are inside the serving directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/serving
+cd <package dir>/quickstart/mlops/serving
 ```
 
 The parameters that can be changed within the serving resources are shown in the table[^1] below:
@@ -136,7 +136,7 @@ calls the served model API. Benchmarking metrics are printed out.
 Run the [run_tf_serving_client.py](run_tf_serving_client.py) script with
 the `--help` flag to see the argument options:
 ```
-$ python <k8s package name>/quickstart/run_tf_serving_client.py --help
+$ python <package name>/quickstart/run_tf_serving_client.py --help
 Send TF records or simulated image data to tensorflow_model_server loaded with ResNet50v1_5 model.
 
 flags:
@@ -160,7 +160,7 @@ run_tf_serving_client.py:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python <k8s package name>/quickstart/run_tf_serving_client.py --server <Internal IP>:<Node Port> --data_dir <path to TF records> --batch_size <batch size>
+   python <package name>/quickstart/run_tf_serving_client.py --server <Internal IP>:<Node Port> --data_dir <path to TF records> --batch_size <batch size>
    ```
    The script will call the served model using data from the `data_dir` path or simulated data
    and output performance metrics.
@@ -178,7 +178,7 @@ run_tf_serving_client.py:
    Example:
    
    ```
-   cd <k8s package name>/quickstart
+   cd <package name>/quickstart
    bash multi_client.sh --model=resnet50v1_5 --servers="<Internal IP>:<Node Port>" --clients=5
    cd ../../
    ```

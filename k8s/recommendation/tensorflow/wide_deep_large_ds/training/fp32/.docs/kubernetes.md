@@ -4,8 +4,8 @@
 Download and untar the model <mode> package to get the yaml and config
 files for running <mode> on a single node using Kubernetes.
 ```
-wget <k8s package url>
-tar -xvf <k8s package name>
+wget <package url>
+tar -xvf <package name>
 ```
 
 ### Execution
@@ -33,8 +33,8 @@ Both single-node and pipeline deployments use [kustomize-v3.8.4](https://github.
 The kustomization files that the kustomize command references are located withing the following directories:
 
 ```
-<k8s package name>/quickstart/mlops/pipeline/kustomization.yaml
-<k8s package name>/quickstart/mlops/single-node/kustomization.yaml
+<package name>/quickstart/mlops/pipeline/kustomization.yaml
+<package name>/quickstart/mlops/single-node/kustomization.yaml
 ```
 
 #### Single-node Training
@@ -46,7 +46,7 @@ the quick start script command within the pod's container.
 Make sure you are inside the single-node directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/single-node
+cd <package dir>/quickstart/mlops/single-node
 ```
 
 The parameters that can be changed within the pod are shown in the table[^1] below:
@@ -156,7 +156,7 @@ external requests.
 Make sure you are inside the pipeline directory:
 
 ```
-cd <k8s package dir>/quickstart/mlops/pipeline
+cd <package dir>/quickstart/mlops/pipeline
 ```
 
 The parameters that can be changed within the pipeline are shown in the table[^2] below:
@@ -249,7 +249,7 @@ Run the [run_tf_serving_client.py](run_tf_serving_client.py) script with
 the `--help` flag to see the argument options:
 ```
 $ python run_wide_deep_client.py --help
-usage: <k8s package dir>/quickstart/run_tf_serving_client.py [-h]
+usage: <package dir>/quickstart/run_tf_serving_client.py [-h]
        [-s SERVER] -d DATA_FILE [-b BATCH_SIZE] [-n NUM_ITERATION] [-w WARM_UP_ITERATION]
 
 optional arguments:
@@ -275,7 +275,7 @@ optional arguments:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python <k8s package dir>/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
+   python <package dir>/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
    ```
    The script will call the served model using data from the csv file
    and output performance and accuracy metrics.
