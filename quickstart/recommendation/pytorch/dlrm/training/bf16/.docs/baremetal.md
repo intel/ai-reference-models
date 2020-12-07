@@ -1,4 +1,4 @@
-<!--- 50. Bare Metal -->
+<!--- 40. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal first, follow the [instruction described here](/models/recommendation/pytorch/dlrm/training/bf16/README.md#1-install-anaconda-30) until section 4.

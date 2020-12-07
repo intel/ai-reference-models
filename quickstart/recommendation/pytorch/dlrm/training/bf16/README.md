@@ -7,14 +7,14 @@
 This document has instructions for running DLRM bf16 training using
 Intel-optimized PyTorch.
 
-<!--- 30. Datasets -->
+<!--- 20. Datasets -->
 ## Datasets
 
 Prepare your dataset according to the [instruction described here](/models/recommendation/pytorch/dlrm/training/bf16/README.md#4-prepare-dataset)
 
 Set the `DATA_PATH` to point to "<dir/to/save/dlrm_data>" directory when running DLRM.
 
-<!--- 40. Quick Start Scripts -->
+<!--- 30. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
@@ -25,7 +25,7 @@ These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
 
-<!--- 50. Bare Metal -->
+<!--- 40. Bare Metal -->
 ## Bare Metal
 
 To run on bare metal first, follow the [instruction described here](/models/recommendation/pytorch/dlrm/training/bf16/README.md#1-install-anaconda-30) until section 4.
@@ -40,7 +40,7 @@ OUTPUT_DIR=<directory where log files will be written>
 quickstart/<script name>.sh
 ```
 
-<!--- 60. Docker -->
+<!--- 50. Docker -->
 ## Docker
 
 The model container includes the scripts and libraries needed to run 
@@ -62,7 +62,7 @@ docker run \
   /bin/bash quickstart/recommendation/pytorch/dlrm/training/bf16/train_single_node.sh
 ```
 
-<!--- 80. License -->
+<!--- 70. License -->
 ## License
 
 [LICENSE](/LICENSE)

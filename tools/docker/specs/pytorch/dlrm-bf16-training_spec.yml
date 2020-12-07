@@ -57,19 +57,11 @@ slice_sets:
       uri: models/quickstart/recommendation/pytorch/dlrm/training/bf16
     downloads: []
     files:
-    - destination: benchmarks/common
-      source: benchmarks/common
-    - destination: benchmarks/launch_benchmark.py
-      source: benchmarks/launch_benchmark.py
-    - destination: benchmarks/recommendation/__init__.py
-      source: benchmarks/recommendation/__init__.py
-    - destination: models/common
-      source: models/common
     - destination: models/recommendation/pytorch/dlrm/training/bf16
       source: models/recommendation/pytorch/dlrm/training/bf16
-    - destination: quickstart/common
-      source: quickstart/common
     - destination: quickstart
       source: quickstart/recommendation/pytorch/dlrm/training/bf16
     partials:
     - recommendation/dlrm
+    - model_package
+    - entrypoint
