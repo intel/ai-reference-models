@@ -1,4 +1,4 @@
-<!--- 40. Quick Start Scripts -->
+<!--- 30. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
