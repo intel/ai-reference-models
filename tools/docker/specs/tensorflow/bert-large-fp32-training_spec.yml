@@ -14,7 +14,6 @@ slice_sets:
           documentation:
               name: README.md
               uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32
-              k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32
               text_replace:
                 <mode>: training
                 <model name>: BERT Large
@@ -23,38 +22,26 @@ slice_sets:
                 <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training.tar.gz
                 <package name>: bert-large-fp32-training.tar.gz
                 <package dir>: bert-large-fp32-training
-                <k8s package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training-k8s.tar.gz
-                <k8s package name>: bert-large-fp32-training-k8s.tar.gz
-                <k8s package dir>: bert-large-fp32-training-k8s
                 <docker image>: intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-fp32-training
               docs:
                   - name: Title
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
                   - name: Description
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/description.md
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/description.md
                   - name: Download link
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/download.md
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/download.md
                   - name: Datasets
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/datasets.md
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/datasets.md
                   - name: Quick Start Scripts
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/quickstart.md
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/quickstart.md
                   - name: Bare Metal
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/baremetal.md
                   - name: Docker
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/docker.md
-                  - name: Kubernetes
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/kubernetes.md
                   - name: License link
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/license.md
-                    k8s_uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/license.md
           args:
               - PACKAGE_NAME=bert-large-fp32-training
-              - K8S_PACKAGE_NAME=bert-large-fp32-training-k8s
           files:
               - source: benchmarks/common
                 destination: benchmarks/common
@@ -65,8 +52,6 @@ slice_sets:
               - source: models/language_modeling/tensorflow/bert_large/training/fp32
                 destination: ./models/language_modeling/tensorflow/bert_large/training/fp32
               - source: quickstart/language_modeling/tensorflow/bert_large/training/fp32
-                k8s_source: k8s/language_modeling/tensorflow/bert_large/training/fp32
                 destination: quickstart
               - source: quickstart/common
-                k8s_source: k8s/common
                 destination: quickstart/common

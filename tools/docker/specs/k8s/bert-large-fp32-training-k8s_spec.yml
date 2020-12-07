@@ -1,0 +1,75 @@
+releases:
+  versioned:
+    tag_specs:
+      - '{_TAG_PREFIX}{intel-tf}{language-modeling}{mpi-horovod}{bert-large-fp32-training-k8s}'
+slice_sets:
+  bert-large-fp32-training-k8s:
+    - add_to_name: -bert-large-fp32-training-k8s
+      documentation:
+        name: README.md
+        uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32
+        text_replace:
+          <mode>: training
+          <model name>: BERT Large
+          <precision>: FP32
+          <use case>: language_modeling
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training-k8s.tar.gz
+          <package name>: bert-large-fp32-training-k8s.tar.gz
+          <package dir>: bert-large-fp32-training-k8s
+          <docker image>: intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-fp32-training
+        docs:
+          - name: Title
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
+          - name: Description
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/description.md
+          - name: Download link
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/download.md
+          - name: Datasets
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/datasets.md
+          - name: Quick Start Scripts
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/quickstart.md
+          - name: Kubernetes
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/kubernetes.md
+          - name: License link
+            uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/license.md
+      args:
+        - PACKAGE_NAME=bert-large-fp32-training-k8s
+      files:
+        - source: k8s/language_modeling/tensorflow/bert_large/training/fp32
+          destination: quickstart
+        - source: k8s/common
+          destination: quickstart/common
+      runtime:
+        command:
+          - kubectl
+        args:
+          - apply
+          - -f
+          - user-mounted-nfs.yaml
+        env:
+          - name: DATASET_DIR
+            value: /datasets
+          - name: FS_ID
+            value: "0"
+          - name: GROUP_ID
+            value: "0"
+          - name: GROUP_NAME
+            value: root
+          - name: IMAGE_VERSION
+            value: tf-2.3.0-imz-2.1.0
+          - name: NAME_SPACE
+            value: default
+          - name: NFS_PATH
+            value: /nfs
+          - name: NFS_SERVER
+            value: 0.0.0.0
+          - name: PVC_NAME
+            value: workdisk
+          - name: PVC_PATH
+            value: /pvc
+          - name: REGISTRY
+            value: docker.io
+          - name: USER_ID
+            value: "0"
+          - name: USER_NAME
+            value: root

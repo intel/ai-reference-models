@@ -1,0 +1,75 @@
+releases:
+  versioned:
+    tag_specs:
+      - '{_TAG_PREFIX}{intel-tf}{image-recognition}{resnet50v1-5-fp32-inference-k8s}'
+slice_sets:
+  resnet50v1-5-fp32-inference-k8s:
+    - add_to_name: -resnet50v1-5-fp32-inference-k8s
+      args:
+        - PACKAGE_NAME=resnet50v1-5-fp32-inference-k8s
+      files:
+        - destination: quickstart/common
+          source: k8s/common
+        - destination: quickstart
+          source: k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
+      documentation:
+        name: README.md
+        uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
+        text_replace:
+          <model name>: ResNet50 v1.5
+          <precision>: FP32
+          <mode>: inference
+          <use case>: image_recognition
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-fp32-inference-k8s.tar.gz
+          <package name>: resnet50v1-5-fp32-inference-k8s.tar.gz
+          <package dir>: resnet50v1-5-fp32-inference-k8s
+          <docker image>: intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-fp32-inference
+        docs:
+          - name: Title
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/title.md
+          - name: Description
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/description.md
+          - name: Download link
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/download.md
+          - name: Datasets
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/datasets.md
+          - name: Quick Start Scripts
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/quickstart.md
+          - name: Kubernetes
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/kubernetes.md
+          - name: License link
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/license.md
+      runtime:
+        command:
+          - kubectl
+        args:
+          - apply
+          - -f
+          - user-mounted-nfs.yaml
+        env:
+          - name: DATASET_DIR
+            value: /datasets
+          - name: FS_ID
+            value: "0"
+          - name: GROUP_ID
+            value: "0"
+          - name: GROUP_NAME
+            value: root
+          - name: IMAGE_VERSION
+            value: tf-2.3.0-imz-2.1.0
+          - name: NAME_SPACE
+            value: default
+          - name: NFS_PATH
+            value: /nfs
+          - name: NFS_SERVER
+            value: 0.0.0.0
+          - name: PVC_NAME
+            value: workdisk
+          - name: PVC_PATH
+            value: /pvc
+          - name: REGISTRY
+            value: docker.io
+          - name: USER_ID
+            value: "0"
+          - name: USER_NAME
+            value: root

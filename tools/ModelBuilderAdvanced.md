@@ -130,8 +130,6 @@ The `--framework` (or `-f`) flag applies to the following model-builder subcomma
 * models (e.g. `model-builder models -f pytorch`)
 * package (e.g. `model-builder package -f pytorch pytorch-resnet50-bf16-inference`)
 * packages (e.g. `model-builder packages -f tensorflow`)
-* package-k8s (e.g. `model-builder package-k8s -f tensorflow bert-large-fp32-training`)
-* packages-k8s (e.g. `model-builder packages-k8s -f tensorflow`)
 * run-test-suite (e.g. `model-builder run-test-suite -c generate-dockerfile -f pytorch`)
 
 > If no `--framework <framework>` (or `-f`) flag is passed to the
@@ -190,7 +188,7 @@ The model-builder's run-test-suit subcommand will generate tests for one or more
 The syntax is shown below:
 
 ```
-model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|package|package-k8s] --release-group <release-group> <model> ...
+model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|package] --release-group <release-group> <model> ...
 ```
 
 The run-test-suite subcommand generates test cases using syntax compatible with [bats-core](https://github.com/bats-core/bats-core). After generation, it calls bats providing the generated script. Several examples with output are shown below
@@ -206,14 +204,14 @@ The run-test-suite subcommand generates test cases using syntax compatible with 
 4 tests, 0 failures
 ```
 
-2. `model-builder run-test-suite -c package-k8s`
+2. `model-builder run-test-suite -c package -f k8s`
 
 ```
- ✓ validate package-k8s for bert-large-fp32-training in release-group dockerfiles creates bert-large-fp32-training-k8s.tar.gz
- ✓ validate package-k8s for resnet50v1-5-fp32-inference in release-group dockerfiles creates resnet50v1-5-fp32-inference-k8s.tar.gz
- ✓ validate package-k8s for resnet50v1-5-fp32-training in release-group dockerfiles creates resnet50v1-5-fp32-training-k8s.tar.gz
- ✓ validate package-k8s for rfcn-fp32-inference in release-group dockerfiles creates rfcn-fp32-inference-k8s.tar.gz
- ✓ validate package-k8s for wide-deep-large-ds-fp32-training in release-group dockerfiles creates wide-deep-large-ds-fp32-training-k8s.tar.gz
+ ✓ validate package for bert-large-fp32-training-k8s in framework k8s creates bert-large-fp32-training-k8s.tar.gz
+ ✓ validate package for resnet50v1-5-fp32-inference-k8s in framework k8s creates resnet50v1-5-fp32-inference-k8s.tar.gz
+ ✓ validate package for resnet50v1-5-fp32-training-k8s in framework k8s creates resnet50v1-5-fp32-training-k8s.tar.gz
+ ✓ validate package for rfcn-fp32-inference-k8s in framework k8s creates rfcn-fp32-inference-k8s.tar.gz
+ ✓ validate package for wide-deep-large-ds-fp32-training-k8s in framework k8s creates wide-deep-large-ds-fp32-training-k8s.tar.gz
 
 5 tests, 0 failures
 ```
