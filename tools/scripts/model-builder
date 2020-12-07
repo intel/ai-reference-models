@@ -50,13 +50,10 @@ _usage()
   echo "# -- Adding --dry-run will show the docker call but not execute it --"
   echo 'model-builder --dry-run generate-dockerfile <modelname>'
   echo ''
-  echo "# -- Create all k8 packages --"
-  echo 'model-builder package-k8s'
-  echo ''
   echo "# -- Generate a model's documentation --"
   echo 'model-builder generate-documentation <modelname>'
   echo ''
-  echo "# -- Do {generate-documentation,package,package-k8s,generate-dockerfile,build} for several models --"
+  echo "# -- Do {generate-documentation,package,generate-dockerfile,build} for several models --"
   echo 'model-builder make <modelname> <modelname>'
   echo ''
   echo "# -- Run the test-suite for the subcommand generate-documentation with the framework tensorflow and models: resnet50-fp32-inference and resnet50-int8-inference. --"
@@ -248,7 +245,6 @@ _model_builder._init()
   declare -g -a _all_commands _current_commands _remaining_commands
   declare -g -a _all_frameworks _remaining_frameworks
   declare -g -a _release_groups
-  declare -g -a _all_k8s _current_k8s _remaining_k8s
   declare -g -a _all_specs _tmp_files
   declare -g _show_framework_options=true
 
@@ -260,13 +256,13 @@ _model_builder._init()
     exit 1
   fi
 
-  if (( ${#_all_frameworks[@]} == 0 )) && (( ${#_all_models[*]} == 0 )) && (( ${#_all_k8s[@]} == 0 )); then
+  if (( ${#_all_frameworks[@]} == 0 )) && (( ${#_all_models[*]} == 0 )); then
     _all_specs=$(mktemp /tmp/$(basename $0)_specs.XXXXXXXXX)
     _tmp_files+=($_all_specs)
 
     cat $(find ${_spec_folder} -name '*.yml') > $_all_specs
 
-    _all_commands=(generate-documentation package package-k8s generate-dockerfile build)
+    _all_commands=(generate-documentation package generate-dockerfile build)
     eval $'__model_builder_frameworks_function() { [[ -d ${_spec_folder} ]] && echo $(ls $_spec_folder); }'
 
     eval "_model_builder_frameworks_function() { echo $(__model_builder_frameworks_function); }"
@@ -292,10 +288,6 @@ _model_builder._init()
     done
 
     _model_builder._set_current_models
-
-    eval $'__model_builder_k8s_function() { [[ -d ${_spec_folder} ]] && echo $(cat $_all_specs | grep \'<k8s package name>\' | sed \'s/^[ \\t]*<k8s package name>: //g\' | sed \'s/-k8s.tar.gz//g\' | sort | uniq); }'
-    eval "_model_builder_k8s_function() { echo $(__model_builder_k8s_function); }"
-    _all_k8s+=( $(_model_builder_k8s_function) )
   fi
 }
 
@@ -361,7 +353,7 @@ _model_builder._subcommand_show_frameworks()
 {
   local _arg _cur _i=2 _options _prev _subcommand=$1
   case "$_subcommand" in
-    images|models|packages|packages-k8s)
+    images|models|packages)
       while (( $_i < $COMP_CWORD )); do
         local s="${COMP_WORDS[_i]}"
         case "$s" in
@@ -412,7 +404,7 @@ _model_builder._subcommand_show_frameworks_and_models()
 {
   local _arg _cur _i=2 _options _prev _subcommand=$1
   case "$_subcommand" in
-    build|generate-dockerfile|generate-documentation|make|package|package-k8s)
+    build|generate-dockerfile|generate-documentation|make|package)
       while (( $_i < $COMP_CWORD )); do
         local s="${COMP_WORDS[_i]}"
         case "$s" in
@@ -591,14 +583,14 @@ _model_builder._completion()
       _model_builder._subcommand_show_frameworks $_subcommand
       return
       ;;
-    generate-dockerfile|generate-documentation|k8s|package|package-k8s)
+    generate-dockerfile|generate-documentation|package)
       _current_framework=$DEFAULT_FRAMEWORK
       _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_frameworks_and_models $_subcommand
       return
       ;;
-    models|packages|packages-k8s)
+    models|packages)
       _current_framework=$DEFAULT_FRAMEWORK
       _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
@@ -646,7 +638,6 @@ _model_builder.completion()
   echo '  declare -g '$'_all_frameworks=('${_all_frameworks[@]}$')'
   echo '  declare -g '$'_current_framework='${DEFAULT_FRAMEWORK}$
   echo '  declare -g _remaining_frameworks=(${_current_framework[@]})'
-  echo '  declare -g '$'_all_k8s+=('$(_model_builder_k8s_function)$')'
   echo '  declare -g _first_framework=true'
   echo '  declare -g _show_framework_options=true'
   echo '  declare -g _g_commands=('${_g_commands[@]}')'
@@ -991,80 +982,6 @@ _model_builder.package()
 }
 
 #
-# Entry point for 'model-builder package-k8s'
-# Packages one or more k8 packages
-# Calls assembler.py
-#
-_model_builder.package_k8s()
-{
-  local _abs_model_dir='' _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _output_dir='' _release_args=() _framework _verbose=''
-  pushd $_g_root/docker 1>/dev/null 2>/dev/null
-  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-    case "$1" in
-      -h|--help)
-        echo -e 'Builds the k8 packages for the specified models (default=*) in the specified framework.\n'
-        return 0
-        ;;
-      --dry-run)
-        _dry_run=true
-        _args+=("--dry_run")
-        ;;
-      --model_dir=*)
-        _abs_model_dir=${1#*=}
-        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
-        _model_dir='--model_dir=models'
-        _args+=("$_model_dir")
-        ;;
-      --output_dir=*)
-        _output_dir=${1#*=}
-        _output_dir=${_output_dir##*/}
-        _args+=("$1")
-        ;;
-      -f|--framework)
-        ;;
-      --verbose)
-        _verbose=$1
-        _args+=("$1")
-        ;;
-      *)
-        _args+=("$1")
-        ;;
-    esac
-    shift
-  done
-
-  # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
-
-  # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
-
-  for _release_group in "${_release_groups[@]}"
-  do
-    case "$_release_group" in
-      versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
-        ;;
-      tf_1.15.2_containers)
-        _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
-        ;;
-      *)
-        _release_args=()
-        ;;
-    esac
-    # Call the assembler to build k8s packages
-    _model_builder._echo_command ${_asm_dockerfiles} \
-      --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
-      --build_k8s_packages \
-      ${_release_args[@]} \
-      ${_args[@]}
-  done
-
-  popd 1>/dev/null 2>/dev/null
-}
-
-#
 # Entry point for 'model-builder generate-dockerfile ...'
 # Generates one or more dockerfiles from specified models
 # Calls assembler.py
@@ -1295,25 +1212,6 @@ _model_builder.images()
 }
 
 #
-# Entry point for 'model-builder k8s'
-#
-_model_builder.k8s()
-{
-  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-    case "$1" in
-      -h|--help)
-        echo -e 'List all kubernetes packages\n'
-        exit 0
-        ;;
-      *)
-        ;;
-    esac
-    shift
-  done
-  echo ${_all_k8s[@]}
-}
-
-#
 # Entry point for 'model-builder models'
 #
 _model_builder.models()
@@ -1387,73 +1285,6 @@ _model_builder.packages()
     --arg TENSORFLOW_TAG=${TENSORFLOW_TAG} \
     ${_args[@]} 2>&1 | sort | column -c 2 -t
 
-  popd 1>/dev/null 2>/dev/null
-}
-
-#
-# Entry point for 'model-builder packages-k8s'
-#
-_model_builder.packages_k8s()
-{
-  local _abs_model_dir _args=() _asm_dockerfiles _dry_run=false _model_dir='' _model_dir_mount='' _verbose=''
-  pushd $_g_root/docker 1>/dev/null 2>/dev/null
-  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-    case "$1" in
-      -h|--help)
-        echo -e 'List the k8 packages that would be built for the specified framework.\n'
-        exit 0
-        ;;
-      --dry-run)
-        _dry_run=true
-        _args+=("--dry_run")
-        ;;
-      --model_dir=*)
-        _abs_model_dir=${1#*=}
-        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
-        _model_dir='--model_dir=models'
-        _args+=("$_model_dir")
-        ;;
-      -f|--framework)
-        ;;
-      --verbose)
-        _verbose=$1
-        _args+=("$1")
-        ;;
-      *)
-        _args+=("$1")
-        ;;
-    esac
-    shift
-  done
-
-  # Check for the imz-tf-tools container and build it if it doesn't exist
-  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
-
-  # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
-
-  for _release_group in "${_release_groups[@]}"
-  do
-    case "$_release_group" in
-      versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
-        ;;
-      tf_1.15.2_containers)
-        _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
-        ;;
-      *)
-        _release_args=()
-        ;;
-    esac
-    # Call the assembler to list k8s
-    _model_builder._echo_command ${_asm_dockerfiles} \
-      --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
-      --repository ${LOCAL_REPO} \
-      --list_k8s \
-      ${_release_args[@]} \
-      ${_args[@]} 2>&1 | sort | column -c 2 -t
-  done
   popd 1>/dev/null 2>/dev/null
 }
 
@@ -1579,11 +1410,48 @@ _model_builder._tests.build()
 }
 
 #
+# parses model name into parts: _prefix, _precision, _mode
+# also sets the top-level directory to quickstart or k8s based on model name suffix
+#
+_model_builder._parse_model_name()
+{
+  local _model=$1 _framework=$2 _last_suffix _lmode _lprefix _suffix
+  declare -n __prefix=$3
+  declare -n __precision=$4
+  declare -n __mode=$5
+  declare -n __dir=$6
+  if [[ $_model =~ bf16 ]]; then
+    __precision=bf16
+  elif [[ $_model =~ bfloat16 ]]; then
+    __precision=bfloat16
+  elif [[ $_model =~ fp32 ]]; then
+    __precision=fp32
+  elif [[ $_model =~ int8 ]]; then
+    __precision=int8
+  else 
+    echo 'Unknown precision specified in model: '$_model >&2
+    exit 1
+  fi
+  _lprefix=${_model%-${__precision}-*}
+  _suffix=${_model/${_lprefix}-/}
+  _lmode=${_suffix#*-}
+  _last_suffix=${_lmode##*-}
+  if [[ $_last_suffix =~ k8s ]]; then
+    __prefix=/${_lprefix//-/[_-]}/
+    __dir=k8s
+  else
+    __prefix=/${_framework}/${_lprefix//-/[_-]}/
+    __dir=quickstart
+  fi
+  __mode=${_lmode%%-*}
+}
+
+#
 # Generates tests for model-builder generate-documentation -f <framework> models...
 #
 _model_builder._tests.generate_documentation()
 {
-  local _docdir _framework='' _image_name _image_names _mode _model _precision _prefix _suffix
+  local _dir='' _docdir _framework='' _image_name _image_names _mode _model _precision _prefix
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       --arg)
@@ -1609,12 +1477,8 @@ _model_builder._tests.generate_documentation()
   echo '#' >> $_g_root'/tests/model-builder.bats'
   echo ''  >> $_g_root'/tests/model-builder.bats'
   for _model in "$@"; do
-    _prefix=${_model%-*-*}
-    _suffix=${_model/${_prefix}-/}
-    _prefix=${_prefix//-/[_-]}
-    _precision=${_suffix%-*}
-    _mode=${_suffix#*-}
-    _docdir=$(find quickstart -type d | grep '/'$_framework'/'$_prefix'/' | grep $_mode | grep $_precision'$')
+    _model_builder._parse_model_name $_model $_framework _prefix _precision _mode _dir
+    _docdir=$(find $_dir -type d | grep $_prefix | grep $_mode | grep $_precision'$')
     if [[ -n $_docdir ]]; then
       _readme=$_docdir/README.md
       echo $'@test "validate generate-documentation for '$_model$' in framework '$_framework$' creates '$_readme$'" {
@@ -1746,51 +1610,6 @@ _model_builder._tests.package()
   done
 }
 
-_model_builder._tests.package_k8s()
-{
-  local _model _package_names _package_path _package _framework=''
-  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-    case "$1" in
-      --arg)
-        shift
-        ;;
-      -h|--help)
-        echo -e 'package tests\n'
-        exit 0
-        ;;
-      --model_dir=|--output_dir=|--dry_run)
-        ;;
-      --framework)
-        shift
-        _framework=$1
-        ;;
-      *)
-        ;;
-    esac
-    shift
-  done
-  echo ''  >> $_g_root'/tests/model-builder.bats'
-  echo '#' >> $_g_root'/tests/model-builder.bats'
-  echo '# *** tests for k8s package ***' >> $_g_root'/tests/model-builder.bats'
-  echo '#' >> $_g_root'/tests/model-builder.bats'
-  echo ''  >> $_g_root'/tests/model-builder.bats'
-  _package_names=$(mktemp /tmp/package_names.XXXXXXXXXX)
-  _tmp_files+=($_package_names)
-  model-builder packages-k8s -f $_framework 2>&1 > $_package_names
-  for _model in "$@"; do
-    _package_path=$(cat $_package_names | grep '^.*'$_model'-k8s.tar.gz$' | awk '{print $2}' || exit 0)
-    if [[ -n $_package_path ]]; then
-      _package=${_package_path##*/}
-      echo $'@test "validate package-k8s for '$_model$' in framework '$_framework$' creates '$_package$'" {
-  run model-builder package-k8s -f '$_framework$' '$_model$'
-  (( $status == 0 ))
-  [[ "${lines[@]}" =~ '$_package$' ]]
-  (( $(last_modified '$_package_path$') <= 50 ))
-}' >> $_g_root'/tests/model-builder.bats'
-    fi
-  done
-}
-
 _model_builder.run_test_suite()
 {
   local _abs_model_dir='' _args=() _dry_run='' _model_dir='' _model_dir_mount='' _model_package_folder 
@@ -1900,18 +1719,6 @@ _model_builder.run_test_suite()
           $_dry_run \
           ${_selected_models[@]}
         ;;
-      package-k8s)
-        _model_builder._echo_command \
-          _model_builder._tests.package_k8s \
-          --arg http_proxy=${http_proxy} \
-          --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
-          --framework ${_current_framework} \
-          ${_release_args[@]} \
-          ${_args[@]} \
-          $_dry_run \
-          ${_selected_models[@]}
-        ;;
     esac
   done
 
@@ -1949,7 +1756,7 @@ _model_builder.install_completion()
 }
 
 #
-# Convenience function: Calls generate-documentation, package, package-k8s, generate-dockerfile, build
+# Convenience function: Calls generate-documentation, package, generate-dockerfile, build
 #
 _model_builder.make()
 {
@@ -1964,13 +1771,6 @@ _model_builder.make()
   _model_builder.package $@
   if (( $? != 0 )); then
     echo "There was an error building model packages." >&2
-    exit 1
-  fi
-
-  # build k8s packages
-  _model_builder.package_k8s $@
-  if (( $? != 0 )); then
-    echo "There was an error building k8s packages." >&2
     exit 1
   fi
 
@@ -2133,62 +1933,6 @@ _model_builder._validate_commands()
 }
 
 #
-# Parses model args and verifies that the model is 
-# is in the set of _all_k8s[]
-#
-_model_builder._validate_k8s()
-{
-  local _arg
-  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-    case "$1" in
-      -h|--help)
-        return 0
-        ;;
-      -c|--command)
-        shift
-        ;;
-      -f|--framework)
-        shift
-        ;;
-      *)
-        ;;
-    esac
-    shift
-  done
-  for _arg in "$@"; do
-    if ! [[ "${_all_k8s[@]}" =~ $_arg ]]; then
-      echo 'unknown k8 model'$_arg >&2
-      _usage
-      exit 1
-    elif ! [[ "${_current_k8s[@]}" =~ $_arg ]]; then
-      _current_k8s+=( $_arg )
-      _remaining_k8s=( ${_remaining_k8s[@]/$_arg/} )
-    fi
-  done
-  # all models
-  if [[ ${#_current_k8s[@]} == 0 ]]; then
-    _current_k8s=( ${_all_k8s[@]}  )
-    _remaining_k8s=()
-  fi
-
-  local _arg _remainingModels=()
-  _remainingModels+=( ${_all_k8s[@]} )
-  for _arg in "$@"; do
-    if [[ $_arg == -h ]] || [[ $_arg == --help ]]; then
-      break
-    elif ! [[ "${_all_k8s[@]}" =~ $_arg ]]; then
-      echo 'unknown option '$_arg >&2
-      _usage
-      exit 1
-    elif ! [[ "${_current_k8s[@]}" =~ $_arg ]]; then
-      _current_k8s+=( $_arg )
-    fi
-    _remainingModels=( ${_remainingModels[@]/$_arg/} )
-  done
-  return 0
-}
-
-#
 # Filters input models as only those in _current_models[@] and returns one or more
 #  ' --only_tags_matching=^.*<model>$ --exclude_tags_matching=^.*<model>$'
 #
@@ -2235,45 +1979,6 @@ _model_builder._build_only_tags_matching_args()
     fi
   done
   echo ${_exclude_models[@]} ${_models[@]} 
-}
-
-#
-# Filters input models as only those in _all_k8s[@] and returns one or more
-#  ' --only_tags_matching=^.*<model>$ --exclude_tags_matching=^.*<model>$'
-#
-_model_builder._build_only_tags_matching_args_k8s()
-{
-  local _arg _all_k8s_count _exclude_model _excluded_models=() _exclude_models=() _models=()
-  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
-    case "$1" in
-      -h|--help)
-        return 0
-        ;;
-      -f|--framework)
-        shift
-        ;;
-      *)
-        ;;
-    esac
-    shift
-  done
-  _all_k8s_count=${#_all_k8s[@]}
-  for _arg in "$@";do
-    if [[ ${_all_k8s[@]} =~ $_arg ]]; then
-      _models+=( ' --only_tags_matching=^.*'$_arg'$' )
-      _exclude_models=(${_all_k8s[@]//*$_arg} $_arg)
-      if (( $_all_k8s_count != ${#_exclude_models[@]} )); then
-        _exclude_models=(${_all_k8s[@]} ${_exclude_models[@]})
-        if (( ${#_exclude_models[@]} > 0 )); then
-          _exclude_models=($(printf "%s\n" "${_exclude_models[@]}" | sort | uniq -u))
-          for _exclude_model in "${_exclude_models[@]}"; do
-            _excluded_models+=(' --exclude_tags_matching=^.*'$_exclude_model'$')
-          done
-        fi
-      fi
-    fi
-  done
-  echo ${_excluded_models[@]} ${_models[@]} 
 }
 
 #
@@ -2386,10 +2091,6 @@ _model_builder_main()
             exit 1
           fi
           ;;
-        k8s)
-          _model_builder._set_current_models
-          _model_builder.k8s $@
-          ;;
         make)
           _model_builder._set_current_models
           _model_builder._validate_frameworks $@ || exit 0
@@ -2413,28 +2114,11 @@ _model_builder_main()
             exit 1
           fi
           ;;
-        package-k8s)
-          _model_builder._set_current_models
-          _model_builder._validate_frameworks $@ || exit 0
-          _model_builder._validate_k8s $@ || exit 0
-          _only_tags_matching="$(_model_builder._build_only_tags_matching_args_k8s $@)"
-          _model_builder.package_k8s $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
-          if (( $? != 0 )); then
-            echo "There was an error building k8s packages."
-            exit 1
-          fi
-          ;;
         packages)
           _model_builder._set_current_models
           _model_builder._validate_frameworks $@ || exit 0
           _model_builder.packages $_model_dir $_verbose $_dry_run $@
           return 0
-          ;;
-        packages-k8s)
-          _model_builder._set_current_models
-          _model_builder._validate_frameworks $@ || exit 0
-          _model_builder._validate_k8s $@ || exit 0
-          _model_builder.packages_k8s $_model_dir $_verbose $_dry_run $@
           ;;
         frameworks)
           _model_builder.frameworks $@

@@ -1,4 +1,4 @@
 <!--- 20. Download link -->
 ## Download link
 
-[<k8s package name>](<k8s package url>)
+[<package name>](<package url>)

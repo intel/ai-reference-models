@@ -88,9 +88,6 @@ flags.DEFINE_boolean(
     'build_packages', False, 'Do not build packages', short_name='z')
 
 flags.DEFINE_boolean(
-    'build_k8s_packages', False, 'Do not build k8s packages', short_name='f')
-
-flags.DEFINE_boolean(
     'construct_dockerfiles', False, 'Do not build Dockerfiles', short_name='d')
 
 flags.DEFINE_boolean(
@@ -110,9 +107,6 @@ flags.DEFINE_boolean(
 
 flags.DEFINE_boolean(
     'list_packages', False, 'Do not list model packages that would be built')
-
-flags.DEFINE_boolean(
-    'list_k8s', False, 'Do not list k8s packages that would be built')
 
 flags.DEFINE_string(
     'run_tests_path', None,
@@ -152,7 +146,7 @@ flags.DEFINE_string(
 
 flags.DEFINE_string(
     'output_dir',
-    'output', 'Path to an output directory for model and k8s packages.'
+    'output', 'Path to an output directory for model packages.'
     ' Will be created if it doesn\'t exist.')
 
 flags.DEFINE_string(
@@ -260,8 +254,6 @@ slice_sets:
               type: string
             uri:
               type: string
-            k8s_uri:
-              type: string
             text_replace:
               type: dict
             docs:
@@ -272,8 +264,6 @@ slice_sets:
                   name:
                     type: string
                   uri:
-                    type: string
-                  k8s_uri:
                     type: string
         test_runtime:
           type: string
@@ -296,8 +286,6 @@ slice_sets:
             schema:
               source:
                 type: string
-              k8s_source:
-                type: string
               destination:
                 type: string
         downloads:
@@ -309,6 +297,28 @@ slice_sets:
                 type: string
               destination:
                 type: string
+        runtime:
+          type: dict
+          schema:
+            command:
+              type: list
+              default: []
+              schema:
+                type: string
+            args:
+              type: list
+              default: []
+              schema:
+                type: string
+            env:
+              type: list
+              schema:
+                type: dict
+                schema:
+                  name:
+                    type: string
+                  value:
+                    type: string
 
 releases:
   type: dict
@@ -545,9 +555,7 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             documentation = slices[len(slices)-1]['documentation']
             docs_list = gather_slice_list_items([documentation], 'docs')
             documentation_contents = merge_docs(docs_list)
-            documentation_k8s_contents = merge_docs(docs_list, 'k8s')
-            documentation.update({ 'contents': documentation_contents,
-                                   'k8s_contents': documentation_k8s_contents })
+            documentation.update({ 'contents': documentation_contents })
         else:
             docs_list = []
         files_list = gather_slice_list_items(slices, 'files')
@@ -607,8 +615,6 @@ def merge_docs(docs_list, package_type='model'):
       uri = ''
       if package_type == 'model' and 'uri' in doc:
         uri = doc['uri']
-      elif package_type == 'k8s' and 'k8s_uri' in doc:
-        uri = doc['k8s_uri']
       if uri:
         contents += '\n'.join([doc_contents(uri) + '\n'])
   return contents
@@ -681,13 +687,6 @@ def get_package_name(package_def):
       return cli_args["PACKAGE_NAME"]
   return None
 
-def get_k8s_name(package_def):
-  if "cli_args" in package_def:
-    cli_args = package_def["cli_args"]
-    if "K8S_PACKAGE_NAME" in cli_args:
-      return cli_args["K8S_PACKAGE_NAME"]
-  return None
-
 def get_file(source, destination):
     if os.path.isdir(source):
         if not os.path.isdir(os.path.dirname(destination)):
@@ -755,48 +754,6 @@ def write_package(package_def, succeeded_packages, failed_packages):
     finally:
       eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
       shutil.rmtree(temp_dir)
-
-
-def write_k8s_package(package_def, succeeded_packages, failed_packages):
-    output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
-    if not os.path.isdir(output_dir):
-        eprint(">> Creating directory: {}".format(output_dir), verbose=FLAGS.verbose)
-        os.mkdir(output_dir)
-
-    package = get_k8s_name(package_def)
-    if package != None:
-        tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
-        eprint("> Creating k8s package: {}".format(tar_file), verbose=FLAGS.verbose)
-
-        try:
-            temp_dir = tempfile.mkdtemp()
-
-            # Grab things from the files list
-            model_dir = os.path.join(os.getcwd(), FLAGS.model_dir)
-            if "files" in package_def.keys():
-                for item in [f for f in package_def["files"] if 'k8s_source' in f]:
-                    source = os.path.join(model_dir, item["k8s_source"])
-                    destination = os.path.join(temp_dir, item["destination"])
-                    get_file(source, destination)
-            # Grab things from the downloads list
-            if "downloads" in package_def.keys():
-                for item in package_def["downloads"]:
-                    source = item["source"]
-                    destination = os.path.join(temp_dir, item["destination"])
-                    get_download(source, destination)
-            # Write tar file
-            eprint("Writing {} to {}".format(temp_dir, tar_file), verbose=FLAGS.verbose)
-            with tarfile.open(tar_file, "w:gz") as tar:
-                tar.add(temp_dir, arcname=package)
-            succeeded_packages.append(tar_file)
-        except Exception as e:
-            failed_packages.append(tar_file)
-            eprint("Error when writing package: {}".format(tar_file))
-            eprint(e)
-        finally:
-            eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
-            shutil.rmtree(temp_dir)
-
 
 def read_spec_files(spec_dir, tag_spec):
     """ Recursively read the spec files into one dict, used for everything """
@@ -1285,12 +1242,13 @@ def main(argv):
   if FLAGS.list_images:
     for tag, tag_defs in all_tags.items():
       for tag_def in tag_defs:
-        if 'tag_spec' in tag_def:
-          lst = re.findall('{([^{}]*)}',tag_def['tag_spec'])
-          if lst is not None and len(lst) > 0:
-            target = lst[len(lst)-1]
-            image = '{}:{}'.format(FLAGS.repository, tag)
-            eprint('{} {} {}'.format(tag_def['release'], target,image))
+        if 'tag_spec' in tag_def and 'is_dockerfiles' in tag_def:
+          if tag_def['is_dockerfiles'] == True:
+            lst = re.findall('{([^{}]*)}',tag_def['tag_spec'])
+            if lst is not None and len(lst) > 0:
+              target = lst[len(lst)-1]
+              image = '{}:{}'.format(FLAGS.repository, tag)
+              eprint('{} {} {}'.format(tag_def['release'], target,image))
     sys.exit(0)
 
   if FLAGS.list_packages:
@@ -1304,21 +1262,6 @@ def main(argv):
             if package != None:
               tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
               eprint('{} {}'.format(target, tar_file))
-    sys.exit(0)
-
-  if FLAGS.list_k8s:
-    for tag, tag_defs in all_tags.items():
-      for tag_def in tag_defs:
-        #eprint(tag_def)
-        #sys.exit(0)
-        if 'tag_spec' in tag_def:
-          lst = re.findall('{([^{}]*)}',tag_def['tag_spec'])
-          if lst is not None and len(lst) > 0:
-            target = lst[len(lst)-1]
-            package = get_k8s_name(tag_def)
-            if package != None:
-              tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
-              eprint('{} {}'.format(target,tar_file))
     sys.exit(0)
 
   # Empty Dockerfile directory if building new Dockerfiles
@@ -1375,10 +1318,6 @@ def main(argv):
       if FLAGS.build_packages:
         write_package(tag_def, succeeded_packages, failed_packages)
 
-      # Write k8s packages to the output_dir
-      if FLAGS.build_k8s_packages:
-        write_k8s_package(tag_def, succeeded_packages, failed_packages)
-
       # Write releases marked "is_dockerfiles" into the Dockerfile directory
       if FLAGS.construct_dockerfiles and tag_def['is_dockerfiles']:
         path = os.path.join(FLAGS.dockerfile_dir,
@@ -1409,19 +1348,6 @@ def main(argv):
               succeeded_docs.append(readme)
             except Exception as e:
               eprint("Error while writing documentation for {}".format(tag))
-              eprint(e)
-              failed_docs.append(readme)
-        if all(key in documentation for key in ('k8s_contents', 'k8s_uri')):
-            readme = os.path.join(documentation['k8s_uri'], documentation['name'])
-            eprint('>> Writing {}...'.format(readme), verbose=FLAGS.verbose)
-            try:
-              with open(readme, 'w', encoding="utf-8") as f:
-                for k, v in text_replace.items():
-                    documentation['k8s_contents'] = documentation['k8s_contents'].replace(k, v)
-                f.write(documentation['k8s_contents'])
-              succeeded_docs.append(readme)
-            except Exception as e:
-              eprint("Error while writing k8s docs for {}".format(tag))
               eprint(e)
               failed_docs.append(readme)
 
