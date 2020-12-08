@@ -7,7 +7,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: BERT_BASE_DIR
-          value: bert_official/MRPC
+          value: bert_official/MRPC/uncased_L-12_H-768_A-12
           isSet: true
           setBy: model-builder
     io.k8s.cli.setters.GLUE_DIR:
@@ -160,20 +160,6 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
-    io.k8s.cli.substitutions.OUTPUT_PATH:
-      x-k8s-cli:
-        substitution:
-          name: OUTPUT_PATH
-          pattern: ${NFS_PATH}/${USER_NAME}/${MODEL_NAME}/${OUTPUT_DIR}
-          values:
-          - marker: ${NFS_PATH}
-            ref: '#/definitions/io.k8s.cli.setters.NFS_PATH'
-          - marker: ${USER_NAME}
-            ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
-          - marker: ${MODEL_NAME}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
-          - marker: ${OUTPUT_DIR}
-            ref: '#/definitions/io.k8s.cli.setters.OUTPUT_DIR'
     io.k8s.cli.setters.FS_ID:
       type: integer
       description: owner id of mounted volumes
@@ -194,3 +180,35 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
+    io.k8s.cli.substitutions.OUTPUT_PATH:
+      x-k8s-cli:
+        substitution:
+          name: OUTPUT_PATH
+          pattern: ${PVC_PATH}/${USER_NAME}/${MODEL_NAME}/${OUTPUT_DIR}
+          values:
+          - marker: ${PVC_PATH}
+            ref: '#/definitions/io.k8s.cli.setters.PVC_PATH'
+          - marker: ${USER_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
+          - marker: ${MODEL_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
+          - marker: ${OUTPUT_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.OUTPUT_DIR'
+    io.k8s.cli.setters.PVC_NAME:
+      description: pvc name
+      x-k8s-cli:
+        setter:
+          name: PVC_NAME
+          value: workdisk
+          isSet: true
+          required: true
+          setBy: model-builder
+    io.k8s.cli.setters.PVC_PATH:
+      description: pvc path
+      x-k8s-cli:
+        setter:
+          name: PVC_PATH
+          value: /pvc
+          isSet: true
+          required: true
+          setBy: model-builder
