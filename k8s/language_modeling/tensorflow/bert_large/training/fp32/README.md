@@ -1,10 +1,68 @@
+<!--- 0. Title -->
+# BERT Large FP32 training
+
+<!-- 10. Description -->
+
+This document has instructions for running [BERT](https://github.com/google-research/bert#what-is-bert) FP32 training using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+For all fine-tuning the datasets (SQuAD, MultiNLI, MRPC etc..) and checkpoints
+should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
+
+Refer to google reference page for [checkpoints](https://github.com/google-research/bert#pre-trained-models).
+
+
+
+<!--- 20. Download link -->
+## Download link
+
+[bert-large-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Datasets
+
+### Pretrained models
+
+Download and extract checkpoints the bert pretrained model from the
+[google bert repo](https://github.com/google-research/bert#pre-trained-models).
+The extracted directory should be set to the `CHECKPOINT_DIR` environment
+variable when running the quickstart scripts.
+
+For training from scratch, Wikipedia and BookCorpus need to be downloaded
+and pre-processed.
+
+### GLUE data
+
+[GLUE data](https://gluebenchmark.com/tasks) is used when running BERT
+classification training. Download and unpack the GLUE data by running
+[this script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e).
+
+### SQuAD data
+
+The Stanford Question Answering Dataset (SQuAD) dataset files can be downloaded
+from the [Google bert repo](https://github.com/google-research/bert#squad-11).
+The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
+should be downloaded to the same directory. Set the `DATASET_DIR` to point to
+that directory when running bert fine tuning using the SQuAD data.
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_training_single_node.sh`](mlops/single-node/fp32_training_single_node.sh) | This script is used by the single node Kubernetes job to run bert classifier inference. |
+
+These quickstart scripts can be run in the following environment:
+* [Kubernetes](#kubernetes)
+
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the <model name> <precision> <mode> package:
+Download and untar the BERT Large FP32 training package:
 ```
-wget <package url>
-tar -xvf <package name>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training-k8s.tar.gz
+tar -xvf bert-large-fp32-training-k8s.tar.gz
 ```
 
 #### Prerequisites
@@ -17,7 +75,7 @@ Both single and multi-node deployments use [kustomize-v3.8.7](https://github.com
 
 ### Execution
 
-The Kubernetes* package for `<model name> <precision> <mode>` includes single and multi-node kubernetes deployments.
+The Kubernetes* package for `BERT Large FP32 training` includes single and multi-node kubernetes deployments.
 Within the single and multi-node deployments are common use cases that include storage and security
 variations that are common across different kubernetes installations. The directory tree within the model package is shown below,
 where single and multi-node directories are below the [mlops](https://en.wikipedia.org/wiki/MLOps) directory.
@@ -43,11 +101,11 @@ The multi-node use cases (user-allocated-pvc, user-mounted-nfs) make the followi
 
 ##### [Devops](https://en.wikipedia.org/wiki/DevOps)
 
-The k8 resources needed to run the multi-node <package dir> quickstart require deployment of an mpi-operator.
+The k8 resources needed to run the multi-node bert-large-fp32-training-k8s quickstart require deployment of an mpi-operator.
 See the [MPI Operator deployment](/k8s/common/tensorflow/KubernetesDevOps.md#mpi-operator-deployment) section of the Kubernetes DevOps document for instructions.
 
 Once these resources have been deployed, the mlops user then has a choice 
-of running <package dir> multi-node (distributed training) or single-node. 
+of running bert-large-fp32-training-k8s multi-node (distributed training) or single-node. 
 
 ##### [Mlops](https://en.wikipedia.org/wiki/MLOps)
 
@@ -126,7 +184,7 @@ kubectl apply -f <use-case>.yaml
 
 ##### Multi-node training output
 
-Viewing the log output of the <package name> MPIJob is done by viewing the logs of the 
+Viewing the log output of the bert-large-fp32-training-k8s.tar.gz MPIJob is done by viewing the logs of the 
 launcher pod. The launcher pod aggregrates output from the workerpods. 
 This pod is found by filtering the list of pods for the name 'launcher'
 
@@ -227,7 +285,7 @@ kubectl apply -f <use-case>.yaml
 
 ##### Single-node training output
 
-Viewing the log output of the <package name> Pod is done by viewing the logs of the 
+Viewing the log output of the bert-large-fp32-training-k8s.tar.gz Pod is done by viewing the logs of the 
 training pod. This pod is found by filtering the list of pods for the name 'training'
 
 ```
@@ -247,3 +305,9 @@ Removing the pod and related resources is done by running:
 ```
 kubectl delete -f <use-case>.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
