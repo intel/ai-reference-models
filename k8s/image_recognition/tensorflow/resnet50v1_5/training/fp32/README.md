@@ -72,7 +72,7 @@ quickstart
 
 The multi-node use cases (user-allocated-pvc, user-mounted-nfs) make the following assumptions:
 - the [mpi-operator](/tools/k8s/devops/operators/mpi-operator.yaml) has been deployed on the cluster by [devops](https://en.wikipedia.org/wiki/DevOps) (see below).
-- the OUTPUT_DIR parameter is a shared volume that is writable and available cluster wide.
+- the OUTPUT_DIR parameter is a shared volume that is writable by the user and available cluster wide.
 - the DATASET_DIR parameter is a dataset volume also available cluster wide (eg: using zfs or other performant storage). Typically these volumes are read-only.
 
 ##### [Devops](https://en.wikipedia.org/wiki/DevOps)
@@ -174,8 +174,7 @@ This can be combined with the kubectl logs subcommand to tail the output of the 
 kubectl logs -f $(kubectl get pods -oname|grep launch|cut -c5-)
 ```
 
-Note that the mpirun parameter -output-filename causes a segfault when attempting to write to the $OUTPUT_DIR that is 
-NFS mounted when the securityContext has been changed to run as the user's UID/GID.
+Note that the mpirun parameter -output-filename is actually a directory and is set to $OUTPUT_DIR.
 
 ##### Multi-node training cleanup
 
