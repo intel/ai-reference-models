@@ -13,7 +13,7 @@ spec:
           serviceAccountName: resnet50v1-5-fp32-training
           containers:
           - name: mpi-launcher
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
             image: docker.io/intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
@@ -46,6 +46,8 @@ spec:
             - none
             - -map-by
             - slot
+            - -output-filename
+            - $(OUTPUT_DIR)
             - python3
             - /workspace/resnet50v1-5-fp32-training/models/image_recognition/tensorflow/resnet50v1_5/training/mlperf_resnet/imagenet_main.py # {"$openapi":"MODEL_SCRIPT"}
             - "2"
@@ -86,13 +88,13 @@ spec:
           serviceAccountName: resnet50v1-5-fp32-training
           containers:
           - name: mpi-worker
-            imagePullPolicy: Always
+            imagePullPolicy: IfNotPresent
             workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
             image: docker.io/intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
-              runAsUser: 0
-              runAsGroup: 0
-              fsGroup: 0
+              runAsUser: 0 # {"$openapi":"USER_ID"}
+              runAsGroup: 0 # {"$openapi":"GROUP_ID"}
+              fsGroup: 0 # {"$openapi":"FS_ID"}
             envFrom:
             - configMapRef:
                 name: resnet50v1-5-fp32-training # {"$openapi":"MODEL_NAME"}
