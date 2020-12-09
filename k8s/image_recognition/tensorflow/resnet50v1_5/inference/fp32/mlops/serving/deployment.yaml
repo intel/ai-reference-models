@@ -19,21 +19,9 @@ spec:
       containers:
       - name: model-server
         image: docker.io/intel/intel-optimized-tensorflow-serving:2.3.0 # {"$openapi":"IMAGE"}
-        env:
-        - name: MODEL_NAME
-          value: resnet50v1_5 # {"$openapi":"MODEL_NAME"}
-        - name: MODEL_BASE_PATH
-          value: /models/savedmodels # {"$openapi":"MODEL_BASE_PATH"}
-        - name: TF_CPP_MIN_VLOG_LEVEL
-          value: "1"
-        - name: GROUP_ID
-          value: "0" # {"$openapi":"GROUP_ID_VALUE"}
-        - name: GROUP_NAME
-          value: root # {"$openapi":"GROUP_NAME"}
-        - name: USER_ID
-          value: "0" # {"$openapi":"USER_ID_VALUE"}
-        - name: USER_NAME
-          value: root # {"$openapi":"USER_NAME"}
+        envFrom:
+        - configMapRef:
+            name: resnet50v1-5-fp32-inference # {"$openapi":"MODEL_SERVING_NAME"}
         volumeMounts:
         - name: models
           mountPath: /models # {"$openapi":"MODEL_DIR"}
