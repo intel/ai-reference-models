@@ -27,6 +27,7 @@ set the MPI_NUM_PROCESSES var to the number of sockets to use.
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
+MPI_NUM_PROCESSES=<number of sockets to use>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
