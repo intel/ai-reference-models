@@ -151,10 +151,14 @@ class PlatformUtils:
         return
 
     def dump_platform_info(self):
-        # let's print CPU information
-        file_dir = os.path.dirname(os.path.abspath(__file__))
-        platform_util_path = os.path.join(file_dir, '../../../../benchmarks/common')
-        sys.path.insert(0, platform_util_path)
+        # Import platform_util and print CPU information
+        if 'ModelZooRoot' in os.environ and os.environ['ModelZooRoot']:
+            zoo_root = os.environ['ModelZooRoot']
+            platform_util = os.path.join(zoo_root, 'benchmarks/common')
+        else:
+            file_dir = os.path.dirname(os.path.abspath(__file__))
+            platform_util = os.path.join(file_dir, '../../../../benchmarks/common')
+        sys.path.insert(0, platform_util)
         import platform_util
         cpu_info = platform_util.CPUInfo()
         print("=" * 20, "CPU Info", "=" * 20)
