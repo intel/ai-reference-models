@@ -19,19 +19,12 @@ quickstart
     └── serving
 ```
 
-#### prerequisites
+#### Prerequisites
 
-Both single and multi-node deployments use [kustomize-v3.8.4](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.4) to configure deployment parameters. This archive should be downloaded, extracted and the kustomize command should be moved to a directory within your PATH. You can verify the correct version of kustomize has been installed by typing `kustomize version`. On MACOSX you would see
-
-```
-{Version:kustomize/v3.8.4 GitCommit:8285af8cf11c0b202be533e02b88e114ad61c1a9 BuildDate:2020-09-19T15:39:21Z GoOs:darwin GoArch:amd64}
-```
-
-
-The kustomization files that the kustomize command references are located withing the following directory:
+The <package name> package uses [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure parameters within the deployment.yaml. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
 
 ```
-<package dir>/quickstart/mlops/serving/kustomization.yaml
+{Version:kustomize/v3.8.7 GitCommit:ad092cc7a91c07fdf63a2e4b7f13fa588a39af4f BuildDate:2020-11-11T23:19:38Z GoOs:darwin GoArch:amd64}
 ```
 
 #### TensorFlow Serving
@@ -56,29 +49,22 @@ Make sure you are inside the serving directory:
 cd <package dir>/quickstart/mlops/serving
 ```
 
-The parameters that can be changed within the serving resources are shown in the table[^1] below:
+The parameters that should be changed within the serving resources are shown in the table below:
 
-|            NAME             |                  VALUE                   |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
-|-----------------------------|------------------------------------------|---------------|-----------------------------|-------|----------|
-| FS_ID                       | 0                                        | model-builder | owner id of mounted volumes | 1     | Yes      |
-| GROUP_ID                    | 0                                        | model-builder | process group id            | 2     | Yes      |
-| GROUP_NAME                  | root                                     | model-builder | process group name          | 1     | Yes      |
-| IMAGE_SUFFIX                |                                          | model-builder | appended to image name      | 1     | No       |
-| MODEL_BASE_NAME             | savedmodels                              | model-builder | base directory name         | 1     | Yes      |
-| MODEL_DIR                   | /models                                  | model-builder | mounted model directory     | 3     | Yes      |
-| MODEL_NAME                  | resnet50v1_5                             | model-builder | model name                  | 1     | No       |
-| MODEL_PORT                  | 8500                                     | model-builder | model container port        | 2     | Yes      |
-| MODEL_SERVICE_PORT          | 8501                                     | model-builder | model service port          | 1     | Yes      |
-| MODEL_SERVING_IMAGE_NAME    | intel/intel-optimized-tensorflow-serving | model-builder | image name                  | 1     | No       |
-| MODEL_SERVING_IMAGE_VERSION | 2.3.0                                    | model-builder | image tag                   | 1     | No       |
-| MODEL_SERVING_LABEL         | resnet50v1-5-fp32-server                 | model-builder | selector label              | 4     | No       |
-| MODEL_SERVING_NAME          | resnet50v1-5-fp32-inference              | model-builder | model serving name          | 2     | No       |
-| REGISTRY                    | docker.io                                | model-builder | image location              | 1     | No       |
-| REPLICAS                    | 3                                        | model-builder | number of replicas          | 1     | Yes      |
-| USER_ID                     | 0                                        | model-builder | process owner id            | 2     | Yes      |
-| USER_NAME                   | root                                     | model-builder | process owner name          | 1     | Yes      |
+|            NAME             |                  VALUE                   |         DESCRIPTION         |
+|-----------------------------|------------------------------------------|-----------------------------|
+| FS_ID                       | 0                                        | owner id of mounted volumes |
+| GROUP_ID                    | 0                                        | process group id            |
+| GROUP_NAME                  | root                                     | process group name          |
+| MODEL_BASE_NAME             | savedmodels                              | base directory name         |
+| MODEL_DIR                   | /models                                  | mounted model directory     |
+| MODEL_NAME                  | resnet50v1_5                             | model name                  |
+| MODEL_PORT                  | 8500                                     | model container port        |
+| MODEL_SERVICE_PORT          | 8501                                     | model service port          |
+| REPLICAS                    | 3                                        | number of replicas          |
+| USER_ID                     | 0                                        | process owner id            |
+| USER_NAME                   | root                                     | process owner name          |
 
-[^1]: The serving parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
 
 For example to change the MODEL_SERVICE_PORT from 8500 to 9500
 
@@ -86,38 +72,34 @@ For example to change the MODEL_SERVICE_PORT from 8500 to 9500
 kustomize cfg set . MODEL_SERVICE_PORT 9500
 ```
 
-The required column that contains a 'Yes' indicates values that are often changed by the user.
-The 'No' values indicate that the default values are fine, and seldom changed. Note that the mlops user may run the
-serving process with their own uid/gid permissions by using kustomize to change the securityContext in the deployment.yaml file.
-This is done by running the following:
+The user should change the values below so the pod is deployed with the user's identity, rather than running as root.
 
 ```
-kustomize cfg set . FS_ID <Group ID>
-kustomize cfg set . GROUP_ID <Group ID>
-kustomize cfg set . GROUP_NAME <Group Name>
-kustomize cfg set . USER_ID <User ID>
-kustomize cfg set . USER_NAME <User Name>
+kustomize cfg set . FS_ID <Group ID> -R
+kustomize cfg set . GROUP_ID <Group ID> -R
+kustomize cfg set . GROUP_NAME <Group Name> -R
+kustomize cfg set . USER_ID <User ID> -R
+kustomize cfg set . USER_NAME <User Name> -R
 ```
 
-Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+The user should change the default namespace of all the resources by running the kustomize command:
 
 ```
-kustomize edit set namespace $USER
+kustomize edit set namespace <User's namespace>
 ```
 
-Note: if the namespace is changed from default, it should be created prior to deployment.
-Once the user has changed parameter values they can then deploy the serving manifests by running:
+This will place all resources within the specified namespace. Note: this namespace should be created prior to deployment.
+
+The user can also change their default kubectl context by running
 
 ```
-kustomize build > serving.yaml
-kubectl apply -f serving.yaml
+kubectl config set-context --current --namespace=<User's namespace>
 ```
 
-Once the kubernetes workflow has been submitted, the status can be
-checked using (you will need to substitute a pod's name in the second line):
+Once the user has changed parameter values they can then deploy the <package name> by running:
+
 ```
-kubectl get pods
-kubectl logs -f <pod name>
+kustomize build  . | kubectl apply -f -
 ```
 
 ##### TensorFlow Serving Client
