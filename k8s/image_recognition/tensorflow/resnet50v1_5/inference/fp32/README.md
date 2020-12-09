@@ -1,15 +1,51 @@
+<!--- 0. Title -->
+# ResNet50 v1.5 FP32 inference
+
+<!-- 10. Description -->
+
+This document has instructions for running ResNet50 v1.5 FP32 inference using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+
+
+<!--- 20. Download link -->
+## Download link
+
+[resnet50v1-5-fp32-inference-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-fp32-inference-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Dataset
+
+OPTIONAL: The ImageNet dataset can be used in these ResNet50 v1.5 Kubernetes examples.
+You can download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`run_tf_serving_client.py`](run_tf_serving_client.py) | Runs gRPC client for multi-node batch and online inference. |
+| [`multi_client.sh`](multi_client.sh) | Runs multiple parallel gRPC clients for multi-node batch and online inference. |
+
+These quickstart scripts can be run in this environment:
+* [Kubernetes](#kubernetes)
+
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the ResNet50 v1.5 FP32 inference package.
 ```
-wget <package url>
-tar -xvf <package name>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-fp32-inference-k8s.tar.gz
+tar -xvf resnet50v1-5-fp32-inference-k8s.tar.gz
 ```
 
 ### Execution
 
-The Kubernetes* package for `<model name> <precision> <mode>` includes a kubernetes serving deployment.
+The Kubernetes* package for `ResNet50 v1.5 FP32 inference` includes a kubernetes serving deployment.
 The directory tree within the model package is shown below, where the serving directory is below the
 [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
@@ -21,7 +57,7 @@ quickstart
 
 #### Prerequisites
 
-The <package name> package uses [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure parameters within the deployment.yaml. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
+The resnet50v1-5-fp32-inference-k8s.tar.gz package uses [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure parameters within the deployment.yaml. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
 
 ```
 {Version:kustomize/v3.8.7 GitCommit:ad092cc7a91c07fdf63a2e4b7f13fa588a39af4f BuildDate:2020-11-11T23:19:38Z GoOs:darwin GoArch:amd64}
@@ -46,7 +82,7 @@ external requests.
 Make sure you are inside the serving directory:
 
 ```
-cd <package dir>/quickstart/mlops/serving
+cd resnet50v1-5-fp32-inference-k8s/quickstart/mlops/serving
 ```
 
 The parameters that should be changed within the serving resources are shown in the table below:
@@ -96,7 +132,7 @@ The user can also change their default kubectl context by running
 kubectl config set-context --current --namespace=<User's namespace>
 ```
 
-Once the user has changed parameter values they can then deploy the <package name> by running:
+Once the user has changed parameter values they can then deploy the resnet50v1-5-fp32-inference-k8s.tar.gz by running:
 
 ```
 kustomize build  . | kubectl apply -f -
@@ -118,7 +154,7 @@ calls the served model API. Benchmarking metrics are printed out.
 Run the [run_tf_serving_client.py](run_tf_serving_client.py) script with
 the `--help` flag to see the argument options:
 ```
-$ python <package name>/quickstart/run_tf_serving_client.py --help
+$ python resnet50v1-5-fp32-inference-k8s.tar.gz/quickstart/run_tf_serving_client.py --help
 Send TF records or simulated image data to tensorflow_model_server loaded with ResNet50v1_5 model.
 
 flags:
@@ -142,7 +178,7 @@ run_tf_serving_client.py:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python <package name>/quickstart/run_tf_serving_client.py --server <Internal IP>:<Node Port> --data_dir <path to TF records> --batch_size <batch size>
+   python resnet50v1-5-fp32-inference-k8s.tar.gz/quickstart/run_tf_serving_client.py --server <Internal IP>:<Node Port> --data_dir <path to TF records> --batch_size <batch size>
    ```
    The script will call the served model using data from the `data_dir` path or simulated data
    and output performance metrics.
@@ -160,7 +196,7 @@ run_tf_serving_client.py:
    Example:
    
    ```
-   cd <package name>/quickstart
+   cd resnet50v1-5-fp32-inference-k8s.tar.gz/quickstart
    bash multi_client.sh --model=resnet50v1_5 --servers="<Internal IP>:<Node Port>" --clients=5
    cd ../../
    ```
@@ -172,3 +208,9 @@ deployment, and other resources using the following commands:
 ```
 kubectl delete -f serving.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
