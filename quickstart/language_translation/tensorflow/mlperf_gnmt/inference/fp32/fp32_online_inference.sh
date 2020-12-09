@@ -25,19 +25,26 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-FROZEN_GRAPH=${FROZEN_GRAPH-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb"}
+if [ -z "${DATASET_DIR}" ]; then
+  echo "The required environment variable DATASET_DIR has not been set"
+  exit 1
+fi
 
-source "$(dirname $0)/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph $FROZEN_GRAPH \
-    --model-source-dir $TF_MODELS_DIR \
-    --model-name ssd-resnet34 \
-    --framework tensorflow \
-    --precision fp32 \
-    --mode inference \
-    --socket-id 0 \
-    --batch-size 1 \
-    --benchmark-only \
-    --output-dir ${OUTPUT_DIR} \
-    $@ \
-    -- input-size=1200
+if [ ! -d "${DATASET_DIR}" ]; then
+  echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
+  exit 1
+fi
+
+MODEL_FILE="${MODEL_DIR}/mlperf_gnmt_fp32_pretrained_model.pb"
+python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  --model-name mlperf_gnmt \
+  --framework tensorflow \
+  --precision fp32 \
+  --mode inference \
+  --batch-size 1 \
+  --socket-id 0 \
+  --data-location ${DATASET_DIR} \
+  --in-graph ${MODEL_FILE} \
+  --output-dir ${OUTPUT_DIR} \
+  --benchmark-only
+

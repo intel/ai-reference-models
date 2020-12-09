@@ -35,6 +35,15 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-# TODO: Fill in the launch_benchmark.py command with the recommended args
-source "$(dirname $0)/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py ... $@
+MODEL_FILE="${MODEL_DIR}/mlperf_gnmt_fp32_pretrained_model.pb"
+python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  --model-name mlperf_gnmt \
+  --framework tensorflow \
+  --precision fp32 \
+  --mode inference \
+  --batch-size 32 \
+  --socket-id 0 \
+  --data-location ${DATASET_DIR} \
+  --in-graph ${MODEL_FILE} \
+  --output-dir ${OUTPUT_DIR} \
+  --accuracy-only

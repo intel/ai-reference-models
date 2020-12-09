@@ -74,6 +74,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --socket-id 0 \
       --checkpoint ${CHECKPOINT_DIR} \
       --model-source-dir ${TF_UNET_DIR} \
+      --output-dir ${OUTPUT_DIR} \
       $@ \
       -- checkpoint_name=model.ckpt
 
