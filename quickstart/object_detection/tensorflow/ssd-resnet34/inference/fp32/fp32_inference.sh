@@ -38,4 +38,5 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --benchmark-only \
     --in-graph $FROZEN_GRAPH \
     --model-source-dir $TF_MODELS_DIR \
+    --output-dir ${OUTPUT_DIR} \
     $@
