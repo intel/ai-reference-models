@@ -36,9 +36,30 @@ RUN if [ "$HTTP_PROXY" != "" ]]; then \
   echo 'Acquire::http::Proxy "'$HTTP_PROXY'";' >> /etc/apt/apt.conf.d/proxy.conf; \
 fi
 
-RUN apt-get update && apt-get install -y python3 python3-pip bash curl
+RUN apt-get update && \
+    apt-get install -y \
+    bash \
+    build-essential \
+    curl \
+    libffi-dev \
+    libssl-dev \
+    python3 \
+    python3-pip \
+    python-dev
+
 RUN curl -sSL https://get.docker.com/ | sh
-RUN pip3 install --upgrade pip setuptools pyyaml absl-py cerberus docker==4.2.2 pyopenssl ndg-httpsclient pyasn1 urllib3
+RUN pip3 install --upgrade pip && \
+    pip3 install \
+         absl-py \
+         cerberus \
+         'cryptography<=3.2.1' \
+         'docker==4.2.2' \
+         ndg-httpsclient \
+         pyasn1 \
+         pyopenssl \
+         pyyaml \
+         setuptools \
+         urllib3
 
 WORKDIR /tf
 VOLUME ["/tf"]
