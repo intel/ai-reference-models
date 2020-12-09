@@ -38,5 +38,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --socket-id 0 \
     --batch-size 1 \
     --benchmark-only \
+    --output-dir ${OUTPUT_DIR} \
     $@ \
     -- input-size=1200

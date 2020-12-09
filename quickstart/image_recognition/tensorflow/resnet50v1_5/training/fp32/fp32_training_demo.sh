@@ -42,6 +42,7 @@ _command python benchmarks/launch_benchmark.py \
          --batch-size 16 \
          --checkpoint ${OUTPUT_DIR} \
          --data-location=${DATASET_DIR} \
+         --output-dir ${OUTPUT_DIR} \
          --noinstall \
          $@ \
          -- steps=50 train_epochs=1 epochs_between_evals=1

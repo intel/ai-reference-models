@@ -45,5 +45,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --socket-id 0 \
   --data-location ${DATASET_DIR} \
   --in-graph ${MODEL_FILE} \
+  --output-dir ${OUTPUT_DIR} \
   --benchmark-only
 

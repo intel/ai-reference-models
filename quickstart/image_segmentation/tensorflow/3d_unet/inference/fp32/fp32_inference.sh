@@ -53,6 +53,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --framework tensorflow \
   --in-graph ${PRETRAINED_MODEL} \
   --data-location ${DATASET_DIR} \
+  --output-dir ${OUTPUT_DIR} \
   --batch-size 1 \
   --socket-id 0 \
   $@
