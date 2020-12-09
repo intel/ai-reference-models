@@ -1,0 +1,68 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{_TAG_PREFIX}{intel-tf}{image-recognition}{mpi-horovod}{resnet50v1-5-bfloat16-training}'
+slice_sets:
+  resnet50v1-5-bfloat16-training:
+  - add_to_name: -resnet50v1-5-bfloat16-training
+    args:
+    - PACKAGE_NAME=resnet50v1-5-bfloat16-training
+    dockerfile_subdirectory: model_containers
+    documentation:
+      docs:
+      - name: Title
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/title.md
+      - name: Description
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/description.md
+      - name: Download link
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/download.md
+      - name: Datasets
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/datasets.md
+      - name: Quick Start Scripts
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/quickstart.md
+      - name: Bare Metal
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/baremetal.md
+      - name: Docker
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/docker.md
+      - name: License
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/.docs/license.md
+      name: README.md
+      text_replace:
+        <docker image>: 'intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-bfloat16-training'
+        <mode>: training
+        <model name>: ResNet50 v1.5
+        <package dir>: resnet50v1-5-bfloat16-training
+        <package name>: resnet50v1-5-bfloat16-training.tar.gz
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-bfloat16-training.tar.gz'
+        <precision>: BFloat16
+        <use case>: image_recognition
+      uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16
+    downloads: []
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/common_resnet50
+      destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/common_resnet50
+    - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/bfloat16
+      destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/bfloat16
+    - source: benchmarks/image_recognition/__init__.py
+      destination: benchmarks/image_recognition/__init__.py
+    - source: benchmarks/image_recognition/tensorflow/__init__.py
+      destination: benchmarks/image_recognition/tensorflow/__init__.py
+    - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+      destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+    - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
+      destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
+    - destination: models/common
+      source: models/common
+    - destination: models/image_recognition/tensorflow/resnet50v1_5/training
+      source: models/image_recognition/tensorflow/resnet50v1_5/training
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/bfloat16
+    partials:
+    - model_package
+    - entrypoint
