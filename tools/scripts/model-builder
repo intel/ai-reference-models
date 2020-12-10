@@ -737,7 +737,6 @@ _model_builder.init_spec()
   _model_builder._echo_command ${_asm_new_spec} \
       --arg http_proxy=${http_proxy} \
       --arg https_proxy=${https_proxy} \
-      --arg https_proxy=${https_proxy} \
       --spec_dir=./specs/${_current_framework} \
       --generate_new_spec=${_new_model} \
       --framework=${_current_framework} \
