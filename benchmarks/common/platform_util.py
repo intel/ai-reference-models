@@ -241,3 +241,49 @@ class PlatformUtil:
 
     def mac_init(self):
         raise NotImplementedError("Mac Support not yet implemented")
+
+    @property
+    def cores_per_socket(self):
+        """
+        Return amount of available cores per socket.
+        :return: amount of cores
+        :rtype: int
+        """
+        return int(self.num_cores_per_socket)  # type: ignore
+
+    @property
+    def sockets(self):
+        """
+        Return count of sockets available on server.
+        :return: available cores
+        :rtype: int
+        """
+        return int(self.num_cpu_sockets)  # type: ignore
+
+    @property
+    def cores(self):
+        """
+        Return amount of cores available on server.
+        :return: amount of cores
+        :rtype: int
+        """
+        available_cores = self.num_cores_per_socket * self.num_cpu_sockets
+        return int(available_cores)  # type: ignore
+
+    @property
+    def logical_cores(self):
+        """
+        Return amount of logical cores available on server.
+        :return: amount of logical cores
+        :rtype: int
+        """
+        return int(self.num_logical_cpus)  # type: ignore
+
+    @property
+    def numa_nodes(self):
+        """
+        Return amount of numa nodes available on server.
+        :return: amount of numa nodes
+        :rtype: int
+        """
+        return int(self.num_numa_nodes)  # type: ignore
