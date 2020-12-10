@@ -7,15 +7,20 @@ wget <package url>
 tar -xvf <package name>
 ```
 
-The Kubernetes* package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
-The directory tree within the model package is shown below, where single and pipeline directories are below the
-[mlops](https://en.wikipedia.org/wiki/MLOps) directory:
+The Kubernetes* package for `<model name> <precision> <mode>` includes serving and pipeline kubernetes deployments.
+Within the serving and pipeline deployments are common use cases that include storage and security
+variations that are common across different kubernetes installations. The directory tree within the model package is shown below, 
+where serving and pipeline directories are below the [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
 
 ```
 quickstart
 └── mlops
     ├── pipeline
-    └── single-node
+    │       ├── user-allocated-pvc
+    │       └── user-mounted-nfs
+    └── serving
+            ├── user-allocated-pvc
+            └── user-mounted-nfs
 ```
 
 
@@ -23,7 +28,7 @@ The `pipeline` example can be used to preprocess the coco dataset to get a
 TF records file and then run an RFCN FP32 accuracy test using an
 [argo workflow](https://github.com/argoproj/argo). Deployment of argo needs to be done by devops.
 
-The `single-node` example uses a single pod to run inference to get performance metrics (using raw
+The `serving` example uses a pod to run inference to get performance metrics (using raw
 images from the coco dataset) or test accuracy (when you already have the TF records file on NFS).
 
 The deployments use [kustomize](https://kustomize.io/) to configure
@@ -32,96 +37,96 @@ prior to deploying the job to kubernetes.
 
 #### Prerequisites
 
-Both single and pipeline deployments use [kustomize-v3.8.4](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.4) to configure deployment parameters.
-This archive should be downloaded, extracted and the kustomize command should be moved to a directory within your PATH. 
-You can verify the correct version of kustomize has been installed by typing `kustomize version`. On MACOSX you would see
+The <package name> package uses [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure parameters within the deployment.yaml. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
 
 ```
-{Version:kustomize/v3.8.4 GitCommit:8285af8cf11c0b202be533e02b88e114ad61c1a9 BuildDate:2020-09-19T15:39:21Z GoOs:darwin GoArch:amd64}
+{Version:kustomize/v3.8.7 GitCommit:ad092cc7a91c07fdf63a2e4b7f13fa588a39af4f BuildDate:2020-11-11T23:19:38Z GoOs:darwin GoArch:amd64}
 ```
 
-
-The kustomization files that the kustomize command references are located withing the following directories:
-
-```
-<package dir>/quickstart/mlops/single-node/kustomization.yaml
-<package dir>/quickstart/mlops/pipeline/kustomization.yaml
-```
-
-#### Single-node Inference
+#### Serving Inference
 
 Inference is run by submitting a pod yaml file to the k8s api-server,
 which results in the pod creation and then the specified
 [quickstart script](#quick-start-scripts) is run in the pod's container.
 
-Make sure you are inside the single-node directory:
+Make sure you are inside the serving directory:
 
 ```
-cd <package dir>/quickstart/mlops/single-node
+cd <package dir>/quickstart/mlops/serving
 ```
 
-The parameters that can be changed within the single-node deployment are shown in the table[^1] below:
+The parameters that can be changed within the serving deployment are shown in the table below:
 
-|     NAME     |             VALUE              |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
-|--------------|--------------------------------|---------------|-----------------------------|-------|----------|
-| DATASET_DIR  | /datasets                      | model-builder | input dataset directory     | 3     | Yes      |
-| FS_ID        | 0                              | model-builder | owner id of mounted volumes | 1     | Yes      |
-| GROUP_ID     | 0                              | model-builder | process group id            | 2     | Yes      |
-| GROUP_NAME   | root                           | model-builder | process group name          | 1     | Yes      |
-| IMAGE_SUFFIX |                                | model-builder | appended to image name      | 1     | No       |
-| MODEL_DIR    | /workspace/rfcn-fp32-inference | model-builder | container model directory   | 3     | No       |
-| MODEL_NAME   | rfcn-fp32-inference            | model-builder | name use-case               | 5     | No       |
-| MODEL_SCRIPT | fp32_inference                 | model-builder | model script name           | 5     | No       |
-| NFS_PATH     | /nfs                           | model-builder | nfs path                    | 3     | Yes      |
-| NFS_SERVER   | 0.0.0.0                        | model-builder | nfs server                  | 1     | Yes      |
-| OUTPUT_DIR   | output                         | model-builder | output dir basename         | 1     | Yes      |
-| REGISTRY     | docker.io                      | model-builder | image location              | 1     | No       |
-| USER_ID      | 0                              | model-builder | process owner id            | 2     | Yes      |
-| USER_NAME    | root                           | model-builder | process owner name          | 2     | Yes      |
+|     NAME     |             VALUE              |         DESCRIPTION         |
+|--------------|--------------------------------|-----------------------------|
+| DATASET_DIR  | /datasets                      | input dataset directory     |
+| FS_ID        | 0                              | owner id of mounted volumes |
+| GROUP_ID     | 0                              | process group id            |
+| GROUP_NAME   | root                           | process group name          |
+| NFS_PATH     | /nfs                           | nfs path                    |
+| NFS_SERVER   | 0.0.0.0                        | nfs server                  |
+| PVC_NAME     | workdisk                       | pvc name                    |
+| PVC_PATH     | /pvc                           | pvc path                    |
+| OUTPUT_DIR   | output                         | output dir basename         |
+| USER_ID      | 0                              | process owner id            |
+| USER_NAME    | root                           | process owner name          |
 
 > Note that when running inference, the `DATASET_DIR` should point to the
 > directory of raw coco images (val2017) and when running accuracy testing,
 > the `DATASET_DIR` should point to the TF records directory.
 
-[^1]: The single-node parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
+For the user mounted nfs use case, the user should change NFS_PATH and NFS_SERVER.
 
-For example to change the NFS_SERVER IP address to 10.35.215.25 the user would run:
+For the user allocated pvc use case, the user should change PVC_NAME and PVC_PATH.
 
-```
-kustomize cfg set . NFS_SERVER 10.35.215.25
-```
-
-The required column that contains a 'Yes' indicates which values should be changed by the user.
-The 'No' values indicate that the default values are fine. Note that the mlops user should run the
-inference process with their own uid/gid permissions by using kustomize to change the securityContext in the pod.yaml file.
-This is done by running the following:
+For example to change the NFS_SERVER address the user would run:
 
 ```
-kustomize cfg set . FS_ID <Group ID>
-kustomize cfg set . GROUP_ID <Group ID>
-kustomize cfg set . GROUP_NAME <Group Name>
-kustomize cfg set . USER_ID <User ID>
-kustomize cfg set . USER_NAME <User Name>
+kustomize cfg set . NFS_SERVER <ip address> -R
 ```
 
-Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+To change the PVC_NAME the user would run:
 
 ```
-kustomize edit set namespace $USER
+kustomize cfg set . PVC_NAME <PVC Name> -R
 ```
-
-This will tell kubernetes to deploy the resources within the specified namespace. Note: this namespace should be created prior to deployment.
-Once the user has changed parameter values they can then deploy the single-node job by running:
+In both use cases, the user should change the values below so the pod is deployed with the user's identity.
 
 ```
-kustomize build > single-node.yaml
-kubectl apply -f single-node.yaml
+kustomize cfg set . FS_ID <Group ID> -R
+kustomize cfg set . GROUP_ID <Group ID> -R
+kustomize cfg set . GROUP_NAME <Group Name> -R
+kustomize cfg set . USER_ID <User ID> -R
+kustomize cfg set . USER_NAME <User Name> -R
 ```
 
-##### single-node inference output
+The user should change the default namespace of all the resources by running the kustomize command:
 
-Viewing the log output of the resnet50v1_5 Pod is done by viewing the logs of the
-inference pod. This pod is found by filtering the list of pods for the name 'inference'
+```
+pushd <use-case>
+kustomize edit set namespace <User's namespace>
+popd
+```
+
+This will place all resources within the specified namespace. Note: this namespace should be created prior to deployment.
+
+The user can also change their default kubectl context by running
+
+```
+kubectl config set-context --current --namespace=<User's namespace>
+```
+
+Once the user has changed parameter values they can then deploy the use-case by running:
+
+```
+kustomize build  <use-case> > <use-case>.yaml
+kubectl apply -f <use-case>.yaml
+```
+
+##### Serving inference output
+
+Viewing the log output of the <package name> is done by viewing the logs of the
+deployed pod. This pod is found by filtering the list of pods for the name 'inference'
 
 ```
 kubectl get pods -oname|grep inference|cut -c5-
@@ -133,12 +138,12 @@ This can be combined with the kubectl logs subcommand to tail the output of the 
 kubectl logs -f $(kubectl get pods -oname|grep inference|cut -c5-)
 ```
 
-##### single-node inference cleanup
+##### Serving inference cleanup
 
 Removing the pod and related resources is done by running:
 
 ```
-kubectl delete -f single-node.yaml
+kubectl delete -f <use-case>.yaml
 ```
 
 #### Pipeline
@@ -157,65 +162,74 @@ Make sure you are inside the pipeline directory:
 cd <package dir>/quickstart/mlops/pipeline
 ```
 
-The parameters that can be changed within the pipeline are shown in the table[^2] below:
+The parameters that can be changed within the pipeline are shown in the table below:
 
-|       NAME        |             VALUE              |    SET BY     |          DESCRIPTION           | COUNT | REQUIRED |
-|-------------------|--------------------------------|---------------|--------------------------------|-------|----------|
-| DATASET_DIR       | /datasets                      | model-builder | input dataset directory        | 6     | Yes      |
-| FS_ID             | 0                              | model-builder | owner id of mounted volumes    | 2     | Yes      |
-| GROUP_ID          | 0                              | model-builder | process group id               | 4     | Yes      |
-| GROUP_NAME        | root                           | model-builder | process group name             | 2     | Yes      |
-| IMAGE_SUFFIX      |                                | model-builder | appended to image name         | 2     | No       |
-| MODEL_DIR         | /workspace/rfcn-fp32-inference | model-builder | container model directory      | 2     | No       |
-| MODEL_NAME        | rfcn-fp32-inference            | model-builder | name use-case                  | 7     | No       |
-| MODEL_SCRIPT      | fp32_accuracy.sh               | model-builder | model script name              | 5     | No       |
-| NFS_PATH          | /nfs                           | model-builder | nfs path                       | 6     | Yes      |
-| NFS_SERVER        | 0.0.0.0                        | model-builder | nfs server                     | 2     | Yes      |
-| OUTPUT_DIR        | output                         | model-builder | output dir basename            | 2     | Yes      |
-| PREPROCESS_DIR    | /workspace/preprocess-coco-val | model-builder | container preprocess directory | 2     | No       |
-| PREPROCESS_NAME   | preprocess-coco-val            | model-builder | preprocess image part          | 1     | No       |
-| PREPROCESS_SCRIPT | preprocess_coco_val.sh         | model-builder | preprocess script              | 5     | No       |
-| REGISTRY          | docker.io                      | model-builder | image location                 | 2     | No       |
-| USER_ID           | 0                              | model-builder | process owner id               | 4     | Yes      |
-| USER_NAME         | root                           | model-builder | process owner name             | 4     | Yes      |
+|       NAME        |             VALUE              |          DESCRIPTION           |
+|-------------------|--------------------------------|--------------------------------|
+| DATASET_DIR       | /datasets                      | input dataset directory        |
+| FS_ID             | 0                              | owner id of mounted volumes    |
+| GROUP_ID          | 0                              | process group id               |
+| GROUP_NAME        | root                           | process group name             |
+| NFS_PATH          | /nfs                           | nfs path                       |
+| NFS_SERVER        | 0.0.0.0                        | nfs server                     |
+| PVC_NAME          | workdisk                       | pvc name                       |
+| PVC_PATH          | /pvc                           | pvc path                       |
+| OUTPUT_DIR        | output                         | output dir basename            |
+| PREPROCESS_DIR    | /workspace/preprocess-coco-val | container preprocess directory |
+| PREPROCESS_NAME   | preprocess-coco-val            | preprocess image part          |
+| PREPROCESS_SCRIPT | preprocess_coco_val.sh         | preprocess script              |
+| USER_ID           | 0                              | process owner id               |
+| USER_NAME         | root                           | process owner name             |
 
+For the user mounted nfs use case, the user should change NFS_PATH and NFS_SERVER.
 
-[^2]: The pipeline parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
+For the user allocated pvc use case, the user should change PVC_NAME and PVC_PATH.
 
-For example to change the NFS_SERVER IP address to 10.35.215.25 the user would run:
+For example to change the NFS_SERVER address the user would run:
 
 ```
-kustomize cfg set . NFS_SERVER 10.35.215.25
+kustomize cfg set . NFS_SERVER <ip address> -R
 ```
 
-The required column that contains a 'Yes' indicates which values should be changed by the user.
-The 'No' values indicate that the default values are fine. Note that the mlops user should run the
-argo workflow[^3] with their own uid/gid permissions by using kustomize to change the securityContext in the single_node_accuracy.yaml file.
-
-This is done by running the following:
+To change the PVC_NAME the user would run:
 
 ```
-kustomize cfg set . FS_ID <Group ID>
-kustomize cfg set . GROUP_ID <Group ID>
-kustomize cfg set . GROUP_NAME <Group Name>
-kustomize cfg set . USER_ID <User ID>
-kustomize cfg set . USER_NAME <User Name>
+kustomize cfg set . PVC_NAME <PVC Name> -R
 ```
+
+In both use cases, the user should change the values below so the pod is deployed with the user's identity[^3].
 
 [^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issue [2239](https://github.com/argoproj/argo/issues/2239). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
 
-Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+```
+kustomize cfg set . FS_ID <Group ID> -R
+kustomize cfg set . GROUP_ID <Group ID> -R
+kustomize cfg set . GROUP_NAME <Group Name> -R
+kustomize cfg set . USER_ID <User ID> -R
+kustomize cfg set . USER_NAME <User Name> -R
+```
+
+The user should change the default namespace of all the resources by running the kustomize command:
 
 ```
-kustomize edit set namespace $USER
+pushd <use-case>
+kustomize edit set namespace <User's namespace>
+popd
 ```
 
-This will tell kubernetes to deploy the resources within the specified namespace. Note: this namespace should be created prior to deployment.
-Once the user has changed parameter values they can then deploy the workflow by running:
+This will place all resources within the specified namespace. Note: this namespace should be created prior to deployment.
+
+The user can also change their default kubectl context by running
 
 ```
-kustomize build > pipeline.yaml
-kubectl apply -f pipeline.yaml
+kubectl config set-context --current --namespace=<User's namespace>
+```
+
+Once the user has changed parameter values they can then deploy the use-case by running:
+
+```
+kustomize build  <use-case> > <use-case>.yaml
+kubectl apply -f <use-case>.yaml
 ```
 
 Once the job has been submitted, the status and logs can be viewed using
@@ -231,8 +245,9 @@ $ kubectl logs <pod name> main
 ##### Cleanup
 
 Remove the workflow and related resources using the following command:
+
 ```
-kubectl delete -f pipeline.yaml
+kubectl delete -f <use case>.yaml
 ```
 
 ### Advanced Options
