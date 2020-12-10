@@ -20,21 +20,9 @@ spec:
       image: docker.io/intel/object-detection:tf-1.15.2-imz-2.1.0-preprocess-coco-val # {"$openapi":"PREPROCESS_IMAGE"}
       command: # {"$openapi":"PREPROCESS_COMMAND"}
       - /workspace/preprocess-coco-val/scripts/preprocess_coco_val.sh # {"$openapi":"PREPROCESS_COMMAND"}
-      env:
-      - name: VAL_IMAGE_DIR
-        value: /datasets/val2017 # {"$openapi":"VAL_IMAGE_DIR"}
-      - name: ANNOTATIONS_DIR
-        value: /datasets/annotations # {"$openapi":"ANNOTATIONS_DIR"}
-      - name: OUTPUT_DIR
-        value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
-      - name: GROUP_ID
-        value: "0" # {"$openapi":"GROUP_ID_VALUE"}
-      - name: GROUP_NAME
-        value: root # {"$openapi":"GROUP_NAME"}
-      - name: USER_ID
-        value: "0" # {"$openapi":"USER_ID_VALUE"}
-      - name: USER_NAME
-        value: root # {"$openapi":"USER_NAME"}
+      envFrom:
+      - configMapRef:
+          name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
       volumeMounts:
       - name: nfs-path
         mountPath: /nfs # {"$openapi":"NFS_PATH"}
@@ -54,7 +42,7 @@ spec:
         path: /nfs # {"$openapi":"NFS_PATH"}
     - name: mlops-scripts
       configMap:
-        name: mlops-scripts-rfcn-fp32-inference # {"$openapi":"MODEL_CONFIGMAP_NAME"}
+        name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
         defaultMode: 0770
         items:
         - key: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
@@ -69,23 +57,9 @@ spec:
       imagePullPolicy: Always
       command: # {"$openapi":"MODEL_COMMAND"}
       - /workspace/rfcn-fp32-inference/quickstart/fp32_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
-      env:
-      - name: MODELS_DIR
-        value: /workspace/rfcn-fp32-inference # {"$openapi":"MODELS_DIR"}
-      - name: VAL_IMAGE_DIR
-        value: /datasets/val2017 # {"$openapi":"VAL_IMAGE_DIR"}
-      - name: DATASET_DIR
-        value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
-      - name: OUTPUT_DIR
-        value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
-      - name: GROUP_ID
-        value: "0" # {"$openapi":"GROUP_ID_VALUE"}
-      - name: GROUP_NAME
-        value: root # {"$openapi":"GROUP_NAME"}
-      - name: USER_ID
-        value: "0" # {"$openapi":"USER_ID_VALUE"}
-      - name: USER_NAME
-        value: root # {"$openapi":"USER_NAME"}
+      envFrom:
+      - configMapRef:
+          name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
       volumeMounts:
       - name: nfs-path
         mountPath: /nfs # {"$openapi":"NFS_PATH"}
@@ -99,7 +73,7 @@ spec:
         path: /nfs # {"$openapi":"NFS_PATH"}
     - name: mlops-scripts
       configMap:
-        name: mlops-scripts-rfcn-fp32-inference # {"$openapi":"MODEL_CONFIGMAP_NAME"}
+        name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
         defaultMode: 0770
         items:
         - key: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}

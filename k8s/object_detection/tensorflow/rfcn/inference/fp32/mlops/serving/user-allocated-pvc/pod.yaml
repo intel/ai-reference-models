@@ -9,30 +9,20 @@ spec:
     runAsGroup: 0 # {"$openapi":"GROUP_ID"}
     fsGroup: 0 # {"$openapi":"FS_ID"}
   containers:
-  - name: single-node
+  - name: serving
     image: docker.io/intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-fp32-inference # {"$openapi":"IMAGE"}
     workingDir: /workspace/rfcn-fp32-inference # {"$openapi":"MODEL_DIR"}
     command: # {"$openapi":"COMMAND"}
     - /workspace/rfcn-fp32-inference/quickstart/fp32_inference.sh # {"$openapi":"COMMAND"}
-    env:
-    - name: DATASET_DIR
-      value: /datasets # {"$openapi":"DATASET_DIR"}
-    - name: GROUP_ID
-      value: "0" # {"$openapi":"GROUP_ID_VALUE"}
-    - name: GROUP_NAME
-      value: root # {"$openapi":"GROUP_NAME"}
-    - name: OUTPUT_DIR
-      value: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
-    - name: USER_ID
-      value: "0" # {"$openapi":"USER_ID_VALUE"}
-    - name: USER_NAME
-      value: root # {"$openapi":"USER_NAME"}
+    envFrom:
+    - configMapRef:
+        name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
     volumeMounts:
     - name: datasets
       mountPath: /datasets # {"$openapi":"DATASET_DIR"}
       readOnly: true
-    - name: nfs-path
-      mountPath: /nfs # {"$openapi":"NFS_PATH"}
+    - name: pvc-path
+      mountPath: /pvc # {"$openapi":"PVC_PATH"}
     - name: mlops-scripts
       mountPath: /workspace/rfcn-fp32-inference/quickstart/fp32_inference.sh # {"$openapi":"COMMAND"}
       subPath: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
@@ -40,10 +30,9 @@ spec:
   - name: datasets
     hostPath:
       path: /datasets # {"$openapi":"DATASET_DIR"}
-  - name: nfs-path
-    nfs:
-      server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
-      path: /nfs # {"$openapi":"NFS_PATH"}
+  - name: pvc-path
+    persistentVolumeClaim:
+      claimName: workdisk # {"$openapi":"PVC_NAME"}
   - name: mlops-scripts
     configMap:
       name: mlops-scripts
