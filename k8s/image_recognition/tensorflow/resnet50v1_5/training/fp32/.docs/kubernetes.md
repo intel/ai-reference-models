@@ -70,8 +70,8 @@ using kustomize's [cfg set](https://github.com/kubernetes-sigs/kustomize/blob/ma
 | GROUP_NAME | root                     | process group name          |
 | NFS_PATH   | /nfs                     | nfs path                    |
 | NFS_SERVER | 0.0.0.0                  | nfs server                  |
-| PVC_NAME   | workdisk                 | model-builder | pvc name    |
-| PVC_PATH   | /pvc                     | model-builder | pvc path    |
+| PVC_NAME   | workdisk                 | pvc name                    |
+| PVC_PATH   | /pvc                     | pvc path                    |
 | USER_ID    | 0                        | process owner id            |
 | USER_NAME  | root                     | process owner name          |
 

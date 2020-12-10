@@ -1,13 +1,49 @@
+<!--- 0. Title -->
+# RFCN FP32 inference
+
+<!-- 10. Description -->
+
+This document has instructions for running RFCN FP32 inference using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+<!--- 20. Download link -->
+## Download link
+
+[rfcn-fp32-inference-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-fp32-inference-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Dataset
+
+The [COCO validation dataset](http://cocodataset.org) is used in these
+RFCN quickstart scripts. The inference quickstart scripts use raw images,
+and the accuracy quickstart scripts require the dataset to be converted
+into the TF records format.
+See the [COCO dataset](/datasets/coco/README.md) for instructions on
+downloading and preprocessing the COCO validation dataset.
+
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_inference.sh`](mlops/serving/user-mounted-nfs/config-map.yaml#L117) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`fp32_accuracy.sh`](mlops/pipeline/user-mounted-nfs/config-map.yaml#L117) | Processes the TF records to run inference and check accuracy on the results. |
+
+These quickstart scripts can be run in the following environment:
+* [Kubernetes](#kubernetes)
+
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
 Download and untar the RFCN FP32 inference package.
 ```
-wget <package url>
-tar -xvf <package name>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-fp32-inference-k8s.tar.gz
+tar -xvf rfcn-fp32-inference-k8s.tar.gz
 ```
 
-The Kubernetes* package for `<model name> <precision> <mode>` includes serving and pipeline kubernetes deployments.
+The Kubernetes* package for `RFCN FP32 inference` includes serving and pipeline kubernetes deployments.
 Within the serving and pipeline deployments are common use cases that include storage and security
 variations that are common across different kubernetes installations. The directory tree within the model package is shown below, 
 where serving and pipeline directories are below the [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
@@ -37,7 +73,7 @@ prior to deploying the job to kubernetes.
 
 #### Prerequisites
 
-The <package name> package uses [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure parameters within the deployment.yaml. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
+The rfcn-fp32-inference-k8s.tar.gz package uses [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure parameters within the deployment.yaml. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
 
 ```
 {Version:kustomize/v3.8.7 GitCommit:ad092cc7a91c07fdf63a2e4b7f13fa588a39af4f BuildDate:2020-11-11T23:19:38Z GoOs:darwin GoArch:amd64}
@@ -52,7 +88,7 @@ which results in the pod creation and then the specified
 Make sure you are inside the serving directory:
 
 ```
-cd <package dir>/quickstart/mlops/serving
+cd rfcn-fp32-inference-k8s/quickstart/mlops/serving
 ```
 
 The parameters that can be changed within the serving deployment are shown in the table below:
@@ -125,7 +161,7 @@ kubectl apply -f <use-case>.yaml
 
 ##### Serving inference output
 
-Viewing the log output of the <package name> is done by viewing the logs of the
+Viewing the log output of the rfcn-fp32-inference-k8s.tar.gz is done by viewing the logs of the
 deployed pod. This pod is found by filtering the list of pods for the name 'inference'
 
 ```
@@ -159,7 +195,7 @@ the TF records file.
 Make sure you are inside the pipeline directory:
 
 ```
-cd <package dir>/quickstart/mlops/pipeline
+cd rfcn-fp32-inference-k8s/quickstart/mlops/pipeline
 ```
 
 The parameters that can be changed within the pipeline are shown in the table below:
@@ -247,10 +283,16 @@ $ kubectl logs <pod name> main
 Remove the workflow and related resources using the following command:
 
 ```
-kubectl delete -f <use case>.yaml
+kubectl delete -f object_detection.yaml
 ```
 
 ### Advanced Options
 
 See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
