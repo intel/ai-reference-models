@@ -211,6 +211,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "MPI_HOSTNAMES": args.mpi_hostnames,
             "MPI_NUM_PROCESSES": args.mpi,
             "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi,
+            "NUMA_CORES_PER_INSTANCE": args.numa_cores_per_instance,
             "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",  # noqa: E501
             "NUM_CORES": args.num_cores,
             "NUM_INTER_THREADS": args.num_inter_threads,

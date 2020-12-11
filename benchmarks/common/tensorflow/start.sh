@@ -51,6 +51,7 @@ echo "    OUTPUT_DIR: ${OUTPUT_DIR}"
 echo "    MPI_NUM_PROCESSES: ${MPI_NUM_PROCESSES}"
 echo "    MPI_NUM_PEOCESSES_PER_SOCKET: ${MPI_NUM_PROCESSES_PER_SOCKET}"
 echo "    MPI_HOSTNAMES: ${MPI_HOSTNAMES}"
+echo "    NUMA_CORES_PER_INSTANCE: ${NUMA_CORES_PER_INSTANCE}"
 echo "    PYTHON_EXE: ${PYTHON_EXE}"
 echo "    PYTHONPATH: ${PYTHONPATH}"
 echo "    DRY_RUN: ${DRY_RUN}"
@@ -134,6 +135,11 @@ if [ ${OUTPUT_RESULTS} == "True" ]; then
   output_results_arg="--output-results"
 fi
 
+numa_cores_per_instance_arg=""
+if [[ -n ${NUMA_CORES_PER_INSTANCE} && ${NUMA_CORES_PER_INSTANCE} != "None" ]]; then
+  numa_cores_per_instance_arg="--numa-cores-per-instance=${NUMA_CORES_PER_INSTANCE}"
+fi
+
 RUN_SCRIPT_PATH="common/${FRAMEWORK}/run_tf_benchmark.py"
 
 timestamp=`date +%Y%m%d_%H%M%S`
@@ -152,8 +158,12 @@ function run_model() {
 
   # Start benchmarking
   if [[ -z $DRY_RUN ]]; then
-    echo "Log output location: ${LOGFILE}"
-    eval ${CMD} 2>&1 | tee ${LOGFILE}
+    if [[ -z $numa_cores_per_instance_arg ]]; then
+      eval ${CMD} 2>&1 | tee ${LOGFILE}
+    else
+      # Don't tee to a log file for numactl multi-instance runs
+      eval ${CMD}
+    fi
   else
     echo ${CMD}
     return
@@ -178,7 +188,12 @@ function run_model() {
   else
     LOG_LOCATION_OUTSIDE_CONTAINER=${LOGFILE}
   fi
-  echo "Log file location: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
+
+  # Don't print log file location for numactl multi-instance runs, because those have
+  # separate log files for each instance
+  if [[ -z $numa_cores_per_instance_arg ]]; then
+    echo "Log file location: ${LOG_LOCATION_OUTSIDE_CONTAINER}" | tee -a ${LOGFILE}
+  fi
 }
 
 # basic run command with commonly used args
@@ -195,11 +210,11 @@ CMD="${PYTHON_EXE} ${RUN_SCRIPT_PATH} \
 --socket-id=${SOCKET_ID} \
 --output-dir=${OUTPUT_DIR} \
 --num-train-steps=${NUM_TRAIN_STEPS} \
+${numa_cores_per_instance_arg} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
 ${verbose_arg}"
-
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"

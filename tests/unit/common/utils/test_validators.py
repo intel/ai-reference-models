@@ -27,7 +27,7 @@ from mock import MagicMock
 from common.utils.validators import (check_for_link, check_no_spaces, check_positive_number,
                                      check_positive_number_or_equal_to_negative_one, check_valid_filename,
                                      check_valid_folder, check_valid_file_or_dir, check_volume_mount,
-                                     check_shm_size)
+                                     check_shm_size, check_num_cores_per_instance)
 
 
 @pytest.fixture()
@@ -189,3 +189,22 @@ def test_valid_volume_mount():
         check_volume_mount(volume_mount)
     finally:
         os.rmdir(temp_dir)
+
+
+@pytest.mark.parametrize("test_str",
+                         ["socket",
+                          "Socket",
+                          "SOCKET",
+                          "4",
+                          "8"])
+def test_valid_num_cores_per_instance(test_str):
+    assert check_num_cores_per_instance(test_str) == test_str.lower()
+
+
+@pytest.mark.parametrize("test_str",
+                         ["foo",
+                          "0",
+                          "-1"])
+def test_invalid_num_cores_per_instance(test_str):
+    with pytest.raises(ArgumentTypeError):
+        check_num_cores_per_instance(test_str)

@@ -117,3 +117,24 @@ def check_shm_size(value):
         if not re.match("([1-9][0-9]*)['b','k','m','g']", value):
             raise ArgumentTypeError("{} does not follow the --shm-size format definition.".format(value))
     return value
+
+
+def check_num_cores_per_instance(value):
+    """
+    Verifies that the number of cores per instance is either 'socket' (specifying
+    to use the number of cores per socket) or a positive integer.
+    """
+    if value:
+        error_message = "Invalid number of cores per instance ({}). The value " \
+                        "must be a positive integer or 'socket'".format(value)
+
+        if value.lower().strip() == "socket":
+            return "socket"
+        elif not str(value).isdigit():
+            raise ArgumentTypeError(error_message)
+
+        try:
+            check_positive_number(value)
+        except ArgumentTypeError:
+            raise ArgumentTypeError(error_message)
+    return value
