@@ -34,6 +34,7 @@ Set the `DATASET_DIR` to point to this directory when running Faster_RCNN.
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
 * [Docker](#docker)
+* [Kubernetes](#kubernetes)
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
