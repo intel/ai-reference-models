@@ -1,16 +1,60 @@
+<!--- 0. Title -->
+# Wide and Deep Large Dataset FP32 training
+
+<!-- 10. Description -->
+
+This document has instructions for running [Wide and Deep](https://arxiv.org/pdf/1606.07792.pdf) FP32 training using
+Intel® Optimizations for TensorFlow* on Kubernetes*.
+
+
+
+<!--- 20. Download link -->
+## Download link
+
+[wide-deep-large-ds-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-training-k8s.tar.gz)
+
+<!--- 30. Datasets -->
+## Dataset
+
+The large [Kaggle Display Advertising Challenge Dataset](https://www.kaggle.com/c/criteo-display-ad-challenge/data)
+will be used for training Wide and Deep. The
+[data](https://www.kaggle.com/c/criteo-display-ad-challenge/data) is from
+[Criteo](https://www.criteo.com) and has a field indicating if an ad was
+clicked (1) or not (0), along with integer and categorical features.
+
+Download large Kaggle Display Advertising Challenge Dataset from
+[Criteo Labs](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/).
+* Download the large version of train dataset from: https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/train.csv
+* Download the large version of evaluation dataset from: https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/eval.csv
+
+The directory where you've downloaded the `train.csv` and `eval.csv`
+files should be used as the `DATASET_DIR` when running [quickstart scripts](#quick-start-scripts).
+
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_training_check_accuracy.sh`](mlops/pipeline/user-mounted-nfs/train_and_serve.yaml#L50) | Trains the model for a specified number of steps (default is 500) and then compare the accuracy against the specified target accuracy. If the accuracy is not met, then script exits with error code 1. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`launch_benchmark.py`](mlops/single-node/user-mounted-nfs/pod.yaml#L50) | Trains the model for 10 epochs if -- steps is not specified. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+
+These quickstart scripts are run in the following environment:
+* [Kubernetes](#kubernetes)
+
 <!--- 70. Kubernetes -->
 ## Kubernetes
 
-Download and untar the model <mode> package to get the yaml and config
-files for running <mode> on a single node using Kubernetes.
+Download and untar the model training package to get the yaml and config
+files for running training on a single node using Kubernetes.
 ```
-wget <package url>
-tar -xvf <package name>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
+tar -xvf wide-deep-large-ds-fp32-training-k8s.tar.gz
 ```
 
 ### Execution
 
-The Kubernetes* package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
+The Kubernetes* package for `Wide and Deep Large Dataset FP32 training` includes single-node and pipeline kubernetes deployments.
 Within the single and pipeline deployments are common use cases that include storage and security variations that are common 
 across different kubernetes installations. The directory tree within the kubernetes package is shown below, where 
 single-node and pipeline directories are below the [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
@@ -110,7 +154,7 @@ kubectl apply -f <use-case>.yaml
 
 ##### Single-node training output
 
-Viewing the log output of the <package name> Pod is done by viewing the logs of the 
+Viewing the log output of the wide-deep-large-ds-fp32-training-k8s.tar.gz Pod is done by viewing the logs of the 
 training pod. This pod is found by filtering the list of pods for the name 'training'
 
 ```
@@ -257,7 +301,7 @@ Run the [run_tf_serving_client.py](run_tf_serving_client.py) script with
 the `--help` flag to see the argument options:
 ```
 $ python run_wide_deep_client.py --help
-usage: <package dir>/quickstart/run_tf_serving_client.py [-h]
+usage: wide-deep-large-ds-fp32-training-k8s/quickstart/run_tf_serving_client.py [-h]
        [-s SERVER] -d DATA_FILE [-b BATCH_SIZE] [-n NUM_ITERATION] [-w WARM_UP_ITERATION]
 
 optional arguments:
@@ -283,7 +327,7 @@ optional arguments:
 
 1. Run the client script with your preferred parameters. For example:
    ```
-   python <package dir>/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
+   python wide-deep-large-ds-fp32-training-k8s/quickstart/run_tf_serving_client.py -s <Internal IP>:<Node Port> -d <path to eval.csv> --b <batch size>
    ```
    The script will call the served model using data from the csv file
    and output performance and accuracy metrics.
@@ -296,3 +340,9 @@ deployment, and other resources using the following commands:
 ```
 kubectl delete -f <use-case>.yaml
 ```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
