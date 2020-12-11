@@ -10,7 +10,7 @@ This document has instructions for running ResNet50 BFloat16 inference using
 <!--- 20. Download link -->
 ## Download link
 
-[pytorch-resnet50-bf16-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/aipg-local/aipg-tf/ML-container-build-from-partials/66/pytorch-resnet50-bf16-inference.tar.gz)
+[pytorch-resnet50-bf16-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/pytorch-resnet50-bf16-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -71,7 +71,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 
 # Download and extract the model package
-wget https://ubit-artifactory-or.intel.com/artifactory/aipg-local/aipg-tf/ML-container-build-from-partials/66/pytorch-resnet50-bf16-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/pytorch-resnet50-bf16-inference.tar.gz
 tar -xzf pytorch-resnet50-bf16-inference.tar.gz
 cd pytorch-resnet50-bf16-inference
 
@@ -99,7 +99,7 @@ docker run \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo-ci:66-ci-build-pytorch-resnet50-bf16-inference \
+  intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-bfloat16-inference \
   /bin/bash quickstart/bf16_accuracy.sh
 ```
 
@@ -109,7 +109,7 @@ dataset mount is needed.
 ```
 docker run \
   --privileged --init -t \
-  amr-registry.caas.intel.com/aipg-tf/model-zoo-ci:66-ci-build-pytorch-resnet50-bf16-inference \
+  intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-bfloat16-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
