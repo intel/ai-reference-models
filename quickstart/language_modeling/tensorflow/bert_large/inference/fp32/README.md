@@ -10,7 +10,7 @@ using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-inference.tar.gz)
+[bert-large-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -58,7 +58,7 @@ for more details on the different options.
 
 The snippet below shows how to run a quickstart script:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-inference.tar.gz
 tar -xvf bert-large-fp32-inference.tar.gz
 cd bert-large-fp32-inference
 
@@ -90,7 +90,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-fp32-inference \
+  intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-inference \
   /bin/bash ./quickstart/<SCRIPT NAME>.sh
 ```
 

@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-fp32-inference.tar.gz)
+[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -45,7 +45,7 @@ to run the RFCN scripts must be installed in your environment.
 Download and untar the RFCN FP32 inference model package:
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-fp32-inference.tar.gz
 tar -xvf rfcn-fp32-inference.tar.gz
 ```
 
@@ -108,7 +108,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-fp32-inference \
+  intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-fp32-inference \
   /bin/bash quickstart/fp32_inference.sh
 ```
 
@@ -133,7 +133,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-fp32-inference \
+  intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-fp32-inference \
   /bin/bash quickstart/fp32_accuracy.sh
 ```
 

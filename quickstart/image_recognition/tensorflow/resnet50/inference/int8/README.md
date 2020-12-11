@@ -10,7 +10,7 @@ Intel Optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50-int8-inference.tar.gz)
+[resnet50-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet50-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -49,7 +49,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet50-int8-inference.tar.gz
 tar -xzf resnet50-int8-inference.tar.gz
 cd resnet50-int8-inference
 
@@ -76,7 +76,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50-int8-inference \
+  intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet50-int8-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

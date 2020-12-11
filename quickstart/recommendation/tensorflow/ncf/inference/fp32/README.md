@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ncf-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/ncf-fp32-inference.tar.gz)
+[ncf-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ncf-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -69,7 +69,7 @@ DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<path to the TensorFlow models directory tf_models>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/ncf-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ncf-fp32-inference.tar.gz
 tar -xzf ncf-fp32-inference.tar.gz
 cd ncf-fp32-inference
 
@@ -96,7 +96,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-1.15.2-imz-2.1.0-ncf-fp32-inference \
+  intel/recommendation:tf-1.15.2-imz-2.2.0-ncf-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

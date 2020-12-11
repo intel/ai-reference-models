@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-inference.tar.gz)
+[wide-deep-large-ds-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wide-deep-large-ds-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -40,7 +40,7 @@ Copy the eval.csv and test.csv into your current working directory `/home/<user>
     cd /home/<user>/dataset
     docker run -it --privileged -u root:root \
                --volume /home/<user>/dataset:/dataset \
-               intel/recommendation:tf-1.15.2-imz-2.1.0-wide-deep-large-ds-fp32-inference \
+               intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-fp32-inference \
                /bin/bash
 
     ```
@@ -93,7 +93,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wide-deep-large-ds-fp32-inference.tar.gz
 tar -xzf wide-deep-large-ds-fp32-inference.tar.gz
 cd wide-deep-large-ds-fp32-inference
 ```
@@ -131,7 +131,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-1.15.2-imz-2.1.0-wide-deep-large-ds-fp32-inference \
+  intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-fp32-inference \
   /bin/bash quickstart/fp32_accuracy.sh
 ```
 
@@ -152,7 +152,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-1.15.2-imz-2.1.0-wide-deep-large-ds-fp32-inference \
+  intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-fp32-inference \
   /bin/bash quickstart/fp32_online_inference.sh \
   --num-intra-threads 1 --num-inter-threads 1
 ```

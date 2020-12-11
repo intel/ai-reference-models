@@ -10,7 +10,7 @@ Intel Optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[unet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/unet-fp32-inference.tar.gz)
+[unet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/unet-fp32-inference.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -56,7 +56,7 @@ Set environment variables for the path to your `TF_UNET_DIR` and an `OUTPUT_DIR`
 TF_UNET_DIR=<tensorflow-wavenet directory>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/unet-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/unet-fp32-inference.tar.gz
 tar -xzf unet-fp32-inference.tar.gz
 cd unet_trained
 
@@ -81,7 +81,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-segmentation:tf-1.15.2-imz-2.1.0-unet-fp32-inference \
+  intel/image-segmentation:tf-1.15.2-imz-2.2.0-unet-fp32-inference \
   /bin/bash quickstart/fp32_inference.sh
 ```
 
