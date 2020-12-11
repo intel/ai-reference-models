@@ -1,0 +1,120 @@
+<!--- 0. Title -->
+# ResNet50 FP32 inference
+
+<!-- 10. Description -->
+## Description
+
+This document has instructions for running ResNet50 FP32 inference using
+[intel-extension-for-pytorch](https://github.com/intel/intel-extension-for-pytorch).
+
+<!--- 20. Download link -->
+## Download link
+
+[pytorch-resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/pytorch-resnet50-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
+## Datasets
+
+The [ImageNet](http://www.image-net.org/) validation dataset is used when
+testing accuracy. The inference scripts use synthetic data, so no dataset
+is needed.
+
+Download and extract the ImageNet2012 dataset from http://www.image-net.org/,
+then move validation images to labeled subfolders, using
+[the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
+
+The accuracy script looks for a folder named `val`, so after running the
+data prep script, your folder structure should look something like this:
+
+```
+imagenet
+└── val
+    ├── ILSVRC2012_img_val.tar
+    ├── n01440764
+    │   ├── ILSVRC2012_val_00000293.JPEG
+    │   ├── ILSVRC2012_val_00002138.JPEG
+    │   ├── ILSVRC2012_val_00003014.JPEG
+    │   ├── ILSVRC2012_val_00006697.JPEG
+    │   └── ...
+    └── ...
+```
+The folder that contains the `val` directory should be set as the
+`DATASET_DIR` when running accuracy
+(for example: `export DATASET_DIR=/home/<user>/imagenet`).
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference using synthetic data (batch_size=1). |
+| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference using synthetic data (batch_size=128). |
+| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=128). |
+
+These quickstart scripts can be run in different environments:
+* [Bare Metal](#bare-metal)
+* [Docker](#docker)
+
+<!--- 50. Bare Metal -->
+## Bare Metal
+
+To run on bare metal, the following prerequisites must be installed in your environment:
+* Python 3
+* [intel-extension-for-pytorch](https://github.com/intel/intel-extension-for-pytorch)
+* [torchvision==v0.6.1](https://github.com/pytorch/vision/tree/v0.6.1)
+* numactl
+
+Download and untar the model package and then run a [quickstart script](#quick-start-scripts).
+
+```
+# Optional: to run accuracy script
+export DATASET_DIR=<path to the preprocessed imagenet dataset>
+
+# Download and extract the model package
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/pytorch-resnet50-fp32-inference.tar.gz
+tar -xzf pytorch-resnet50-fp32-inference.tar.gz
+cd pytorch-resnet50-fp32-inference
+
+bash quickstart/<script name>.sh
+```
+
+<!--- 60. Docker -->
+## Docker
+
+The model container includes the scripts and libraries needed to run 
+ResNet50 FP32 inference.
+
+To run the accuracy test, you will need
+mount a volume and set the `DATASET_DIR` environment variable to point
+to the prepped [ImageNet validation dataset](#dataset). The accuracy
+script also downloads the pretrained model at runtime, so provide proxy
+environment variables, if necessary.
+
+```
+DATASET_DIR=<path to the dataset folder>
+
+docker run \
+  --env DATASET_DIR=${DATASET_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --privileged --init -t \
+  intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-fp32-inference \
+  /bin/bash quickstart/fp32_accuracy.sh
+```
+
+Synthetic data is used when running batch or online inference, so no
+dataset mount is needed.
+
+```
+docker run \
+  --privileged --init -t \
+  intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-fp32-inference \
+  /bin/bash quickstart/<script name>.sh
+```
+
+<!--- 80. License -->
+## License
+
+[LICENSE](/LICENSE)
+
