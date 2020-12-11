@@ -67,9 +67,20 @@ optional arguments:
   -ts NUM_TRAIN_STEPS, --num-train-steps NUM_TRAIN_STEPS
                         Specify the number of training steps
   --mpi_num_processes MPI
-                        The number of MPI processes
+                        The number of MPI processes. This cannot in
+                        conjunction with --numa-cores-per-instance, which uses
+                        numactl to run multiple instances.
   --mpi_num_processes_per_socket NUM_MPI
                         Specify how many MPI processes to launch per socket
+  --numa-cores-per-instance NUMA_CORES_PER_INSTANCE
+                        If set, the script will run multiple instances using
+                        numactl to specify which cores will be used to execute
+                        each instance. Set the value of this arg to a positive
+                        integer for the number of cores to use per instance or
+                        to 'socket' to indicate that all the cores on a socket
+                        should be used for each instance. This cannot be used
+                        in conjunction with --mpi_num_processes, which uses
+                        mpirun.
   -d DATA_LOCATION, --data-location DATA_LOCATION
                         Specify the location of the data. If this parameter is
                         not specified, the script will use random/dummy

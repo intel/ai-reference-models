@@ -21,6 +21,7 @@
 import glob
 import json
 import os
+import time
 
 
 def set_env_var(env_var, value, overwrite_existing=False):
@@ -101,9 +102,142 @@ class BaseModelInitializer(object):
             print("Received these standard args: {}".format(self.args))
             print("Received these custom args: {}".format(self.custom_args))
             print("Current directory: {}".format(os.getcwd()))
-            print("Running: {}".format(str(cmd)))
 
-        os.system(cmd)
+        if self.args.numa_cores_per_instance:
+            num_numas = self.platform_util.num_numa_nodes
+
+            if not num_numas:
+                print("Warning: Unable to run multiple instances using numactl, "
+                      "because no numa nodes were found.")
+            elif not self.platform_util.cpu_core_list:
+                print("Warning: Unable to run multiple instances using numactl, "
+                      "the list of cpu nodes could not be retrieved. Please ensure "
+                      "that your system has numa nodes and numactl is installed.")
+            else:
+                self.run_numactl_multi_instance(cmd)
+        else:
+            if self.args.verbose:
+                print("Running: {}".format(str(cmd)))
+
+            os.system(cmd)
+
+    def group_cores(self, cpu_cores_list, cores_per_instance):
+        """
+        Group cores based on the number of cores we want per instance.
+        Returns a 2D array with the list of cores for each instance.
+        """
+        list_of_groups = zip(*(iter(cpu_cores_list),) * cores_per_instance)
+        end_list = [list(i) for i in list_of_groups]
+        count = len(cpu_cores_list) % cores_per_instance
+        end_list.append(cpu_cores_list[-count:]) if count != 0 else end_list
+        return end_list
+
+    def run_numactl_multi_instance(self, cmd):
+        """
+        Generates a series of commands that call the specified cmd with multiple
+        instances, where each instance uses the a specified number of cores. The
+        number of cores used per instance is specified by args.numa_cores_per_instance.
+
+        The command for each instance uses numactl and the --physcpubind arg with
+        the appropriate core list. Each instance writes output to it's own log file,
+        and a combined log file is created after everything has executed.
+        """
+        # Get the cores list and group them according to the number of cores per instance
+        cores_per_instance = int(self.args.numa_cores_per_instance)
+        cpu_cores_list = self.platform_util.cpu_core_list
+
+        if self.args.socket_id != -1:
+            # If it's specified to just use a single socket, then only use the cores from that socket
+            if len(cpu_cores_list) > self.args.socket_id:
+                cpu_cores_list = cpu_cores_list[self.args.socket_id]
+            else:
+                raise ValueError("Error while trying to get the core list for socket {0}. "
+                                 "The core list does not have cores for socket {0}.\n "
+                                 "Core list: {1}\n".format(self.args.socket_id, str(cpu_cores_list)))
+        else:
+            # Using cores from all sockets
+            combined_core_list = []
+            for socket_cores in cpu_cores_list:
+                combined_core_list += socket_cores
+            cpu_cores_list = combined_core_list
+
+        instance_cores_list = self.group_cores(cpu_cores_list, cores_per_instance)
+
+        # Setup the log file name with the model name, precision, mode, batch size (if there is one),
+        # number of cores per instance. An extra {} is intentionally left in the log_filename_format
+        # string, because this value is filled in with the instance number later on.
+        batch_size = ""
+        if self.args.batch_size and self.args.batch_size > 0:
+            batch_size = "bs{}_".format(self.args.batch_size)
+        log_filename_format = os.path.join(
+            self.args.output_dir, "{}_{}_{}_{}cores{}_".format(
+                self.args.model_name, self.args.precision, self.args.mode, batch_size, cores_per_instance))
+        log_filename_format += "{}.log"
+        instance_logfiles = []
+
+        # Loop through each instance and add that instance's command to a string
+        multi_instance_command = ""
+        for instance_num, core_list in enumerate(instance_cores_list):
+            if len(core_list) < int(cores_per_instance):
+                print("NOTE: Skipping remainder of {} cores for instance {}"
+                      .format(len(core_list), instance_num))
+                continue
+
+            prefix = ("OMP_NUM_THREADS={0} "
+                      "numactl --localalloc --physcpubind={1}").format(
+                len(core_list), ",".join(core_list))
+            instance_logfile = log_filename_format.format("instance" + str(instance_num))
+            instance_command = "{} {}".format(prefix, cmd)
+            multi_instance_command += "{} >> {} 2>&1 & \\\n".format(
+                instance_command, instance_logfile)
+            instance_logfiles.append(instance_logfile)
+
+            # write the command to the instance's log file
+            with open(instance_logfile, "w") as log:
+                log.write(instance_command)
+                log.write("\n\n")
+
+        multi_instance_command += "wait"
+
+        # Run the multi-instance command
+        print("\nMulti-instance run:\n" + multi_instance_command)
+        os.system(multi_instance_command)
+
+        # Wait to ensure that log files have been written
+        max_retries = 20
+        retry_counter = 0
+        while retry_counter < max_retries:
+            if all([os.path.exists(log) for log in instance_logfiles]):
+                break
+            retry_counter += 1
+            if retry_counter >= max_retries:
+                print("Warning: Log files for all instances were not found after "
+                      "rechecking and waiting for {} seconds. The combined log file "
+                      "may not have output from all instances.".format(retry_counter))
+                break
+            time.sleep(1)
+
+        # Generate the combined log file
+        all_instance_log = log_filename_format.format("all_instances")
+        os.environ["LOG_FILENAME"] = os.path.basename(all_instance_log)
+        with open(all_instance_log, mode="w") as combined_file:
+            for instance_logfile in instance_logfiles:
+                if not os.path.exists(instance_logfile):
+                    print("Skipping {} when generating the combined log file, because "
+                          "it doesn't exist".format(os.path.basename(instance_logfile)))
+                    continue
+
+                with open(instance_logfile) as individual_file:
+                    for line in individual_file:
+                        combined_file.write(line)
+
+        # Print out lists of log files
+        print("\nThe following log files were saved to the output directory:")
+        print("\n".join([os.path.basename(log_path) for log_path in instance_logfiles
+                         if os.path.exists(log_path)]))
+        if os.path.exists(all_instance_log):
+            print("\nA combined log file was saved to the output directory:\n"
+                  "{}\n".format(os.path.basename(all_instance_log)))
 
     def get_command_prefix(self, socket_id, numactl=True):
         """
@@ -130,7 +264,7 @@ class BaseModelInitializer(object):
                       "so the LD_PRELOAD environment variable will not be set.")
 
         num_numas = self.platform_util.num_numa_nodes
-        if num_numas and socket_id != -1 and numactl:
+        if num_numas and socket_id != -1 and numactl and not self.args.numa_cores_per_instance:
             command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
 
         return command
@@ -159,6 +293,11 @@ class BaseModelInitializer(object):
         are the values that will be used. Otherwise, if they are None, then the
         following criteria applies:
 
+        If multiple instances are being used (specified with numa_cores_per_instance),
+        then each instance should have:
+        * num_inter_threads = 1
+        * num_intra_threads = number of cores per instance
+
         If a single socket is being used:
          * num_inter_threads = 1
          * num_intra_threads = The number of cores on a single socket, or
@@ -180,7 +319,12 @@ class BaseModelInitializer(object):
         if num_intra_threads and not self.args.num_intra_threads:
             self.args.num_intra_threads = num_intra_threads
 
-        if self.args.socket_id != -1:
+        if self.args.numa_cores_per_instance:
+            self.args.num_inter_threads = 1
+            self.args.num_intra_threads = self.args.numa_cores_per_instance
+            self.args.data_num_inter_threads = 1
+            self.args.data_num_intra_threads = self.args.numa_cores_per_instance
+        elif self.args.socket_id != -1:
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
