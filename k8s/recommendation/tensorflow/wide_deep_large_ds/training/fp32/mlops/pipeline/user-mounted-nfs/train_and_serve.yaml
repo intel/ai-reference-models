@@ -44,36 +44,19 @@ spec:
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
       image: docker.io/intel/recommendation:tf-2.3.0-imz-2.1.0-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
-      imagePullPolicy: Always
+      imagePullPolicy: IfNotPresent
       workingDir: /workspace/wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_DIR"}
       command: # {"$openapi":"MODEL_COMMAND"}
       - /workspace/wide-deep-large-ds-fp32-training/quickstart/fp32_training_check_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
-      env:
-      - name: CHECKPOINT_DIR
-        value: /nfs/root/wide-deep-large-ds-fp32-training/checkpoints # {"$openapi":"CHECKPOINT_PATH"}
-      - name: DATASET_DIR
-        value: /datasets # {"$openapi":"DATASET_DIR"}
-      - name: GROUP_ID
-        value: "0" # {"$openapi":"GROUP_ID_VALUE"}
-      - name: GROUP_NAME
-        value: root # {"$openapi":"GROUP_NAME"}
-      - name: OUTPUT_DIR # Serving requires a model base directory and a model name folder, so
-        value: /nfs/root/wide-deep-large-ds-fp32-training/output # {"$openapi":"OUTPUT_PATH"}
-      - name: TARGET_ACCURACY
-        value: "0.75" # {"$openapi":"TARGET_ACCURACY_VALUE"}
-      - name: USER_ID
-        value: "0" # {"$openapi":"USER_ID_VALUE"}
-      - name: USER_NAME
-        value: root # {"$openapi":"USER_NAME"}
+      envFrom:
+      - configMapRef:
+          name: wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_NAME"}
       volumeMounts:
       - name: datasets
         mountPath: /datasets # {"$openapi":"DATASET_DIR"}
         readOnly: true
       - name: nfs-path
         mountPath: /nfs # {"$openapi":"NFS_PATH"}
-      - name: mlops-scripts
-        mountPath: /workspace/wide-deep-large-ds-fp32-training/quickstart/fp32_training_check_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
-        subPath: fp32_training_check_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
     retryStrategy:
       limit: 10 # {"$openapi":"RETRY_LIMIT"}
       retryPolicy: "OnFailure"
@@ -85,13 +68,6 @@ spec:
       nfs:
         server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
         path: /nfs # {"$openapi":"NFS_PATH"}
-    - name: mlops-scripts
-      configMap:
-        name: mlops-scripts-wide-deep-large-ds-fp32-training
-        defaultMode: 0770
-        items:
-        - key: fp32_training_check_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
-          path: fp32_training_check_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
   - name: wide-deep-large-ds-deployment
     resource:
       action: create
