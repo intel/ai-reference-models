@@ -13,8 +13,8 @@ slice_sets:
           <precision>: FP32
           <mode>: inference
           <use case>: object_detection
-          <docker image>: intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-fp32-inference
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-fp32-inference-k8s.tar.gz
+          <docker image>: intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-fp32-inference
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-fp32-inference-k8s.tar.gz
           <package name>: rfcn-fp32-inference-k8s.tar.gz
           <package dir>: rfcn-fp32-inference-k8s
         docs:
@@ -56,7 +56,7 @@ slice_sets:
           - name: GROUP_NAME
             value: root
           - name: IMAGE_VERSION
-            value: tf-2.3.0-imz-2.1.0
+            value: tf-2.3.0-imz-2.2.0
           - name: NAME_SPACE
             value: default
           - name: NFS_PATH
