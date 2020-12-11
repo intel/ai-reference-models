@@ -42,7 +42,6 @@ dependencies to be installed:
 | Recommendation          | TensorFlow   | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | Inference | Model Containers: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-fp32-inference-tensorflow-container.html) <br> Model Packages: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-fp32-inference-tensorflow-model.html)  | [FP32](recommendation/tensorflow/wide_deep/README.md#fp32-inference-instructions) |
 | Reinforcement           | TensorFlow   | [MiniGo](https://arxiv.org/abs/1712.01815.pdf) | Training |  | [FP32](reinforcement/tensorflow/minigo/README.md#fp32-training-instructions) |
 | Text-to-Speech          | TensorFlow   | [WaveNet](https://arxiv.org/pdf/1609.03499.pdf) | Inference | Model Containers: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/wavenet-fp32-inference-tensorflow-container.html) <br> Model Packages: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/wavenet-fp32-inference-tensorflow-model.html)  | [FP32](text_to_speech/tensorflow/wavenet/README.md#fp32-inference-instructions) |
-| ----------------------- | ------------ | ------------------ | --------- | ------------------- | --------------------------------- |
 
 ## TensorFlow Serving Use Cases
 
