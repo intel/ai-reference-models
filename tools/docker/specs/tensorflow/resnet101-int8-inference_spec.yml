@@ -28,12 +28,12 @@ slice_sets:
         uri: models/quickstart/image_recognition/tensorflow/resnet101/inference/int8/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet101-int8-inference
+        <docker image>: intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet101-int8-inference
         <mode>: inference
         <model name>: ResNet101
         <package dir>: resnet101-int8-inference
         <package name>: resnet101-int8-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet101-int8-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet101-int8-inference.tar.gz
         <precision>: Int8
         <use case>: image_recognition
       uri: models/quickstart/image_recognition/tensorflow/resnet101/inference/int8

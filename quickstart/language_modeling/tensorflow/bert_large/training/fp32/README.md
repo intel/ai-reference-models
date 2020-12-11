@@ -15,7 +15,7 @@ Refer to google reference page for [checkpoints](https://github.com/google-resea
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training.tar.gz)
+[bert-large-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -74,7 +74,7 @@ details on the different options.
 
 The snippet below shows a quickstart script running with a single instance:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-training.tar.gz
 tar -xvf bert-large-fp32-training.tar.gz
 cd bert-large-fp32-training
 
@@ -112,7 +112,7 @@ installed in your environment:
 * horovod==0.19.1
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/bert-large-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-training.tar.gz
 tar -xvf bert-large-fp32-training.tar.gz
 cd bert-large-fp32-training
 
@@ -150,7 +150,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-fp32-training \
+  intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 
@@ -186,7 +186,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/language-modeling:tf-2.3.0-imz-2.1.0-bert-large-fp32-training \
+  intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 

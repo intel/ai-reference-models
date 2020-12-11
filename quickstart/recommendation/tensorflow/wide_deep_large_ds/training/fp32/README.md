@@ -10,7 +10,7 @@ using a large dataset using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-training.tar.gz)
+[wide-deep-large-ds-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wide-deep-large-ds-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -60,7 +60,7 @@ DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
 cd wide-deep-large-ds-fp32-training
 
@@ -94,7 +94,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-2.3.0-imz-2.1.0-wide-deep-large-ds-fp32-training \
+  intel/recommendation:tf-2.3.0-imz-2.2.0-wide-deep-large-ds-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 

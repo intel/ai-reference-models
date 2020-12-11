@@ -28,12 +28,12 @@ slice_sets:
         uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/bfloat16/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: 'intel/language-translation:tf-2.3.0-imz-2.1.0-transformer-mlperf-bfloat16-training'
+        <docker image>: 'intel/language-translation:tf-2.3.0-imz-2.2.0-transformer-mlperf-bfloat16-training'
         <mode>: training
         <model name>: Transformer Language
         <package dir>: transformer-mlperf-bfloat16-training
         <package name>: transformer-mlperf-bfloat16-training.tar.gz
-        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/transformer-mlperf-bfloat16-training.tar.gz'
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/transformer-mlperf-bfloat16-training.tar.gz'
         <precision>: BFloat16
         <use case>: language_translation
       uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/bfloat16

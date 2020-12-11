@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-mobilenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/ssd-mobilenet-fp32-inference.tar.gz)
+[ssd-mobilenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ssd-mobilenet-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -47,7 +47,7 @@ inference model package, and then run a [quickstart script](#quick-start-scripts
 DATASET_DIR=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/ssd-mobilenet-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ssd-mobilenet-fp32-inference.tar.gz
 tar -xzf ssd-mobilenet-fp32-inference.tar.gz
 cd ssd-mobilenet-fp32-inference
 
@@ -75,7 +75,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.1.0-ssd-mobilenet-fp32-inference \
+  intel/object-detection:tf-2.3.0-imz-2.2.0-ssd-mobilenet-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
