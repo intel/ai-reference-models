@@ -1,2 +1,3 @@
 Makefile
-pipeline.yaml
+user-allocated-pvc.yaml
+user-mounted-nfs.yaml
