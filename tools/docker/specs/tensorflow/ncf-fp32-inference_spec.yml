@@ -30,12 +30,12 @@ slice_sets:
         uri: models/quickstart/recommendation/tensorflow/ncf/inference/fp32/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/recommendation:tf-1.15.2-imz-2.1.0-ncf-fp32-inference
+        <docker image>: intel/recommendation:tf-1.15.2-imz-2.2.0-ncf-fp32-inference
         <mode>: inference
         <model name>: NCF
         <package dir>: ncf-fp32-inference
         <package name>: ncf-fp32-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/ncf-fp32-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ncf-fp32-inference.tar.gz
         <precision>: FP32
         <use case>: recommendation
       uri: models/quickstart/recommendation/tensorflow/ncf/inference/fp32

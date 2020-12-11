@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wavenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wavenet-fp32-inference.tar.gz)
+[wavenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wavenet-fp32-inference.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -53,7 +53,7 @@ Set environment variables for the path to your `TF_WAVENET_DIR` and an
 TF_WAVENET_DIR=<tensorflow-wavenet directory>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wavenet-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wavenet-fp32-inference.tar.gz
 tar -xzf wavenet-fp32-inference.tar.gz
 cd wavenet-fp32-inference
 
@@ -63,7 +63,7 @@ quickstart/fp32_inference.sh
 <!--- 60. Docker -->
 ## Docker
 
-The model container intel/text-to-speech:tf-1.15.2-imz-2.1.0-wavenet-fp32-inference includes the scripts and libraries needed to run 
+The model container intel/text-to-speech:tf-1.15.2-imz-2.2.0-wavenet-fp32-inference includes the scripts and libraries needed to run 
 WaveNet FP32 inference. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the output directory.
 
@@ -76,7 +76,7 @@ docker run \
   --env https_proxy=${https_proxy} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/text-to-speech:tf-1.15.2-imz-2.1.0-wavenet-fp32-inference \
+  intel/text-to-speech:tf-1.15.2-imz-2.2.0-wavenet-fp32-inference \
   /bin/bash quickstart/fp32_inference.sh
 ```
 

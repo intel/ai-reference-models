@@ -20,10 +20,10 @@ slice_sets:
           <model name>: Wide and Deep Large Dataset
           <precision>: FP32
           <use case>: recommendation
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
           <package name>: wide-deep-large-ds-fp32-training-k8s.tar.gz
           <package dir>: wide-deep-large-ds-fp32-training-k8s
-          <docker image>: intel/recommendation:tf-2.3.0-imz-2.1.0-wide-deep-large-ds-fp32-training
+          <docker image>: intel/recommendation:tf-2.3.0-imz-2.2.0-wide-deep-large-ds-fp32-training
         docs:
           - name: Title
             uri: models/k8s/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/title.md
@@ -56,7 +56,7 @@ slice_sets:
           - name: GROUP_NAME
             value: root
           - name: IMAGE_VERSION
-            value: tf-2.3.0-imz-2.1.0
+            value: tf-2.3.0-imz-2.2.0
           - name: NAME_SPACE
             value: default
           - name: NFS_PATH

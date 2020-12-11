@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[faster-rcnn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/faster-rcnn-fp32-inference.tar.gz)
+[faster-rcnn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/faster-rcnn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -69,7 +69,7 @@ for the path to your `DATASET_DIR` (where the coco TF records file is
 located) and an `OUTPUT_DIR` where log files will be written, then run a
 [quickstart script](#quick-start-scripts).
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/faster-rcnn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/faster-rcnn-fp32-inference.tar.gz
 tar -xzf faster-rcnn-fp32-inference.tar.gz
 cd faster-rcnn-fp32-inference
 
@@ -99,7 +99,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-1.15.2-imz-2.1.0-faster-rcnn-fp32-inference \
+  intel/object-detection:tf-1.15.2-imz-2.2.0-faster-rcnn-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

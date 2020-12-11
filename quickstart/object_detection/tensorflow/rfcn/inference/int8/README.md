@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-int8-inference.tar.gz)
+[rfcn-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -59,7 +59,7 @@ from the [TensorFlow Model Garden](https://github.com/tensorflow/models) reposit
 
 After installing the prerequisites, download and untar the model package.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/rfcn-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-int8-inference.tar.gz
 tar -xzf rfcn-int8-inference.tar.gz
 ```
 
@@ -108,7 +108,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-int8-inference \
+  intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-int8-inference \
   /bin/bash quickstart/int8_inference.sh
 ```
 To get accuracy metrics:
@@ -124,7 +124,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-imz-2.1.0-rfcn-int8-inference \
+  intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-int8-inference \
   /bin/bash quickstart/int8_accuracy.sh
 ```
 
