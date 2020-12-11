@@ -19,6 +19,15 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
+    io.k8s.cli.setters.CHECKPOINT_DIR:
+      description: checkpoint dir base name
+      x-k8s-cli:
+        setter:
+          name: CHECKPOINT_DIR
+          value: checkpoints
+          isSet: true
+          setBy: model-builder
+          required: true
     io.k8s.cli.setters.DATASET_DIR:
       description: input dataset directory
       x-k8s-cli:
@@ -167,13 +176,45 @@ openAPI:
       x-k8s-cli:
         substitution:
           name: OUTPUT_PATH
-          pattern: ${NFS_PATH}/${USER_NAME}/${MODEL_NAME}/${OUTPUT_DIR}
+          pattern: ${PVC_PATH}/${USER_NAME}/${MODEL_NAME}/${OUTPUT_DIR}
           values:
-          - marker: ${NFS_PATH}
-            ref: '#/definitions/io.k8s.cli.setters.NFS_PATH'
+          - marker: ${PVC_PATH}
+            ref: '#/definitions/io.k8s.cli.setters.PVC_PATH'
           - marker: ${USER_NAME}
             ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
           - marker: ${MODEL_NAME}
             ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
           - marker: ${OUTPUT_DIR}
             ref: '#/definitions/io.k8s.cli.setters.OUTPUT_DIR'
+    io.k8s.cli.substitutions.CHECKPOINT_PATH:
+      x-k8s-cli:
+        substitution:
+          name: CHECKPOINT_PATH
+          pattern: ${PVC_PATH}/${USER_NAME}/${MODEL_NAME}/${CHECKPOINT_DIR}
+          values:
+          - marker: ${PVC_PATH}
+            ref: '#/definitions/io.k8s.cli.setters.PVC_PATH'
+          - marker: ${USER_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
+          - marker: ${MODEL_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
+          - marker: ${CHECKPOINT_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.CHECKPOINT_DIR'
+    io.k8s.cli.setters.PVC_NAME:
+      description: pvc name
+      x-k8s-cli:
+        setter:
+          name: PVC_NAME
+          value: workdisk
+          isSet: true
+          required: true
+          setBy: model-builder
+    io.k8s.cli.setters.PVC_PATH:
+      description: pvc path
+      x-k8s-cli:
+        setter:
+          name: PVC_PATH
+          value: /pvc
+          isSet: true
+          required: true
+          setBy: model-builder

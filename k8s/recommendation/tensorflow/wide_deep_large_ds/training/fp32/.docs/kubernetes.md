@@ -11,105 +11,106 @@ tar -xvf <package name>
 ### Execution
 
 The Kubernetes* package for `<model name> <precision> <mode>` includes single-node and pipeline kubernetes deployments.
-The directory tree within the kubernetes package is shown below, where single-node and pipeline directories are below the
-[mlops](https://en.wikipedia.org/wiki/MLOps) directory:
+Within the single and pipeline deployments are common use cases that include storage and security variations that are common 
+across different kubernetes installations. The directory tree within the kubernetes package is shown below, where 
+single-node and pipeline directories are below the [mlops](https://en.wikipedia.org/wiki/MLOps) directory:
+Common use cases are found under the single and pipeline directories:
 
 ```
 quickstart
 └── mlops
     ├── pipeline
+    │       ├── user-allocated-pvc
+    │       └── user-mounted-nfs
     └── single-node
+            ├── user-allocated-pvc
+            └── user-mounted-nfs
 ```
 
 #### Prerequisites
 
-Both single-node and pipeline deployments use [kustomize-v3.8.4](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.4) to configure deployment parameters. This archive should be downloaded, extracted and the kustomize command should be moved to a directory within your PATH. You can verify the correct version of kustomize has been installed by typing `kustomize version`. On MACOSX you would see
+Both single-node and pipeline deployments use [kustomize-v3.8.7](https://github.com/kubernetes-sigs/kustomize/releases/tag/kustomize%2Fv3.8.7) to configure deployment parameters. Kustomize-v3.8.7 should be downloaded, extracted and moved to a directory within your PATH. You can verify that you've installed the correct version of kustomize by typing `kustomize version`. On MACOSX you would see:
 
 ```
-{Version:kustomize/v3.8.4 GitCommit:8285af8cf11c0b202be533e02b88e114ad61c1a9 BuildDate:2020-09-19T15:39:21Z GoOs:darwin GoArch:amd64}
-```
-
-
-The kustomization files that the kustomize command references are located withing the following directories:
-
-```
-<package name>/quickstart/mlops/pipeline/kustomization.yaml
-<package name>/quickstart/mlops/single-node/kustomization.yaml
+{Version:kustomize/v3.8.7 GitCommit:ad092cc7a91c07fdf63a2e4b7f13fa588a39af4f BuildDate:2020-11-11T23:19:38Z GoOs:darwin GoArch:amd64}
 ```
 
 #### Single-node Training
 
-Single node training is similar to the docker use case but the command is run within a pod.
+Single node training is similar to the docker use case but is run within a pod.
 Training is done by submitting a pod.yaml to the k8s api-server which results in the pod creation and running
-the quick start script command within the pod's container.
+the [`launch_benchmark.py`](mlops/single-node/user-mounted-nfs/pod.yaml#L50) script within the pod's container.
 
-Make sure you are inside the single-node directory:
+In a terminal, `cd` to the single-node directory. Each use case under this directory has parameters that can be changed 
+using kustomize's [cfg set](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/set.md)
 
-```
-cd <package dir>/quickstart/mlops/single-node
-```
+##### User mounted nfs and user allocated pvc parameter values
 
-The parameters that can be changed within the pod are shown in the table[^1] below:
+|     NAME   |                 VALUE    |        DESCRIPTION          |
+|------------|--------------------------|-----------------------------|
+| DATASET_DIR| /datasets                | input dataset directory     |
+| FS_ID      | 0                        | owner id of mounted volumes |
+| GROUP_ID   | 0                        | process group id            |
+| GROUP_NAME | root                     | process group name          |
+| NFS_PATH   | /nfs                     | nfs path                    |
+| NFS_SERVER | 0.0.0.0                  | nfs server                  |
+| PVC_NAME   | workdisk                 | model-builder | pvc name    |
+| PVC_PATH   | /pvc                     | model-builder | pvc path    |
+| USER_ID    | 0                        | process owner id            |
+| USER_NAME  | root                     | process owner name          |
 
-|     NAME     |                    VALUE                    |    SET BY     |        DESCRIPTION        | COUNT | REQUIRED |
-|--------------|---------------------------------------------|---------------|---------------------------|-------|----------|
-| DATASET_DIR  | /datasets                                   | model-builder | input dataset directory   | 3     | Yes      |
-| FS_ID        | 0                                           | model-builder | filesystem id             | 1     | Yes      |
-| GROUP_ID     | 0                                           | model-builder | process group id          | 2     | Yes      |
-| GROUP_NAME   | root                                        | model-builder | process group name        | 1     | Yes      |
-| IMAGE_SUFFIX |                                             | model-builder | appended to image name    | 1     | No       |
-| MODEL_DIR    | /workspace/wide-deep-large-ds-fp32-training | model-builder | container model directory | 3     | No       |
-| MODEL_NAME   | wide-deep-large-ds-fp32-training            | model-builder | name use-case             | 5     | No       |
-| MODEL_SCRIPT | fp32_training.sh                            | model-builder | model script name         | 5     | No       |
-| NFS_PATH     | /nfs                                        | model-builder | nfs path                  | 3     | Yes      |
-| NFS_SERVER   | 0.0.0.0                                     | model-builder | nfs server                | 1     | Yes      |
-| OUTPUT_DIR   | output                                      | model-builder | output dir base name      | 1     | Yes      |
-| REGISTRY     | docker.io                                   | model-builder | image location            | 1     | No       |
-| USER_ID      | 0                                           | model-builder | process owner id          | 2     | Yes      |
-| USER_NAME    | root                                        | model-builder | process owner name        | 2     | Yes      |
+For the user mounted nfs use case, the user should change NFS_PATH and NFS_SERVER.
 
+For the user allocated pvc use case, the user should change PVC_NAME and PVC_PATH.
 
-[^1]: The single-node parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
-
-For example to change the NFS_SERVER IP address to 10.35.215.25 the user would run:
+For example to change the NFS_SERVER address the user would run:
 
 ```
-kustomize cfg set . NFS_SERVER 10.35.215.25
+kustomize cfg set . NFS_SERVER <ip address> -R
 ```
 
-The required column that contains a 'Yes' indicates which values should be changed by the user.
-The 'No' values indicate that the default values are fine. Note that the mlops user should run the
-training process with their own uid/gid permissions by using kustomize to change the securityContext in the pod.yaml file.
-This is done by running the following:
+To change the PVC_NAME the user would run:
 
 ```
-kustomize cfg set . FS_ID <Group ID>
-kustomize cfg set . GROUP_ID <Group ID>
-kustomize cfg set . GROUP_NAME <Group Name>
-kustomize cfg set . USER_ID <User ID>
-kustomize cfg set . USER_NAME <User Name>
+kustomize cfg set . PVC_NAME <PVC Name> -R
 ```
 
-Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+In both use cases, the user should change the values below so the pod is deployed with the user's identity.
 
 ```
-kustomize edit set namespace $USER
+kustomize cfg set . FS_ID <Group ID> -R
+kustomize cfg set . GROUP_ID <Group ID> -R
+kustomize cfg set . GROUP_NAME <Group Name> -R
+kustomize cfg set . USER_ID <User ID> -R
+kustomize cfg set . USER_NAME <User Name> -R
 ```
 
-This will tell kubernetes to deploy the resources within the specified namespace. Note: this namespace should be created prior to deployment.
-Once the user has changed parameter values they can then deploy the single-node job by running:
+The user should change the default namespace of all the resources by running the kustomize command:
 
 ```
-kustomize build > single-node.yaml
-kubectl apply -f single-node.yaml
+pushd <use-case>
+kustomize edit set namespace <User's namespace>
+popd
+```
+
+This will place all resources within the specified namespace. Note: this namespace should be created prior to deployment.
+
+The user can also change their default kubectl context by running
+
+```
+kubectl config set-context --current --namespace=<User's namespace>
+```
+
+Once the user has changed parameter values they can then deploy the use-case by running:
+
+```
+kustomize build  <use-case> > <use-case>.yaml
+kubectl apply -f <use-case>.yaml
 ```
 
 ##### Single-node training output
 
-The script will write a log file, checkpoints, and the saved model to
-the `OUTPUT_DIR`.
-
-Viewing the log output of the single-node job is done by viewing the logs of the
+Viewing the log output of the <package name> Pod is done by viewing the logs of the 
 training pod. This pod is found by filtering the list of pods for the name 'training'
 
 ```
@@ -127,7 +128,7 @@ kubectl logs -f $(kubectl get pods -oname|grep training|cut -c5-)
 Removing the pod and related resources is done by running:
 
 ```
-kubectl delete -f single-node.yaml
+kubectl delete -f <use-case>.yaml
 ```
 
 #### Model Training and TF Serving Pipeline
@@ -152,79 +153,86 @@ with the exception that it does not use a Google Cloud Kubernetes
 cluster. Since the Kubernetes cluster being used does not have a load
 balancer, the configuration is setup for NodePort, which will allow
 external requests.
+In a terminal, `cd` to the multi-node directory. Each use case under this directory has parameters that can be changed 
+using kustomize's [cfg set](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/set.md)
 
-Make sure you are inside the pipeline directory:
+##### [Mlops](https://en.wikipedia.org/wiki/MLOps)
 
-```
-cd <package dir>/quickstart/mlops/pipeline
-```
+###### User mounted nfs and user allocated pvc parameter values
 
-The parameters that can be changed within the pipeline are shown in the table[^2] below:
+|     NAME        |                 VALUE    |        DESCRIPTION          |
+|-----------------|--------------------------|-----------------------------|
+| DATASET_DIR     | /datasets                | input dataset directory     |
+| FS_ID           | 0                        | owner id of mounted volumes |
+| GROUP_ID        | 0                        | process group id            |
+| GROUP_NAME      | root                     | process group name          |
+| NFS_PATH        | /nfs                     | nfs path                    |
+| NFS_SERVER      | 0.0.0.0                  | nfs server                  |
+| PVC_NAME        | workdisk                 | model-builder | pvc name    |
+| PVC_PATH        | /pvc                     | model-builder | pvc path    |
+| REPLICAS        | 3                        | replica number              |
+| RETRY_LIMIT     | 10                       | replica number              |
+| TARGET_ACCURACY | 0.74                     | target accuracy             |
+| TF_SERVING_PORT | 8501                     | tf serving port             |
+| USER_ID    | 0                             | process owner id            |
+| USER_NAME  | root                          | process owner name          |
 
-|      NAME       |                    VALUE                    |    SET BY     |         DESCRIPTION         | COUNT | REQUIRED |
-|-----------------|---------------------------------------------|---------------|-----------------------------|-------|----------|
-| CHECKPOINT_DIR  | checkpoints                                 | model-builder | checkpoint dir basename     | 1     | Yes      |
-| DATASET_DIR     | /datasets                                   | model-builder | input dataset directory     | 3     | Yes      |
-| FS_ID           | 0                                           | model-builder | owner id of mounted volumes | 2     | Yes      |
-| GROUP_ID        | 0                                           | model-builder | process group id            | 3     | Yes      |
-| GROUP_NAME      | root                                        | model-builder | process group name          | 1     | Yes      |
-| IMAGE_SUFFIX    |                                             | model-builder | appended to image name      | 1     | No       |
-| MODEL_DIR       | /workspace/wide-deep-large-ds-fp32-training | model-builder | container model directory   | 3     | No       |
-| MODEL_NAME      | wide-deep-large-ds-fp32-training            | model-builder | name use-case               | 9     | No       |
-| MODEL_SCRIPT    | fp32_training_check_accuracy.sh             | model-builder | model script name           | 5     | No       |
-| NFS_PATH        | /nfs                                        | model-builder | nfs path                    | 6     | Yes      |
-| NFS_SERVER      | 0.0.0.0                                     | model-builder | nfs server                  | 2     | Yes      |
-| OUTPUT_DIR      | output                                      | model-builder | output dir basename         | 2     | Yes      |
-| REGISTRY        | docker.io                                   | model-builder | image location              | 1     | No       |
-| REPLICAS        | 3                                           | model-builder | replica number              | 1     | No       |
-| RETRY_LIMIT     | 10                                          | model-builder | replica number              | 1     | No       |
-| TARGET_ACCURACY | 0.75                                        | model-builder | target accuracy             | 1     | Yes      |
-| TF_SERVING_PORT | 8501                                        | model-builder | tf serving port             | 1     | Yes      |
-| USER_ID         | 0                                           | model-builder | process owner id            | 3     | Yes      |
-| USER_NAME       | root                                        | model-builder | process owner name          | 4     | Yes      |
+For the user mounted nfs use case, the user should change NFS_PATH and NFS_SERVER.
 
-[^2]: The pipeline parameters table is generated by `kustomize cfg list-setters . --markdown`. See [list-setters](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/list-setters.md) for explanations of each column.
+For the user allocated pvc use case, the user should change PVC_NAME and PVC_PATH.
 
-For example to change the NFS_SERVER IP address to 10.35.215.25 the user would run:
+For example to change the NFS_SERVER address the user would run:
 
 ```
-kustomize cfg set . NFS_SERVER 10.35.215.25
+kustomize cfg set . NFS_SERVER <ip address> -R
 ```
 
-The required column that contains a 'Yes' indicates which values should be changed by the user.
-The 'No' values indicate that the default values are fine. Note that the mlops user should run the
-argo workflow[^3] with their own uid/gid permissions by using kustomize to change the securityContext in the single_node_accuracy.yaml file.
-
-This is done by running the following:
+To change the PVC_NAME the user would run:
 
 ```
-kustomize cfg set . FS_ID <Group ID>
-kustomize cfg set . GROUP_ID <Group ID>
-kustomize cfg set . GROUP_NAME <Group Name>
-kustomize cfg set . USER_ID <User ID>
-kustomize cfg set . USER_NAME <User Name>
+kustomize cfg set . PVC_NAME <PVC Name> -R
 ```
+
+In both use cases, the user should change the values below so the argo workflow[^3] is deployed with the user's identity.
 
 [^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issue [2239](https://github.com/argoproj/argo/issues/2239). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
 
-Finally, the namespace can be changed by the user from the default namespace by running the kustomize command:
+```
+kustomize cfg set . FS_ID <Group ID> -R
+kustomize cfg set . GROUP_ID <Group ID> -R
+kustomize cfg set . GROUP_NAME <Group Name> -R
+kustomize cfg set . USER_ID <User ID> -R
+kustomize cfg set . USER_NAME <User Name> -R
+```
+
+The user should change the default namespace of all the resources by running the kustomize command:
 
 ```
-kustomize edit set namespace $USER
+pushd <use-case>
+kustomize edit set namespace <User's namespace>
+popd
 ```
 
-This will tell kubernetes to deploy the resources within the specified namespace. Note: this namespace should be created prior to deployment.
-Once the user has changed parameter values they can then deploy the workflow by running:
+This will place all resources within the specified namespace. Note: this namespace should be created prior to deployment.
+
+The user can also change their default kubectl context by running
 
 ```
-kustomize build > pipeline.yaml
-kubectl apply -f pipeline.yaml
+kubectl config set-context --current --namespace=<User's namespace>
+```
+
+Once the user has changed parameter values they can then deploy the use-case by running:
+
+```
+kustomize build  <use-case> > <use-case>.yaml
+kubectl apply -f <use-case>.yaml
 ```
 
 Once the job has been submitted, the status and logs can be viewed using
 the Argo user inferface or from the command line using kubectl or argo.
 The commands below describe how to use kubectl to see the workflow, pods,
 and log files:
+
 ```
 $ kubectl get wf
 $ kubectl get pods
@@ -284,6 +292,7 @@ optional arguments:
 
 To clean up the model training/serving pipeline, delete the service,
 deployment, and other resources using the following commands:
+
 ```
-kubectl delete -f pipeline.yaml
+kubectl delete -f <use-case>.yaml
 ```
