@@ -61,7 +61,7 @@ openAPI:
       x-k8s-cli:
         substitution:
           name: IMAGE
-          pattern: ${REGISTRY}/intel/object-detection:tf-2.3.0-imz-2.1.0-${MODEL_NAME}${IMAGE_SUFFIX}
+          pattern: ${REGISTRY}/intel/object-detection:tf-2.3.0-imz-2.2.0-${MODEL_NAME}${IMAGE_SUFFIX}
           values:
           - marker: ${REGISTRY}
             ref: '#/definitions/io.k8s.cli.setters.REGISTRY'
@@ -181,7 +181,7 @@ openAPI:
       x-k8s-cli:
         substitution:
           name: IMAGE
-          pattern: ${REGISTRY}/intel/object-detection:tf-1.15.2-imz-2.1.0-${PREPROCESS_NAME}
+          pattern: ${REGISTRY}/intel/object-detection:tf-1.15.2-imz-2.2.0-${PREPROCESS_NAME}
           values:
           - marker: ${REGISTRY}
             ref: '#/definitions/io.k8s.cli.setters.REGISTRY'
