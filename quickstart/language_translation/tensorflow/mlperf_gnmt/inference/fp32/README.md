@@ -1,21 +1,21 @@
 <!--- 0. Title -->
-# Mlperf GNMT FP32 inference
+# MLPerf GNMT FP32 inference
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running Mlperf GNMT FP32 inference using
+This document has instructions for running MLPerf GNMT FP32 inference using
 Intel-optimized TensorFlow.
 
 <!--- 20. Download link -->
 ## Download link
 
-[mlperf_gnmt-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mlperf_gnmt-fp32-inference.tar.gz)
+[mlperf-gnmt-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mlperf-gnmt-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
 
-Download and unzip the Mlperf GNMT model benchmarking data.
+Download and unzip the MLPerf GNMT model benchmarking data.
 
 ```
 wget https://zenodo.org/record/2531868/files/gnmt_inference_data.zip
@@ -23,7 +23,7 @@ unzip gnmt_inference_data.zip
 export DATASET_DIR=$(pwd)/nmt/data
 ```
 
-Set the `DATASET_DIR` to point as instructed above  when running Mlperf GNMT.
+Set the `DATASET_DIR` to point as instructed above  when running MLPerf GNMT.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -57,9 +57,9 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mlperf_gnmt-fp32-inference.tar.gz
-tar -xzf mlperf_gnmt-fp32-inference.tar.gz
-cd mlperf_gnmt-fp32-inference
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mlperf-gnmt-fp32-inference.tar.gz
+tar -xzf mlperf-gnmt-fp32-inference.tar.gz
+cd mlperf-gnmt-fp32-inference
 
 # TensorFlow addons (r0.5) build and installation instructions:
 #   Clone TensorFlow addons (r0.5) and apply a patch: A patch file
@@ -88,7 +88,7 @@ quickstart/<script name>.sh
 ## Docker
 
 The model container includes the scripts and libraries needed to run 
-Mlperf GNMT FP32 inference. To run one of the quickstart scripts 
+MLPerf GNMT FP32 inference. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
 and an output directory.
 
