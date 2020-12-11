@@ -246,7 +246,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: TARGET_ACCURACY
-          value: "0.75"
+          value: "0.74"
           isSet: true
           setBy: model-builder
           required: true
