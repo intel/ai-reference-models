@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[mlperf-gnmt-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mlperf-gnmt-fp32-inference.tar.gz)
+[mlperf-gnmt-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/mlperf-gnmt-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -57,7 +57,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mlperf-gnmt-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/mlperf-gnmt-fp32-inference.tar.gz
 tar -xzf mlperf-gnmt-fp32-inference.tar.gz
 cd mlperf-gnmt-fp32-inference
 
@@ -104,7 +104,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-translation:tf-2.3.0-imz-2.1.0-mlperf-gnmt-fp32-inference \
+  intel/language-translation:tf-2.3.0-imz-2.2.0-mlperf-gnmt-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

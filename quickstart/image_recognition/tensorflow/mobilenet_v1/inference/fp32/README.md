@@ -13,7 +13,7 @@ ImageNet dataset in the TF records format.
 <!--- 20. Download link -->
 ## Download link
 
-[mobilenet-v1-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mobilenet-v1-fp32-inference.tar.gz)
+[mobilenet-v1-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/mobilenet-v1-fp32-inference.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -43,7 +43,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/mobilenet-v1-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/mobilenet-v1-fp32-inference.tar.gz
 tar -xzf mobilenet-v1-fp32-inference.tar.gz
 cd mobilenet-v1-fp32-inference
 
@@ -54,7 +54,7 @@ quickstart/<script name>.sh
 <!-- 60. Docker -->
 ## Docker
 
-The model container `intel/image-recognition:tf-2.3.0-imz-2.1.0-mobilenet-v1-fp32-inference` includes the scripts
+The model container `intel/image-recognition:tf-2.3.0-imz-2.2.0-mobilenet-v1-fp32-inference` includes the scripts
 and libraries needed to run MobileNet V1 FP32 inference. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
@@ -71,7 +71,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.3.0-imz-2.1.0-mobilenet-v1-fp32-inference \
+  intel/image-recognition:tf-2.3.0-imz-2.2.0-mobilenet-v1-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

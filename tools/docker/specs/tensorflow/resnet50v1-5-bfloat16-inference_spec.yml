@@ -28,12 +28,12 @@ slice_sets:
         uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/image-recognition:tf-2.3.0-imz-2.1.0-resnet50v1-5-bfloat16-inference
+        <docker image>: intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet50v1-5-bfloat16-inference
         <mode>: inference
         <model name>: ResNet50 v1.5
         <package dir>: resnet50v1_5-bfloat16-inference
         <package name>: resnet50v1_5-bfloat16-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_1_0/resnet50v1-5-bfloat16-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet50v1-5-bfloat16-inference.tar.gz
         <precision>: BFloat16
         <use case>: image_recognition
       uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16
