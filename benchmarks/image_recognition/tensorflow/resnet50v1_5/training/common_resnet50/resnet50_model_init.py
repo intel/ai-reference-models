@@ -75,9 +75,9 @@ class ResNet50ModelInitializer(BaseModelInitializer):
         #    "/models && " + self.get_command_prefix(args.socket_id) + \
         #    self.python_exe + " " + benchmark_script
 
-        self.benchmark_command = "PYTHONPATH=$PYTHONPATH:" + \
-            os.path.join(self.args.intelai_models, self.args.mode) + \
-            " " + self.get_command_prefix(args.socket_id) + \
+        os.environ["PYTHONPATH"] = "{}:{}".format(os.environ["PYTHONPATH"],
+                                                  os.path.join(self.args.intelai_models, self.args.mode))
+        self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
 
         # Model requires random_seed. Just setting it to a random value.

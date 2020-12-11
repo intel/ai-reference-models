@@ -135,3 +135,20 @@ def test_cpu_info_binding_information_no_numa(subprocess_mock):
         expected_value = json.load(json_data)
 
     assert generated_value == expected_value
+
+
+def test_numa_cpu_core_list(subprocess_mock):
+    """ Test the platform utils to ensure that we are getting the proper core lists """
+    subprocess_mock.side_effect = [platform_config.LSCPU_OUTPUT,
+                                   platform_config.NUMA_CORES_OUTPUT]
+    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    os_mock.return_value = True
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    platform_util = PlatformUtil(MagicMock(verbose=True))
+
+    # ensure there are 2 items in the list since there are 2 sockets
+    assert len(platform_util.cpu_core_list) == 2
+
+    # ensure each list of cores has the length of the number of cores per socket
+    for core_list in platform_util.cpu_core_list:
+        assert len(core_list) == platform_util.num_cores_per_socket
