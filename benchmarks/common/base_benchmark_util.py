@@ -28,7 +28,8 @@ import sys
 from argparse import ArgumentParser
 from common import platform_util
 from common.utils.validators import (check_positive_number, check_valid_filename, check_valid_file_or_dir,
-                                     check_valid_folder, check_positive_number_or_equal_to_negative_one)
+                                     check_valid_folder, check_positive_number_or_equal_to_negative_one,
+                                     check_num_cores_per_instance)
 
 
 class BaseBenchmarkUtil(object):
@@ -89,7 +90,8 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "--mpi_num_processes", type=check_positive_number,
-            help="The number of MPI processes",
+            help="The number of MPI processes. This cannot in conjunction with --numa-cores-per-instance, "
+                 "which uses numactl to run multiple instances.",
             dest="mpi", default=None)
 
         self._common_arg_parser.add_argument(
@@ -101,6 +103,15 @@ class BaseBenchmarkUtil(object):
             "--mpi_hostnames",
             help="Specify MPI hostnames string of the form --mpi_hostnames host1,host2,host3",
             dest="mpi_hostnames", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--numa-cores-per-instance", type=check_num_cores_per_instance,
+            help="If set, the script will run multiple instances using numactl to specify which "
+                 "cores will be used to execute each instance. Set the value of this arg to a "
+                 "positive integer for the number of cores to use per instance or to 'socket' to "
+                 "indicate that all the cores on a socket should be used for each instance. This "
+                 "cannot be used in conjunction with --mpi_num_processes, which uses mpirun.",
+            dest="numa_cores_per_instance", default=None)
 
         self._common_arg_parser.add_argument(
             "-d", "--data-location",
@@ -284,6 +295,28 @@ class BaseBenchmarkUtil(object):
         elif args.output_results and (args.mode != "inference" or not args.data_location):
             raise ValueError("--output-results can only be used when running inference with a dataset.")
 
+        # Verify that the number of numa cores per instances is less than the number of system cores
+        if args.numa_cores_per_instance:
+            # Make sure that --mpi_num_processes hasn't also been set
+            if args.mpi:
+                raise ValueError("--mpi_num_processes cannot be used together with --numa-cores-per-instance.")
+
+            if args.numa_cores_per_instance == "socket":
+                args.numa_cores_per_instance = self._platform_util.num_cores_per_socket
+
+            if args.socket_id != -1:
+                if int(args.numa_cores_per_instance) > self._platform_util.num_cores_per_socket:
+                    raise ValueError("The number of --numa-cores-per-instance ({}) cannot exceed the "
+                                     "number of cores per socket {} when a single socket (--socket-id {}) "
+                                     "is being used.".format(args.numa_cores_per_instance,
+                                                             self._platform_util.num_cores_per_socket,
+                                                             args.socket_id))
+            else:
+                if int(args.numa_cores_per_instance) > system_num_cores:
+                    raise ValueError("The number of --numa-cores-per-instance ({}) cannot exceed the "
+                                     "number of system cores ({}).".format(args.numa_cores_per_instance,
+                                                                           system_num_cores))
+
     def initialize_model(self, args, unknown_args):
         """Create model initializer for the specified model"""
         model_initializer = None
@@ -291,6 +324,9 @@ class BaseBenchmarkUtil(object):
         if args.model_name:  # not empty
             current_path = os.path.dirname(
                 os.path.dirname(os.path.realpath(__file__)))
+
+            if args.numa_cores_per_instance == "socket":
+                args.numa_cores_per_instance = self._platform_util.num_cores_per_socket
 
             # find the path to the model_init.py file
             filename = "{}.py".format(self.MODEL_INITIALIZER)
