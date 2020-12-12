@@ -63,18 +63,27 @@ openAPI:
           isSet: true
           setBy: model-builder
     io.k8s.cli.substitutions.IMAGE:
-      description: image name
       x-k8s-cli:
         substitution:
           name: IMAGE
-          pattern: ${REGISTRY}/intel/language-modeling:tf-2.3.0-imz-2.2.0-${MODEL_NAME}${IMAGE_SUFFIX}
+          pattern: ${REGISTRY}/intel/language-modeling:${IMAGE_VERSION}-${MODEL_NAME}${IMAGE_SUFFIX}
           values:
           - marker: ${REGISTRY}
             ref: '#/definitions/io.k8s.cli.setters.REGISTRY'
+          - marker: ${IMAGE_VERSION}
+            ref: '#/definitions/io.k8s.cli.setters.IMAGE_VERSION'
           - marker: ${MODEL_NAME}
             ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
           - marker: ${IMAGE_SUFFIX}
             ref: '#/definitions/io.k8s.cli.setters.IMAGE_SUFFIX'
+    io.k8s.cli.setters.IMAGE_VERSION:
+      description: image version
+      x-k8s-cli:
+        setter:
+          name: IMAGE_VERSION
+          value: tf-2.3.0-imz-2.2.0
+          isSet: true
+          setBy: model-builder
     io.k8s.cli.substitutions.GROUP_ID_VALUE:
       x-k8s-cli:
         substitution:
@@ -194,3 +203,34 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
+    io.k8s.cli.setters.CHECKPOINT_DIR:
+      description: checkpoint directory
+      x-k8s-cli:
+        setter:
+          name: CHECKPOINT_DIR
+          value: /checkpoints
+          isSet: true
+          required: true
+          setBy: model-builder
+    io.k8s.cli.substitutions.CHECKPOINT_PATH:
+      x-k8s-cli:
+        substitution:
+          name: CHECKPOINT_PATH
+          pattern: ${NFS_PATH}/${USER_NAME}/${MODEL_NAME}/${CHECKPOINT_DIR}
+          values:
+          - marker: ${NFS_PATH}
+            ref: '#/definitions/io.k8s.cli.setters.NFS_PATH'
+          - marker: ${USER_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.USER_NAME'
+          - marker: ${MODEL_NAME}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
+          - marker: ${CHECKPOINT_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.CHECKPOINT_DIR'
+    io.k8s.cli.substitutions.PYTHONPATH:
+      x-k8s-cli:
+        substitution:
+          name: PYTHONPATH
+          pattern: ${MODEL_DIR}/benchmarks:${MODEL_DIR}/models/language_modeling/tensorflow/bert_large/training:$PYTHONPATH
+          values:
+          - marker: ${MODEL_DIR}
+            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
