@@ -23,6 +23,9 @@ spec:
       readOnly: true
     - name: nfs-path
       mountPath: /nfs # {"$openapi":"NFS_PATH"}
+    - name: mlops-scripts
+      mountPath: /workspace/rfcn-fp32-inference/quickstart/fp32_inference.sh # {"$openapi":"COMMAND"}
+      subPath: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
   volumes:
   - name: datasets
     hostPath:
@@ -31,4 +34,11 @@ spec:
     nfs:
       server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
       path: /nfs # {"$openapi":"NFS_PATH"}
+  - name: mlops-scripts
+    configMap:
+      name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
+      defaultMode: 0770
+      items:
+      - key: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
+        path: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
   restartPolicy: OnFailure

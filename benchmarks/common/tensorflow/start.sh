@@ -461,6 +461,20 @@ function add_calibration_arg() {
   echo "${calibration_arg}"
 }
 
+# 3D UNet model
+function 3d_unet() {
+  if [[ ${PRECISION} == "fp32" ]] && [[ ${MODE} == "inference" ]]; then
+    if [[ ${NOINSTALL} != "True" ]]; then
+      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+    fi
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "${PRECISION} ${MODE} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 #BERT model
 function bert() {
    if [ ${PRECISION} == "fp32" ]; then
@@ -725,7 +739,7 @@ function maskrcnn() {
 
 # mobilenet_v1 model
 function mobilenet_v1() {
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
     CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
     $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) \
     $(add_arg "--input_layer" ${input_layer}) $(add_arg "--output_layer" ${output_layer})"
@@ -767,10 +781,24 @@ function mtcc() {
 
 # NCF model
 function ncf() {
-  if [ ${PRECISION} == "fp32" ]; then
-    # For nfc, if dataset location is empty, script downloads dataset at given location.
+  if [[ -n "${clean}" ]]; then
+    CMD="${CMD} --clean"
+  fi
+
+  # NCF supports different datasets including ml-1m and ml-20m.
+  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
+    CMD="${CMD} --dataset=${dataset}"
+  fi
+
+  if [[ -n "${te}" && ${te} != "" ]]; then
+    CMD="${CMD} -te=${te}"
+  fi
+
+  if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
+    # For ncf, if dataset location is empty, script downloads dataset at given location.
     if [ ! -d "${DATASET_LOCATION}" ]; then
-      mkdir -p /dataset
+      mkdir -p ./dataset
+      CMD="${CMD} --data-location=./dataset"
     fi
 
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
@@ -895,7 +923,7 @@ function rfcn() {
 
 # SSD-MobileNet model
 function ssd_mobilenet() {
-  if [ ${PRECISION} == "fp32" ]; then
+  if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
     if [ ${BATCH_SIZE} != "-1" ]; then
       echo "Warning: SSD-MobileNet FP32 inference script does not use the batch_size arg"
     fi
@@ -1287,9 +1315,6 @@ function wide_deep_large_ds() {
       if [ "${kmp_block_time}" != None ] ; then
         CMD="${CMD} --kmp_block_time=${kmp_block_time}"
       fi
-      if [ "${kmp_affinity}" != None ]; then
-        CMD="${CMD} --kmp_affinity=${kmp_affinity}"
-      fi
       if [ "${kmp_settings}" != None ]; then
         CMD="${CMD} --kmp_settings=${kmp_settings}"
       fi
@@ -1306,7 +1331,9 @@ function wide_deep_large_ds() {
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
-if [ ${MODEL_NAME} == "bert" ]; then
+if [ ${MODEL_NAME} == "3d_unet" ]; then
+  3d_unet
+elif [ ${MODEL_NAME} == "bert" ]; then
   bert
 elif [ ${MODEL_NAME} == "dcgan" ]; then
   dcgan

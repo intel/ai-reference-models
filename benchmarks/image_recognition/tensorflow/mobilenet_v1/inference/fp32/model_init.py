@@ -44,8 +44,7 @@ class ModelInitializer(BaseModelInitializer):
         script_name = "accuracy.py" if self.args.accuracy_only \
             else "benchmark.py"
         script_path = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            script_name)
+            self.args.intelai_models, self.args.mode, script_name)
         self.command_prefix = "{} {}".format(self.python_exe, script_path)
 
         if self.args.socket_id != -1:
@@ -61,7 +60,7 @@ class ModelInitializer(BaseModelInitializer):
             script_args_list = [
                 "input_graph", "input_height", "input_width", "batch_size",
                 "input_layer", "output_layer", "num_inter_threads",
-                "num_intra_threads", "warmup_steps", "steps"]
+                "num_intra_threads", "warmup_steps", "steps", "precision"]
             self.command_prefix = self.add_args_to_command(
                 self.command_prefix, script_args_list)
         else:
@@ -69,7 +68,7 @@ class ModelInitializer(BaseModelInitializer):
             script_args_list = [
                 "input_graph", "data_location", "input_height", "input_width",
                 "batch_size", "input_layer", "output_layer",
-                "num_inter_threads", "num_intra_threads"]
+                "num_inter_threads", "num_intra_threads", "precision"]
             self.command_prefix = self.add_args_to_command(
                 self.command_prefix, script_args_list)
 

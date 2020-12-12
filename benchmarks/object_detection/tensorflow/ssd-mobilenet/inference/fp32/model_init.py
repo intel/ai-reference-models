@@ -41,7 +41,7 @@ class ModelInitializer(BaseModelInitializer):
         self.set_kmp_vars(config_file_path)
 
         benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
-                                        self.args.precision, "infer_detections.py")
+                                        "infer_detections.py")
         self.command_prefix = self.get_command_prefix(self.args.socket_id) \
             + "{} {}".format(self.python_exe, benchmark_script)
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)

@@ -23,6 +23,9 @@ spec:
       readOnly: true
     - name: pvc-path
       mountPath: /pvc # {"$openapi":"PVC_PATH"}
+    - name: mlops-scripts
+      mountPath: /workspace/rfcn-fp32-inference/quickstart/fp32_inference.sh # {"$openapi":"COMMAND"}
+      subPath: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
   volumes:
   - name: datasets
     hostPath:
@@ -30,4 +33,11 @@ spec:
   - name: pvc-path
     persistentVolumeClaim:
       claimName: workdisk # {"$openapi":"PVC_NAME"}
+  - name: mlops-scripts
+    configMap:
+      name: mlops-scripts
+      defaultMode: 0770
+      items:
+      - key: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
+        path: fp32_inference.sh # {"$openapi":"MODEL_SCRIPT"}
   restartPolicy: OnFailure
