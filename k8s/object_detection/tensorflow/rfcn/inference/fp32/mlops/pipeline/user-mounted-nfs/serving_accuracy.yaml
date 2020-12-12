@@ -54,7 +54,13 @@ spec:
       volumeMounts:
       - name: nfs-path
         mountPath: /nfs # {"$openapi":"NFS_PATH"}
+      - name: coco-raw-data
+        mountPath: /datasets # {"$openapi":"DATASET_DIR"}
+        readOnly: true
     volumes:
+    - name: coco-raw-data
+      hostPath:
+        path: /datasets # {"$openapi":"DATASET_DIR"}
     - name: nfs-path
       nfs:
         server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
