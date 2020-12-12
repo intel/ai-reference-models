@@ -27,8 +27,8 @@ downloading and preprocessing the COCO validation dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_inference.sh`](mlops/serving/user-mounted-nfs/config-map.yaml#L117) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
-| [`fp32_accuracy.sh`](mlops/pipeline/user-mounted-nfs/config-map.yaml#L117) | Processes the TF records to run inference and check accuracy on the results. |
+| [`fp32_inference.sh`](mlops/serving/user-mounted-nfs/pod.yaml#L16) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`fp32_accuracy.sh`](mlops/pipeline/user-mounted-nfs/serving_accuracy.yaml#L49) | Processes the TF records to run inference and check accuracy on the results. |
 
 These quickstart scripts can be run in the following environment:
 * [Kubernetes](#kubernetes)
@@ -211,9 +211,6 @@ The parameters that can be changed within the pipeline are shown in the table be
 | PVC_NAME          | workdisk                       | pvc name                       |
 | PVC_PATH          | /pvc                           | pvc path                       |
 | OUTPUT_DIR        | output                         | output dir basename            |
-| PREPROCESS_DIR    | /workspace/preprocess-coco-val | container preprocess directory |
-| PREPROCESS_NAME   | preprocess-coco-val            | preprocess image part          |
-| PREPROCESS_SCRIPT | preprocess_coco_val.sh         | preprocess script              |
 | USER_ID           | 0                              | process owner id               |
 | USER_NAME         | root                           | process owner name             |
 
@@ -235,7 +232,7 @@ kustomize cfg set . PVC_NAME <PVC Name> -R
 
 In both use cases, the user should change the values below so the pod is deployed with the user's identity[^3].
 
-[^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issue [2239](https://github.com/argoproj/argo/issues/2239). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
+[^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issues [2239](https://github.com/argoproj/argo/issues/2239),[4186](https://github.com/argoproj/argo/issues/4186). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
 
 ```
 kustomize cfg set . FS_ID <Group ID> -R
@@ -290,6 +287,23 @@ kubectl delete -f object_detection.yaml
 
 See the [Advanced Options for Model Packages and Containers](/quickstart/common/ModelPackagesAdvancedOptions.md)
 document for more advanced use cases.
+
+<!--- 71. TroubleShooting -->
+## TroubleShooting
+
+- Pod doesn't start. Status is ErrImagePull.<br/>
+  Docker recently implemented rate limits.<br/>
+  See this [note](https://thenewstack.io/docker-hub-limits-what-they-are-and-how-to-route-around-them/) about rate limits and work-arounds.
+
+- Argo workflow steps do not execute.<br/>
+  Error from `argo get <workflow>` is 'failed to save outputs: Failed to establish pod watch: timed out waiting for the condition'.<br/>
+  See this argo [issue](https://github.com/argoproj/argo/issues/4186). This is due to the workflow running as non-root.<br/>
+  Devops will need to change the workflow-executor to k8sapi as described [here](https://github.com/argoproj/argo/blob/master/docs/workflow-executors.md).
+
+- MpiOperator can't create workers. Error is '/bin/sh: /etc/hosts: Permission denied'. This is due to a bug in mpi-operator in the 'latest' container image
+  when the workers run as non-root. See this [issue](https://github.com/kubeflow/mpi-operator/issues/288).<br/>
+  Use the container images: mpioperator/mpi-operator:v02.3 and mpioperator/kubectl-delivery:v0.2.3.
+
 
 <!--- 80. License -->
 ## License

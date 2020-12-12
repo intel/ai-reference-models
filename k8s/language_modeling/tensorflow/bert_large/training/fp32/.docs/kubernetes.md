@@ -58,8 +58,6 @@ The distributed training algorithm is handled by [mpirun](https://www.open-mpi.o
 In a terminal, `cd` to the multi-node directory. Each use case under this directory has parameters that can be changed 
 using kustomize's [cfg set](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/set.md)
 
-##### [Mlops](https://en.wikipedia.org/wiki/MLOps)
-
 ###### User mounted nfs and user allocated pvc parameter values
 
 |     NAME   |                 VALUE    |        DESCRIPTION          |
