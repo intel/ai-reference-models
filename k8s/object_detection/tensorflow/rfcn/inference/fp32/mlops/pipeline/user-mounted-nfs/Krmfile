@@ -61,14 +61,24 @@ openAPI:
       x-k8s-cli:
         substitution:
           name: IMAGE
-          pattern: ${REGISTRY}/intel/object-detection:tf-2.3.0-imz-2.2.0-${MODEL_NAME}${IMAGE_SUFFIX}
+          pattern: ${REGISTRY}/intel/object-detection:${IMAGE_VERSION}-${MODEL_NAME}${IMAGE_SUFFIX}
           values:
           - marker: ${REGISTRY}
             ref: '#/definitions/io.k8s.cli.setters.REGISTRY'
+          - marker: ${IMAGE_VERSION}
+            ref: '#/definitions/io.k8s.cli.setters.IMAGE_VERSION'
           - marker: ${MODEL_NAME}
             ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
           - marker: ${IMAGE_SUFFIX}
             ref: '#/definitions/io.k8s.cli.setters.IMAGE_SUFFIX'
+    io.k8s.cli.setters.IMAGE_VERSION:
+      description: image version
+      x-k8s-cli:
+        setter:
+          name: IMAGE_VERSION
+          value: tf-2.3.0-imz-2.2.0
+          isSet: true
+          setBy: model-builder
     io.k8s.cli.setters.IMAGE_SUFFIX:
       description: appended to image name
       x-k8s-cli:
@@ -168,15 +178,25 @@ openAPI:
           name: PREPROCESS_DIR
           value: /workspace/preprocess-coco-val
           setBy: model-builder
+    io.k8s.cli.setters.PREPROCESS_IMAGE_VERSION:
+      description: image version
+      x-k8s-cli:
+        setter:
+          name: PREPROCESS_IMAGE_VERSION
+          value: tf-1.15.2-imz-2.2.0
+          isSet: true
+          setBy: model-builder
     io.k8s.cli.substitutions.PREPROCESS_IMAGE:
       description: image name
       x-k8s-cli:
         substitution:
-          name: IMAGE
-          pattern: ${REGISTRY}/intel/object-detection:tf-1.15.2-imz-2.2.0-${PREPROCESS_NAME}
+          name: PREPROCESS_IMAGE
+          pattern: ${REGISTRY}/intel/object-detection:${PREPROCESS_IMAGE_VERSION}-${PREPROCESS_NAME}
           values:
           - marker: ${REGISTRY}
             ref: '#/definitions/io.k8s.cli.setters.REGISTRY'
+          - marker: ${PREPROCESS_IMAGE_VERSION}
+            ref: '#/definitions/io.k8s.cli.setters.PREPROCESS_IMAGE_VERSION'
           - marker: ${PREPROCESS_NAME}
             ref: '#/definitions/io.k8s.cli.setters.PREPROCESS_NAME'
           - marker: ${IMAGE_SUFFIX}
