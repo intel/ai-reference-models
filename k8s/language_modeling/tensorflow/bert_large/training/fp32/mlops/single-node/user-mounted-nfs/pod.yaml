@@ -8,44 +8,10 @@ spec:
     runAsUser: 0 # {"$openapi":"USER_ID"}
     runAsGroup: 0 # {"$openapi":"GROUP_ID"}
     fsGroup: 0 # {"$openapi":"FS_ID"}
-  initContainers:
-  - name: create-output-dir
-    image: docker.io/intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
-    imagePullPolicy: IfNotPresent
-    workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
-    command:
-    - mkdir
-    args: 
-    - -p
-    - $(OUTPUT_DIR)
-    envFrom:
-    - configMapRef:
-        name: bert-large-fp32-training # {"$openapi":"MODEL_NAME"}
-    volumeMounts:
-    - name: nfs-path
-      mountPath: /nfs # {"$openapi":"NFS_PATH"}
-  - name: create-checkpoint-dir
-    image: docker.io/intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
-    imagePullPolicy: IfNotPresent
-    workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
-    command:
-    - mkdir
-    args: 
-    - -p
-    - $(CHECKPOINT_DIR)
-    envFrom:
-    - configMapRef:
-        name: bert-large-fp32-training # {"$openapi":"MODEL_NAME"}
-    volumeMounts:
-    - name: nfs-path
-      mountPath: /nfs # {"$openapi":"NFS_PATH"}
   containers:
   - name: single-node
     image: docker.io/intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
     workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
-    envFrom:
-    - configMapRef:
-        name: bert-large-fp32-training # {"$openapi":"MODEL_NAME"}
     command:
     - python
     args: # {"$openapi":"COMMAND"}
@@ -76,8 +42,8 @@ spec:
     - name: datasets
       mountPath: /datasets # {"$openapi":"DATASET_DIR"}
       readOnly: true
-    - name: nfs-path
-      mountPath: /nfs # {"$openapi":"NFS_PATH"}
+    - name: pvc-path
+      mountPath: /pvc # {"$openapi":"PVC_PATH"}
   volumes:
   - name: datasets
     hostPath:

@@ -43,9 +43,6 @@ class ModelInitializer(BaseModelInitializer):
         parser.add_argument('--kmp_block_time', dest='kmp_block_time',
                             help='number of kmp block time.',
                             type=str, default=None)
-        parser.add_argument('--kmp_affinity', dest='kmp_affinity',
-                            help='kmp affinity value',
-                            type=str, default=None)
         parser.add_argument('--kmp_settings', dest='kmp_settings',
                             help='kmp settings',
                             type=str, default=None)
@@ -53,7 +50,7 @@ class ModelInitializer(BaseModelInitializer):
                                       namespace=self.args)
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_settings=str(self.args.kmp_settings),
-                          kmp_blocktime=str(self.args.kmp_block_time), kmp_affinity=str(self.args.kmp_affinity))
+                          kmp_blocktime=str(self.args.kmp_block_time))
 
     def run_benchmark(self):
         enable_parallel_batches = getattr(self.args, 'use_parallel_batches')
@@ -66,9 +63,6 @@ class ModelInitializer(BaseModelInitializer):
         else:
             benchmark_script = os.path.join(self.args.intelai_models, self.args.mode, "inference.py")
         command_prefix = self.get_command_prefix(-1)
-        if self.args.socket_id != -1 and self.args.num_cores != -1:
-            command_prefix = command_prefix + " numactl --physcpubind=0-{} --membind={} ".\
-                format(str(int(self.args.num_cores) - 1), self.args.socket_id)
         cmd_prefix = command_prefix + self.python_exe + " " + benchmark_script
         cmd = self.add_args_to_command(cmd_prefix, script_args_list)
         self.run_command(cmd)

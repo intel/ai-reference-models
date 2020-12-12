@@ -37,8 +37,6 @@ slice_sets:
             uri: models/k8s/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/quickstart.md
           - name: Kubernetes
             uri: models/k8s/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/kubernetes.md
-          - name: Trouble Shooting
-            uri: models/k8s/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/troubleshooting.md
           - name: License link
             uri: models/k8s/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/license.md
       runtime:

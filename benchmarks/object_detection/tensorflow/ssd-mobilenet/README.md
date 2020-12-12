@@ -5,6 +5,7 @@ following modes/precisions:
 - [SSD-MobileNet](#ssd-mobilenet)
   - [Int8 Inference Instructions](#int8-inference-instructions)
   - [FP32 Inference Instructions](#fp32-inference-instructions)
+  - [BFloat16 Inference Instructions](#bfloat16-inference-instructions)
 
 Instructions and scripts for model training and inference
 for other precisions are coming later.
@@ -237,3 +238,16 @@ Below is a sample log file tail when testing accuracy:
 Ran inference with batch size -1
 Log location outside container: {--output-dir value}/benchmark_ssd-mobilenet_inference_fp32_20190123_225145.log
 ```
+
+# BFloat16 Inference Instructions
+
+SSD-MobileNet BFloat16 inference depends on Auto-Mixed-Precision to convert graph from FP32 to BFloat16 online.
+Before evaluating SSD-MobileNet BFloat16 inference, please set the following environment variables:
+
+```
+export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD=BiasAdd,Relu6,Mul,AddV2
+export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE=BiasAdd,AddV2,Mul
+export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_CLEARLIST_REMOVE=Relu6
+```
+
+The instructions are the same as FP32 inference instructions above, except one needs to change the `--precision=fp32` to `--precision=bfloat16` in the above commands.

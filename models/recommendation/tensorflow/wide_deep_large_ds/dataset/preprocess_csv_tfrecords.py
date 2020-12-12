@@ -27,7 +27,20 @@ import pandas
 import argparse
 import numpy as np
 import tensorflow as tf
-tf.enable_eager_execution()
+def version_is_less_than(a, b):
+    a_parts = a.split('.')
+    b_parts = b.split('.')
+    
+    for i in range(len(a_parts)):
+        if int(a_parts[i]) < int(b_parts[i]):
+            print('{} < {}, version_is_less_than() returning False'.format(
+              a_parts[i], b_parts[i]))
+            return True
+    return False
+print("TensorFlow version {}".format(tf.__version__))
+required_tf_version = '2.0.0'
+if version_is_less_than(tf.__version__ , required_tf_version):
+    tf.compat.v1.enable_eager_execution()
 parser = argparse.ArgumentParser()
 parser.add_argument('--inputcsv-datafile', type=str,
                     help='full path of data file e.g. eval.csv',
@@ -117,8 +130,7 @@ with open(eval_csv_file, 'r') as f:
     print('max list',max_list)
     print('range list',range_list)
 
-
-with tf.python_io.TFRecordWriter(output_file) as writer:
+with tf.io.TFRecordWriter(output_file) as writer:
     print('*****Processing data******')
     for row in csv:
         no_of_rows = no_of_rows+1
@@ -137,7 +149,7 @@ with tf.python_io.TFRecordWriter(output_file) as writer:
                 new_categorical_list.append("")
             else:
                 new_categorical_list.append(new_categorical_dict[i])
-        hash_values =  tf.string_to_hash_bucket_fast(
+        hash_values =  tf.strings.to_hash_bucket_fast(
             new_categorical_list, 1000).numpy()
         new_numerical_dict = dict(zip(NUMERIC_COLUMNS2, normalized_vals))
         example = tf.train.Example()

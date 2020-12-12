@@ -4,7 +4,6 @@ metadata:
   name: wide-deep-large-ds-fp32-train-serve-wf # {"$openapi":"WORKFLOW_NAME"}
 spec:
   entrypoint: wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_NAME"}
-  serviceAccountName: wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_NAME"}
   arguments:
     parameters:
     - name: DEPLOYMENT_NAME

@@ -51,6 +51,8 @@ class ModelInitializer(BaseModelInitializer):
                                 default='Classifier')
         arg_parser.add_argument("--max-seq-length", type=int, dest="max_seq_length", default=None)
         arg_parser.add_argument("--profile", dest="profile", default=None)
+        arg_parser.add_argument('--experimental-gelu', help=' [Experimental] Use experimental gelu op.',
+                                dest="experimental_gelu", default="False")
         arg_parser.add_argument("--config-file", dest="bert_config_file", default="bert_config.json")
         arg_parser.add_argument("--vocab-file", dest="vocab_file", default="vocab.txt")
         arg_parser.add_argument('--task-name', help=' Task name for classifier', dest="task_name", default='MRPC')
@@ -111,7 +113,8 @@ class ModelInitializer(BaseModelInitializer):
                 " --do_eval=" + str(self.args.do_eval) + eoo + \
                 " --vocab_file=" + str(self.args.vocab_file) + eoo + \
                 " --data_dir=" + str(self.args.data_dir) + eoo + \
-                " --eval_batch_size=" + str(self.args.batch_size)
+                " --eval_batch_size=" + str(self.args.batch_size) + \
+                " --experimental_gelu=" + str(self.args.experimental_gelu)
 
         if self.args.accuracy_only:
             model_args += " --mode=accuracy"

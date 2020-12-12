@@ -143,7 +143,15 @@ flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hoo
                                     "The profile output will be generated in the output_dir")
 
 flags.DEFINE_string("precision", "fp32", "[Optional] TensorFlow training precision.")
+
 flags.DEFINE_string("frozen_graph_path", None, "path of frozen graph.")
+
+flags.DEFINE_bool("experimental_gelu", False,
+    "[Optional] If true, use experimental gelu op in model."
+    "           Be careful this flag will crash model with incompatible TF.")
+
+flags.DEFINE_bool("optimized_softmax", False,
+    "[Optional] If true, use optimized softmax op in model.")
 
 class LoggerHook(tf.estimator.SessionRunHook):
   """ Logs runtime. """
@@ -894,6 +902,8 @@ def main(_):
         "At least one of `do_train`, `do_eval` or `do_predict' must be True.")
 
   bert_config = modeling.BertConfig.from_json_file(FLAGS.bert_config_file)
+  bert_config.experimental_gelu = FLAGS.experimental_gelu
+
   if FLAGS.precision:
     bert_config.precision = FLAGS.precision
 

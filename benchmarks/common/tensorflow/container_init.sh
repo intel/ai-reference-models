@@ -17,5 +17,9 @@
 
 # This file includes runtime installs for model containers
 
-apt-get install numactl -y
-
+if (( $(id -u) == 0 )); then
+  apt-get install numactl -y
+else
+  echo "Please run as root"
+  exit 1
+fi

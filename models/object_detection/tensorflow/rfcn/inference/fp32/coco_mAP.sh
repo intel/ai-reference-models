@@ -31,6 +31,7 @@ fi
 
 export PYTHONPATH=$PYTHONPATH:${TF_MODELS_ROOT}/research:${TF_MODELS_ROOT}/research/slim:${TF_MODELS_ROOT}/research/object_detection
 
+echo "PWD=$PWD"
 echo "SPLIT=${SPLIT}"
 echo "FROZEN_GRAPH=${FROZEN_GRAPH}"
 echo "TF_RECORD_FILES=${TF_RECORD_FILES}"
@@ -49,15 +50,15 @@ mkdir -p ${SPLIT}_eval_metrics
 echo "
 label_map_path: '${TF_MODELS_ROOT}/research/object_detection/data/mscoco_label_map.pbtxt'
 tf_record_input_reader: { input_path: '${SPLIT}_detections.tfrecord' }
-" > ${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt
+" > ${SPLIT}_eval_metrics/$(basename ${SPLIT})_input_config.pbtxt
 
 echo "
 metrics_set: 'coco_detection_metrics'
-" > ${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt
+" > ${SPLIT}_eval_metrics/$(basename ${SPLIT})_eval_config.pbtxt
 
 
 python -m object_detection.metrics.offline_eval_map_corloc \
   --eval_dir=${SPLIT}_eval_metrics \
-  --eval_config_path=${SPLIT}_eval_metrics/${SPLIT}_eval_config.pbtxt \
-  --input_config_path=${SPLIT}_eval_metrics/${SPLIT}_input_config.pbtxt
+  --eval_config_path=${SPLIT}_eval_metrics/$(basename ${SPLIT})_eval_config.pbtxt \
+  --input_config_path=${SPLIT}_eval_metrics/$(basename ${SPLIT})_input_config.pbtxt
 
