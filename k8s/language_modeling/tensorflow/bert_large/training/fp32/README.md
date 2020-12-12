@@ -50,7 +50,7 @@ that directory when running bert fine tuning using the SQuAD data.
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_training_single_node.sh`](mlops/single-node/fp32_training_single_node.sh) | This script is used by the single node Kubernetes job to run bert classifier inference. |
+| [`launch_benchmark.py`](mlops/single-node/user-mounted-nfs/pod.yaml#L18) | This script is used by the single node Kubernetes job to run bert classifier inference. |
 
 These quickstart scripts can be run in the following environment:
 * [Kubernetes](#kubernetes)
@@ -115,8 +115,6 @@ The distributed training algorithm is handled by [mpirun](https://www.open-mpi.o
 
 In a terminal, `cd` to the multi-node directory. Each use case under this directory has parameters that can be changed 
 using kustomize's [cfg set](https://github.com/kubernetes-sigs/kustomize/blob/master/cmd/config/docs/commands/set.md)
-
-##### [Mlops](https://en.wikipedia.org/wiki/MLOps)
 
 ###### User mounted nfs and user allocated pvc parameter values
 
@@ -305,6 +303,23 @@ Removing the pod and related resources is done by running:
 ```
 kubectl delete -f <use-case>.yaml
 ```
+
+<!--- 71. TroubleShooting -->
+## TroubleShooting
+
+- Pod doesn't start. Status is ErrImagePull.<br/>
+  Docker recently implemented rate limits.<br/>
+  See this [note](https://thenewstack.io/docker-hub-limits-what-they-are-and-how-to-route-around-them/) about rate limits and work-arounds.
+
+- Argo workflow steps do not execute.<br/>
+  Error from `argo get <workflow>` is 'failed to save outputs: Failed to establish pod watch: timed out waiting for the condition'.<br/>
+  See this argo [issue](https://github.com/argoproj/argo/issues/4186). This is due to the workflow running as non-root.<br/>
+  Devops will need to change the workflow-executor to k8sapi as described [here](https://github.com/argoproj/argo/blob/master/docs/workflow-executors.md).
+
+- MpiOperator can't create workers. Error is '/bin/sh: /etc/hosts: Permission denied'. This is due to a bug in mpi-operator in the 'latest' container image
+  when the workers run as non-root. See this [issue](https://github.com/kubeflow/mpi-operator/issues/288).<br/>
+  Use the container images: mpioperator/mpi-operator:v02.3 and mpioperator/kubectl-delivery:v0.2.3.
+
 
 <!--- 80. License -->
 ## License

@@ -1,0 +1,70 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
+data:
+  DATASET_DIR: /datasets # {"$openapi":"DATASET_DIR"}
+  FS_ID: "0" # {"$openapi":"FS_ID_VALUE"}
+  GROUP_ID: "0" # {"$openapi":"GROUP_ID_VALUE"}
+  GROUP_NAME: root # {"$openapi":"GROUP_NAME"}
+  OUTPUT_DIR: /nfs/root/rfcn-fp32-inference/output # {"$openapi":"OUTPUT_PATH"}
+  USER_ID: "0" # {"$openapi":"USER_ID_VALUE"}
+  USER_NAME: root # {"$openapi":"USER_NAME"}
+  fp32_inference.sh: |
+    #!/usr/bin/env bash
+    #
+    # Copyright (c) 2020 Intel Corporation
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License");
+    # you may not use this file except in compliance with the License.
+    # You may obtain a copy of the License at
+    #
+    #    http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software
+    # distributed under the License is distributed on an "AS IS" BASIS,
+    # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    # See the License for the specific language governing permissions and
+    # limitations under the License.
+    #
+
+    if [ -z "${OUTPUT_DIR}" ]; then
+      echo "The required environment variable OUTPUT_DIR has not been set"
+      exit 1
+    fi
+
+    # Create the output directory in case it doesn't already exist
+    mkdir -p ${OUTPUT_DIR}
+
+    if [ -z "${DATASET_DIR}" ]; then
+      echo "The required environment variable DATASET_DIR has not been set"
+      exit 1
+    fi
+
+    if [ -z "${TF_MODELS_DIR}" ]; then
+      echo "The required environment variable TF_MODELS_DIR has not been set"
+      exit 1
+    fi
+
+    # Untar the pretrained model
+    pretrained_model_dir="${OUTPUT_DIR}/pretrained_model/rfcn_resnet101_coco_2018_01_28"
+    if [ ! -d "${pretrained_model_dir}" ]; then
+      mkdir -p ${OUTPUT_DIR}/pretrained_model
+      tar -C ${OUTPUT_DIR}/pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+    fi
+    FROZEN_GRAPH="${pretrained_model_dir}/frozen_inference_graph.pb"
+
+    source "$(dirname $0)/common/utils.sh"
+    _command python benchmarks/launch_benchmark.py \
+        --model-name rfcn \
+        --mode inference \
+        --precision fp32 \
+        --framework tensorflow \
+        --model-source-dir ${TF_MODELS_DIR} \
+        --data-location ${DATASET_DIR} \
+        --in-graph ${FROZEN_GRAPH} \
+        --output-dir ${OUTPUT_DIR} \
+        --batch-size 1 \
+        --benchmark-only \
+        $@ \
+        -- number_of_steps=500

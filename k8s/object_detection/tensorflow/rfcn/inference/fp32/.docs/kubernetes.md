@@ -175,9 +175,6 @@ The parameters that can be changed within the pipeline are shown in the table be
 | PVC_NAME          | workdisk                       | pvc name                       |
 | PVC_PATH          | /pvc                           | pvc path                       |
 | OUTPUT_DIR        | output                         | output dir basename            |
-| PREPROCESS_DIR    | /workspace/preprocess-coco-val | container preprocess directory |
-| PREPROCESS_NAME   | preprocess-coco-val            | preprocess image part          |
-| PREPROCESS_SCRIPT | preprocess_coco_val.sh         | preprocess script              |
 | USER_ID           | 0                              | process owner id               |
 | USER_NAME         | root                           | process owner name             |
 
@@ -199,7 +196,7 @@ kustomize cfg set . PVC_NAME <PVC Name> -R
 
 In both use cases, the user should change the values below so the pod is deployed with the user's identity[^3].
 
-[^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issue [2239](https://github.com/argoproj/argo/issues/2239). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
+[^3]: In order for the argo workflow to run as a non root user it must set the WorkflowExecutor to be k8sapi, otherwise the workflow will fail with "Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock". See argo issues [2239](https://github.com/argoproj/argo/issues/2239),[4186](https://github.com/argoproj/argo/issues/4186). Setting argo's WorkflowExecutor to k8sapi is described [here](https://argoproj.github.io/argo/workflow-executors/). This must be performed by devops.
 
 ```
 kustomize cfg set . FS_ID <Group ID> -R

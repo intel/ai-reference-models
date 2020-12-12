@@ -29,9 +29,6 @@ spec:
       - name: coco-raw-data
         mountPath: /datasets # {"$openapi":"DATASET_DIR"}
         readOnly: true
-      - name: mlops-scripts
-        mountPath: /workspace/preprocess-coco-val/scripts/preprocess_coco_val.sh # {"$openapi":"PREPROCESS_COMMAND"}
-        subPath: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
     volumes:
     - name: coco-raw-data
       hostPath:
@@ -40,13 +37,6 @@ spec:
       nfs:
         server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
         path: /nfs # {"$openapi":"NFS_PATH"}
-    - name: mlops-scripts
-      configMap:
-        name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
-        defaultMode: 0770
-        items:
-        - key: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
-          path: preprocess_coco_val.sh # {"$openapi":"PREPROCESS_SCRIPT"}
   - name: rfcn-fp32-accuracy
     securityContext:
       runAsUser: 0 # {"$openapi":"USER_ID"}
@@ -63,18 +53,8 @@ spec:
       volumeMounts:
       - name: nfs-path
         mountPath: /nfs # {"$openapi":"NFS_PATH"}
-      - name: mlops-scripts
-        mountPath: /workspace/rfcn-fp32-inference/quickstart/fp32_accuracy.sh # {"$openapi":"MODEL_COMMAND"}
-        subPath: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
     volumes:
     - name: nfs-path
       nfs:
         server: 0.0.0.0 # {"$openapi":"NFS_SERVER"}
         path: /nfs # {"$openapi":"NFS_PATH"}
-    - name: mlops-scripts
-      configMap:
-        name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
-        defaultMode: 0770
-        items:
-        - key: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
-          path: fp32_accuracy.sh # {"$openapi":"MODEL_SCRIPT"}
