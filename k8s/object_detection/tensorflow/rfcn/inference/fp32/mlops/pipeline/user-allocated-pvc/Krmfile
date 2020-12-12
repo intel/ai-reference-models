@@ -87,14 +87,6 @@ openAPI:
             ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
           - marker: ${MODEL_SCRIPT}
             ref: '#/definitions/io.k8s.cli.setters.MODEL_SCRIPT'
-    io.k8s.cli.substitutions.MODEL_CONFIGMAP_NAME:
-      x-k8s-cli:
-        substitution:
-          name: MODEL_CONFIGMAP_NAME
-          pattern: mlops-scripts-${MODEL_NAME}
-          values:
-          - marker: ${MODEL_NAME}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_NAME'
     io.k8s.cli.setters.MODEL_DIR:
       description: container model directory
       x-k8s-cli:

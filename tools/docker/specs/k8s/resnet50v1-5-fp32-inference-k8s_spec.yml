@@ -37,6 +37,8 @@ slice_sets:
             uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/quickstart.md
           - name: Kubernetes
             uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/kubernetes.md
+          - name: Trouble Shooting
+            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/troubleshooting.md
           - name: License link
             uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/license.md
       runtime:
