@@ -3,8 +3,8 @@ apiVersion: v1
 metadata:
   name: bert-large-fp32-training # {"$openapi":"MODEL_NAME"}
 data:
-  CHECKPOINT_DIR: /nfs/root/bert-large-fp32-training/checkpoints # {"$openapi":"CHECKPOINT_PATH"}
   BERT_BASE_DIR: bert_official/MRPC/uncased_L-12_H-768_A-12 # {"$openapi":"BERT_BASE_DIR"}
+  CHECKPOINT_DIR: /checkpoints # {"$openapi":"CHECKPOINT_DIR"}
   DATASET_DIR: /datasets # {"$openapi":"DATASET_DIR"}
   FS_ID: "0" # {"$openapi":"FS_ID_VALUE"}
   GLUE_DIR: bert_official # {"$openapi":"GLUE_DIR"}
