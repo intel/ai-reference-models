@@ -4,6 +4,7 @@ metadata:
   name: rfcn-fp32-inference-wf # {"$openapi":"WORKFLOW_NAME"}
 spec:
   entrypoint: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
+  serviceAccountName: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
   templates:
   - name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
     steps:
