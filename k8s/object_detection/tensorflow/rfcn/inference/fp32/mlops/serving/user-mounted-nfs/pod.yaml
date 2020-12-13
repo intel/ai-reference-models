@@ -8,12 +8,53 @@ spec:
     runAsUser: 0 # {"$openapi":"USER_ID"}
     runAsGroup: 0 # {"$openapi":"GROUP_ID"}
     fsGroup: 0 # {"$openapi":"FS_ID"}
+  initContainers:
+  - name: extract-pretrained-model
+    image: docker.io/intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-fp32-inference # {"$openapi":"IMAGE"}
+    imagePullPolicy: IfNotPresent
+    workingDir: /workspace/rfcn-fp32-inference # {"$openapi":"MODEL_DIR"}
+    command:
+    - bash
+    - -c
+    args:
+    - mkdir -p $(PRETRAINED_MODEL_DIR);
+      find $(PRETRAINED_MODEL_DIR) -type d -exec chmod 777 {} \;;
+      tar -C $(PRETRAINED_MODEL_DIR) -xvf pretrained_model/rfcn_fp32_model.tar.gz;
+    envFrom:
+    - configMapRef:
+        name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
+    volumeMounts:
+    - name: nfs-path
+      mountPath: /nfs # {"$openapi":"NFS_PATH"}
   containers:
   - name: serving
     image: docker.io/intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-fp32-inference # {"$openapi":"IMAGE"}
     workingDir: /workspace/rfcn-fp32-inference # {"$openapi":"MODEL_DIR"}
-    command: # {"$openapi":"COMMAND"}
-    - /workspace/rfcn-fp32-inference/quickstart/fp32_inference.sh # {"$openapi":"COMMAND"}
+    command:
+    - python
+    args: # {"$openapi":"COMMAND"}
+    - /workspace/rfcn-fp32-inference/benchmarks/launch_benchmark.py # {"$openapi":"COMMAND"}
+    - --model-name
+    - rfcn
+    - --mode
+    - inference
+    - --precision
+    - fp32
+    - --framework
+    - tensorflow
+    - --model-source-dir
+    - /tensorflow/models
+    - --data-location
+    - $(VAL_IMAGE_DIR)
+    - --in-graph
+    - $(FROZEN_GRAPH)
+    - --output-dir
+    - $(OUTPUT_DIR)
+    - --batch-size
+    - "1"
+    - --benchmark-only
+    - --
+    - number_of_steps=500
     envFrom:
     - configMapRef:
         name: rfcn-fp32-inference # {"$openapi":"MODEL_NAME"}
