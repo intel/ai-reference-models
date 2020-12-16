@@ -171,10 +171,10 @@ flags.DEFINE_float(
     "null_score_diff_threshold", 0.0,
     "If null_score - best_non_null is greater than the threshold predict null.")
 
-flags.DEFINE_integer( "inter_op_parallelism_threads", 2,
+flags.DEFINE_integer( "inter_op_parallelism_threads", 1,
                       "Setting inter op for the model")
 
-flags.DEFINE_integer("intra_op_parallelism_threads", 27,
+flags.DEFINE_integer("intra_op_parallelism_threads", 28,
                      "Setting inter op for the model")
 
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
@@ -1354,10 +1354,10 @@ def main(_):
     tf.compat.v1.disable_eager_execution()
     if FLAGS.mode == 'benchmark':
       hooks = [UpdateGlobalStepHook(),
-               StopAtStepHook(30)]
+               StopAtStepHook(15)]
     elif FLAGS.mode == 'profile':
       hooks = [UpdateGlobalStepHook(),
-               StopAtStepHook(30),
+               StopAtStepHook(15),
                ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
     else:
       hooks = []
