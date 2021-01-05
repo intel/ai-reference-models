@@ -92,14 +92,14 @@ if [[ ${NOINSTALL} != "True" ]]; then
     export HOROVOD_WITHOUT_PYTORCH=1
     export HOROVOD_WITHOUT_MXNET=1
     export HOROVOD_WITH_TENSORFLOW=1
+
+    apt-get update
     # In case installing released versions of Horovod fail,and there is
     # a working commit replace next set of commands with something like:
-    # apt-get update
-    # apt-get install -y --no-install-recommends --fix-missing cmake git
-    # pip install git+https://github.com/horovod/horovod.git@bb4e4cf7
-    apt-get update
-    apt-get install -y --no-install-recommends --fix-missing cmake
-    pip install horovod==0.21.0
+    apt-get install -y --no-install-recommends --fix-missing cmake git
+    pip install git+https://github.com/horovod/horovod.git@v0.21.0
+    # apt-get install -y --no-install-recommends --fix-missing cmake
+    # pip install horovod==0.21.0
   fi 
 fi
 
