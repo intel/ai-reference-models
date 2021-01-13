@@ -1354,14 +1354,14 @@ def main(_):
     tf.compat.v1.disable_eager_execution()
     if FLAGS.mode == 'benchmark':
       hooks = [UpdateGlobalStepHook(),
-               StopAtStepHook(15)]
+               StopAtStepHook(40)]
     elif FLAGS.mode == 'profile':
       hooks = [UpdateGlobalStepHook(),
-               StopAtStepHook(15),
+               StopAtStepHook(40),
                ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
     else:
       hooks = []
-    warm_up_steps = 5
+    warm_up_steps = 20
     threshod_examples = warm_up_steps * FLAGS.predict_batch_size
     num_processed_examples = 0
     all_results = []
