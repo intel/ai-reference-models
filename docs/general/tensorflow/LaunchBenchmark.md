@@ -311,9 +311,6 @@ describe how that can be done using the `launch_benchmark.py` script.
 
 ### Prerequisites for running on bare metal
 
-Since the `launch_benchmark.py` is intended to run in an Ubuntu-based
-Docker container, we recommend running on bare metal using Ubuntu 18.04.
-
 Before running a model, you must also install all the dependencies
 that are required to run that model. **(Note: the `--noinstall` 
 flag defaults to 'True' when running on bare metal.)**
@@ -322,11 +319,17 @@ Basic requirements for running all models include:
  * python 3.6
  * [intel-tensorflow](https://github.com/tensorflow/tensorflow/blob/master/README.md#community-supported-builds)
  * python-tk
- * numactl
  * libsm6
  * libxext6
  * requests
 
+Ubuntu 18.04:
+ * numactl
+
+Windows:
+ * [MSYS2](https://www.msys2.org)
+ >Note: All of the system cores on Windows will be used.
+ 
 Individual models may have additional dependencies that need to be
 installed. The easiest way is to find this out find the model's function in
 the [start.sh](/benchmarks/common/tensorflow/start.sh) script and check

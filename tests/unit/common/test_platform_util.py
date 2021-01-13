@@ -77,11 +77,6 @@ def test_platform_util_unsupported_os(platform_mock, subprocess_mock, os_mock):
     with pytest.raises(NotImplementedError) as e:
         PlatformUtil(MagicMock(verbose=True))
     assert "Mac Support not yet implemented" in str(e)
-    # Windows is not supported yet
-    platform_mock.return_value = "Windows"
-    with pytest.raises(NotImplementedError) as e:
-        PlatformUtil(MagicMock(verbose=False))
-    assert "Windows Support not yet implemented" in str(e)
 
 
 def test_cpu_info_binding_information(subprocess_mock):

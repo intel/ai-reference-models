@@ -259,7 +259,44 @@ class PlatformUtil:
                       format(cpu_array_command, e))
 
     def windows_init(self):
-        raise NotImplementedError("Windows Support not yet implemented")
+        NUM_SOCKETS_STR_ = "DeviceID"
+        CORES_PER_SOCKET_STR_ = "NumberOfCores"
+        THREAD_COUNT_STR_ = "ThreadCount"
+        NUM_LOGICAL_CPUS_STR_ = "NumberOfLogicalProcessors"
+        num_threads = 0
+        wmic_cmd = "wmic cpu get DeviceID, NumberOfCores, \
+            NumberOfLogicalProcessors, ThreadCount /format:list"
+        try:
+            wmic_output = subprocess.check_output(wmic_cmd, shell=True)
+
+            # handle python2 vs 3 (bytes vs str type)
+            if isinstance(wmic_output, bytes):
+                wmic_output = wmic_output.decode('utf-8')
+
+            cpu_info = wmic_output.split('\r\r\n')
+
+        except Exception as e:
+            print("Problem getting CPU info: {}".format(e))
+            sys.exit(1)
+
+        # parse it
+        for line in cpu_info:
+            # CORES_PER_SOCKET_STR_ = "NumberOfCores"
+            if line.find(CORES_PER_SOCKET_STR_) == 0:
+                self.num_cores_per_socket = int(line.split("=")[1].strip())
+            # NUM_LOGICAL_CPUS_STR_ = "NumberOfLogicalProcessors"
+            elif line.find(NUM_LOGICAL_CPUS_STR_) == 0:
+                self.num_logical_cpus = int(line.split("=")[1].strip())
+            # THREAD_COUNT_STR_ = "ThreadCount"
+            elif line.find(THREAD_COUNT_STR_) == 0:
+                num_threads = int(line.split("=")[1].strip())
+
+        self.num_cpu_sockets = len(re.findall(
+            r'\b%s\b' % re.escape(NUM_SOCKETS_STR_), wmic_output))
+
+        if self.num_cpu_sockets > 0 and num_threads:
+            self.num_threads_per_core =\
+                int(num_threads / self.num_cpu_sockets)
 
     def mac_init(self):
         raise NotImplementedError("Mac Support not yet implemented")
