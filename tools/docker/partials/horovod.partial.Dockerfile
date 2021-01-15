@@ -1,3 +1,5 @@
+ARG HOROVOD_VERSION=0.21.0
+
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \
     HOROVOD_WITH_TENSORFLOW=1
@@ -13,4 +15,4 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
     cmake
 
-RUN pip install horovod==0.21.0
+RUN pip install horovod==${HOROVOD_VERSION}
