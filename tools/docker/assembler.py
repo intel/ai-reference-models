@@ -42,6 +42,7 @@ import re
 import shutil
 import sys
 import urllib
+import subprocess
 
 from absl import app
 from absl import flags
@@ -89,6 +90,9 @@ flags.DEFINE_boolean(
 
 flags.DEFINE_boolean(
     'construct_dockerfiles', False, 'Do not build Dockerfiles', short_name='d')
+
+flags.DEFINE_boolean(
+    'generate_deployments', False, 'Do not generate deployments')
 
 flags.DEFINE_boolean(
     'generate_documentation', False, 'Do not create README.md', short_name='e')
@@ -156,6 +160,13 @@ flags.DEFINE_string(
     ' Existing files in this directory will be deleted when new Dockerfiles'
     ' are made.',
     short_name='o')
+
+flags.DEFINE_string(
+    'deployment_dir',
+    'models/deployments', 'Path to directory for k8 deployments.'
+    ' Will be created if it doesn\'t exist.'
+    ' Existing files under this directory will be deleted when new deployments'
+    ' are created.')
 
 flags.DEFINE_string(
     'partial_dir',
@@ -565,6 +576,11 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             slices, 'dockerfile_subdirectory')
         dockerfile_contents = merge_partials(spec['header'], used_partials,
                                              all_partials)
+        runtime = {}
+        if 'runtime' in slices[len(slices)-1]:
+            runtime = slices[len(slices)-1]['runtime']
+            env_list = gather_slice_list_items([runtime], 'env')
+            runtime.update({ 'env': env_list })
 
         tag_data[tag_name].append({
             'release': name,
@@ -581,6 +597,7 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             'downloads': downloads_list,
             'documentation': documentation,
             'dockerfile_tag_name': dockerfile_tag_name,
+            'runtime': runtime,
         })
 
   return tag_data
@@ -715,6 +732,93 @@ def get_download(source, destination):
     urllib.request.urlretrieve(source, destination)
     eprint("Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
 
+def run(cmd):
+    proc = subprocess.Popen(cmd,
+        stdout = subprocess.PIPE,
+        stderr = subprocess.PIPE,
+    )
+    stdout, stderr = proc.communicate()
+    return proc.returncode, stdout, stderr
+
+def cfg_set_namespace(package, dir, tag_def):
+  for env in tag_def['runtime']['env']:
+    if not 'name' in env:
+      eprint("name missing in env values for {}".format(package))
+      continue
+    if not 'value' in env:
+      eprint("value missing in env values for {}".format(package))
+      continue
+    if env['name'] == 'NAME_SPACE':
+      cmd = ["kustomize", "edit", "set", 'namespace',  env['value']]
+      cwd = os.getcwd()
+      os.chdir(dir)
+      returncode, out, err = run(cmd)
+      if returncode != 0:
+        eprint("returncode:{}\nstdout:{}\nstderr:{}".format(returncode, out, err), verbose=FLAGS.verbose)
+      os.chdir(cwd)
+
+def cfg_set_values(dir, tag_def):
+  if not 'runtime' in tag_def:
+    sys.exit("No runtime section with the specification file")
+  runtime = tag_def['runtime']
+  if not 'env' in runtime:
+    sys.exit("No runtime.env section with the specification file")
+  for env in runtime['env']:
+    if 'name' in env and 'value' in env:
+      eprint("name:{} value:{}".format(env['name'], env['value']), verbose=FLAGS.verbose)
+      name = env['name']
+      value = env['value']
+      if name != 'NAME_SPACE':
+        cmd = ["kustomize", "cfg", "set", dir, name, value, "--set-by", "model-builder", "-R"]
+        returncode, out, err = run(cmd)
+        if returncode != 0:
+          eprint("returncode:{}\nstdout:{}\nstderr:{}".format(returncode, out, err), verbose=FLAGS.verbose)
+
+def write_deployment(tag_def):
+  output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
+  if not os.path.isdir(output_dir):
+    sys.exit("You must create the k8s package prior to calling generate-deployment")
+  package = get_package_name(tag_def)
+  if not package:
+    sys.exit("Unable to generate deployment, because the spec doesn't have a package name")
+  deployments_top_dir = os.path.join(os.getcwd(), FLAGS.deployment_dir, package)
+  if package != None:
+    tar_file = os.path.join(FLAGS.output_dir, "{}.tar.gz".format(package))
+    try:
+      temp_dir = tempfile.mkdtemp()
+      extract_tar(tar_file, temp_dir)
+      mlops_dir = os.path.join(temp_dir, package, 'quickstart/mlops')
+      cfg_set_values(mlops_dir, tag_def)
+      _, out, _ = run(["find", mlops_dir, "-name", "kustomization.yaml"])
+      kustomization_dirs  = out.splitlines()
+      for kustomization_dir in kustomization_dirs:
+        dir = os.path.dirname(kustomization_dir).decode("utf-8")
+        eprint("dir:{}".format(dir), verbose=FLAGS.verbose)
+        m = re.search('^.*mlops\/(.*)$', dir)
+        subdir = m.group(1)
+        subdir_dirs = subdir.split('/')
+        subdir_dirs_root = subdir.split('/')[0]
+        if len(subdir_dirs) == 1:
+          subdir_dirs_leaf = subdir_dirs_root
+        else:
+          subdir_dirs_leaf = subdir.split('/')[1]
+        deployment_dir = os.path.join(deployments_top_dir, subdir_dirs_root)
+        deployment_file = os.path.join(deployment_dir, subdir_dirs_leaf+".yaml")
+        if not os.path.isdir(deployment_dir):
+          mkdir_p(deployment_dir)
+        deployment_output = os.path.join(deployment_dir, deployment_file)
+        cfg_set_namespace(package, dir, tag_def)
+        returncode, out, err = run(["kustomize", "build", dir])
+        eprint("Creating deployment file: {}".format(deployment_output[len(os.getcwd()+"/models/"):]))
+        with open(deployment_output, "w") as file:
+          file.write(out.decode("utf-8"))
+    except Exception as e:
+      eprint("Error when generating deployment from k8s package: {}".format(tar_file), verbose=FLAGS.verbose)
+      raise e
+    finally:
+      eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
+      shutil.rmtree(temp_dir)
+
 def write_package(package_def, succeeded_packages, failed_packages):
   output_dir = os.path.join(os.getcwd(), FLAGS.output_dir)
   if not os.path.isdir(output_dir):
@@ -755,33 +859,50 @@ def write_package(package_def, succeeded_packages, failed_packages):
       eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
       shutil.rmtree(temp_dir)
 
-def read_spec_files(spec_dir, tag_spec):
+def extract_tar(tar_file, temp_dir):
+    """ Extract tar.gz """
+    if tarfile.is_tarfile(tar_file):
+      try:
+        with tarfile.open(tar_file, "r:gz") as tar:
+          tar.extractall(temp_dir)
+      except Exception as e:
+        eprint("Error when extracting package: {}".format(tar_file))
+        raise e
+
+def read_spec_file(spec_dir, spec_file, tag_spec, replace=False):
+    with open(os.path.join(spec_dir, spec_file), 'r') as spec_file:
+        try:
+            spec_contents = yaml.safe_load(spec_file)
+            update_spec(tag_spec, spec_contents, replace)
+        except Exception as e:
+            eprint("exception in {}: {}".format(spec_file, e))
+            raise e
+
+def read_spec_files(spec_dir, tag_spec, replace=False):
     """ Recursively read the spec files into one dict, used for everything """
     for spec_file in os.listdir(spec_dir):
         if os.path.isdir(os.path.join(spec_dir, spec_file)):
-            tag_spec = read_spec_files(os.path.join(spec_dir, spec_file), tag_spec)
+            tag_spec = read_spec_files(os.path.join(spec_dir, spec_file), tag_spec, replace)
         else:
-            with open(os.path.join(spec_dir, spec_file), 'r') as spec_file:
-                try:
-                    spec_contents = yaml.safe_load(spec_file)
-                    update_spec(tag_spec, spec_contents)
-                except Exception as e:
-                    eprint("exception in {}: {}".format(spec_file, e))
-                    raise e
+            read_spec_file(spec_dir, spec_file, tag_spec, replace)
     return tag_spec
 
-def update_spec(a, b):
+def update_spec(a, b, replace=False):
     """Merge two dictionary specs into one, recursing through any embedded dicts."""
     for k, v in b.items():
         if isinstance(v, dict):
-            a[k] = update_spec(a.get(k, {}), v)
+            a[k] = update_spec(a.get(k, {}), v, replace)
         elif isinstance(v, list) and k in a:
             if len(v) > 0 and isinstance(v[0], dict):
-                # If a list of dicts is detected for an existing key, reject it
-                # This is a duplicate slice set
-                eprint('Duplicate slice set found for {}'.format(k))
-                exit(1)
-            a[k] = list(set(a[k]).union(v))
+                if replace is True:
+                    a[k] = v
+                else:
+                    # If a list of dicts is detected for an existing key, reject it
+                    # This is a duplicate slice set
+                    eprint('Duplicate slice set found for {}'.format(k))
+                    exit(1)
+            else:
+                a[k] = list(set(a[k]).union(v))
         elif k in a and a[k] != v:
             # If a string value for an existing key is being overwritten with
             # a different value, the specs are ambiguous
@@ -1193,6 +1314,29 @@ def auto_generate_model_spec(spec_name):
                os.path.join('quickstart', zoo_use_case, framework, zoo_model_name,
                             mode, precision, ".docs")))
 
+def get_tag_spec(spec_dir, partials):
+  """ Reads in a spec files under spec_dir """
+  # Read the spec files into one dict, used for everything
+  tag_spec = read_spec_files(spec_dir, {})
+  spec_home = None
+  if 'MODEL_BUILDER_SPEC_HOME' in os.environ:
+      spec_home = os.environ['MODEL_BUILDER_SPEC_HOME']
+  elif 'HOME' in os.environ:
+      spec_home = os.path.join(os.environ['HOME'], ".config", "model-builder", "specs")
+  if spec_home != None and os.path.isdir(spec_home):
+    tag_spec = read_spec_files(spec_home, tag_spec, True)
+
+  # Abort if spec yaml is invalid
+  schema = yaml.safe_load(SCHEMA_TEXT)
+  v = TfDockerTagValidator(schema, partials=partials)
+  if not v.validate(tag_spec):
+    eprint('> Error: Combined spec is invalid! The errors are:')
+    eprint(yaml.dump(v.errors, indent=2))
+    exit(1)
+  tag_spec = v.normalized(tag_spec)
+  return tag_spec
+
+
 def main(argv):
   if len(argv) > 1:
     raise app.UsageError('Too many command-line arguments.')
@@ -1204,20 +1348,11 @@ def main(argv):
     # we can't build dockerfiles/images in the same run as creating the spec
     sys.exit(0)
 
-  # Read the spec files into one dict, used for everything
-  tag_spec = read_spec_files(FLAGS.spec_dir, {})
-
   # Get existing partial contents
   partials = gather_existing_partials(FLAGS.partial_dir)
 
-  # Abort if spec yaml is invalid
-  schema = yaml.safe_load(SCHEMA_TEXT)
-  v = TfDockerTagValidator(schema, partials=partials)
-  if not v.validate(tag_spec):
-    eprint('> Error: Combined spec is invalid! The errors are:')
-    eprint(yaml.dump(v.errors, indent=2))
-    exit(1)
-  tag_spec = v.normalized(tag_spec)
+  # read in all spec files 
+  tag_spec = get_tag_spec(FLAGS.spec_dir, partials)
 
   # characters for underlining headers
   underlined = '\033[4m'
@@ -1332,6 +1467,10 @@ def main(argv):
               succeeded_dockerfiles.append(os.path.relpath(path, FLAGS.dockerfile_dir))
           else:
               failed_dockerfiles.append(os.path.relpath(path, FLAGS.dockerfile_dir))
+
+      if FLAGS.generate_deployments:
+        eprint('> Generating deployment for {}'.format(tag), verbose=FLAGS.verbose)
+        write_deployment(tag_def)
 
       if FLAGS.generate_documentation:
         documentation = tag_def['documentation']
