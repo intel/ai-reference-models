@@ -243,7 +243,7 @@ def test_launch_benchmark_validate_model(launch_benchmark, mock_popen, platform_
     """
     Verifies that a valid model name passes validation and starts a docker container.
     """
-    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    platform_mock.return_value = platform_config.OS_TYPE
     launch_benchmark.main()
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
@@ -253,7 +253,7 @@ def test_launch_benchmark_validate_model(launch_benchmark, mock_popen, platform_
 
 def test_bare_metal(launch_benchmark, mock_popen, platform_mock):
     """ Tests the bare metal launch script function """
-    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    platform_mock.return_value = platform_config.OS_TYPE
     test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
     launch_benchmark.run_bare_metal("/foo", "/bar", "/baz", test_env_vars)
     assert mock_popen.called
@@ -321,7 +321,7 @@ def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen, platform_m
     """
     custom_volumes = ["~:/foo1", "~:/foo2"]
     launch_benchmark.args.custom_volumes = custom_volumes
-    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    platform_mock.return_value = platform_config.OS_TYPE
     launch_benchmark.main()
     assert mock_popen.called
     args, _ = mock_popen.call_args
@@ -336,7 +336,7 @@ def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen, platform_m
 def test_disable_tcmalloc(launch_benchmark, mock_popen,
                           platform_mock, precision, expected_disable_tcmalloc):
     launch_benchmark.args.precision = precision
-    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    platform_mock.return_value = platform_config.OS_TYPE
     launch_benchmark.main()
     assert mock_popen.called
     args, _ = mock_popen.call_args
