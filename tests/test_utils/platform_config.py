@@ -18,7 +18,11 @@
 
 #
 
+import platform as system_platform
+
+
 # Constants used for test mocks
+OS_TYPE = system_platform.system()
 SYSTEM_TYPE = "Linux"
 LSCPU_OUTPUT = ("Architecture:          x86_64\n"
                 "CPU(s):                112\n"
@@ -29,11 +33,21 @@ LSCPU_OUTPUT = ("Architecture:          x86_64\n"
 NUMA_CORES_OUTPUT = ['0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27',
                      '28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55']
 
+WMIC_OUTPUT = ("DeviceID=CPU0\r\r\n"
+               "NumberOfCores=28\r\r\n"
+               "NumberOfLogicalProcessors=56\r\r\n"
+               "ThreadCount=56\r\r\n"
+
+
+               "DeviceID=CPU1\r\r\n"
+               "NumberOfCores=28\r\r\n"
+               "NumberOfLogicalProcessors=56\r\r\n"
+               "ThreadCount=56\r\r\n")
+
 
 def set_mock_system_type(mock_platform):
     """
-    Sets the system type return value to Linux, which is currently the only
-    supported system type.
+    Sets the system type return value to Linux.
     """
     mock_platform.system.return_value = SYSTEM_TYPE
 
@@ -50,3 +64,10 @@ def set_mock_lscpu_subprocess_values(mock_subprocess):
     Sets mock return value for the lscpu output with platform info
     """
     mock_subprocess.check_output.return_value = LSCPU_OUTPUT
+
+
+def set_mock_wmic_subprocess_values(mock_subprocess):
+    """
+    Sets mock return value for the wmic output with platform info on Windows
+    """
+    mock_subprocess.check_output.return_value = WMIC_OUTPUT
