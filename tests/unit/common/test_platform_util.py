@@ -44,6 +44,11 @@ def subprocess_mock(patch):
 
 
 @pytest.fixture
+def subprocess_popen_mock(patch):
+    return patch("subprocess.Popen")
+
+
+@pytest.fixture
 def platform_mock(patch):
     return patch("system_platform.system")
 
@@ -132,10 +137,10 @@ def test_cpu_info_binding_information_no_numa(subprocess_mock):
     assert generated_value == expected_value
 
 
-def test_numa_cpu_core_list(subprocess_mock):
+def test_numa_cpu_core_list(subprocess_mock, subprocess_popen_mock, platform_mock, os_mock):
     """ Test the platform utils to ensure that we are getting the proper core lists """
-    subprocess_mock.side_effect = [platform_config.LSCPU_OUTPUT,
-                                   platform_config.NUMA_CORES_OUTPUT]
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    subprocess_popen_mock.return_value.stdout.readlines.return_value = platform_config.NUMA_CORES_OUTPUT
     platform_mock.return_value = platform_config.SYSTEM_TYPE
     os_mock.return_value = True
     subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
@@ -147,3 +152,20 @@ def test_numa_cpu_core_list(subprocess_mock):
     # ensure each list of cores has the length of the number of cores per socket
     for core_list in platform_util.cpu_core_list:
         assert len(core_list) == platform_util.num_cores_per_socket
+
+
+def test_platform_util_wmic_parsing(platform_mock, subprocess_mock, os_mock):
+    """
+    Verifies that platform_utils gives us the proper values that we expect
+    based on the wmic_output string provided.
+    """
+    platform_mock.return_value = "Windows"
+    os_mock.return_value = True
+    subprocess_mock.return_value = platform_config.WMIC_OUTPUT
+    platform_util = PlatformUtil(MagicMock(verbose=True))
+    platform_util.windows_init()
+    assert platform_util.num_cpu_sockets == 2
+    assert platform_util.num_cores_per_socket == 28
+    assert platform_util.num_threads_per_core == 28
+    assert platform_util.num_logical_cpus == 56
+    assert platform_util.num_numa_nodes == 0

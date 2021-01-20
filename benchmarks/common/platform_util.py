@@ -255,7 +255,7 @@ class PlatformUtil:
                     node_cpus = str(node_cpus).lstrip("b'").replace("\\n'", " ")
                     self.cpu_core_list.append([x for x in node_cpus.split(" ") if x != ''])
             except Exception as e:
-                print("Warning: An error occured when getting the list of cores using '':\n {}".
+                print("Warning: An error occured when getting the list of cores using '{}':\n {}".
                       format(cpu_array_command, e))
 
     def windows_init(self):

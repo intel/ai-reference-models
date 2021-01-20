@@ -23,6 +23,7 @@ from argparse import ArgumentTypeError
 
 import pytest
 from mock import MagicMock
+from test_utils import platform_config
 
 from common.utils.validators import (check_for_link, check_no_spaces, check_positive_number,
                                      check_positive_number_or_equal_to_negative_one, check_valid_filename,
@@ -175,6 +176,8 @@ def test_bad_volume_mount_strings(volume_mount_str):
         check_volume_mount(volume_mount_str)
 
 
+@pytest.mark.skipif(platform_config.OS_TYPE == "Windows",
+                    reason="Windows supports baremetal only")
 def test_valid_volume_mount():
     # create temp directory
     temp_dir = tempfile.mkdtemp()
