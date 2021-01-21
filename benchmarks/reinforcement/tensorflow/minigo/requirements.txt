@@ -16,3 +16,5 @@ setuptools>=34.0.0
 oauth2client==4.1
 
 horovod==0.15.1
+
+rsa>=4.7 # not directly required, pinned by Snyk to avoid a vulnerability
