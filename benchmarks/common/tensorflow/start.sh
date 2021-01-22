@@ -1252,7 +1252,7 @@ function bert_base() {
 # BERT Large model
 function bert_large() {
     # Change if to support fp32
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       bert_options
       CMD=${CMD} run_model
