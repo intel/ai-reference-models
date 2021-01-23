@@ -34,6 +34,7 @@ RUN apt-get update && \
         ca-certificates \
         coreutils \
         iproute2 \
+        libc6 \
         openjdk-8-jdk-headless \
         procps \
         sudo \
