@@ -77,7 +77,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
   apt-get install -y libsm6 libxext6
-  pip install --upgrade pip
+  pip install --upgrade pip==20.3.4
   pip install requests
 
   # install google-perftools for tcmalloc
