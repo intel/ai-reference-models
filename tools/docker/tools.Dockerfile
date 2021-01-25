@@ -48,7 +48,7 @@ RUN apt-get update && \
     python-dev
 
 RUN curl -sSL https://get.docker.com/ | sh
-RUN pip3 install --upgrade pip && \
+RUN pip3 install --upgrade pip==20.3.4 && \
     pip3 install \
          absl-py \
          cerberus \
