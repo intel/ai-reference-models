@@ -40,6 +40,11 @@ These quickstart scripts can be run in different environments:
 <!--- 50. Bare Metal -->
 ### Bare Metal
 
+To run on bare metal, the following prerequisites must be installed in your environment:
+* Python 3
+* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* numactl
+
 1. Download and untar the Wide & Deep FP32 inference model package:
 
     ```
