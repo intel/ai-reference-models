@@ -75,3 +75,17 @@ slice_sets:
             value: "0"
           - name: USER_NAME
             value: root
+        tolerations:
+          - name: TOLERATION_KEY
+            value: dedicated
+          - name: TOLERATION_VALUE
+            value: CPUPinning
+        resources:
+          - name: RESOURCE_LIMITS_MEMORY
+            value: "5G"
+          - name: RESOURCE_LIMITS_CPU
+            value: "10"
+          - name: RESOURCE_REQUESTS_MEMORY
+            value: "5G"
+          - name: RESOURCE_REQUESTS_CPU
+            value: "10"
