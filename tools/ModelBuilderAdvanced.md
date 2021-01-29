@@ -186,7 +186,9 @@ For single targets such as `bert-large-fp32-training` the model-builder adds an 
 
 ### Generating k8 deployments
 
-The model-builder's generate-deployment subcommand will generate kubernetes deployments for that model using the model's k8 package. The subcommand will use env values from the model specification's runtime.env yaml array. The subcommand will look for runtime.env replacements under `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs/k8s`. The first time `model-builder generate-deployment` is run, it will copy ./tools/docker/specs to `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs`. The user can then edit the k8 specification files to provide env values specific to their k8 deployment. For example the user would replace USER_ID with their [id](https://man7.org/linux/man-pages/man1/id.1.html). The subcommand algorithm is as follows:
+The model-builder's generate-deployment subcommand will generate kubernetes deployments for that model using the model's k8 package. The subcommand will use env values from the model specification's runtime.env yaml array. The subcommand will look for runtime.env replacements under `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs/k8s`[^Ψ]. The first time `model-builder generate-deployment` is run, it will copy ./tools/docker/specs to `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs`. The user can then edit the k8 specification files to provide env values specific to their k8 deployment. For example the user would replace USER_ID with their [id](https://man7.org/linux/man-pages/man1/id.1.html). The subcommand algorithm is as follows:
+
+[^Ψ]: If $HOME is a nfs mount point then you should chose an alternate directory eg: `XDG_CONFIG_HOME=/tmp/$USER/config model-builder generate-deployment ...`.
 
 1. Read in all specification files under tools/docker/specs.
 2. Copy tools/docker/specs to `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs` if the directory does not exist.
