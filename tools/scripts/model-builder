@@ -223,7 +223,7 @@ _model_builder._sort_unique()
 #
 _model_builder._init()
 {
-  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home=${XDG_CONFIG_HOME:-$HOME/.config}
+  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home
   _xdg_config_home=${XDG_CONFIG_HOME:-$HOME/.config}
   declare -g _spec_home=${_xdg_config_home}/$(basename $0)/specs
 
@@ -261,7 +261,7 @@ _model_builder._init()
     exit 1
   fi
   if [[ ! -d $_spec_home ]]; then
-    mkdir -p $(dirname $_spec_home) && cp -r $_spec_folder $_spec_home
+    mkdir -p $_spec_home && cp -r $_spec_folder/k8s $_spec_home && rm -f $_spec_home/k8s/base_spec.yml
     if (( $? != 0 )); then
       echo "Unable to create ${_spec_home}." >&2
       exit 1
@@ -1040,7 +1040,7 @@ _model_builder.generate_deployment()
   _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
   
   # Note: Run as user so that the generated deployment(s) have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) -e MODEL_BUILDER_SPEC_HOME=/specs $(_model_builder._get-proxy-env-vars) -v ${_spec_home}:/specs -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) -e MODEL_BUILDER_SPEC_HOME=/specs $(_model_builder._get-proxy-env-vars) -v ${_spec_home}:/specs -v $(pwd):/tf -w /tf $_model_dir_mount imz-tf-tools python3 assembler.py "
 
   for _release_group in "${_release_groups[@]}"
   do
