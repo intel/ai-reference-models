@@ -30,7 +30,7 @@ converting the coco dataset to the TF records format.
 [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
-4. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+4. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
    Be sure to export the $DATASET_DIR and $OUTPUT_DIR environment variables. Then, rename the tf_records file and copy the annotations file:
 
 ```
@@ -175,7 +175,7 @@ converting the coco dataset to the TF records format.
 [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
-4. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+4. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
    Be sure to export the $OUTPUT_DIR environment variable. Then, rename the tf_records file:
 
 ```
