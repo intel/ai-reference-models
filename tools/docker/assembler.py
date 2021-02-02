@@ -330,6 +330,24 @@ slice_sets:
                     type: string
                   value:
                     type: string
+            resources:
+              type: list
+              schema:
+                type: dict
+                schema:
+                  name:
+                    type: string
+                  value:
+                    type: string
+            tolerations:
+              type: list
+              schema:
+                type: dict
+                schema:
+                  name:
+                    type: string
+                  value:
+                    type: string
 
 releases:
   type: dict
