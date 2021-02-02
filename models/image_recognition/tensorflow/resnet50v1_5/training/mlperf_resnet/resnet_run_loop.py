@@ -27,6 +27,8 @@ import argparse
 import os
 
 import tensorflow as tf  # pylint: disable=g-bad-import-order
+from tensorflow.core.protobuf import rewriter_config_pb2
+
 
 from mlperf_compliance import mlperf_log
 from mlperf_compliance import tf_mlperf_log
@@ -483,6 +485,9 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
       inter_op_parallelism_threads=flags.inter_op_parallelism_threads,
       intra_op_parallelism_threads=flags.intra_op_parallelism_threads,
       allow_soft_placement=True)
+  session_config.graph_options.rewrite_options.remapping = (
+          rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+
 
   if flags.num_gpus == 0:
     distribution = tf.distribute.OneDeviceStrategy('device:CPU:0')
