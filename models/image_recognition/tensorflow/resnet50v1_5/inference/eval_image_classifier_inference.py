@@ -24,6 +24,7 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
 from tensorflow.python.framework import dtypes
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 import datasets
 import numpy as np
@@ -124,6 +125,9 @@ class eval_classifier_optimized_graph:
     infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
     infer_config.use_per_session_threads = 1
+    infer_config.graph_options.rewrite_options.remapping = (
+                  rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+
 
     data_graph = tf.Graph()
     with data_graph.as_default():
@@ -247,7 +251,7 @@ class eval_classifier_optimized_graph:
           accuracy5 = tf.reduce_sum(
             input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
                                    targets=tf.constant(np_labels), k=5), tf.float32))
-          with tf.compat.v1.Session() as accu_sess:
+          with tf.compat.v1.Session(config=infer_config) as accu_sess:
             np_accuracy1, np_accuracy5 = accu_sess.run([accuracy1, accuracy5])
 
           total_accuracy1 += np_accuracy1
