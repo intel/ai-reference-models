@@ -232,6 +232,8 @@ _model_builder._init()
   declare -g -r MODEL_DIR=${MODEL_DIR-$PWD}
   # Tag to use for the 'versioned' images
   declare -g -r TENSORFLOW_TAG=${TENSORFLOW_TAG:=2.3.0-ubuntu-20.04}
+  # Image name to use for the 'versioned' images
+  declare -g -r TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE:=intel/intel-optimized-tensorflow}
   # Local container repo used for building images
   declare -g -r LOCAL_REPO=${LOCAL_REPO-model-zoo}
   declare -g -r TAG_PREFIX=${TENSORFLOW_TAG}
@@ -866,7 +868,7 @@ _model_builder.build()
     _tmp_files+=($temp_output_file)
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -978,7 +980,7 @@ _model_builder.package()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1046,7 +1048,7 @@ _model_builder.generate_deployment()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1114,7 +1116,7 @@ _model_builder.generate_dockerfile()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1188,7 +1190,7 @@ _model_builder.generate_documentation()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1271,7 +1273,7 @@ _model_builder.images()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1745,7 +1747,7 @@ _model_builder.run_test_suite()
     do
       case "$_release_group" in
         versioned)
-          _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+          _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
           ;;
         tf_1.15.2_containers)
           _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
