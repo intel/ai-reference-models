@@ -69,6 +69,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/fp32
     partials:
+    - tcmalloc
     - model_package
     - recommendation/pandas_install
     - entrypoint
