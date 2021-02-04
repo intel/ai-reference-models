@@ -320,10 +320,15 @@ class BaseModelInitializer(object):
             self.args.num_intra_threads = num_intra_threads
 
         if self.args.numa_cores_per_instance:
-            self.args.num_inter_threads = 1
-            self.args.num_intra_threads = self.args.numa_cores_per_instance
-            self.args.data_num_inter_threads = 1
-            self.args.data_num_intra_threads = self.args.numa_cores_per_instance
+            # Set default num inter/intra threads if the user didn't provide specific values
+            if not self.args.num_inter_threads:
+                self.args.num_inter_threads = 1
+            if not self.args.num_intra_threads:
+                self.args.num_intra_threads = self.args.numa_cores_per_instance
+            if not self.args.data_num_inter_threads:
+                self.args.data_num_inter_threads = 1
+            if not self.args.data_num_intra_threads:
+                self.args.data_num_intra_threads = self.args.numa_cores_per_instance
         elif self.args.socket_id != -1:
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = 1
