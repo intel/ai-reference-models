@@ -74,15 +74,17 @@ example_req_args = ["--model-name", test_model_name,
                     "--docker-image", test_docker_image]
 
 
+@patch("benchmarks.common.base_model_init.open")
 @patch("common.platform_util.os")
 @patch("common.platform_util.system_platform")
 @patch("common.platform_util.subprocess")
 @patch("os.system")
 def test_base_model_initializer(
-        mock_system, mock_subprocess, mock_platform, mock_os):
+        mock_system, mock_subprocess, mock_platform, mock_os, mock_open):
     # Setup base model init with test settings
     platform_util = MagicMock()
-    args = MagicMock(verbose=True, model_name=test_model_name)
+    args = MagicMock(verbose=True, model_name=test_model_name, batch_size=100,
+                     numa_cores_per_instance=None)
     os.environ["PYTHON_EXE"] = "python"
     os.environ["MPI_HOSTNAMES"] = "None"
     os.environ["MPI_NUM_PROCESSES"] = "None"
@@ -190,6 +192,7 @@ def test_command_prefix_tcmalloc_int8(precision, mock_glob):
     os.environ["PYTHON_EXE"] = "python"
     args.socket_id = 0
     args.precision = precision
+    args.numa_cores_per_instance = None
 
     # If tcmalloc is not disabled, we should have LD_PRELOAD in the prefix
     args.disable_tcmalloc = False
@@ -224,6 +227,7 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     os.environ["PYTHON_EXE"] = "python"
     args.socket_id = 0
     args.precision = precision
+    args.numa_cores_per_instance = None
 
     # By default, TCMalloc should not be used
     base_model_init = BaseModelInitializer(args, [], platform_util)
@@ -246,6 +250,25 @@ def test_command_prefix_tcmalloc_fp32(precision, mock_glob):
     assert "numactl" not in command_prefix
 
 
+@pytest.mark.parametrize('precision', ['fp32', 'int8', 'bfloat16'])
+def test_command_prefix_numa_multi_instance(precision, mock_glob):
+    """ Tests that models don't get a numactl command prefix from
+    base_model_init.get_command_prefix, if numa_cores_per_instance is set, since numactl
+    commands will be added later for each instance run. """
+    platform_util = MagicMock()
+    args = MagicMock(verbose=True, model_name=test_model_name)
+    test_tcmalloc_lib = "/usr/lib/libtcmalloc.so.4.2.6"
+    mock_glob.return_value = [test_tcmalloc_lib]
+    os.environ["PYTHON_EXE"] = "python"
+    args.socket_id = 0
+    args.precision = precision
+    args.numa_cores_per_instance = 4
+
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+    command_prefix = base_model_init.get_command_prefix(args.socket_id)
+    assert "numactl" not in command_prefix
+
+
 @pytest.mark.skip("Method get_multi_instance_train_prefix() no longer exists")
 def test_multi_instance_train_prefix():
     platform_util = MagicMock()
@@ -261,3 +284,47 @@ def test_multi_instance_train_prefix():
     base_model_init = BaseModelInitializer(args, [], platform_util)
     command = base_model_init.get_multi_instance_train_prefix(option_list=["--genv:test", "--genv:test2"])
     assert command == "mpirun --genv test --genv test2 "
+
+
+@pytest.mark.parametrize('test_num_instances,test_socket_id,test_cpu_list, expected_cpu_bind',
+                         [['2', -1, [['0', '1'], ['2', '3']], ['0,1', '2,3']],
+                          ['2', 0, [['0', '1'], ['2', '3']], ['0,1']],
+                          ['2', 1, [['0', '1'], ['2', '3']], ['2,3']],
+                          ['4', -1, [['4', '5', '6', '7', '0', '1', '2', '3']], ['4,5,6,7', '0,1,2,3']],
+                          ['8', -1, [['4', '5', '6', '7', '0', '1', '2', '3']], ['4,5,6,7,0,1,2,3']],
+                          ['3', -1, [['4', '5', '6', '7'], ['0', '1', '2', '3']], ['4,5,6', '7,0,1']]])
+@patch("os.path.exists")
+@patch("benchmarks.common.base_model_init.open")
+@patch("common.platform_util.os")
+@patch("common.platform_util.system_platform")
+@patch("common.platform_util.subprocess")
+@patch("os.system")
+def test_numa_multi_instance_run_command(
+        mock_system, mock_subprocess, mock_platform, mock_os, mock_open,
+        mock_path_exists, test_num_instances, test_socket_id, test_cpu_list, expected_cpu_bind):
+    """ Test the multi instance run using numactl by trying different combinations of
+    cpu lists and the number of cores used per instance. Checks the system call that
+    is run to verify that it matches the cpu groups that are expected. """
+    platform_util = MagicMock(cpu_core_list=test_cpu_list)
+    test_output_dir = "/tmp/output"
+    args = MagicMock(verbose=True, model_name=test_model_name, batch_size=100,
+                     numa_cores_per_instance=test_num_instances, precision="fp32",
+                     output_dir=test_output_dir, socket_id=test_socket_id)
+    os.environ["PYTHON_EXE"] = "python"
+    os.environ["MPI_HOSTNAMES"] = "None"
+    os.environ["MPI_NUM_PROCESSES"] = "None"
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+
+    mock_path_exists.return_value = True
+
+    expected_omp_num_threads = "OMP_NUM_THREADS={}".format(test_num_instances)
+
+    # call run_command and then check the output
+    test_run_command = "python foo.py"
+    base_model_init.run_command(test_run_command)
+    system_call_args = mock_system.call_args[0][0]
+    assert expected_omp_num_threads in system_call_args
+
+    for cpu_bind in expected_cpu_bind:
+        assert "numactl --localalloc --physcpubind={} {} >> {}".\
+            format(cpu_bind, test_run_command, test_output_dir) in system_call_args

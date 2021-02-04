@@ -48,7 +48,7 @@ RUN apt-get update && \
     python-dev
 
 RUN curl -sSL https://get.docker.com/ | sh
-RUN pip3 install --upgrade pip && \
+RUN pip3 install --upgrade pip==20.3.4 && \
     pip3 install \
          absl-py \
          cerberus \
@@ -60,6 +60,11 @@ RUN pip3 install --upgrade pip && \
          pyyaml \
          setuptools \
          urllib3
+
+RUN curl -L -o kustomize.tar.gz https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv3.8.7/kustomize_v3.8.7_linux_amd64.tar.gz && \
+    tar xzf kustomize.tar.gz && \
+    chmod +x kustomize && \
+    mv kustomize /usr/local/bin
 
 WORKDIR /tf
 VOLUME ["/tf"]

@@ -35,6 +35,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32
     partials:
+    - tcmalloc
     - model_package
     - entrypoint
     documentation:

@@ -106,6 +106,7 @@ The `--framework <framework>` (or `-f`) flag to the `model-builder` script
 refers the names fo the folders in the [specs folder](/tools/docker/specs):
 ```
 tools/docker/specs/
+├── k8s
 ├── ml
 ├── pytorch
 └── tensorflow
@@ -114,7 +115,7 @@ tools/docker/specs/
 See a list of the available frameworks using:
 ```
 $ model-builder frameworks
-ml pytorch tensorflow
+k8s ml pytorch tensorflow
 ```
 
 The model-builder script uses this value for the `--spec_dir` and `--framework`
@@ -124,6 +125,7 @@ The `--framework` (or `-f`) flag applies to the following model-builder subcomma
 * build (e.g `model-builder build -f ml xgboost`)
 * generate-dockerfile (e.g. `model-builder generate-dockerfile -f ml`)
 * generate-documentation (e.g. `model-builder generate-documentation -f tensorflow`)
+* generate-deployment (e.g. `model-builder generate-deployment -f k8s`)
 * images (e.g `model-builder images -f pytorch` or `model-builder images -f ml`)
 * init-spec (e.g. `model-builder init-spec -f tensorflow inceptionv4-fp32-inference`)
 * make (e.g. `model-builder make -f pytorch pytorch-resnet50-bf16-inference`)
@@ -181,6 +183,20 @@ For single targets such as `bert-large-fp32-training` the model-builder adds an 
 ```
 --only_tags_matching=.*bert-large-fp32-training$
 ```
+
+### Generating k8 deployments
+
+The model-builder's generate-deployment subcommand will generate kubernetes deployments for that model using the model's k8 package. The subcommand will use env values from the model specification's runtime.env yaml array. The subcommand will look for runtime.env replacements under `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs/k8s`[^Ψ]. The first time `model-builder generate-deployment` is run, it will copy ./tools/docker/specs to `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs`. The user can then edit the k8 specification files to provide env values specific to their k8 deployment. For example the user would replace USER_ID with their [id](https://man7.org/linux/man-pages/man1/id.1.html). The subcommand algorithm is as follows:
+
+[^Ψ]: If $HOME is a nfs mount point then you should chose an alternate directory eg: `XDG_CONFIG_HOME=/tmp/$USER/config model-builder generate-deployment ...`.
+
+1. Read in all specification files under tools/docker/specs.
+2. Copy tools/docker/specs to `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs` if the directory does not exist.
+3. Read in all specification files under `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs`.
+4. Replace any specifications in 1 with specifications from 2.
+5. Extract the k8 package into a temporary directory.
+6. For each env in the model's specification under runtime, call `kustomize cfg set <temp-dir> env.name env.value`.
+7. Output the specific deployment under `deployments/<model>` by calling `kustomize build <temp-dir>`.
 
 ### Running test-suites
 
