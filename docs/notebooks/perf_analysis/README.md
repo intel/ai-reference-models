@@ -94,7 +94,7 @@ There are two different analysis type.
 
 1. Create conda env: `$conda create -n stock-tensorflow python matplotlib ipykernel psutil pandas gitpython`
 
-> NOTE: If users want to use Tensorflow v1.14, they need to install python v3.5 by assigning `python=3.5`.
+> NOTE: If users want to use Tensorflow v1.14, they need to install python v3.6 by assigning `python=3.6`.
 
 2. Activate the created conda env: `$conda activate stock-tensorflow`
 3. Install stock tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.3.0`
@@ -112,7 +112,7 @@ There are two different analysis type.
 
 1. Create conda env: `$conda create -n intel-tensorflow python matplotlib ipykernel psutil pandas gitpython`
 
-> NOTE: If users want to use Tensorflow v1.14, they need to install python v3.5 by assigning `python=3.5`
+> NOTE: If users want to use Tensorflow v1.14, they need to install python v3.6 by assigning `python=3.6`
 
 2. Activate the created conda env: `$conda activate intel-tensorflow`
 3. Install Intel-optimized tensorflow with a specific version: `(intel-tensorflow) $pip install intel-tensorflow==2.3.0`

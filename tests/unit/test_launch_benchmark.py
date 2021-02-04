@@ -25,7 +25,7 @@ import sys
 
 import pytest
 from mock import MagicMock, patch as mock_patch
-
+from test_utils import platform_config
 from launch_benchmark import LaunchBenchmark
 
 
@@ -40,6 +40,10 @@ test_num_cores = "1"
 # need a valid file for tests to work, see conftest.py for where this is managed
 test_input_graph = "test.pb"
 test_tfserving_framework = "tensorflow_serving"
+
+
+def setup_mock_values(mock_platform):
+    platform_config.set_mock_system_type(mock_platform)
 
 
 @pytest.fixture
@@ -67,6 +71,11 @@ def mock_popen(patch):
 @pytest.fixture
 def mock_system_platform(patch):
     return patch("common.base_benchmark_util.platform_util.system_platform")
+
+
+@pytest.fixture
+def platform_mock(patch):
+    return patch("system_platform.system")
 
 
 @pytest.fixture
@@ -230,10 +239,11 @@ def test_output_results_with_accuracy(launch_benchmark, mock_system_platform, mo
     pass
 
 
-def test_launch_benchmark_validate_model(launch_benchmark, mock_popen):
+def test_launch_benchmark_validate_model(launch_benchmark, mock_popen, platform_mock):
     """
     Verifies that a valid model name passes validation and starts a docker container.
     """
+    platform_mock.return_value = platform_config.OS_TYPE
     launch_benchmark.main()
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
@@ -241,8 +251,9 @@ def test_launch_benchmark_validate_model(launch_benchmark, mock_popen):
     assert "run" == args[0][1]
 
 
-def test_bare_metal(launch_benchmark, mock_popen):
+def test_bare_metal(launch_benchmark, mock_popen, platform_mock):
     """ Tests the bare metal launch script function """
+    platform_mock.return_value = platform_config.OS_TYPE
     test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
     launch_benchmark.run_bare_metal("/foo", "/bar", "/baz", test_env_vars)
     assert mock_popen.called
@@ -304,12 +315,13 @@ def test_help(mock_platform_util, capsys):
         assert "error" not in captured.out.lower()
 
 
-def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen):
+def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen, platform_mock):
     """
     Verifies the docker run command includes custom volumes
     """
     custom_volumes = ["~:/foo1", "~:/foo2"]
     launch_benchmark.args.custom_volumes = custom_volumes
+    platform_mock.return_value = platform_config.OS_TYPE
     launch_benchmark.main()
     assert mock_popen.called
     args, _ = mock_popen.call_args
@@ -321,8 +333,10 @@ def test_launch_benchmark_custom_volume(launch_benchmark, mock_popen):
 
 @pytest.mark.parametrize("precision,expected_disable_tcmalloc", [["int8", "False"],
                                                                  ["fp32", "True"]])
-def test_disable_tcmalloc(launch_benchmark, mock_popen, precision, expected_disable_tcmalloc):
+def test_disable_tcmalloc(launch_benchmark, mock_popen,
+                          platform_mock, precision, expected_disable_tcmalloc):
     launch_benchmark.args.precision = precision
+    platform_mock.return_value = platform_config.OS_TYPE
     launch_benchmark.main()
     assert mock_popen.called
     args, _ = mock_popen.call_args

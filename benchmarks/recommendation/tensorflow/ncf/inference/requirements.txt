@@ -7,3 +7,5 @@ pandas
 psutil==5.6.6
 py-cpuinfo==3.3.0
 typing
+
+rsa>=4.7 # not directly required, pinned by Snyk to avoid a vulnerability

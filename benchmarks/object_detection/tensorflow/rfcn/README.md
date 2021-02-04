@@ -30,7 +30,7 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 The TensorFlow models repo will be used for installing dependencies and running inference as well as
 converting the coco dataset to the TF records format.
 
-2. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+2. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
    Be sure to export the $DATASET_DIR and $OUTPUT_DIR environment variables.
 
 The `coco_val.record` file is what we will use in this inference example.
@@ -145,7 +145,7 @@ $ git clone https://github.com/cocodataset/cocoapi.git
 
 The TensorFlow models repo will be used for installing dependencies and running inference.
 
-2. Download and preprocess the COCO validation images using the [instructions here](datasets/coco/README.md).
+2. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
    Be sure to export the $DATASET_DIR and $OUTPUT_DIR environment variables.
 
 3. Download the pre-trained model (FP32 graph):

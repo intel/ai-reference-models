@@ -27,6 +27,7 @@ import os
 import signal
 import subprocess
 import sys
+import platform as system_platform
 from argparse import ArgumentParser
 from common import base_benchmark_util
 from common import platform_util
@@ -48,11 +49,17 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
     def main(self):
         benchmark_scripts = os.path.dirname(os.path.realpath(__file__))
-        use_case = self.get_model_use_case(benchmark_scripts)
-        intelai_models = self.get_model_dir(benchmark_scripts, use_case)
-        intelai_models_common = self.get_model_dir(benchmark_scripts, "common")
+        os_type = system_platform.system()
+        use_case = self.get_model_use_case(benchmark_scripts, os_type)
+        intelai_models = self.get_model_dir(benchmark_scripts, use_case, os_type)
+        intelai_models_common = self.get_model_dir(benchmark_scripts, "common", os_type)
         env_var_dict = self.get_env_vars(benchmark_scripts, use_case, intelai_models,
-                                         intelai_models_common)
+                                         intelai_models_common, os_type)
+        if "Windows" == os_type:
+            os.environ["PYTHONPATH"] = "{};{};{}".format(
+                os.environ["PYTHONPATH"], benchmark_scripts,
+                os.path.join(benchmark_scripts, "common"),
+                os.path.join(benchmark_scripts, "common", "tensorflow"))
 
         if self.args.docker_image:
             if self.args.framework == 'tensorflow_serving':
@@ -132,7 +139,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if self.args.mode == "inference" and self.args.checkpoint:
             print("Warning: The --checkpoint argument is being deprecated in favor of using frozen graphs.")
 
-    def get_model_use_case(self, benchmark_scripts):
+    def get_model_use_case(self, benchmark_scripts, os_type):
         """
         Infers the use case based on the directory structure for the specified model.
         """
@@ -152,14 +159,17 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             raise ValueError(error_str.format(args.framework, args.model_name, args.precision))
 
         # use the benchmarks directory path to find the use case
-        dir_list = matches[0].split("/")
+        if "Windows" == os_type:
+            dir_list = matches[0].split("\\")
+        else:
+            dir_list = matches[0].split("/")
 
         # find the last occurrence of framework in the list, then return
         # the element before it in the path, which is the use case
         return next(dir_list[elem - 1] for elem in range(len(dir_list) - 1, -1, -1)
                     if dir_list[elem] == args.framework)
 
-    def get_model_dir(self, benchmark_scripts, use_case):
+    def get_model_dir(self, benchmark_scripts, use_case, os_type):
         """
         Finds the path to the optimized model directory in this repo, if it exists.
         """
@@ -172,23 +182,27 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # find the intelai_optimized model directory
         args = self.args
-        optimized_model_dir = os.path.join(
-            benchmark_scripts, os.pardir, "models", use_case,
-            args.framework, args.model_name)
+        optimized_model_dir = os.path.join(intelai_models, use_case,
+                                           args.framework, args.model_name)
+        if "Windows" == os_type:
+            optimized_model_dir = optimized_model_dir.replace("\\", "/")
 
         # if we find an optimized model, then we will use that path
         if os.path.isdir(optimized_model_dir):
             intelai_models = optimized_model_dir
-
         return intelai_models
 
     def get_env_vars(self, benchmark_scripts, use_case, intelai_models,
-                     intelai_models_common):
+                     intelai_models_common, os_type):
         """
         Sets up dictionary of standard env vars that are used by start.sh
         """
         # Standard env vars
         args = self.args
+        python_exe = str(sys.executable if not args.docker_image else "python")
+        if "Windows" == os_type:
+            python_exe = r'"{}"'.format(python_exe)
+
         env_var_dict = {
             "ACCURACY_ONLY": args.accuracy_only,
             "BACKBONE_MODEL_DIRECTORY_VOL": args.backbone_model,
@@ -211,6 +225,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "MPI_HOSTNAMES": args.mpi_hostnames,
             "MPI_NUM_PROCESSES": args.mpi,
             "MPI_NUM_PROCESSES_PER_SOCKET": args.num_mpi,
+            "NUMA_CORES_PER_INSTANCE": args.numa_cores_per_instance,
             "NOINSTALL": str(args.noinstall) if args.noinstall is not None else "True" if not args.docker_image else "False",  # noqa: E501
             "NUM_CORES": args.num_cores,
             "NUM_INTER_THREADS": args.num_inter_threads,
@@ -218,7 +233,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "NUM_TRAIN_STEPS": args.num_train_steps,
             "OUTPUT_RESULTS": args.output_results,
             "PRECISION": args.precision,
-            "PYTHON_EXE": sys.executable if not args.docker_image else "python",
+            "PYTHON_EXE": python_exe,
             "SOCKET_ID": args.socket_id,
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "TF_SERVING_VERSION": args.tf_serving_version,
@@ -441,7 +456,12 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
     def _launch_command(self, run_cmd):
         """runs command that runs the start script in a container or on bare metal and exits on ctrl c"""
-        p = subprocess.Popen(run_cmd, preexec_fn=os.setsid)
+        os_type = system_platform.system()
+        if "Windows" == os_type:
+            p = subprocess.Popen(run_cmd, start_new_session=True)
+        else:
+            p = subprocess.Popen(run_cmd, preexec_fn=os.setsid)
+
         try:
             p.communicate()
         except KeyboardInterrupt:

@@ -63,6 +63,9 @@ and for local testing.
      optional and is only used in the case where the model does not already
      exist in the repo, and you want the model-builder to create the
      model's directories for you.
+   * `model-builder generate-deployment <model>`: Generates the k8 deployment files
+     under ./deployments/... . It will use env values from user specification files 
+     under `${XDG_CONFIG_HOME:-$HOME/.config}/model-builder/specs/k8s`.
 
 For details on the model-builder script see the
 [model builder advanced documentation](ModelBuilderAdvanced.md).

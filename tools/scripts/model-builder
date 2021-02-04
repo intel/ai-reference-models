@@ -56,6 +56,9 @@ _usage()
   echo "# -- Do {generate-documentation,package,generate-dockerfile,build} for several models --"
   echo 'model-builder make <modelname> <modelname>'
   echo ''
+  echo "# -- Generate a k8 model's deployment file --"
+  echo 'model-builder generate-deployment <modelname>'
+  echo ''
   echo "# -- Run the test-suite for the subcommand generate-documentation with the framework tensorflow and models: resnet50-fp32-inference and resnet50-int8-inference. --"
   echo '  -- {subcommand,framework,[model model]} --'
   echo 'model-builder run-test-suite --command generate-documentation --framework tensorflow resnet50-fp32-inference resnet50-int8-inference'
@@ -220,13 +223,17 @@ _model_builder._sort_unique()
 #
 _model_builder._init()
 {
-  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder
+  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home
+  _xdg_config_home=${XDG_CONFIG_HOME:-$HOME/.config}
+  declare -g _spec_home=${_xdg_config_home}/$(basename $0)/specs
 
   trap '_model_builder._onexit $? $LINENO' EXIT
 
   declare -g -r MODEL_DIR=${MODEL_DIR-$PWD}
   # Tag to use for the 'versioned' images
   declare -g -r TENSORFLOW_TAG=${TENSORFLOW_TAG:=2.3.0-ubuntu-20.04}
+  # Image name to use for the 'versioned' images
+  declare -g -r TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE:=intel/intel-optimized-tensorflow}
   # Local container repo used for building images
   declare -g -r LOCAL_REPO=${LOCAL_REPO-model-zoo}
   declare -g -r TAG_PREFIX=${TENSORFLOW_TAG}
@@ -254,6 +261,13 @@ _model_builder._init()
   if [[ ! -d $_spec_folder ]]; then
     echo "Error: The spec folder does not exist ($_spec_folder)."
     exit 1
+  fi
+  if [[ ! -d $_spec_home ]]; then
+    mkdir -p $_spec_home && cp -r $_spec_folder/k8s $_spec_home && rm -f $_spec_home/k8s/base_spec.yml
+    if (( $? != 0 )); then
+      echo "Unable to create ${_spec_home}." >&2
+      exit 1
+    fi
   fi
 
   if (( ${#_all_frameworks[@]} == 0 )) && (( ${#_all_models[*]} == 0 )); then
@@ -404,7 +418,7 @@ _model_builder._subcommand_show_frameworks_and_models()
 {
   local _arg _cur _i=2 _options _prev _subcommand=$1
   case "$_subcommand" in
-    build|generate-dockerfile|generate-documentation|make|package)
+    build|generate-deployment|generate-dockerfile|generate-documentation|make|package)
       while (( $_i < $COMP_CWORD )); do
         local s="${COMP_WORDS[_i]}"
         case "$s" in
@@ -585,6 +599,13 @@ _model_builder._completion()
       ;;
     generate-dockerfile|generate-documentation|package)
       _current_framework=$DEFAULT_FRAMEWORK
+      _remaining_frameworks=(${_all_frameworks[@]})
+      _model_builder._set_current_models
+      _model_builder._subcommand_show_frameworks_and_models $_subcommand
+      return
+      ;;
+    generate-deployment)
+      _current_framework=k8s
       _remaining_frameworks=(${_all_frameworks[@]})
       _model_builder._set_current_models
       _model_builder._subcommand_show_frameworks_and_models $_subcommand
@@ -847,7 +868,7 @@ _model_builder.build()
     _tmp_files+=($temp_output_file)
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -959,7 +980,7 @@ _model_builder.package()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -977,6 +998,73 @@ _model_builder.package()
       ${_args[@]}
   done
 
+  popd 1>/dev/null 2>/dev/null
+}
+
+#
+# Entry point for 'model-builder generate-deployment ...'
+# Generates one or more yaml files from specified k8 packages
+#
+_model_builder.generate_deployment()
+{
+  local _abs_model_dir _args=() _asm_dockerfiles _count _dry_run=false _model_dir='' _model_dir_mount='' _output_dir='' _release_args=() _framework _verbose=''
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      -h|--help)
+        echo -e 'Generates k8 yaml files for the specified model in the k8 framework.\n'
+        return 0
+        ;;
+      --model_dir=*)
+        _abs_model_dir=${1#*=}
+        _model_dir_mount='-v '$_abs_model_dir':/tf/models'
+        _model_dir='--model_dir=models'
+        _args+=("$_model_dir") 
+        ;;
+      --verbose)
+        _verbose=$1
+        _args+=("$1") 
+        ;;
+      --dry-run)
+        _dry_run=true
+        _args+=("--dry_run")
+        ;;
+      -f|--framework)
+        ;;
+      *)
+        _args+=("$1") 
+        ;;
+    esac
+    shift
+  done
+  
+  # Check for the imz-tf-tools container and build it if it doesn't exist
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
+  
+  # Note: Run as user so that the generated deployment(s) have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) -e MODEL_BUILDER_SPEC_HOME=/specs $(_model_builder._get-proxy-env-vars) -v ${_spec_home}:/specs -v $(pwd):/tf -w /tf $_model_dir_mount imz-tf-tools python3 assembler.py "
+
+  for _release_group in "${_release_groups[@]}"
+  do
+    case "$_release_group" in
+      versioned)
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
+        ;;
+      tf_1.15.2_containers)
+        _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
+        ;;
+      *)
+        _release_args=()
+        ;;
+    esac
+    # Call the assembler to generate deployments
+    _model_builder._echo_command ${_asm_dockerfiles} \
+      --release $_release_group \
+      --spec_dir=./specs/${_current_framework} \
+      --generate_deployments \
+      ${_release_args[@]} \
+      ${_args[@]}
+  done
   popd 1>/dev/null 2>/dev/null
 }
 
@@ -1028,7 +1116,7 @@ _model_builder.generate_dockerfile()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1102,7 +1190,7 @@ _model_builder.generate_documentation()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1185,7 +1273,7 @@ _model_builder.images()
   do
     case "$_release_group" in
       versioned)
-        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+        _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
         ;;
       tf_1.15.2_containers)
         _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -1410,7 +1498,7 @@ _model_builder._tests.build()
 
 #
 # parses model name into parts: _prefix, _precision, _mode
-# also sets the top-level directory to quickstart or k8s based on model name suffix
+# also sets the top-level directory to either quickstart or k8s
 #
 _model_builder._parse_model_name()
 {
@@ -1530,7 +1618,7 @@ _model_builder._tests.generate_dockerfile()
   echo '#' >> $_g_root'/tests/model-builder.bats'
   echo ''  >> $_g_root'/tests/model-builder.bats'
   for _model in "$@"; do
-    _results=( $(find $(eval "echo dockerfiles/$_subdir") -name '*'$_model'.Dockerfile') )
+    _results=( $(find $(eval "echo dockerfiles/$_subdir") -name '*'$_model'.Dockerfile' 2>/dev/null) )
     case ${#_results[@]} in 
       0)
         _dockerfile_path=''
@@ -1659,7 +1747,7 @@ _model_builder.run_test_suite()
     do
       case "$_release_group" in
         versioned)
-          _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}")
+          _release_args=("--arg" "_TAG_PREFIX=${TAG_PREFIX}" "--arg" "TENSORFLOW_TAG=${TENSORFLOW_TAG}" "--arg" "TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE}")
           ;;
         tf_1.15.2_containers)
           _release_args=("--arg" "_TAG_PREFIX=1.15.2" "--arg" "TENSORFLOW_TAG=1.15.2")
@@ -2056,17 +2144,17 @@ _model_builder_main()
         completion)
           _model_builder.completion $@
           ;;
-        images)
+        generate-deployment)
+          _current_framework=k8s
           _model_builder._set_current_models
           _model_builder._validate_frameworks $@ || exit 0
-          _model_builder.images $_model_dir $_verbose $_dry_run $@
-          ;;
-        init-spec)
-          _model_builder._validate_frameworks $@ || exit 0
-          _model_builder.init_spec $_verbose $_dry_run $@
-          ;;
-        install-completion)
-          _model_builder.install_completion $@
+          _model_builder._validate_models $@ || exit 0
+          _only_tags_matching="$(_model_builder._build_only_tags_matching_args $@)"
+          _model_builder.generate_deployment $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
+          if (( $? != 0 )); then
+            echo "There was an error while generating deployments." >&2
+            exit 1
+          fi
           ;;
         generate-dockerfile)
           _model_builder._set_current_models
@@ -2086,9 +2174,21 @@ _model_builder_main()
           _only_tags_matching="$(_model_builder._build_only_tags_matching_args $@)"
           _model_builder.generate_documentation $_model_dir $_output_dir $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
-            echo "There was an error while constructing dockerfiles." >&2
+            echo "There was an error while creating documentation." >&2
             exit 1
           fi
+          ;;
+        images)
+          _model_builder._set_current_models
+          _model_builder._validate_frameworks $@ || exit 0
+          _model_builder.images $_model_dir $_verbose $_dry_run $@
+          ;;
+        init-spec)
+          _model_builder._validate_frameworks $@ || exit 0
+          _model_builder.init_spec $_verbose $_dry_run $@
+          ;;
+        install-completion)
+          _model_builder.install_completion $@
           ;;
         make)
           _model_builder._set_current_models

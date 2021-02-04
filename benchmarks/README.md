@@ -7,7 +7,7 @@ Training and inference scripts with Intel-optimized MKL
 The model scripts can be run on Linux and require the following
 dependencies to be installed:
 * [Docker](https://docs.docker.com/install/)
-* [Python](https://www.python.org/downloads/) 3.5 or later
+* [Python](https://www.python.org/downloads/) 3.6 or later
 * [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 * `wget` for downloading pre-trained models
 

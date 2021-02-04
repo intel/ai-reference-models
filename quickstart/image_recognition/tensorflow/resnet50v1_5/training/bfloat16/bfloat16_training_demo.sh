@@ -52,4 +52,3 @@ _command python benchmarks/launch_benchmark.py \
 	 ${mpi_num_proc_arg} \
          $@ \
          -- steps=50 train_epochs=1 epochs_between_evals=1
-

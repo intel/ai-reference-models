@@ -67,9 +67,20 @@ optional arguments:
   -ts NUM_TRAIN_STEPS, --num-train-steps NUM_TRAIN_STEPS
                         Specify the number of training steps
   --mpi_num_processes MPI
-                        The number of MPI processes
+                        The number of MPI processes. This cannot in
+                        conjunction with --numa-cores-per-instance, which uses
+                        numactl to run multiple instances.
   --mpi_num_processes_per_socket NUM_MPI
                         Specify how many MPI processes to launch per socket
+  --numa-cores-per-instance NUMA_CORES_PER_INSTANCE
+                        If set, the script will run multiple instances using
+                        numactl to specify which cores will be used to execute
+                        each instance. Set the value of this arg to a positive
+                        integer for the number of cores to use per instance or
+                        to 'socket' to indicate that all the cores on a socket
+                        should be used for each instance. This cannot be used
+                        in conjunction with --mpi_num_processes, which uses
+                        mpirun.
   -d DATA_LOCATION, --data-location DATA_LOCATION
                         Specify the location of the data. If this parameter is
                         not specified, the script will use random/dummy
@@ -300,9 +311,6 @@ describe how that can be done using the `launch_benchmark.py` script.
 
 ### Prerequisites for running on bare metal
 
-Since the `launch_benchmark.py` is intended to run in an Ubuntu-based
-Docker container, we recommend running on bare metal using Ubuntu 18.04.
-
 Before running a model, you must also install all the dependencies
 that are required to run that model. **(Note: the `--noinstall` 
 flag defaults to 'True' when running on bare metal.)**
@@ -311,11 +319,16 @@ Basic requirements for running all models include:
  * python 3.6
  * [intel-tensorflow](https://github.com/tensorflow/tensorflow/blob/master/README.md#community-supported-builds)
  * python-tk
- * numactl
  * libsm6
  * libxext6
  * requests
 
+Ubuntu 18.04:
+ * numactl
+
+Windows:
+ * [MSYS2](https://www.msys2.org)
+ 
 Individual models may have additional dependencies that need to be
 installed. The easiest way is to find this out find the model's function in
 the [start.sh](/benchmarks/common/tensorflow/start.sh) script and check
@@ -332,7 +345,8 @@ model, you can follow the [tutorials](/docs/README.md) or model
 [README](/benchmarks/README.md) files for instructions on getting the
 required code repositories, dataset, and pretrained model. Once you get
 to the step for running the `launch_benchmark.py` script, omit the
-`--docker-image` arg to run without a Docker container. If you have
+`--docker-image` arg to run without a Docker container.
+If you run on Windows, please omit the `--socket-id` arg too to run using all of the cores on the system. If you have
 installed the model dependencies in a virtual environment be sure that
 you are calling the proper python executable, which includes the
 dependencies that you installed in the previous step.
@@ -345,6 +359,7 @@ commands writing to the log file to work properly.
 For example, in order to run ResNet50 FP32 on bare metal,
 the following command can be used:
 
+* On Ubuntu 18.04:
 ```
  /home/<user>/venv/bin/python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
@@ -363,3 +378,27 @@ overwrite environment variables that have already been set, such as
 but since a new docker container instance is started with each run, you
 won't have previously set environment variables, like you may have on
 bare metal.
+
+* On Windows:
+```
+ python launch_benchmark.py ^
+    --in-graph <path_to_pretrained_model>\resnet50_fp32_pretrained_model.pb ^
+    --model-name resnet50 ^
+    --framework tensorflow ^
+    --precision fp32 ^
+    --mode inference ^
+    --batch-size=1
+```
+
+>Note that only the following list of use cases are tested on Windows,
+ and that all of the system cores will be used: 
+
+| Use Case                | Framework    | Model              | Mode      | Run from the Model Zoo repository |
+| ----------------------- | ------------ | ------------------ | --------- | --------------------------------- |
+| Image Recognition       | TensorFlow   | [DenseNet169](https://arxiv.org/pdf/1608.06993.pdf) | Inference | [FP32](image_recognition/tensorflow/densenet169/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf) | Inference | [Int8](image_recognition/tensorflow/inceptionv4/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv4/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [MobileNet V1*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](image_recognition/tensorflow/mobilenet_v1/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/mobilenet_v1/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf) | Inference | [Int8](image_recognition/tensorflow/resnet101/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet101/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf) | Inference  | [Int8](image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet50/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | Inference | [Int8](image_recognition/tensorflow/resnet50v1_5/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet50v1_5/README.md#fp32-inference-instructions) |

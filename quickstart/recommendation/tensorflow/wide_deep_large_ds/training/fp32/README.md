@@ -48,7 +48,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
 
 Download and untar the model package and then run a
 [quickstart script](#quick-start-scripts) with enviornment variables
