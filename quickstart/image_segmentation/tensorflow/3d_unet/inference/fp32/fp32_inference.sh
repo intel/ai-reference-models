@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -33,23 +35,25 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-mpi_num_proc_arg=""
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  echo "The required environment variable PRETRAINED_MODEL has not been set"
+  exit 1
+fi
 
-if [[ -n $MPI_NUM_PROCESSES ]]; then
-  mpi_num_proc_arg="--mpi_num_processes=${MPI_NUM_PROCESSES}"
+if [ ! -f "${PRETRAINED_MODEL}" ]; then
+  echo "The PRETRAINED_MODEL file '${PRETRAINED_MODEL}' does not exist"
+  exit 1
 fi
 
 source "$(dirname $0)/common/utils.sh"
-_command python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=bfloat16 \
-         --mode=training \
-         --framework tensorflow \
-         --batch-size 16 \
-         --checkpoint ${OUTPUT_DIR} \
-         --data-location=${DATASET_DIR} \
-         --noinstall \
-	 ${mpi_num_proc_arg} \
-         $@ \
-         -- steps=50 train_epochs=1 epochs_between_evals=1
-
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  --precision fp32 \
+  --model-name 3d_unet \
+  --mode inference \
+  --framework tensorflow \
+  --in-graph ${PRETRAINED_MODEL} \
+  --data-location ${DATASET_DIR} \
+  --output-dir ${OUTPUT_DIR} \
+  --batch-size 1 \
+  --socket-id 0 \
+  $@

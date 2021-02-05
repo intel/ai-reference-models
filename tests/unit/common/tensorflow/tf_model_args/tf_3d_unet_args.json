@@ -1,0 +1,7 @@
+[
+  {
+    "_comment": "3d_unet_inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0  --benchmark-only --verbose --in-graph=/in_graph/tumor_segmentation_model.h5 --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/brats/predict.py --inter 1 --intra 28 --nw 1 --nb 5 --bs 1"
+  }
+]
