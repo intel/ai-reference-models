@@ -29,12 +29,12 @@ slice_sets:
         uri: models/quickstart/image_segmentation/tensorflow/3d_unet/inference/fp32/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: 'amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-image-segmentation-3d-unet-fp32-inference'
+        <docker image>: 'intel/image-segmentation:1.15.2-3d-unet-fp32-inference'
         <mode>: inference
         <model name>: 3D U-Net
         <package dir>: 3d-unet-fp32-inference
         <package name>: 3d-unet-fp32-inference.tar.gz
-        <package url>: 'https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/3d-unet-fp32-inference.tar.gz'
+        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/3d-unet-fp32-inference.tar.gz'
         <precision>: FP32
         <use case>: image_segmentation
       uri: models/quickstart/image_segmentation/tensorflow/3d_unet/inference/fp32

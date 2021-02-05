@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[3d-unet-fp32-inference.tar.gz](https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/3d-unet-fp32-inference.tar.gz)
+[3d-unet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/3d-unet-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -57,7 +57,7 @@ Follow the [instructions above for downloading the BraTS dataset](#dataset).
    will be written), and then run the [quickstart script](#quick-start-scripts).
 
    ```
-   wget https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/model-zoo/3d-unet-fp32-inference.tar.gz
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/3d-unet-fp32-inference.tar.gz
    tar -xzf 3d-unet-fp32-inference.tar.gz
    cd 3d-unet-fp32-inference
 
@@ -99,7 +99,7 @@ follow the [instructions above for downloading the BraTS dataset](#dataset).
      --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
      --volume ${PRETRAINED_MODEL_DIR}:${PRETRAINED_MODEL_DIR} \
      --privileged --init -t \
-     amr-registry.caas.intel.com/aipg-tf/model-zoo:1.15.2-image-segmentation-3d-unet-fp32-inference \
+     intel/image-segmentation:1.15.2-3d-unet-fp32-inference \
      /bin/bash quickstart/<script name>.sh
    ```
 
