@@ -135,7 +135,10 @@ class ModelInitializer(BaseModelInitializer):
 
     def run(self):
         if self.benchmark_command:
-            self.run_command(self.benchmark_command)
+            # Bert needs to have unique output directories for every instance, so pass the output_dir
+            # string to the run_command function so that unique dirs get swapped in to the commands
+            self.run_command(self.benchmark_command,
+                             replace_unique_output_dir=str(self.args.output_dir))
 
         # execute the evaluate script for accuracy mode
         if self.args.accuracy_only:
