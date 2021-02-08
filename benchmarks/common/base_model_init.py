@@ -93,10 +93,14 @@ class BaseModelInitializer(object):
                     + " --map-by ppr:" + str(pps) + ":socket:pe=" + split_a_socket + " --cpus-per-proc " \
                     + split_a_socket + " " + self.python_exe
 
-    def run_command(self, cmd):
+    def run_command(self, cmd, replace_unique_output_dir=None):
         """
         Prints debug messages when verbose is enabled, and then runs the
         specified command.
+        
+        If the replace_unique_output_dir arg is set, multi-instance runs will 
+        swap out that path for a path with the instance number in the folder name
+        so that each instance uses a unique output folder.
         """
         if self.args.verbose:
             print("Received these standard args: {}".format(self.args))
@@ -114,7 +118,8 @@ class BaseModelInitializer(object):
                       "the list of cpu nodes could not be retrieved. Please ensure "
                       "that your system has numa nodes and numactl is installed.")
             else:
-                self.run_numactl_multi_instance(cmd)
+                self.run_numactl_multi_instance(
+                    cmd, replace_unique_output_dir=replace_unique_output_dir)
         else:
             if self.args.verbose:
                 print("Running: {}".format(str(cmd)))
@@ -132,7 +137,7 @@ class BaseModelInitializer(object):
         end_list.append(cpu_cores_list[-count:]) if count != 0 else end_list
         return end_list
 
-    def run_numactl_multi_instance(self, cmd):
+    def run_numactl_multi_instance(self, cmd, replace_unique_output_dir=None):
         """
         Generates a series of commands that call the specified cmd with multiple
         instances, where each instance uses the a specified number of cores. The
@@ -141,6 +146,10 @@ class BaseModelInitializer(object):
         The command for each instance uses numactl and the --physcpubind arg with
         the appropriate core list. Each instance writes output to it's own log file,
         and a combined log file is created after everything has executed.
+        
+        If the replace_unique_output_dir arg is set, multi-instance runs will 
+        swap out that path for a path with the instance number in the folder name
+        so that each instance uses a unique output folder.
         """
         # Get the cores list and group them according to the number of cores per instance
         cores_per_instance = int(self.args.numa_cores_per_instance)
@@ -187,7 +196,15 @@ class BaseModelInitializer(object):
                       "numactl --localalloc --physcpubind={1}").format(
                 len(core_list), ",".join(core_list))
             instance_logfile = log_filename_format.format("instance" + str(instance_num))
-            instance_command = "{} {}".format(prefix, cmd)
+
+            unique_command = cmd
+            if replace_unique_output_dir:
+                # Swap out the output dir for a unique dir
+                unique_dir = os.path.join(replace_unique_output_dir,
+                                          "instance_{}".format(instance_num))
+                unique_command = unique_command.replace(replace_unique_output_dir, unique_dir)
+
+            instance_command = "{} {}".format(prefix, unique_command)
             multi_instance_command += "{} >> {} 2>&1 & \\\n".format(
                 instance_command, instance_logfile)
             instance_logfiles.append(instance_logfile)
