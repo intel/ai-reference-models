@@ -29,7 +29,7 @@ slice_sets:
         uri: models/quickstart/object_detection/tensorflow/rfcn/inference/int8/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-int8-inference
+        <docker image>: intel/object-detection:tf-2.3.0-rfcn-int8-inference
         <mode>: inference
         <model name>: RFCN
         <package dir>: rfcn-int8-inference

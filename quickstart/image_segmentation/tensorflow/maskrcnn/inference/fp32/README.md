@@ -96,7 +96,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-segmentation:tf-1.15.2-imz-2.2.0-maskrcnn-fp32-inference \
+  intel/image-segmentation:tf-1.15.2-maskrcnn-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
