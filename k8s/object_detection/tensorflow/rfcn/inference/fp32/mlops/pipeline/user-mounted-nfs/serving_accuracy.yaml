@@ -18,7 +18,7 @@ spec:
       runAsGroup: 0 # {"$openapi":"GROUP_ID"}
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: docker.io/intel/object-detection:tf-1.15.2-imz-2.2.0-preprocess-coco-val # {"$openapi":"PREPROCESS_IMAGE"}
+      image: docker.io/intel/object-detection:tf-1.15.2-preprocess-coco-val # {"$openapi":"PREPROCESS_IMAGE"}
       command: # {"$openapi":"PREPROCESS_COMMAND"}
       - /workspace/preprocess-coco-val/scripts/preprocess_coco_val.sh # {"$openapi":"PREPROCESS_COMMAND"}
       envFrom:
@@ -44,7 +44,7 @@ spec:
       runAsGroup: 0 # {"$openapi":"GROUP_ID"}
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: docker.io/intel/object-detection:tf-2.3.0-imz-2.2.0-rfcn-fp32-inference # {"$openapi":"IMAGE"}
+      image: docker.io/intel/object-detection:tf-2.3.0-rfcn-fp32-inference # {"$openapi":"IMAGE"}
       imagePullPolicy: Always
       command: # {"$openapi":"MODEL_COMMAND"}
       - /workspace/rfcn-fp32-inference/quickstart/fp32_accuracy.sh # {"$openapi":"MODEL_COMMAND"}

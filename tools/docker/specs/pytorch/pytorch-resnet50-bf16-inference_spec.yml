@@ -29,7 +29,7 @@ slice_sets:
         uri: models/quickstart/image_recognition/pytorch/resnet50/inference/bf16/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: 'intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-bfloat16-inference'
+        <docker image>: 'intel/image-recognition:pytorch-1.5.0-rc3-resnet50-bfloat16-inference'
         <mode>: inference
         <model name>: ResNet50
         <package dir>: pytorch-resnet50-bf16-inference

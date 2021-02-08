@@ -40,7 +40,7 @@ Copy the eval.csv and test.csv into your current working directory `/home/<user>
     cd /home/<user>/dataset
     docker run -it --privileged -u root:root \
                --volume /home/<user>/dataset:/dataset \
-               intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-int8-inference \
+               intel/recommendation:tf-1.15.2-wide-deep-large-ds-int8-inference \
                /bin/bash
 
     ```
@@ -133,7 +133,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-int8-inference \
+  intel/recommendation:tf-1.15.2-wide-deep-large-ds-int8-inference \
   /bin/bash quickstart/int8_accuracy.sh
 ```
 
@@ -154,7 +154,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-int8-inference \
+  intel/recommendation:tf-1.15.2-wide-deep-large-ds-int8-inference \
   /bin/bash quickstart/int8_online_inference.sh \
   --num-intra-threads 1 --num-inter-threads 1
 ```
