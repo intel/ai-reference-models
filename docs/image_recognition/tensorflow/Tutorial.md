@@ -146,7 +146,7 @@ You can refer to [ImageNet](/datasets/imagenet) or [Coco Dataset](http://cocodat
 1. Pull the relevant Intel-optimized TensorFlow Docker image. We'll be running the pretrained model to infer on Docker container. 
 [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull docker.io/intel/intel-optimized-tensorflow:2.3.0
+docker pull intel/intel-optimized-tensorflow:2.3.0
 ```
 2. cd to the inference script directory
 ```bash        

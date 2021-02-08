@@ -56,7 +56,7 @@ $ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --data-location /home/<user>/COCO2014 \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 
+    --docker-image intel/intel-optimized-tensorflow:1.15.2
 ```
 
 5. Log files are located at:

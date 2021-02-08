@@ -80,7 +80,7 @@ $ python launch_benchmark.py \
     --batch-size 98304 \
     --num-inter-threads 2 \
     --verbose \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image intel/intel-optimized-tensorflow:1.15.2 \
     -- dataset=ml-20m clean=1 te=12
 ```
 
@@ -113,7 +113,7 @@ $ python launch_benchmark.py \
     --batch-size 98304 \
     --num-inter-threads 2 \
     --verbose \
-    --docker-image intelaipg/intel-optimized-tensorflow:1.14 \
+    --docker-image intel/intel-optimized-tensorflow:1.15.2 \
     -- dataset=ml-20m clean=1 te=12
 ```
 
