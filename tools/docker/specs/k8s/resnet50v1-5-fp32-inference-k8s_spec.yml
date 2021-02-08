@@ -23,7 +23,7 @@ slice_sets:
           <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet50v1-5-fp32-inference-k8s.tar.gz
           <package name>: resnet50v1-5-fp32-inference-k8s.tar.gz
           <package dir>: resnet50v1-5-fp32-inference-k8s
-          <docker image>: intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet50v1-5-fp32-inference
+          <docker image>: intel/image-recognition:tf-2.3.0-resnet50v1-5-fp32-inference
         docs:
           - name: Title
             uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/title.md
@@ -58,7 +58,7 @@ slice_sets:
           - name: GROUP_NAME
             value: root
           - name: IMAGE_VERSION
-            value: tf-2.3.0-imz-2.2.0
+            value: tf-2.3.0
           - name: NAME_SPACE
             value: default
           - name: NFS_PATH

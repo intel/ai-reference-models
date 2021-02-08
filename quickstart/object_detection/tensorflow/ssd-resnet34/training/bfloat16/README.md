@@ -227,7 +227,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/object-detection:tf-2.3.0-imz-2.2.0-ssd-resnet34-bfloat16-training \
+  intel/object-detection:tf-2.3.0-ssd-resnet34-bfloat16-training \
   /bin/bash quickstart/bfloat16_training_demo.sh
 ```
 
@@ -260,7 +260,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${BACKBONE_MODEL_DIR}:${BACKBONE_MODEL_DIR} \
   --privileged --init -it \
-  intel/object-detection:tf-2.3.0-imz-2.2.0-ssd-resnet34-bfloat16-training \
+  intel/object-detection:tf-2.3.0-ssd-resnet34-bfloat16-training \
   /bin/bash quickstart/bfloat16_training.sh
 ```
 
@@ -288,7 +288,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --privileged --init -it \
-  intel/object-detection:tf-2.3.0-imz-2.2.0-ssd-resnet34-bfloat16-training \
+  intel/object-detection:tf-2.3.0-ssd-resnet34-bfloat16-training \
   /bin/bash quickstart/bfloat16_training_accuracy.sh
 ```
 
