@@ -170,7 +170,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/object-detection:tf-2.3.0-imz-2.2.0-ssd-resnet34-fp32-training \
+  intel/object-detection:tf-2.3.0-ssd-resnet34-fp32-training \
   /bin/bash quickstart/fp32_training.sh
 ```
 

@@ -28,7 +28,7 @@ slice_sets:
         uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/int8/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/object-detection:tf-2.3.0-imz-2.2.0-ssd-mobilenet-int8-inference
+        <docker image>: intel/object-detection:tf-2.3.0-ssd-mobilenet-int8-inference
         <mode>: inference
         <model name>: SSD-MobileNet
         <package dir>: ssd-mobilenet-int8-inference

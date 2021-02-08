@@ -21,7 +21,7 @@ slice_sets:
                 <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet50v1-5-fp32-training.tar.gz
                 <package name>: resnet50v1-5-fp32-training.tar.gz
                 <package dir>: resnet50v1-5-fp32-training
-                <docker image>: intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet50v1-5-fp32-training
+                <docker image>: intel/image-recognition:tf-2.3.0-resnet50v1-5-fp32-training
               docs:
                   - name: Title
                     uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/fp32/.docs/title.md

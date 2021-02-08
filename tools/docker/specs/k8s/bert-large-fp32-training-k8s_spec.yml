@@ -16,7 +16,7 @@ slice_sets:
           <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-training-k8s.tar.gz
           <package name>: bert-large-fp32-training-k8s.tar.gz
           <package dir>: bert-large-fp32-training-k8s
-          <docker image>: intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-training
+          <docker image>: intel/language-modeling:tf-2.3.0-bert-large-fp32-training
         docs:
           - name: Title
             uri: models/k8s/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
@@ -58,7 +58,7 @@ slice_sets:
           - name: GROUP_NAME
             value: root
           - name: IMAGE_VERSION
-            value: tf-2.3.0-imz-2.2.0
+            value: tf-2.3.0
           - name: NAME_SPACE
             value: default
           - name: NFS_PATH

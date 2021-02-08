@@ -90,7 +90,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-inference \
+  intel/language-modeling:tf-2.3.0-bert-large-fp32-inference \
   /bin/bash ./quickstart/<SCRIPT NAME>.sh
 ```
 
