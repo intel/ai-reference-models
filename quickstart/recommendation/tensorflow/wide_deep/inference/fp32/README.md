@@ -94,7 +94,7 @@ docker run \
 --volume ${DATASET_DIR}:${DATASET_DIR} \
 --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
 --privileged --init -t \
-intel/recommendation:tf-2.3.0-imz-2.2.0-wide-deep-fp32-inference \
+intel/recommendation:tf-2.3.0-wide-deep-fp32-inference \
 /bin/bash quickstart/<script name>.sh
 ```
 

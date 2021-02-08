@@ -99,7 +99,7 @@ docker run \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --privileged --init -t \
-  intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-fp32-inference \
+  intel/image-recognition:pytorch-1.5.0-rc3-resnet50-fp32-inference \
   /bin/bash quickstart/fp32_accuracy.sh
 ```
 
@@ -109,7 +109,7 @@ dataset mount is needed.
 ```
 docker run \
   --privileged --init -t \
-  intel/image-recognition:pytorch-1.5.0-rc3-imz-2.2.0-resnet50-fp32-inference \
+  intel/image-recognition:pytorch-1.5.0-rc3-resnet50-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

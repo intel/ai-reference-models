@@ -28,7 +28,7 @@ slice_sets:
         uri: models/quickstart/image_recognition/tensorflow/resnet101/inference/fp32/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet101-fp32-inference
+        <docker image>: intel/image-recognition:tf-2.3.0-resnet101-fp32-inference
         <mode>: inference
         <model name>: ResNet101
         <package dir>: resnet101-fp32-inference

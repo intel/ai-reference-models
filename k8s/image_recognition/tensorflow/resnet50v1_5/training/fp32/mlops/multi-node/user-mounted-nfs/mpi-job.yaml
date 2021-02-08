@@ -16,7 +16,7 @@ spec:
           - name: mpi-launcher
             imagePullPolicy: IfNotPresent
             workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
-            image: docker.io/intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+            image: docker.io/intel/image-recognition:tf-2.3.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
               runAsUser: 0 # {"$openapi":"USER_ID"}
               runAsGroup: 0 # {"$openapi":"GROUP_ID"}
@@ -92,7 +92,7 @@ spec:
           - name: mpi-worker
             imagePullPolicy: IfNotPresent
             workingDir: /workspace/resnet50v1-5-fp32-training # {"$openapi":"MODEL_DIR"}
-            image: docker.io/intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
+            image: docker.io/intel/image-recognition:tf-2.3.0-resnet50v1-5-fp32-training # {"$openapi":"IMAGE"}
             securityContext:
               runAsUser: 0 # {"$openapi":"USER_ID"}
               runAsGroup: 0 # {"$openapi":"GROUP_ID"}

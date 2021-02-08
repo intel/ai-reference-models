@@ -29,7 +29,7 @@ slice_sets:
         uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/int8/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/recommendation:tf-1.15.2-imz-2.2.0-wide-deep-large-ds-int8-inference
+        <docker image>: intel/recommendation:tf-1.15.2-wide-deep-large-ds-int8-inference
         <mode>: inference
         <model name>: Wide and Deep using a large dataset
         <package dir>: wide-deep-large-ds-int8-inference
