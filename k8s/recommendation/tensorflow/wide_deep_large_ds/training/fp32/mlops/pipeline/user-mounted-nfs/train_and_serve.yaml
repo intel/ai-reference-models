@@ -44,7 +44,7 @@ spec:
       runAsGroup: 0 # {"$openapi":"GROUP_ID"}
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: docker.io/intel/recommendation:tf-2.3.0-imz-2.2.0-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
+      image: docker.io/intel/recommendation:tf-2.3.0-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
       imagePullPolicy: IfNotPresent
       workingDir: /workspace/wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_DIR"}
       command: # {"$openapi":"MODEL_COMMAND"}

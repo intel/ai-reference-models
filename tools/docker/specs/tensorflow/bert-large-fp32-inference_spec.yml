@@ -47,7 +47,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-inference.tar.gz
         <package name>: bert-large-fp32-inference.tar.gz
         <package dir>: bert-large-fp32-inference
-        <docker image>: intel/language-modeling:tf-2.3.0-imz-2.2.0-bert-large-fp32-inference
+        <docker image>: intel/language-modeling:tf-2.3.0-bert-large-fp32-inference
       docs:
       - name: Title
         uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/title.md

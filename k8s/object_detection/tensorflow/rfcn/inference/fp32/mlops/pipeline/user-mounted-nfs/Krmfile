@@ -76,7 +76,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: IMAGE_VERSION
-          value: tf-2.3.0-imz-2.2.0
+          value: tf-2.3.0
           isSet: true
           setBy: model-builder
     io.k8s.cli.setters.IMAGE_SUFFIX:
@@ -183,7 +183,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: PREPROCESS_IMAGE_VERSION
-          value: tf-1.15.2-imz-2.2.0
+          value: tf-1.15.2
           isSet: true
           setBy: model-builder
     io.k8s.cli.substitutions.PREPROCESS_IMAGE:

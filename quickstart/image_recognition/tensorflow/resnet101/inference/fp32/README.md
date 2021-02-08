@@ -78,7 +78,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.3.0-imz-2.2.0-resnet101-fp32-inference \
+  intel/image-recognition:tf-2.3.0-resnet101-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
