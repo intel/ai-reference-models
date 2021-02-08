@@ -54,7 +54,7 @@ for other precisions are coming later.
      --mode inference \
      --socket-id 0 \
      --checkpoint /home/<user>/faster_rcnn_resnet50_fp32_coco \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
+     --docker-image intel/intel-optimized-tensorflow:1.15.2 \
      -- config_file=pipeline.config
     ```
 
@@ -67,7 +67,7 @@ for other precisions are coming later.
      --mode inference \
      --precision fp32 \
      --framework tensorflow \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
+     --docker-image intel/intel-optimized-tensorflow:1.15.2 \
      --model-source-dir /home/<user>/tensorflow/models \
      --data-location $OUTPUT_DIR \
      --in-graph /home/<user>/faster_rcnn_resnet50_fp32_coco/frozen_inference_graph.pb \
@@ -149,7 +149,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
      --mode inference \
      --socket-id 0 \
      --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
+     --docker-image intel/intel-optimized-tensorflow:1.15.2 \
      --benchmark-only \
      -- number_of_steps=5000
     ```
@@ -164,7 +164,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
      --precision int8 \
      --framework tensorflow \
      --socket-id 0 \
-     --docker-image intelaipg/intel-optimized-tensorflow:1.15.2 \
+     --docker-image intel/intel-optimized-tensorflow:1.15.2 \
      --model-source-dir /home/<user>/tensorflow/models \
      --data-location ${OUTPUT_DIR}/coco_val.record \
      --in-graph /home/<user>/faster_rcnn_int8_pretrained_model.pb  \
