@@ -102,7 +102,7 @@ This directory will be passed as the `--checkpoint` location when running infere
 5. Pull the relevant Intel-optimized TensorFlow Docker image.
 [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull intel/intel-optimized-tensorflow:2.3.0
+docker pull intel/intel-optimized-tensorflow:2.4.0
 ```
 
 6. Navigate to the inference script directory in local IntelAI repository.
@@ -131,7 +131,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     -- infer_option=SQuAD
 ```
 Console out:
@@ -159,7 +159,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     -- infer_option=SQuAD
 ```
 
@@ -196,7 +196,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     -- infer_option=SQuAD
 ```
 
@@ -215,7 +215,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     -- infer_option=SQuAD
 ```
 
@@ -236,7 +236,7 @@ python launch_benchmark.py \
     --checkpoint ~/bert_large_checkpoints \
     --output-dir ~/output \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --debug \
     -- infer_option=SQuAD
 ```

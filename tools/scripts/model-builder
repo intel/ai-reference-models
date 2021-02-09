@@ -231,7 +231,7 @@ _model_builder._init()
 
   declare -g -r MODEL_DIR=${MODEL_DIR-$PWD}
   # Tag to use for the 'versioned' images
-  declare -g -r TENSORFLOW_TAG=${TENSORFLOW_TAG:=2.3.0-ubuntu-20.04}
+  declare -g -r TENSORFLOW_TAG=${TENSORFLOW_TAG:=2.4.0-ubuntu-20.04}
   # Image name to use for the 'versioned' images
   declare -g -r TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE:=intel/intel-optimized-tensorflow}
   # Local container repo used for building images

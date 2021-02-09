@@ -73,7 +73,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --accuracy-only \
     --batch-size 100 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords
 ```
@@ -94,7 +94,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -111,7 +111,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -127,7 +127,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     --data-location /home/<user>/datasets/ImageNet_TFRecords \
     -- warmup_steps=50 steps=500
@@ -144,7 +144,7 @@ python launch_benchmark.py \
     --benchmark-only \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_int8_pretrained_model.pb \
     -- warmup_steps=50 steps=500
 ```
@@ -234,7 +234,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for online inference:
@@ -265,7 +265,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 128 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for batch inference:
@@ -297,7 +297,7 @@ python launch_benchmark.py \
     --accuracy-only \
     --batch-size 100 \
     --data-location /dataset/Imagenet_Validation \
-    --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     --in-graph /home/<user>/inceptionv3_fp32_pretrained_model.pb
 ```
 Example log tail when running for accuracy:

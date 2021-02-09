@@ -5,10 +5,10 @@ It's based on Scikit-learn and TensorFlow conda packages from Intel channel
 
 To build the container try this:
 ```
-docker build -f scikit-learn-databricks.Dockerfile . -t intel/intel-optimized-ml:tf-2.3.0-scikit-learn
+docker build -f scikit-learn-databricks.Dockerfile . -t intel/intel-optimized-ml:tf-2.4.0-scikit-learn
 ```
 
 To run the workflow try this:
 ```
-$ docker run -it intel/intel-optimized-ml:tf-2.3.0-imz-2.1.1-scikit-learn bash
+$ docker run -it intel/intel-optimized-ml:tf-2.4.0-scikit-learn bash
 ```

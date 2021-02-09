@@ -6,7 +6,7 @@ slice_sets:
   bert-large-int8-inference:
   - add_to_name: -bert-large-int8-inference
     args:
-    - TENSORFLOW_IMAGE=amr-registry.caas.intel.com/aipg-tf/model-zoo
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=bert-large-int8-inference
     dockerfile_subdirectory: model_containers
     documentation:
@@ -29,7 +29,7 @@ slice_sets:
         uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/int8/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/language-modeling:tf-2.3.0-bert-large-int8-inference
+        <docker image>: intel/language-modeling:tf-2.4.0-bert-large-int8-inference
         <mode>: inference
         <model name>: BERT Large
         <package dir>: bert-large-int8-inference

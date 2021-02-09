@@ -28,7 +28,7 @@ slice_sets:
         uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: 'intel/language-modeling:tf-2.3.0-bert-large-bfloat16-inference'
+        <docker image>: 'intel/language-modeling:tf-2.4.0-bert-large-bfloat16-inference'
         <mode>: inference
         <model name>: BERT Large
         <package dir>: bert-large-bfloat16-inference
