@@ -185,7 +185,7 @@ spec:
       - args:
         - -alsologtostderr
         - --kubectl-delivery-image
-        - mpioperator/kubectl-delivery:latest
+        - mpioperator/kubectl-delivery:v0.2.3
         image: mpioperator/mpi-operator:v0.2.3
         imagePullPolicy: Always
         name: mpi-operator
