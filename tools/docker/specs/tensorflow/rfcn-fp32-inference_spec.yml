@@ -23,8 +23,8 @@ slice_sets:
                 <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-fp32-inference.tar.gz
                 <package name>: rfcn-fp32-inference.tar.gz
                 <package dir>: rfcn-fp32-inference
-                <docker image>: intel/object-detection:tf-2.3.0-rfcn-fp32-inference
-                <docker image>: intel/object-detection:tf-2.3.0-rfcn-fp32-inference
+                <docker image>: intel/object-detection:tf-2.4.0-rfcn-fp32-inference
+                <docker image>: intel/object-detection:tf-2.4.0-rfcn-fp32-inference
               docs:
                   - name: Title
                     uri: models/quickstart/object_detection/tensorflow/rfcn/inference/fp32/.docs/title.md

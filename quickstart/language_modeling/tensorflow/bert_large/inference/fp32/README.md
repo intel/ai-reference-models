@@ -47,7 +47,7 @@ These quickstart scripts can be run the following environments:
 
 To run on bare metal, the following prerequisites must be installed in your enviornment:
 * Python 3
-* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * git
 
@@ -90,7 +90,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-modeling:tf-2.3.0-bert-large-fp32-inference \
+  intel/language-modeling:tf-2.4.0-bert-large-fp32-inference \
   /bin/bash ./quickstart/<SCRIPT NAME>.sh
 ```
 

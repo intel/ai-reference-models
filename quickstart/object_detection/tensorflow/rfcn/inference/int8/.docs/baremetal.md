@@ -3,7 +3,7 @@
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * <model name> uses the object detection code from the
 [TensorFlow Model Garden](https://github.com/tensorflow/models). Clone this repo with the SHA specified

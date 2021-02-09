@@ -71,7 +71,7 @@ docker run \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.3.0-resnet50-fp32-inference \
+  intel/image-recognition:tf-2.4.0-resnet50-fp32-inference \
   python benchmarks/launch_benchmark.py \
     --model-name resnet50 \
     --precision fp32 \
@@ -120,7 +120,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -w /workspace -t \
-  <mark><b>intel/image-recognition:tf-2.3.0-resnet50-fp32-inference</b></mark> \
+  <mark><b>intel/image-recognition:tf-2.4.0-resnet50-fp32-inference</b></mark> \
   /bin/bash /workspace/quickstart/&lt;script name&gt;.sh
 </pre>
 
@@ -151,6 +151,6 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -w /workspace -t \
-  <mark><b>intel/image-recognition:tf-2.3.0-resnet50-fp32-inference</b></mark> \
+  <mark><b>intel/image-recognition:tf-2.4.0-resnet50-fp32-inference</b></mark> \
   /bin/bash /workspace/quickstart/&lt;script name&gt;.sh
 </pre>

@@ -244,7 +244,7 @@ $ popd
             --framework tensorflow \
             --batch-size 1000 \
             --accuracy-only \
-            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+            --docker-image intel/intel-optimized-tensorflow:2.4.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords
        ```
@@ -263,7 +263,7 @@ $ popd
             --framework tensorflow \
             --benchmark-only \
             --batch-size 1 \
-            --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+            --docker-image intel/intel-optimized-tensorflow:2.4.0 \
             --in-graph $MODEL_WORK_DIR/wide_deep_fp32_pretrained_model.pb \
             --data-location $MODEL_WORK_DIR/models/eval_preprocessed_eval.tfrecords \
             --num-intra-threads 1 --num-inter-threads 1  \
@@ -362,13 +362,13 @@ $ popd
            --framework tensorflow \
            --batch-size 512 \
            --data-location $MODEL_WORK_DIR \
-           --docker-image intel/intel-optimized-tensorflow:2.3.0
+           --docker-image intel/intel-optimized-tensorflow:2.4.0
         
         ```
     Once the training completes successfully the path of checkpoint files and saved_model.pb will be printed as shown below
     ```
     INFO:tensorflow:SavedModel written to: home/<user>/temp-1602670603/saved_model.pb
-    Using TensorFlow version 2.3.0
+    Using TensorFlow version 2.4.0
     Begin training and evaluation
     Saving model checkpoints to /home/<user>/model_WIDE_AND_DEEP_1602670581
     ****Computing statistics of train dataset*****
@@ -377,5 +377,3 @@ $ popd
     evaluate done
     Model exported to home/<user>
     ```
-
-    

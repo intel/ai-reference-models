@@ -39,7 +39,7 @@ RUN git clone https://github.com/IntelAI/models.git
 
 WORKDIR models/docs/notebooks/perf_analysis
 
-ARG TF_VERSION=2.3.0
+ARG TF_VERSION=2.4.0
 
 # Create a virtual environment for stock TF
 RUN virtualenv -p python3 ./venv-stock-tf 

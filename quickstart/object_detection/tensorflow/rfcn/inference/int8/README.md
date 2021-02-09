@@ -39,7 +39,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * RFCN uses the object detection code from the
 [TensorFlow Model Garden](https://github.com/tensorflow/models). Clone this repo with the SHA specified
@@ -108,7 +108,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-rfcn-int8-inference \
+  intel/object-detection:tf-2.4.0-rfcn-int8-inference \
   /bin/bash quickstart/int8_inference.sh
 ```
 To get accuracy metrics:
@@ -124,7 +124,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-rfcn-int8-inference \
+  intel/object-detection:tf-2.4.0-rfcn-int8-inference \
   /bin/bash quickstart/int8_accuracy.sh
 ```
 

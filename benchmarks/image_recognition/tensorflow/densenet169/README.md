@@ -41,7 +41,7 @@ following modes/precisions:
         --batch-size 100 \
         --socket-id 0 \
         --in-graph /home/<user>/densenet169_fp32_pretrained_model.pb \
-        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
         -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"
     ```
@@ -57,7 +57,7 @@ following modes/precisions:
         --batch-size 1 \
         --socket-id 0 \
         --in-graph /home/<user>/densenet169_fp32_pretrained_model.pb \
-        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
         -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"
     ```
@@ -74,7 +74,7 @@ following modes/precisions:
         --batch-size 100 \
         --socket-id 0 \
         --in-graph /home/<user>/densenet169_fp32_pretrained_model.pb \
-        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
         --data-location /home/<user>/imagenet_validation_dataset \
         -- input_height=224 input_width=224 \
         input_layer="input" output_layer="densenet169/predictions/Reshape_1"

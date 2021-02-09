@@ -22,7 +22,7 @@ slice_sets:
                 <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-fp32-training.tar.gz
                 <package name>: bert-large-fp32-training.tar.gz
                 <package dir>: bert-large-fp32-training
-                <docker image>: intel/language-modeling:tf-2.3.0-bert-large-fp32-training
+                <docker image>: intel/language-modeling:tf-2.4.0-bert-large-fp32-training
               docs:
                   - name: Title
                     uri: models/quickstart/language_modeling/tensorflow/bert_large/training/fp32/.docs/title.md
