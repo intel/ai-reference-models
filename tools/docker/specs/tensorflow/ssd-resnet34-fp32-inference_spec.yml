@@ -40,7 +40,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ssd-resnet34-fp32-inference.tar.gz
         <package name>: ssd-resnet34-fp32-inference.tar.gz
         <package dir>: ssd-resnet34-fp32-inference
-        <docker image>: intel/object-detection:tf-2.3.0-ssd-resnet34-fp32-inference
+        <docker image>: intel/object-detection:tf-2.4.0-ssd-resnet34-fp32-inference
       uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32
     downloads:
     - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssd_resnet34_fp32_bs1_pretrained_model.pb

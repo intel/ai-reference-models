@@ -7,7 +7,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * cpio
 * Cython
 * horovod
-* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * jupyter
 * lxml
 * matplotlib

@@ -27,7 +27,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mlper
 4. Install Intel TensorFlow:
  It's a main dependency to build TensorFlow addons repository and create a pip wheel.
 ```
-pip install intel-tensorflow==2.3.0
+pip install intel-tensorflow==2.4.0
 ```
 
 Clone TensorFlow addons (r0.5) and apply a patch:
@@ -69,7 +69,7 @@ python launch_benchmark.py \
 --batch-size 1 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
---docker-image intel/intel-optimized-tensorflow:2.3.0 \
+--docker-image intel/intel-optimized-tensorflow:2.4.0 \
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --benchmark-only
 ```
@@ -84,7 +84,7 @@ python launch_benchmark.py \
 --batch-size 32 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
---docker-image intel/intel-optimized-tensorflow:2.3.0 \
+--docker-image intel/intel-optimized-tensorflow:2.4.0 \
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --benchmark-only
 ```
@@ -99,7 +99,7 @@ python launch_benchmark.py \
 --batch-size 32 \
 --socket-id 0 \
 --data-location /home/<user>/nmt/data \
---docker-image intel/intel-optimized-tensorflow:2.3.0 \
+--docker-image intel/intel-optimized-tensorflow:2.4.0 \
 --in-graph /home/<user>/mlperf_gnmt_fp32_pretrained_model.pb \
 --accuracy-only
 ```

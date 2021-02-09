@@ -5,7 +5,7 @@ It's based on Scikit-learn conda package from Intel channel
 
 To run the workflow try this:
 ```
-$ docker run -it intel/intel-optimized-ml:imz-2.1.1-scikit-learn-census-workflow bash
+$ docker run -it intel/intel-optimized-ml:scikit-learn-census-workflow bash
 $ python census_modin.py
 ```
 
