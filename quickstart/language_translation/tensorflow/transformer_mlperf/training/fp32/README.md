@@ -40,7 +40,7 @@ cd /home/<user>/transformer-mlperf-fp32-training/models/language_translation/ten
 python data_download.py --data_dir=$DATASET_DIR
 ```
 
-Running `python data_download.py --data_dir=$DATASET_DIR` assumes you have a python environment similar to what the `intel/intel-optimized-tensorflow:2.3.0-ubuntu-18.04` container provides. One option would be to run the above within the `intel/intel-optimized-tensorflow:2.3.0-ubuntu-18.04` container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:2.3.0-ubuntu-18.04`
+Running `python data_download.py --data_dir=$DATASET_DIR` assumes you have a python environment similar to what the `intel/intel-optimized-tensorflow:2.4.0-ubuntu-18.04` container provides. One option would be to run the above within the `intel/intel-optimized-tensorflow:2.4.0-ubuntu-18.04` container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:2.4.0-ubuntu-18.04`
 
 
 <!--- 40. Quick Start Scripts -->
@@ -65,7 +65,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 
 After installing the prerequisites, download and untar the model package.
@@ -125,7 +125,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-translation:tf-2.3.0-transformer-mlperf-fp32-training \
+  intel/language-translation:tf-2.4.0-transformer-mlperf-fp32-training \
   /bin/bash quickstart/<script name>
 ```
 

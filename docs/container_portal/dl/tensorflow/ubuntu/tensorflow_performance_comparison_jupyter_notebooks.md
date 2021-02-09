@@ -4,7 +4,7 @@
 ## Pull Command
 
 ```
-docker pull intel/intel-optimized-tensorflow:2.3.0-ubuntu-20.04-jupyter-performance-comparison
+docker pull intel/intel-optimized-tensorflow:2.4.0-ubuntu-20.04-jupyter-performance-comparison
 ```
 
 ## Description
@@ -29,7 +29,7 @@ There are two different analysis types:
        -p 8888:8888 \
        --env LISTEN_IP=0.0.0.0 \
        --privileged \
-       intel/intel-optimized-tensorflow:2.3.0-ubuntu-20.04-performance-comparison-jupyter
+       intel/intel-optimized-tensorflow:2.4.0-ubuntu-20.04-performance-comparison-jupyter
    ```
 
    If your machine is behind a proxy, you will need to pass proxy arguments to the run command. For example:

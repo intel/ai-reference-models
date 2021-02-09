@@ -28,7 +28,7 @@ slice_sets:
         uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/bfloat16/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: 'intel/language-translation:tf-2.3.0-transformer-mlperf-bfloat16-training'
+        <docker image>: 'intel/language-translation:tf-2.4.0-transformer-mlperf-bfloat16-training'
         <mode>: training
         <model name>: Transformer Language
         <package dir>: transformer-mlperf-bfloat16-training

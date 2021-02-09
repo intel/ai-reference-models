@@ -59,7 +59,7 @@ use in the next step.
              --batch-size 1 \
              --data-location /home/<user>/widedeep_dataset \
              --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+             --docker-image intel/intel-optimized-tensorflow:2.4.0 \
              --verbose
        ```
        The three locations used (model-source-dir, data-location, checkpoint) here, 
@@ -79,7 +79,7 @@ use in the next step.
              --batch-size 1024 \
              --data-location /home/<user>/path/to/dataset \
              --checkpoint /home/<user>/path/to/wide_deep_fp32_pretrained_model \
-             --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+             --docker-image intel/intel-optimized-tensorflow:2.4.0 \
              --verbose
        ```
        The three locations used (model-source-dir, data-location, checkpoint) here, 

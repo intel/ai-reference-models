@@ -41,7 +41,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.3.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * build-essential
 * Cython
@@ -122,7 +122,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-rfcn-fp32-inference \
+  intel/object-detection:tf-2.4.0-rfcn-fp32-inference \
   /bin/bash quickstart/fp32_inference.sh
 ```
 
@@ -147,7 +147,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.3.0-rfcn-fp32-inference \
+  intel/object-detection:tf-2.4.0-rfcn-fp32-inference \
   /bin/bash quickstart/fp32_accuracy.sh
 ```
 

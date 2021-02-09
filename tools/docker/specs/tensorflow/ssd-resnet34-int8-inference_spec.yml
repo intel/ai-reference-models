@@ -32,7 +32,7 @@ slice_sets:
         uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/int8/.docs/license.md
       name: README.md
       text_replace:
-        <docker image>: intel/object-detection:tf-2.3.0-ssd-resnet34-int8-inference
+        <docker image>: intel/object-detection:tf-2.4.0-ssd-resnet34-int8-inference
         <mode>: inference
         <model name>: SSD-ResNet34
         <package dir>: ssd-resnet34-int8-inference

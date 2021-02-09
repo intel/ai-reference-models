@@ -149,7 +149,7 @@ Follow the instructions below to download and prepare the dataset.
 1. Pull the relevant Intel Optimizations for TensorFlow Docker image. We'll be running the pretrained model to infer in a Docker container. 
    [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
 ```bash
-docker pull intel/intel-optimized-tensorflow:2.3.0
+docker pull intel/intel-optimized-tensorflow:2.4.0
 ```
 2. cd to the inference script directory:
 ```bash        
@@ -176,7 +176,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --mode inference \
         --framework tensorflow \
         --benchmark-only \
-        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
@@ -193,7 +193,7 @@ Set this parameter to a socket id to run the workload on a single socket.
         --mode inference \
         --framework tensorflow \
         --benchmark-only \
-        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose
@@ -231,7 +231,7 @@ The logs are captured in a directory outside of the container.<br>
         --mode inference \
         --framework tensorflow \
         --accuracy-only \
-        --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
         --in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
         --data-location ~/models/models/eval_preprocessed.tfrecords \
         --verbose		
@@ -261,7 +261,7 @@ perform necessary installs, run the ```launch_benchmark.py``` script, and does n
 			--mode inference \
 			--framework tensorflow \
 			--benchmark-only \
-			--docker-image intel/intel-optimized-tensorflow:2.3.0 \
+			--docker-image intel/intel-optimized-tensorflow:2.4.0 \
 			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
 			--data-location ~/models/models/eval_preprocessed.tfrecords \
 			--debug				
@@ -335,7 +335,7 @@ Untar the file to create three files:
 			--mode inference \
 			--framework tensorflow \
 			--benchmark-only \
-			--docker-image intel/intel-optimized-tensorflow:2.3.0 \
+			--docker-image intel/intel-optimized-tensorflow:2.4.0 \
 			--in-graph ~/wide_deep_files/wide_deep_fp32_pretrained_model.pb \
 			--data-location ~/models/models/test_preprocessed.tfrecords \
 			--verbose
