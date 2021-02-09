@@ -61,7 +61,7 @@ There are two different analysis type.
 
 1. Create conda env: `$conda create -n stock-tensorflow python matplotlib ipykernel psutil pandas gitpython`
 2. Activate the created conda env: `$source activate stock-tensorflow`
-3. Install stock Tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.3.0`
+3. Install stock Tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.4.0`
 4. Install extra needed package: `(stock-tensorflow) $pip install cxxfilt`
 5. Deactivate conda env: `(stock-tensorflow)$conda deactivate`
 6. Register the kernel to Jupyter NB: `$~/.conda/envs/stock-tensorflow/bin/python -m ipykernel install --user --name=stock-tensorflow`
@@ -94,12 +94,12 @@ There are two different analysis type.
 
 1. Create conda env: `$conda create -n stock-tensorflow python matplotlib ipykernel psutil pandas gitpython`
 
-> NOTE: If users want to use Tensorflow v1.14, they need to install python v3.6 by assigning `python=3.6`.
+> NOTE: If users want to use Tensorflow v1.15.2, they need to install python v3.6 by assigning `python=3.6`.
 
 2. Activate the created conda env: `$conda activate stock-tensorflow`
-3. Install stock tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.3.0`
+3. Install stock tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.4.0`
 
-> NOTE: You can change the Tensorflow version to different one. We validated on v1.14 and v2.3.0.
+> NOTE: You can change the Tensorflow version to different one. We validated on v1.15.1 and v2.4.0.
 
 4. Install extra needed package: `(stock-tensorflow) $pip install cxxfilt`
 5. Deactivate conda env: `(stock-tensorflow)$conda deactivate`
@@ -112,12 +112,12 @@ There are two different analysis type.
 
 1. Create conda env: `$conda create -n intel-tensorflow python matplotlib ipykernel psutil pandas gitpython`
 
-> NOTE: If users want to use Tensorflow v1.14, they need to install python v3.6 by assigning `python=3.6`
+> NOTE: If users want to use Tensorflow v1.15.2, they need to install python v3.6 by assigning `python=3.6`
 
 2. Activate the created conda env: `$conda activate intel-tensorflow`
-3. Install Intel-optimized tensorflow with a specific version: `(intel-tensorflow) $pip install intel-tensorflow==2.3.0`
+3. Install Intel-optimized tensorflow with a specific version: `(intel-tensorflow) $pip install intel-tensorflow==2.4.0`
 
-> NOTE: You can change the Tensorflow version to a different one. We validated on v1.14 and v2.3.0.
+> NOTE: You can change the Tensorflow version to a different one. We validated on v1.15.2 and v2.4.0.
 
 4. Install extra needed package: `(intel-tensorflow) $pip install cxxfilt`
 5. Deactivate conda env: `(intel-tensorflow)$conda deactivate`
@@ -135,7 +135,7 @@ There are two different analysis type.
 1. Create virtual env: `$virtualenv  -p python3 ./venv-stock-tf`
 2. Activate the created virtualenv:  `$source ./venv-stock-tf/bin/activate`
 3. Install required packages:  `(venv-stock-tf)$pip install matplotlib ipykernel psutil pandas cxxfilt gitpython`
-4. Install intel tensorflow with specific version: `(venv-stock-tf)$pip install tensorflow==2.3.0`
+4. Install intel tensorflow with specific version: `(venv-stock-tf)$pip install tensorflow==2.4.0`
 5. Deactivate virtualenv: `(venv-stock-tf)$deactivate`
 6. Register the kernel to Jupyter NB: `$venv-stock-tf/bin/python  -m ipykernel install --user --name=stock-tensorflow`
 
@@ -146,7 +146,7 @@ There are two different analysis type.
 1. Create virtual env: `$virtualenv  -p python3 ./venv-intel-tf`
 2. Activate the created virtualenv:  `$source ./venv-intel-tf/bin/activate`
 3. Install required packages:  `(venv-intel-tf)$pip install matplotlib ipykernel psutil pandas cxxfilt gitpython`
-4. Install Intel-optimized tensorflow with a specific version: `(venv-intel-tf)$pip install intel-tensorflow==2.3.0`
+4. Install Intel-optimized tensorflow with a specific version: `(venv-intel-tf)$pip install intel-tensorflow==2.4.0`
 5. Deactivate virtualenv: `(venv-intel-tf)$deactivate`
 6. Register the kernel to Jupyter NB: `$venv-intel-tf/bin/python  -m ipykernel install --user --name=intel-tensorflow` 
 
