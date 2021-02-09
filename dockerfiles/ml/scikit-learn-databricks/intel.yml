@@ -13,4 +13,4 @@ dependencies:
   - six=1.15.0
   - pip:
     - pyarrow==0.17.0
-    - intel-tensorflow==2.3.0
+    - intel-tensorflow==2.4.0

@@ -24,5 +24,5 @@ cd /home/<user>/<package dir>/models/language_translation/tensorflow/transformer
 python data_download.py --data_dir=$DATASET_DIR
 ```
 
-Running `python data_download.py --data_dir=$DATASET_DIR` assumes you have a python environment similar to what the `intel/intel-optimized-tensorflow:2.3.0-ubuntu-18.04` container provides. One option would be to run the above within the `intel/intel-optimized-tensorflow:2.3.0-ubuntu-18.04` container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:2.3.0-ubuntu-18.04`
+Running `python data_download.py --data_dir=$DATASET_DIR` assumes you have a python environment similar to what the `intel/intel-optimized-tensorflow:2.4.0-ubuntu-18.04` container provides. One option would be to run the above within the `intel/intel-optimized-tensorflow:2.4.0-ubuntu-18.04` container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:2.4.0-ubuntu-18.04`
 

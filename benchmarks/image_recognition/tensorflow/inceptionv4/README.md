@@ -57,7 +57,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+       --docker-image intel/intel-optimized-tensorflow:2.4.0 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb \
        --data-location /home/<user>/ImageNet_TFRecords
    ```
@@ -72,7 +72,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+       --docker-image intel/intel-optimized-tensorflow:2.4.0 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -86,7 +86,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+       --docker-image intel/intel-optimized-tensorflow:2.4.0 \
        --in-graph /home/<user>/inceptionv4_int8_pretrained_model.pb
    ```
 
@@ -187,7 +187,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --accuracy-only \
        --batch-size 100 \
        --socket-id 0 \
-       --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+       --docker-image intel/intel-optimized-tensorflow:2.4.0 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb \
        --data-location /home/<user>/ImageNet_TFRecords
    ```
@@ -202,7 +202,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 240 \
        --socket-id 0 \
-       --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+       --docker-image intel/intel-optimized-tensorflow:2.4.0 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
@@ -216,7 +216,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
        --benchmark-only \
        --batch-size 1 \
        --socket-id 0 \
-       --docker-image intel/intel-optimized-tensorflow:2.3.0 \
+       --docker-image intel/intel-optimized-tensorflow:2.4.0 \
        --in-graph /home/<user>/inceptionv4_fp32_pretrained_model.pb
    ```
 
