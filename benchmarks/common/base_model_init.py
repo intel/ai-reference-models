@@ -97,6 +97,10 @@ class BaseModelInitializer(object):
         """
         Prints debug messages when verbose is enabled, and then runs the
         specified command.
+
+        If the replace_unique_output_dir arg is set, multi-instance runs will
+        swap out that path for a path with the instance number in the folder name
+        so that each instance uses a unique output folder.
         """
         if self.args.verbose:
             print("Received these standard args: {}".format(self.args))
@@ -141,6 +145,10 @@ class BaseModelInitializer(object):
         The command for each instance uses numactl and the --physcpubind arg with
         the appropriate core list. Each instance writes output to it's own log file,
         and a combined log file is created after everything has executed.
+
+        If the replace_unique_output_dir arg is set, multi-instance runs will
+        swap out that path for a path with the instance number in the folder name
+        so that each instance uses a unique output folder.
         """
         # Get the cores list and group them according to the number of cores per instance
         cores_per_instance = int(self.args.numa_cores_per_instance)
