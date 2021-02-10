@@ -114,7 +114,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * pillow>=7.1.0
 * protoc
 * pycocotools
-* tensorflow-addons==0.8.1
+* tensorflow-addons==0.11.0
 
 For more information, see the
 [installation instructions](https://github.com/tensorflow/models/blob/8110bb64ca63c48d0caee9d565e5b4274db2220a/research/object_detection/g3doc/installation.md#installation)
