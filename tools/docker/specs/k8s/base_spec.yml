@@ -37,7 +37,7 @@ slice_sets:
     mpi-horovod:
         - add_to_name: ""
           args:
-              - PY_VERSION=3.7
+              - PY_VERSION=3.8
 
     image-recognition:
         - add_to_name: "-image-recognition"
@@ -74,7 +74,7 @@ slice_sets:
     object-detection:
         - add_to_name: "-object-detection"
           args:
-              - PY_VERSION=3.7
+              - PY_VERSION=3.8
           files:
                - source: LICENSE
                  destination: licenses/LICENSE
