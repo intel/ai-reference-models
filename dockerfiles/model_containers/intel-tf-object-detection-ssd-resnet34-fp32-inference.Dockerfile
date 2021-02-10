@@ -90,7 +90,7 @@ RUN apt-get update && \
 
 RUN pip install opencv-python
 
-RUN pip install tensorflow-addons==0.8.1
+RUN pip install tensorflow-addons==0.11.0
 
 ARG TF_BENCHMARKS_BRANCH
 

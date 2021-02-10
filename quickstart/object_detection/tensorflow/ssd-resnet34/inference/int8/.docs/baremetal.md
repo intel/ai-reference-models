@@ -17,7 +17,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * matplotlib
 * pycocotools
 * horovod==0.20.0
-* tensorflow-addons==0.8.1
+* tensorflow-addons==0.11.0
 * opencv-python
 
 In addition to the libraries above, <model name> uses the
