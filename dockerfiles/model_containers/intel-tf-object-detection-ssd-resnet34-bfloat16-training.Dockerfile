@@ -145,7 +145,7 @@ RUN pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
 RUN apt-get update && \
     apt-get install -y cpio
 
-RUN pip install tensorflow-addons==0.8.1
+RUN pip install tensorflow-addons==0.11.0
 
 RUN pip install opencv-python
 
