@@ -21,7 +21,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * opencv-python
 * pillow>=7.1.0
 * pycocotools
-* tensorflow-addons==0.8.1
+* tensorflow-addons==0.11.0
 
 The [TensorFlow models](https://github.com/tensorflow/models) and
 [benchmarks](https://github.com/tensorflow/benchmarks) repos are used by
