@@ -84,6 +84,38 @@ docker run \
     --data-location ${DATASET_DIR}
 ```
 
+#### Docker CPUSET Settings
+
+We recommend pinning a TensorFlow model container to a single NUMA node. Use the Docker run options `--cpuset-cpus` and `--cpuset-mems`. 
+The output of the `lscpu` command will show the CPU IDs associated with each NUMA node.
+
+***--cpuset-cpus/--cpuset-mems*** to confine the container to use a single NUMA node or the specified CPUs within a NUMA node.
+For the equivalent of `numactl --cpunodebind=0 --membind=0`, use `docker run ... --cpuset-cpus="<cpus_in_numa_node_0>" --cpuset-mems=0 ...` for NUMA node 0.
+
+An example for running `python benchmarks/launch_benchmark.py` using ResNet50 FP32 inference container, that is pinned to CPUs `0-27` in NUMA node 0:
+<pre>
+DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
+OUTPUT_DIR=&lt;directory where log files will be written&gt;
+
+docker run \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --env http_proxy=${http_proxy} \
+  --env https_proxy=${https_proxy} \
+  <mark><b>--cpuset-cpus="0-27" --cpuset-mems="0"</b></mark> \
+  --privileged --init -t \
+  intel/image-recognition:tf-2.4.0-resnet50-fp32-inference \
+  python benchmarks/launch_benchmark.py \
+    --model-name resnet50 \
+    --precision fp32 \
+    --mode inference \
+    --batch-size=128 \
+    --framework tensorflow \
+    --output-dir {OUTPUT_DIR} \
+    --in-graph resnet50_fp32_pretrained_model.pb \
+    --data-location ${DATASET_DIR}
+</pre>
+
 ## Mounting local model packages in docker
 
 A download of the model package can be run in a docker container by mounting the
