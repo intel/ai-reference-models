@@ -86,7 +86,7 @@ RUN cd ${TF_MODELS_DIR}/research && \
 RUN apt-get update && \
     apt-get install -y cpio
 
-RUN pip install tensorflow-addons==0.8.1
+RUN pip install tensorflow-addons==0.11.0
 
 RUN pip install opencv-python
 

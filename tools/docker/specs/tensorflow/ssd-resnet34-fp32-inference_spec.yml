@@ -79,7 +79,7 @@ slice_sets:
     partials:
     - libgl
     - opencv
-    - tensorflow-addons-0.8.1
+    - tensorflow-addons-0.11.0
     - tensorflow/benchmarks-source
     - model_package
     - entrypoint
