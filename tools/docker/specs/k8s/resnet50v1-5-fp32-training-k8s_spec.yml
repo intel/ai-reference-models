@@ -13,7 +13,7 @@ slice_sets:
           <precision>: FP32
           <mode>: training
           <use case>: image_recognition
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/resnet50v1-5-fp32-training-k8s.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50v1-5-fp32-training-k8s.tar.gz
           <package name>: resnet50v1-5-fp32-training-k8s.tar.gz
           <package dir>: resnet50v1-5-fp32-training-k8s
           <docker image>: intel/image-recognition:tf-2.4.0-resnet50v1-5-fp32-training
