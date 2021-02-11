@@ -10,7 +10,7 @@ using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-int8-inference.tar.gz)
+[bert-large-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -59,7 +59,7 @@ for more details on the different options.
 
 The snippet below shows how to run a quickstart script:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/bert-large-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-int8-inference.tar.gz
 tar -xvf bert-large-int8-inference.tar.gz
 cd bert-large-int8-inference
 
