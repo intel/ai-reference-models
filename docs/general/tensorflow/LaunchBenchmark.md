@@ -91,7 +91,9 @@ optional arguments:
                         with --num-cores, all cores will be allocated on the
                         single socket.
   --num-instances NUM_INSTANCES
-                        Specify the number of instances to run.
+                        Specify the number of instances to run. This flag is
+                        deprecated and will be removed in the future. Please
+                        use --numa-cores-per-instance instead.
   -n NUM_CORES, --num-cores NUM_CORES
                         Specify the number of cores to use. If the parameter
                         is not specified or is -1, all cores will be used.

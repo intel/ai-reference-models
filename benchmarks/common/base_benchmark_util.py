@@ -135,7 +135,8 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "--num-instances", type=check_positive_number,
-            help="Specify the number of instances to run.",
+            help="Specify the number of instances to run. This flag is deprecated and will "
+                 "be removed in the future. Please use --numa-cores-per-instance instead.",
             dest="num_instances", default=1)
 
         self._common_arg_parser.add_argument(
@@ -294,6 +295,10 @@ class BaseBenchmarkUtil(object):
             raise ValueError("--output-results is currently only supported for resnet50 FP32 inference.")
         elif args.output_results and (args.mode != "inference" or not args.data_location):
             raise ValueError("--output-results can only be used when running inference with a dataset.")
+
+        if args.num_instances != 1:
+            print("Warning: The --num-instances flag is deprecated and will be removed in the future. "
+                  "Please use --numa-cores-per-instance instead.")
 
         # Verify that the number of numa cores per instances is less than the number of system cores
         if args.numa_cores_per_instance:
