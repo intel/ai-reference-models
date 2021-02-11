@@ -1,5 +1,3 @@
-#! /usr/bin/env python
-
 # coding=utf-8
 # Copyright 2018 The Google AI Language Team Authors.
 #
@@ -181,8 +179,6 @@ flags.DEFINE_integer("intra_op_parallelism_threads", 28,
 
 flags.DEFINE_bool("profile", False, "[Optional] To enable Tensorflow profile hook."
                                     "The profile output will be generated in the output_dir")
-
-flags.DEFINE_string("input_graph", None, "path of frozen graph.")
 
 flags.DEFINE_bool("experimental_gelu", False,
     "[Optional] If true, use experimental gelu op in model."
@@ -639,40 +635,13 @@ def create_model(bert_config, is_training, input_ids, input_mask, segment_ids,
   unstacked_logits = tf.unstack(logits, axis=0)
 
   (start_logits, end_logits) = (unstacked_logits[0], unstacked_logits[1])
-  start = tf.identity(start_logits, name = "start_logits")
-  end = tf.identity(end_logits, name = "end_logits")
 
-  return (start, end)
-
-
-def create_model_top(bert_config, is_training, input_ids, input_mask, segment_ids,
-                     use_one_hot_embeddings, frozen_graph=None):
-    if frozen_graph and not is_training:
-        print("reading***** From *** pb", flush=True)
-        inputs ={'input_ids': input_ids,
-                 'input_mask': input_mask,
-                 'segment_ids': segment_ids}
-
-        outputs = ['start_logits:0', 'end_logits:0']
-
-        with tf.io.gfile.GFile(frozen_graph, "rb") as f:
-            graph_def = tf.compat.v1.GraphDef()
-            graph_def.ParseFromString(f.read())
-
-        return tf.graph_util.import_graph_def(graph_def, inputs, outputs, name="")
-
-    return create_model(
-        bert_config=bert_config,
-        is_training=is_training,
-        input_ids=input_ids,
-        input_mask=input_mask,
-        segment_ids=segment_ids,
-        use_one_hot_embeddings=use_one_hot_embeddings)
+  return (start_logits, end_logits)
 
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, use_tpu,
-                     use_one_hot_embeddings, frozen_graph):
+                     use_one_hot_embeddings):
   """Returns `model_fn` closure for TPUEstimator."""
 
   def model_fn(features, labels, mode, params):  # pylint: disable=unused-argument
@@ -691,25 +660,23 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
 
     if bert_config.precision == "bfloat16" :
       with tf.compat.v1.tpu.bfloat16_scope():
-        (start_logits, end_logits) = create_model_top(
+        (start_logits, end_logits) = create_model(
             bert_config=bert_config,
             is_training=is_training,
             input_ids=input_ids,
             input_mask=input_mask,
             segment_ids=segment_ids,
-            use_one_hot_embeddings=use_one_hot_embeddings,
-            frozen_graph=frozen_graph)
+            use_one_hot_embeddings=use_one_hot_embeddings)
       start_logits = tf.cast(start_logits, tf.float32)
       end_logits = tf.cast(end_logits, tf.float32)
     else :
-        (start_logits, end_logits) = create_model_top(
+        (start_logits, end_logits) = create_model(
             bert_config=bert_config,
             is_training=is_training,
             input_ids=input_ids,
             input_mask=input_mask,
             segment_ids=segment_ids,
-            use_one_hot_embeddings=use_one_hot_embeddings,
-            frozen_graph=frozen_graph)
+            use_one_hot_embeddings=use_one_hot_embeddings)
 
     tvars = tf.compat.v1.trainable_variables()
 
@@ -1297,8 +1264,7 @@ def main(_):
       num_train_steps=num_train_steps,
       num_warmup_steps=num_warmup_steps,
       use_tpu=FLAGS.use_tpu,
-      use_one_hot_embeddings=FLAGS.use_tpu,
-      frozen_graph=FLAGS.input_graph)
+      use_one_hot_embeddings=FLAGS.use_tpu)
 
   # If TPU is not available, this will fall back to normal Estimator on CPU
   # or GPU.
@@ -1396,7 +1362,7 @@ def main(_):
     else:
       hooks = []
     warm_up_steps = 20
-    threshold_examples = warm_up_steps * FLAGS.predict_batch_size
+    threshod_examples = warm_up_steps * FLAGS.predict_batch_size
     num_processed_examples = 0
     all_results = []
     for result in estimator.predict(
@@ -1406,7 +1372,7 @@ def main(_):
       if FLAGS.mode in ('benchmark', 'profile'):
         if num_processed_examples % 10 == 0:
           tf.compat.v1.logging.info("Processed #examples: %d" % (num_processed_examples))
-        if num_processed_examples == (threshold_examples):
+        if num_processed_examples == (threshod_examples + 1):
           start = time.time()
       elif FLAGS.mode == 'accuracy':
         if len(all_results) % 10 == 0:
@@ -1421,10 +1387,10 @@ def main(_):
                 end_logits=end_logits))
     if FLAGS.mode in ('benchmark', 'profile'):
       end = time.time()
-      print("Elapsed time: %f num processed examples: %d threshold_examples: %d"
-                                            % (end-start, num_processed_examples, threshold_examples))
-      print("throughput((num_processed_examples-threshold_examples)/Elapsedtime): %3.2f"
-                                           % (float(num_processed_examples-threshold_examples)/float(end-start)))
+      print("Elapsed time: %f num processed examples: %d threshod_examples: %d"
+                                            % (end-start, num_processed_examples, threshod_examples))
+      print("throughput((num_processed_examples-threshod_examples)/Elapsedtime): %3.2f"
+                                           % (float(num_processed_examples-threshod_examples)/float(end-start)))
     if FLAGS.mode == 'accuracy':
       output_prediction_file = os.path.join(FLAGS.output_dir, "predictions.json")
       output_nbest_file = os.path.join(FLAGS.output_dir, "nbest_predictions.json")
