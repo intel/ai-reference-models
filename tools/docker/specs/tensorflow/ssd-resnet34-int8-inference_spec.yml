@@ -37,7 +37,7 @@ slice_sets:
         <model name>: SSD-ResNet34
         <package dir>: ssd-resnet34-int8-inference
         <package name>: ssd-resnet34-int8-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ssd-resnet34-int8-inference.tar.gz
+        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz
         <precision>: Int8
         <use case>: object_detection
       uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/int8
