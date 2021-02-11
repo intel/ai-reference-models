@@ -11,7 +11,7 @@ using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-resnet34-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ssd-resnet34-int8-inference.tar.gz)
+[ssd-resnet34-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -92,7 +92,7 @@ download and untar the model package. The model package includes the
 SSD-ResNet34 Int8 pretrained model and the scripts needed to run
 inference.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/ssd-resnet34-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz
 tar -xzf ssd-resnet34-int8-inference.tar.gz
 cd ssd-resnet34-int8-inference
 ```

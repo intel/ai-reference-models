@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-fp32-inference.tar.gz)
+[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/rfcn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -59,7 +59,7 @@ in the TensorFlow models repo.
 Download and untar the RFCN FP32 inference model package:
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_2_0/rfcn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/rfcn-fp32-inference.tar.gz
 tar -xvf rfcn-fp32-inference.tar.gz
 ```
 
