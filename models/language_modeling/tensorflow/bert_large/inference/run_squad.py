@@ -1396,7 +1396,7 @@ def main(_):
     else:
       hooks = []
     warm_up_steps = 20
-    threshold_examples = warm_up_steps * FLAGS.predict_batch_size
+    threshod_examples = warm_up_steps * FLAGS.predict_batch_size
     num_processed_examples = 0
     all_results = []
     for result in estimator.predict(
@@ -1406,7 +1406,7 @@ def main(_):
       if FLAGS.mode in ('benchmark', 'profile'):
         if num_processed_examples % 10 == 0:
           tf.compat.v1.logging.info("Processed #examples: %d" % (num_processed_examples))
-        if num_processed_examples == (threshold_examples):
+        if num_processed_examples == (threshod_examples + 1):
           start = time.time()
       elif FLAGS.mode == 'accuracy':
         if len(all_results) % 10 == 0:
@@ -1421,10 +1421,10 @@ def main(_):
                 end_logits=end_logits))
     if FLAGS.mode in ('benchmark', 'profile'):
       end = time.time()
-      print("Elapsed time: %f num processed examples: %d threshold_examples: %d"
-                                            % (end-start, num_processed_examples, threshold_examples))
-      print("throughput((num_processed_examples-threshold_examples)/Elapsedtime): %3.2f"
-                                           % (float(num_processed_examples-threshold_examples)/float(end-start)))
+      print("Elapsed time: %f num processed examples: %d threshod_examples: %d"
+                                            % (end-start, num_processed_examples, threshod_examples))
+      print("throughput((num_processed_examples-threshod_examples)/Elapsedtime): %3.2f"
+                                           % (float(num_processed_examples-threshod_examples)/float(end-start)))
     if FLAGS.mode == 'accuracy':
       output_prediction_file = os.path.join(FLAGS.output_dir, "predictions.json")
       output_nbest_file = os.path.join(FLAGS.output_dir, "nbest_predictions.json")
