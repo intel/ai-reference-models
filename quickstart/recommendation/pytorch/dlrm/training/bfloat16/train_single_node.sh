@@ -37,6 +37,6 @@ fi
 
 # TODO: Fill in the launch_benchmark.py command with the recommended args
 
-${MODEL_DIR}/models/recommendation/pytorch/dlrm/training/bf16/bench/cleanup.sh
-${MODEL_DIR}/models/recommendation/pytorch/dlrm/training/bf16/bench/dlrm_mlperf_4s_1n_cpx.sh
+${MODEL_DIR}/models/recommendation/pytorch/dlrm/training/bfloat16/bench/cleanup.sh
+${MODEL_DIR}/models/recommendation/pytorch/dlrm/training/bfloat16/bench/dlrm_mlperf_4s_1n_cpx.sh
 

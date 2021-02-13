@@ -20,7 +20,7 @@ tools/docker/specs/
 │   ├── scikit-learn-census_spec.yml
 │   └── ...
 ├── pytorch
-│   ├── pytorch-resnet50-bf16-inference_spec.yml
+│   ├── pytorch-resnet50-bfloat16-inference_spec.yml
 │   └── ...
 └── tensorflow
     ├── bert-large-bfloat16-inference_spec.yml
