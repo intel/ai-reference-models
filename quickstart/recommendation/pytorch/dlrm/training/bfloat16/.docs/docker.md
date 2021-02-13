@@ -16,6 +16,6 @@ docker run \
   --volume ${DATA_PATH}:${DATA_PATH} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  model-zoo:intel-python-dlrm-bf16-training \
-  /bin/bash quickstart/recommendation/pytorch/dlrm/training/bf16/train_single_node.sh
+  intel/recommendation:pytorch-1.5.0-rc3-dlrm-bfloat16-training \
+  /bin/bash quickstart/<script name>.sh
 ```
