@@ -128,9 +128,9 @@ The `--framework` (or `-f`) flag applies to the following model-builder subcomma
 * generate-deployment (e.g. `model-builder generate-deployment -f k8s`)
 * images (e.g `model-builder images -f pytorch` or `model-builder images -f ml`)
 * init-spec (e.g. `model-builder init-spec -f tensorflow inceptionv4-fp32-inference`)
-* make (e.g. `model-builder make -f pytorch pytorch-resnet50-bf16-inference`)
+* make (e.g. `model-builder make -f pytorch pytorch-resnet50-bfloat16-inference`)
 * models (e.g. `model-builder models -f pytorch`)
-* package (e.g. `model-builder package -f pytorch pytorch-resnet50-bf16-inference`)
+* package (e.g. `model-builder package -f pytorch pytorch-resnet50-bfloat16-inference`)
 * packages (e.g. `model-builder packages -f tensorflow`)
 * run-test-suite (e.g. `model-builder run-test-suite -c generate-dockerfile -f pytorch`)
 

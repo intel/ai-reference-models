@@ -76,4 +76,4 @@ slice_sets:
     - opencv
     - model_package
     - entrypoint
-    - object_detection/ssdresnet34_bf16_patch
+    - object_detection/ssdresnet34_bfloat16_patch
