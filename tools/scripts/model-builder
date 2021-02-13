@@ -1507,9 +1507,7 @@ _model_builder._parse_model_name()
   declare -n __precision=$4
   declare -n __mode=$5
   declare -n __dir=$6
-  if [[ $_model =~ bf16 ]]; then
-    __precision=bf16
-  elif [[ $_model =~ bfloat16 ]]; then
+  if [[ $_model =~ bfloat16 ]]; then
     __precision=bfloat16
   elif [[ $_model =~ fp32 ]]; then
     __precision=fp32

@@ -10,7 +10,7 @@ Intel-optimized PyTorch.
 <!--- 20. Datasets -->
 ## Datasets
 
-Prepare your dataset according to the [instruction described here](/models/recommendation/pytorch/dlrm/training/bf16/README.md#4-prepare-dataset)
+Prepare your dataset according to the [instruction described here](/models/recommendation/pytorch/dlrm/training/bfloat16/README.md#4-prepare-dataset)
 
 Set the `DATA_PATH` to point to "<dir/to/save/dlrm_data>" directory when running DLRM.
 
@@ -28,7 +28,7 @@ These quickstart scripts can be run in different environments:
 <!--- 40. Bare Metal -->
 ## Bare Metal
 
-To run on bare metal first, follow the [instruction described here](/models/recommendation/pytorch/dlrm/training/bf16/README.md#1-install-anaconda-30) until section 4.
+To run on bare metal first, follow the [instruction described here](/models/recommendation/pytorch/dlrm/training/bfloat16/README.md#1-install-anaconda-30) until section 4.
 
 After installing the prerequisites, Set environment variables
 for the path to your `DATA_PATH`then run a 
@@ -58,8 +58,8 @@ docker run \
   --volume ${DATA_PATH}:${DATA_PATH} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  model-zoo:intel-python-dlrm-bf16-training \
-  /bin/bash quickstart/recommendation/pytorch/dlrm/training/bf16/train_single_node.sh
+  intel/recommendation:pytorch-1.5.0-rc3-dlrm-bfloat16-training \
+  /bin/bash quickstart/<script name>.sh
 ```
 
 <!--- 70. License -->
