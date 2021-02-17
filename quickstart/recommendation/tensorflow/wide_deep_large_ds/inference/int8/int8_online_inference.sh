@@ -35,12 +35,8 @@ if [ ! -f "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ -z "${NUM_OMP_THREADS}" ]; then
-  echo "The required environment variable NUM_OMP_THREADS has not been set"
-  exit 1
-fi
-
-MODEL_FILE="$(pwd)/wide_deep_int8_pretrained_model.pb"
+NUM_OMP_THREADS="${NUM_OMP_THREADS:-1}"
+MODEL_FILE="${MODEL_DIR}/wide_deep_int8_pretrained_model.pb"
 
 # Run wide and deep large dataset inference
 source "$(dirname $0)/common/utils.sh"
