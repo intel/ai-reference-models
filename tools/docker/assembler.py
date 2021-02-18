@@ -1366,10 +1366,14 @@ def main(argv):
     # we can't build dockerfiles/images in the same run as creating the spec
     sys.exit(0)
 
-  # Get existing partial contents
-  partials = gather_existing_partials(FLAGS.partial_dir)
+  # Get existing partial contents for centos or ubuntu
+  partials_dir = FLAGS.partial_dir
+  if any("centos" in arg for arg in FLAGS.arg):
+    partials_dir = os.path.join(FLAGS.partial_dir, 'centos')
 
-  # read in all spec files 
+  partials = gather_existing_partials(partials_dir)
+
+  # read in all spec files
   tag_spec = get_tag_spec(FLAGS.spec_dir, partials)
 
   # characters for underlining headers

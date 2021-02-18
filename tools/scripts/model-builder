@@ -223,7 +223,7 @@ _model_builder._sort_unique()
 #
 _model_builder._init()
 {
-  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home
+  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home _platform
   _xdg_config_home=${XDG_CONFIG_HOME:-$HOME/.config}
   declare -g _spec_home=${_xdg_config_home}/$(basename $0)/specs
 
@@ -258,6 +258,17 @@ _model_builder._init()
   _model_builder._root 1>/dev/null
 
   _spec_folder=$(_model_builder._root)/docker/specs
+  _spec_dir_mounted='./specs'
+
+  # add platforms other than ubuntu:
+  _platform='centos'
+  if [[ ${TAG_PREFIX} == *"${_platform}"* ]]; then
+    _spec_folder=${_spec_folder}/${_platform}
+    _spec_home=${_spec_home}/${_platform}
+    _spec_dir_mounted=${_spec_dir_mounted}/${_platform}
+  fi
+  declare -g _spec_dir_mounted=${_spec_dir_mounted}
+
   if [[ ! -d $_spec_folder ]]; then
     echo "Error: The spec folder does not exist ($_spec_folder)."
     exit 1
@@ -758,7 +769,7 @@ _model_builder.init_spec()
   _model_builder._echo_command ${_asm_new_spec} \
       --arg http_proxy=${http_proxy} \
       --arg https_proxy=${https_proxy} \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_new_spec=${_new_model} \
       --framework=${_current_framework} \
       ${_use_case} \
@@ -882,7 +893,7 @@ _model_builder.build()
       --arg https_proxy=${https_proxy} \
       --arg PACKAGE_DIR=${_model_package_folder} \
       --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --repository ${LOCAL_REPO} \
       --release ${_release_group} \
       ${TEST_DIR:+"--run_tests_path" "$TEST_DIR"} \
@@ -992,7 +1003,7 @@ _model_builder.package()
     # Call the assembler to build model packages
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --build_packages \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1060,7 +1071,7 @@ _model_builder.generate_deployment()
     # Call the assembler to generate deployments
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_deployments \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1128,7 +1139,7 @@ _model_builder.generate_dockerfile()
     # Call the assembler to construct dockerfiles
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --construct_dockerfiles \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1202,7 +1213,7 @@ _model_builder.generate_documentation()
     # Call the assembler to generate documentation
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_documentation \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1286,7 +1297,7 @@ _model_builder.images()
       --release ${_release_group} \
       --repository ${LOCAL_REPO} \
       --list_images \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       ${_release_args[@]} \
       ${_args[@]} 2>&1 | sort | column -c 2 -t
     if [[ $_dry_run == false ]]; then
@@ -1365,7 +1376,7 @@ _model_builder.packages()
 
   # Call the assembler to list packages
   _model_builder._echo_command ${_asm_dockerfiles} \
-    --spec_dir=./specs/${_current_framework} \
+    --spec_dir=${_spec_dir_mounted}/${_current_framework} \
     --repository ${LOCAL_REPO} \
     --list_packages \
     --arg _TAG_PREFIX=${TAG_PREFIX} \
@@ -1761,7 +1772,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.build \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1773,7 +1784,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.generate_documentation \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1785,7 +1796,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.generate_dockerfile \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1797,7 +1808,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.package \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
