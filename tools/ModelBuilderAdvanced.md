@@ -43,7 +43,12 @@ settings. For example:
 ```
 MODEL_PACKAGE_DIR=/tmp/model_packages model-builder
 ```
-
+`model-builder` supports `CentOS` or `Ubuntu` based TensorFlow tags. Use the environment variable `TENSORFLOW_TAG` to specify the tag for the base `intel-optimized-tensorflow` image.
+For example:
+```
+TENSORFLOW_TAG=2.3.0-centos-8 model-builder make mobilenet-v1-int8-inference
+```
+You can find the list of supported models on CentOS in `tools/docker/specs/centos`.
 ## Documentation text replacement
 
 When `init-spec` is run, model spec yaml file's documentation section has
