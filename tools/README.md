@@ -111,7 +111,7 @@ using these steps.
    The spec name should be formatted like `modelname-precision-mode`
    (for example: `rfcn-fp32-inference` or `resnet50v1-5-fp32-training`)
    where the model name matches the name of a model in the
-   [model zoo repo](https://gitlab.devtools.intel.com/intelai/models)
+   [model zoo repo](https://github.com/intelai/models)
    except with underscores changed to dashes.
 
    If the model does not already exist in the model zoo repo, you can
@@ -131,7 +131,7 @@ using these steps.
    When the `model-builder init-spec` command is run, it will create a yaml
    file in [`tools/docker/specs/<framework>` folder](docker/specs)
    named `<spec name>_spec.yml`. If you have not already created
-   [quickstart scripts](https://gitlab.devtools.intel.com/intelai/models/-/tree/develop/quickstart)
+   [quickstart scripts](https://github.com/IntelAI/models/tree/master/quickstart)
    for your model, the `init-spec` command also adds a quickstart template
    script for your model.
 
