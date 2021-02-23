@@ -8,7 +8,7 @@ The steps below explain how to deploy the mpi-operator on your cluster using ver
 
 1. Download the `mpi-operator.yaml` file
    ```
-   curl -o mpi-operator.yaml https://github.com/kubeflow/mpi-operator/blob/v0.2.3/deploy/v1/mpi-operator.yaml
+   curl -o mpi-operator.yaml https://raw.githubusercontent.com/kubeflow/mpi-operator/v0.2.3/deploy/v1/mpi-operator.yaml
    ```
 
 2. Change line #189 from `image: mpioperator/mpi-operator:latest` to `image: mpioperator/mpi-operator:v0.2.3`
@@ -24,9 +24,10 @@ For more information on deploying the mpi-operator to the k8s cluster, see the
 ## Argo Deployment
 
 Prior to running Argo workflows, the controller needs to be deployed on
-the cluster. See [Argo's Getting Started Guide](https://github.com/argoproj/argo/blob/stable/docs/getting-started.md)
+the cluster. See [Argo's Quick Start Guide](https://github.com/argoproj/argo-workflows/blob/stable/docs/quick-start.md)
 for installation instructions.
 
-Running one of the [example workflows](https://github.com/argoproj/argo/blob/stable/docs/getting-started.md#4-run-sample-workflows)
+Running the [hello world workflow](https://github.com/argoproj/argo-workflows/blob/stable/docs/quick-start.md)
 and verifying that it succeeds is a good test to verify that the argo
-installation is working.
+installation is working. Using the Argo CLI is optional. The argo yaml
+can be deployed using `kubectl create`.
