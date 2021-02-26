@@ -98,6 +98,9 @@ flags.DEFINE_boolean(
     'generate_documentation', False, 'Do not create README.md', short_name='e')
 
 flags.DEFINE_boolean(
+    'generate_deployments_tests', False, 'Do not create model-builder.bats for generate-deployment tests')
+
+flags.DEFINE_boolean(
     'keep_temp_dockerfiles',
     False,
     'Retain .temp.Dockerfiles created while building images.',
@@ -348,6 +351,22 @@ slice_sets:
                     type: string
                   value:
                     type: string
+            tests:
+              type: list
+              schema:
+                type: dict
+                schema:
+                  uri:
+                    type: string
+                  args:
+                    type: list
+                    schema:
+                      type: dict
+                      schema:
+                        name:
+                          type: string
+                        value:
+                          type: string
 
 releases:
   type: dict
@@ -757,6 +776,20 @@ def run(cmd):
     )
     stdout, stderr = proc.communicate()
     return proc.returncode, stdout, stderr
+
+def set_test_args(tag_def, test, test_uri):
+  with open(test_uri, 'r') as f:
+    test_file = f.read()
+    if 'args' in test:
+      for arg in test['args']:
+        if arg['value'] and not arg['value'].startswith('$'):
+          test_file = test_file.replace('${}'.format(arg['name']), arg['value'])
+        else:
+          # look up test arg value in env vars
+          for env in tag_def['runtime']['env']:
+            if env['name'] == arg['name']:
+              test_file = test_file.replace(arg['value'], env['value'])
+    return test_file
 
 def cfg_set_namespace(package, dir, tag_def):
   for env in tag_def['runtime']['env']:
@@ -1493,6 +1526,29 @@ def main(argv):
       if FLAGS.generate_deployments:
         eprint('> Generating deployment for {}'.format(tag), verbose=FLAGS.verbose)
         write_deployment(tag_def)
+
+      if FLAGS.generate_deployments_tests:
+        eprint('> Generating tests for K8s packages and deployments {}'.format(tag), verbose=FLAGS.verbose)
+        model_dir = os.path.join(os.getcwd(), "models")
+        tests_bats = os.path.join(model_dir, 'tools', 'tests', 'model-builder.bats')
+        model_name = get_package_name(tag_def)
+        model_deployments_dir = os.path.join(os.getcwd(), FLAGS.deployment_dir, model_name)
+        try:
+          eprint('>> Writing {}...'.format(tests_bats), verbose=FLAGS.verbose)
+          with open(tests_bats, 'w') as f:
+            # add at the beginning of the test
+            f.write('#!/usr/bin/env tools/tests/bin/bats\npushd {}\n'.format(model_dir))
+            # get test uri from the model spec file and append it to model-builder.bats file
+            for test in tag_def['runtime']['tests']:
+              if not 'uri' in test:
+                eprint("uri missing in tests values for {}".format(model_name))
+                continue
+              test_uri = os.path.join(model_dir, test['uri'])
+              f.write(set_test_args(tag_def, test, test_uri))
+              f.write('\n')
+        except Exception as e:
+          eprint("Error while writing tests for {}".format(tag))
+          eprint(e)
 
       if FLAGS.generate_documentation:
         documentation = tag_def['documentation']

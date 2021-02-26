@@ -209,7 +209,7 @@ The model-builder's run-test-suit subcommand will generate tests for one or more
 The syntax is shown below:
 
 ```
-model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|package] --release-group <release-group> <model> ...
+model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|generate-deployment|package] --release-group <release-group> <model> ...
 ```
 
 The run-test-suite subcommand generates test cases using syntax compatible with [bats-core](https://github.com/bats-core/bats-core). After generation, it calls bats providing the generated script. Several examples with output are shown below
