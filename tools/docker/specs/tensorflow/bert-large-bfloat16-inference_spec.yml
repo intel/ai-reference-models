@@ -11,21 +11,21 @@ slice_sets:
     documentation:
       docs:
       - name: Title
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/title.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/title.md
       - name: Description
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/description.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/description.md
       - name: Download link
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/download.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/datasets.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/quickstart.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/baremetal.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/docker.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/docker.md
       - name: License
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16/.docs/license.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/.docs/license.md
       name: README.md
       text_replace:
         <docker image>: 'intel/language-modeling:tf-2.4.0-bert-large-bfloat16-inference'
@@ -36,7 +36,7 @@ slice_sets:
         <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-bfloat16-inference.tar.gz'
         <precision>: BFloat16
         <use case>: language_modeling
-      uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16
+      uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16
     downloads:
     - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
       destination: pretrained_model/bert_large_checkpoints.zip
@@ -60,7 +60,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/language_modeling/tensorflow/bert_large/inference/bfloat16
+      source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16
     partials:
     - model_package
     - unzip

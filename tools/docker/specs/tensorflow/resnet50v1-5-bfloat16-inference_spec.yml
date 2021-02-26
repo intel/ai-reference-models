@@ -11,21 +11,21 @@ slice_sets:
     documentation:
       docs:
       - name: Title
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/title.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/title.md
       - name: Description
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/description.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/description.md
       - name: Download link
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/download.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/datasets.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/quickstart.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/baremetal.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/docker.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/docker.md
       - name: License
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/license.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16/.docs/license.md
       name: README.md
       text_replace:
         <docker image>: intel/image-recognition:tf-2.4.0-resnet50v1-5-bfloat16-inference
@@ -36,7 +36,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50v1-5-bfloat16-inference.tar.gz
         <precision>: BFloat16
         <use case>: image_recognition
-      uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16
+      uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16
     downloads:
     - destination: resnet50_v1_5_bfloat16.pb
       source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_v1_5_bfloat16.pb
@@ -64,7 +64,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16
+      source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16
     partials:
     - model_package
     - entrypoint
