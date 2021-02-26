@@ -11,21 +11,21 @@ slice_sets:
     documentation:
       docs:
       - name: Title
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/title.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/title.md
       - name: Description
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/description.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/description.md
       - name: Download link
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/download.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/datasets.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/quickstart.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/baremetal.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/docker.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/docker.md
       - name: License
-        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8/.docs/license.md
+        uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8/.docs/license.md
       name: README.md
       text_replace:
         <docker image>: intel/image-recognition:tf-2.4.0-inceptionv3-int8-inference
@@ -36,7 +36,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/inceptionv3-int8-inference.tar.gz
         <precision>: Int8
         <use case>: image_recognition
-      uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/int8
+      uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8
     downloads:
     - destination: inceptionv3_int8_pretrained_model.pb
       source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_int8_pretrained_model.pb
@@ -64,7 +64,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/image_recognition/tensorflow/inceptionv3/inference/int8
+      source: quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8
     partials:
     - model_package
     - entrypoint

@@ -28,7 +28,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/language_modeling/tensorflow/bert_large/inference/fp32
+      source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32
     downloads:
       - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
         destination: pretrained_model/bert_large_checkpoints.zip
@@ -38,7 +38,7 @@ slice_sets:
     - entrypoint
     documentation:
       name: README.md
-      uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32
+      uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32
       text_replace:
         <mode>: inference
         <model name>: BERT Large
@@ -50,18 +50,18 @@ slice_sets:
         <docker image>: intel/language-modeling:tf-2.4.0-bert-large-fp32-inference
       docs:
       - name: Title
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/title.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/title.md
       - name: Description
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/description.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/description.md
       - name: Download link
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/download.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/datasets.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/quickstart.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/baremetal.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/fp32/.docs/docker.md
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/.docs/docker.md
       - name: License link
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/fp32/.docs/license.md
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/fp32/.docs/license.md
