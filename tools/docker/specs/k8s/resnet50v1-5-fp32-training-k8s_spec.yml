@@ -89,3 +89,10 @@ slice_sets:
             value: "5G"
           - name: RESOURCE_REQUESTS_CPU
             value: "10"
+        tests:
+          - uri: k8s/image_recognition/tensorflow/resnet50v1_5/training/fp32/.tests/deployments-yml-exist.sh
+          - uri: k8s/image_recognition/tensorflow/resnet50v1_5/training/fp32/.tests/namespace-exists.sh
+            args:
+              - name: USER_NAME
+                value: $USER_NAME
+          - uri: k8s/image_recognition/tensorflow/resnet50v1_5/training/fp32/.tests/single_node_deployment.sh
