@@ -17,21 +17,21 @@ slice_sets:
     documentation:
       docs:
       - name: Title
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/title.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/title.md
       - name: Description
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/description.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/description.md
       - name: Download link
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/download.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/datasets.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/quickstart.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/baremetal.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/docker.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/docker.md
       - name: License
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16/.docs/license.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/license.md
       name: README.md
       text_replace:
         <docker image>: 'intel/object-detection:tf-2.4.0-ssd-resnet34-bfloat16-training'
@@ -42,7 +42,7 @@ slice_sets:
         <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-bfloat16-training.tar.gz'
         <precision>: BFloat16
         <use case>: object_detection
-      uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16
+      uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16
     downloads: []
     files:
     - destination: benchmarks/common
@@ -72,7 +72,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/object_detection/tensorflow/ssd-resnet34/training/bfloat16
+      source: quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16
     partials:
     - cpio
     - tensorflow-addons-0.11.0

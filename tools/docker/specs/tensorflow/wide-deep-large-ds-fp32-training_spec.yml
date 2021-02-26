@@ -33,14 +33,14 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32
+      source: quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32
     partials:
     - tcmalloc
     - model_package
     - entrypoint
     documentation:
       name: README.md
-      uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32
+      uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32
       text_replace:
         <mode>: training
         <model name>: Wide and Deep Large Dataset
@@ -52,20 +52,20 @@ slice_sets:
         <docker image>: intel/recommendation:tf-2.4.0-wide-deep-large-ds-fp32-training
       docs:
       - name: Title
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/title.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/title.md
       - name: Description
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/description.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/description.md
       - name: Download link
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/download.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/datasets.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/quickstart.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/baremetal.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/docker.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/docker.md
       - name: Advanced Options
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/advancedoptions.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/advancedoptions.md
       - name: License link
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/fp32/.docs/license.md
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/license.md

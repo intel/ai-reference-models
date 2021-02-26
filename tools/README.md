@@ -136,7 +136,7 @@ using these steps.
    script for your model.
 
    The `model-builder init-spec` command will also copy markdown snippets from `tools/docker/docs`
-   to `quickstart/<use_case>/tensorflow/<model>/<mode>/<precision>/.docs`. These snippets are generic and 
+   to `quickstart/<use_case>/tensorflow/<model>/<mode>/<device>/<precision>/.docs`. These snippets are generic and
    should be updated to include model specific information.
 
    > **Optional:** If additional library installs (like pip installs) or
@@ -152,8 +152,8 @@ using these steps.
    model-builder make -f <framework> <spec name>
    ```
    After this command runs, you'll have:
-   * A model README.md in your `quickstart/<use_case>/tensorflow/<model>/<mode>/<precision>/`
-     that was built using markdown snippets from `quickstart/<use_case>/tensorflow/<model>/<mode>/<precision>/.docs`. 
+   * A model README.md in your `quickstart/<use_case>/tensorflow/<model>/<mode>/<device>/<precision>/`
+     that was built using markdown snippets from `quickstart/<use_case>/tensorflow/<model>/<mode>/<device>/<precision>/.docs`.
    * A model package tar file your `<models repo>/output` directory
      (this can be used for testing the model on bare metal).
    * A model dockerfile in your `<models repo>/dockerfiles` directory.

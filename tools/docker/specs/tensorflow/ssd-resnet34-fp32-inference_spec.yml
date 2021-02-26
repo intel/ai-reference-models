@@ -14,23 +14,23 @@ slice_sets:
     documentation:
       docs:
       - name: Title
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/title.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/title.md
       - name: Description
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/description.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/description.md
       - name: Download link
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/download.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/datasets.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/quickstart.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/baremetal.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/docker.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/docker.md
       - name: Advanced Options
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/advancedoptions.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/advancedoptions.md
       - name: License
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32/.docs/license.md
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/.docs/license.md
       name: README.md
       text_replace:
         <mode>: inference
@@ -41,7 +41,7 @@ slice_sets:
         <package name>: ssd-resnet34-fp32-inference.tar.gz
         <package dir>: ssd-resnet34-fp32-inference
         <docker image>: intel/object-detection:tf-2.4.0-ssd-resnet34-fp32-inference
-      uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32
+      uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32
     downloads:
     - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/ssd_resnet34_fp32_bs1_pretrained_model.pb
       destination: pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb
@@ -75,7 +75,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/fp32
+      source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32
     partials:
     - libgl
     - opencv

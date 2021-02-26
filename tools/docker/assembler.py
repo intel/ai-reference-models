@@ -212,6 +212,12 @@ flags.DEFINE_string(
     'structure cannot be used to infer the use case.')
 
 flags.DEFINE_string(
+    'device',
+    'cpu',
+    'Name of the device folder to be used.'
+)
+
+flags.DEFINE_string(
     'generate_new_spec',
     None,
     'Used to auto generate a spec with model package files. Specify the name '
@@ -998,7 +1004,7 @@ def get_model_name_directory(framework, model_name):
     return zoo_model_name
 
 
-def auto_generate_package_file_list(framework, use_case, model_name, precision, mode):
+def auto_generate_package_file_list(framework, use_case, model_name, precision, mode, device):
     """
     Auto-generates the list of model package files for the specified model.
     Files that are included are:
@@ -1074,7 +1080,7 @@ def auto_generate_package_file_list(framework, use_case, model_name, precision, 
 
     # add the model's quickstart folder
     quickstart_folder = os.path.join('quickstart', use_case, framework,
-                                   model_name, mode, precision)
+                                   model_name, mode, device, precision)
     quickstart_folder_full_path = os.path.join(model_dir, quickstart_folder)
     if not os.path.exists(quickstart_folder_full_path):
         os.makedirs(quickstart_folder_full_path)
@@ -1106,34 +1112,34 @@ def auto_generate_package_file_list(framework, use_case, model_name, precision, 
     return sorted(model_package_files, key=lambda f: f['source'])
 
 
-def auto_generate_documentation_list(framework, use_case, model_name, precision, mode):
+def auto_generate_documentation_list(framework, use_case, model_name, precision, mode, device):
     """
     Auto-generates the list of model documentation entries {name: <section>, uri: <uri>} for the specified model.
     Entries that are included are:
       - name: Title
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/title.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/title.md
       - name: Description
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/description.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/description.md
       - name: Download link
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/download.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/download.md
       - name: Datasets
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/datasets.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/quickstart.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/baremetal.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/docker.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/docker.md
       - name: Kubernetes
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/kubernetes.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/kubernetes.md
       - name: License link
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/license.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/license.md
     """
     model_dir = os.path.join(os.getcwd(), FLAGS.model_dir)
 
     # the model's documentation folder
     docs_folder = os.path.join('quickstart', use_case, framework,
-                                   model_name, mode, precision, ".docs")
+                                   model_name, mode, device, precision, ".docs")
     docs_folder_full_path = os.path.join(model_dir, docs_folder)
     if os.path.exists(docs_folder_full_path) == False:
       shutil.copytree("./docs", docs_folder_full_path)
@@ -1141,7 +1147,7 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
     markdowns = os.listdir(docs_folder_full_path)
 
     readme_folder = os.path.join(os.path.basename(model_dir), 'quickstart', use_case, framework,
-                                   model_name, mode, precision)
+                                   model_name, mode, device, precision)
 
     documentation = {"name": "README.md", "uri": readme_folder, "docs": []}
     doc_partials = []
@@ -1235,6 +1241,7 @@ def auto_generate_model_spec(spec_name):
     precision = matched_groups[1]
     mode = matched_groups[2]
     framework = FLAGS.framework
+    device = FLAGS.device
 
     if not FLAGS.use_case:
         zoo_use_case, zoo_model_name = get_use_case_directory(framework, model_name, precision, mode)
@@ -1288,9 +1295,9 @@ def auto_generate_model_spec(spec_name):
     model_slice_set[0]['add_to_name'] = '-{}'.format(spec_name)
     model_slice_set[0]['args'].append("PACKAGE_NAME={}".format(spec_name))
     model_slice_set[0]['files'] = auto_generate_package_file_list(
-        framework, zoo_use_case, zoo_model_name, precision, mode)
+        framework, zoo_use_case, zoo_model_name, precision, mode, device)
     model_slice_set[0]['documentation'] = auto_generate_documentation_list(
-        framework, zoo_use_case, zoo_model_name, precision, mode)
+        framework, zoo_use_case, zoo_model_name, precision, mode, device)
 
     # add text replace options for the documentation
     text_replace_dict = generate_doc_text_replace_options(
@@ -1330,7 +1337,7 @@ def auto_generate_model_spec(spec_name):
            "directory at:\n{}\nPlease edit these files to fill in the "
            "information for your model.\n".format(
                os.path.join('quickstart', zoo_use_case, framework, zoo_model_name,
-                            mode, precision, ".docs")))
+                            mode, device, precision, ".docs")))
 
 def get_tag_spec(spec_dir, partials):
   """ Reads in a spec files under spec_dir """
