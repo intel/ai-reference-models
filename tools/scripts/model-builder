@@ -287,7 +287,7 @@ _model_builder._init()
 
     cat $(find ${_spec_folder} -name '*.yml') > $_all_specs
 
-    _all_commands=(generate-documentation package generate-dockerfile build)
+    _all_commands=(generate-deployment generate-documentation package generate-dockerfile build)
     eval $'__model_builder_frameworks_function() { [[ -d ${_spec_folder} ]] && echo $(ls $_spec_folder); }'
 
     eval "_model_builder_frameworks_function() { echo $(__model_builder_frameworks_function); }"
@@ -388,7 +388,7 @@ _model_builder._subcommand_show_frameworks()
               _first_framework=false
             fi
             ;;
-          -*) 
+          -*)
             ;;
           *)
             if [[ "${_remaining_frameworks[@]}" =~ $s ]]; then
@@ -502,7 +502,14 @@ _model_builder._subcommand_show_commands_frameworks_and_models()
               _show_command_options=false
             fi
             ;;
-          -*) 
+          -*)
+            if [[ "${_remaining_commands[@]}" =~ $s ]]; then
+              _current_commands+=( $s )
+              _model_builder._remove_item _remaining_commands $s
+              if (( ${#_remaining_commands[@]} == 0 )); then
+                _show_command_options=false
+              fi
+            fi
             ;;
           *)
             if [[ "${_remaining_commands[@]}" =~ $s ]]; then
@@ -1659,6 +1666,48 @@ _model_builder._tests.generate_dockerfile()
 }
 
 #
+# Generates tests for model-builder generate-deployment models...
+#
+_model_builder._tests.generate_deployment()
+{
+  local _asm_dockerfiles _model _framework
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      --arg)
+        shift
+        ;;
+      -h|--help)
+        echo -e 'generate-deployment tests\n'
+        exit 0
+        ;;
+      --model_dir=|--output_dir=|--dry_run)
+        ;;
+      --framework)
+        shift
+        _framework=$1
+        ;;
+      *)
+        ;;
+    esac
+    shift
+  done
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
+  # Check for the tf-tool container and build it if it doesn't exist
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
+  _model_dir=$_g_root/..
+  _model_dir_mount='-v $_model_dir:$_model_dir'
+  # Note: Run as user so that the generated deployment(s) have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) -e MODEL_BUILDER_SPEC_HOME=/specs $(_model_builder._get-proxy-env-vars) -v ${_spec_home}:/specs -v $(pwd):$_model_dir/.. -w $_model_dir/.. $_model_dir_mount imz-tf-tools python3 assembler.py "
+  _model_builder._echo_command ${_asm_dockerfiles} \
+    --release $_release_group \
+    --spec_dir=./specs/$_framework \
+    --generate_deployments_tests \
+    ${_release_args[@]} \
+    ${_args[@]}
+  popd 1>/dev/null 2>/dev/null
+}
+
+#
 # Generates tests for model-builder package -f <framework> models...
 #
 _model_builder._tests.package()
@@ -1803,6 +1852,20 @@ _model_builder.run_test_suite()
           $_dry_run \
           ${_selected_models[@]}
         ;;
+      generate-deployment)
+        rm -f $_g_root'/tests/model-builder.bats'
+        _current_framework=k8s
+        _model_builder._echo_command \
+          _model_builder._tests.generate_deployment \
+          --arg http_proxy=${http_proxy} \
+          --arg https_proxy=${https_proxy} \
+          --spec_dir=./specs/${_current_framework} \
+          --framework ${_current_framework} \
+          ${_release_args[@]} \
+          ${_args[@]} \
+          $_dry_run \
+          ${_selected_models[@]}
+        ;;
       package)
         _model_builder._echo_command \
           _model_builder._tests.package \
@@ -1821,7 +1884,6 @@ _model_builder.run_test_suite()
   _model_builder._echo_command \
     $_g_root/tests/bin/bats \
     $_g_root/tests/model-builder.bats \
-    ${_args[@]} \
     $_dry_run
 
   result=$?
@@ -2236,9 +2298,10 @@ _model_builder_main()
           _model_builder._set_current_models
           _model_builder._validate_frameworks $@ || exit 0
           _model_builder._validate_models $@ || exit 0
-          _model_builder.run_test_suite $_verbose $_dry_run $@
+          _only_tags_matching="$(_model_builder._build_only_tags_matching_args $@)"
+          _model_builder.run_test_suite $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
-            echo "There was an error building model packages."
+            echo "There was an error while running tests."
             exit 1
           fi
           ;;
