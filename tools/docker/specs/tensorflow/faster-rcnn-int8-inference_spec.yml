@@ -13,21 +13,21 @@ slice_sets:
     documentation:
       docs:
       - name: Title
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/title.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/title.md
       - name: Description
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/description.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/description.md
       - name: Download link
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/download.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/download.md
       - name: Datasets
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/datasets.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/quickstart.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/baremetal.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/docker.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/docker.md
       - name: License
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8/.docs/license.md
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/.docs/license.md
       name: README.md
       text_replace:
         <docker image>: intel/object-detection:tf-1.15.2-faster-rcnn-int8-inference
@@ -38,7 +38,7 @@ slice_sets:
         <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/faster-rcnn-int8-inference.tar.gz
         <precision>: Int8
         <use case>: object_detection
-      uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/int8
+      uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8
     downloads:
     - destination: faster_rcnn_int8_pretrained_model.pb
       source: https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_int8_pretrained_model.pb
@@ -66,7 +66,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/object_detection/tensorflow/faster_rcnn/inference/int8
+      source: quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8
     partials:
     - model_package
     - entrypoint

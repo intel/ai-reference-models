@@ -11,7 +11,7 @@ slice_sets:
               - entrypoint
           documentation:
             name: README.md
-            uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32
+            uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32
             text_replace:
               <model name>: ResNet50
               <precision>: FP32
@@ -23,21 +23,21 @@ slice_sets:
               <docker image>: intel/image-recognition:tf-2.4.0-resnet50-fp32-inference
             docs:
             - name: Title
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/title.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/title.md
             - name: Description
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/description.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/description.md
             - name: Download link
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/download.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/download.md
             - name: Quick Start Scripts
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/quickstart.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/quickstart.md
             - name: Bare Metal
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/baremetal.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/baremetal.md
             - name: Docker
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/docker.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/docker.md
             - name: Advanced Options
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/advancedoptions.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/advancedoptions.md
             - name: License link
-              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/fp32/.docs/license.md
+              uri: models/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/.docs/license.md
           args:
               - PACKAGE_NAME=resnet50-fp32-inference
           files:
@@ -63,7 +63,7 @@ slice_sets:
                 destination: models/image_recognition/tensorflow/resnet50/inference
               - destination: quickstart/common
                 source: quickstart/common
-              - source: quickstart/image_recognition/tensorflow/resnet50/inference/fp32
+              - source: quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32
                 destination: quickstart
           downloads:
               - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6/resnet50_fp32_pretrained_model.pb
