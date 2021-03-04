@@ -53,7 +53,7 @@ As part of Jenkins CICD the following steps will be included for MRs and general
 
 ### K8s Model deployment tests:
 
-The command `model-builder run-test-suite generate-deployment -f k8s <target-k8s-model>`
+The command `model-builder run-test-suite -c generate-deployment -f k8s <target-k8s-model>`
 generates and tests kubernetes deployments for the target model using the model's k8 package such as `bert-large-fp32-training-k8s`. The supported K8s models are listed in `models/k8s`.
 
 >Note: 
