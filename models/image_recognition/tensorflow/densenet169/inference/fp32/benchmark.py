@@ -132,8 +132,6 @@ if __name__ == "__main__":
   if (args.gpu < 0):
     config.inter_op_parallelism_threads = num_inter_threads
     config.intra_op_parallelism_threads = num_intra_threads
-  config.graph_options.rewrite_options.remapping = (
-          rewriter_config_pb2.RewriterConfig.OFF)
   #os.environ["OMP_NUM_THREADS"] = "14"
   #with tf.compat.v1.Session(config=config) as sess:
   #  image_data = sess.run(images)
