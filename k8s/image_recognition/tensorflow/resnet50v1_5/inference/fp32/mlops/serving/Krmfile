@@ -74,26 +74,15 @@ openAPI:
           isSet: true
           setBy: model-builder
           required: true
-    io.k8s.cli.setters.MODEL_BASE_NAME:
+    io.k8s.cli.setters.MODEL_BASE_PATH:
       description: base directory name
       x-k8s-cli:
         setter:
-          name: MODEL_BASE_NAME
-          value: savedmodels
+          name: MODEL_BASE_PATH
+          value: /models
           isSet: true
           setBy: model-builder
           required: true
-    io.k8s.cli.substitutions.MODEL_BASE_PATH:
-      description: model base path
-      x-k8s-cli:
-        substitution:
-          name: MODEL_BASE_PATH
-          pattern: ${MODEL_DIR}/${MODEL_BASE_NAME}
-          values:
-          - marker: ${MODEL_DIR}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_DIR'
-          - marker: ${MODEL_BASE_NAME}
-            ref: '#/definitions/io.k8s.cli.setters.MODEL_BASE_NAME'
     io.k8s.cli.setters.MODEL_PORT:
       type: integer
       description: model container port

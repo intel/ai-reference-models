@@ -92,8 +92,8 @@ The parameters that should be changed within the serving resources are shown in 
 | FS_ID                       | 0                                        | owner id of mounted volumes |
 | GROUP_ID                    | 0                                        | process group id            |
 | GROUP_NAME                  | root                                     | process group name          |
-| MODEL_BASE_NAME             | savedmodels                              | base directory name         |
-| MODEL_DIR                   | /models                                  | mounted model directory     |
+| MODEL_BASE_PATH             | /models                                  | mounted model directory     |
+| MODEL_DIR                   | /models                                  | host model base directory   |
 | MODEL_NAME                  | resnet50v1_5                             | model name                  |
 | MODEL_PORT                  | 8500                                     | model container port        |
 | MODEL_SERVICE_PORT          | 8501                                     | model service port          |
@@ -116,6 +116,14 @@ kustomize cfg set . GROUP_ID <Group ID> -R
 kustomize cfg set . GROUP_NAME <Group Name> -R
 kustomize cfg set . USER_ID <User ID> -R
 kustomize cfg set . USER_NAME <User Name> -R
+```
+
+The user should change the values below so the SavedModel is mounted into the pod from the host machine.
+
+```
+kustomize cfg set . MODEL_BASE_PATH <Full path in the pod where the model directory will be mounted> -R
+kustomize cfg set . MODEL_DIR <Full path on the host to the directory containing the model directory> -R
+kustomize cfg set . MODEL_NAME <Model name - must be the name of the directory containing the SavedModel> -R
 ```
 
 The user should change the default namespace of all the resources by running the kustomize command:
@@ -206,7 +214,7 @@ run_tf_serving_client.py:
 To clean up the served model, delete the service,
 deployment, and other resources using the following commands:
 ```
-kubectl delete -f serving.yaml
+kustomize build  . | kubectl delete -f -
 ```
 
 <!--- 71. TroubleShooting -->
