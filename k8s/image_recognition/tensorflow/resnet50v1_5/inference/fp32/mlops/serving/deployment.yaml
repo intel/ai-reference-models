@@ -24,7 +24,7 @@ spec:
             name: resnet50v1-5-fp32-inference # {"$openapi":"MODEL_SERVING_NAME"}
         volumeMounts:
         - name: models
-          mountPath: /models # {"$openapi":"MODEL_DIR"}
+          mountPath: /models # {"$openapi":"MODEL_BASE_PATH"}
         ports:
         - containerPort: 8500 # {"$openapi":"MODEL_PORT"}
       volumes:
