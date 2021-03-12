@@ -35,7 +35,7 @@ repository:
             --precision=fp32 \
             --mode inference \
             --batch-size=1 \
-            --docker-image=intel/intel-optimized-tensorflow-serving:2.3.0 \
+            --docker-image=intel/intel-optimized-tensorflow-serving:2.4.0 \
             --data-location $TLT_DATA_LOCATION \
             --benchmark-only
         ```
@@ -70,7 +70,7 @@ repository:
             --precision=fp32 \
             --mode inference \
             --batch-size=128 \
-            --docker-image=intel/intel-optimized-tensorflow-serving:2.3.0 \
+            --docker-image=intel/intel-optimized-tensorflow-serving:2.4.0 \
             --data-location $TLT_DATA_LOCATION \
             --benchmark-only
         ```
