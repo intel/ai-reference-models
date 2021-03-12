@@ -39,7 +39,7 @@ We will break down the installation into 2 steps:
 ### Step 1: Pull or build TensorFlow Serving Docker image.
 The recommended way to use TensorFlow Serving is with Docker images. The easiest way to get an image is to pull the latest version from Docker Hub.
 ```
-$ docker pull intel/intel-optimized-tensorflow-serving:2.3.0
+$ docker pull intel/intel-optimized-tensorflow-serving:2.4.0
 ```
 
 * Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 
@@ -50,28 +50,38 @@ $ docker pull intel/intel-optimized-tensorflow-serving:2.3.0
 	```
 
 If you pulled the image and cloned the repository, you can move on to step 2. Alternatively, you can build an image with TensorFlow Serving optimized for Intel® Processors. 
-You can build the docker images using [this script](/benchmarks/common/tensorflow_serving/build_tfserving_image.sh) or continue with the steps below.
 
 * Using `Dockerfile.devel-mkl`, build an image with Intel optimized ModelServer. This creates an image with all the required development tools and builds from sources. The image size will be around 5GB and will take some time. On AWS c5.4xlarge instance (16 logical cores), it took about 25min.
   
     **NOTE**: It is recommended that you build an official release version using `--build-arg TF_SERVING_VERSION_GIT_BRANCH="<release_number>"`, but if you wish to build the (unstable) head of master, omit the build argument and master will be used by default.
 	
-	```
+	```bash
+    export TF_SERVING_VERSION_GIT_BRANCH="2.4.0"
+    export TF_SERVING_VERSION_GIT_COMMIT="447243894d6f79a7504521a51aa4314d1acb8de0"
+    export TF_SERVING_BUILD_IMAGE="intel/intel-optimized-tensorflow-serving:${TF_SERVING_VERSION_GIT_BRANCH}"
+
 	cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
+    git checkout ${TF_SERVING_VERSION_GIT_BRANCH}
+    # This is because the fix for this issue: https://github.com/tensorflow/serving/issues/1797
+    # was only merged into `r2.4` and not make it into `2.4.0`, but for next release we won't need this patch:
+    git cherry-pick ${TF_SERVING_VERSION_GIT_COMMIT} -m 1
+
 	docker build \
 	    -f Dockerfile.devel-mkl \
+        --build-arg TF_SERVING_VERSION_GIT_BRANCH=${TF_SERVING_VERSION_GIT_BRANCH} \
 	    --build-arg TF_SERVING_BUILD_OPTIONS="--config=mkl" \
-	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="2.3.0" \
-	    -t intel/intel-optimized-tensorflow-serving:2.3.0-devel .
+	    -t ${TF_SERVING_BUILD_IMAGE}-devel .
 	```
-* Next, using `Dockerfile.mkl`, build a serving image which is a light-weight image without any development tools in it. `Dockerfile.mkl` will build a serving image by copying Intel optimized libraries and ModelServer from the development image built in the previous step - `tensorflow/serving:latest-devel-mkl `
-	```
+* Next, using `Dockerfile.mkl`, build a serving image which is a light-weight image without any development tools in it. `Dockerfile.mkl` will build a serving image by copying Intel optimized libraries and ModelServer from the development image built in the previous step:
+
+	```bash
 	cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
 	docker build \
 	    -f Dockerfile.mkl \
+        --build-arg TF_SERVING_BUILD_IMAGE=${TF_SERVING_BUILD_IMAGE}-devel \
+        --build-arg TF_SERVING_VERSION_GIT_BRANCH=${TF_SERVING_VERSION_GIT_BRANCH} \
 	    --build-arg TF_SERVING_BUILD_OPTIONS="--config=mkl" \
-	    --build-arg TF_SERVING_VERSION_GIT_BRANCH="2.3.0" \
-	    -t intel/intel-optimized-tensorflow-serving:2.3.0 .
+	    -t ${TF_SERVING_BUILD_IMAGE} .
 	```
 
 	**NOTE 1**: Docker build commands require a `.` path argument at the end; see [docker examples](https://docs.docker.com/engine/reference/commandline/build/#examples) for more background.
@@ -84,15 +94,15 @@ You can build the docker images using [this script](/benchmarks/common/tensorflo
 	```
 	docker images
 	REPOSITORY                                 TAG                 IMAGE ID            CREATED             SIZE
-	intel/intel-optimized-tensorflow-serving   2.3.0               d33c8d849aa3        7 minutes ago       520MB
-	intel/intel-optimized-tensorflow-serving   2.3.0-devel         a2e69840d5cc        8 minutes ago       5.21GB
+	intel/intel-optimized-tensorflow-serving   2.4.0               d33c8d849aa3        7 minutes ago       325MB
+	intel/intel-optimized-tensorflow-serving   2.4.0-devel         a2e69840d5cc        8 minutes ago       6.58GB
 	ubuntu                                     18.04               20bb25d32758        13 days ago         87.5MB
 	hello-world                                latest              fce289e99eb9        5 weeks ago         1.84kB
 	```
 	
 ### Step 2: Verify the Docker image by serving a simple model - half_plus_two
 
-Let us test the server by serving a simple oneDNN version of half_plus_two model which is included in the repo which we cloned in the previous step.
+Now let's test the server by serving a simple oneDNN version of half_plus_two model which is included in the repo which we cloned in the previous step.
 
 * Set the location of test model data:
 	```
@@ -104,7 +114,7 @@ Let us test the server by serving a simple oneDNN version of half_plus_two model
 	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `$TEST_DATA/saved_model_half_plus_two_mkl` on the container `/models/half_plus_two`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
-	* with `intel/intel-optimized-tensorflow-serving:2.3.0` docker image
+	* with `intel/intel-optimized-tensorflow-serving:2.4.0` docker image
 	```
 	docker run \
 	  -d \
@@ -112,7 +122,7 @@ Let us test the server by serving a simple oneDNN version of half_plus_two model
 	  --name tfserving_half_plus_two \
 	  -v $TEST_DATA/saved_model_half_plus_two_mkl:/models/half_plus_two \
 	  -e MODEL_NAME=half_plus_two \
-	  intel/intel-optimized-tensorflow-serving:2.3.0
+	  intel/intel-optimized-tensorflow-serving:2.4.0
 	```
 
 * Query the model using the predict API:
@@ -163,7 +173,7 @@ Let us test the server by serving a simple oneDNN version of half_plus_two model
 	  -v $TEST_DATA/saved_model_half_plus_two_mkl:/models/half_plus_two \
 	  -e MODEL_NAME=half_plus_two \
 	  -e MKLDNN_VERBOSE=1 \
-	  intel/intel-optimized-tensorflow-serving:2.3.0
+	  intel/intel-optimized-tensorflow-serving:2.4.0
 	```  
 	 Query the model using the predict API as before:
     ```
@@ -220,7 +230,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
-	* with `intel/intel-optimized-tensorflow-serving:2.3.0` docker image
+	* with `intel/intel-optimized-tensorflow-serving:2.4.0` docker image
 	```
 	docker run \
 	  -d \
@@ -228,7 +238,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	  --name=tfserving_resnet_restapi \
 	  -v "/tmp/resnet:/models/resnet" \
 	  -e MODEL_NAME=resnet \
-	  intel/intel-optimized-tensorflow-serving:2.3.0
+	  intel/intel-optimized-tensorflow-serving:2.4.0
 	```
 * If you don't already have them, install the prerequisites for running the python client code
 	```
@@ -260,7 +270,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
-	* with `intel/intel-optimized-tensorflow-serving:2.3.0` docker image
+	* with `intel/intel-optimized-tensorflow-serving:2.4.0` docker image
  	```
     docker run \
 	  -d \
@@ -268,7 +278,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 	  --name=tfserving_resnet_grpc \
 	  -v "/tmp/resnet:/models/resnet" \
 	  -e MODEL_NAME=resnet \
-	  intel/intel-optimized-tensorflow-serving:2.3.0
+	  intel/intel-optimized-tensorflow-serving:2.4.0
 	```
 * You will need a few python packages in order to run the client, we recommend installing them in a virtual environment. 
 	```
