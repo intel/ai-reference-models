@@ -102,7 +102,7 @@ docker run \
     -e OMP_NUM_THREADS=56 \
     -e TENSORFLOW_INTER_OP_PARALLELISM=2 \
     -e TENSORFLOW_INTRA_OP_PARALLELISM=56 \
-    intel/intel-optimized-tensorflow-serving:2.3.0
+    intel/intel-optimized-tensorflow-serving:2.4.0
 ```
 
 For two containers, each on a single socket (this is an example, use your computed `num_physical_cores` in place of `28` and your NUMA node CPU ID ranges from the output of `lscpu`):
@@ -119,7 +119,7 @@ docker run \
     -e TENSORFLOW_INTRA_OP_PARALLELISM=28 \
     --cpuset-cpus="0-27,56-83" \ 
     --cpuset-mems="0" \ 
-    intel/intel-optimized-tensorflow-serving:2.3.0
+    intel/intel-optimized-tensorflow-serving:2.4.0
 
 docker run \
     --name=tfserving \
@@ -133,7 +133,7 @@ docker run \
     -e TENSORFLOW_INTRA_OP_PARALLELISM=28 \
     --cpuset-cpus="28-55,84-111" \ 
     --cpuset-mems="1" \ 
-    intel/intel-optimized-tensorflow-serving:2.3.0
+    intel/intel-optimized-tensorflow-serving:2.4.0
 ```
 
 To customize other settings, just use the relevant environment variables when running the TensorFlow Serving container: 
