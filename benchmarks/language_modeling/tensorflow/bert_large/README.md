@@ -6,7 +6,7 @@ following modes/platforms:
 * [FP32 training](#fp32-training-instructions)
 * [BFloat16 inference](#bfloat16-inference-instructions)
 * [FP32 inference](#fp32-inference-instructions)
-
+* [Int8 inference](#int8-inference-instructions)
 
 For all fine-tuning, the datasets (SQuAD, MultiNLI, MRPC etc..) and checkpoints should be downloaded as mentioned in the [Google bert repo](https://github.com/google-research/bert).
 
@@ -401,3 +401,233 @@ FP32 training instructions are the same as Bfloat16 training instructions above,
 
 ## FP32 Inference Instructions
 FP32 inference instructions are the same as Bfloat16 inference instructions above, except one needs to change the `--precision=bfloat16` to `--precision=fp32` in the above commands.
+
+ 1. Clone the Intel model zoo:
+    ```
+    git clone https://github.com/IntelAI/models.git
+    ```
+
+ 2. Download and unzip the BERT large uncased (whole word masking) model from the
+    [google bert repo](https://github.com/google-research/bert#pre-trained-models).
+    Then, download the `dev-v1.1.json` file from the
+    [google bert repo](https://github.com/google-research/bert#squad-11)
+    into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
+
+    ```
+    wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
+    unzip wwm_uncased_L-24_H-1024_A-16.zip
+
+    wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_uncased_L-24_H-1024_A-16
+    ```
+
+    The `wwm_uncased_L-24_H-1024_A-16` directory is what will be passed as
+    the `--data-location` when running inference in step 4.
+
+ 3. Download and unzip the pretrained model checkpoint files:
+    ```
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip
+    unzip bert_large_checkpoints.zip
+    ```
+
+    This directory will be passed as the `--checkpoint` location when
+    running inference in step 5.
+
+4.  Download the frozen graph:
+    ```
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/fp32_bert_squad.pb
+    ```
+    The path to this file should be passed as the `--in-graph` in the next step.
+
+ 4. Navigate to the `benchmarks` directory in the model zoo that you
+    cloned in step 1. This directory contains the
+    [launch_benchmarks.py script](/models/docs/general/tensorflow/LaunchBenchmark.md)
+    that will be used to run inference.
+    ```
+    cd benchmarks
+    ```
+
+    Bert large inference can be run in 3 different modes:
+    * **Batch inference**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=fp32 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=128 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert_large_checkpoints \
+            --in-graph /home/<user>/fp32_bert_squad.pb \
+            --output-dir /home/<user>/bert-squad-output \
+            --benchmark-only \
+            --docker-image intel/intel-optimized-tensorflow:tf-r2.5-icx-b631821f \
+            -- infer_option=SQuAD
+        ```
+
+    * **Online inference**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=fp32 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert_large_checkpoints \
+            --output-dir /home/<user>/bert-squad-output \
+            --docker-image intel/intel-optimized-tensorflow:tf-r2.5-icx-b631821f \
+            -- profile=True infer_option=SQuAD
+        ```
+
+    * **Accuracy**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=fp32 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert_large_checkpoints \
+            --output-dir /home/<user>/bert-squad-output \
+            --docker-image intel/intel-optimized-tensorflow:tf-r2.5-icx-b631821f \
+            --accuracy-only \
+            -- infer_option=SQuAD
+        ```
+
+    Output files and logs are saved to the
+    `models/benchmarks/common/tensorflow/logs` directory. To change the
+    location, use the `--output-dir` flag in the
+    [launch_benchmarks.py script](/models/docs/general/tensorflow/LaunchBenchmark.md).
+
+    Note that args specific to this model are specified after ` -- ` at
+    the end of the command (like the `profile=True` arg in the Profile
+    command above. Below is a list of all of the model specific args and
+    their default values:
+
+    | Model arg | Default value |
+    |-----------|---------------|
+    | doc_stride | `128` |
+    | max_seq_length | `384` |
+    | profile | `False` |
+    | config_file | `bert_config.json` |
+    | vocab_file | `vocab.txt` |
+    | predict_file | `dev-v1.1.json` |
+    | init_checkpoint | `model.ckpt-3649` |
+
+## Int8 Inference Instructions
+
+ 1. Clone the Intel model zoo:
+    ```
+    git clone https://github.com/IntelAI/models.git
+    ```
+
+ 2. Download and unzip the BERT large uncased (whole word masking) model from the
+    [google bert repo](https://github.com/google-research/bert#pre-trained-models).
+    Then, download the `dev-v1.1.json` file from the
+    [google bert repo](https://github.com/google-research/bert#squad-11)
+    into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
+
+    ```
+    wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
+    unzip wwm_uncased_L-24_H-1024_A-16.zip
+
+    wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json -P wwm_uncased_L-24_H-1024_A-16
+    ```
+
+    The `wwm_uncased_L-24_H-1024_A-16` directory is what will be passed as
+    the `--data-location` when running inference in step 4.
+
+ 3. Download and unzip the pretrained model checkpoint files:
+    ```
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip
+    unzip bert_large_checkpoints.zip
+    ```
+
+    This directory will be passed as the `--checkpoint` location when
+    running inference in step 5.
+
+4.  Download the frozen graph:
+    ```
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/asymmetric_per_channel_bert_int8.pb
+    ```
+    The path to this file should be passed as the `--in-graph` in the next step.
+
+ 4. Navigate to the `benchmarks` directory in the model zoo that you
+    cloned in step 1. This directory contains the
+    [launch_benchmarks.py script](/models/docs/general/tensorflow/LaunchBenchmark.md)
+    that will be used to run inference.
+    ```
+    cd benchmarks
+    ```
+
+    Bert large inference can be run in 3 different modes:
+    * **Batch inference**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=int8 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert_large_checkpoints \
+            --in-graph /home/<user>/asymmetric_per_channel_bert_int8.pb\
+            --output-dir /home/<user>/bert-squad-output \
+            --benchmark-only \
+            --docker-image intel/intel-optimized-tensorflow:tf-r2.5-icx-b631821f \
+            -- infer_option=SQuAD
+        ```
+
+    * **Online inference**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=int8 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert_large_checkpoints \
+            --in-graph /home/<user>/asymmetric_per_channel_bert_int8.pb\
+            --output-dir /home/<user>/bert-squad-output \
+            --docker-image intel/intel-optimized-tensorflow:tf-r2.5-icx-b631821f \
+            -- profile=True infer_option=SQuAD
+        ```
+
+    * **Accuracy**
+        ```
+        python launch_benchmark.py \
+            --model-name=bert_large \
+            --precision=int8 \
+            --mode=inference \
+            --framework=tensorflow \
+            --batch-size=32 \
+            --data-location /home/<user>/wwm_uncased_L-24_H-1024_A-16 \
+            --checkpoint /home/<user>/bert_large_checkpoints \
+            --in-graph /home/<user>/asymmetric_per_channel_bert_int8.pb\
+            --output-dir /home/<user>/bert-squad-output \
+            --docker-image intel/intel-optimized-tensorflow:tf-r2.5-icx-b631821f \
+            --accuracy-only \
+            -- infer_option=SQuAD
+        ```
+
+    Output files and logs are saved to the
+    `models/benchmarks/common/tensorflow/logs` directory. To change the
+    location, use the `--output-dir` flag in the
+    [launch_benchmarks.py script](/models/docs/general/tensorflow/LaunchBenchmark.md).
+
+    Note that args specific to this model are specified after ` -- ` at
+    the end of the command (like the `profile=True` arg in the Profile
+    command above. Below is a list of all of the model specific args and
+    their default values:
+
+    | Model arg | Default value |
+    |-----------|---------------|
+    | doc_stride | `128` |
+    | max_seq_length | `384` |
+    | profile | `False` |
+    | config_file | `bert_config.json` |
+    | vocab_file | `vocab.txt` |
+    | predict_file | `dev-v1.1.json` |
+    | init_checkpoint | `model.ckpt-3649` |

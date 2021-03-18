@@ -19,7 +19,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
   <docker image> \
-  /bin/bash quickstart/int8_inference.sh
+  /bin/bash quickstart/<script name>.sh
 ```
 
 To test accuracy using the COCO dataset:

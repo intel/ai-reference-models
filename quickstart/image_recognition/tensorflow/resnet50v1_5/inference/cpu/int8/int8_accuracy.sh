@@ -52,5 +52,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --batch-size=100 \
     --output-dir ${OUTPUT_DIR} \
     --accuracy-only \
+    --socket-id 0 \
     $@
 

@@ -6,6 +6,7 @@ slice_sets:
   ssd-resnet34-int8-inference:
   - add_to_name: -ssd-resnet34-int8-inference
     args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=ssd-resnet34-int8-inference
     - CODE_DIR=/workspace/tf_models
     - TF_MODELS_BRANCH=f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc

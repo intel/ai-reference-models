@@ -9,9 +9,9 @@ To run on bare metal, the following prerequisites must be installed in your envi
 Download and untar the model package. The model package includes a
 [pretrained model](https://zenodo.org/record/2535873/files/resnet50_v1.pb)
 and the scripts needed to run the <model name> <precision> <model>. Set
-environment variables to point to the imagenet dataset directory, and an
-output directory where log files will be written, then run a
-[quickstart script](#quick-start-scripts).
+environment variables to point to the imagenet dataset directory (if real
+data is being used), and an output directory where log files will be
+written, then run a [quickstart script](#quick-start-scripts).
 
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>

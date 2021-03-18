@@ -96,6 +96,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.init_checkpoint and not os.path.isabs(self.args.init_checkpoint):
             self.args.init_checkpoint = os.path.join(self.args.checkpoint, self.args.init_checkpoint)
 
+        # set default inter/intra threads
+        self.set_num_inter_intra_threads()
+
         if self.args.num_intra_threads:
             set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         else:

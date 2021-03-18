@@ -33,14 +33,42 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# Get number of cores per socket line from lscpu
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+
+# Subtract 4 to use as the num_intra_threads
+num_intra_threads=$(($cores_per_socket - 4))
+
+BATCH_SIZE="256"
+NUM_INSTANCES="2"
+
 source "$(dirname $0)/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=fp32 \
-         --mode=training \
-         --framework tensorflow \
-         --checkpoint ${OUTPUT_DIR} \
-         --data-location=${DATASET_DIR} \
-         --output-dir ${OUTPUT_DIR} \
-         --numa-cores-per-instance socket \
-         $@
+  --model-name=resnet50v1_5 \
+  --precision=fp32 \
+  --mode=training \
+  --framework tensorflow \
+  --checkpoint ${OUTPUT_DIR} \
+  --data-location=${DATASET_DIR} \
+  --output-dir ${OUTPUT_DIR} \
+  --mpi_num_processes=${NUM_INSTANCES} \
+  --mpi_num_processes_per_socket=1 \
+  --batch-size ${BATCH_SIZE} \
+  --num-intra-threads ${num_intra_threads} \
+  --num-inter-threads 2 \
+  --numa-cores-per-instance socket \
+  $@ \
+  -- \
+  train_epochs=3 \
+  epochs_between_evals=1 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_fp32_training_bs${BATCH_SIZE}_all_instances.log
+
+if [[ $? == 0 ]]; then
+  global_steps=`cat ${OUTPUT_DIR}/resnet50v1_5_fp32_training_bs${BATCH_SIZE}_all_instances.log | grep "global_step/sec:" | sed -e s"/.*: //" | tail -n 1`
+  summary=`python -c "print(${global_steps}*${NUM_INSTANCES}*${BATCH_SIZE})"`
+  echo "Throughput summary:"
+  echo $summary
+  exit 0
+else
+  exit 1
+fi
