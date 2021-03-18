@@ -95,7 +95,7 @@ container".
 
 Once there are partials added for the category you are using, the model
 package can be added on top of that to create the model container. This is done
-using the [model package partial](partials/model_package.partial.Dockerfile).
+using the [model package partial](partials/common/model_package.partial.Dockerfile).
 This partial simply adds the model package .tar.gz file to the predefined `${MODEL_WORKSPACE}` environment variable in the
 container (which also extracts the tar) and sets the working directory to that
 package location.
