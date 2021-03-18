@@ -267,6 +267,7 @@ _model_builder._init()
     _spec_home=${_spec_home}/${_platform}
     _spec_dir_mounted=${_spec_dir_mounted}/${_platform}
   fi
+
   declare -g _spec_dir_mounted=${_spec_dir_mounted}
 
   if [[ ! -d $_spec_folder ]]; then

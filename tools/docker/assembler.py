@@ -1394,6 +1394,16 @@ def get_tag_spec(spec_dir, partials):
   tag_spec = v.normalized(tag_spec)
   return tag_spec
 
+def merge_dir(dir_1, dir_2):
+  merged_dir = '/tmp/partials'
+  if os.path.exists(merged_dir):
+    shutil.rmtree(merged_dir)
+  if not os.path.exists(merged_dir):
+    os.makedirs(merged_dir)
+  copy_tree(dir_1, merged_dir)
+  copy_tree(dir_2, merged_dir)
+  return merged_dir
+
 
 def main(argv):
   if len(argv) > 1:
@@ -1407,10 +1417,12 @@ def main(argv):
     sys.exit(0)
 
   # Get existing partial contents for centos or ubuntu
-  partials_dir = FLAGS.partial_dir
+  common_partials = os.path.join(FLAGS.partial_dir, 'common')
+  os_partials = os.path.join(FLAGS.partial_dir, 'ubuntu')
   if any("centos" in arg for arg in FLAGS.arg):
-    partials_dir = os.path.join(FLAGS.partial_dir, 'centos')
+    os_partials = os.path.join(FLAGS.partial_dir, 'centos')
 
+  partials_dir = merge_dir(os_partials, common_partials)
   partials = gather_existing_partials(partials_dir)
 
   # read in all spec files
