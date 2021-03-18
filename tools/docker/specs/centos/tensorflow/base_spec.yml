@@ -53,3 +53,69 @@ slice_sets:
                  destination: licenses/LICENSE
                - source: third_party
                  destination: licenses/third_party
+
+    image-segmentation:
+        - add_to_name: "-image-segmentation"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    language-modeling:
+        - add_to_name: "-language-modeling"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    language-translation:
+        - add_to_name: "-language-translation"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    object-detection:
+        - add_to_name: "-object-detection"
+          partials:
+              - common
+              - python-build
+              - tensorflow/model-source
+              - object_detection/pip_installs
+              - object_detection/protoc
+          args:
+              - PY_VERSION=3.8
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    recommendation:
+        - add_to_name: "-recommendation"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    text-to-speech:
+        - add_to_name: "-text-to-speech"
+          partials:
+              - common
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
