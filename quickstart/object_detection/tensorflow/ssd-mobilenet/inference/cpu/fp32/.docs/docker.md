@@ -5,7 +5,8 @@ When running in docker, the <model name> <precision> <mode> container includes t
 libraries and the model package, which are needed to run <model name> <precision>
 <mode>. To run the quickstart scripts, you'll need to provide volume mounts for the
 [COCO validation dataset](/datasets/coco/README.md) TF Record file and an output directory
-where log files will be written.
+where log files will be written. Omit the `DATASET_DIR` when running the multi-instance
+quickstart scripts, since synthetic data will be used.
 
 ```
 DATASET_DIR=<path to the dataset (for accuracy testing only)>

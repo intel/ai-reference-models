@@ -28,6 +28,8 @@ downloading and preprocessing the COCO validation dataset.
 |-------------|-------------|
 | [`fp32_inference.sh`](fp32_inference.sh) | Runs inference on TF records and outputs performance metrics. |
 | [`fp32_accuracy.sh`](fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
+| [`multi_instance_batch_inference.sh`](multi_instance_batch_inference.sh) | A multi-instance run that uses all the cores for each socket for each instance with a batch size of 448 and synthetic data. |
+| [`multi_instance_online_inference.sh`](multi_instance_online_inference.sh) | A multi-instance run that uses 4 cores per instance with a batch size of 1. Uses synthetic data if no `DATASET_DIR` is set. |
 
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
@@ -75,7 +77,8 @@ When running in docker, the SSD-MobileNet FP32 inference container includes the
 libraries and the model package, which are needed to run SSD-MobileNet FP32
 inference. To run the quickstart scripts, you'll need to provide volume mounts for the
 [COCO validation dataset](/datasets/coco/README.md) TF Record file and an output directory
-where log files will be written.
+where log files will be written. Omit the `DATASET_DIR` when running the multi-instance
+quickstart scripts, since synthetic data will be used.
 
 ```
 DATASET_DIR=<path to the dataset (for accuracy testing only)>

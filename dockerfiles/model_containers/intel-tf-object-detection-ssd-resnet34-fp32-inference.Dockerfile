@@ -84,6 +84,9 @@ RUN cd ${TF_MODELS_DIR}/research && \
     apt-get autoremove -y
 
 RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
+
+RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
         libgl1-mesa-glx \
         libglib2.0-0

@@ -6,6 +6,7 @@ slice_sets:
   resnet50v1-5-int8-inference:
   - add_to_name: -resnet50v1-5-int8-inference
     args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=resnet50v1-5-int8-inference
     dockerfile_subdirectory: model_containers
     documentation:
@@ -66,5 +67,6 @@ slice_sets:
     - destination: quickstart
       source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8
     partials:
+    - numactl
     - model_package
     - entrypoint

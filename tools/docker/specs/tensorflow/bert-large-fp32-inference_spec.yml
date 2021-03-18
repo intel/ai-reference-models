@@ -6,6 +6,7 @@ slice_sets:
   bert-large-fp32-inference:
   - add_to_name: -bert-large-fp32-inference
     args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=bert-large-fp32-inference
     dockerfile_subdirectory: model_containers
     files:
@@ -32,6 +33,8 @@ slice_sets:
     downloads:
       - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
         destination: pretrained_model/bert_large_checkpoints.zip
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/fp32_bert_squad.pb
+        destination: pretrained_model/fp32_bert_squad.pb
     partials:
     - model_package
     - unzip

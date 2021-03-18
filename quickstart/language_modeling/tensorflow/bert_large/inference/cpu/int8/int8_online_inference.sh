@@ -45,7 +45,7 @@ if [ ! -d "${pretrained_model_dir}" ]; then
     unzip pretrained_model/bert_large_checkpoints.zip -d pretrained_model
 fi
 CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
-PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/int8_bert_squad.pb"
+PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/asymmetric_per_channel_bert_int8.pb"
 BATCH_SIZE="1"
 
 source "$(dirname $0)/common/utils.sh"

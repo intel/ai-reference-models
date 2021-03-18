@@ -3,8 +3,9 @@
 
 The model container includes the scripts and libraries needed to run 
 <model name> <precision> <mode>. To run one of the quickstart scripts 
-using this container, you'll need to provide volume mounts for the dataset 
-and an output directory.
+using this container, you'll need to provide volume mounts for the dataset
+and an output directory. Omit the `DATASET_DIR` when running the multi-instance
+quickstart scripts, since synthetic data will be used.
 
 ```
 DATASET_DIR=<path to the coco tf record file>

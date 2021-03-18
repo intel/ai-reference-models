@@ -11,6 +11,8 @@ _command()
   if [[ ${_args[@]} =~ --dry-run ]]; then
     echo "${_args[@]}"
   fi
+  echo $@
+  echo ""
   eval $@
 }
 
