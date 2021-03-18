@@ -23,12 +23,12 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
+# Use synthetic data (no --data-location arg) if no DATASET_DIR is set
+dataset_arg="--data-location=${DATASET_DIR}"
 if [ -z "${DATASET_DIR}" ]; then
-  echo "The required environment variable DATASET_DIR has not been set"
-  exit 1
-fi
-
-if [ ! -d "${DATASET_DIR}" ]; then
+  echo "Using synthetic data, since the DATASET_DIR environment variable is not set."
+  dataset_arg=""
+elif [ ! -d "${DATASET_DIR}" ]; then
   echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
   exit 1
 fi
@@ -42,8 +42,11 @@ _command python benchmarks/launch_benchmark.py \
          --mode=inference \
          --framework tensorflow \
          --in-graph ${MODEL_FILE} \
-         --data-location=${DATASET_DIR} \
+         ${dataset_arg} \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=128 \
          --socket-id 0 \
-         $@
+         $@ \
+         -- \
+         warmup_steps=50 \
+         steps=1500

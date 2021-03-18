@@ -6,6 +6,7 @@ slice_sets:
   ssd-mobilenet-fp32-inference:
   - add_to_name: -ssd-mobilenet-fp32-inference
     args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=ssd-mobilenet-fp32-inference
     dockerfile_subdirectory: model_containers
     downloads:
@@ -47,6 +48,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/fp32
     partials:
+    - numactl
     - model_package
     - entrypoint
     documentation:

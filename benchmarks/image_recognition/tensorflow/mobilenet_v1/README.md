@@ -26,9 +26,9 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     ImageNet dataset in the TF records format.
 
 2. Download the pre-trained model.
-```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
-```
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
+   ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
     and then run the model scripts for either online or batch inference or accuracy. For --dataset-location in accuracy run, please use the ImageNet validation data path from step 1.
@@ -151,9 +151,9 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mob
    ImageNet dataset in the TF records format.
 
 2. Download the pre-trained model.
-```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
-```
+   ```
+   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+   ```
 
 3. Clone the [tensorflow/models](https://github.com/tensorflow/models)
    repository.

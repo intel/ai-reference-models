@@ -6,6 +6,7 @@ slice_sets:
   ssd-mobilenet-int8-inference:
   - add_to_name: -ssd-mobilenet-int8-inference
     args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=ssd-mobilenet-int8-inference
     dockerfile_subdirectory: model_containers
     documentation:
@@ -76,5 +77,6 @@ slice_sets:
     - destination: quickstart
       source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8
     partials:
+    - numactl
     - model_package
     - entrypoint

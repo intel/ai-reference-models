@@ -34,7 +34,7 @@ pretrained_model_dir="pretrained_model/bert_large_checkpoints"
 if [ ! -d "${pretrained_model_dir}" ]; then
     unzip pretrained_model/bert_large_checkpoints.zip -d pretrained_model
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
+CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_dirs
@@ -44,7 +44,7 @@ input_dirs[DATASET_DIR]=${DATASET_DIR}
 for i in "${!input_dirs[@]}"; do
   var_name=$i
   dir_path=${input_dirs[$i]}
- 
+
   if [[ -z $dir_path ]]; then
     echo "The required environment variable $var_name is empty" >&2
     exit 1
@@ -56,17 +56,23 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
+PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/fp32_bert_squad.pb"
+
 source "$(dirname $0)/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name=bert_large \
     --precision=fp32 \
     --mode=inference \
     --framework=tensorflow \
+    --socket-id 0 \
     --batch-size=32 \
+    --in-graph ${PRETRAINED_MODEL} \
     --data-location ${DATASET_DIR} \
     --checkpoint ${CHECKPOINT_DIR} \
     --output-dir ${OUTPUT_DIR} \
     --accuracy-only \
     $@ \
-    -- infer_option=SQuAD
-
+    -- \
+    init_checkpoint=model.ckpt-3649 \
+    infer_option=SQuAD \
+    experimental-gelu=True

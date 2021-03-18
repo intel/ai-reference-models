@@ -46,7 +46,7 @@ if [ ! -d "${pretrained_model_dir}" ]; then
 fi
 
 CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
-PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/int8_bert_squad.pb"
+PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/asymmetric_per_channel_bert_int8.pb"
 BATCH_SIZE="32"
 
 source "$(dirname $0)/common/utils.sh"
