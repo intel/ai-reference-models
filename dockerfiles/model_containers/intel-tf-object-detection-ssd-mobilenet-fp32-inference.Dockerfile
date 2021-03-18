@@ -83,6 +83,9 @@ RUN cd ${TF_MODELS_DIR}/research && \
         wget && \
     apt-get autoremove -y
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME

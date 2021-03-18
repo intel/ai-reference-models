@@ -4,7 +4,8 @@
 The model container `<docker image>` includes the scripts
 and libraries needed to run <model name> <precision> <mode>. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
-the ImageNet dataset and an output directory where checkpoint files will be written.
+the ImageNet dataset (if a real dataset is being used) and an output directory where
+checkpoint files will be written.
 
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>

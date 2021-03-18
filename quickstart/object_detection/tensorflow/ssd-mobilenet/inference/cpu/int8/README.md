@@ -27,6 +27,8 @@ downloading and preprocessing the COCO validation dataset.
 |-------------|-------------|
 | [`int8_inference.sh`](int8_inference.sh) | Runs inference on TF records and outputs performance metrics. |
 | [`int8_accuracy.sh`](int8_accuracy.sh) | Runs inference and checks accuracy on the results. |
+| [`multi_instance_batch_inference.sh`](multi_instance_batch_inference.sh) | A multi-instance run that uses all the cores for each socket for each instance with a batch size of 448 and synthetic data. |
+| [`multi_instance_online_inference.sh`](multi_instance_online_inference.sh) | A multi-instance run that uses 4 cores per instance with a batch size of 1 and synthetic data. |
 
 These quickstart scripts can be run in different environments:
 * [Bare Metal](#bare-metal)
@@ -73,8 +75,9 @@ quickstart/<script name>.sh
 
 The model container includes the scripts and libraries needed to run 
 SSD-MobileNet Int8 inference. To run one of the quickstart scripts 
-using this container, you'll need to provide volume mounts for the dataset 
-and an output directory.
+using this container, you'll need to provide volume mounts for the dataset
+and an output directory. Omit the `DATASET_DIR` when running the multi-instance
+quickstart scripts, since synthetic data will be used.
 
 ```
 DATASET_DIR=<path to the coco tf record file>

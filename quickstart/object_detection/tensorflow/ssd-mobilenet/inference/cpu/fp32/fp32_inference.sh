@@ -23,7 +23,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 
 # Create the output directory in case it doesn't already exist
-mkdir -p ${OUTPUT_LOCATION}
+mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"

@@ -6,6 +6,7 @@ slice_sets:
   ssd-resnet34-fp32-inference:
   - add_to_name: -ssd-resnet34-fp32-inference
     args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
     - PACKAGE_NAME=ssd-resnet34-fp32-inference
     - TF_BENCHMARKS_BRANCH=509b9d288937216ca7069f31cfb22aaa7db6a4a7
     - TF_BENCHMARKS_DIR=/tensorflow/ssd-resnet-benchmarks
@@ -77,6 +78,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32
     partials:
+    - numactl
     - libgl
     - opencv
     - tensorflow-addons-0.11.0

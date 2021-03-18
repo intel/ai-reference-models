@@ -6,9 +6,6 @@ slice_sets:
   ssd-resnet34-bfloat16-training:
   - add_to_name: -ssd-resnet34-bfloat16-training
     args:
-    # TODO: Remove the TENSORFLOW_IMAGE and TENSORFLOW_TAG args from here once we have TF2.5 with the 'all reduce' change
-    - TENSORFLOW_IMAGE=amr-registry.caas.intel.com/aipg-tf/intel-optimized-tensorflow
-    - TENSORFLOW_TAG=nightly-master-avx512-devel-mkl
     - PACKAGE_NAME=ssd-resnet34-bfloat16-training
     - TF_MODELS_BRANCH=8110bb64ca63c48d0caee9d565e5b4274db2220a
     - TF_BENCHMARKS_BRANCH=509b9d288937216ca7069f31cfb22aaa7db6a4a7
