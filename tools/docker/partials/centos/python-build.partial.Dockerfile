@@ -1,6 +1,3 @@
-ARG PY_VERSION=3
-
-RUN yum update -y && \
-    yum install -y \
-       build-essential \
-       python${PY_VERSION}-dev
+RUN yum install -y gcc gcc-c++ && \
+    yum install -y python3-devel && \
+    yum clean all
