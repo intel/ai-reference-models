@@ -14,7 +14,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/)
 * keras==2.0.8
 * matplotlib
-* numpy==1.16.0
+* numpy==1.16.3
 * opencv-python
 * pycocotools
 * scikit-image

@@ -3,5 +3,5 @@ RUN pip install \
         SimpleITK==1.2.0 \
         nibabel==2.3.3 \
         nilearn==0.6.2 \
-        numpy==1.16.1 \
+        numpy==1.16.3 \
         tables==3.4.4
