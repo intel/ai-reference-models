@@ -62,7 +62,7 @@ RUN pip install \
         imgaug \
         keras==2.0.8 \
         matplotlib \
-        numpy==1.16.0 \
+        numpy==1.16.3 \
         opencv-python \
         pycocotools \
         scikit-image \

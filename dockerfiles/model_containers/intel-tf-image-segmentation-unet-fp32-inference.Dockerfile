@@ -53,7 +53,7 @@ RUN pip install \
         'Pillow>=7.1.0' \
         click \
         matplotlib \
-        numpy==1.16.1
+        numpy==1.16.3
 
 ARG PACKAGE_DIR=model_packages
 

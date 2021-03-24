@@ -30,7 +30,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * Python 3
 * [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
 * numactl
-* numpy==1.16.1
+* numpy==1.16.3
 * Pillow>=7.1.0
 * matplotlib
 * click
