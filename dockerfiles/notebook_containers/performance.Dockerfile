@@ -53,7 +53,7 @@ RUN . ./venv-stock-tf/bin/activate && \
         ipykernel \
         matplotlib \
         pandas \
-        psutil \
+        'psutil>=5.6.7' \
         pycocotools && \
     deactivate
 
@@ -72,7 +72,7 @@ RUN . ./venv-intel-tf/bin/activate && \
         ipykernel \
         matplotlib \
         pandas \
-        psutil \
+        'psutil>=5.6.7' \
         pycocotools && \
     deactivate
 

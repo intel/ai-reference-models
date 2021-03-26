@@ -7,7 +7,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * numactl
 * wget
 * IPython[all]
-* Pillow
+* Pillow>=7.1.0
 * cython
 * h5py
 * imgaug

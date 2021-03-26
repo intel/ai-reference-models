@@ -13,3 +13,5 @@ pillow>=7.1.0
 lxml
 absl-py
 notebook>=6.1.5
+
+pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
