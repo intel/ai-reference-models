@@ -1,7 +1,7 @@
 pycocotools
 numpy==1.16.3
 scipy==1.2.0
-Pillow
+Pillow>=7.1.0
 cython
 matplotlib
 scikit-image
@@ -11,3 +11,5 @@ opencv-python
 h5py
 imgaug
 IPython[all]
+
+pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability
