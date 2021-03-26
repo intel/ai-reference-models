@@ -5,6 +5,6 @@ RUN pip install \
         numpy==1.16.3 \
         oauth2client==4.1.2 \
         pandas \
-        psutil==5.6.6 \
+        'psutil>=5.6.7' \
         py-cpuinfo==3.3.0 \
         typing
