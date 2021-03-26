@@ -4,7 +4,7 @@ ENV MODEL_SRC_DIR=${MASK_RCNN_SOURCE_DIR}
 
 RUN pip install \
         IPython[all] \
-        Pillow \
+        'Pillow>=7.1.0' \
         cython \
         h5py \
         imgaug \
