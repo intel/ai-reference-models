@@ -99,7 +99,7 @@ follow the [instructions above for downloading the BraTS dataset](#dataset).
      --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
      --volume ${PRETRAINED_MODEL_DIR}:${PRETRAINED_MODEL_DIR} \
      --privileged --init -t \
-     intel/image-segmentation:1.15.2-3d-unet-fp32-inference \
+     intel/image-segmentation:tf-1.15.2-3d-unet-fp32-inference \
      /bin/bash quickstart/<script name>.sh
    ```
 
