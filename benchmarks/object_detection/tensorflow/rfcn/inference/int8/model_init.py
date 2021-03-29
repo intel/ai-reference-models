@@ -116,7 +116,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.num_cores != -1:
             num_cores = str(self.args.num_cores)
 
-        set_env_var("OMP_NUM_THREADS", num_cores)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.socket_id != -1:
             self.command.append("numactl")
