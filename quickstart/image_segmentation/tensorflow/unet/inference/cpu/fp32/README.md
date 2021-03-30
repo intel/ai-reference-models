@@ -27,8 +27,8 @@ These quickstart scripts can be run in different environments:
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your environment:
-* Python 3
-* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
+* Python 3.6 or 3.7
+* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/1.15.2/)
 * numactl
 * numpy==1.16.3
 * Pillow>=7.1.0

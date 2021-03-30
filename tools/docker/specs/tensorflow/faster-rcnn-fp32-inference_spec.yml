@@ -8,6 +8,7 @@ slice_sets:
     args:
     - PACKAGE_NAME=faster-rcnn-fp32-inference
     - TF_MODELS_BRANCH=tags/v1.12.0
+    - TENSORFLOW_TAG=1.15.2
     dockerfile_subdirectory: model_containers
     documentation:
       docs:
