@@ -21,6 +21,7 @@ For any performance and/or benchmarking information on specific Intel platforms,
 
 - If you know what model you are interested in, or if you want to see a full list of models in the Model Zoo, start **[here](/benchmarks)**.
 - For framework best practice guides, and step-by-step tutorials for some models in the Model Zoo, start **[here](/docs)**.
+
 - AI Kit provides a consolidated package of Intel’s latest deep and machine
   learning optimizations all in one place for ease of development. Along with
   Model Zoo,  the toolkit also includes Intel optimized versions of deep
@@ -29,7 +30,6 @@ For any performance and/or benchmarking information on specific Intel platforms,
 
   |[Download AI Kit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/ai-analytics-toolkit/) |[AI Kit Get Started Guide](https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html) |
   |---|---|
-
 
 ### Directory Structure
 The Model Zoo is divided into four main directories:
