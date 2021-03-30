@@ -50,7 +50,7 @@ RUN apt-get update && \
     git checkout ${TF_UNET_BRANCH} )
 
 RUN pip install \
-        'Pillow>=7.1.0' \
+        'Pillow>=8.1.2' \
         click \
         matplotlib \
         numpy==1.16.3

@@ -64,7 +64,7 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy==1.17.4 \
-        'pillow>=7.1.0' && \
+        'pillow>=8.1.2' && \
     pip install pycocotools
 
 ARG TF_MODELS_DIR=/tensorflow/models
