@@ -2,12 +2,12 @@
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your environment:
-* Python 3
+* Python 3.6 or 3.7
 * git
 * numactl
 * wget
 * [Protobuf Compilation](https://github.com/tensorflow/models/blob/v1.12.0/research/object_detection/g3doc/installation.md#protobuf-compilation)
-* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
 * Cython
 * contextlib2
 * jupyter
