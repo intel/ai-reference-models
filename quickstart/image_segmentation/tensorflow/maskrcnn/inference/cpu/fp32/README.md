@@ -33,7 +33,7 @@ These quickstart scripts can be run in different environments:
 ## Bare Metal
 
 To run on bare metal, the following prerequisites must be installed in your environment:
-* Python 3
+* Python 3.6 or 3.7
 * git
 * numactl
 * wget
@@ -42,7 +42,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * cython
 * h5py
 * imgaug
-* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
 * keras==2.0.8
 * matplotlib
 * numpy==1.16.3

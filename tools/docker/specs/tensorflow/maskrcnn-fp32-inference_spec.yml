@@ -7,6 +7,7 @@ slice_sets:
   - add_to_name: -maskrcnn-fp32-inference
     args:
     - PACKAGE_NAME=maskrcnn-fp32-inference
+    - TENSORFLOW_TAG=1.15.2
     dockerfile_subdirectory: model_containers
     documentation:
       docs:
