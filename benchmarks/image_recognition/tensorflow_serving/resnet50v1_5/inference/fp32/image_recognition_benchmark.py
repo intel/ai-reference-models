@@ -42,8 +42,8 @@ tf_v1.disable_eager_execution()
 tf_v1.app.flags.DEFINE_string('server', 'localhost:8500', 'PredictionService host:port')
 tf_v1.app.flags.DEFINE_integer('batch_size', 1, 'Batch size to use')
 tf_v1.app.flags.DEFINE_string('data_dir', '', 'path to images in TF records format')
+tf_v1.app.flags.DEFINE_string('model', 'resnet50v1_5', 'served model name')
 FLAGS = tf_v1.app.flags.FLAGS
-MODEL = 'resnet50v1_5'
 IMAGE_SIZE = 224
 
 
@@ -60,7 +60,7 @@ def sample_images(image_size):
     next_element = iterator.get_next()
     with tf.Session() as sess:
         images, labels = sess.run(next_element)
-        images = np.array([sess.run(preprocess_image(x, MODEL, image_size)) for x in images])
+        images = np.array([sess.run(preprocess_image(x, FLAGS.model, image_size)) for x in images])
 
     return images
 
@@ -81,19 +81,19 @@ def main(_):
             image_np *= 256.0
 
         request = predict_pb2.PredictRequest()
-        request.model_spec.name = MODEL
+        request.model_spec.name = FLAGS.model
         request.model_spec.signature_name = 'serving_default'
         request.inputs['input_tensor'].CopyFrom(
             tf.make_tensor_proto(image_np, shape=[FLAGS.batch_size, IMAGE_SIZE, IMAGE_SIZE, 3]))
         start_time = time.time()
-        stub.Predict(request, 10.0)  # 10 secs timeout
+        stub.Predict(request, 500.0)  # 500 sec timeout
         time_consume = time.time() - start_time
         print('Iteration %d: %.3f sec' % (i, time_consume))
         if i > warm_up_iteration:
             total_time += time_consume
 
     time_average = total_time / (num_iteration - warm_up_iteration)
-    print('Average time: %.3f sec' % (time_average))
+    print("Total: {} Average: {:.3f}".format(total_time, time_average))
 
     print('Batch size = %d' % FLAGS.batch_size)
     if (FLAGS.batch_size == 1):
