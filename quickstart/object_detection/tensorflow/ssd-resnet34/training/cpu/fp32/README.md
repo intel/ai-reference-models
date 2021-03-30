@@ -107,7 +107,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * opencv
 * openmpi
 * openssh
-* pillow>=7.1.0
+* pillow>=8.1.2
 * protoc
 * pycocotools
 * tensorflow-addons==0.11.0
