@@ -13,7 +13,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * jupyter
 * lxml
 * matplotlib
-* pillow>=7.1.0
+* pillow>=8.1.2
 * pycocotools
 
 Clone the [TensorFlow Model Garden](https://github.com/tensorflow/models)
