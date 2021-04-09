@@ -1,0 +1,57 @@
+From 850f715a097d75b62136d2577b73a9d642e04b2a Mon Sep 17 00:00:00 2001
+From: yhu5 <ying.hu@intel.com>
+Date: Thu, 17 Dec 2020 02:34:06 +0800
+Subject: [PATCH] faster_rcnn int8 TF timeline
+
+---
+ .../inference/int8/run_frozen_graph_rcnn.py         | 13 +++++++++++--
+ 1 file changed, 11 insertions(+), 2 deletions(-)
+
+diff --git a/models/object_detection/tensorflow/faster_rcnn/inference/int8/run_frozen_graph_rcnn.py b/models/object_detection/tensorflow/faster_rcnn/inference/int8/run_frozen_graph_rcnn.py
+index 1e4a03d9..badec1a9 100644
+--- a/models/object_detection/tensorflow/faster_rcnn/inference/int8/run_frozen_graph_rcnn.py
++++ b/models/object_detection/tensorflow/faster_rcnn/inference/int8/run_frozen_graph_rcnn.py
+@@ -36,6 +36,10 @@ import time
+ import argparse
+ from tensorflow.python.client import timeline
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
+ 
+ parser = argparse.ArgumentParser()
+ parser.add_argument('-g', '--graph', help='Path to input graph to run', type=str, required=True)
+@@ -70,6 +74,11 @@ PATH_TO_LABELS = os.path.join('object_detection/data', 'mscoco_label_map.pbtxt')
+ 
+ NUM_CLASSES = 90
+ 
++configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++configf.read_config("faster_rcnn infer int8")
++infer_many_runs_timeline = TimeLiner()
++infer_run_metadata = tf.compat.v1.RunMetadata()
++
+ detection_graph = tf.Graph()
+ with detection_graph.as_default():
+   od_graph_def = tf.GraphDef()
+@@ -115,7 +124,7 @@ def run_inference_for_single_image(graph):
+     os.environ["OMP_NUM_THREADS"] = args.num_intra_threads
+ 
+   with graph.as_default():
+-    with tf.Session(config=sess_config) as sess:
++    with tfSession(config=sess_config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline ) as sess:
+       # Get handles to input and output tensors
+       tensor_dict = {}
+       if (args.evaluate_tensor is None):
+@@ -211,7 +220,7 @@ def run_inference_for_single_image(graph):
+ 
+ # Actual detection.
+ output_dict, image_np = run_inference_for_single_image(detection_graph)
+-
++infer_many_runs_timeline.save(configf.json_fname)
+ # Visualization of the results of a detection.
+ if (args.visualize and args.single_image and args.evaluate_tensor is None):
+   vis_util.visualize_boxes_and_labels_on_image_array(
+-- 
+2.22.1
+
