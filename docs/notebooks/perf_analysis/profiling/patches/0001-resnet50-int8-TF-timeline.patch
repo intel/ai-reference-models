@@ -1,14 +1,14 @@
-From da19c7320c79c489228ba669ee1e258a25a6b1a6 Mon Sep 17 00:00:00 2001
+From 9c20a196a6b018f001f32ee0c5fcfa692e3d88b9 Mon Sep 17 00:00:00 2001
 From: ltsai1 <louie.tsai@intel.com>
 Date: Thu, 18 Jun 2020 12:28:35 -0700
 Subject: [PATCH] resnet50 int8 TF timeline
 
 ---
- .../eval_image_classifier_inference.py        | 20 +++++++++++++++++--
- 1 file changed, 18 insertions(+), 2 deletions(-)
+ .../eval_image_classifier_inference.py        | 23 ++++++++++++++++---
+ 1 file changed, 20 insertions(+), 3 deletions(-)
 
 diff --git a/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py b/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py
-index d8d8487e..66223696 100644
+index d8d8487e..f9f1b273 100644
 --- a/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py
 +++ b/models/image_recognition/tensorflow/resnet50/inference/eval_image_classifier_inference.py
 @@ -33,6 +33,11 @@ OUTPUTS = 'predict'
@@ -49,7 +49,24 @@ index d8d8487e..66223696 100644
  
      num_processed_images = 0
      num_remaining_images = dataset.num_examples_per_epoch(subset=subset) - num_processed_images \
-@@ -258,6 +271,9 @@ class eval_classifier_optimized_graph:
+@@ -218,6 +231,7 @@ class eval_classifier_optimized_graph:
+       print('Throughput: %.3f images/sec' % (self.args.batch_size / time_average))
+ 
+     else: # accuracy check
++      num_remaining_images = 9000 # reduce the number of inference images for smaller timeline json file.
+       total_accuracy1, total_accuracy5 = (0.0, 0.0)
+ 
+       while num_remaining_images >= self.args.batch_size:
+@@ -247,7 +261,7 @@ class eval_classifier_optimized_graph:
+           accuracy5 = tf.reduce_sum(
+             input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
+                                    targets=tf.constant(np_labels), k=5), tf.float32))
+-          with tf.compat.v1.Session() as accu_sess:
++          with tfSession(run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as accu_sess:
+             np_accuracy1, np_accuracy5 = accu_sess.run([accuracy1, accuracy5])
+ 
+           total_accuracy1 += np_accuracy1
+@@ -258,6 +272,9 @@ class eval_classifier_optimized_graph:
                    % (num_processed_images, total_accuracy1 / num_processed_images,
                       total_accuracy5 / num_processed_images))
  
