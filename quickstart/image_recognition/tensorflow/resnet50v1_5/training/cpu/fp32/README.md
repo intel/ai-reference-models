@@ -53,7 +53,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/res
 tar -xvf resnet50v1-5-fp32-training.tar.gz
 cd resnet50v1-5-fp32-training
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!-- 60. Docker -->

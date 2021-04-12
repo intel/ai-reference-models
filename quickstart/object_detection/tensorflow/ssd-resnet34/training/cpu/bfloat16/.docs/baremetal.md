@@ -61,7 +61,7 @@ export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 
 cd <package dir>
-quickstart/bfloat16_training_demo.sh
+./quickstart/bfloat16_training_demo.sh
 ```
 
 To run training and achieve convergence, download the backbone model using the
@@ -82,7 +82,7 @@ export OUTPUT_DIR=<directory where the log file and checkpoints will be written>
 export MPI_NUM_PROCESSES=<optional, defaults to 4>
 
 cd <package dir>
-quickstart/bfloat16_training.sh
+./quickstart/bfloat16_training.sh
 ```
 
 To run in eval mode (to check accuracy), set the `CHECKPOINT_DIR` to the
@@ -97,5 +97,5 @@ export CHECKPOINT_DIR=<directory where your checkpoint files are located>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 
 cd <package dir>
-quickstart/bfloat16_training_accuracy.sh
+./quickstart/bfloat16_training_accuracy.sh
 ```

@@ -61,7 +61,7 @@ To run inference using synthetic data:
 ```
 export OUTPUT_DIR=<directory where log files will be written>
 
-quickstart/int8_inference.sh
+./quickstart/int8_inference.sh
 ```
 
 To test accuracy using the COCO dataset:
@@ -69,5 +69,5 @@ To test accuracy using the COCO dataset:
 export DATASET_DIR=<path to the coco directory>
 export OUTPUT_DIR=<directory where log files will be written>
 
-quickstart/int8_accuracy.sh
+./quickstart/int8_accuracy.sh
 ```

@@ -61,7 +61,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/res
 tar -xzf resnet50v1-5-int8-inference.tar.gz
 cd resnet50v1-5-int8-inference
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 60. Docker -->

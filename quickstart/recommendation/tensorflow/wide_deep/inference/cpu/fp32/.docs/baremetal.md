@@ -33,5 +33,5 @@ To run on bare metal, the following prerequisites must be installed in your envi
     OUTPUT_DIR=<directory where log files will be written>
     TF_MODEL_SOURCE_DIR=<path to tensorflow-models>
 
-    quickstart/<script name>.sh
+    ./quickstart/<script name>.sh
     ```

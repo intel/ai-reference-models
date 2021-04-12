@@ -67,7 +67,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/tra
 tar -xzf transformer-lt-official-fp32-inference.tar.gz
 cd transformer-lt-official-fp32-inference
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 If you have your own pretrained model, you can specify the path to the frozen

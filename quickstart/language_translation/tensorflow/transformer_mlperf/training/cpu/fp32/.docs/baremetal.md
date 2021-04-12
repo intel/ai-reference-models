@@ -19,7 +19,7 @@ wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-quickstart/fp32_training.sh (or quickstart/fp32_training_demo.sh)
+./quickstart/fp32_training.sh (or ./quickstart/fp32_training_demo.sh)
 ```
 
 For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
@@ -40,5 +40,5 @@ DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
 cd <package dir>
-quickstart/fp32_training_mpirun.sh
+./quickstart/fp32_training_mpirun.sh
 ```

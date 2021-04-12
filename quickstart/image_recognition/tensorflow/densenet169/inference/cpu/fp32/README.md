@@ -55,7 +55,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/den
 tar -xzf densenet169-fp32-inference.tar.gz
 cd densenet169-fp32-inference
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 60. Docker -->
