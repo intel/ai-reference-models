@@ -81,7 +81,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/tra
 tar -xzf transformer-mlperf-fp32-training.tar.gz
 cd transformer-mlperf-fp32-training
 
-quickstart/fp32_training.sh (or quickstart/fp32_training_demo.sh)
+./quickstart/fp32_training.sh (or ./quickstart/fp32_training_demo.sh)
 ```
 
 For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
@@ -102,7 +102,7 @@ DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
 cd transformer-mlperf-fp32-training
-quickstart/fp32_training_mpirun.sh
+./quickstart/fp32_training_mpirun.sh
 ```
 
 <!--- 60. Docker -->

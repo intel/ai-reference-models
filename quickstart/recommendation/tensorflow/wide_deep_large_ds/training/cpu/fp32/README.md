@@ -64,7 +64,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/wid
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
 cd wide-deep-large-ds-fp32-training
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 The script will write a log file and the saved model to the `OUTPUT_DIR`

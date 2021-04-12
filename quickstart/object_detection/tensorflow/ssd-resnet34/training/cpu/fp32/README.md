@@ -143,7 +143,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd
 tar -xzf ssd-resnet34-fp32-training.tar.gz
 cd ssd-resnet34-fp32-training
 
-quickstart/fp32_training.sh
+./quickstart/fp32_training.sh
 ```
 
 <!--- 60. Docker -->

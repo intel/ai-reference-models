@@ -23,5 +23,5 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/<mo
 tar -xzf <model-precision-mode>.tar.gz
 cd <model-precision-mode>
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```

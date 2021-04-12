@@ -16,7 +16,7 @@ wget <package url>
 tar -xvf <package name>
 cd <package dir>
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 To run distributed training (one MPI process per socket) for better throughput,
@@ -40,5 +40,5 @@ wget <package url>
 tar -xvf <package name>
 cd <package dir>
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
