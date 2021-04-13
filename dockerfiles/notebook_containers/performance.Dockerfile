@@ -46,6 +46,7 @@ RUN virtualenv -p python3 ./venv-stock-tf
 
 # Install all the necessary libraries for stock TF
 RUN . ./venv-stock-tf/bin/activate && \
+    pip install --no-binary numpy==1.19.5 numpy==1.19.5 && \
     pip install \
         cxxfilt  \
         gitpython \
@@ -65,6 +66,7 @@ RUN virtualenv -p python3 ./venv-intel-tf
 
 # Install all the necessary libraries for Intel TF environment
 RUN . ./venv-intel-tf/bin/activate && \
+    pip install --no-binary numpy==1.19.5 numpy==1.19.5 && \
     pip install \
         cxxfilt  \
         gitpython \

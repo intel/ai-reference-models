@@ -124,11 +124,12 @@ class ModelInitializer(BaseModelInitializer):
 
             if self.args.num_cores != -1:
                 self.command.append("-C")
-                self.command.append("+0")
+                cpuid = "+0"
                 i = 1
                 while i < self.args.num_cores:
-                    self.command.append(",{}".format(i))
+                    cpuid += ','+str(i)
                     i += i
+                self.command.append(cpuid)
 
             self.command.append("-N")
             self.command.append("{}".format(socket_id))
