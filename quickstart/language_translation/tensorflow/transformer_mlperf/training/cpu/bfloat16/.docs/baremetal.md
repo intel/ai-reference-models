@@ -19,7 +19,7 @@ wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-quickstart/<script name>
+./quickstart/<script name>
 ```
 
 For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
@@ -42,6 +42,6 @@ OUTPUT_DIR=<directory where log files will be written>
 MPI_NUM_PROCESSES=<number of sockets to use>
 
 cd <package dir>
-quickstart/<script name>
+./quickstart/<script name>
 ```
 

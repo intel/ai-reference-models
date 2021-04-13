@@ -82,7 +82,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/tra
 tar -xzf transformer-mlperf-bfloat16-training.tar.gz
 cd transformer-mlperf-bfloat16-training
 
-quickstart/<script name>
+./quickstart/<script name>
 ```
 
 For training in multi-instance mode (2 sockets in a single node for example) in evaluation mode,
@@ -105,7 +105,7 @@ OUTPUT_DIR=<directory where log files will be written>
 MPI_NUM_PROCESSES=<number of sockets to use>
 
 cd transformer-mlperf-bfloat16-training
-quickstart/<script name>
+./quickstart/<script name>
 ```
 
 

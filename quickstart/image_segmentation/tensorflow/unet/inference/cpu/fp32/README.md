@@ -60,7 +60,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/une
 tar -xzf unet-fp32-inference.tar.gz
 cd unet_trained
 
-quickstart/fp32_inference.sh
+./quickstart/fp32_inference.sh
 ```
 
 <!--- 60. Docker -->

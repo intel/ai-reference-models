@@ -55,7 +55,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/res
 tar -xzf resnet101-fp32-inference.tar.gz
 cd resnet101-fp32-inference
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 60. Docker -->

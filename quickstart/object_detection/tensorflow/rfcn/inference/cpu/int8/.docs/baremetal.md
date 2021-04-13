@@ -38,7 +38,7 @@ OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 cd <package name>
-quickstart/int8_inference.sh
+./quickstart/int8_inference.sh
 ```
 
 To get accuracy metrics:
@@ -48,5 +48,5 @@ OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 cd <package name>
-quickstart/int8_accuracy.sh
+./quickstart/int8_accuracy.sh
 ```

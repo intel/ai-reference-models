@@ -41,5 +41,5 @@ cd <package dir>
 export DATASET_DIR=<path to the coco dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```

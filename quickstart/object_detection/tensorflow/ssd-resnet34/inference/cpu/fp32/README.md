@@ -104,7 +104,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd
 tar -xzf ssd-resnet34-fp32-inference.tar.gz
 cd ssd-resnet34-fp32-inference
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 60. Docker -->

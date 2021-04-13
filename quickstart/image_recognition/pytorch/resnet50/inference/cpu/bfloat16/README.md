@@ -75,7 +75,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/pyt
 tar -xzf pytorch-resnet50-bfloat16-inference.tar.gz
 cd pytorch-resnet50-bfloat16-inference
 
-bash quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 60. Docker -->
