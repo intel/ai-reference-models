@@ -1,0 +1,41 @@
+From e3fbc43f2f6dd98ff1e8d354d3db1734e0e49fa7 Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Wed, 6 Jan 2021 17:51:13 +0800
+Subject: [PATCH] bert_large train fp32
+
+---
+ .../tensorflow/bert_large/training/fp32/run_squad.py   | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/models/language_modeling/tensorflow/bert_large/training/fp32/run_squad.py b/models/language_modeling/tensorflow/bert_large/training/fp32/run_squad.py
+index c9b53ec2..9f56325f 100644
+--- a/models/language_modeling/tensorflow/bert_large/training/fp32/run_squad.py
++++ b/models/language_modeling/tensorflow/bert_large/training/fp32/run_squad.py
+@@ -30,6 +30,10 @@ import six
+ import tensorflow as tf
+ import generic_ops as bf
+ 
++import sys
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import ConfigFile, tfProfileHook
++
+ global is_mpi
+ try:
+   import horovod.tensorflow as hvd
+@@ -1315,8 +1319,12 @@ def main(_):
+       hooks.append(tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
+                                                    show_memory=False))
+ 
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config("bert_large train fp32")
++    profile_hook = [tfProfileHook(save_steps=1, json_fname=config.json_fname)]
++
+     estimator.train(input_fn=train_input_fn, max_steps=num_train_steps,
+-                    hooks=hooks)
++                    hooks=hooks + profile_hook)
+ 
+   if FLAGS.do_predict:
+     eval_examples = read_squad_examples(
+-- 
+2.25.1
+
