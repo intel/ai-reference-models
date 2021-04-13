@@ -18,5 +18,5 @@ wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-bash quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```

@@ -37,7 +37,7 @@ for the path to your `DATA_PATH`then run a
 ```
 DATA_PATH=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 50. Docker -->

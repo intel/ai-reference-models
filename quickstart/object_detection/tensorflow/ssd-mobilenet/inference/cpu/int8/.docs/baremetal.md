@@ -31,5 +31,5 @@ wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
