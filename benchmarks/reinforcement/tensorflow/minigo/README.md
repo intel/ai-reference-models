@@ -31,21 +31,21 @@ check whether the `gsutil` has already been installed
 
 ```bash
 $ wget https://storage.googleapis.com/pub/gsutil.zip
-$ tar xfz gsutil.tar.gz -C $HOME
+$ unzip gsutil.zip -d $HOME
 $ export PATH=${PATH}:$HOME/gsutil
 ```
 
 2.2 Download the `checkpoint` and `target` folders and copy them to the `minigo/mlperf` directory 
 ```bash
 # under minigo directory
-$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/checkpoint ml_perf/
+$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/target ml_perf/
 # organize target folders
 $ cd ml_perf/target
 $ mkdir 9
 $ mv target* ./9
 $ cd ../../
 # organize checkpoint folders
-$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/target ml_perf/
+$ gsutil cp -r gs://minigo-pub/ml_perf/0.6/checkpoint ml_perf/
 $ cd ml_perf/checkpoint/
 $ mv ./work_dir/work_dir/* ./work_dir/
 $ rm -rf ./work_dir/work_dir/
@@ -141,7 +141,8 @@ The project has been tested on gcc 8.2.0. We recommend to run the project with g
 $ git clone -b releases/gcc-8.2.0 https://github.com/gcc-mirror/gcc.git
 $ cd gcc
 $ ./configure  --prefix=/path/to/gcc
-$ make $$ make install
+$ make 
+$ make install
 $ export PATH=/path/to/gcc/bin:$PATH
 $ export LD_LIBRARY_PATH=/path/to/gcc/lib:$LD_LIBRARY_PATH
 
@@ -166,7 +167,8 @@ $ wget https://www.zlib.net/zlib-1.2.11.tar.gz
 $ tar -xzf https://www.zlib.net/zlib-1.2.11.tar.gz
 $ cd zlib-1.2.11
 $ ./configure --prefix=/path/to/zlib
-$ make $$ make install
+$ make 
+$ make install
 $ export C_INCLUDE_PATH=/path/to/zlib/include:$C_INCLUDE_PATH
 $ export CPLUS_INCLUDE_PATH=/path/to/zlib/include:$CPLUS_INCLUDE_PATH
 $ export LD_LIBRARY_PATH=/path/to/zlib/lib:$LD_LIBRARY_PATH
