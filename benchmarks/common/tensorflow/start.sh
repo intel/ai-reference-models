@@ -967,7 +967,7 @@ function ssd_mobilenet() {
 # SSD-ResNet34 model
 function ssd-resnet34() {
       if [ ${MODE} == "inference" ]; then
-        if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
+        if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "int8" ]; then
 
           old_dir=${PWD}
 

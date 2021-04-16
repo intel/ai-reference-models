@@ -3,6 +3,7 @@
 This document has instructions for how to run SSD-ResNet34 for the
 following modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
+* [BF16 inference](#bf16-inference-instructions)
 * [INT8 inference](#int8-inference-instructions)
 * [FP32 Training](#fp32-training-instructions)
 * [BF16 Training](#bf16-training-instructions)
@@ -152,6 +153,83 @@ Current AP: 0.21082
 ```
 $ popd
 ```
+
+## BF16 Inference Instructions
+1. Follow the steps 1-7 from the above FP32 Inference Instructions to setup the environment.
+2. Next, navigate to the `benchmarks` directory of the
+[intelai/models](https://github.com/intelai/models) repo that was cloned. Use the following commands to measure performance and accuracy.
+
+To run with input size of 1200x1200, set the `--in-graph` to the downloaded frozen graph `ssd_resnet34_fp32_1200x1200_pretrained_model.pb` and add `-- input-size=1200` flag (by default, the benchmark runs with input size of 300x300).
+To run with input size of 300x300, set the `--in-graph` to the downloaded frozen graph `ssd_resnet34_fp32_bs1_pretrained_model.pb`.
+Use `--benchmark-only` flag to measure performance, and `--accuracy-only` flag to test accuracy.
+If you run in Docker mode, you also need to provide `ssd-resnet-benchmarks` path for `volume` flag.
+
+```
+$ cd $MODEL_WORK_DIR/models/benchmarks
+
+# benchmarks with input size 1200x1200
+$ python launch_benchmark.py \
+    --in-graph /home/<user>/ssd_resnet34_fp32_1200x1200_pretrained_model.pb \
+    --model-source-dir /home/<user>/tf_models \
+    --model-name ssd-resnet34 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --socket-id 0 \
+    --batch-size 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
+    --benchmark-only \
+    -- input-size=1200
+```
+
+To run the accuracy test, use the following command with `--data-location` set to the tf record file that you generated.
+
+```
+# accuracy test with input size 1200x1200
+$ python launch_benchmark.py \
+    --data-location <path_to_tf_records> \
+    --in-graph /home/<user>/ssd_resnet34_fp32_1200x1200_pretrained_model.pb \
+    --model-source-dir /home/<user>/tf_models \
+    --model-name ssd-resnet34 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --socket-id 0 \
+    --batch-size 1 \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
+    --accuracy-only \
+    -- input-size=1200
+```
+
+3. The log file is saved to the value of `--output-dir`.
+
+Below is a sample log file tail when running for performance:
+
+```
+Batchsize: 1
+Time spent per BATCH:    ... ms
+Total samples/sec:    ... samples/s
+```
+
+Below is a sample log file tail when testing accuracy:
+
+```
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.224
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.410
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.220
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.140
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.297
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.257
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.214
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.342
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.367
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.185
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.454
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.443
+```
+
 
 ## INT8 Inference Instructions
 1. Please ensure you have installed all the libraries listed in the 
