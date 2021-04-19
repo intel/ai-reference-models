@@ -22,14 +22,14 @@ cd <package dir>
 
 * Running inference to check accuracy:
 ```
-quickstart/int8_accuracy.sh
+./quickstart/int8_accuracy.sh
 ```
 
 * Running online inference:
 Set `NUM_OMP_THREADS` for tunning the hyperparameter `num_omp_threads`.
 ```
 NUM_OMP_THREADS=1
-quickstart/int8_online_inference.sh \
+./quickstart/int8_online_inference.sh \
 --num-intra-threads 1 --num-inter-threads 1
 ```
 

@@ -100,13 +100,13 @@ cd wide-deep-large-ds-fp32-inference
 
 * Running inference to check accuracy:
 ```
-quickstart/fp32_accuracy.sh
+./quickstart/fp32_accuracy.sh
 ```
 * Running online inference:
 Set `NUM_OMP_THREADS` for tunning the hyperparameter `num_omp_threads`.
 ```
 NUM_OMP_THREADS=1
-quickstart/fp32_online_inference.sh \
+./quickstart/fp32_online_inference.sh \
 --num-intra-threads 1 --num-inter-threads 1
 ```
 

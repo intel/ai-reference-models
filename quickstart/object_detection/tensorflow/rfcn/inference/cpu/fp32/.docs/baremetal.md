@@ -50,7 +50,7 @@ DATASET_DIR=<path to the coco val2017 directory>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
-quickstart/fp32_inference.sh
+./quickstart/fp32_inference.sh
 ```
 
 To get accuracy metrics:
@@ -59,5 +59,5 @@ DATASET_DIR=<path to the COCO validation TF record directory>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
-quickstart/fp32_accuracy.sh
+./quickstart/fp32_accuracy.sh
 ```
