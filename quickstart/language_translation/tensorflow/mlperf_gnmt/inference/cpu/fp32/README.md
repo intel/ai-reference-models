@@ -81,7 +81,7 @@ bazel-bin/build_pip_pkg artifacts
 pip install artifacts/tensorflow_addons-*.whl --no-deps
 
 cd .. # back to package dir
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 <!--- 60. Docker -->

@@ -19,7 +19,7 @@ wget <package url>
 tar -xvf <package name>
 cd <package dir>
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 The script will write a log file and the saved model to the `OUTPUT_DIR`

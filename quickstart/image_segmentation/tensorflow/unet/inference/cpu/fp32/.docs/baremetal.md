@@ -35,5 +35,5 @@ wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-quickstart/fp32_inference.sh
+./quickstart/fp32_inference.sh
 ```

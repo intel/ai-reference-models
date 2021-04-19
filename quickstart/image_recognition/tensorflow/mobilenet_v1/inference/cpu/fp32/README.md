@@ -49,7 +49,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/mob
 tar -xzf mobilenet-v1-fp32-inference.tar.gz
 cd mobilenet-v1-fp32-inference
 
-quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
 
 

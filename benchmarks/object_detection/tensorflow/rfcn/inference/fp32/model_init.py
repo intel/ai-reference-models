@@ -92,7 +92,7 @@ class ModelInitializer(BaseModelInitializer):
                 cpuid = "+0"
                 i = 1
                 while i < self.args.num_cores:
-                    cpuid += ','+str(i)
+                    cpuid += ',' + str(i)
                     i += i
                 command.append(cpuid)
 

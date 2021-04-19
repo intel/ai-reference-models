@@ -51,5 +51,5 @@ wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-quickstart/fp32_training.sh
+./quickstart/fp32_training.sh
 ```

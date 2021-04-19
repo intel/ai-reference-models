@@ -22,5 +22,5 @@ DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where log files will be saved>
 
 # Run a script for your desired usage
-bash ./quickstart/<script name>.sh
+./quickstart/<script name>.sh
 ```
