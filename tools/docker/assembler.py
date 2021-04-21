@@ -268,23 +268,26 @@ slice_sets:
             type: string
             ispartial: true
         documentation:
-          type: dict
+          type: list
+          default: []
           schema:
-            name:
-              type: string
-            uri:
-              type: string
-            text_replace:
-              type: dict
-            docs:
-              type: list
-              schema:
+            type: dict
+            schema:
+              name:
+                type: string
+              uri:
+                type: string
+              text_replace:
                 type: dict
+              docs:
+                type: list
                 schema:
-                  name:
-                    type: string
-                  uri:
-                    type: string
+                  type: dict
+                  schema:
+                    name:
+                      type: string
+                    uri:
+                      type: string
         test_runtime:
           type: string
           required: false
@@ -411,7 +414,7 @@ slice_set_template = [
         'add_to_name': '',
         'dockerfile_subdirectory': 'model_containers',
         'partials': ['model_package', 'entrypoint'],
-        'documentation': {'text_replace': {}},
+        'documentation': [{'text_replace': {}}],
         'args': [],
         'files': [],
         'downloads': []
@@ -604,14 +607,10 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             tag_spec, slices, tag_args, is_dockerfile=True)
         used_partials = gather_slice_list_items(slices, 'partials')
         used_tests = gather_slice_list_items(slices, 'tests')
-        documentation = {}
+        documentation = []
         if 'documentation' in slices[len(slices)-1]:
             documentation = slices[len(slices)-1]['documentation']
-            docs_list = gather_slice_list_items([documentation], 'docs')
-            documentation_contents = merge_docs(docs_list)
-            documentation.update({ 'contents': documentation_contents })
-        else:
-            docs_list = []
+            documentation = merge_docs(documentation)
         files_list = gather_slice_list_items(slices, 'files')
         downloads_list = gather_slice_list_items(slices, 'downloads')
         test_runtime = find_first_slice_value(slices, 'test_runtime')
@@ -669,15 +668,17 @@ def doc_contents(path):
   return contents
 
 def merge_docs(docs_list, package_type='model'):
-  """Build the README.md document"""
-  contents=''
+  """Build the documents and fills in the contents for each doc entry"""
   for doc in docs_list:
+    contents = ''
+    for doc_partial in doc["docs"]:
       uri = ''
-      if package_type == 'model' and 'uri' in doc:
-        uri = doc['uri']
+      if package_type == 'model' and 'uri' in doc_partial:
+        uri = doc_partial['uri']
       if uri:
         contents += '\n'.join([doc_contents(uri) + '\n'])
-  return contents
+    doc.update({'contents': contents})
+  return docs_list
 
 def upload_in_background(hub_repository, dock, image, tag):
   """Upload a docker image (to be used by multiprocessing)."""
@@ -1204,7 +1205,7 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
     for doc_partial in doc_partials_sorted:
       if 'name' in doc_partial and 'uri' in doc_partial:
         documentation['docs'].append({"name": doc_partial['name'], "uri": doc_partial['uri']})
-    return documentation
+    return [documentation]
 
 def generate_doc_text_replace_options(use_case, model_name, precision, mode):
     """
@@ -1335,7 +1336,7 @@ def auto_generate_model_spec(spec_name):
     # add text replace options for the documentation
     text_replace_dict = generate_doc_text_replace_options(
         zoo_use_case, zoo_model_name, precision, mode)
-    model_slice_set[0]['documentation']['text_replace'] = text_replace_dict
+    model_slice_set[0]['documentation'][0]['text_replace'] = text_replace_dict
 
     # add a download, if there's one defined
     if FLAGS.model_download:
@@ -1354,8 +1355,8 @@ def auto_generate_model_spec(spec_name):
     # print out info for the user to see the spec and file name
     eprint(yaml.dump(model_spec), verbose=FLAGS.verbose)
     eprint("\nWrote the spec file to your directory at "
-           "tools/docker/specs/{}\nPlease edit the file if additional "
-           "files, partials, or downloads are needed.\n".format(spec_file_name))
+           "tools/docker/specs/{}/{}\nPlease edit the file if additional "
+           "files, partials, or downloads are needed.\n".format(framework, spec_file_name))
 
     # print out the documentation text_replace options
     eprint("The spec file has documentation text replacement setup for the following key/values:")
@@ -1570,10 +1571,18 @@ def main(argv):
           eprint(e)
 
       if FLAGS.generate_documentation:
-        documentation = tag_def['documentation']
-        text_replace = tag_def['documentation']['text_replace'] \
-            if 'text_replace' in tag_def['documentation'] else {}
-        if 'contents' in documentation:
+        documentation_list = tag_def['documentation']
+        doc_paths = [os.path.join(doc['uri'], doc['name']) for doc in documentation_list]
+        if len(doc_paths) != len(set(doc_paths)):
+            eprint('ERROR: The documentation for {} has more than one item with the same uri/name '
+                   'path, which means that one doc would overwrite the other.'.format(tag))
+            eprint('\n'.join(doc_paths))
+            sys.exit(1)
+
+        for documentation in documentation_list:
+          text_replace = documentation['text_replace'] \
+            if 'text_replace' in documentation else {}
+          if 'contents' in documentation:
             readme = os.path.join(documentation['uri'], documentation['name'])
             eprint('>> Writing {}...'.format(readme), verbose=FLAGS.verbose)
             try:
@@ -1583,7 +1592,7 @@ def main(argv):
                 f.write(documentation['contents'])
               succeeded_docs.append(readme)
             except Exception as e:
-              eprint("Error while writing documentation for {}".format(tag))
+              eprint("Error while writing documentation file ({}) for {}".format(readme, tag))
               eprint(e)
               failed_docs.append(readme)
 

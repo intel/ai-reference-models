@@ -13,34 +13,34 @@ slice_sets:
     - TF_BENCHMARKS_BRANCH=509b9d288937216ca7069f31cfb22aaa7db6a4a7
     dockerfile_subdirectory: model_containers
     documentation:
-      docs:
-      - name: Title
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/title.md
-      - name: Description
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/description.md
-      - name: Download link
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/download.md
-      - name: Datasets
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/datasets.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/quickstart.md
-      - name: Bare Metal
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/baremetal.md
-      - name: Docker
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/docker.md
-      - name: License
-        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/license.md
-      name: README.md
-      text_replace:
-        <docker image>: intel/object-detection:tf-2.4.0-ssd-resnet34-int8-inference
-        <mode>: inference
-        <model name>: SSD-ResNet34
-        <package dir>: ssd-resnet34-int8-inference
-        <package name>: ssd-resnet34-int8-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz
-        <precision>: Int8
-        <use case>: object_detection
-      uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8
+      - docs:
+        - name: Title
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/title.md
+        - name: Description
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/description.md
+        - name: Download link
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/download.md
+        - name: Datasets
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/baremetal.md
+        - name: Docker
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/docker.md
+        - name: License
+          uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/.docs/license.md
+        name: README.md
+        text_replace:
+          <docker image>: intel/object-detection:tf-2.4.0-ssd-resnet34-int8-inference
+          <mode>: inference
+          <model name>: SSD-ResNet34
+          <package dir>: ssd-resnet34-int8-inference
+          <package name>: ssd-resnet34-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz
+          <precision>: Int8
+          <use case>: object_detection
+        uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8
     downloads:
     - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_bs1_pretrained_model.pb
       destination: pretrained_models/ssd_resnet34_int8_bs1_pretrained_model.pb
