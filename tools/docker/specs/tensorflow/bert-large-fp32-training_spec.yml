@@ -12,7 +12,7 @@ slice_sets:
               - model_package
               - entrypoint
           documentation:
-              name: README.md
+            - name: README.md
               uri: models/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32
               text_replace:
                 <mode>: training

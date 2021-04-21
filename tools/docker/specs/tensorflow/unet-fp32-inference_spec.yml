@@ -12,32 +12,32 @@ slice_sets:
     - TENSORFLOW_TAG=1.15.2
     dockerfile_subdirectory: model_containers
     documentation:
-      docs:
-      - name: Title
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/title.md
-      - name: Description
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/description.md
-      - name: Download link
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/download.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/quickstart.md
-      - name: Bare Metal
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/baremetal.md
-      - name: Docker
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/docker.md
-      - name: License
-        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/license.md
-      name: README.md
-      text_replace:
-        <docker image>: intel/image-segmentation:tf-1.15.2-unet-fp32-inference
-        <mode>: inference
-        <model name>: UNet
-        <package dir>: unet_trained
-        <package name>: unet-fp32-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/unet-fp32-inference.tar.gz
-        <precision>: FP32
-        <use case>: image_segmentation
-      uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32
+      - docs:
+        - name: Title
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/title.md
+        - name: Description
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/description.md
+        - name: Download link
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/download.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/baremetal.md
+        - name: Docker
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/docker.md
+        - name: License
+          uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/.docs/license.md
+        name: README.md
+        text_replace:
+          <docker image>: intel/image-segmentation:tf-1.15.2-unet-fp32-inference
+          <mode>: inference
+          <model name>: UNet
+          <package dir>: unet_trained
+          <package name>: unet-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/unet-fp32-inference.tar.gz
+          <precision>: FP32
+          <use case>: image_segmentation
+        uri: models/quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32
     downloads:
     - destination: pretrained_model/unet_fp32_pretrained_model.tar.gz
       source: https://storage.googleapis.com/intel-optimized-tensorflow/models/unet_fp32_pretrained_model.tar.gz

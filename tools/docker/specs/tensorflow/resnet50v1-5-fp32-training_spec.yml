@@ -12,7 +12,7 @@ slice_sets:
               - model_package
               - entrypoint
           documentation:
-              name: README.md
+            - name: README.md
               uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/fp32
               text_replace:
                 <model name>: ResNet50 v1.5
