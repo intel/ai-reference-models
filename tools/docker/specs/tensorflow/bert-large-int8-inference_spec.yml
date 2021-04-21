@@ -10,34 +10,34 @@ slice_sets:
     - PACKAGE_NAME=bert-large-int8-inference
     dockerfile_subdirectory: model_containers
     documentation:
-      docs:
-      - name: Title
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/title.md
-      - name: Description
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/description.md
-      - name: Download link
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/download.md
-      - name: Datasets
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/datasets.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/quickstart.md
-      - name: Bare Metal
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/baremetal.md
-      - name: Docker
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/docker.md
-      - name: License
-        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/license.md
-      name: README.md
-      text_replace:
-        <docker image>: intel/language-modeling:tf-2.4.0-bert-large-int8-inference
-        <mode>: inference
-        <model name>: BERT Large
-        <package dir>: bert-large-int8-inference
-        <package name>: bert-large-int8-inference.tar.gz
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-int8-inference.tar.gz
-        <precision>: Int8
-        <use case>: language_modeling
-      uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8
+      - docs:
+        - name: Title
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/title.md
+        - name: Description
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/description.md
+        - name: Download link
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/download.md
+        - name: Datasets
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/baremetal.md
+        - name: Docker
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/docker.md
+        - name: License
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/license.md
+        name: README.md
+        text_replace:
+          <docker image>: intel/language-modeling:tf-2.4.0-bert-large-int8-inference
+          <mode>: inference
+          <model name>: BERT Large
+          <package dir>: bert-large-int8-inference
+          <package name>: bert-large-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-int8-inference.tar.gz
+          <precision>: Int8
+          <use case>: language_modeling
+        uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8
     downloads:
       - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/asymmetric_per_channel_bert_int8.pb
         destination: pretrained_model/asymmetric_per_channel_bert_int8.pb

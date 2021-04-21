@@ -40,33 +40,33 @@ slice_sets:
     - model_package
     - language_translation/transformer_lt_pip_installs
     documentation:
-      name: README.md
-      uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32
-      text_replace:
-        <mode>: inference
-        <model name>: Transformer LT Official
-        <precision>: FP32
-        <use case>: language_translation
-        <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/transformer-lt-official-fp32-inference.tar.gz
-        <package name>: transformer-lt-official-fp32-inference.tar.gz
-        <package dir>: transformer-lt-official-fp32-inference
-        <docker image>: intel/language-translation:tf-2.4.0-transformer-lt-official-fp32-inference
-      docs:
-      - name: Title
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/title.md
-      - name: Description
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/description.md
-      - name: Download link
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/download.md
-      - name: Datasets
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/datasets.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/quickstart.md
-      - name: Bare Metal
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/baremetal.md
-      - name: Docker
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/docker.md
-      - name: Advanced Options
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/advancedoptions.md
-      - name: License link
-        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/license.md
+      - name: README.md
+        uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32
+        text_replace:
+          <mode>: inference
+          <model name>: Transformer LT Official
+          <precision>: FP32
+          <use case>: language_translation
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/transformer-lt-official-fp32-inference.tar.gz
+          <package name>: transformer-lt-official-fp32-inference.tar.gz
+          <package dir>: transformer-lt-official-fp32-inference
+          <docker image>: intel/language-translation:tf-2.4.0-transformer-lt-official-fp32-inference
+        docs:
+        - name: Title
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/title.md
+        - name: Description
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/description.md
+        - name: Download link
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/download.md
+        - name: Datasets
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/baremetal.md
+        - name: Docker
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/docker.md
+        - name: Advanced Options
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/advancedoptions.md
+        - name: License link
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/license.md
