@@ -9,32 +9,32 @@ slice_sets:
     - PACKAGE_NAME=resnet50v1-5-int8-inference
     dockerfile_subdirectory: model_containers
     documentation:
-      docs:
-      - name: Title
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/title.md
-      - name: Description
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/description.md
-      - name: Download link
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/download.md
-      - name: Datasets
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/datasets.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/quickstart.md
-      - name: Bare Metal
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/baremetal.md
-      - name: Docker
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/docker.md
-      - name: License
-        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/license.md
-      name: README.md
-      text_replace:
-        <mode>: inference
-        <model name>: ResNet50 v1.5
-        <model-precision-mode>: resnet50v1-5-int8-inference
-        <precision>: Int8
-        <use case>: image-recognition
-        <docker image>: intel/image-recognition:tf-2.4.0-resnet50v1-5-int8-inference
-      uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8
+      - docs:
+        - name: Title
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/title.md
+        - name: Description
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/description.md
+        - name: Download link
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/download.md
+        - name: Datasets
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/baremetal.md
+        - name: Docker
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/docker.md
+        - name: License
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8/.docs/license.md
+        name: README.md
+        text_replace:
+          <mode>: inference
+          <model name>: ResNet50 v1.5
+          <model-precision-mode>: resnet50v1-5-int8-inference
+          <precision>: Int8
+          <use case>: image-recognition
+          <docker image>: intel/image-recognition:tf-2.4.0-resnet50v1-5-int8-inference
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/int8
     downloads:
       - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50v1_5_int8_pretrained_model.pb
         destination: pretrained_model/resnet50v1_5_int8_pretrained_model.pb

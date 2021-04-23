@@ -1534,7 +1534,7 @@ _model_builder._parse_model_name()
     __precision=int8
   else 
     echo 'Unknown precision specified in model: '$_model >&2
-    exit 1
+    return 1
   fi
   _lprefix=${_model%-${__precision}-*}
   _suffix=${_model/${_lprefix}-/}
@@ -1548,6 +1548,8 @@ _model_builder._parse_model_name()
     __dir=quickstart
   fi
   __mode=${_lmode%%-*}
+
+  return 0
 }
 
 #
@@ -1555,7 +1557,7 @@ _model_builder._parse_model_name()
 #
 _model_builder._tests.generate_documentation()
 {
-  local _dir='' _docdir _framework='' _image_name _image_names _mode _model _precision _prefix
+  local _dir='' _docdir _framework='' _image_name _image_names _mode _model _precision _prefix _re="[[:space:]]+"
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       --arg)
@@ -1582,8 +1584,17 @@ _model_builder._tests.generate_documentation()
   echo ''  >> $_g_root'/tests/model-builder.bats'
   for _model in "$@"; do
     _model_builder._parse_model_name $_model $_framework _prefix _precision _mode _dir
+    ret_val=$?
+    if (( $ret_val != 0 )); then
+      echo "Skipping validation of generate-documentation for $_model"
+      continue
+    fi
     _docdir=$(find $_dir -type d | grep $_prefix | grep $_mode | grep $_precision'$')
     if [[ -n $_docdir ]]; then
+      if [[ $_docdir =~ $_re ]]; then
+        echo "More than one path returned from \`find $_dir -type d ' | grep '$_prefix' | grep '$_mode' | grep '$_precision'$'\`: $(echo $_docdir). Skipping." >&2
+        continue
+      fi
       _readme=$_docdir/README.md
       echo $'@test "validate generate-documentation for '$_model$' in framework '$_framework$' creates '$_readme$'" {
   run model-builder generate-documentation -f '$_framework$' '$_model$'

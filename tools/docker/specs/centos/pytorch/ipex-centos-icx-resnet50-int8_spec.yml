@@ -10,21 +10,21 @@ slice_sets:
     dockerfile_subdirectory: pytorch
     downloads: []
     documentation:
-      docs:
-      - name: Title
-        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/title.md
-      - name: Description
-        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/description.md
-      - name: Datasets
-        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/datasets.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/quickstart.md
-      - name: Docker
-        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/docker.md
-      - name: License
-        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/license.md
-      name: README.md
-      uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8
+      - docs:
+        - name: Title
+          uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/title.md
+        - name: Description
+          uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/description.md
+        - name: Datasets
+          uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/quickstart.md
+        - name: Docker
+          uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/docker.md
+        - name: License
+          uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8/.docs/license.md
+        name: README.md
+        uri: models/quickstart/ipex-bkc/resnet50-icx/inference/int8
     files:
     - destination: quickstart/inference_throughput.sh
       source: quickstart/ipex-bkc/resnet50-icx/inference/int8/inference_throughput.sh
