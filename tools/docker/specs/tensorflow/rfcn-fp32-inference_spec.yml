@@ -13,7 +13,7 @@ slice_sets:
               - tar
               - entrypoint
           documentation:
-              name: README.md
+            - name: README.md
               uri: models/quickstart/object_detection/tensorflow/rfcn/inference/cpu/fp32
               text_replace:
                 <model name>: RFCN

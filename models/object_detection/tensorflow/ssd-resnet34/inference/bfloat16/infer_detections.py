@@ -313,7 +313,7 @@ class ssd_resnet34_infer:
 
   def run_inference_for_eval(self, graph):
     with graph.as_default():
-      with tf.compat.v1.Session() as sess:
+      with tf.compat.v1.Session(config=self.config) as sess:
 
         num_iter = self.num_batches
 

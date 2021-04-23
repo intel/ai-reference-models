@@ -11,34 +11,34 @@ slice_sets:
     - TENSORFLOW_TAG=1.15.2
     dockerfile_subdirectory: model_containers
     documentation:
-      docs:
-      - name: Title
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/title.md
-      - name: Description
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/description.md
-      - name: Download link
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/download.md
-      - name: Datasets
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/datasets.md
-      - name: Quick Start Scripts
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/quickstart.md
-      - name: Bare Metal
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/baremetal.md
-      - name: Docker
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/docker.md
-      - name: License
-        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/license.md
-      name: README.md
-      text_replace:
-        <docker image>: 'intel/object-detection:tf-1.15.2-faster-rcnn-fp32-inference'
-        <mode>: inference
-        <model name>: Faster R-CNN
-        <package dir>: faster-rcnn-fp32-inference
-        <package name>: faster-rcnn-fp32-inference.tar.gz
-        <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/faster-rcnn-fp32-inference.tar.gz'
-        <precision>: FP32
-        <use case>: object_detection
-      uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32
+      - docs:
+        - name: Title
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/title.md
+        - name: Description
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/description.md
+        - name: Download link
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/download.md
+        - name: Datasets
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/baremetal.md
+        - name: Docker
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/docker.md
+        - name: License
+          uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/.docs/license.md
+        name: README.md
+        text_replace:
+          <docker image>: 'intel/object-detection:tf-1.15.2-faster-rcnn-fp32-inference'
+          <mode>: inference
+          <model name>: Faster R-CNN
+          <package dir>: faster-rcnn-fp32-inference
+          <package name>: faster-rcnn-fp32-inference.tar.gz
+          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/faster-rcnn-fp32-inference.tar.gz'
+          <precision>: FP32
+          <use case>: object_detection
+        uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32
     downloads:
     - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
       destination: faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
