@@ -77,8 +77,8 @@ if [[ ${NOINSTALL} != "True" ]]; then
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
   update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
   apt-get install -y libsm6 libxext6
-  pip install --upgrade pip==20.3.4
-  pip install requests
+  python3 -m pip install --upgrade pip==20.3.4
+  python3 -m pip install requests
 
   # install google-perftools for tcmalloc
   if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
@@ -99,9 +99,9 @@ if [[ ${NOINSTALL} != "True" ]]; then
     # In case installing released versions of Horovod fail,and there is
     # a working commit replace next set of commands with something like:
     apt-get install -y --no-install-recommends --fix-missing cmake git
-    pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
+    python3 -m pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
     # apt-get install -y --no-install-recommends --fix-missing cmake
-    # pip install horovod==${HOROVOD_VERSION}
+    # python3 -m pip install horovod==${HOROVOD_VERSION}
   fi 
 fi
 
@@ -482,7 +482,7 @@ function add_calibration_arg() {
 function 3d_unet() {
   if [[ ${PRECISION} == "fp32" ]] && [[ ${MODE} == "inference" ]]; then
     if [[ ${NOINSTALL} != "True" ]]; then
-      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+      python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
     fi
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -499,7 +499,7 @@ function bert() {
 
     if [ ${NOINSTALL} != "True" ]; then
       apt-get update && apt-get install -y git
-      pip install -r ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt
+      python3 -m pip install -r ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt
     fi
 
     CMD="${CMD} \
@@ -551,7 +551,7 @@ function faster_rcnn() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
+      python3 -m pip install -r "${MOUNT_BENCHMARK}/object_detection/tensorflow/faster_rcnn/requirements.txt"
       cd "${MOUNT_EXTERNAL_MODELS_SOURCE}/research"
       # install protoc v3.3.0, if necessary, then compile protoc files
       install_protoc "https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip"
@@ -625,8 +625,8 @@ function minigo() {
         BENCHMARK_DIR=${MOUNT_BENCHMARK}
         # install dependencies
         apt-get update && apt-get install -y cpio
-        # pip3 install -r ${MODEL_DIR}/requirements.txt
-        pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
+        # python3 -m pip install -r ${MODEL_DIR}/requirements.txt
+        python3 -m pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
         if [ ! -f "bazel-0.22.0-installer-linux-x86_64.sh" ];then
           wget https://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
           chmod 755 bazel-0.22.0-installer-linux-x86_64.sh
@@ -637,13 +637,13 @@ function minigo() {
         cd /l_mpi
         sh install.sh --silent silent.cfg
         source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
-        pip install mpi4py
+        python3 -m pip install mpi4py
       fi
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
       apt-get update && apt-get install -y git
-      pip3 install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-      pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
+      python3 -m pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
+      python3 -m pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
       if [ "${EXTERNAL_MODELS_SOURCE_DIRECTORY}" == "None" ]; then
         echo "You are supposed to provide model dir."
         exit 1
@@ -700,11 +700,11 @@ function minigo() {
       pip uninstall -y ./cc/tensorflow_pkg/tensorflow-*.whl
       pip uninstall -y tensorflow
       pip uninstall -y intel-tensorflow
-      pip install ./cc/tensorflow_pkg/tensorflow-*.whl
+      python3 -m pip install ./cc/tensorflow_pkg/tensorflow-*.whl
       ./build.sh
 
       # ensure horovod installed
-      pip install horovod==0.15.1
+      python3 -m pip install horovod==0.15.1
 
 
       # set the python path for quantization tools
@@ -743,7 +743,7 @@ function maskrcnn() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip3 install -r ${MOUNT_BENCHMARK}/image_segmentation/tensorflow/maskrcnn/inference/fp32/requirements.txt 
+      python3 -m pip install -r ${MOUNT_BENCHMARK}/image_segmentation/tensorflow/maskrcnn/inference/fp32/requirements.txt
     fi
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/mrcnn
     CMD="${CMD} --data-location=${DATASET_LOCATION}"
@@ -784,8 +784,8 @@ function mtcc() {
     fi
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-        pip install opencv-python
-        pip install easydict
+        python3 -m pip install opencv-python
+        python3 -m pip install easydict
     fi
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/Detection:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32:${MOUNT_INTELAI_MODELS_SOURCE}/inference/fp32/Detection
 
@@ -821,7 +821,7 @@ function ncf() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/ncf/inference/requirements.txt
+      python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/ncf/inference/requirements.txt
     fi
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -881,7 +881,7 @@ function mlperf_gnmt() {
 
     if [ ${NOINSTALL} != "True" ]; then
       # install dependencies
-      pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
+      python3 -m pip install ${MOUNT_INTELAI_MODELS_SOURCE}/tensorflow_addons*.whl --no-deps
     fi
 
     # For accuracy, dataset location is required.
@@ -909,9 +909,9 @@ function rfcn() {
   if [ ${NOINSTALL} != "True" ]; then
     apt-get update && apt-get install -y git
     # install dependencies
-    for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt)
+    for line in $(sed 's/#.*//g' ${MOUNT_BENCHMARK}/object_detection/tensorflow/rfcn/requirements.txt)
     do
-      pip install $line
+      python3 -m pip install $line
     done
     original_dir=$(pwd)
 
@@ -955,9 +955,9 @@ function ssd_mobilenet() {
     # install dependencies for both fp32 and int8
     apt-get update && apt-get install -y git
     # install one by one to solve dependency problems
-    for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt)
+    for line in $(sed 's/#.*//g' ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-mobilenet/requirements.txt)
     do
-      pip install $line
+      python3 -m pip install $line
     done
   fi
 
@@ -973,9 +973,9 @@ function ssd-resnet34() {
 
           if [ ${NOINSTALL} != "True" ]; then
             apt-get update && apt-get install -y git libgl1-mesa-glx libglib2.0-0
-            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            for line in $(sed 's/#.*//g' ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
             do
-              pip install $line
+              python3 -m pip install $line
             done
             model_source_dir=${MOUNT_EXTERNAL_MODELS_SOURCE}
             infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
@@ -1018,9 +1018,9 @@ function ssd-resnet34() {
             sh install.sh --silent silent.cfg
             source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
 
-            for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+            for line in $(sed 's/#.*//g' ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
             do
-              pip install $line
+              python3 -m pip install $line
             done
           fi
 
@@ -1058,7 +1058,7 @@ function ssd_vgg16() {
 
     if [ ${NOINSTALL} != "True" ]; then
         apt-get update && apt-get install -y git
-        pip install opencv-python Cython
+        python3 -m pip install opencv-python Cython
 
         if [ ${ACCURACY_ONLY} == "True" ]; then
             # get the python cocoapi
@@ -1073,9 +1073,9 @@ function ssd_vgg16() {
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "int8" ]; then
 
       if [ ${NOINSTALL} != "True" ]; then
-        for line in $(cat ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
+        for line in $(sed 's/#.*//g' ${MOUNT_BENCHMARK}/object_detection/tensorflow/ssd-resnet34/requirements.txt)
         do
-          pip install $line
+          python3 -m pip install $line
         done
 
         old_dir=${PWD}
@@ -1106,7 +1106,7 @@ function ssd_vgg16() {
 function unet() {
   if [ ${PRECISION} == "fp32" ]; then
     if [[ ${NOINSTALL} != "True" ]]; then
-      pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+      python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
     fi
 
     if [[ -z "${checkpoint_name}" ]]; then
@@ -1148,7 +1148,7 @@ function transformer_lt_official() {
     fi
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install -r "${MOUNT_BENCHMARK}/language_translation/tensorflow/transformer_lt_official/requirements.txt"
+      python3 -m pip install -r "${MOUNT_BENCHMARK}/language_translation/tensorflow/transformer_lt_official/requirements.txt"
     fi
 
     CMD="${CMD}
@@ -1168,7 +1168,7 @@ function transformer_lt_official() {
 # transformer in mlperf Translation for Tensorflow  model
 function transformer_mlperf() {
   export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
-  #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
+  #python3 -m pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
   if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
   then
 
@@ -1226,7 +1226,7 @@ function wavenet() {
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
     if [ ${NOINSTALL} != "True" ]; then
-      pip install librosa==0.5
+      python3 -m pip install librosa==0.5
     fi
 
     CMD="${CMD} --checkpoint_name=${checkpoint_name} \
