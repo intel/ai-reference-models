@@ -4,13 +4,15 @@ This document has instructions for how to run Transformer Language used in mlper
 Benchmark suits for the following modes/platforms:
 * [FP32 training](#fp32-training-instructions)
 * [Bfloat16 training](#bfloat16-training-instructions)
+* [FP32 inference](#fp32-inference-instructions)
+* [Bfloat16 inference](#bfloat16-inference-instructions)
 
 Detailed information on Benchmark can be found in [mlperf/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
 
 Instructions and scripts for model training and inference for
 other platforms are coming later.
 
-## FP32 Training Instructions
+# <a name="fp32-training-instructions"></a> FP32 Training Instructions
 
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
@@ -223,7 +225,7 @@ RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --us
 Log file location: /tmp/models/benchmarks/common/tensorflow/logs/benchmark_transformer_mlperf_training_fp32_20200820_200237.log
 ```
 
-## Bfloat16 Training Instructions
+## <a name="bfloat16-training-instructions"></a> Bfloat16 Training Instructions
 
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
@@ -438,3 +440,127 @@ I0820 21:36:40.121570 140325266102080 basic_session_run_hooks.py:260] loss = 8.1
 INFO:tensorflow:loss = 8.131919 (685.550 sec)
 I0820 21:36:40.121664 140325266102080 basic_session_run_hooks.py:260] loss = 8.131919 (685.550 sec)
 ```
+
+# <a name="fp32-inference-instructions"></a> FP32 Inference Instructions
+
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
+repository:
+
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+2. Obtain the dataset.
+Decide the problem you want to run to get the appropriate dataset.
+We will get the training data of it as an example:
+
+    Download dataset for computing BLEU score reported in the paper
+    ```
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ mkdir $DATA_DIR && cd $DATA_DIR
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    ```
+    Download<sup id="a1">[1](#f1)</sup> the training dataset<sup id="a2">[2](#f2)</sup>. 
+    ```
+    $ export PYTHONPATH=$PYTHONPATH:/home/<user>/models/models/common/tensorflow
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ cd /home/<user>/models/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer
+    $ python data_download.py --data_dir=$DATA_DIR
+    ```
+
+---
+
+<sub><b id="f1">1 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.4.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.4.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a1)</sub><br/>
+<sub><b id="f2">2 - </b> Downloading the datasets can take some time, you should see `XX% completed` updates for the datasets [↩](#a2)</sub>
+
+---
+    
+3. Next, navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
+The `launch_benchmark.py` script in the `benchmarks` directory is
+used for starting a model run in a optimized TensorFlow docker
+container. It has arguments to specify which model, framework, mode,
+precision, and docker image to use, along with your path to the dataset location (from step 2).
+
+
+Before running inference, users should have the model fully trained and have saved checkpoints ready at the path $CHECKPOINT_DIR:
+
+```
+python launch_benchmark.py \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --model-name transformer_mlperf \
+    --batch-size 64 \
+    -i 0 --data-location $DATA_DIR \
+    --checkpoint $CHECKPOINT_DIR \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --verbose \
+    -- file=newstest2014.en  file_out=translate.txt reference=newstest2014.de
+```
+4.  The log file is saved to the
+`models/benchmarks/common/tensorflow/logs` directory. Below are
+examples of what the tail of your log file should look like for the
+different configs.
+
+## <a name="bfloat16-inference-instructions"></a> Bfloat16 Training Instructions
+
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
+repository:
+
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+2. Obtain the dataset.
+Decide the problem you want to run to get the appropriate dataset.
+We will get the training data of it as an example:
+
+    Download dataset for computing BLEU score reported in the paper
+    ```
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ mkdir $DATA_DIR && cd $DATA_DIR
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    ```
+    Download<sup id="a1">[1](#f1)</sup> the training dataset<sup id="a2">[2](#f2)</sup>. 
+    ```
+    $ export PYTHONPATH=$PYTHONPATH:/home/<user>/models/models/common/tensorflow
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ cd /home/<user>/models/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer
+    $ python data_download.py --data_dir=$DATA_DIR
+    ```
+
+---
+
+<sub><b id="f1">1 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.4.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.4.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a1)</sub><br/>
+<sub><b id="f2">2 - </b> Downloading the datasets can take some time, you should see `XX% completed` updates for the datasets [↩](#a2)</sub>
+
+---
+    
+3. Next, navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
+The `launch_benchmark.py` script in the `benchmarks` directory is
+used for starting a model run in a optimized TensorFlow docker
+container. It has arguments to specify which model, framework, mode,
+precision, and docker image to use, along with your path to the dataset location (from step 2).
+
+
+Before running inference, users should have the model fully trained and have saved checkpoints ready at the path $CHECKPOINT_DIR:
+
+```
+python launch_benchmark.py \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --model-name transformer_mlperf \
+    --batch-size 64 \
+    -i 0 --data-location $DATA_DIR \
+    --checkpoint $CHECKPOINT_DIR \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --verbose \
+    -- file=newstest2014.en  file_out=translate.txt reference=newstest2014.de
+```
+
+* [Bfloat16 inference](#bfloat16-inference-instructions)

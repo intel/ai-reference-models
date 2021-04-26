@@ -1153,7 +1153,7 @@ function transformer_lt_official() {
 
     CMD="${CMD}
     --in_graph=${IN_GRAPH} \
-    --vocab_file=${DATASET_LOCATION}/${vocab_file} \
+    --data_dir=${DATASET_LOCATION} \
     --file=${DATASET_LOCATION}/${file} \
     --file_out=${OUTPUT_DIR}/${file_out} \
     --reference=${DATASET_LOCATION}/${reference}"
@@ -1168,45 +1168,78 @@ function transformer_lt_official() {
 # transformer in mlperf Translation for Tensorflow  model
 function transformer_mlperf() {
   export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
-  #python3 -m pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
-  if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
-  then
+  if [[ ${MODE} == "training" ]]; then
+    #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
+    if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
+    then
 
-    if [[ -z "${random_seed}" ]]; then
-        echo "transformer-language requires --random_seed arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${params}" ]]; then
-        echo "transformer-language requires --params arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${train_steps}" ]]; then
-        echo "transformer-language requires --train_steps arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${steps_between_eval}" ]]; then
-        echo "transformer-language requires --steps_between_eval arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${do_eval}" ]]; then
-        echo "transformer-language requires --do_eval arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${save_checkpoints}" ]]; then
-        echo "transformer-language requires --save_checkpoints arg to be defined"
-        exit 1
-    fi
-    if [[ -z "${print_iter}" ]]; then
-        echo "transformer-language requires --print_iter arg to be defined"
-        exit 1
-    fi
+      if [[ -z "${random_seed}" ]]; then
+          echo "transformer-language requires --random_seed arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${params}" ]]; then
+          echo "transformer-language requires --params arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${train_steps}" ]]; then
+          echo "transformer-language requires --train_steps arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${steps_between_eval}" ]]; then
+          echo "transformer-language requires --steps_between_eval arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${do_eval}" ]]; then
+          echo "transformer-language requires --do_eval arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${save_checkpoints}" ]]; then
+          echo "transformer-language requires --save_checkpoints arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${print_iter}" ]]; then
+          echo "transformer-language requires --print_iter arg to be defined"
+          exit 1
+      fi
 
-    CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
-    --print_iter=${print_iter} --save_profile=${save_profile}"
-    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-  else
-    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-    exit 1
+      CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
+      --print_iter=${print_iter} --save_profile=${save_profile}"
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+  fi
+
+  if [[ ${MODE} == "inference" ]]; then
+    if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]; then
+
+      if [[ -z "${file}" ]]; then
+          echo "transformer-language requires -- file arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${file_out}" ]]; then
+          echo "transformer-language requires -- file_out arg to be defined"
+          exit 1
+      fi
+      if [[ -z "${reference}" ]]; then
+          echo "transformer-language requires -- reference arg to be defined"
+          exit 1
+      fi
+
+      CMD="${CMD}
+      --checkpoint=${CHECKPOINT_DIRECTORY} \
+      --data_dir=${DATASET_LOCATION} \
+      --file=${DATASET_LOCATION}/${file} \
+      --file_out=${OUTPUT_DIR}/${file_out} \
+      --reference=${DATASET_LOCATION}/${reference}"
+      PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+
+    else
+      echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
   fi
 }
 
