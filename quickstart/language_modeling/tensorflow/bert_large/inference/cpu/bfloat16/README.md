@@ -13,7 +13,7 @@ Intel-optimized TensorFlow.
 [bert-large-bfloat16-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-bfloat16-inference.tar.gz)
 
 <!--- 30. Datasets -->
-## Datasets
+## Dataset
 
 ### BERT Large Data
 Download and unzip the BERT Large uncased (whole word masking) model from the
@@ -32,17 +32,11 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
-
 | Script name | Description |
 |-------------|-------------|
-| [`bfloat16_benchmark.sh`](bfloat16_benchmark.sh) | This script runs bert large bfloat16 inference. |
-| [`bfloat16_profile.sh`](bfloat16_profile.sh) | This script runs bfloat16 inference in profile mode. |
-| [`bfloat16_accuracy.sh`](bfloat16_accuracy.sh) | This script is runs bert large bfloat16 inference in accuracy mode. |
-
-These quickstart scripts can be run the following environments:
-* [Bare metal](#bare-metal)
-* [Docker](#docker)
-
+| [`bfloat16_benchmark.sh`](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/bfloat16_benchmark.sh) | This script runs bert large bfloat16 inference. |
+| [`bfloat16_profile.sh`](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/bfloat16_profile.sh) | This script runs bfloat16 inference in profile mode. |
+| [`bfloat16_accuracy.sh`](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/bfloat16/bfloat16_accuracy.sh) | This script is runs bert large bfloat16 inference in accuracy mode. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -77,8 +71,8 @@ OUTPUT_DIR=<directory where log files will be saved>
 
 The BERT Large BFloat16 inference model container includes the scripts and libraries
 needed to run BERT Large BFloat16 inference. To run one of the quickstart scripts
-using this container, you'll need to provide volume mounts for the,
-dataset, and an output directory where log files will be written.
+using this container, you'll need to provide volume mounts for the
+dataset and an output directory where log files will be written.
 
 The snippet below shows how to run a quickstart script:
 ```

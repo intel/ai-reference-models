@@ -3,8 +3,8 @@
 
 The <model name> <precision> <mode> model container includes the scripts and libraries
 needed to run <model name> <precision> <mode>. To run one of the quickstart scripts
-using this container, you'll need to provide volume mounts for the,
-dataset, and an output directory where log files will be written.
+using this container, you'll need to provide volume mounts for the
+dataset and an output directory where log files will be written.
 
 The snippet below shows how to run a quickstart script:
 ```
