@@ -40,15 +40,18 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 # Unzip pretrained model files
-pretrained_model_dir="pretrained_model/bert_large_checkpoints"
-if [ ! -d "${pretrained_model_dir}" ]; then
+if [[ -z "${CHECKPOINT_DIR}" ]]; then
+  pretrained_model_dir="pretrained_model/bert_large_checkpoints"
+  if [ ! -d "${pretrained_model_dir}" ]; then
     unzip pretrained_model/bert_large_checkpoints.zip -d pretrained_model
+  fi
+  CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
-PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/asymmetric_per_channel_bert_int8.pb"
+
+PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/pretrained_model/asymmetric_per_channel_bert_int8.pb}
 BATCH_SIZE="1"
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name bert_large \
   --mode inference \
