@@ -30,11 +30,18 @@ fi
 mkdir -p ${OUTPUT_DIR}
 
 # Unzip pretrained model files
-pretrained_model_dir="pretrained_model/bert_large_checkpoints"
-if [ ! -d "${pretrained_model_dir}" ]; then
+if [[ -z "${CHECKPOINT_DIR}" ]]; then
+  pretrained_model_dir="pretrained_model/bert_large_checkpoints"
+  if [ ! -d "${pretrained_model_dir}" ]; then
     unzip pretrained_model/bert_large_checkpoints.zip -d pretrained_model
+  fi
+  CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
+
+PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/pretrained_model/fp32_bert_squad.pb}
+
+echo 'CHECKPOINT_DIR='$CHECKPOINT_DIR
+echo 'PRETRAINED_MODEL='$PRETRAINED_MODEL
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_dirs
@@ -56,12 +63,13 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name=bert_large \
     --precision=fp32 \
     --mode=inference \
     --framework=tensorflow \
+    --in-graph ${PRETRAINED_MODEL} \
     --batch-size=32 \
     --data-location ${DATASET_DIR} \
     --checkpoint ${CHECKPOINT_DIR} \
