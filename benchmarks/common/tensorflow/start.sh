@@ -1066,6 +1066,7 @@ function ssd-resnet34() {
           cd benchmark_ssd_resnet34
           git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
           git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/nhwc-bug-fix.diff
           if [ ${PRECISION} == "bfloat16" ]; then
             git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
           fi
