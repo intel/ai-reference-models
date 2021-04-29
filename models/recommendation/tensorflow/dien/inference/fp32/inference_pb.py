@@ -26,7 +26,7 @@ parser.add_argument("--num_inter_threads", type=int, default=None, help="num-int
 parser.add_argument("--data_location", type=str, default=None, help="data location")
 parser.add_argument("--timeline", type=bool, default=True, help="obtain timeline")
 parser.add_argument("--input_graph", type=str, default=None, help="pb location")
-parser.add_argument("--accuracy_only", type=bool, default=False, help="Show accuracy only")
+parser.add_argument("--accuracy_only", action='store_true', help="Show accuracy only")
 parser.add_argument("--exact_max_length", type=int, default=0, help="Show perf for exact max length")
 
 args = parser.parse_args()
