@@ -88,7 +88,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         cmd_args += " --num_inter_threads {0}".format(self.args.num_inter_threads)
         cmd_args += " --num_intra_threads {0}".format(self.args.num_intra_threads)
         cmd_args += " --model=ssd300 --data_name coco"
-        cmd_args += " --mkl=True --device=cpu --data_format=NCHW"
+        cmd_args += " --mkl=True --device=cpu --data_format=NHWC"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
 
         if (self.args.timeline is not None):

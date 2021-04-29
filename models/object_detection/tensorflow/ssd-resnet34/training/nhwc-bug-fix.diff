@@ -1,0 +1,13 @@
+diff --git a/scripts/tf_cnn_benchmarks/models/ssd_model.py b/scripts/tf_cnn_benchmarks/models/ssd_model.py
+index f3ac9bb..9ae7215 100644
+--- a/scripts/tf_cnn_benchmarks/models/ssd_model.py
++++ b/scripts/tf_cnn_benchmarks/models/ssd_model.py
+@@ -230,7 +230,7 @@ class SSD300Model(model_lib.CNNModel):
+       l = cnn.conv(nd * 4, 3, 3, 1, 1, input_layer=ac,
+                    num_channels_in=oc, activation=None, use_batch_norm=False,
+                    kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
+-      scale = l.get_shape()[-1]
++      scale = l.get_shape()[2] if cnn.channel_pos == 'channels_last' else l.get_shape()[-1]
+       # shape = [batch_size, nd * 4, scale, scale]
+       l = tf.reshape(l, [self.batch_size, nd, 4, scale, scale])
+       # shape = [batch_size, nd, 4, scale, scale]
