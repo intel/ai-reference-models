@@ -22,6 +22,7 @@ import tensorflow as tf
 
 import beam_search
 
+tf.compat.v1.disable_eager_execution()
 
 class BeamSearchHelperTests(tf.test.TestCase):
 

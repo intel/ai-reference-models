@@ -114,35 +114,37 @@ class Attention(tf.compat.v1.layers.Layer):
     # multiple heads. Multi-head attention uses multiple queries, keys, and
     # values rather than regular attention (which uses a single q, k, v).
     with tf.compat.v1.tpu.bfloat16_scope():
+        if x.dtype == tf.float32:
+           x = tf.cast(x, tf.bfloat16)
+        if y.dtype == tf.float32:
+           y = tf.cast(y, tf.bfloat16)
         q = self.q_dense_layer(x)
         k = self.k_dense_layer(y)
         v = self.v_dense_layer(y)
 
-        if cache is not None:
-          # Combine cached keys and values with new keys and values.
-          
-          k = tf.concat([cache["k"], k], axis=1)
-          v = tf.concat([cache["v"], v], axis=1)
+    if cache is not None:
+      # Combine cached keys and values with new keys and values.
+      k = tf.concat([cache["k"], k], axis=1)
+      v = tf.concat([cache["v"], v], axis=1)
 
-          # Update cache
-          cache["k"] = k
-          cache["v"] = v
+      # Update cache
+      cache["k"] = k
+      cache["v"] = v
 
-        # Split q, k, v into heads.
-        q = self.split_heads(q)
-        k = self.split_heads(k)
-        v = self.split_heads(v)
+    # Split q, k, v into heads.
+    q = self.split_heads(q)
+    k = self.split_heads(k)
+    v = self.split_heads(v)
 
-        # Scale q to prevent the dot product between q and k from growing too large.
-        depth = (self.hidden_size // self.num_heads)
-        q *= depth ** -0.5
-        # Calculate dot product attention
+    # Scale q to prevent the dot product between q and k from growing too large.
+    depth = (self.hidden_size // self.num_heads)
+    q *= depth ** -0.5
+    # Calculate dot product attention
+    with tf.compat.v1.tpu.bfloat16_scope():
         logits = tf.matmul(q, k, transpose_b=True)
-        #bias = tf.cast(bias, tf.float32)     
+        bias = tf.cast(bias, tf.bfloat16)
         logits += bias
-        logits = tf.cast(logits, tf.float32)     
         weights = tf.nn.softmax(logits, name="attention_weights")
-        weights = tf.cast(weights, tf.bfloat16)     
         if self.train:
           mlperf_log.transformer_print(
               key=mlperf_log.MODEL_HP_ATTENTION_DROPOUT,
@@ -155,8 +157,8 @@ class Attention(tf.compat.v1.layers.Layer):
 
         # Run the combined outputs through another linear projection layer.
         attention_output = self.output_dense_layer(attention_output)
-        #attention_output = tf.cast(attention_output, tf.float32)
-    return attention_output
+#        attention_output = tf.cast(attention_output, tf.float32)
+        return attention_output
 
 
 class SelfAttention(Attention):

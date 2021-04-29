@@ -71,7 +71,10 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
       padding = model_utils.get_padding(x)
 
       # Set all padding embedding values to 0
-      embeddings *= tf.expand_dims(1 - padding, -1)
+      with tf.compat.v1.tpu.bfloat16_scope():
+         temp = tf.expand_dims(1 - padding, -1)
+         embeddings = tf.cast(embeddings, tf.bfloat16)
+         embeddings *= temp
       return embeddings
 
   def linear(self, x):
@@ -82,14 +85,15 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
     Returns:
       float32 tensor with shape [batch_size, length, vocab_size].
     """
-    #with tf.compat.v1.tpu.bfloat16_scope():
     with tf.compat.v1.name_scope("presoftmax_linear"):
-      #x = tf.cast(x, tf.bfloat16)
       batch_size = tf.shape(input=x)[0]
       length = tf.shape(input=x)[1]
 
       x = tf.reshape(x, [-1, self.hidden_size])
+      x = tf.cast(x, tf.bfloat16)
+      self.shared_weights = tf.cast(self.shared_weights, tf.bfloat16)
       logits = tf.matmul(x, self.shared_weights, transpose_b=True)
-      #logits = tf.cast(logits, tf.float32)
+      logits = tf.cast(logits, tf.float32)
+      
 
       return tf.reshape(logits, [batch_size, length, self.vocab_size])
