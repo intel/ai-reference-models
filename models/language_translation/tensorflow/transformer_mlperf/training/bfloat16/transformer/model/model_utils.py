@@ -42,7 +42,7 @@ def get_position_encoding(
   Returns:
     Tensor with shape [length, hidden_size]
   """
-  #length = tf.cast(length, tf.float32)
+  length = tf.cast(length, tf.float32)
   position = tf.cast(tf.range(length), dtype=tf.float32)
   num_timescales = hidden_size // 2
   log_timescale_increment = (
@@ -87,7 +87,7 @@ def get_padding(x, padding_value=0):
       0 -> non-padding, 1 -> padding
   """
   with tf.compat.v1.name_scope("padding"):
-    return tf.cast(tf.equal(x, padding_value), dtype=tf.float32)
+    return tf.cast(tf.equal(x, padding_value), dtype=tf.bfloat16)
 
 
 def get_padding_bias(x):
