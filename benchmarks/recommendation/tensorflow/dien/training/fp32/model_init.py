@@ -24,8 +24,6 @@ import sys
 from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
 
-from common.utils.validators import check_positive_number
-
 import argparse
 
 
