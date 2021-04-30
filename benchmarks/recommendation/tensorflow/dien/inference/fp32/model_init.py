@@ -24,8 +24,6 @@ import sys
 from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
 
-from common.utils.validators import check_positive_number
-
 import argparse
 
 
@@ -44,7 +42,7 @@ class ModelInitializer(BaseModelInitializer):
 
         arg_parser = argparse.ArgumentParser(description='Parse additional args')
         arg_parser.add_argument('--exact-max-length', type=int, default=0, dest='exact_max_length',
-                                  help='Exact sequence length for perf testing')
+                                help='Exact sequence length for perf testing')
 
         self.additional_args, unknown_args = arg_parser.parse_known_args(custom_args)
         self.run_inference_sanity_checks(self.args, self.custom_args)
@@ -72,10 +70,8 @@ class ModelInitializer(BaseModelInitializer):
 
         self.run_cmd += " --input_graph {0}".format(self.args.input_graph)
         self.run_cmd += " --accuracy_only" if self.args.accuracy_only else ""
-        if self.additional_args.exact_max_length :
-           self.run_cmd += " --exact_max_length {0}".format(self.additional_args.exact_max_length)
-
-        # self.run_cmd += " --timeline {0}".format(True)
+        if self.additional_args.exact_max_length:
+            self.run_cmd += " --exact_max_length {0}".format(self.additional_args.exact_max_length)
 
     def run(self):
         self.run_command(self.run_cmd)
