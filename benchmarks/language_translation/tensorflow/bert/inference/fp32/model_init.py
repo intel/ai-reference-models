@@ -49,8 +49,7 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads(num_inter_threads=self.args.num_inter_threads,
                                          num_intra_threads=self.args.num_intra_threads)
 
-        omp_num_threads = platform_util.num_cores_per_socket if self.args.num_cores == -1 else self.args.num_cores
-        set_env_var("OMP_NUM_THREADS", omp_num_threads)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         # model parameter control
         script_path = os.path.join(self.args.intelai_models, self.args.mode, self.args.precision, "run_classifier.py")
