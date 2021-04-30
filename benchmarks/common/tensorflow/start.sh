@@ -1189,7 +1189,7 @@ function transformer_lt_official() {
 
     CMD="${CMD}
     --in_graph=${IN_GRAPH} \
-    --data_dir=${DATASET_LOCATION} \
+    --vocab_file=${DATASET_LOCATION}/${vocab_file} \
     --file=${DATASET_LOCATION}/${file} \
     --file_out=${OUTPUT_DIR}/${file_out} \
     --reference=${DATASET_LOCATION}/${reference}"
