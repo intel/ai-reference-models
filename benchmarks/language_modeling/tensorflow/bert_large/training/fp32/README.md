@@ -48,29 +48,34 @@ that directory when running bert fine tuning using the SQuAD data.
 | [`fp32_squad_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32/fp32_squad_training.sh) | This script fine-tunes bert using SQuAD data. Download the [bert large pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [squad data files](#squad-data). |
 | [`fp32_squad_training_demo.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32/fp32_squad_training_demo.sh) | This script does a short demo run of 0.01 epochs using SQuAD data. |
 
-<!--- 50. Bare Metal -->
-## Bare Metal
+<!--- 50. AI Kit -->
+## Run the model
 
-> If you are running using AI Kit, first follow the
-> [instructions here](/docs/general/tensorflow/AIKit.md) to get your environment setup.
-
-Clone the Model Zoo repo:
+From AI Kit, activate the TensorFlow language modeling environment:
 ```
-git clone https://github.com/IntelAI/models.git
+conda activate tensorflow_language_modeling
 ```
 
-To run on bare metal, the following prerequisites must be installed in your enviornment.
-If you are using AI Kit, your TensorFlow conda environment should already have Python and
-TensorFlow installed.
+If you are not using AI Kit you will need:
 * Python 3
 * [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * git
+* openmpi-bin (only required for multi-instance)
+* openmpi-common (only required for multi-instance)
+* openssh-client (only required for multi-instance)
+* openssh-server (only required for multi-instance)
+* libopenmpi-dev (only required for multi-instance)
+* horovod==0.19.1 (only required for multi-instance)
+* Clone the Model Zoo repo:
+  ```
+  git clone https://github.com/IntelAI/models.git
+  ```
 
-Once the above dependencies have been installed, set environment variables,
-and then run a quickstart script. See the [datasets](#datasets) and
-[list of quickstart scripts](#quick-start-scripts) for more details on
-the different options.
+Next, set environment variables with paths to the [dataset](#datasets),
+[checkpoint files](#pretrained-models), and an output directory,then run
+a quickstart script. See [list of quickstart scripts](#quick-start-scripts)
+for details on the different options.
 
 The snippet below shows a quickstart script running with a single instance:
 ```
@@ -101,15 +106,7 @@ picked in the end. To enable gradients synchronization, set the
 options, modify the quickstart .sh script or call the `launch_benchmarks.py`
 script directly with your preferred args.
 
-To run with multiple instances, these additional dependencies will need to be
-installed in your environment:
-* openmpi-bin
-* openmpi-common
-* openssh-client
-* openssh-server
-* libopenmpi-dev
-* horovod==0.19.1
-
+The snippet below shows a quickstart script running with a multiple instances:
 ```
 # cd to your model zoo directory
 cd models
