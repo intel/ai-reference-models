@@ -49,8 +49,8 @@ slice_sets:
                 uri: models/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32/.docs/datasets.md
               - name: Quick Start Scripts
                 uri: models/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32/.docs/quickstart.md
-              - name: Bare Metal
-                uri: models/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32/.docs/baremetal_from_repo.md
+              - name: AI Kit
+                uri: models/quickstart/language_modeling/tensorflow/bert_large/training/cpu/fp32/.docs/aikit.md
               - name: Resources
                 uri: models/quickstart/common/.docs/resources_with_portal_link.md
               name: README.md
