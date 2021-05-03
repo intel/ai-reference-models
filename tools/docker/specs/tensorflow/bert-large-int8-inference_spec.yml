@@ -47,8 +47,8 @@ slice_sets:
           uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/datasets.md
         - name: Quick Start Scripts
           uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/quickstart.md
-        - name: Bare Metal
-          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/baremetal_from_repo.md
+        - name: AI Kit
+          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/.docs/aikit.md
         - name: Resources
           uri: models/quickstart/common/.docs/resources.md
         name: README.md
