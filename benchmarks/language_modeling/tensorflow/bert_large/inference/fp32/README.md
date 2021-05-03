@@ -34,26 +34,25 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 | [`multi_instance_batch_inference.sh`](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/multi_instance_batch_inference.sh) | A multi-instance run that uses all the cores for each socket for each instance with a batch size of 128. |
 | [`multi_instance_online_inference.sh`](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/multi_instance_online_inference.sh) | A multi-instance run that uses 4 cores for each instance with a batch size of 1. |
 
-<!--- 50. Bare Metal -->
-## Bare Metal
+<!--- 50. AI Kit -->
+## Run the model
 
-> If you are running using AI Kit, first follow the
-> [instructions here](/docs/general/tensorflow/AIKit.md) to get your environment setup.
+From AI Kit, activate the TensorFlow language modeling environment:
+```
+conda activate tensorflow_language_modeling
+```
 
-To run on bare metal, the following prerequisites must be installed in your enviornment.
-If you are using AI Kit, your TensorFlow conda environment should already have Python and
-TensorFlow installed.
+If you are not using AI Kit you will need:
 * Python 3
 * [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
-* numactl
 * git
+* numactl
 * unzip
 * wget
-
-Clone the Model Zoo repo:
-```
-git clone https://github.com/IntelAI/models.git
-```
+* Clone the Model Zoo repo:
+  ```
+  git clone https://github.com/IntelAI/models.git
+  ```
 
 Download and unzip the pretrained model. The path to this directory should
 be set as the `CHECKPOINT_DIR` before running quickstart scripts.
@@ -70,10 +69,10 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/fp3
 export PRETRAINED_MODEL=$(pwd)/fp32_bert_squad.pb
 ```
 
-Once the above dependencies have been installed, set environment variables,
-and then run a quickstart script. See the [datasets](#datasets) and
-[list of quickstart scripts](#quick-start-scripts) for more details on
-the different options.
+Next, set environment variables with paths to the [dataset](#datasets),
+checkpoint files, pretrained model, and an output directory, then run a
+quickstart script. See the [list of quickstart scripts](#quick-start-scripts)
+for details on the different options.
 
 The snippet below shows how to run a quickstart script:
 ```
