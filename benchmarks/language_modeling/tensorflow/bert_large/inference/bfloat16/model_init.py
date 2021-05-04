@@ -96,6 +96,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.init_checkpoint and not os.path.isabs(self.args.init_checkpoint):
             self.args.init_checkpoint = os.path.join(self.args.checkpoint, self.args.init_checkpoint)
 
+        # set default inter/intra threads
+        self.set_num_inter_intra_threads()
+
         if self.args.num_intra_threads:
             set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         else:
@@ -119,6 +122,7 @@ class ModelInitializer(BaseModelInitializer):
                      " --predict_batch_size=" + str(self.args.batch_size) + \
                      " --experimental_gelu=" + str(self.args.experimental_gelu) + \
                      " --optimized_softmax=" + str(self.args.optimized_softmax) + \
+                     " --input_graph=" + str(self.args.input_graph) + \
                      " --do_predict=True "
 
         if self.args.accuracy_only:
