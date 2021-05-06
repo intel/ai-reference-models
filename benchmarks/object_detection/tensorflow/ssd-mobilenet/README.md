@@ -137,7 +137,7 @@ The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
 2. Follow the TensorFlow models object detection
-[installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
+[installation instructions](https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
 3. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
