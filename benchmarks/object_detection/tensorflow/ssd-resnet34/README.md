@@ -27,7 +27,7 @@ The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
 3. Follow the TensorFlow models object detection
-[installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
+[installation instructions](https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
 4. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
@@ -172,7 +172,7 @@ The TensorFlow models repo will be used for running inference as well as
 converting the coco dataset to the TF records format.
 
 3. Follow the TensorFlow models object detection
-[installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation)
+[installation instructions](https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/installation.md#installation)
 to get your environment setup with the required dependencies.
 
 4. Download and preprocess the COCO validation images using the [instructions here](/datasets/coco/README.md).
@@ -325,7 +325,7 @@ $ pushd $MODEL_WORK_DIR
 
    The TensorFlow models repository will be used for running training as well as converting the coco dataset to the TF records format.
 
-4. Follow the TensorFlow models object detection [installation instructions](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/installation.md#installation) to get your environment setup with the required dependencies.
+4. Follow the TensorFlow models object detection [installation instructions](https://github.com/tensorflow/models/blob/master/research/deeplab/g3doc/installation.md#installation) to get your environment setup with the required dependencies.
 
 5. Download the 2017 train [COCO dataset](http://cocodataset.org/#home):
 
