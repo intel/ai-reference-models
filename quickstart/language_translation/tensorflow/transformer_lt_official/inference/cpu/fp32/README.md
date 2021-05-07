@@ -56,7 +56,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * [pandas](https://pypi.org/project/pandas/)
 
 Download and untar the model package and then run a
-[quickstart script](#quick-start-scripts) with enviornment variables
+[quickstart script](#quick-start-scripts) with environment variables
 that point to your dataset and an output directory.
 
 ```
