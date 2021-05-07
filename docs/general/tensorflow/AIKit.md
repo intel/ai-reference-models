@@ -7,7 +7,7 @@ TensorFlow models.
 
 ## Install AI Kit
 
-Install AI Kit and setup your enviornment using the instructions here:
+Install AI Kit and setup your environment using the instructions here:
 [https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html](https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html)
 
 ## Activate the TensorFlow Conda Environment
