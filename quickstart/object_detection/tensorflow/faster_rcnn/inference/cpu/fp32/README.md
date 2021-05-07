@@ -26,12 +26,8 @@ and preprocessing the COCO validation dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| [fp32_inference.sh](fp32_inference.sh) | Runs batch and online inference using the coco dataset |
-| [fp32_accuracy.sh](fp32_accuracy.sh) | Runs inference and evaluates the model's accuracy |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
+| [fp32_inference.sh](/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/fp32_inference.sh) | Runs batch and online inference using the coco dataset |
+| [fp32_accuracy.sh](/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/fp32_accuracy.sh) | Runs inference and evaluates the model's accuracy |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -65,15 +61,15 @@ popd
 
 Download and extract the model package, which includes the pretrained
 model and scripts needed to run inference. Set environment variables
-for the path to your `DATASET_DIR` (where the coco TF records file is
-located) and an `OUTPUT_DIR` where log files will be written, then run a
-[quickstart script](#quick-start-scripts).
+for the path to your `DATASET_DIR` (directory where the `coco_val.record`
+TF records file is located) and an `OUTPUT_DIR` where log files will be
+written, then run a [quickstart script](#quick-start-scripts).
 ```
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/faster-rcnn-fp32-inference.tar.gz
 tar -xzf faster-rcnn-fp32-inference.tar.gz
 cd faster-rcnn-fp32-inference
 
-export DATASET_DIR=<path to the coco dataset>
+export DATASET_DIR=<path to the directory that contains the coco_val.record file>
 export OUTPUT_DIR=<directory where log files will be written>
 
 ./quickstart/<script name>.sh
