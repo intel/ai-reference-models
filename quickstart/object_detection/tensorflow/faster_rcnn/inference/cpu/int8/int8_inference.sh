@@ -49,14 +49,14 @@ if [[ ! -d ${TF_MODELS_DIR} ]]; then
   exit 1
 fi
 
-PRETRAINED_MODEL=${MODEL_DIR}/faster_rcnn_int8_pretrained_model.pb
+PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/faster_rcnn_int8_pretrained_model.pb}
 
 if [[ ! -f ${PRETRAINED_MODEL} ]]; then
   echo "The pretrained model (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
