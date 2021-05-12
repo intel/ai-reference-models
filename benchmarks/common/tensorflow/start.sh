@@ -1044,8 +1044,9 @@ function ssd-resnet34() {
             model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
             infer_dir="${INTELAI_MODELS}/${MODE}"
           fi
-          benchmarks_patch_path=${infer_dir}/tensorflow_benchmarks_tf2.0.patch
+          benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+          
 
           cd  ${model_source_dir}/../
           cd ssd-resnet-benchmarks
@@ -1091,7 +1092,7 @@ function ssd-resnet34() {
           git clone https://github.com/tensorflow/benchmarks.git benchmark_ssd_resnet34
           cd benchmark_ssd_resnet34
           git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
-          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-tf-2.0.diff
+          git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/tf_benchmarks.patch
           git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/nhwc-bug-fix.diff
           if [ ${PRECISION} == "bfloat16" ]; then
             git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
