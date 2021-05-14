@@ -7,13 +7,19 @@ TensorFlow models.
 
 ## Install AI Kit
 
-Install AI Kit and setup your environment using the instructions here:
+Use the link below for instructions on how to install AI Kit or run the AI Kit
+docker container:
 [https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html](https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html)
 
-## Activate the TensorFlow Conda Environment
+## Activate a Conda Environment
 
-After you've installed AI Kit and setup your oneAPI environment with the `setvars.sh`
-script, activate the TensorFlow conda environment using one of the methods below:
+Use the `conda env list` command to see a list of all of the available conda environments.
+The individual [model documentation files](/benchmarks#tensorflow-use-cases) will have
+information on which conda environment can be used to run that particular model. There are
+conda enviornments TensorFlow as well as for each deep learning use case (like image
+recognition, recommendation, language translation, etc).
+
+To activate a general use TensorFlow conda environment use the instructions below:
 
 * **Activate conda environment With Root Access**
   Navigate the Linux shell to your oneapi installation path, typically `/opt/intel/oneapi`.
