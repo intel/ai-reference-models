@@ -6,12 +6,11 @@ Intel® Extension for PyTorch.
 
 ## Prerequisites
 
-The model scripts can be run on Linux and require the following
-dependencies to be installed:
-* [Docker](https://docs.docker.com/install/)
-* [Python](https://www.python.org/downloads/) 3.6 or later
-* [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
-* `wget` for downloading pre-trained models
+The model documentation in the tables below have information on the
+prerequisites to run each model. The model scripts run on Linux. Select
+models are also able to run using bare metal on Windows. For more information
+and a list of models that are supported on Windows, see the
+[documentation here](/docs/general/tensorflow/LaunchBenchmark.md#running-the-launch-script-on-bare-metal).
 
 The [oneContainer Portal](http://software.intel.com/containers) column has
 links for using workload containers and model packages for each model precision.
@@ -27,11 +26,8 @@ For information on running more advanced use cases using the workload containers
 
 ## TensorFlow Use Cases
 
-> If you are using the Intel® oneAPI AI Analytics Toolkit (AI Kit), please follow the
-> setup instructions [here](/docs/general/tensorflow/AIKit.md).
-
-| Use Case                | Model              | Mode      | oneContainer Portal | Run from the Model Zoo repository |
-| ------------------------| ------------------ | --------- | ------------------- | --------------------------------- |
+| Use Case                | Model              | Mode      | oneContainer Portal | Model Documentation |
+| ------------------------| ------------------ | --------- | ------------------- | ------------------- |
 | Image Recognition       | [DenseNet169](https://arxiv.org/pdf/1608.06993.pdf) | Inference | Model Containers: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/densenet169-fp32-inference-tensorflow-container.html) <br> Model Packages: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/densenet169-fp32-inference-tensorflow-model.html) | [FP32](image_recognition/tensorflow/densenet169/inference/fp32/README.md) |
 | Image Recognition       | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | Model Containers: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-int8-inference-tensorflow-container.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-fp32-inference-tensorflow-container.html) <br> Model Packages: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-int8-inference-tensorflow-model.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-fp32-inference-tensorflow-model.html)  | [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
 | Image Recognition       | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf) | Inference | Model Containers: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-int8-inference-tensorflow-container.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-fp32-inference-tensorflow-container.html) <br> Model Packages: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-int8-inference-tensorflow-model.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-fp32-inference-tensorflow-model.html)  | [Int8](image_recognition/tensorflow/inceptionv4/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv4/README.md#fp32-inference-instructions) |
@@ -64,8 +60,8 @@ For information on running more advanced use cases using the workload containers
 
 ## TensorFlow Serving Use Cases
 
-| Use Case               | Model               | Mode      | Run from the Model Zoo repository    |
-| -----------------------| ------------------- | --------- |------------------------------|
+| Use Case               | Model               | Mode      | Model Documentation |
+| -----------------------| ------------------- | --------- |---------------------|
 | Image Recognition      | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf)        | Inference | [FP32](image_recognition/tensorflow_serving/inceptionv3/README.md#fp32-inference-instructions) |
 | Image Recognition      | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | Inference | [FP32](image_recognition/tensorflow_serving/resnet50v1_5/README.md#fp32-inference-instructions) |
 | Language Translation   | [Transformer_LT_Official](https://arxiv.org/pdf/1706.03762.pdf) | Inference | [FP32](language_translation/tensorflow_serving/transformer_lt_official/README.md#fp32-inference-instructions) |
@@ -73,8 +69,8 @@ For information on running more advanced use cases using the workload containers
 
 ## PyTorch Use Cases
 
-| Use Case                | Model              | Mode      | oneContainer Portal | Run from the Model Zoo repository |
-| ----------------------- | ------------------ | --------- | ------------------- | --------------------------------- |
+| Use Case                | Model              | Mode      | oneContainer Portal | Model Documentation |
+| ----------------------- | ------------------ | --------- | ------------------- | --------------------|
 | Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)   | Inference | Model Containers: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-fp32-inference-pytorch-container.html) [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-bfloat16-inference-pytorch-container.html) <br> Model Packages: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-fp32-inference-pytorch-model.html) [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-bfloat16-inference-pytorch-model.html)  | [FP32](/quickstart/image_recognition/pytorch/resnet50/inference/fp32/README.md) [BFloat16**](/quickstart/image_recognition/pytorch/resnet50/inference/bf16/README.md) |
 | Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)        | Training  | Model Containers: [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/dlrm-bfloat16-training-pytorch-container.html) <br> Model Packages: [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/dlrm-bfloat16-training-pytorch-model.html) | [BFloat16**](../models/recommendation/pytorch/dlrm/training/bfloat16/README.md#dlrm-mlperf-bf16-training-v07-intel-submission) |
 
