@@ -1,29 +1,41 @@
 <!--- 50. AI Kit -->
 ## Run the model
 
-From AI Kit, activate the TensorFlow language modeling environment:
-```
-conda activate tensorflow_object_detection
-```
+Setup your environment using the instructions below, depending on if you are
+using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
-If you are not using AI Kit you will need:
-* Python 3.6 or 3.7
-* git
-* numactl
-* wget
-* [Protobuf Compilation](https://github.com/tensorflow/models/blob/v1.12.0/research/object_detection/g3doc/installation.md#protobuf-compilation)
-* [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
-* Cython
-* contextlib2
-* jupyter
-* lxml
-* matplotlib
-* pillow>=8.1.2
-* pycocotools
-* Clone the Model Zoo repo:
-  ```
-  git clone https://github.com/IntelAI/models.git
-  ```
+<table>
+  <tr>
+    <th>Setup using AI Kit</th>
+    <th>Setup without AI Kit</th>
+  </tr>
+  <tr>
+    <td>
+      <p>Install numactl and activate the TensorFlow object detection conda environment:</p>
+      <pre>apt-get update && apt-get install numactl<br>conda activate tensorflow_object_detection</pre>
+    </td>
+    <td>
+      <p>To run without AI Kit you will need:</p>
+      <ul>
+        <li>Python 3.6 or 3.7
+        <li>git
+        <li>numactl
+        <li>wget
+        <li><a href="https://github.com/tensorflow/models/blob/v1.12.0/research/object_detection/g3doc/installation.md#protobuf-compilation">Protobuf Compilation</a>
+        <li><a href="https://pypi.org/project/intel-tensorflow/1.15.2/">intel-tensorflow==1.15.2</a>
+        <li>Cython
+        <li>contextlib2
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>pillow>=8.1.2
+        <li>pycocotools
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 Running <model name> <precision> <mode> also requires cloning the TensorFlow
 models repo using the tag specified below. Set the `TF_MODELS_DIR` environment

@@ -47,28 +47,40 @@ that directory when running bert fine tuning using the SQuAD data.
 <!--- 50. AI Kit -->
 ## Run the model
 
-From AI Kit, activate the TensorFlow language modeling environment:
-```
-conda activate tensorflow_language_modeling
-```
+Setup your environment using the instructions below, depending on if you are
+using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
-If you are not using AI Kit you will need:
-* Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
-* numactl
-* git
-* openmpi-bin (only required for multi-instance)
-* openmpi-common (only required for multi-instance)
-* openssh-client (only required for multi-instance)
-* openssh-server (only required for multi-instance)
-* libopenmpi-dev (only required for multi-instance)
-* horovod==0.19.1 (only required for multi-instance)
-* Clone the Model Zoo repo:
-  ```
-  git clone https://github.com/IntelAI/models.git
-  ```
+<table>
+  <tr>
+    <th>Setup using AI Kit</th>
+    <th>Setup without AI Kit</th>
+  </tr>
+  <tr>
+    <td>
+      <p>Install numactl and activate the TensorFlow language modeling conda environment:</p>
+      <pre>apt-get update && apt-get install numactl<br>conda activate tensorflow_language_modeling</pre>
+    </td>
+    <td>
+      <p>To run without AI Kit you will need:</p>
+      <ul>
+        <li>Python 3
+        <li>intel-tensorflow==2.4.0
+        <li>git
+        <li>numactl
+        <li>openmpi-bin (only required for multi-instance)
+        <li>openmpi-common (only required for multi-instance)
+        <li>openssh-client (only required for multi-instance)
+        <li>openssh-server (only required for multi-instance)
+        <li>libopenmpi-dev (only required for multi-instance)
+        <li>horovod==0.21.0 (only required for multi-instance)
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+  </tr>
+</table>
 
-Next, set environment variables with paths to the [dataset](#datasets),
+After your setup is done, export environment variables with paths to the [dataset](#datasets),
 [checkpoint files](#pretrained-models), and an output directory,then run
 a quickstart script. See [list of quickstart scripts](#quick-start-scripts)
 for details on the different options.
