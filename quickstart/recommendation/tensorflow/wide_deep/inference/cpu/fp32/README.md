@@ -6,7 +6,6 @@
 This document has instructions for running Wide & Deep FP32 inference using
 Intel-optimized TensorFlow.
 
-
 <!--- 20. Download link -->
 ## Download link
 
@@ -31,11 +30,6 @@ $ python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_do
 |-------------|-------------|
 | [`fp32_inference_online.sh`](fp32_inference_online.sh) | Runs wide & deep model inference online mode (batch size = 1)|
 | [`fp32_inference_batch.sh`](fp32_inference_batch.sh) | Runs wide & deep model inference in batch mode (batch size = 1024)|
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
-
 
 <!--- 50. Bare Metal -->
 ### Bare Metal
@@ -70,7 +64,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
     ```
     DATASET_DIR=<path to the Wide & Deep dataset directory>
     OUTPUT_DIR=<directory where log files will be written>
-    TF_MODEL_SOURCE_DIR=<path to tensorflow-models>
+    TF_MODELS_DIR=<path to tensorflow-models>
 
     ./quickstart/<script name>.sh
     ```

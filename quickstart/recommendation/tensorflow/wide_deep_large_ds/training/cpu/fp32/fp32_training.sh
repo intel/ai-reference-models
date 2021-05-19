@@ -44,7 +44,7 @@ if [ ! -z "${CHECKPOINT_DIR}" ]; then
 fi
 
 # Run wide and deep large dataset training
-source "$(dirname $0)/common/utils.sh"
+source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --model-name wide_deep_large_ds \
    --precision fp32 \
@@ -52,6 +52,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --framework tensorflow \
    --batch-size 512 \
    --data-location $DATASET_DIR \
+   $CHECKPOINT_ARG \
    --output-dir $OUTPUT_DIR \
    $@
 
