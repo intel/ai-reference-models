@@ -4,8 +4,8 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running NCF FP32 inference using
-Intel-optimized TensorFlow.
+This document has instructions for running Neural Collaborative Filtering (NCF)
+FP32 inference using Intel-optimized TensorFlow.
 
 <!--- 20. Download link -->
 ## Download link
@@ -17,9 +17,8 @@ Intel-optimized TensorFlow.
 
 Download [movielens 1M dataset](https://grouplens.org/datasets/movielens/1m/)
 ```
-    wget http://files.grouplens.org/datasets/movielens/ml-1m.zip
-    unzip ml-1m.zip
-
+wget http://files.grouplens.org/datasets/movielens/ml-1m.zip
+unzip ml-1m.zip
 ```
 Set the `DATASET_DIR` to point to this directory when running NCF.
 
@@ -31,10 +30,6 @@ Set the `DATASET_DIR` to point to this directory when running NCF.
 | [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
 | [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=256). |
 | [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=256). |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
