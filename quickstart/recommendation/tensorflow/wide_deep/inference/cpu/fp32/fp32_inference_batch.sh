@@ -29,22 +29,36 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-# Check for TF_MODEL_SOURCE_DIR
+# Check for TF_MODELS_DIR
 if [ -d "/tensorflow/models" ]; then # if true assume running in docker
-   TF_MODEL_SOURCE_DIR=/tensorflow/models
-elif [ -z ${TF_MODEL_SOURCE_DIR} ]; then
-    echo "Please set TF_MODEL_SOURCE_DIR or run in docker mode." >&2
+   TF_MODELS_DIR=/tensorflow/models
+elif [ -z ${TF_MODELS_DIR} ]; then
+    echo "Please set TF_MODELS_DIR or run in docker mode." >&2
     exit 1
 fi
 
-echo 'TF_MODEL_SOURCE_DIR='$TF_MODEL_SOURCE_DIR
+echo 'TF_MODELS_DIR='TF_MODELS_DIR
 
-# Unzip pretrained model files
-pretrained_model_dir="pretrained_model/wide_deep_fp32_pretrained_model"
-if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/wide_deep_fp32_pretrained_model.tar.gz
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  # If the env var is not set, we might be running as part of a workload container
+  pretrained_model_dir="pretrained_model/wide_deep_fp32_pretrained_model"
+  if [ ! -d "${pretrained_model_dir}" ]; then
+    if [ -f pretrained_model/wide_deep_fp32_pretrained_model.tar.gz ]; then
+      tar -C pretrained_model/ -xvf pretrained_model/wide_deep_fp32_pretrained_model.tar.gz
+    else
+      echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the pretrained model directory."
+      exit 1
+    fi
+  fi
+  CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
+else
+  if [ ! -d "${PRETRAINED_MODEL}" ]; then
+    echo "The PRETRAINED_MODEL directory (${PRETRAINED_MODEL}) does not exist."
+    exit 1
+  else
+    CHECKPOINT_DIR=${PRETRAINED_MODEL}
+  fi
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_dirs
@@ -66,10 +80,10 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-source "$(dirname $0)/common/utils.sh"
+source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --framework tensorflow \
-      --model-source-dir ${TF_MODEL_SOURCE_DIR} \
+      --model-source-dir ${TF_MODELS_DIR} \
       --precision fp32 \
       --mode inference \
       --model-name wide_deep \
@@ -78,4 +92,3 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --checkpoint ${CHECKPOINT_DIR} \
       --output-dir ${OUTPUT_DIR} \
       $@
-
