@@ -35,10 +35,10 @@ if [ ! -f "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="$(pwd)/wide_deep_int8_pretrained_model.pb"
+PRETRAINED_MODEL=${PRETRAINED_MODEL-$MODEL_DIR/wide_deep_int8_pretrained_model.pb}
 
 # Run wide and deep large dataset inference
-source "$(dirname $0)/common/utils.sh"
+source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --model-name wide_deep_large_ds \
    --precision int8 \
@@ -47,6 +47,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --batch-size 1000 \
    --data-location $DATASET_DIR \
    --output-dir $OUTPUT_DIR \
-   --in-graph ${MODEL_FILE} \
+   --in-graph ${PRETRAINED_MODEL} \
    --accuracy-only \
    $@

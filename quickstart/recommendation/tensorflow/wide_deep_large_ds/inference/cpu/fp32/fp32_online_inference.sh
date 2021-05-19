@@ -36,10 +36,10 @@ if [ ! -f "${DATASET_DIR}" ]; then
 fi
 
 NUM_OMP_THREADS="${NUM_OMP_THREADS:-1}"
-MODEL_FILE="${MODEL_DIR}/wide_deep_fp32_pretrained_model.pb"
+PRETRAINED_MODEL=${PRETRAINED_MODEL-$MODEL_DIR/wide_deep_fp32_pretrained_model.pb}
 
 # Run wide and deep large dataset inference
-source "$(dirname $0)/common/utils.sh"
+source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --model-name wide_deep_large_ds \
    --precision fp32 \
@@ -48,7 +48,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --batch-size 1 \
    --data-location $DATASET_DIR \
    --output-dir $OUTPUT_DIR \
-   --in-graph ${MODEL_FILE} \
+   --in-graph ${PRETRAINED_MODEL} \
    --benchmark-only \
    $@ \
    -- num_omp_threads=$NUM_OMP_THREADS
