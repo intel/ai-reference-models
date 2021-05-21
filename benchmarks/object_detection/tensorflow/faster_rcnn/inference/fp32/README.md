@@ -37,8 +37,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
   <tr>
     <td>
-      <p>Install numactl and activate the TensorFlow object detection conda environment:</p>
-      <pre>apt-get update && apt-get install numactl<br>conda activate tensorflow_object_detection</pre>
+      <p>AI Kit does not currently support TF 1.15.2 models</p>
     </td>
     <td>
       <p>To run without AI Kit you will need:</p>
