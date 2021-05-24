@@ -448,13 +448,13 @@ $ pushd $MODEL_WORK_DIR
 
    3. To run training and achieve convergence, download the backbone model from the links below, then use the following command:
 
-      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/checkpoint
+      https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/checkpoint
 
-      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.data-00000-of-00001
+      https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.data-00000-of-00001
 
-      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.index
+      https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.index
 
-      https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.meta
+      https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.meta
 
       Place the above files in one directory, and pass that location below as --backbone-model.
 
