@@ -27,10 +27,6 @@ the launch script when running the benchmarking script.
 |-------------|-------------|
 | [fp32_inference.sh](fp32_inference.sh) | Runs inference with a batch size of 1 using the BraTS dataset and a pretrained model |
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
-
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
@@ -44,6 +40,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * tables==3.4.4
 * nibabel==2.3.3
 * SimpleITK===1.2.0
+* h5py==2.10.0
 
 Follow the [instructions above for downloading the BraTS dataset](#dataset).
 
