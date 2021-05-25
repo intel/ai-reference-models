@@ -5,6 +5,9 @@ The <model name> <precision> <mode> model container includes the scripts and lib
 needed to run <model name> <precision> fine tuning. To run one of the quickstart scripts
 using this container, you'll need to provide volume mounts for the pretrained model,
 dataset, and an output directory where log and checkpoint files will be written.
+If switching between running squad and classifier training or running classifier
+training multiple times, use a new empty `OUTPUT_DIR` to prevent incompatible
+checkpoints from getting picked up.
 
 The snippet below shows a quickstart script running with a single instance:
 ```

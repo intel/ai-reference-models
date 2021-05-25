@@ -8,7 +8,7 @@ This document has instructions for running BERT Large BFloat16 inference using
 Intel-optimized TensorFlow.
 
 <!--- 30. Datasets -->
-## Dataset
+## Datasets
 
 ### BERT Large Data
 Download and unzip the BERT Large uncased (whole word masking) model from the
@@ -46,8 +46,14 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
   <tr>
     <td>
-      <p>Install numactl and activate the TensorFlow language modeling conda environment:</p>
-      <pre>apt-get update && apt-get install numactl<br>conda activate tensorflow_language_modeling</pre>
+      <p>To run using AI Kit you will need:</p>
+      <ul>
+        <li>numactl
+        <li>unzip
+        <li>wget
+        <li>Activate the `tensorflow` conda environment
+        <pre>conda activate tensorflow</pre>
+      </ul>
     </td>
     <td>
       <p>To run without AI Kit you will need:</p>

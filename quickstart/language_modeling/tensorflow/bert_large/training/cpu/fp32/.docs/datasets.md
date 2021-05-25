@@ -6,7 +6,9 @@
 Download and extract checkpoints the bert pretrained model from the
 [google bert repo](https://github.com/google-research/bert#pre-trained-models).
 The extracted directory should be set to the `CHECKPOINT_DIR` environment
-variable when running the quickstart scripts.
+variable when running the quickstart scripts. To run using SQuAD, use the
+BERT large uncased (whole word masking) pretrained model. To run classifier
+training, use the BERT base uncased 12-layer, 768-hidden pretrained model.
 
 For training from scratch, Wikipedia and BookCorpus need to be downloaded
 and pre-processed.
