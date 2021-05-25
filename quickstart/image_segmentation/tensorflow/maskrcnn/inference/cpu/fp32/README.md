@@ -25,10 +25,6 @@ Set the `DATASET_DIR` to point to this directory when running Mask R-CNN.
 |-------------|-------------|
 | [fp32_inference.sh](fp32_inference.sh) | Runs inference with batch size 1 using Coco dataset and pretrained model|
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
-
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
