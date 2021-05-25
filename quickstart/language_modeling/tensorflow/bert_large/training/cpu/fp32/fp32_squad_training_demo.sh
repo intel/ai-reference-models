@@ -63,6 +63,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 --mode=training \
 --framework=tensorflow \
 --batch-size=24 \
+${mpi_num_proc_arg} \
 --output-dir $OUTPUT_DIR \
 $@ \
 -- train_option=SQuAD \
