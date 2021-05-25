@@ -40,9 +40,9 @@ that directory when running bert fine tuning using the SQuAD data.
 
 | Script name | Description |
 |-------------|-------------|
-| [`bfloat16_classifier_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_classifier_training.sh) | This script fine-tunes the bert base model on the Microsoft Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples. Download the [bert base pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [GLUE data](#glue-data). |
-| [`bfloat16_squad_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_squad_training.sh) | This script fine-tunes bert using SQuAD data. Download the [bert large pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [squad data files](#squad-data). |
-| [`bfloat16_squad_training_demo.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_squad_training_demo.sh) | This script does a short demo run of 0.01 epochs using SQuAD data. |
+| [`bfloat16_classifier_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_classifier_training.sh) | This script fine-tunes the bert base model on the Microsoft Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples. Download the [bert base uncased 12-layer, 768-hidden pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [GLUE data](#glue-data). |
+| [`bfloat16_squad_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_squad_training.sh) | This script fine-tunes bert using SQuAD data. Download the [bert large uncased (whole word masking) pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [squad data files](#squad-data). |
+| [`bfloat16_squad_training_demo.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_squad_training_demo.sh) | This script does a short demo run of 0.01 epochs using the `mini-dev-v1.1.json` file instead of the full SQuAD dataset. |
 
 <!--- 50. AI Kit -->
 ## Run the model
@@ -57,8 +57,20 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
   <tr>
     <td>
-      <p>Install numactl and activate the TensorFlow language modeling conda environment:</p>
-      <pre>apt-get update && apt-get install numactl<br>conda activate tensorflow_language_modeling</pre>
+      <p>To run using AI Kit you will need:</p>
+      <ul>
+        <li>numactl
+        <li>unzip
+        <li>wget
+        <li>openmpi-bin (only required for multi-instance)
+        <li>openmpi-common (only required for multi-instance)
+        <li>openssh-client (only required for multi-instance)
+        <li>openssh-server (only required for multi-instance)
+        <li>libopenmpi-dev (only required for multi-instance)
+        <li>horovod==0.21.0 (only required for multi-instance)
+        <li>Activate the `tensorflow` conda environment
+        <pre>conda activate tensorflow</pre>
+      </ul>
     </td>
     <td>
       <p>To run without AI Kit you will need:</p>
@@ -81,9 +93,11 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 </table>
 
 After your setup is done, export environment variables with paths to the [dataset](#datasets),
-[checkpoint files](#pretrained-models), and an output directory,then run
-a quickstart script. See [list of quickstart scripts](#quick-start-scripts)
-for details on the different options.
+[checkpoint files](#pretrained-models), and an output directory, then run
+a quickstart script. If switching between running squad and classifier training or
+running classifier training multiple times, use a new empty `OUTPUT_DIR` to
+prevent incompatible checkpoints from getting picked up. See the
+[list of quickstart scripts](#quick-start-scripts) for details on the different options.
 
 The snippet below shows a quickstart script running with a single instance:
 ```

@@ -12,7 +12,10 @@ export OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 
 <model name> <mode> can be run in three different modes:
 
-* **To run SQuAD training** use the following command with the `train_option=SQuAD`:
+* **To run SQuAD training** use the following command with the `train_option=SQuAD`.  The
+  `CHECKPOINT_DIR` should point to the location where you've downloaded the BERT
+  large (whole word masking) pretrained model, and the `DATASET_DIR` should point to
+  the SQuAD data.
   ```
   python launch_benchmark.py \
     --model-name=bert_large \
@@ -93,8 +96,10 @@ export OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 
 * **To run Classifier** training, use the following command with the
   `train-option=Classifier`. For classifier training, use the GLUE data in
-  as the `DATASET_DIR`. This example code fine-tunes BERT-Base on the Microsoft
-  Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples.
+  as the `DATASET_DIR`. The `CHECKPOINT_DIR` should point to the BERT base
+  uncased 12-layer, 768-hidden pretrained model that you've downloaded.
+  This example code fine-tunes BERT-Base on the Microsoft Research Paraphrase
+  Corpus (MRPC) corpus, which only contains 3,600 examples.
   ```
   python launch_benchmark.py \
     --model-name=bert_large \
@@ -163,7 +168,8 @@ export OUTPUT_DIR=<directory where checkpoints and log files will be saved>
   And in the second phase, sequential length 512 is used.
   Please follow instructions in [google bert pre-training](https://github.com/google-research/bert#pre-training-with-bert)
   for data pre-processing and set the `DATASET_DIR` environment variable
-  to the TF record directory.
+  to the TF record directory. The `CHECKPOINT_DIR` should point to the
+  BERT large uncased (whole word masking) directory.
   ```
   python launch_benchmark.py \
     --model-name=bert_large \

@@ -13,7 +13,7 @@ Intel-optimized TensorFlow.
 [bert-large-bfloat16-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-bfloat16-inference.tar.gz)
 
 <!--- 30. Datasets -->
-## Dataset
+## Datasets
 
 ### BERT Large Data
 Download and unzip the BERT Large uncased (whole word masking) model from the
@@ -49,7 +49,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 
 Once the above dependencies have been installed, download and untar the model
 package, set environment variables, and then run a quickstart script. See the
-[datasets](#datasets) and [list of quickstart scripts](#quick-start-scripts) 
+[datasets](#datasets) and [list of quickstart scripts](#quick-start-scripts)
 for more details on the different options.
 
 The snippet below shows how to run a quickstart script:
