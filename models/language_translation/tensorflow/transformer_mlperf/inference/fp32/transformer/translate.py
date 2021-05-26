@@ -17,6 +17,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from mlperf_compliance import mlperf_log
 
 import argparse
 import os
@@ -79,7 +80,7 @@ def _trim_and_decode(ids, subtokenizer):
 
 def translate_file(
     estimator, subtokenizer, input_file, output_file=None,
-    print_all_translations=False):
+    batch_size=_DECODE_BATCH_SIZE, print_all_translations=False):
   """Translate lines in file, and save to output file if specified.
 
   Args:
@@ -93,7 +94,6 @@ def translate_file(
   Raises:
     ValueError: if output file is invalid.
   """
-  batch_size = _DECODE_BATCH_SIZE
 
   # Read and sort inputs by length. Keep dictionary (original index-->new index
   # in sorted list) to write translations in the original order.
@@ -182,7 +182,7 @@ def main(unused_argv):
   params.beam_size = _BEAM_SIZE
   params.alpha = _ALPHA
   params.extra_decode_length = _EXTRA_DECODE_LENGTH
-  params.batch_size = _DECODE_BATCH_SIZE
+  params.batch_size = FLAGS.batch_size
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
@@ -208,7 +208,8 @@ def main(unused_argv):
       output_file = os.path.abspath(FLAGS.file_out)
       tf.compat.v1.logging.info("File output specified: %s" % output_file)
 
-    translate_file(estimator, subtokenizer, input_file, output_file)
+    translate_file(estimator, subtokenizer, input_file, output_file,
+        FLAGS.batch_size, False)
 
 
 if __name__ == "__main__":
@@ -256,6 +257,9 @@ if __name__ == "__main__":
   parser.add_argument(
       "--inter_op_parallelism_threads", "-inter", type=int, default=None,
       help="the intra op parallelism thread to use", metavar="<INTER>")
+  parser.add_argument(
+      "--batch_size", "-batch", type=int, default=_DECODE_BATCH_SIZE,
+      help="the batch size for inference", metavar="<INTER>")
 
   FLAGS, unparsed = parser.parse_known_args()
   main(sys.argv)

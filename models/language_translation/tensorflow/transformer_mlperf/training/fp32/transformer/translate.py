@@ -17,10 +17,12 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from mlperf_compliance import mlperf_log
 
 import argparse
 import os
 import sys
+import time
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
@@ -78,7 +80,7 @@ def _trim_and_decode(ids, subtokenizer):
 
 def translate_file(
     estimator, subtokenizer, input_file, output_file=None,
-    print_all_translations=True):
+    batch_size=_DECODE_BATCH_SIZE, print_all_translations=False):
   """Translate lines in file, and save to output file if specified.
 
   Args:
@@ -92,7 +94,6 @@ def translate_file(
   Raises:
     ValueError: if output file is invalid.
   """
-  batch_size = _DECODE_BATCH_SIZE
 
   # Read and sort inputs by length. Keep dictionary (original index-->new index
   # in sorted list) to write translations in the original order.
@@ -105,7 +106,7 @@ def translate_file(
       if i % batch_size == 0:
         batch_num = (i // batch_size) + 1
 
-        print("Decoding batch %d out of %d." % (batch_num, num_decode_batches))
+#        print("Decoding batch %d out of %d." % (batch_num, num_decode_batches))
       yield _encode_and_add_eos(line, subtokenizer)
 
   def input_fn():
@@ -116,6 +117,7 @@ def translate_file(
     return ds
 
   translations = []
+  start_time = time.time()
   for i, prediction in enumerate(estimator.predict(input_fn)):
     translation = _trim_and_decode(prediction["outputs"], subtokenizer)
     translations.append(translation)
@@ -125,6 +127,11 @@ def translate_file(
       print("\tInput: %s" % sorted_inputs[i])
       print("\tOutput: %s\n" % translation)
       print("=" * 100)
+
+  duration = time.time() - start_time
+  num_sentences = len(sorted_inputs)
+  print('Total inferencing time:%s' %(duration))
+  print('Throughput:{} sentences/second'.format(num_sentences/duration))
 
   # Write translations in the order they appeared in the original file.
   if output_file is not None:
@@ -175,9 +182,16 @@ def main(unused_argv):
   params.beam_size = _BEAM_SIZE
   params.alpha = _ALPHA
   params.extra_decode_length = _EXTRA_DECODE_LENGTH
-  params.batch_size = _DECODE_BATCH_SIZE
+  params.batch_size = FLAGS.batch_size
+  # Add inter_op and intra_op parallelism thread
+  session_config = tf.compat.v1.ConfigProto(
+      inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
+      intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
+      allow_soft_placement=True)
+  run_config = tf.estimator.RunConfig(session_config=session_config)
   estimator = tf.estimator.Estimator(
-      model_fn=transformer_main.model_fn, model_dir=FLAGS.model_dir, params=params)
+      model_fn=transformer_main.model_fn, model_dir=FLAGS.model_dir, params=params,
+      config=run_config)
 
   if FLAGS.text is not None:
     tf.compat.v1.logging.info("Translating text: %s" % FLAGS.text)
@@ -194,7 +208,8 @@ def main(unused_argv):
       output_file = os.path.abspath(FLAGS.file_out)
       tf.compat.v1.logging.info("File output specified: %s" % output_file)
 
-    translate_file(estimator, subtokenizer, input_file, output_file)
+    translate_file(estimator, subtokenizer, input_file, output_file,
+        FLAGS.batch_size, False)
 
 
 if __name__ == "__main__":
@@ -236,6 +251,15 @@ if __name__ == "__main__":
       help="[default: %(default)s] If --file flag is specified, save "
            "translation to this file.",
       metavar="<FO>")
+  parser.add_argument(
+      "--intra_op_parallelism_threads", "-intra", type=int, default=None,
+      help="the intra op parallelism thread to use", metavar="<INTRA>")
+  parser.add_argument(
+      "--inter_op_parallelism_threads", "-inter", type=int, default=None,
+      help="the intra op parallelism thread to use", metavar="<INTER>")
+  parser.add_argument(
+      "--batch_size", "-batch", type=int, default=_DECODE_BATCH_SIZE,
+      help="the batch size for inference", metavar="<INTER>")
 
   FLAGS, unparsed = parser.parse_known_args()
   main(sys.argv)

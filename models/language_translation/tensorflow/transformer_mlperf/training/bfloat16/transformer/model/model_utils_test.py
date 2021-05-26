@@ -24,6 +24,8 @@ import model_utils
 
 NEG_INF = -1e9
 
+tf.compat.v1.disable_eager_execution()
+
 
 class ModelUtilsTest(tf.test.TestCase):
 
@@ -44,10 +46,11 @@ class ModelUtilsTest(tf.test.TestCase):
     with self.test_session() as sess:
       flattened_bias, bias_shape = sess.run((flattened_bias, bias_shape))
 
-    self.assertAllEqual([[0, NEG_INF, NEG_INF, NEG_INF, 0],
+    rhs = tf.constant([[0, NEG_INF, NEG_INF, NEG_INF, 0],
                          [0, 0, NEG_INF, NEG_INF, NEG_INF],
-                         [NEG_INF, 0, 0, NEG_INF, 0]],
-                        flattened_bias)
+                         [NEG_INF, 0, 0, NEG_INF, 0]], dtype=tf.bfloat16)
+
+    self.assertAllEqual(rhs, flattened_bias)
     self.assertAllEqual([3, 1, 1, 5], bias_shape)
 
   def test_get_decoder_self_attention_bias(self):
