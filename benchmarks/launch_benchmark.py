@@ -33,7 +33,6 @@ from common import base_benchmark_util
 from common import platform_util
 from common.utils.validators import check_no_spaces, check_volume_mount, check_shm_size
 from common.base_model_init import BaseModelInitializer
-from common.base_model_init import set_env_var
 
 
 class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
@@ -132,11 +131,6 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         # default disable_tcmalloc=False for int8 and disable_tcmalloc=True for other precisions
         if not self.args.disable_tcmalloc:
             self.args.disable_tcmalloc = str(self.args.precision != "int8")
-        if self.args.precision == "int8":
-            set_env_var("TF_ENABLE_MKL_NATIVE_FORMAT", 0, overwrite_existing=True)
-            print("Warning: Running int8 inference with blocked format. Native format will be supported in future "
-                  "TensorFlow releases. Please don't define TF_ENABLE_MKL_NATIVE_FORMAT in CLI unless native format "
-                  "is enabled for your installed TensorFlow version.")
 
         if self.args.custom_volumes and not self.args.docker_image:
             raise ValueError("Volume mounts can only be used when running in a docker container "
