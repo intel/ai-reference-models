@@ -37,16 +37,25 @@ elif [ -z ${TF_UNET_DIR} ]; then
 fi
 echo 'TF_UNET_DIR='$TF_UNET_DIR
 
-# Unzip pretrained model files
-pretrained_model_dir="pretrained_model/unet_trained"
-if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/unet_fp32_pretrained_model.tar.gz
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  # If the PRETRAINED_MODEL env var is not set, then we are probably running in a workload
+  # container or model package, so check for the tar file and extract it, if needed
+  pretrained_model_dir="pretrained_model/unet_trained"
+  if [ ! -d "${pretrained_model_dir}" ]; then
+    if [[ -f "pretrained_model/unet_fp32_pretrained_model.tar.gz" ]]; then
+      mkdir -p pretrained_model
+      tar -C pretrained_model/ -xvf pretrained_model/unet_fp32_pretrained_model.tar.gz
+    else
+      echo "The pretrained model was not found. Please set the PRETRAINED_MODEL var to point to the checkpoint file directory."
+      exit 1
+    fi
+  fi
+  PRETRAINED_MODEL="${MODEL_DIR}/${pretrained_model_dir}"
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_dirs
-input_dirs[CHECKPOINT_DIR]=${CHECKPOINT_DIR}
+input_dirs[PRETRAINED_MODEL]=${PRETRAINED_MODEL}
 
 for i in "${!input_dirs[@]}"; do
   var_name=$i
@@ -63,7 +72,7 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --model-name unet \
       --precision fp32 \
@@ -72,9 +81,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --benchmark-only \
       --batch-size 1 \
       --socket-id 0 \
-      --checkpoint ${CHECKPOINT_DIR} \
+      --checkpoint ${PRETRAINED_MODEL} \
       --model-source-dir ${TF_UNET_DIR} \
       --output-dir ${OUTPUT_DIR} \
       $@ \
       -- checkpoint_name=model.ckpt
-

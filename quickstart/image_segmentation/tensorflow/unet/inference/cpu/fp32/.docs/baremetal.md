@@ -14,13 +14,10 @@ To run on bare metal, the following prerequisites must be installed in your envi
    to get cpu optimizations:
 
    ```
-   $ git clone https://github.com/jakeret/tf_unet.git
-
-   $ cd tf_unet/
-
-   $ git fetch origin pull/276/head:cpu_optimized
-
-   $ git checkout cpu_optimized
+   git clone https://github.com/jakeret/tf_unet.git
+   cd tf_unet/
+   git fetch origin pull/276/head:cpu_optimized
+   git checkout cpu_optimized
    ``` 
 
 After installing the prerequisites, download and untar the model package.
@@ -28,7 +25,7 @@ Set environment variables for the path to your `TF_UNET_DIR` and an `OUTPUT_DIR`
 [quickstart script](#quick-start-scripts).
 
 ```
-TF_UNET_DIR=<tensorflow-wavenet directory>
+TF_UNET_DIR=<path to tf_unet directory>
 OUTPUT_DIR=<directory where log files will be written>
 
 wget <package url>
