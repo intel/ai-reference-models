@@ -24,7 +24,7 @@ python launch_benchmark.py \
  --mode inference \
  --socket-id 0 \
  --in-graph ${PRETRAINED_MODEL} \
- --docker-image intel/intel-optimized-tensorflow:1.15.2 \
+ --docker-image <docker image> \
  --output-dir ${OUTPUT_DIR} \
  --benchmark-only \
  -- number_of_steps=5000
@@ -40,7 +40,7 @@ python launch_benchmark.py \
  --precision int8 \
  --framework tensorflow \
  --socket-id 0 \
- --docker-image intel/intel-optimized-tensorflow:1.15.2 \
+ --docker-image <docker image> \
  --model-source-dir ${TF_MODELS_DIR} \
  --data-location ${DATASET_DIR}/coco_val.record \
  --in-graph ${PRETRAINED_MODEL} \
