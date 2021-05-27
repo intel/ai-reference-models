@@ -30,10 +30,6 @@ downloading and preprocessing the COCO validation dataset.
 | [`int8_inference.sh`](int8_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
 | [`int8_accuracy.sh`](int8_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
-
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
@@ -69,7 +65,7 @@ Set environment variables for the TensorFlow Model Garden directory to `TF_MODEL
 
 To run inference with performance metrics:
 ```
-DATASET_DIR=<path to the coco val2017 directory>
+DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
@@ -79,7 +75,7 @@ cd rfcn-int8-inference.tar.gz
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO validation TF record directory>
+DATASET_DIR=<path to the COCO validation TF record file (ex: /home/user/coco_output/coco_val.record)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
@@ -97,7 +93,7 @@ and an output directory.
 
 To run inference with performance metrics:
 ```
-DATASET_DIR=<path to the coco val2017 directory>
+DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
@@ -113,7 +109,7 @@ docker run \
 ```
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO validation TF record directory>
+DATASET_DIR=<path to the COCO validation TF record file (ex: /home/user/coco_output/coco_val.record)>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
