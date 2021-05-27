@@ -43,7 +43,7 @@ python launch_benchmark.py \
  --mode inference \
  --socket-id 0 \
  --checkpoint ${PRETRAINED_MODEL} \
- --docker-image intel/intel-optimized-tensorflow:1.15.2 \
+ --docker-image <docker image> \
  --output-dir ${OUTPUT_DIR} \
  -- config_file=pipeline.config
 ```
@@ -55,7 +55,7 @@ python launch_benchmark.py \
  --mode inference \
  --precision fp32 \
  --framework tensorflow \
- --docker-image intel/intel-optimized-tensorflow:1.15.2 \
+ --docker-image <docker image> \
  --model-source-dir ${TF_MODELS_DIR} \
  --data-location ${DATASET_DIR} \
  --in-graph ${PRETRAINED_MODEL}/frozen_inference_graph.pb \
