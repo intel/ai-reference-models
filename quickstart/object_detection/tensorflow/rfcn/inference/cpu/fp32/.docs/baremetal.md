@@ -46,7 +46,7 @@ a quickstart script.
 
 To run inference with performance metrics:
 ```
-DATASET_DIR=<path to the coco val2017 directory>
+DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
@@ -55,7 +55,7 @@ TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO validation TF record directory>
+DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 

@@ -31,11 +31,6 @@ downloading and preprocessing the COCO validation dataset.
 | [`fp32_inference.sh`](fp32_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
 | [`fp32_accuracy.sh`](fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
-
-
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
@@ -84,7 +79,7 @@ a quickstart script.
 
 To run inference with performance metrics:
 ```
-DATASET_DIR=<path to the coco val2017 directory>
+DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
@@ -93,7 +88,7 @@ TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO validation TF record directory>
+DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
@@ -111,7 +106,7 @@ where log files will be written.
 
 To run inference with performance metrics:
 ```
-DATASET_DIR=<path to the coco val2017 directory>
+DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
@@ -136,7 +131,7 @@ Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002239.l
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO validation TF record directory>
+DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
 OUTPUT_DIR=<directory where log files will be written>
 
 docker run \
