@@ -10,12 +10,12 @@ following modes/precisions:
 repository:
 
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 2. Download the pre-trained model.
 ```
-$ wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
+wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
 ```
 
 3. Navigate to the `benchmarks` directory in your local clone of

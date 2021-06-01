@@ -15,11 +15,11 @@ the cloned repo will be passed as the model source directory when
 running the launch script.
 
 ```
-$ git clone https://github.com/ibab/tensorflow-wavenet.git
-$ cd tensorflow-wavenet/
+git clone https://github.com/ibab/tensorflow-wavenet.git
+cd tensorflow-wavenet/
 
-$ git fetch origin pull/352/head:cpu_optimized
-$ git checkout cpu_optimized
+git fetch origin pull/352/head:cpu_optimized
+git checkout cpu_optimized
 ```
 
 2. Clone this [intelai/models](https://github.com/intelai/models) repo.
@@ -29,14 +29,14 @@ navigate to the `benchmarks` directory, which is where the launch script
 is located.
 
 ```
-$ git clone https://github.com/IntelAI/models.git
-$ cd models/benchmarks
+git clone https://github.com/IntelAI/models.git
+cd models/benchmarks
 ```
 
 3. Download and extract the pretrained model:
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wavenet_fp32_pretrained_model.tar.gz
-$ tar -xvf wavenet_fp32_pretrained_model.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/wavenet_fp32_pretrained_model.tar.gz
+tar -xvf wavenet_fp32_pretrained_model.tar.gz
 ```
 
 4. Start a model run by executing the launch script and passing args
