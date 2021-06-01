@@ -188,7 +188,7 @@ in the container at `custom_folder_1` and `/home/<user>/custom_folder_2`
 in the container at `custom_folder_2`:
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
         --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
         --model-name resnet50 \
         --framework tensorflow \
@@ -225,7 +225,7 @@ Below is an example showing how to use the `--debug` flag:
    `start.sh` file:
 
    ```
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
         --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
         --model-name resnet50 \
         --framework tensorflow \

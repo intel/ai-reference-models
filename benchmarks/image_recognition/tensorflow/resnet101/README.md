@@ -16,7 +16,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 repository:
 
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 This repository includes launch scripts for running 
@@ -24,7 +24,7 @@ an optimized version of the ResNet101 model code.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_int8_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_int8_pretrained_model.pb
 ```
 
 3. If you would like to run ResNet101 inference with real data or test for
@@ -52,9 +52,9 @@ For accuracy (using your `--data-location`,`--in-graph`, `--accuracy-only` and
 `--batch-size 100`):
 
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --model-name resnet101 \
     --precision int8 \
     --mode inference \
@@ -182,12 +182,12 @@ Log location outside container: {--output-dir value}/benchmark_resnet101_inferen
 [intelai/models](https://github.com/intelai/models)
 repository
     ```
-    $ git clone https://github.com/IntelAI/models.git
+    git clone https://github.com/IntelAI/models.git
     ```
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_fp32_pretrained_model.pb
 ```
 
 3. Download ImageNet dataset.
@@ -203,8 +203,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/res
     For online inference measurements with dummy data set `--batch-size 1` and for batch inference set `--batch-size 128`
 
     ```
-    $ cd /home/<user>/models/benchmarks
-    $ python launch_benchmark.py \
+    cd /home/<user>/models/benchmarks
+    python launch_benchmark.py \
         --framework tensorflow \
         --precision fp32 \
         --mode inference \
@@ -230,8 +230,8 @@ $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/res
 
 5. Run for accuracy
     ```
-    $ cd /home/<user>/models/benchmarks
-    $ python launch_benchmark.py \
+    cd /home/<user>/models/benchmarks
+    python launch_benchmark.py \
         --framework tensorflow \
         --precision fp32 \
         --mode inference \

@@ -46,8 +46,8 @@ The accuracy script needs the model weight. To set up the `WEIGHT_PATH`
 follow the steps described below.
 
 ```
-$ export WEIGHT_PATH=<path to weight file>
-$ wget -O $WEIGHT_PATH https://storage.googleapis.com/intel-optimized-tensorflow/models/icx-base-a37fb5e8/terabyte_mlperf_official.pt 
+export WEIGHT_PATH=<path to weight file>
+wget -O $WEIGHT_PATH https://storage.googleapis.com/intel-optimized-tensorflow/models/icx-base-a37fb5e8/terabyte_mlperf_official.pt
 ```
 Here, <path to weight file> can be the path you want the weight file to be downloaded at
 Note that you'll need the `WEIGHT_PATH`only for calculating the accuracy

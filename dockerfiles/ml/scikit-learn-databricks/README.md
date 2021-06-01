@@ -10,5 +10,5 @@ docker build -f scikit-learn-databricks.Dockerfile . -t intel/intel-optimized-ml
 
 To run the workflow try this:
 ```
-$ docker run -it intel/intel-optimized-ml:tf-2.4.0-scikit-learn bash
+docker run -it intel/intel-optimized-ml:tf-2.4.0-scikit-learn bash
 ```

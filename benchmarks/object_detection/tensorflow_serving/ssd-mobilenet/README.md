@@ -8,31 +8,31 @@ following modes/precisions:
 1. Download the 2017 validation COCO dataset (~780MB) (**note**: do not convert the COCO dataset to TF records format):
    
    ```
-   $ cd ~
-   $ mkdir -p coco/val
-   $ wget http://images.cocodataset.org/zips/val2017.zip
-   $ unzip val2017.zip -d coco/val
-   $ export COCO_VAL_DATA=$(pwd)/coco/val/val2017
+   cd ~
+   mkdir -p coco/val
+   wget http://images.cocodataset.org/zips/val2017.zip
+   unzip val2017.zip -d coco/val
+   export COCO_VAL_DATA=$(pwd)/coco/val/val2017
    ```
 2. Download the pre-trained model.
     ```
-    $ cd ~
-    $ wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
-    $ tar -xzvf ssd_mobilenet_v1_coco_2018_01_28.tar.gz
-    $ export SAVED_MODEL=$(pwd)/ssd_mobilenet_v1_coco_2018_01_28/saved_model/saved_model.pb
+    cd ~
+    wget http://download.tensorflow.org/models/object_detection/ssd_mobilenet_v1_coco_2018_01_28.tar.gz
+    tar -xzvf ssd_mobilenet_v1_coco_2018_01_28.tar.gz
+    export SAVED_MODEL=$(pwd)/ssd_mobilenet_v1_coco_2018_01_28/saved_model/saved_model.pb
     ```
 3. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
     ```
-    $ git clone https://github.com/IntelAI/models.git
-    $ cd models/benchmarks
+    git clone https://github.com/IntelAI/models.git
+    cd models/benchmarks
     ```
 4. For specifying a docker image that the model server should run with, you should use the --docker-image arg. This will pull the TensorFlow Serving image and run the model in docker. The client benchmarking script will then be launched from a virtualenv on bare metal and make requests to the serving container over GRPC.
 
 5. SSD-Mobilenet can be run for measuring online inference or batch inference using following command.
     * For online inference use `--batch-size=1` 
         ```
-        $ python launch_benchmark.py \
+        python launch_benchmark.py \
             --in-graph $SAVED_MODEL \
             --model-name=ssd-mobilenet \
             --framework=tensorflow_serving \
@@ -67,7 +67,7 @@ repository:
 
     * For online inference use `--batch-size=128`
         ```
-        $ python launch_benchmark.py \
+        python launch_benchmark.py \
             --in-graph $SAVED_MODEL \
             --model-name=ssd-mobilenet \
             --framework=tensorflow_serving \

@@ -37,11 +37,11 @@ the cloned repo will be passed as the model source directory when
 running the launch script.
 
 ```
-$ git clone https://github.com/ibab/tensorflow-wavenet.git
-$ cd tensorflow-wavenet/
+git clone https://github.com/ibab/tensorflow-wavenet.git
+cd tensorflow-wavenet/
 
-$ git fetch origin pull/352/head:cpu_optimized
-$ git checkout cpu_optimized
+git fetch origin pull/352/head:cpu_optimized
+git checkout cpu_optimized
 ```
 
 After installing the prerequisites, download and untar the model package.
