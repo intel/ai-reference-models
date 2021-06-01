@@ -39,7 +39,7 @@ We will break down the installation into 2 steps:
 ### Step 1: Pull or build TensorFlow Serving Docker image.
 The recommended way to use TensorFlow Serving is with Docker images. The easiest way to get an image is to pull the latest version from Docker Hub.
 ```
-$ docker pull intel/intel-optimized-tensorflow-serving:2.4.0
+docker pull intel/intel-optimized-tensorflow-serving:2.4.0
 ```
 
 * Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 

@@ -20,7 +20,7 @@ modes/precisions:
 3. Clone this [intelai/models](https://github.com/IntelAI/models)
    repository:
    ```
-   $ git clone https://github.com/IntelAI/models.git
+   git clone https://github.com/IntelAI/models.git
    ```
    This repository contains the scripts that we will use for running
    benchmarks as well as the Intel-Optimized 3D-Unet model code.
@@ -31,9 +31,9 @@ Currently, the model runs for `batch-size=1` only.
    * Evaluate the model accuracy: For evaluating accuracy the required parameters include: the `Brats 2019` dataset location (from step 1), the pre-trained `224_224_160.pb` input graph file (from step 2), and the `--accuracy-only` flag.
 
    ```
-   $ cd /home/<user>/models/benchmarks
+   cd /home/<user>/models/benchmarks
 
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
       --data-location /home/<user>/MICCAI_BraTS_2019_Data_Training \
       --in-graph /home/<user>/224_224_160.pb \
       --model-name 3d_unet_mlperf \
@@ -56,9 +56,9 @@ Currently, the model runs for `batch-size=1` only.
    ```
    * Evaluate the model performance: Currently, for performance evaluation dummy data is used. The required parameters include: the pre-trained `224_224_160.pb` input graph file (from step 2) and the `--benchmark-only` flag. Optionally, you can also specify the number of `warmup-steps` and `steps` as shown in the example below. If these optional arguments are not specified, the script will use the default values `warup-steps=10` and `steps=50`.
    ```
-   $ cd /home/<user>/models/benchmarks
+   cd /home/<user>/models/benchmarks
 
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
       --in-graph /home/<user>/224_224_160.pb \
       --model-name 3d_unet_mlperf \
       --framework tensorflow \

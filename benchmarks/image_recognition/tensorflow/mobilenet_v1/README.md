@@ -27,7 +27,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pre-trained model.
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
    ```
 
 3. Clone the [intelai/models](https://github.com/intelai/models) repo
@@ -36,9 +36,9 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
     Unless configured, these arguments will run with default values. Below are the example codes for each use case:
     
     ```
-    $ git clone https://github.com/IntelAI/models.git
+    git clone https://github.com/IntelAI/models.git
 
-    $ cd benchmarks
+    cd benchmarks
     ```
 
     For batch inference (using `--benchmark-only`, `--socket-id 0` and `--batch-size 240`):
@@ -152,14 +152,14 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 
 2. Download the pre-trained model.
    ```
-   $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenet_v1_1.0_224_frozen.pb
    ```
 
 3. Clone the [tensorflow/models](https://github.com/tensorflow/models)
    repository.
 
     ```
-    $ git clone https://github.com/tensorflow/models
+    git clone https://github.com/tensorflow/models
     ```
 
     The [tensorflow/models](https://github.com/tensorflow/models) files
@@ -169,8 +169,8 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
    and then navigate to the benchmarks directory:
 
    ```
-   $ git clone https://github.com/IntelAI/models.git
-   $ cd models/benchmarks
+   git clone https://github.com/IntelAI/models.git
+   cd models/benchmarks
    ```
 
    MobileNet V1 can be run for either online or batch inference using the
