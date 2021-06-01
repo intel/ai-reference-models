@@ -19,24 +19,24 @@ If you want to download movielens 1M/20M dataset and provide that path to `--dat
 
 For training, please checkout with tag `r2.1_model_reference `:
 ```
-$ git clone https://github.com/tensorflow/models.git
-$ cd models
-$ git checkout r2.1_model_reference
+git clone https://github.com/tensorflow/models.git
+cd models
+git checkout r2.1_model_reference
 ```
 
 3. Now clone `IntelAI/models` repository, then navigate to the `benchmarks` folder:
 
 ```
-$ cd $MODEL_WORK_DIR
-$ git clone https://github.com/IntelAI/models.git
-$ cd models/benchmarks
+cd $MODEL_WORK_DIR
+git clone https://github.com/IntelAI/models.git
+cd models/benchmarks
 ```
 
 4. Download and extract the pre-trained model, be careful it only works for 1M dataset.
 Skip this step if training only.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ncf_fp32_pretrained_model.tar.gz
-$ tar -xzvf ncf_fp32_pretrained_model.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_5/ncf_fp32_pretrained_model.tar.gz
+tar -xzvf ncf_fp32_pretrained_model.tar.gz
 ```
 
 5. Run the `launch_benchmark.py` script with the appropriate parameters.
@@ -51,7 +51,7 @@ For training, suggest options are:
 * `te=12` - set the max epoch. NCF will train 6+ epochs to SOTA, this flag will stop training when reach specific epoch. Set it to 1 if only want to test performance
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --checkpoint /home/<user>/ncf_fp32_pretrained_model \
     --model-source-dir /home/<user>/tensorflow/models \
     --model-name ncf \
@@ -84,7 +84,7 @@ For training, suggest options are:
 * `te=12` - set the max epoch. NCF will train 6+ epochs to SOTA, this flag will stop training when reach specific epoch. Set it to 1 if only want to test performance
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --checkpoint /home/<user>/ncf_fp32_pretrained_model \
     --model-source-dir /home/<user>/tensorflow/models \
     --model-name ncf \
@@ -111,5 +111,5 @@ I0122 12:00:14.881944 140303790921536 mlperf_log.py:134] NCF_RAW_:::MLPv0.5.0 nc
 
 6. To return to where you started from:
 ```
-$ popd
+popd
 ```

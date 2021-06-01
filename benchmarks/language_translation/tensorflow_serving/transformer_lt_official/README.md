@@ -10,25 +10,24 @@ following modes/precisions:
     Download and extract the packaged pre-trained model and dataset `transformer_lt_official_fp32_pretrained_model.tar.gz`
 
     ```
-    $ cd ~
-    $ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
-    $ tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
-    $ export TLT_DATA_LOCATION=$(pwd)/transformer_lt_official_fp32_pretrained_model/data
-    $ export TLT_MODEL=$(pwd)/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb
-
+    cd ~
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/transformer_lt_official_fp32_pretrained_model.tar.gz
+    tar -xzvf transformer_lt_official_fp32_pretrained_model.tar.gz
+    export TLT_DATA_LOCATION=$(pwd)/transformer_lt_official_fp32_pretrained_model/data
+    export TLT_MODEL=$(pwd)/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb
     ```
 3. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
     ```
-    $ git clone https://github.com/IntelAI/models.git
-    $ cd models/benchmarks
+    git clone https://github.com/IntelAI/models.git
+    cd models/benchmarks
     ```
 4. For specifying a docker image that the model server should run with, you should use the --docker-image arg. This will pull the TensorFlow Serving image and run the model in docker. The client benchmarking script will then be launched from a virtualenv on bare metal and make requests to the serving container over GRPC.
 
 5. Transformer-LT can be run for measuring online inference or batch inference using following command.
     * For online inference use `--batch-size=1` 
         ```
-        $ python launch_benchmark.py \
+        python launch_benchmark.py \
             --in-graph $TLT_MODEL \
             --model-name=transformer_lt_official \
             --framework=tensorflow_serving \
@@ -63,7 +62,7 @@ repository:
 
     * For online inference use `--batch-size=128`
         ```
-        $ python launch_benchmark.py \
+        python launch_benchmark.py \
             --in-graph $TLT_MODEL \
             --model-name=transformer_lt_official \
             --framework=tensorflow_serving \

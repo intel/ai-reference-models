@@ -20,20 +20,20 @@ and for local testing.
    Either:
 
    ```
-   $ install tools/scripts/model-builder /usr/local/bin
+   install tools/scripts/model-builder /usr/local/bin
    ```
 
    or
 
    ```
-   $ export PATH=$PWD/tools/scripts:$PATH
+   export PATH=$PWD/tools/scripts:$PATH
    ```
 
    or
 
    ```
-   $ export MODELS_REPO=$HOME/src/models
-   $ $MODELS_REPO/tools/scripts/model-builder
+   export MODELS_REPO=$HOME/src/models
+   $MODELS_REPO/tools/scripts/model-builder
    ```
 
 
