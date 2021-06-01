@@ -59,9 +59,3 @@ class TransformerBigParams(TransformerBaseParams):
   filter_size = 4096
   num_heads = 16
 
-class TransformerSmallParams(TransformerBaseParams):
-  """Parameters for the big Transformer model."""
-  batch_size = 2
-  hidden_size = 4
-  filter_size = 8
-  num_heads = 2

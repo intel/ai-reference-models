@@ -41,7 +41,6 @@ class ModelUtilsTest(tf.test.TestCase):
   def test_get_padding_bias(self):
     x = tf.constant([[1, 0, 0, 0, 2], [3, 4, 0, 0, 0], [0, 5, 6, 0, 7]])
     bias = model_utils.get_padding_bias(x)
-    tf.print(bias, "bias")
     bias_shape = tf.shape(input=bias)
     flattened_bias = tf.reshape(bias, [3, 5])
     with self.test_session() as sess:
