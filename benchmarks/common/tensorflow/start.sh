@@ -68,48 +68,97 @@ function _running-in-container()
   [ -f /.dockerenv ]
 }
 
+# Check the Linux platform distribution if CentOS or Ubuntu
+CENTOS_PLATFORM="False"
+if [[ $(awk -F= '/^NAME/{print $2}' /etc/os-release) == *"CentOS"* ]]; then
+  CENTOS_VERSION_ID=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
+  if [[ "${CENTOS_VERSION_ID}" == '"8"' ]]; then
+    CENTOS_PLATFORM="True"
+  else
+    echo "CentOS version ${CENTOS_VERSION_ID} is not currently supported."
+    exit 1
+  fi
+fi
+
 if [[ ${NOINSTALL} != "True" ]]; then
-  ## install common dependencies
-  apt-get update -y
-  # Set env var before installs so that user interaction is not required
+  # set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
-  apt-get install gcc-8 g++-8 cmake python-tk -y
-  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
-  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-  apt-get install -y libsm6 libxext6
+  # install common dependencies
+  if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+    yum update -y
+    yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
+
+    # install google-perftools for tcmalloc
+    if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
+      dnf -y install https://extras.getpagespeed.com/release-el8-latest.rpm && \
+      dnf -y install gperftools && \
+      yum clean all
+    fi
+
+    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+      ## Installing OpenMPI
+      yum install -y openmpi openmpi-devel openssh openssh-server
+      yum clean all
+      export PATH="/usr/lib64/openmpi/bin:${PATH}"
+
+      ## Install Horovod
+      export HOROVOD_WITHOUT_PYTORCH=1
+      export HOROVOD_WITHOUT_MXNET=1
+      export HOROVOD_WITH_TENSORFLOW=1
+      export HOROVOD_VERSION=0.21.1
+
+      # In case installing released versions of Horovod fail,and there is
+      # a working commit replace next set of commands with something like:
+      yum install -y git make
+      yum clean all
+      python3 -m pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
+      # python3 -m pip install horovod==${HOROVOD_VERSION}
+    fi
+  else
+    apt-get update -y
+    apt-get install gcc-8 g++-8 cmake python-tk -y
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+    apt-get install -y libsm6 libxext6
+
+    # install google-perftools for tcmalloc
+    if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
+      apt-get install google-perftools -y
+    fi
+
+    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+      ## Installing OpenMPI
+      apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
+      # Horovod Installation
+      export HOROVOD_VERSION=0.21.0
+
+      export HOROVOD_WITHOUT_PYTORCH=1
+      export HOROVOD_WITHOUT_MXNET=1
+      export HOROVOD_WITH_TENSORFLOW=1
+
+      apt-get update
+      # In case installing released versions of Horovod fail,and there is
+      # a working commit replace next set of commands with something like:
+      apt-get install -y --no-install-recommends --fix-missing cmake git
+      python3 -m pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
+      # apt-get install -y --no-install-recommends --fix-missing cmake
+      # python3 -m pip install horovod==${HOROVOD_VERSION}
+    fi
+  fi
   python3 -m pip install --upgrade pip==20.3.4
   python3 -m pip install requests
-
-  # install google-perftools for tcmalloc
-  if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-    apt-get install google-perftools -y
-  fi
-
-  if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-    ## Installing OpenMPI
-    apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
-    # Horovod Installation
-    export HOROVOD_VERSION=0.21.0
-
-    export HOROVOD_WITHOUT_PYTORCH=1
-    export HOROVOD_WITHOUT_MXNET=1
-    export HOROVOD_WITH_TENSORFLOW=1
-
-    apt-get update
-    # In case installing released versions of Horovod fail,and there is
-    # a working commit replace next set of commands with something like:
-    apt-get install -y --no-install-recommends --fix-missing cmake git
-    python3 -m pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
-    # apt-get install -y --no-install-recommends --fix-missing cmake
-    # python3 -m pip install horovod==${HOROVOD_VERSION}
-  fi 
 fi
 
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
   # Call the framework's container_init.sh, if it exists
   if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+      yum update -y
+      yum install -y numactl
+    else
      ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+    fi
   fi
   # Call the model specific container_init.sh, if it exists
   if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
@@ -380,7 +429,11 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    apt-get update && apt-get install -y unzip wget
+    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+      yum update -y && yum install -y unzip wget
+    else
+      apt-get update && apt-get install -y unzip wget
+    fi
     wget -O protobuf.zip ${install_location}
     unzip -o protobuf.zip
     rm protobuf.zip
