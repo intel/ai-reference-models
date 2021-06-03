@@ -11,8 +11,13 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
   <tr>
     <td>
-      <p>Install numactl and activate the TensorFlow image recognition conda environment:</p>
-      <pre>apt-get update && apt-get install numactl<br>conda activate tensorflow_image_recognition</pre>
+      <p>To run using AI Kit you will need:</p>
+      <ul>
+        <li>numactl
+        <li>wget
+        <li>Activate the tensorflow conda environment
+        <pre>conda activate tensorflow</pre>
+      </ul>
     </td>
     <td>
       <p>To run without AI Kit you will need:</p>
