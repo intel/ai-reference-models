@@ -35,18 +35,22 @@ if [ ! -f "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-# Untar pretrained model files
-pretrained_model="ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb"
-if [ ! -f "${pretrained_model}" ]; then
-    echo "Following ${pretrained_model} frozen graph file does not exists"
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  # If no PRETRAINED_MODEL var is set, we are probably running in a workload container
+  # or model package, so check for the frozen graph file
+  pretrained_model="ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb"
+  if [ ! -f "${pretrained_model}" ]; then
+    echo "The pretrained model could not be found at: ${pretrained_model}."
+    echo "Set the PRETRAINED_MODEL environment variable to the path to the frozen graph file."
     exit 1
+  fi
+  PRETRAINED_MODEL="${MODEL_DIR}/${pretrained_model}"
 fi
-FROZEN_GRAPH="$(pwd)/${pretrained_model}"
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
-    --in-graph ${FROZEN_GRAPH} \
+    --in-graph ${PRETRAINED_MODEL} \
     --output-dir ${OUTPUT_DIR} \
     --model-name ssd-mobilenet \
     --framework tensorflow \

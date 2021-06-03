@@ -21,6 +21,7 @@
 import glob
 import json
 import os
+import sys
 import time
 
 
@@ -218,6 +219,7 @@ class BaseModelInitializer(object):
 
         # Run the multi-instance command
         print("\nMulti-instance run:\n" + multi_instance_command)
+        sys.stdout.flush()
         os.system(multi_instance_command)
 
         # Wait to ensure that log files have been written
