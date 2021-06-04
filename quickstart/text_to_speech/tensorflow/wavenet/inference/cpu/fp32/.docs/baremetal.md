@@ -25,8 +25,8 @@ Set environment variables for the path to your `TF_WAVENET_DIR` and an
 [quickstart script](#quick-start-scripts).
 
 ```
-TF_WAVENET_DIR=<tensorflow-wavenet directory>
-OUTPUT_DIR=<directory where log files will be written>
+export TF_WAVENET_DIR=<tensorflow-wavenet directory>
+export OUTPUT_DIR=<directory where log files will be written>
 
 wget <package url>
 tar -xzf <package name>
