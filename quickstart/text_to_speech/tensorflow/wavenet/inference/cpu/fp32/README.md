@@ -17,11 +17,7 @@ Intel-optimized TensorFlow.
 
 | Script name | Description |
 |-------------|-------------|
-| [fp32_inference.sh](fp32_inference.sh) | Runs inference with a pretrained model |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
+| [fp32_inference.sh](/quickstart/text_to_speech/tensorflow/wavenet/inference/cpu/fp32/fp32_inference.sh) | Runs inference with a pretrained model |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -50,8 +46,8 @@ Set environment variables for the path to your `TF_WAVENET_DIR` and an
 [quickstart script](#quick-start-scripts).
 
 ```
-TF_WAVENET_DIR=<tensorflow-wavenet directory>
-OUTPUT_DIR=<directory where log files will be written>
+export TF_WAVENET_DIR=<tensorflow-wavenet directory>
+export OUTPUT_DIR=<directory where log files will be written>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/wavenet-fp32-inference.tar.gz
 tar -xzf wavenet-fp32-inference.tar.gz
