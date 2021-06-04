@@ -3,8 +3,4 @@
 
 | Script name | Description |
 |-------------|-------------|
-| [fp32_inference.sh](fp32_inference.sh) | Runs inference with a pretrained model |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
+| [fp32_inference.sh](/quickstart/text_to_speech/tensorflow/wavenet/inference/cpu/fp32/fp32_inference.sh) | Runs inference with a pretrained model |
