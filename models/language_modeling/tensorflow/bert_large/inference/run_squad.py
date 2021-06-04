@@ -191,6 +191,13 @@ flags.DEFINE_bool("experimental_gelu", False,
 flags.DEFINE_bool("optimized_softmax", False,
     "[Optional] If true, use optimized softmax op in model.")
 
+flags.DEFINE_integer("warmup_steps", 10,
+    "[Optional] Number of warmup steps.")
+
+flags.DEFINE_integer("steps", 30,
+    "[Optional] Number of benchmark steps.")
+
+
 class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
   def __init__(self):
     pass
@@ -1386,17 +1393,18 @@ def main(_):
     # If running eval on the TPU, you will need to specify the number of
     # steps.
     tf.compat.v1.disable_eager_execution()
+    warmup_steps = FLAGS.warmup_steps
+    total_steps = FLAGS.warmup_steps + FLAGS.steps
     if FLAGS.mode == 'benchmark':
       hooks = [UpdateGlobalStepHook(),
-               StopAtStepHook(40)]
+               StopAtStepHook(total_steps)]
     elif FLAGS.mode == 'profile':
       hooks = [UpdateGlobalStepHook(),
-               StopAtStepHook(40),
+               StopAtStepHook(total_steps),
                ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
     else:
       hooks = []
-    warm_up_steps = 20
-    threshold_examples = warm_up_steps * FLAGS.predict_batch_size
+    num_warmup_examples = warmup_steps * FLAGS.predict_batch_size
     num_processed_examples = 0
     all_results = []
     for result in estimator.predict(
@@ -1406,7 +1414,7 @@ def main(_):
       if FLAGS.mode in ('benchmark', 'profile'):
         if num_processed_examples % 10 == 0:
           tf.compat.v1.logging.info("Processed #examples: %d" % (num_processed_examples))
-        if num_processed_examples == (threshold_examples):
+        if num_processed_examples == (num_warmup_examples):
           start = time.time()
       elif FLAGS.mode == 'accuracy':
         if len(all_results) % 10 == 0:
@@ -1421,10 +1429,14 @@ def main(_):
                 end_logits=end_logits))
     if FLAGS.mode in ('benchmark', 'profile'):
       end = time.time()
-      print("Elapsed time: %f num processed examples: %d threshold_examples: %d"
-                                            % (end-start, num_processed_examples, threshold_examples))
-      print("throughput((num_processed_examples-threshold_examples)/Elapsedtime): %3.2f"
-                                           % (float(num_processed_examples-threshold_examples)/float(end-start)))
+      num_benchmark_examples = num_processed_examples-num_warmup_examples
+      benchmark_duration = end - start
+      print("Total examples: %d, Warmup examples: %d, "
+            "Benchmark examples: %d, Benchmark time: %f secs"
+            % (num_processed_examples, num_warmup_examples,
+            num_benchmark_examples, benchmark_duration))
+      print("Throughput: %3.2f"
+            % (float(num_benchmark_examples)/float(benchmark_duration)))
     if FLAGS.mode == 'accuracy':
       output_prediction_file = os.path.join(FLAGS.output_dir, "predictions.json")
       output_nbest_file = os.path.join(FLAGS.output_dir, "nbest_predictions.json")
