@@ -60,6 +60,9 @@ def download_model(input_graph):
     if not os.path.isfile(OTHER_FILES):
         os.system('wget -O fold_1.zip https://zenodo.org/record/3904106/files/fold_1.zip?download=1;')
         zip_file = "fold_1.zip"
+        #legacy bitmap issue https://bugzilla.redhat.com/show_bug.cgi?id=1802689
+        if (not os.path.isfile(OTHER_FILES)):
+            os.system('curl -O --output fold_1.zip https://zenodo.org/record/3904106/files/fold_1.zip')
         try:
             with zipfile.ZipFile(zip_file) as z:
                 z.extractall()
