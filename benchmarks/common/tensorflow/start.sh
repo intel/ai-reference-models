@@ -340,6 +340,10 @@ function bert_options() {
     CMD=" ${CMD} --warmup-steps=${warmup_steps}"
   fi
 
+  if [[ -n "${steps}" && ${steps} != "" ]]; then
+    CMD=" ${CMD} --steps=${steps}"
+  fi
+
   if [[ -n "${vocab_file}" && ${vocab_file} != "" ]]; then
     CMD=" ${CMD} --vocab-file=${vocab_file}" 
   fi
