@@ -549,32 +549,6 @@ function 3d_unet() {
   fi
 }
 
-# MLPerf 3D UNet model
-function 3d_unet_mlperf() {
-  # For accuracy, dataset location is required
-  # if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
-  #   echo "No dataset directory specified, accuracy cannot be calculated."
-  #   exit 1
-  # fi
-  CMD="${CMD} $(add_steps_args)"
-  if [ ${MODE} == "inference" ]; then
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        echo "Installing requirements"
-        python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
-      fi
-      export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/${PRECISION}
-      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    else
-      echo "${PRECISION} ${MODE} is not supported for ${MODEL_NAME}"
-      exit 1
-    fi
-  else
-    echo "${MODE} is not supported for ${MODEL_NAME}"
-    exit 1
-  fi
-}
-
 #BERT model
 function bert() {
    if [ ${PRECISION} == "fp32" ]; then
@@ -1503,8 +1477,6 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "3d_unet" ]; then
   3d_unet
-elif [ ${MODEL_NAME} == "3d_unet_mlperf" ]; then
-  3d_unet_mlperf
 elif [ ${MODEL_NAME} == "bert" ]; then
   bert
 elif [ ${MODEL_NAME} == "dcgan" ]; then
