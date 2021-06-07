@@ -575,41 +575,6 @@ function bert() {
   fi
 }
 
-function dien_options() {
-  if [[ -n "${exact_max_length}" && ${exact_max_length} != "" ]]; then
-    CMD=" ${CMD} --exact-max-length=${exact_max_length}"
-  fi
-}
-
-# DIEN model
-function dien() {
-  if [ ${MODE} == "inference" ]; then
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/DIEN/requirements.txt
-      fi
-      dien_options
-      CMD=${CMD} run_model
-
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
-    fi
-  elif [ ${MODE} == "training" ]; then
-    if [ ${PRECISION} == "fp32" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/DIEN/requirements.txt
-      fi
-      dien_options
-      CMD=${CMD} run_model
-
-    else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
-      exit 1
-    fi
-  fi
-}
-
 # DCGAN model
 function dcgan() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -1531,8 +1496,6 @@ elif [ ${MODEL_NAME} == "bert_base" ]; then
   bert_base
 elif [ ${MODEL_NAME} == "bert_large" ]; then
   bert_large
-elif [ ${MODEL_NAME} == "dien" ]; then
-  dien
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
