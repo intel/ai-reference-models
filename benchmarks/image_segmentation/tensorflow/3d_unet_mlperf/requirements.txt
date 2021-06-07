@@ -8,9 +8,10 @@ nnunet
 torch
 tqdm
 dicom2nifti
-scikit-image
+scikit-image>=0.14
 medpy
 scipy
-batchgenerators
+batchgenerators>=0.20.0
 sklearn
 pandas
+nibabel
