@@ -249,7 +249,7 @@ def inference(data_location,
         print("batch_size ", batch_size)
         print("niters ", niters)
         print("Total recommendations: %d" % (num_iters * batch_size))
-        print("Approximate accelerator time in seconds is %.3f" % (approximate_accelerator_time/niters))
+        print("Approximate accelerator time in seconds is %.3f" % approximate_accelerator_time)
         print("Approximate accelerator performance in recommendations/second is %.3f" %
               (float(niters * num_iters * batch_size) / float(approximate_accelerator_time)))
 
