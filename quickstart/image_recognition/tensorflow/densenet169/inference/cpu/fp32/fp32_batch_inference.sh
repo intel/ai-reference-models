@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -33,15 +35,15 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="$(pwd)/densenet169_fp32_pretrained_model.pb"
+PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/densenet169_fp32_pretrained_model.pb}
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=densenet169 \
          --precision=fp32 \
          --mode=inference \
          --framework tensorflow \
-         --in-graph ${MODEL_FILE} \
+         --in-graph ${PRETRAINED_MODEL} \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=100 \

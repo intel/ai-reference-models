@@ -12,11 +12,11 @@ the cloned repo will be passed as the model source directory when
 running the launch script.
 
 ```
-$ git clone https://github.com/ibab/tensorflow-wavenet.git
-$ cd tensorflow-wavenet/
+git clone https://github.com/ibab/tensorflow-wavenet.git
+cd tensorflow-wavenet/
 
-$ git fetch origin pull/352/head:cpu_optimized
-$ git checkout cpu_optimized
+git fetch origin pull/352/head:cpu_optimized
+git checkout cpu_optimized
 ```
 
 After installing the prerequisites, download and untar the model package.
@@ -25,8 +25,8 @@ Set environment variables for the path to your `TF_WAVENET_DIR` and an
 [quickstart script](#quick-start-scripts).
 
 ```
-TF_WAVENET_DIR=<tensorflow-wavenet directory>
-OUTPUT_DIR=<directory where log files will be written>
+export TF_WAVENET_DIR=<tensorflow-wavenet directory>
+export OUTPUT_DIR=<directory where log files will be written>
 
 wget <package url>
 tar -xzf <package name>

@@ -30,15 +30,15 @@ popd
 
 Download and extract the model package, which includes the pretrained
 model and scripts needed to run inference. Set environment variables
-for the path to your `DATASET_DIR` (where the coco TF records file is
-located) and an `OUTPUT_DIR` where log files will be written, then run a
-[quickstart script](#quick-start-scripts).
+for the path to your `DATASET_DIR` (directory where the `coco_val.record`
+TF records file is located) and an `OUTPUT_DIR` where log files will be
+written, then run a [quickstart script](#quick-start-scripts).
 ```
 wget <package url>
 tar -xzf <package name>
 cd <package dir>
 
-export DATASET_DIR=<path to the coco dataset>
+export DATASET_DIR=<path to the directory that contains the coco_val.record file>
 export OUTPUT_DIR=<directory where log files will be written>
 
 ./quickstart/<script name>.sh

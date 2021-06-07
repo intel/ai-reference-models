@@ -19,10 +19,10 @@ To run on bare metal, the following prerequisites must be installed in your envi
     # We going to use a branch based on older version of the tensorflow model repo.
     # Since, we need to to use logs utils on that branch, which were removed from 
     # the latest master
-    $ git clone https://github.com/tensorflow/models.git tensorflow-models
-    $ cd tensorflow-models
-    $ git fetch origin pull/7461/head:wide-deep-tf2  
-    $ git checkout wide-deep-tf2 
+    git clone https://github.com/tensorflow/models.git tensorflow-models
+    cd tensorflow-models
+    git fetch origin pull/7461/head:wide-deep-tf2
+    git checkout wide-deep-tf2
     ```
 
 3. Once your environment is setup, navigate back to the directory that contains the <model name> <precision> <mode>
@@ -31,7 +31,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
     ```
     DATASET_DIR=<path to the Wide & Deep dataset directory>
     OUTPUT_DIR=<directory where log files will be written>
-    TF_MODEL_SOURCE_DIR=<path to tensorflow-models>
+    TF_MODELS_DIR=<path to tensorflow-models>
 
     ./quickstart/<script name>.sh
     ```

@@ -23,7 +23,7 @@ Download and preprocess the COCO validation images using the
 [instructions here](/datasets/coco). After the script to convert the raw
 images to the TF records file completes, rename the tf_records file:
 ```
-$ mv ${OUTPUT_DIR}/coco_val.record ${OUTPUT_DIR}/validation-00000-of-00001
+mv ${OUTPUT_DIR}/coco_val.record ${OUTPUT_DIR}/validation-00000-of-00001
 ```
 
 Set the `DATASET_DIR` to the folder that has the `validation-00000-of-00001`
@@ -84,8 +84,8 @@ cd ..
 # Clone the TensorFlow benchmarks repo
 git clone --single-branch https://github.com/tensorflow/benchmarks.git ssd-resnet-benchmarks
 cd ssd-resnet-benchmarks
-$ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
-$ cd ..
+git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
+cd ..
 ```
 
 After installing the prerequisites and cloning the required repositories,

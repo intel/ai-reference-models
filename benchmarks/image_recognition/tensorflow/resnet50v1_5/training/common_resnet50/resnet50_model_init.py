@@ -91,7 +91,7 @@ class ResNet50ModelInitializer(BaseModelInitializer):
             " --epochs_between_evals=" + str(self.args.epochsbtwevals) + \
             " --inter_op_parallelism_threads " + str(self.args.num_inter_threads) + \
             " --intra_op_parallelism_threads " + str(self.args.num_intra_threads) + \
-            " --version 1 --resnet_size 50"
+            " --version 1 --resnet_size 50 --data_format=channels_last"
 
         # if the data location and checkpoint directory is not empty, then include the arg
         if self.args.data_location and os.listdir(self.args.data_location):

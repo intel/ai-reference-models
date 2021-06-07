@@ -51,21 +51,25 @@ fi
 
 # If a path to the pretrained model dir was not provided, unzip the pretrained
 # model from the model package
-if [[ -z ${PRETRAINED_MODEL_DIR} ]]; then
+if [[ -z ${PRETRAINED_MODEL} ]]; then
   tar -xvf ${MODEL_DIR}/faster_rcnn_resnet50_fp32_coco_pretrained_model.tar.gz
-  PRETRAINED_MODEL_DIR=${MODEL_DIR}/faster_rcnn_resnet50_fp32_coco
-
-  # Replace paths in the pipeline config file
-  sed -i.bak 128s+/checkpoints+$PRETRAINED_MODEL_DIR+ ${PRETRAINED_MODEL_DIR}/pipeline.config
-  sed -i.bak 132s+/dataset+$DATASET_DIR+ ${PRETRAINED_MODEL_DIR}/pipeline.config
+  PRETRAINED_MODEL=${MODEL_DIR}/faster_rcnn_resnet50_fp32_coco
 fi
 
-if [[ ! ${PRETRAINED_MODEL_DIR} ]]; then
-  echo "The pretrained model directory (${PRETRAINED_MODEL_DIR}) does not exist."
+if [[ ! -d ${PRETRAINED_MODEL} ]]; then
+  echo "The pretrained model directory (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
 
-source "$(dirname $0)/common/utils.sh"
+# Replace paths in the pipeline config file for line 128 (pretrained model) and 132 (dataset dir)
+line_128=$(sed -n '128p' ${PRETRAINED_MODEL}/pipeline.config)
+new_line_128="  label_map_path: \"$PRETRAINED_MODEL/mscoco_label_map.pbtxt\""
+sed -i.bak "128s+$line_128+$new_line_128+" ${PRETRAINED_MODEL}/pipeline.config
+line_132=$(sed -n '132p' ${PRETRAINED_MODEL}/pipeline.config)
+new_line_132="    input_path: \"$DATASET_DIR/coco_val.record\""
+sed -i.bak "132s+$line_132+$new_line_132+" ${PRETRAINED_MODEL}/pipeline.config
+
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
@@ -75,6 +79,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --precision fp32 \
   --mode inference \
   --socket-id 0 \
-  --checkpoint $PRETRAINED_MODEL_DIR \
+  --checkpoint $PRETRAINED_MODEL \
   $@ \
   -- config_file=pipeline.config

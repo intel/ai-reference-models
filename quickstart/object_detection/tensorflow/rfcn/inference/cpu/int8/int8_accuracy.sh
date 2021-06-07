@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -34,17 +36,19 @@ if [ -z "${TF_MODELS_DIR}" ]; then
 fi
 
 # the pretrained model
-FROZEN_GRAPH="$(pwd)/rfcn_resnet101_int8_coco_pretrained_model.pb"
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/rfcn_resnet101_int8_coco_pretrained_model.pb"
+fi
 
-source "$(dirname $0)/common/utils.sh"
-_command python benchmarks/launch_benchmark.py \
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision int8 \
     --framework tensorflow \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \
-    --in-graph ${FROZEN_GRAPH} \
+    --in-graph ${PRETRAINED_MODEL} \
     --batch-size 1 \
     --accuracy-only \
     --output-dir ${OUTPUT_DIR} \

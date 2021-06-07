@@ -45,19 +45,14 @@ that directory when running bert fine tuning using the SQuAD data.
 
 | Script name | Description |
 |-------------|-------------|
-| [`bfloat16_classifier_training.sh`](bfloat16_classifier_training.sh) | This script fine-tunes the bert base model on the Microsoft Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples. Download the [bert base pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [GLUE data](#glue-data). |
-| [`bfloat16_squad_training.sh`](bfloat16_squad_training.sh) | This script fine-tunes bert using SQuAD data. Download the [bert large pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [squad data files](#squad-data). |
-| [`bfloat16_squad_training_demo.sh`](bfloat16_squad_training_demo.sh) | This script does a short demo run of 0.01 epochs using SQuAD data. |
-
-These quickstart scripts can be run the following environments:
-* [Bare metal](#bare-metal)
-* [Docker](#docker)
-
+| [`bfloat16_classifier_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_classifier_training.sh) | This script fine-tunes the bert base model on the Microsoft Research Paraphrase Corpus (MRPC) corpus, which only contains 3,600 examples. Download the [bert base uncased 12-layer, 768-hidden pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [GLUE data](#glue-data). |
+| [`bfloat16_squad_training.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_squad_training.sh) | This script fine-tunes bert using SQuAD data. Download the [bert large uncased (whole word masking) pretrained model](https://github.com/google-research/bert#pre-trained-models) and set the `CHECKPOINT_DIR` to that directory. The `DATASET_DIR` should point to the [squad data files](#squad-data). |
+| [`bfloat16_squad_training_demo.sh`](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/bfloat16_squad_training_demo.sh) | This script does a short demo run of 0.01 epochs using the `mini-dev-v1.1.json` file instead of the full SQuAD dataset. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
-To run on bare metal, the following prerequisites must be installed in your enviornment:
+To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
 * [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
@@ -66,7 +61,9 @@ To run on bare metal, the following prerequisites must be installed in your envi
 Once the above dependencies have been installed, download and untar the model
 package, set environment variables, and then run a quickstart script. See the
 [datasets](#datasets) and [list of quickstart scripts](#quick-start-scripts) for more
-details on the different options.
+details on the different options. If switching between running squad and classifier
+training or running classifier training multiple times, use a new empty
+`OUTPUT_DIR` to prevent incompatible checkpoints from getting picked up.
 
 The snippet below shows a quickstart script running with a single instance:
 ```
@@ -130,6 +127,9 @@ The BERT Large BFloat16 training model container includes the scripts and librar
 needed to run BERT Large BFloat16 fine tuning. To run one of the quickstart scripts
 using this container, you'll need to provide volume mounts for the pretrained model,
 dataset, and an output directory where log and checkpoint files will be written.
+If switching between running squad and classifier training or running classifier
+training multiple times, use a new empty `OUTPUT_DIR` to prevent incompatible
+checkpoints from getting picked up.
 
 The snippet below shows a quickstart script running with a single instance:
 ```

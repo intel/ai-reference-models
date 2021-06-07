@@ -1,7 +1,7 @@
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
-To run on bare metal, the following prerequisites must be installed in your enviornment:
+To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
 * [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
@@ -10,7 +10,9 @@ To run on bare metal, the following prerequisites must be installed in your envi
 Once the above dependencies have been installed, download and untar the model
 package, set environment variables, and then run a quickstart script. See the
 [datasets](#datasets) and [list of quickstart scripts](#quick-start-scripts) for more
-details on the different options.
+details on the different options. If switching between running squad and classifier
+training or running classifier training multiple times, use a new empty
+`OUTPUT_DIR` to prevent incompatible checkpoints from getting picked up.
 
 The snippet below shows a quickstart script running with a single instance:
 ```

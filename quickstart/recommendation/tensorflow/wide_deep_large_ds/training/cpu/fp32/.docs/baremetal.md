@@ -6,7 +6,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
 
 Download and untar the model package and then run a
-[quickstart script](#quick-start-scripts) with enviornment variables
+[quickstart script](#quick-start-scripts) with environment variables
 that point to the [dataset](#dataset), a checkpoint directory, and an
 output directory where log files and the saved model will be written.
 

@@ -45,7 +45,7 @@ if [ ! -f "${PRETRAINED_MODEL}" ]; then
   exit 1
 fi
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --precision fp32 \
   --model-name 3d_unet \
