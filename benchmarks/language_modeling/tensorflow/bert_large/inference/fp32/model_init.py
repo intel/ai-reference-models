@@ -75,6 +75,12 @@ class ModelInitializer(BaseModelInitializer):
             "--experimental-gelu", dest="experimental_gelu", default="False")
         arg_parser.add_argument(
             "--optimized-softmax", dest="optimized_softmax", default="True")
+        arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
+                                type=int, default=10,
+                                help="number of warmup steps")
+        arg_parser.add_argument("--steps", dest='steps',
+                                type=int, default=30,
+                                help="number of benchmark steps")
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -144,6 +150,12 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.num_intra_threads:
             model_args += " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)
+
+        if self.args.warmup_steps:
+            model_args += " --warmup_steps=" + str(self.args.warmup_steps)
+
+        if self.args.steps:
+            model_args += " --steps=" + str(self.args.steps)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + model_script + model_args
