@@ -95,7 +95,7 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.accuracy_only:
             self.benchmark_command += " --accuracy-only"
             # set up env vars for running accuracy with real data
-            set_env_var("nnUNet_preprocessed", "build/preprocessed_data_dir")
+            set_env_var("nUNet_preprocessed", "build/preprocessed_data_dir")
             set_env_var("nnUNet_raw_data_base", "build/raw_data")
             set_env_var("DOWNLOAD_DATA_DIR", self.args.data_location)
             set_env_var("RESULTS_FOLDER", "build/result")
