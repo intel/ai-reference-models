@@ -234,9 +234,9 @@ The commands below describe how to use kubectl to see the workflow, pods,
 and log files:
 
 ```
-$ kubectl get wf
-$ kubectl get pods
-$ kubectl logs <pod name> main
+kubectl get wf
+kubectl get pods
+kubectl logs <pod name> main
 ```
 
 ##### TensorFlow Serving Client

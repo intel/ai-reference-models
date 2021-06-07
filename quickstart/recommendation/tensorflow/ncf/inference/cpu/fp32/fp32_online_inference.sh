@@ -41,12 +41,26 @@ echo 'TF_MODELS_DIR='$TF_MODELS_DIR
 # Commenting out a line that causes a crash in the model script
 sed -i.bak 's/atexit.register/# atexit.register/g' ${TF_MODELS_DIR}/official/recommendation/data_async_generation.py
 
-# Unzip pretrained model files
-pretrained_model_dir="pretrained_model/ncf_trained_movielens_1m"
-if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/ncf_fp32_pretrained_model.tar.gz
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  # Unzip pretrained model files
+  pretrained_model_dir="pretrained_model/ncf_trained_movielens_1m"
+  if [ ! -d "${pretrained_model_dir}" ]; then
+    if [ -f pretrained_model/ncf_fp32_pretrained_model.tar.gz ]; then
+      tar -C pretrained_model/ -xvf pretrained_model/ncf_fp32_pretrained_model.tar.gz
+    else
+      echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the pretrained model directory."
+      exit 1
+    fi
+  fi
+  CHECKPOINT_DIR="${MODEL_DIR}/${pretrained_model_dir}"
+else
+  if [ ! -d "${PRETRAINED_MODEL}" ]; then
+    echo "The PRETRAINED_MODEL directory (${PRETRAINED_MODEL}) does not exist."
+    exit 1
+  else
+    CHECKPOINT_DIR=${PRETRAINED_MODEL}
+  fi
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_dirs
@@ -68,7 +82,7 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --checkpoint ${CHECKPOINT_DIR} \
       --data-location ${DATASET_DIR} \

@@ -10,12 +10,12 @@ following modes/precisions:
 repository:
 
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
 ```
 
 3. Navigate to the `benchmarks` directory in your local clone of

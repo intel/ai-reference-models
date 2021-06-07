@@ -56,13 +56,14 @@ if [[ -n $MPI_NUM_PROCESSES ]]; then
   mpi_num_proc_arg="--mpi_num_processes=${MPI_NUM_PROCESSES}"
 fi
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 --model-name=bert_large \
 --precision=bfloat16 \
 --mode=training \
 --framework=tensorflow \
 --batch-size=24 \
+${mpi_num_proc_arg} \
 --output-dir $OUTPUT_DIR \
 $@ \
 -- train_option=SQuAD \

@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -33,23 +35,31 @@ if [ -z "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
-# Untar the pretrained model
-pretrained_model_dir="${OUTPUT_DIR}/pretrained_model/rfcn_resnet101_coco_2018_01_28"
-if [ ! -d "${pretrained_model_dir}" ]; then
-  mkdir -p ${OUTPUT_DIR}/pretrained_model
-  tar -C ${OUTPUT_DIR}/pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  # If the PRETRAINED_MODEL env var is not set, then we are probably running in a workload
+  # container or model package, so check for the tar file and extract it, if needed
+  pretrained_model_dir="${OUTPUT_DIR}/pretrained_model/rfcn_resnet101_coco_2018_01_28"
+  if [ ! -d "${pretrained_model_dir}" ]; then
+    if [[ -f "pretrained_model/rfcn_fp32_model.tar.gz" ]]; then
+      mkdir -p ${OUTPUT_DIR}/pretrained_model
+      tar -C ${OUTPUT_DIR}/pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
+    else
+      echo "The pretrained model was not found. Please set the PRETRAINED_MODEL var to point to the frozen graph file."
+      exit 1
+    fi
+  fi
+  PRETRAINED_MODEL="${pretrained_model_dir}/frozen_inference_graph.pb"
 fi
-FROZEN_GRAPH="${pretrained_model_dir}/frozen_inference_graph.pb"
 
-source "$(dirname $0)/common/utils.sh"
-_command python benchmarks/launch_benchmark.py \
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \
-    --in-graph ${FROZEN_GRAPH} \
+    --in-graph ${PRETRAINED_MODEL} \
     --output-dir ${OUTPUT_DIR} \
     --batch-size 1 \
     --benchmark-only \

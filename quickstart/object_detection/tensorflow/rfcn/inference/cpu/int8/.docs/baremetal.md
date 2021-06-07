@@ -33,7 +33,7 @@ Set environment variables for the TensorFlow Model Garden directory to `TF_MODEL
 
 To run inference with performance metrics:
 ```
-DATASET_DIR=<path to the coco val2017 directory>
+DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
@@ -43,7 +43,7 @@ cd <package name>
 
 To get accuracy metrics:
 ```
-DATASET_DIR=<path to the COCO validation TF record directory>
+DATASET_DIR=<path to the COCO validation TF record file (ex: /home/user/coco_output/coco_val.record)>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 

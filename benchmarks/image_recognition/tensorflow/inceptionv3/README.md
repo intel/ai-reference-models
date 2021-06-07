@@ -18,7 +18,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
 repository:
 
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 This repository includes launch scripts for running an optimized version of the Inception V3 model code.
@@ -35,7 +35,7 @@ requires.
 
 3. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_int8_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_int8_pretrained_model.pb
 ```
 
 4. If you would like to run Inception V3 inference with real data or test for
@@ -197,12 +197,12 @@ Log location outside container: {--output-dir value}/benchmark_inceptionv3_infer
 repository:
 
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
 ```
 
 3. If you would like to run Inception V3 FP32 inference and test for

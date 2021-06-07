@@ -4,13 +4,15 @@ This document has instructions for how to run Transformer Language used in mlper
 Benchmark suits for the following modes/platforms:
 * [FP32 training](#fp32-training-instructions)
 * [Bfloat16 training](#bfloat16-training-instructions)
+* [FP32 inference](#fp32-inference-instructions)
+* [Bfloat16 inference](#bfloat16-inference-instructions)
 
 Detailed information on Benchmark can be found in [mlperf/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
 
 Instructions and scripts for model training and inference for
 other platforms are coming later.
 
-## FP32 Training Instructions
+# <a name="fp32-training-instructions"></a> FP32 Training Instructions
 
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
@@ -223,7 +225,7 @@ RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --us
 Log file location: /tmp/models/benchmarks/common/tensorflow/logs/benchmark_transformer_mlperf_training_fp32_20200820_200237.log
 ```
 
-## Bfloat16 Training Instructions
+## <a name="bfloat16-training-instructions"></a> Bfloat16 Training Instructions
 
 1. Clone this [intelai/models](https://github.com/IntelAI/models)
 repository:
@@ -367,7 +369,6 @@ in general the num-intra-threads is equal to "available cores per socket - 2".
 
 The transformer model related parameters is appended after "-- "
 the num-intra-threads is equal to available cores - 2. 
-The transformer model related parameters is appended after "-- "
 
 4.  The log file is saved to the
 `models/benchmarks/common/tensorflow/logs` directory. Below are
@@ -376,65 +377,162 @@ different configs.
 
 Example log tail when running training without saving checkpoints and not doing the evaluations:
 ```
-I0820 22:23:04.168998 139758652872512 basic_session_run_hooks.py:260] loss = 8.073875 (631.692 sec)
-INFO:tensorflow:Loss for final step: 7.7058005.
-I0820 22:33:17.025216 139758652872512 estimator.py:350] Loss for final step: 7.7058005.
-:::MLPv0.5.0 transformer 1597962797.026246309 (transformer/transformer_main.py:353) eval_start
-I0820 22:33:17.026297 139758652872512 mlperf_log.py:134] :::MLPv0.5.0 transformer 1597962797.026246309 (transformer/transformer_main.py:353) eval_start
-:::MLPv0.5.0 transformer 1597962797.026616573 (transformer/transformer_main.py:369) eval_stop
-I0820 22:33:17.026626 139758652872512 mlperf_log.py:134] :::MLPv0.5.0 transformer 1597962797.026616573 (transformer/transformer_main.py:369) eval_stop
-:::MLPv0.5.0 transformer 1597962797.026885271 (transformer/transformer_main.py:453) run_stop
-I0820 22:33:17.026893 139758652872512 mlperf_log.py:134] :::MLPv0.5.0 transformer 1597962797.026885271 (transformer/transformer_main.py:453) run_stop
-:::MLPv0.5.0 transformer 1597962797.027143478 (transformer/transformer_main.py:454) run_final
-I0820 22:33:17.027151 139758652872512 mlperf_log.py:134] :::MLPv0.5.0 transformer 1597962797.027143478 (transformer/transformer_main.py:454) run_final
-num_inter_threads: 1
-num_intra_threads: 28
-Received these standard args: Namespace(accuracy_only=False, backbone_model=None, batch_size=-1, benchmark_dir='/workspace/benchmarks', benchmark_only=True, bleu_ref=None, bleu_source=None, bleu_threshold=None, checkpoint=None, data_location='/dataset', data_num_inter_threads=None, data_num_intra_threads=None, disable_tcmalloc=True, do_eval='No', epochs_between_eval=1, experimental_gelu=False, framework='tensorflow', input_graph=None, intelai_models='/workspace/intelai_models', learning_rate=2, mode='training', model_args=[], model_name='transformer_mlperf', model_source_dir='/workspace/models', mpi=None, mpi_hostnames=None, num_cores=-1, num_cpu_cores=4, num_instances=1, num_inter_threads=1, num_intra_threads=28, num_mpi=1, num_train_steps=1, optimized_softmax=True, output_dir='/workspace/benchmarks/common/tensorflow/logs', output_results=False, params='big', precision='bfloat16', print_iter=50, random_seed=11, save_checkpoints='No', save_profile='', socket_id=0, static_batch='No', steps_between_eval=200, tcmalloc_large_alloc_report_threshold=2147483648, tf_serving_version='master', train_epochs=None, train_steps=200, use_case='language_translation', verbose=True)
-Received these custom args: ['--random_seed=11', '--params=big', '--train_steps=200', '--steps_between_eval=200', '--do_eval=No', '--save_checkpoints=No', '--print_iter=50', '--save_profile=']
-Current directory: /workspace/benchmarks
-Running: numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/training/bfloat16/transformer/transformer_main.py --data_dir=/dataset --random_seed=11 --params=big --train_steps=200 --steps_between_eval=200 --do_eval=No --save_checkpoints=No --save_profile= --print_iter=50 --inter_op_parallelism_threads=1 --intra_op_parallelism_threads=28 --learning_rate=2 --static_batch=No
-PYTHONPATH: :/workspace/intelai_models_common:/workspace/intelai_models:/workspace/benchmarks/common/tensorflow:/workspace/benchmarks
-RUNCMD: python common/tensorflow/run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=transformer_mlperf --precision=bfloat16 --mode=training --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --num-train-steps=1  --benchmark-only  --verbose --model-source-dir=/workspace/models --data-location=/dataset --disable-tcmalloc=True --random_seed=11 --params=big --train_steps=200 --steps_between_eval=200 --do_eval=No --save_checkpoints=No
-    --print_iter=50 --save_profile=
-Log file location: /tmp/models/benchmarks/common/tensorflow/logs/benchmark_transformer_mlperf_training_bfloat16_20200820_214732.log
+INFO:tensorflow:loss = 9.804764, step = 0
+I0430 15:43:41.658226 140067518572352 basic_session_run_hooks.py:262] loss = 9.804764, step = 0
+INFO:tensorflow:loss = 9.804764
+I0430 15:43:41.658570 140067518572352 basic_session_run_hooks.py:262] loss = 9.804764
+INFO:tensorflow:Batch [10]:  last 10 steps exp/sec = 1777.54, completed 10/50 warmup steps
+I0430 15:44:10.461924 140067518572352 hooks.py:117] Batch [10]:  last 10 steps exp/sec = 1777.54, completed 10/50 warmup steps
+INFO:tensorflow:loss = 9.741728 (28.804 sec)
+I0430 15:44:10.462378 140067518572352 basic_session_run_hooks.py:260] loss = 9.741728 (28.804 sec)
+INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1910.88, completed 20/50 warmup steps
+I0430 15:44:37.255764 140067518572352 hooks.py:117] Batch [20]:  last 10 steps exp/sec = 1910.88, completed 20/50 warmup steps
+INFO:tensorflow:loss = 9.638916 (26.794 sec)
+I0430 15:44:37.255995 140067518572352 basic_session_run_hooks.py:260] loss = 9.638916 (26.794 sec)
+INFO:tensorflow:Batch [30]:  last 10 steps exp/sec = 1898.28, completed 30/50 warmup steps
+I0430 15:45:04.227502 140067518572352 hooks.py:117] Batch [30]:  last 10 steps exp/sec = 1898.28, completed 30/50 warmup steps
+INFO:tensorflow:loss = 9.4281845 (26.972 sec)
+I0430 15:45:04.227731 140067518572352 basic_session_run_hooks.py:260] loss = 9.4281845 (26.972 sec)
+INFO:tensorflow:Batch [40]:  last 10 steps exp/sec = 1869.21, completed 40/50 warmup steps
+I0430 15:45:31.618821 140067518572352 hooks.py:117] Batch [40]:  last 10 steps exp/sec = 1869.21, completed 40/50 warmup steps
+INFO:tensorflow:loss = 9.169721 (27.392 sec)
+I0430 15:45:31.619261 140067518572352 basic_session_run_hooks.py:260] loss = 9.169721 (27.392 sec)
+INFO:tensorflow:Batch [50]:  last 10 steps exp/sec = 1943.57, completed 50/50 warmup steps
+I0430 15:45:57.962067 140067518572352 hooks.py:117] Batch [50]:  last 10 steps exp/sec = 1943.57, completed 50/50 warmup steps
 ```
 
 Multi-instance sample log:
 Running 2 instances only. Both instances printing loss values.
 
 ```
-INFO:tensorflow:loss = 10.301315, step = 0
-I0820 21:13:46.964926 140325266102080 basic_session_run_hooks.py:262] loss = 10.301315, step = 0
-INFO:tensorflow:loss = 10.301315
-I0820 21:13:46.965517 140325266102080 basic_session_run_hooks.py:262] loss = 10.301315
-INFO:tensorflow:loss = 10.317959, step = 0
-I0820 21:13:46.974031 140221457520448 basic_session_run_hooks.py:262] loss = 10.317959, step = 0
-INFO:tensorflow:loss = 10.317959
-I0820 21:13:46.974589 140221457520448 basic_session_run_hooks.py:262] loss = 10.317959
-INFO:tensorflow:Batch [50]:  last 50 steps exp/sec = 372.306, completed 50/50 wamrup steps
-I0820 21:25:14.571191 140325266102080 hooks.py:117] Batch [50]:  last 50 steps exp/sec = 372.306, completed 50/50 wamrup steps
-INFO:tensorflow:loss = 9.06568 (687.606 sec)
-I0820 21:25:14.571795 140325266102080 basic_session_run_hooks.py:260] loss = 9.06568 (687.606 sec)
-INFO:tensorflow:Batch [50]:  last 50 steps exp/sec = 372.309, completed 50/50 wamrup steps
-I0820 21:25:14.574600 140221457520448 hooks.py:117] Batch [50]:  last 50 steps exp/sec = 372.309, completed 50/50 wamrup steps
-INFO:tensorflow:loss = 8.979176 (687.601 sec)
-I0820 21:25:14.575186 140221457520448 basic_session_run_hooks.py:260] loss = 8.979176 (687.601 sec)
-:::MLPv0.5.0 [08c275d5-fd28-41be-bb3c-948dd6a7c8d3][1597959384.6937411][3.08816198e-06]
-:::MLPv0.5.0 [259380ab-382d-40e9-8971-1e0fd1fd5006][1597959384.701951][3.08816198e-06]
-INFO:tensorflow:global_step/sec: 0.0728256
-I0820 21:36:40.117180 140221457520448 basic_session_run_hooks.py:702] global_step/sec: 0.0728256
-INFO:tensorflow:Batch [100]:  last 50 steps exp/sec = 373.426, total average exp/sec = 373.426
-I0820 21:36:40.118289 140221457520448 hooks.py:113] Batch [100]:  last 50 steps exp/sec = 373.426, total average exp/sec = 373.426
-INFO:tensorflow:loss = 8.15804, step = 100 (1373.145 sec)
-I0820 21:36:40.118491 140221457520448 basic_session_run_hooks.py:260] loss = 8.15804, step = 100 (1373.145 sec)
-INFO:tensorflow:loss = 8.15804 (685.543 sec)
-I0820 21:36:40.118592 140221457520448 basic_session_run_hooks.py:260] loss = 8.15804 (685.543 sec)
-INFO:tensorflow:global_step/sec: 0.072825
-I0820 21:36:40.120503 140325266102080 basic_session_run_hooks.py:702] global_step/sec: 0.072825
-INFO:tensorflow:Batch [100]:  last 50 steps exp/sec = 373.423, total average exp/sec = 373.423
-I0820 21:36:40.121415 140325266102080 hooks.py:113] Batch [100]:  last 50 steps exp/sec = 373.423, total average exp/sec = 373.423
-INFO:tensorflow:loss = 8.131919, step = 100 (1373.157 sec)
-I0820 21:36:40.121570 140325266102080 basic_session_run_hooks.py:260] loss = 8.131919, step = 100 (1373.157 sec)
-INFO:tensorflow:loss = 8.131919 (685.550 sec)
-I0820 21:36:40.121664 140325266102080 basic_session_run_hooks.py:260] loss = 8.131919 (685.550 sec)
+INFO:tensorflow:loss = 9.881177, step = 0
+I0430 14:29:19.457713 140147178080064 basic_session_run_hooks.py:262] loss = 9.881177, step = 0
+INFO:tensorflow:loss = 9.881177
+I0430 14:29:19.458147 140147178080064 basic_session_run_hooks.py:262] loss = 9.881177
+INFO:tensorflow:loss = 9.916411, step = 0
+I0430 14:29:19.486985 140684161857344 basic_session_run_hooks.py:262] loss = 9.916411, step = 0
+INFO:tensorflow:loss = 9.916411
+I0430 14:29:19.487454 140684161857344 basic_session_run_hooks.py:262] loss = 9.916411
+INFO:tensorflow:Batch [10]:  last 10 steps exp/sec = 1368.86, completed 10/50 warmup steps
+I0430 14:29:56.861132 140147178080064 hooks.py:117] Batch [10]:  last 10 steps exp/sec = 1368.86, completed 10/50 warmup steps
+INFO:tensorflow:loss = 9.821904 (37.403 sec)
+I0430 14:29:56.861575 140147178080064 basic_session_run_hooks.py:260] loss = 9.821904 (37.403 sec)
+INFO:tensorflow:Batch [10]:  last 10 steps exp/sec = 1369.8, completed 10/50 warmup steps
+I0430 14:29:56.864749 140684161857344 hooks.py:117] Batch [10]:  last 10 steps exp/sec = 1369.8, completed 10/50 warmup steps
+INFO:tensorflow:loss = 9.83847 (37.378 sec)
+I0430 14:29:56.865195 140684161857344 basic_session_run_hooks.py:260] loss = 9.83847 (37.378 sec)
+INFO:tensorflow:Batch [20]:  last 10 steps exp/sec = 1364.68, completed 20/50 warmup steps
+I0430 14:30:34.378897 140147178080064 hooks.py:117] Batch [20]:  last 10 steps exp/sec = 1364.68, completed 20/50 warmup steps
+INFO:tensorflow:loss = 9.549045 (37.518 sec)
 ```
+
+# <a name="fp32-inference-instructions"></a> FP32 Inference Instructions
+
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
+repository:
+
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+2. Obtain the dataset.
+Decide the problem you want to run to get the appropriate dataset.
+We will get the training data of it as an example:
+
+    Download dataset for computing BLEU score reported in the paper
+    ```
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ mkdir $DATA_DIR && cd $DATA_DIR
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    ```
+
+3. Next, navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
+The `launch_benchmark.py` script in the `benchmarks` directory is
+used for starting a model run in a optimized TensorFlow docker
+container. It has arguments to specify which model, framework, mode,
+precision, and docker image to use, along with your path to the dataset location (from step 2).
+
+
+Before running inference, users should have the model fully trained and have saved checkpoints ready at the path $CHECKPOINT_DIR:
+
+```
+python launch_benchmark.py \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --model-name transformer_mlperf \
+    --batch-size 64 \
+    -i 0 --data-location $DATA_DIR \
+    --checkpoint $CHECKPOINT_DIR \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --verbose \
+    -- file=newstest2014.en  file_out=translate.txt reference=newstest2014.de
+```
+4.  The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
+The performance and accuracy in the the log output when the benchmarking completes should look
+something like this, the real throughput and inferencing time varies:
+```
+	Total inferencing time: xxx
+	Throughput: xxx  sentences/second
+	Case-insensitive results: 26.694846153259277
+	Case-sensitive results: 26.182371377944946
+```
+
+
+## <a name="bfloat16-inference-instructions"></a> Bfloat16 Inference Instructions
+
+1. Clone this [intelai/models](https://github.com/IntelAI/models)
+repository:
+
+```
+$ git clone https://github.com/IntelAI/models.git
+```
+
+2. Obtain the dataset.
+Decide the problem you want to run to get the appropriate dataset.
+We will get the training data of it as an example:
+
+    Download dataset for computing BLEU score reported in the paper
+    ```
+    $ export DATA_DIR=/home/<user>/transformer_data
+    $ mkdir $DATA_DIR && cd $DATA_DIR
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
+    $ wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
+    ```
+    
+3. Next, navigate to the `benchmarks` directory in your local clone of
+the [intelai/models](https://github.com/IntelAI/models) repo (from step 1).
+The `launch_benchmark.py` script in the `benchmarks` directory is
+used for starting a model run in a optimized TensorFlow docker
+container. It has arguments to specify which model, framework, mode,
+precision, and docker image to use, along with your path to the dataset location (from step 2).
+
+
+Before running inference, users should have the model fully trained and have saved checkpoints ready at the path $CHECKPOINT_DIR:
+
+```
+python launch_benchmark.py \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --model-name transformer_mlperf \
+    --batch-size 64 \
+    -i 0 --data-location $DATA_DIR \
+    --checkpoint $CHECKPOINT_DIR \
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --verbose \
+    -- file=newstest2014.en  file_out=translate.txt reference=newstest2014.de
+```
+The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
+The performance and accuracy in the the log output when the benchmarking completes should look
+something like this, the real throughput and inferencing time varies:
+```
+	Total inferencing time: xxx
+	Throughput: xxx  sentences/second
+	Case-insensitive results: 27.636119723320007
+	Case-sensitive results: 27.127626538276672
+```
+
+

@@ -61,7 +61,7 @@ There are two different analysis type.
 
 1. Create conda env: `$conda create -n stock-tensorflow python matplotlib ipykernel psutil pandas gitpython`
 2. Activate the created conda env: `$source activate stock-tensorflow`
-3. Install stock Tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.2.0`
+3. Install stock Tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.4.0`
 4. Install extra needed package: `(stock-tensorflow) $pip install cxxfilt pycocotools`
 5. Deactivate conda env: `(stock-tensorflow)$conda deactivate`
 6. Register the kernel to Jupyter NB: `$~/.conda/envs/stock-tensorflow/bin/python -m ipykernel install --user --name=stock-tensorflow`
@@ -99,7 +99,7 @@ There are two different analysis type.
 2. Activate the created conda env: `$conda activate stock-tensorflow`
 3. Install stock tensorflow with a specific version: `(stock-tensorflow) $pip install tensorflow==2.4.0`
 
-> NOTE: You can change the Tensorflow version to different one. We validated on v1.14, v2.3.0 and v2.4.0.
+> NOTE: You can change the Tensorflow version to different one. We validated on v1.15.2 and v2.4.0.
 
 4. Install extra needed package: `(stock-tensorflow) $pip install cxxfilt pycocotools`
 5. Deactivate conda env: `(stock-tensorflow)$conda deactivate`
@@ -117,7 +117,7 @@ There are two different analysis type.
 2. Activate the created conda env: `$conda activate intel-tensorflow`
 3. Install Intel-optimized tensorflow with a specific version: `(intel-tensorflow) $pip install intel-tensorflow==2.4.0`
 
-> NOTE: You can change the Tensorflow version to a different one. We validated on v1.14, v2.3.0 and v2.4.0.
+> NOTE: You can change the Tensorflow version to a different one. We validated on v1.15.2 and v2.4.0.
 
 4. Install extra needed package: `(intel-tensorflow) $pip install cxxfilt pycocotools`
 5. Deactivate conda env: `(intel-tensorflow)$conda deactivate`

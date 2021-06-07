@@ -11,6 +11,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * tables==3.4.4
 * nibabel==2.3.3
 * SimpleITK===1.2.0
+* h5py==2.10.0
 
 Follow the [instructions above for downloading the BraTS dataset](#dataset).
 

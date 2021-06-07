@@ -57,6 +57,7 @@ import random
 import shutil
 import time
 import warnings
+import sys
 
 import torch
 import torch.nn as nn
@@ -139,11 +140,13 @@ parser.add_argument("--dummy", action='store_true',
                     help="using  dummu data to test the performance of inference")
 parser.add_argument('-w', '--warmup-iterations', default=30, type=int, metavar='N',
                     help='number of warmup iterations to run')
-
+parser.add_argument('--log-path', required = False, default = "", type=str,
+                    help="Path for the log file")
 best_acc1 = 0
-
-
+log_fl = None
 def main():
+    global log_fl
+    log_fl = sys.stdout
     args = parser.parse_args()
     args.cuda = not args.no_cuda and torch.cuda.is_available()
     print(args)
@@ -179,7 +182,10 @@ def main():
         args.world_size = int(os.environ["WORLD_SIZE"])
 
     args.distributed = args.world_size > 1 or args.multiprocessing_distributed
-
+    if not args.log_path == "":
+        if not os.path.isdir(os.path.dirname(args.log_path)):
+            os.makedirs(os.path.dirname(args.log_path))
+        log_fl = open(args.log_path, "w")
     ngpus_per_node = torch.cuda.device_count() if args.cuda else 0
     if args.multiprocessing_distributed:
         # Since we have ngpus_per_node processes per node, the total world_size
@@ -191,14 +197,20 @@ def main():
     else:
         # Simply call main_worker function
         main_worker(args.gpu, ngpus_per_node, args)
+    log_fl.write("Done")
+    if log_fl != sys.stdout:
+        log_fl.write("Closing")
+        log_fl.close()
 
 
 def main_worker(gpu, ngpus_per_node, args):
     global best_acc1
+    global log_fl
+
     args.gpu = gpu
 
     if args.gpu is not None:
-        print("Use GPU: {} for training".format(args.gpu))
+        log_fl.write("Use GPU: {} for training\n".format(args.gpu))
 
     if args.distributed:
         if args.dist_url == "env://" and args.rank == -1:
@@ -211,14 +223,14 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     # create model
     if args.pretrained:
-        print("=> using pre-trained model '{}'".format(args.arch))
+        log_fl.write("=> using pre-trained model '{}'\n".format(args.arch))
         model = models.__dict__[args.arch](pretrained=True)
     else:
-        print("=> creating model '{}'".format(args.arch))
+        log_fl.write("=> creating model '{}'\n".format(args.arch))
         model = models.__dict__[args.arch]()
 
     if not torch.cuda.is_available():
-        print('using CPU, this will be slow')
+        log_fl.write('using CPU, this will be slow\n')
     elif args.distributed:
         # For multiprocessing distributed, DistributedDataParallel constructor
         # should always set the single device scope, otherwise,
@@ -235,9 +247,9 @@ def main_worker(gpu, ngpus_per_node, args):
         else:
             if args.cuda:
                 model.cuda()
-                print("create DistributedDataParallel in GPU")
+                log_fl.write("create DistributedDataParallel in GPU\n")
             else:
-                print("create DistributedDataParallel in CPU")
+                log_fl.write("create DistributedDataParallel in CPU\n")
             # DistributedDataParallel will divide and allocate batch_size to all
             # available GPUs if device_ids are not set
             model = torch.nn.parallel.DistributedDataParallel(model)
@@ -256,14 +268,14 @@ def main_worker(gpu, ngpus_per_node, args):
                 model.cuda()
 
     if args.ipex:
-        model = model.to(device = 'dpcpp:0')
+        model = model.to(device = 'xpu')
     # define loss function (criterion) and optimizer
 
     criterion = nn.CrossEntropyLoss()
     if args.cuda:
         criterion = criterion.cuda(args.gpu)
     elif args.ipex:
-        criterion = criterion.to(device = 'dpcpp:0')
+        criterion = criterion.to(device = 'xpu')
 
     optimizer = torch.optim.SGD(model.parameters(), args.lr,
                                 momentum=args.momentum,
@@ -272,7 +284,7 @@ def main_worker(gpu, ngpus_per_node, args):
     # optionally resume from a checkpoint
     if args.resume:
         if os.path.isfile(args.resume):
-            print("=> loading checkpoint '{}'".format(args.resume))
+            log_fl.write("=> loading checkpoint '{}'\n".format(args.resume))
             if args.gpu is None and args.cuda:
                 checkpoint = torch.load(args.resume)
             else:
@@ -286,10 +298,10 @@ def main_worker(gpu, ngpus_per_node, args):
                 best_acc1 = best_acc1.to(args.gpu)
             model.load_state_dict(checkpoint['state_dict'])
             optimizer.load_state_dict(checkpoint['optimizer'])
-            print("=> loaded checkpoint '{}' (epoch {})"
+            log_fl.write("=> loaded checkpoint '{}' (epoch {})\n"
                   .format(args.resume, checkpoint['epoch']))
         else:
-            print("=> no checkpoint found at '{}'".format(args.resume))
+            log_fl.write("=> no checkpoint found at '{}'\n".format(args.resume))
 
     if args.cuda:
         cudnn.benchmark = True
@@ -339,9 +351,9 @@ def main_worker(gpu, ngpus_per_node, args):
 
     if args.evaluate:
         if args.ipex:
-            print("using ipex model to do inference\n")
+            log_fl.write("using ipex model to do inference\n")
         if args.jit:
-            print("running jit fusion path\n")
+            log_fl.write("running jit fusion path\n")
             script_model = torch.jit.script(model)
 
         if args.jit:
@@ -377,6 +389,8 @@ def main_worker(gpu, ngpus_per_node, args):
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
+    global log_fl
+
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -400,8 +414,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if torch.cuda.is_available():
             target = target.cuda(args.gpu, non_blocking=True)
         if args.ipex:
-            images = images.to(device = 'dpcpp:0')
-            target = target.to(device = 'dpcpp:0')
+            images = images.to(device = 'xpu')
+            target = target.to(device = 'xpu')
 
         # compute output
         output = model(images)
@@ -427,12 +441,14 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
 
 
 def validate(val_loader, model, criterion, args):
+    global log_fl
+
     batch_time = AverageMeter('Time', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
     if args.dummy:
-        number_iter = 300
+        number_iter = 50
     else:
         number_iter = len(val_loader)
 
@@ -445,7 +461,7 @@ def validate(val_loader, model, criterion, args):
     model.eval()
 
     if args.dummy:
-        print("using dummy input data to run")
+        log_fl.write("using dummy input data to run\n")
         images = torch.randn(args.batch_size, 3, 224, 224)
         target = torch.arange(1, args.batch_size + 1).long()
         if args.gpu is not None and args.cuda:
@@ -453,8 +469,8 @@ def validate(val_loader, model, criterion, args):
         if args.cuda:
             arget = target.cuda(args.gpu, non_blocking=True)
         if args.ipex:
-            images = images.to(device = 'dpcpp:0')
-            target = target.to(device = 'dpcpp:0')
+            images = images.to(device = 'xpu')
+            target = target.to(device = 'xpu')
 
         with torch.no_grad():
             for i in range(number_iter):
@@ -465,7 +481,7 @@ def validate(val_loader, model, criterion, args):
                 if i >= args.warmup_iterations:
                     batch_time.update(time.time() - end)
 
-                #print(output)
+                #log_fl.write(output)
                 loss = criterion(output, target)
 
                 # measure accuracy and record loss
@@ -477,7 +493,7 @@ def validate(val_loader, model, criterion, args):
                 if i % args.print_freq == 0:
                     progress.display(i)
     else:
-        print("using real dataset to run")
+        log_fl.write("using real dataset to run\n")
         with torch.no_grad():
             end = time.time()
             for i, (images, target) in enumerate(val_loader):
@@ -486,11 +502,11 @@ def validate(val_loader, model, criterion, args):
                 if args.cuda:
                     target = target.cuda(args.gpu, non_blocking=True)
                 if args.ipex:
-                    images = images.to(device = 'dpcpp:0')
-                    target = target.to(device = 'dpcpp:0')
+                    images = images.to(device = 'xpu')
+                    target = target.to(device = 'xpu')
                 # compute output
                 output = model(images)
-                #print(output)
+                #log_fl.write(output)
                 loss = criterion(output, target)
 
                 # measure accuracy and record loss
@@ -509,11 +525,11 @@ def validate(val_loader, model, criterion, args):
     batch_size = args.batch_size
     latency = batch_time.avg / batch_size * 1000
     perf = batch_size / batch_time.avg
-    print('inference latency %.3f ms'%latency)
-    print('inference performance %.3f fps'%perf)
+    log_fl.write('inference latency %.3f ms\n'%latency)
+    log_fl.write('inference performance %.3f fps\n'%perf)
 
     # TODO: this should also be done with the ProgressMeter
-    print(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}'
+    log_fl.write(' * Acc@1 {top1.avg:.3f} Acc@5 {top5.avg:.3f}\n'
           .format(top1=top1, top5=top5))
 
     return top1.avg
@@ -556,9 +572,11 @@ class ProgressMeter(object):
         self.prefix = prefix
 
     def display(self, batch):
+        global log_fl
+
         entries = [self.prefix + self.batch_fmtstr.format(batch)]
         entries += [str(meter) for meter in self.meters]
-        print('\t'.join(entries))
+        log_fl.write('\t'.join(entries) + '\n')
 
     def _get_batch_fmtstr(self, num_batches):
         num_digits = len(str(num_batches // 1))
@@ -585,7 +603,7 @@ def accuracy(output, target, topk=(1,)):
 
         res = []
         for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0, keepdim=True)
+            correct_k = correct[:k].contiguous().view(-1).float().sum(0, keepdim=True)
             res.append(correct_k.mul_(100.0 / batch_size))
         return res
 

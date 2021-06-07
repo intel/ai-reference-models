@@ -168,10 +168,10 @@ You can optionally set the `MPI_NUM_PROCESSES` (defaults to 4).
 ```
 export BACKBONE_MODEL_DIR="$(pwd)/backbone_model"
 mkdir -p $BACKBONE_MODEL_DIR
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/checkpoint
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.data-00000-of-00001
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.index
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.meta
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/checkpoint
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.data-00000-of-00001
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.index
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.meta
 
 export DATASET_DIR=<path to the COCO training data>
 export OUTPUT_DIR=<directory where the log file and checkpoints will be written>
@@ -240,10 +240,10 @@ to 4 if it is not set.
 ```
 export BACKBONE_MODEL_DIR="$(pwd)/backbone_model"
 mkdir -p $BACKBONE_MODEL_DIR
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/checkpoint
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.data-00000-of-00001
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.index
-wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/tf-perf-public/resnet34_ssd_checkpoint/model.ckpt-28152.meta
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/checkpoint
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.data-00000-of-00001
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.index
+wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.meta
 
 export DATASET_DIR=<path to the COCO training data>
 export OUTPUT_DIR=<directory where the log file and checkpoints will be written>

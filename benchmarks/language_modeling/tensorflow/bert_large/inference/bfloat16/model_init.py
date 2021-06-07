@@ -75,7 +75,12 @@ class ModelInitializer(BaseModelInitializer):
             "--experimental-gelu", dest="experimental_gelu", default="False")
         arg_parser.add_argument(
             "--optimized-softmax", dest="optimized_softmax", default="True")
-
+        arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
+                                type=int, default=10,
+                                help="number of warmup steps")
+        arg_parser.add_argument("--steps", dest='steps',
+                                type=int, default=30,
+                                help="number of benchmark steps")
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
@@ -95,6 +100,9 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.init_checkpoint and not os.path.isabs(self.args.init_checkpoint):
             self.args.init_checkpoint = os.path.join(self.args.checkpoint, self.args.init_checkpoint)
+
+        # set default inter/intra threads
+        self.set_num_inter_intra_threads()
 
         if self.args.num_intra_threads:
             set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
@@ -119,6 +127,7 @@ class ModelInitializer(BaseModelInitializer):
                      " --predict_batch_size=" + str(self.args.batch_size) + \
                      " --experimental_gelu=" + str(self.args.experimental_gelu) + \
                      " --optimized_softmax=" + str(self.args.optimized_softmax) + \
+                     " --input_graph=" + str(self.args.input_graph) + \
                      " --do_predict=True "
 
         if self.args.accuracy_only:
@@ -141,6 +150,12 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.num_intra_threads:
             model_args += " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)
+
+        if self.args.warmup_steps:
+            model_args += " --warmup_steps=" + str(self.args.warmup_steps)
+
+        if self.args.steps:
+            model_args += " --steps=" + str(self.args.steps)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + model_script + model_args

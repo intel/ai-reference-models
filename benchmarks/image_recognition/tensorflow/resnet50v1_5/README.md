@@ -35,7 +35,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resne
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
@@ -50,9 +50,9 @@ located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `resnet50v1_5_int8_pretrained_model.pb` input graph file (from step 2), and the `--accuracy-only` flag.
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --data-location /home/<user>/dataset/FullImageNetData_directory \
     --in-graph resnet50v1_5_int8_pretrained_model.pb \
     --model-name resnet50v1_5 \
@@ -90,9 +90,9 @@ args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50v1_5_int8_pretrained_model.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -125,12 +125,12 @@ to get additional debug output or change the default output location.
 
 If you would like to get a pre-trained model for ResNet50v1.5,
 ```
-$ wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
+wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
 ```
 
 2. Clone the [intelai/models](https://github.com/intelai/models) repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be
@@ -149,9 +149,9 @@ If benchmarking uses dummy data for inference, `--data-location` flag is not req
 
 * To measure online inference, set `--batch-size=1` and run the model script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -187,9 +187,9 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure batch inference, set `--batch-size=128` and run the model script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -226,9 +226,9 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -262,9 +262,9 @@ output can only be used with real data.
 For example, the command below is the same as the accuracy test above,
 except with the `--output-results` flag added:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -310,7 +310,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resne
 
 2. Clone the [intelai/models](https://github.com/intelai/models) repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be
@@ -329,9 +329,9 @@ If benchmarking uses dummy data for inference, `--data-location` flag is not req
 
 * To measure online inference, set `--batch-size=1` and run the model script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -365,9 +365,9 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure batch inference, set `--batch-size=128` and run the model script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -402,9 +402,9 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -436,9 +436,9 @@ output can only be used with real data.
 For example, the command below is the same as the accuracy test above,
 except with the `--output-results` flag added:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph resnet50_v1_5_bfloat16.pb \
     --model-name resnet50v1_5 \
     --framework tensorflow \
@@ -485,12 +485,12 @@ ImageNet dataset in the TF records format.
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 3. Run the following command to start ResNet50v1.5 FP32 training run.
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=fp32 \
          --mode=training \
@@ -530,12 +530,12 @@ ImageNet dataset in the TF records format.
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 3. Run the following command to start ResNet50v1.5 BFloat16 training run.
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \
          --mode=training \
@@ -565,7 +565,7 @@ I0816 basic_session_run_hooks.py:260] loss = 8.373407, step = 100 (... sec)
 ## Distributed Training Instructions
 Training can be done in a distributed fashion. On a dual (or eight) socket system, one can create two (or eight) MPI processes (one socket each) to do the training. As an example, run the following command to start ResNet50v1.5 FP32 training run using 2 MPI processes.
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \
          --mode=training \
@@ -577,7 +577,7 @@ $ python launch_benchmark.py \
 The above distributed training runs one MPI process per socket, to maximize performance, users can run more than one (commonly two) MPI processes per socket. The following command achieves launching 4 MPI processes over 2 sockets. Note that in this case we need to reduce the OMP_NUM_THREADS and intra_op_parallelism_threads by half (minus one or two for performance sometimes, e.g. half of 28 becomes 14, and we can use 12 for good performance).  This is controlled by "-a <half the amount of cores of per socket or less>". Batch size can remain the same for weak scaling or reduced by half as well for strong scaling.
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \
          --mode=training \
@@ -592,7 +592,7 @@ $ python launch_benchmark.py \
 Similarly, the following command achieves launching 2 MPI processes over 1 socket.
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \
          --mode=training \
@@ -609,7 +609,7 @@ You can check output trained model accuracy by setting `--eval=True` in the comm
 Finally, the following command runs MPI across multiple nodes on bare-metal, with 2 MPI processes per node. Each node must have passwordless ssh enabled for the user running the command below. All hosts should have these additional packages installed: (apt-get) openmpi-bin openmpi-common libopenmpi-dev, (pip) horovod==0.20.0
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
          --verbose \
          --model-name=resnet50v1_5 \
          --precision=fp32 \

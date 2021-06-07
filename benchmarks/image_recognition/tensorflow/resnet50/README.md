@@ -21,14 +21,14 @@ ImageNet dataset in the TF records format.
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_int8_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_int8_pretrained_model.pb
 ```
 
 3. Clone the 
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 4. Run the inference script `launch_benchmark.py` with the appropriate parameters to evaluate the model performance and/or calculate the accuracy.
@@ -39,9 +39,9 @@ located at `models/models/image_recognition/tensorflow/resnet50/`.
 the pre-trained `final_int8_resnet50.pb` input graph file (from step
 2), and the `--accuracy-only` flag.
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --data-location /home/<user>/dataset/FullImageNetData_directory
     --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
@@ -81,9 +81,9 @@ args, as shown in the command below. If these values are not specified,
 the script will default to use `warmup_steps=10` and `steps=50`.
 
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_int8_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
@@ -116,14 +116,14 @@ to get additional debug output or change the default output location..
 
 1. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_fp32_pretrained_model.pb
 ```
 
 2. Clone the 
 [intelai/models](https://github.com/intelai/models)
 repository
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 3. If running resnet50 for accuracy, the ImageNet dataset will be
@@ -142,9 +142,9 @@ If using dummy data for inference, `--data-location` flag is not required. Other
 
 * To measure online inference, set `--batch-size=1` and run the script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
@@ -177,9 +177,9 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 
 * To measure batch inference, set `--batch-size=128` and run the launch script as shown:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
@@ -213,9 +213,9 @@ Log location outside container: {--output-dir value}/benchmark_resnet50_inferenc
 * To measure the model accuracy, use the `--accuracy-only` flag and pass
 the ImageNet dataset directory from step 3 as the `--data-location`:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
     --model-name resnet50 \
     --framework tensorflow \
@@ -246,9 +246,9 @@ output can only be used with real data.
 For example, the command below is the same as the accuracy test above,
 except with the `--output-results` flag added:
 ```
-$ cd /home/<user>/models/benchmarks
+cd /home/<user>/models/benchmarks
 
-$ python launch_benchmark.py \
+python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_fp32_pretrained_model/freezed_resnet50.pb \
     --model-name resnet50 \
     --framework tensorflow \

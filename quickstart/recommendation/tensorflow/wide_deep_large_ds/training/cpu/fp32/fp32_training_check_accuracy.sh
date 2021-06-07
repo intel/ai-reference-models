@@ -61,7 +61,7 @@ STEPS=${STEPS:-500}
 
 # Run wide and deep large ds training while saving output to a temp file
 temp_output_file=$(mktemp /tmp/output.XXXXXXXXX)
-source "$(dirname $0)/common/utils.sh"
+source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
  --model-name wide_deep_large_ds \
  --precision fp32 \

@@ -38,15 +38,22 @@ fi
 echo 'TF_WAVENET_DIR='$TF_WAVENET_DIR
 
 # Unzip pretrained model files
-pretrained_model_dir="pretrained_model/wavenet_checkpoints"
-if [ ! -d "${pretrained_model_dir}" ]; then
-    tar -C pretrained_model/ -xvf pretrained_model/wavenet_fp32_pretrained_model.tar.gz
+if [ -z ${PRETRAINED_MODEL} ]; then
+  pretrained_model_dir="pretrained_model/wavenet_checkpoints"
+  if [ ! -d "${pretrained_model_dir}" ]; then
+    if [[ -f "pretrained_model/wavenet_fp32_pretrained_model.tar.gz" ]]; then
+      tar -C pretrained_model/ -xvf pretrained_model/wavenet_fp32_pretrained_model.tar.gz
+    else
+      echo "The PRETRAINED_MODEL environment variable was not defined and the checkpoints could not be found."
+      exit 1
+    fi
+  fi
+  PRETRAINED_MODEL="${MODEL_DIR}/${pretrained_model_dir}"
 fi
-CHECKPOINT_DIR="$(pwd)/${pretrained_model_dir}"
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_dirs
-input_dirs[CHECKPOINT_DIR]=${CHECKPOINT_DIR}
+input_dirs[PRETRAINED_MODEL]=${PRETRAINED_MODEL}
 
 for i in "${!input_dirs[@]}"; do
   var_name=$i
@@ -63,9 +70,9 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-      --checkpoint ${CHECKPOINT_DIR} \
+      --checkpoint ${PRETRAINED_MODEL} \
       --model-source-dir ${TF_WAVENET_DIR} \
       --model-name wavenet \
       --socket-id 0 \
