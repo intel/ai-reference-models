@@ -52,7 +52,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --batch-size 240  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image intel/intel-optimized-tensorflow:latest \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -68,7 +68,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --batch-size 1  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image intel/intel-optimized-tensorflow:latest \
          -- input_height=224 input_width=224 warmup_steps=10 steps=50 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
     ```
@@ -85,7 +85,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --batch-size 100  \
          --socket-id 0 \
          --in-graph /home/<user>/mobilenetv1_int8_pretrained_model.pb  \
-         --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image intel/intel-optimized-tensorflow:latest \
          --data-location /home/<user>/imagenet_validation_dataset \
          -- input_height=224 input_width=224 \
          input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
@@ -191,7 +191,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image intel/intel-optimized-tensorflow:latest \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 1 \
          --socket-id 0 \
@@ -211,7 +211,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image intel/intel-optimized-tensorflow:latest \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --socket-id 0 \
@@ -227,7 +227,7 @@ when calling `launch_benchmark.py` and the script will run without TCMalloc.
          --model-name mobilenet_v1 \
          --mode inference \
          --framework tensorflow \
-         --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image intel/intel-optimized-tensorflow:latest \
          --model-source-dir /home/<user>/tensorflow/models  \
          --batch-size 100 \
          --accuracy-only \

@@ -28,7 +28,7 @@ slice_sets:
           uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/cpu/int8/.docs/license.md
         name: README.md
         text_replace:
-          <docker image>: intel/image-recognition:tf-2.4.0-inceptionv4-int8-inference
+          <docker image>: intel/image-recognition:tf-latest-inceptionv4-int8-inference
           <mode>: inference
           <model name>: Inception V4
           <package dir>: inceptionv4-int8-inference
@@ -75,7 +75,7 @@ slice_sets:
           <model name>: Inception V4
           <precision>: Int8
           <use case>: image_recognition
-          <docker image>: intel/intel-optimized-tensorflow:2.4.0
+          <docker image>: intel/intel-optimized-tensorflow:latest
         uri: models/benchmarks/image_recognition/tensorflow/inceptionv4/inference/int8
     downloads:
     - destination: inceptionv4_int8_pretrained_model.pb

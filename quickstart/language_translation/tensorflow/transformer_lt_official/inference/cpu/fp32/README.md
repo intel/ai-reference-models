@@ -50,7 +50,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * [Cython](https://pypi.org/project/Cython/)
 * [pandas](https://pypi.org/project/pandas/)
@@ -95,7 +95,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/language-translation:tf-2.4.0-transformer-lt-official-fp32-inference \
+  intel/language-translation:tf-latest-transformer-lt-official-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 
