@@ -23,3 +23,7 @@ docker run \
   <docker image> \
   /bin/bash quickstart/<script name>.sh
 ```
+
+If you are new to docker and are running into issues with the container,
+see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
+for troubleshooting tips.
