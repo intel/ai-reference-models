@@ -52,7 +52,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
     --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \
@@ -71,7 +71,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 64 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph /home/<user>/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb \
     --data-location /home/<user>/transformer_lt_official_fp32_pretrained_model/data \
     -- file=newstest2014.en \

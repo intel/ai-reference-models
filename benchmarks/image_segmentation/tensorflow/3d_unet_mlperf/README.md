@@ -42,7 +42,7 @@ Currently, the model runs for `batch-size=1` only.
       --mode inference \
       --batch-size 1 \
       --accuracy-only \
-      --docker-image intel/intel-optimized-tensorflow:2.4.0
+      --docker-image intel/intel-optimized-tensorflow:latest
    ```
 
    The tail of the log output when the accuracy run completes should look
@@ -66,7 +66,7 @@ Currently, the model runs for `batch-size=1` only.
       --mode inference \
       --batch-size 1 \
       --benchmark-only \
-      --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+      --docker-image intel/intel-optimized-tensorflow:latest \
       -- warmup_steps=20 steps=100
    ```
 

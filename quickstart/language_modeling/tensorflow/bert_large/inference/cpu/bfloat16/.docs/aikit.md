@@ -24,7 +24,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       <p>To run without AI Kit you will need:</p>
       <ul>
         <li>Python 3
-        <li>intel-tensorflow==2.4.0
+        <li>intel-tensorflow>=2.5.0
         <li>git
         <li>numactl
         <li>unzip

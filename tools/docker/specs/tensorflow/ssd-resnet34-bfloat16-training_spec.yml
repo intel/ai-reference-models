@@ -31,7 +31,7 @@ slice_sets:
           uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/.docs/license.md
         name: README.md
         text_replace:
-          <docker image>: 'intel/object-detection:tf-2.4.0-ssd-resnet34-bfloat16-training'
+          <docker image>: 'intel/object-detection:tf-latest-ssd-resnet34-bfloat16-training'
           <mode>: training
           <model name>: SSD-ResNet34
           <package dir>: ssd-resnet34-bfloat16-training

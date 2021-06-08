@@ -50,7 +50,7 @@ SSD-MobileNet can be run for testing online inference or testing accuracy.
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir ${OUTPUT_DIR} \
     --benchmark-only
   ```
@@ -64,7 +64,7 @@ SSD-MobileNet can be run for testing online inference or testing accuracy.
     --precision fp32 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir ${OUTPUT_DIR} \
     --accuracy-only
   ```
@@ -118,7 +118,7 @@ cores on your system.
     --mode inference \
     --batch-size 448 \
     --numa-cores-per-instance socket \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --benchmark-only
   ```
   The output will show the multi-instance command being run and a list of the
@@ -153,7 +153,7 @@ cores on your system.
     --mode inference \
     --batch-size 1 \
     --numa-cores-per-instance 4 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --benchmark-only
   ```
   The output will show the multi-instance command being run and a list of the
