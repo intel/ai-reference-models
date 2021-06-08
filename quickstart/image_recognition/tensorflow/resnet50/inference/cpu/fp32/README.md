@@ -35,7 +35,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 
 Download and untar the model package and then run a [quickstart script](#quick-start-scripts).
@@ -55,7 +55,7 @@ cd resnet50-fp32-inference
 <!-- 60. Docker -->
 ## Docker
 
-The model container `intel/image-recognition:tf-2.4.0-resnet50-fp32-inference` includes the scripts
+The model container `intel/image-recognition:tf-latest-resnet50-fp32-inference` includes the scripts
 and libraries needed to run ResNet50 FP32 inference. To run one of the model
 inference quickstart scripts using this container, you'll need to provide volume mounts for
 the ImageNet dataset and an output directory where checkpoint files will be written.
@@ -72,7 +72,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.4.0-resnet50-fp32-inference \
+  intel/image-recognition:tf-latest-resnet50-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

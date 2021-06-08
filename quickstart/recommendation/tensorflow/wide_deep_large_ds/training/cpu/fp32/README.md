@@ -44,7 +44,7 @@ files should be used as the `DATASET_DIR` when running [quickstart scripts](#qui
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
 
 Download and untar the model package and then run a
 [quickstart script](#quick-start-scripts) with environment variables
@@ -90,7 +90,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --privileged --init -t \
-  intel/recommendation:tf-2.4.0-wide-deep-large-ds-fp32-training \
+  intel/recommendation:tf-latest-wide-deep-large-ds-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 

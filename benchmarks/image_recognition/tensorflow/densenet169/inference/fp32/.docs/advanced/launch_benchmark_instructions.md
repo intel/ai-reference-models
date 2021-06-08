@@ -24,7 +24,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --in-graph ${PRETRAINED_MODEL} \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir ${OUTPUT_DIR} \
     -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
     input_layer="input" output_layer="densenet169/predictions/Reshape_1"
@@ -41,7 +41,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --in-graph ${PRETRAINED_MODEL} \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir ${OUTPUT_DIR} \
     -- input_height=224 input_width=224 warmup_steps=20 steps=100 \
     input_layer="input" output_layer="densenet169/predictions/Reshape_1"
@@ -58,7 +58,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --in-graph ${PRETRAINED_MODEL} \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --data-location ${DATASET_DIR} \
     --output-dir ${OUTPUT_DIR} \
     -- input_height=224 input_width=224 \

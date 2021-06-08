@@ -130,7 +130,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/object-detection:tf-2.4.0-ssd-resnet34-fp32-inference \
+  intel/object-detection:tf-latest-ssd-resnet34-fp32-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

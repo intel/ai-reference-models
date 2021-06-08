@@ -52,7 +52,7 @@ Use one of the following examples below, depending on your use case.
     --accuracy-only \
     --batch-size 100 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph ${PRETRAINED_MODEL} \
     --data-location ${DATASET_DIR} \
     --output-dir ${OUTPUT_DIR}
@@ -70,7 +70,7 @@ Use one of the following examples below, depending on your use case.
     --benchmark-only \
     --batch-size 240 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph ${PRETRAINED_MODEL} \
     --output-dir ${OUTPUT_DIR}
   ```
@@ -86,7 +86,7 @@ Use one of the following examples below, depending on your use case.
     --benchmark-only \
     --batch-size 1 \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph ${PRETRAINED_MODEL} \
     --output-dir ${OUTPUT_DIR}
   ```

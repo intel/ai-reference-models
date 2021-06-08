@@ -60,7 +60,7 @@ slice_sets:
           <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-mobilenet-fp32-inference.tar.gz
           <package name>: ssd-mobilenet-fp32-inference.tar.gz
           <package dir>: ssd-mobilenet-fp32-inference
-          <docker image>: intel/object-detection:tf-2.4.0-ssd-mobilenet-fp32-inference
+          <docker image>: intel/object-detection:tf-latest-ssd-mobilenet-fp32-inference
         docs:
         - name: Title
           uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/fp32/.docs/title.md

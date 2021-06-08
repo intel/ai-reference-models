@@ -42,10 +42,9 @@ git clone https://github.com/IntelAI/models.git
 The optimized ResNet50v1.5 model files are attached to the [intelai/models](https://github.com/intelai/models) repo and
 located at `models/models/image_recognition/tensorflow/resnet50v1_5/`.
 
-    The docker image (`intel/intel-optimized-tensorflow:2.4.0`)
+    The docker image (`intel/intel-optimized-tensorflow:latest`)
     used in the commands above were built using
-    [TensorFlow](https://github.com/tensorflow/tensorflow.git) master for TensorFlow
-    version 2.4.0.
+    [TensorFlow](https://github.com/tensorflow/tensorflow.git) and latest released version for TensorFlow.
 
 * Calculate the model accuracy, the required parameters parameters include: the `ImageNet` dataset location (from step 1),
 the pre-trained `resnet50v1_5_int8_pretrained_model.pb` input graph file (from step 2), and the `--accuracy-only` flag.
@@ -61,7 +60,7 @@ python launch_benchmark.py \
     --mode inference \
     --batch-size=100 \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 The log file is saved to the value of `--output-dir`.
 
@@ -100,7 +99,7 @@ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --benchmark-only \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
     -- warmup_steps=50 steps=500
 ```
 The tail of the log output when the benchmarking completes should look
@@ -159,7 +158,7 @@ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id=0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -197,7 +196,7 @@ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id=0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -238,7 +237,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id=0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -275,7 +274,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id=0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -339,7 +338,7 @@ python launch_benchmark.py \
     --mode inference \
     --batch-size=1 \
     --socket-id 0 \
-    --docker-image=intel/intel-optimized-tensorflow:2.4.0
+    --docker-image=intel/intel-optimized-tensorflow:latest
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -375,7 +374,7 @@ python launch_benchmark.py \
     --mode inference \
     --batch-size=128 \
     --socket-id 0 \
-    --docker-image=intel/intel-optimized-tensorflow:2.4.0
+    --docker-image=intel/intel-optimized-tensorflow:latest
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -414,7 +413,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image=intel/intel-optimized-tensorflow:2.4.0
+    --docker-image=intel/intel-optimized-tensorflow:latest
 ```
 
 The log file is saved to the value of `--output-dir`.
@@ -449,7 +448,7 @@ python launch_benchmark.py \
     --batch-size 100 \
     --socket-id 0 \
     --data-location /home/<user>/dataset/ImageNetData_directory \
-    --docker-image=intel/intel-optimized-tensorflow:2.4.0
+    --docker-image=intel/intel-optimized-tensorflow:latest
 ```
 The results file will be written to the
 `models/benchmarks/common/tensorflow/logs` directory, unless another
@@ -542,7 +541,7 @@ python launch_benchmark.py \
          --framework tensorflow \
          --checkpoint <location_to_store_training_checkpoints> \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
-         --docker-image=intel/intel-optimized-tensorflow:2.4.0
+         --docker-image=intel/intel-optimized-tensorflow:latest
 ```
 
 This run will take considerable amount of time since it is running for
@@ -572,7 +571,7 @@ python launch_benchmark.py \
          --framework tensorflow \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=2 \
-         --docker-image=intel/intel-optimized-tensorflow:2.4.0
+         --docker-image=intel/intel-optimized-tensorflow:latest
 ```
 The above distributed training runs one MPI process per socket, to maximize performance, users can run more than one (commonly two) MPI processes per socket. The following command achieves launching 4 MPI processes over 2 sockets. Note that in this case we need to reduce the OMP_NUM_THREADS and intra_op_parallelism_threads by half (minus one or two for performance sometimes, e.g. half of 28 becomes 14, and we can use 12 for good performance).  This is controlled by "-a <half the amount of cores of per socket or less>". Batch size can remain the same for weak scaling or reduced by half as well for strong scaling.
 
@@ -585,7 +584,7 @@ python launch_benchmark.py \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=4 \
          --mpi_num_processes_per_socket=2 \
-         --docker-image=intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image=intel/intel-optimized-tensorflow:latest \
          -a <half the amount of cores per socket or less>
 ```
 
@@ -600,7 +599,7 @@ python launch_benchmark.py \
          --data-location=/home/<user>/dataset/ImageNetData_directory \
          --mpi_num_processes=2 \
          --mpi_num_processes_per_socket=1 \
-         --docker-image=intel/intel-optimized-tensorflow:2.4.0 \
+         --docker-image=intel/intel-optimized-tensorflow:latest \
          -a <half the amount of cores per socket or less>
 ```
 

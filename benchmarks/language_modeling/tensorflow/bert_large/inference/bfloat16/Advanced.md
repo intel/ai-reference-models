@@ -48,7 +48,7 @@ BERT Large inference can be run in three different modes:
     --data-location ${DATASET_DIR} \
     --checkpoint ${CHECKPOINT_DIR} \
     --output-dir ${OUTPUT_DIR} \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --benchmark-only \
     -- infer_option=SQuAD
   ```
@@ -63,7 +63,7 @@ BERT Large inference can be run in three different modes:
     --data-location ${DATASET_DIR}  \
     --checkpoint ${CHECKPOINT_DIR} \
     --output-dir ${OUTPUT_DIR} \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- profile=True infer_option=SQuAD
   ```
 * Accuracy
@@ -77,7 +77,7 @@ BERT Large inference can be run in three different modes:
     --data-location ${DATASET_DIR} \
     --checkpoint ${CHECKPOINT_DIR} \
     --output-dir ${OUTPUT_DIR} \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --accuracy-only \
     -- infer_option=SQuAD
   ```
