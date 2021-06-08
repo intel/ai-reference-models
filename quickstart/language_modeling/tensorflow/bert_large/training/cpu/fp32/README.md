@@ -60,7 +60,7 @@ that directory when running bert fine tuning using the SQuAD data.
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * git
 
@@ -151,7 +151,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/language-modeling:tf-2.4.0-bert-large-fp32-training \
+  intel/language-modeling:tf-latest-bert-large-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 
@@ -187,7 +187,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/language-modeling:tf-2.4.0-bert-large-fp32-training \
+  intel/language-modeling:tf-latest-bert-large-fp32-training \
   /bin/bash quickstart/<script name>.sh
 ```
 

@@ -51,7 +51,7 @@ The following commonds are examples on how Wide & Deep can be run:
     --batch-size 1 \
     --data-location $DATASET_DIR \
     --checkpoint $PRETRAINED_MODEL \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir $OUTPUT_DIR \
     --verbose
   ```
@@ -69,7 +69,7 @@ The following commonds are examples on how Wide & Deep can be run:
     --batch-size 1024 \
     --data-location $DATASET_DIR \
     --checkpoint $PRETRAINED_MODEL \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir $OUTPUT_DIR \
     --verbose
   ```

@@ -75,7 +75,7 @@ python launch_benchmark.py \
     --precision bfloat16 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --benchmark-only
 ```
 
@@ -93,6 +93,6 @@ python launch_benchmark.py \
     --precision bfloat16 \
     --mode inference \
     --socket-id 0 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --accuracy-only
 ```

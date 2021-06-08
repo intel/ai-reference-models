@@ -103,7 +103,7 @@ export SQUAD_DIR=$PWD
 [View the Intel® Optimization for TensorFlow\* Docker\* landing page](https://hub.docker.com/r/intel/intel-optimized-tensorflow) to find other available Docker images.
 
 ```bash
-docker pull intel/intel-optimized-tensorflow:2.4.0
+docker pull intel/intel-optimized-tensorflow:latest
 ```
 
 The Docker\* image has enabled OpenMPI\* and Horovod\*.
@@ -144,7 +144,7 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=24 \
     --mpi_num_processes=4 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $SQUAD_DIR:$SQUAD_DIR \
     -- train_option=SQuAD \
@@ -206,7 +206,7 @@ python launch_benchmark.py \
     --framework=tensorflow \
     --batch-size=32 \
     --mpi_num_processes=4 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --volume $BERT_LARGE_DIR:$BERT_LARGE_DIR \
     --volume $GLUE_DIR:$GLUE_DIR \
     -- train-option=Classifier \

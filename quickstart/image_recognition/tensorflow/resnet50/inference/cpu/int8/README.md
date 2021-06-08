@@ -37,7 +37,7 @@ These quickstart scripts can be run in different environments:
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 
 Download and untar the model package.
@@ -76,7 +76,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.4.0-resnet50-int8-inference \
+  intel/image-recognition:tf-latest-resnet50-int8-inference \
   /bin/bash quickstart/<script name>.sh
 ```
 

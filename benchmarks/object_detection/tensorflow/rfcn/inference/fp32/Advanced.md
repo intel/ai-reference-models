@@ -48,7 +48,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \
     --in-graph ${PRETRAINED_MODEL} \
@@ -66,7 +66,7 @@ python launch_benchmark.py \
     --mode inference \
     --precision fp32 \
     --framework tensorflow \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \
     --in-graph ${PRETRAINED_MODEL} \

@@ -115,7 +115,7 @@ There are two different analysis type.
 > NOTE: If users want to use Tensorflow v1.15.2, they need to install python v3.6 by assigning `python=3.6`
 
 2. Activate the created conda env: `$conda activate intel-tensorflow`
-3. Install Intel-optimized tensorflow with a specific version: `(intel-tensorflow) $pip install intel-tensorflow==2.4.0`
+3. Install Intel-optimized tensorflow with a specific version: `(intel-tensorflow) $pip install intel-tensorflow>=2.5.0`
 
 > NOTE: You can change the Tensorflow version to a different one. We validated on v1.15.2 and v2.4.0.
 
@@ -146,7 +146,7 @@ There are two different analysis type.
 1. Create virtual env: `$virtualenv  -p python3 ./venv-intel-tf`
 2. Activate the created virtualenv:  `$source ./venv-intel-tf/bin/activate`
 3. Install required packages:  `(venv-intel-tf)$pip install matplotlib ipykernel psutil pandas cxxfilt gitpython pycocotools`
-4. Install Intel-optimized tensorflow with a specific version: `(venv-intel-tf)$pip install intel-tensorflow==2.4.0`
+4. Install Intel-optimized tensorflow with a specific version: `(venv-intel-tf)$pip install intel-tensorflow>=2.5.0`
 5. Deactivate virtualenv: `(venv-intel-tf)$deactivate`
 6. Register the kernel to Jupyter NB: `$venv-intel-tf/bin/python  -m ipykernel install --user --name=intel-tensorflow` 
 

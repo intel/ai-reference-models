@@ -42,7 +42,7 @@ We will get the training data of it as an example:
 
 ---
 
-<sub><b id="f1">1 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.4.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.4.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a1)</sub><br/>
+<sub><b id="f1">1 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:latest container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:latest container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a1)</sub><br/>
 <sub><b id="f2">2 - </b> Downloading the datasets can take some time, you should see `XX% completed` updates for the datasets [↩](#a2)</sub>
 
 ---
@@ -67,7 +67,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
 ```
@@ -80,7 +80,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="No" print_iter=50
 ```
@@ -94,7 +94,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -110,7 +110,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="No" do_eval="No" print_iter=50
 ```
@@ -127,7 +127,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
@@ -144,7 +144,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
@@ -253,7 +253,7 @@ We will get the training data of it as an example:
 
 ---
 
-<sub><b id="f3">3 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:2.4.0 container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:2.4.0 container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a3)</sub><br/>
+<sub><b id="f3">3 - </b> Running `python data_download.py --data_dir=$DATA_DIR` assumes you have a python environment similar to what the intel/intel-optimized-tensorflow:latest container provides. One option would be to run the above within the intel/intel-optimized-tensorflow:latest container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:latest` [↩](#a3)</sub><br/>
 <sub><b id="f4">4 - </b> Downloading the datasets can take some time, you should see `XX% completed` updates for the datasets [↩](#a4)</sub>
 
 ---
@@ -278,7 +278,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
 ```
@@ -293,7 +293,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="No" print_iter=50
 ```
@@ -307,7 +307,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -322,7 +322,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     -i 0 --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="No" do_eval="No" print_iter=50
 ```
@@ -339,7 +339,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     --mpi_num_processes=2 \
     --num-intra-threads=26 --num-inter-threads=1 \
@@ -355,7 +355,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --data-location $DATA_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     --mpi_num_processes=4 \
     --num-intra-threads=26 --num-inter-threads=1 \
@@ -466,7 +466,7 @@ python launch_benchmark.py \
     --batch-size 64 \
     -i 0 --data-location $DATA_DIR \
     --checkpoint $CHECKPOINT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- file=newstest2014.en  file_out=translate.txt reference=newstest2014.de
 ```
@@ -521,7 +521,7 @@ python launch_benchmark.py \
     --batch-size 64 \
     -i 0 --data-location $DATA_DIR \
     --checkpoint $CHECKPOINT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --verbose \
     -- file=newstest2014.en  file_out=translate.txt reference=newstest2014.de
 ```
