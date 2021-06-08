@@ -73,3 +73,6 @@ Ran inference with batch size 1
 Log file location: ${OUTPUT_DIR}/benchmark_rfcn_inference_fp32_20200620_002841.log
 ```
 
+If you are new to docker and are running into issues with the container,
+see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
+for troubleshooting tips.
