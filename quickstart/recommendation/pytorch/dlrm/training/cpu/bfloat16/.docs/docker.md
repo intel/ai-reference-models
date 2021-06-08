@@ -19,3 +19,7 @@ docker run \
   intel/recommendation:pytorch-1.5.0-rc3-dlrm-bfloat16-training \
   /bin/bash quickstart/<script name>.sh
 ```
+
+If you are new to docker and are running into issues with the container,
+see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
+for troubleshooting tips.
