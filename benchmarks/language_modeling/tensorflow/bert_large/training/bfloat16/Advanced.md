@@ -50,7 +50,7 @@ BERT Large training can be run in three different modes:
     --batch-size=24 \
     --volume $CHECKPOINT_DIR:$CHECKPOINT_DIR \
     --volume $DATASET_DIR:$DATASET_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir $OUTPUT_DIR \
     -- train_option=SQuAD \
        vocab_file=$CHECKPOINT_DIR/vocab.txt \
@@ -100,7 +100,7 @@ BERT Large training can be run in three different modes:
     --volume $CHECKPOINT_DIR:$CHECKPOINT_DIR \
     --volume $DATASET_DIR:$DATASET_DIR \
     --output-dir $OUTPUT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- train_option=SQuAD \
        vocab_file=$CHECKPOINT_DIR/vocab.txt \
        config_file=$CHECKPOINT_DIR/bert_config.json \
@@ -135,7 +135,7 @@ BERT Large training can be run in three different modes:
     --volume $CHECKPOINT_DIR:$CHECKPOINT_DIR \
     --volume $DATASET_DIR:$DATASET_DIR \
     --output-dir $OUTPUT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- train-option=Classifier \
        task-name=MRPC \
        do-train=true \
@@ -170,7 +170,7 @@ BERT Large training can be run in three different modes:
     --volume $CHECKPOINT_DIR:$CHECKPOINT_DIR \
     --volume $DATASET_DIR:$DATASET_DIR \
     --output-dir $OUTPUT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- train-option=Classifier \
        task-name=MRPC \
        do-train=true \
@@ -208,7 +208,7 @@ BERT Large training can be run in three different modes:
     --volume $CHECKPOINT_DIR:$CHECKPOINT_DIR \
     --volume $DATASET_DIR:$DATASET_DIR \
     --output-dir $OUTPUT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- train-option=Pretraining \
        input-file=$DATASET_DIR/tf_wiki_formatted_slen512.tfrecord \
        do-train=True \
@@ -244,7 +244,7 @@ BERT Large training can be run in three different modes:
     --volume $CHECKPOINT_DIR:$CHECKPOINT_DIR \
     --volume $DATASET_DIR:$DATASET_DIR \
     --output-dir $OUTPUT_DIR \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- train-option=Pretraining \
        input-file=$DATASET_DIR/tf_wiki_formatted_slen512.tfrecord \
        do-train=True \

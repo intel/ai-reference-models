@@ -39,7 +39,7 @@ python launch_benchmark.py \
     --mode training \
     --socket-id 0 \
     --batch-size 128 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 Below is a sample log file tail when training:
@@ -95,7 +95,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 Output is as below. Performance is reported as recommendations/second
@@ -125,7 +125,7 @@ python launch_benchmark.py \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
     --accuracy_only  \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 Below is a sample log file tail when testing accuracy:
@@ -155,7 +155,7 @@ python launch_benchmark.py \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
     --exact-max-length 100 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
 Since DIEN is not a big model checking for latency for batch-size 1
@@ -195,7 +195,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0
+    --docker-image intel/intel-optimized-tensorflow:latest
 
 
 

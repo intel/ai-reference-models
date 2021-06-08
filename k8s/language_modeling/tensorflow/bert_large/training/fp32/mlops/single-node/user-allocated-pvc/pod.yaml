@@ -10,7 +10,7 @@ spec:
     fsGroup: 0 # {"$openapi":"FS_ID"}
   initContainers:
   - name: create-output-dir
-    image: docker.io/intel/language-modeling:tf-2.4.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
+    image: docker.io/intel/language-modeling:tf-latest-bert-large-fp32-training # {"$openapi":"IMAGE"}
     imagePullPolicy: IfNotPresent
     workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
     command:
@@ -25,7 +25,7 @@ spec:
     - name: pvc-path
       mountPath: /pvc # {"$openapi":"PVC_PATH"}
   - name: create-checkpoint-dir
-    image: docker.io/intel/language-modeling:tf-2.4.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
+    image: docker.io/intel/language-modeling:tf-latest-bert-large-fp32-training # {"$openapi":"IMAGE"}
     imagePullPolicy: IfNotPresent
     workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
     command:
@@ -41,7 +41,7 @@ spec:
       mountPath: /pvc # {"$openapi":"PVC_PATH"}
   containers:
   - name: single-node
-    image: docker.io/intel/language-modeling:tf-2.4.0-bert-large-fp32-training # {"$openapi":"IMAGE"}
+    image: docker.io/intel/language-modeling:tf-latest-bert-large-fp32-training # {"$openapi":"IMAGE"}
     workingDir: /workspace/bert-large-fp32-training # {"$openapi":"MODEL_DIR"}
     envFrom:
     - configMapRef:
