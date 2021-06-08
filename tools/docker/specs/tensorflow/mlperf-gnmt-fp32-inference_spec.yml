@@ -28,7 +28,7 @@ slice_sets:
           uri: models/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/.docs/license.md
         name: README.md
         text_replace:
-          <docker image>: 'intel/language-translation:tf-2.4.0-mlperf-gnmt-fp32-inference'
+          <docker image>: 'intel/language-translation:tf-latest-mlperf-gnmt-fp32-inference'
           <mode>: inference
           <model name>: MLPerf GNMT
           <package dir>: mlperf-gnmt-fp32-inference

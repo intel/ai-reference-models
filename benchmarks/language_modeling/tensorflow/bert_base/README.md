@@ -28,7 +28,7 @@ cd -
 If it's ran in docker environments, you should set the arguments of `--docker-image` and relevant `--volume` to `launch_benchmark.py` like below,
 
 ``` shell
---docker-image intel/intel-optimized-tensorflow:2.4.0 \
+--docker-image intel/intel-optimized-tensorflow:latest \
 --volume $BERT_BASE_DIR:$BERT_BASE_DIR \
 --volume $GLUE_DIR:$GLUE_DIR \
 ```

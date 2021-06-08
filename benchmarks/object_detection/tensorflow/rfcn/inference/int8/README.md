@@ -63,7 +63,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>git
         <li>numactl
         <li>wget
-        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow==2.4.0</a>
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>build-essential
         <li>Cython
         <li>contextlib2

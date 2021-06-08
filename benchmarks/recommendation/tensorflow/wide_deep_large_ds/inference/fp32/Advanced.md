@@ -47,7 +47,7 @@ python launch_benchmark.py \
     --framework tensorflow \
     --batch-size 1000 \
     --accuracy-only \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph $PRETRAINED_MODEL \
     --data-location $DATASET_DIR \
     --output-dir $OUTPUT_DIR
@@ -63,7 +63,7 @@ There are a few different modes that performance tests can be run:
     --framework tensorflow \
     --benchmark-only \
     --batch-size 1 \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     --in-graph $PRETRAINED_MODEL \
     --data-location $DATASET_DIR \
     --output-dir $OUTPUT_DIR \

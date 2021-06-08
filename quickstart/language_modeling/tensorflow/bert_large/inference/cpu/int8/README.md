@@ -44,7 +44,7 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 
 To run on bare metal, the following prerequisites must be installed in your environment:
 * Python 3
-* [intel-tensorflow==2.4.0](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
 * numactl
 * git
 * unzip
@@ -89,7 +89,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
-  intel/language-modeling:tf-2.4.0-bert-large-int8-inference \
+  intel/language-modeling:tf-latest-bert-large-int8-inference \
   /bin/bash ./quickstart/<script name>.sh
 ```
 
