@@ -11833,7 +11833,7 @@ terms specified in this license.
 
 The following third party programs have their own third party program files. These additional third party program files are as follows:
 
-1. intel/intel-optimized-tensorflow:latest https://github.com/Intel-tensorflow/tensorflow/blob/r2.3/third-party-programs.txt
+1. intel/intel-optimized-tensorflow:latest https://github.com/Intel-tensorflow/tensorflow/blob/r2.5/third-party-programs.txt
 2. Intel® Quantization Tool (intel-quantization): https://github.com/IntelAI/tools/blob/master/api/third-party-programs.txt
 3. oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
 
