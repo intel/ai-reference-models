@@ -44,3 +44,7 @@ docker run \
   /bin/bash quickstart/fp32_online_inference.sh \
   --num-intra-threads 1 --num-inter-threads 1
 ```
+
+If you are new to docker and are running into issues with the container,
+see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
+for troubleshooting tips.
