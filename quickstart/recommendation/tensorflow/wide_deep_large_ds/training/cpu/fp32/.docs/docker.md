@@ -27,3 +27,7 @@ docker run \
 
 The script will write a log file and the saved model to the `OUTPUT_DIR`
 and checkpoints will be written to the `CHECKPOINT_DIR`.
+
+If you are new to docker and are running into issues with the container,
+see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
+for troubleshooting tips.

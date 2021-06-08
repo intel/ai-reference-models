@@ -54,3 +54,7 @@ docker run \
   intel/image-recognition:pytorch-1.5.0-rc3-icx-a37fb5e8-resnet50-int8 \
   /bin/bash quickstart/<script name>
 ```
+
+If you are new to docker and are running into issues with the container,
+see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
+for troubleshooting tips.
