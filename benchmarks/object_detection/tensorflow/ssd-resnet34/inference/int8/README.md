@@ -8,11 +8,6 @@ This document has instructions for running
 [SSD-ResNet34](https://arxiv.org/pdf/1512.02325.pdf) Int8 inference
 using Intel-optimized TensorFlow.
 
-<!--- 20. Download link -->
-## Download link
-
-[ssd-resnet34-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz)
-
 <!--- 30. Datasets -->
 ## Datasets
 
@@ -41,27 +36,72 @@ test uses synthetic dataset.
 | [multi_instance_batch_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/multi_instance_batch_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with an input size of 1200x1200 and one instance per socket. Waits for all instances to complete, then prints a summarized throughput value. |
 | [multi_instance_online_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/multi_instance_online_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with an input size of 1200x1200 and four cores per instance. Waits for all instances to complete, then prints a summarized throughput value. |
 
-<!--- 50. Bare Metal -->
-## Bare Metal
+<!--- 50. AI Kit -->
+## Run the model
 
-To run on bare metal, the following prerequisites must be installed in your environment:
-* Python 3
-* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
-* numactl
-* git
-* libgl1-mesa-glx
-* libglib2.0-0
-* numpy==1.17.4
-* Cython
-* contextlib2
-* pillow>=8.1.2
-* lxml
-* jupyter
-* matplotlib
-* pycocotools
-* horovod==0.20.0
-* tensorflow-addons==0.11.0
-* opencv-python
+Setup your environment using the instructions below, depending on if you are
+using [AI Kit](/docs/general/tensorflow/AIKit.md):
+
+<table>
+  <tr>
+    <th>Setup using AI Kit</th>
+    <th>Setup without AI Kit</th>
+  </tr>
+  <tr>
+    <td>
+      <p>To run using AI Kit you will need:</p>
+      <ul>
+        <li>build-essential
+        <li>git
+        <li>libgl1-mesa-glx
+        <li>libglib2.0-0
+        <li>numactl
+        <li>python3-dev
+        <li>wget
+        <li>Cython
+        <li>contextlib2
+        <li>horovod==0.19.1
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>numpy==1.17.4
+        <li>opencv-python
+        <li>pillow>=8.1.2
+        <li>pycocotools
+        <li>tensorflow-addons==0.11.0
+        <li>Activate the tensorflow 2.5.0 conda environment
+        <pre>conda activate tensorflow</pre>
+      </ul>
+    </td>
+    <td>
+      <p>To run without AI Kit you will need:</p>
+      <ul>
+        <li>Python 3
+        <li>build-essential
+        <li>git
+        <li>libgl1-mesa-glx
+        <li>libglib2.0-0
+        <li>numactl
+        <li>python3-dev
+        <li>wget
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow==2.5.0</a>
+        <li>Cython
+        <li>contextlib2
+        <li>horovod==0.19.1
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>numpy==1.17.4
+        <li>opencv-python
+        <li>pillow>=8.1.2
+        <li>pycocotools
+        <li>tensorflow-addons==0.11.0
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+  </tr>
+</table>
 
 In addition to the libraries above, SSD-ResNet34 uses the
 [TensorFlow models](https://github.com/tensorflow/models) and
@@ -98,74 +138,33 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_r
 export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 ```
 
-Set an environment variable for the path to an `OUTPUT_DIR`
+After installing the prerequisites and cloning the models and benchmarks
+repos, and downloading the pretrained model, set the required environment
+variables. Set an environment variable for the path to an `OUTPUT_DIR`
 where log files will be written. If the accuracy test is being run, then
 also set the `DATASET_DIR` to point to the folder where the COCO dataset
-`validation-00000-of-00001` file is located. Once the environment
-variables are setup, then run a [quickstart script](#quick-start-scripts).
-
+`validation-00000-of-00001` file is located.  Once the environment variables
+are set, you can then run a [quickstart script](#quick-start-scripts) from the
+Model Zoo.
 To run inference using synthetic data:
 ```
+# cd to your model zoo directory
+cd models
+
+# set environment variables
+export DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
+export TF_MODELS_DIR=<path to the TensorFlow Models repo>
+export PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
 export OUTPUT_DIR=<directory where log files will be written>
 
-./quickstart/int8_inference.sh
+./quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/<script name>.sh
 ```
+<!--- 90. Resource Links-->
+## Additional Resources
 
-To test accuracy using the COCO dataset:
-```
-export DATASET_DIR=<path to the coco directory>
-export OUTPUT_DIR=<directory where log files will be written>
-
-./quickstart/int8_accuracy.sh
-```
-
-<!--- 60. Docker -->
-## Docker
-
-The model container includes the pretrained model, scripts and libraries
-needed to run  SSD-ResNet34 Int8 inference. To run one of the
-quickstart scripts using this container, you'll need to provide a volume
-mount for an output directory where logs will be written. If you are
-testing accuracy, then the directory where the coco dataset
-`validation-00000-of-00001` file located will also need to be mounted.
-
-To run inference using synthetic data:
-```
-OUTPUT_DIR=<directory where log files will be written>
-
-docker run \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -t \
-  intel/object-detection:tf-latest-ssd-resnet34-int8-inference \
-  /bin/bash quickstart/<script name>.sh
-```
-
-To test accuracy using the COCO dataset:
-```
-DATASET_DIR=<path to the COCO directory>
-OUTPUT_DIR=<directory where log files will be written>
-
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -t \
-  intel/object-detection:tf-latest-ssd-resnet34-int8-inference \
-  /bin/bash quickstart/int8_accuracy.sh
-```
-
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
-
-<!--- 80. License -->
-## License
-
-[LICENSE](/LICENSE)
+* To run more advanced use cases, see the instructions [here](Advanced.md)
+  for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
+  workload container:<br />
+  [https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-int8-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-int8-inference-tensorflow-container.html).
 

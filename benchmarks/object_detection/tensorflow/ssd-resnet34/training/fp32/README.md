@@ -7,11 +7,6 @@
 This document has instructions for running SSD-ResNet34 FP32 training using
 Intel-optimized TensorFlow.
 
-<!--- 20. Download link -->
-## Download link
-
-[ssd-resnet34-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-fp32-training.tar.gz)
-
 <!--- 30. Datasets -->
 ## Datasets
 
@@ -86,97 +81,113 @@ to download and preprocess the dataset.
 | [`fp32_training.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/fp32/fp32_training.sh) | Runs 100 training steps using mpirun for the specified number of processes (defaults to MPI_NUM_PROCESSES=1).  |
 
 <!--- 50. Bare Metal -->
-## Bare Metal
+<!--- 50. AI Kit -->
+## Run the model
 
-To run on bare metal, the following prerequisites must be installed in your environment:
-* Python 3
-* contextlib2
-* cpio
-* Cython
-* horovod
-* [intel-tensorflow>=2.5.0](https://pypi.org/project/intel-tensorflow/)
-* jupyter
-* lxml
-* matplotlib
-* numpy==1.17.4
-* opencv
-* openmpi
-* openssh
-* pillow>=8.1.2
-* protoc
-* pycocotools
-* tensorflow-addons==0.11.0
+Setup your environment using the instructions below, depending on if you are
+using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
-For more information, see the
+<table>
+  <tr>
+    <th>Setup using AI Kit</th>
+    <th>Setup without AI Kit</th>
+  </tr>
+  <tr>
+    <td>
+      <p>To run using AI Kit you will need:</p>
+      <ul>
+        <li>git
+        <li>numactl
+        <li>contextlib2
+        <li>cpio
+        <li>Cython
+        <li>horovod
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>numpy==1.17.4
+        <li>opencv
+        <li>openmpi
+        <li>openssh
+        <li>pillow>=8.1.2
+        <li>protoc
+        <li>pycocotools
+        <li>tensorflow-addons==0.11.0
+        <li>Activate the tensorflow 2.5.0 conda environment
+        <pre>conda activate tensorflow</pre>
+      </ul>
+    </td>
+    <td>
+      <p>To run without AI Kit you will need:</p>
+      <ul>
+        <li>Python 3
+        <li>git
+        <li>numactl
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow==2.5.0</a>
+        <li>contextlib2
+        <li>cpio
+        <li>Cython
+        <li>horovod
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>numpy==1.17.4
+        <li>opencv
+        <li>openmpi
+        <li>openssh
+        <li>pillow>=8.1.2
+        <li>protoc
+        <li>pycocotools
+        <li>tensorflow-addons==0.11.0
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+For more information on the dependencies, see the
 [installation instructions](https://github.com/tensorflow/models/blob/8110bb64ca63c48d0caee9d565e5b4274db2220a/research/object_detection/g3doc/installation.md#installation)
 for object detection models at the
 [TensorFlow Model Garden](https://github.com/tensorflow/models) repository.
 
-After installing the prerequisites, download and untar the model package.
-Clone the [TensorFlow Model Garden](https://github.com/tensorflow/models)
-repo at the commit specified below, and set the `TF_MODELS_DIR` environment
-variable to point to that directory. Set the `DATASET_DIR` to point to the
-directory with COCO training TF records files and the `OUTPUT_DIR` to the
-location where log and checkpoint files will be written. Use an empty
-output directory to prevent checkpoint file conflicts from prevouis runs.
-You can optionally set the `MPI_NUM_PROCESSES` environment variable (defaults to 1).
-After all the setup is complete, run the [quickstart script](#quick-start-scripts).
-
+Running SSD-ResNet34 training uses code from the
+[TensorFlow Model Garden](https://github.com/tensorflow/models).
+Clone the  repo at the commit specified below, and set the `TF_MODELS_DIR` environment
+variable to point to that directory.
 ```
-export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log and checkpoint files will be written>
-export MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
-
 # Clone the tensorflow/models repo at the specified commit
 git clone https://github.com/tensorflow/models.git tf_models
 cd tf_models
 export TF_MODELS_DIR=$(pwd)
 git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
 cd ..
-
-# Download and extract the model package, then run a quickstart script
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-fp32-training.tar.gz
-tar -xzf ssd-resnet34-fp32-training.tar.gz
-cd ssd-resnet34-fp32-training
-
-./quickstart/fp32_training.sh
 ```
 
-<!--- 60. Docker -->
-## Docker
-
-The model container includes the scripts and libraries needed to run 
-SSD-ResNet34 FP32 training. To run one of the quickstart scripts 
-using this container, you'll need to provide volume mounts for the dataset 
-and an output directory where the log file will be written. Use an empty
-output directory to prevent checkpoint file conflicts from previous runs.
-To run more than one process, set the `MPI_NUM_PROCESSES` environment
-variable in the container.
-
+Set the `DATASET_DIR` to point to the directory with COCO training TF records
+files and the `OUTPUT_DIR` to the location where log and checkpoint files will
+be written. Use an empty output directory to prevent checkpoint file conflicts
+from previous runs. You can optionally set the `MPI_NUM_PROCESSES` environment
+variable (defaults to 1). After all the setup is complete, run the
+[quickstart script](#quick-start-scripts).
 ```
-DATASET_DIR=<path to the dataset>
-OUTPUT_DIR=<directory where log and checkpoint files will be written>
-MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
+# cd to your model zoo directory
+cd models
 
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env MPI_NUM_PROCESSES=${MPI_NUM_PROCESSES} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -it \
-  intel/object-detection:tf-latest-ssd-resnet34-fp32-training \
-  /bin/bash quickstart/fp32_training.sh
+export TF_MODELS_DIR=<path to your clone of the TensorFlow models repo>
+export DATASET_DIR=<path to the dataset>
+export OUTPUT_DIR=<directory where log and checkpoint files will be written>
+export MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
+
+./quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/fp32/fp32_training.sh
 ```
 
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
+<!--- 90. Resource Links-->
+## Additional Resources
 
-<!--- 80. License -->
-## License
-
-[LICENSE](/LICENSE)
+* To run more advanced use cases, see the instructions [here](Advanced.md)
+  for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
+  workload container:<br />
+  [https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-fp32-training-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-fp32-training-tensorflow-container.html).
 
