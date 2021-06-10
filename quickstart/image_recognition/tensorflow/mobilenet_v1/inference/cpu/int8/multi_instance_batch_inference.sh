@@ -35,11 +35,22 @@ elif [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="${MODEL_DIR}/mobilenetv1_int8_pretrained_model.pb"
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/mobilenetv1_int8_pretrained_model.pb"
+
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
+
 BATCH_SIZE="56"
 CORES_PER_INSTANCE="socket"
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name mobilenet_v1 \
   --precision int8 \
@@ -49,7 +60,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
   --output-dir ${OUTPUT_DIR} \
-  --in-graph ${MODEL_FILE} \
+  --in-graph ${PRETRAINED_MODEL} \
   ${dataset_arg} \
   $@ \
   -- input_height=224 input_width=224 warmup_steps=500 steps=1000 \
