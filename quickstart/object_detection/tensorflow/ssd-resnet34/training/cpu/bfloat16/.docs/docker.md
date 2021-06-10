@@ -5,7 +5,8 @@ The model container includes the scripts and libraries needed to run
 <model name> <precision> <mode>. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
 and an output directory where the log files and checkpoints will be written.
-To run more than one process, set the `MPI_NUM_PROCESSES` environment
+Use an empty output directory to prevent conflicts with checkpoint files
+from previous runs. To run more than one process, set the `MPI_NUM_PROCESSES` environment
 variable in the container. Depending on which quickstart script is being
 run, other volume mounts or environment variables may be required.
 
@@ -15,7 +16,7 @@ can be set in addition to the `DATASET_DIR` and `OUTPUT_DIR`. The
 `MPI_NUM_PROCESSES` will default to 1 if it is not set.
 ```
 export DATASET_DIR=<path to the COCO training data>
-export OUTPUT_DIR=<directory where the log file will be written>
+export OUTPUT_DIR=<directory where the log and checkpoint file will be written>
 export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 

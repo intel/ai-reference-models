@@ -39,15 +39,15 @@ fi
 export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}/research
 export PYTHONPATH=${PYTHONPATH}:${TF_BENCHMARKS_DIR}/scripts/tf_cnn_benchmarks
 
-FROZEN_GRAPH=${FROZEN_GRAPH-"$MODEL_DIR/pretrained_models/ssd_resnet34_int8_1200x1200_pretrained_model.pb"}
+PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_models/ssd_resnet34_int8_1200x1200_pretrained_model.pb"}
 CORES_PER_INSTANCE="4"
 BATCH_SIZE="1"
 PRECISION="int8"
 MODE="inference"
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${FROZEN_GRAPH} \
+    --in-graph ${PRETRAINED_MODEL} \
     --model-source-dir ${TF_MODELS_DIR} \
     --model-name ssd-resnet34 \
     --framework tensorflow \

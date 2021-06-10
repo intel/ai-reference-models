@@ -23,6 +23,9 @@ removing the `--docker-image` arg. Ensure that you have all of the
 [required prerequisites installed](README.md#bare-metal) in your environment
 before running without the docker container.
 
+If you are new to docker and are running into issues with the container,
+see [this document](/docs/general/docker.md) for troubleshooting tips.
+
 <!-- 50. Launch benchmark instructions -->
 Once your environment is setup, navigate to the `benchmarks` directory of
 the model zoo and set environment variables pointing to the directory for the
