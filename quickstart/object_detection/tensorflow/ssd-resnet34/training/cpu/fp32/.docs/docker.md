@@ -4,9 +4,10 @@
 The model container includes the scripts and libraries needed to run 
 <model name> <precision> <mode>. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
-and an output directory where the log file will be written. To run more
-than one process, set the `MPI_NUM_PROCESSES` environment variable in
-the container.
+and an output directory where the log file will be written. Use an empty
+output directory to prevent checkpoint file conflicts from previous runs.
+To run more than one process, set the `MPI_NUM_PROCESSES` environment
+variable in the container.
 
 ```
 DATASET_DIR=<path to the dataset>

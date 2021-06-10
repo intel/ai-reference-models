@@ -105,6 +105,10 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
             cmd_args += " --weight_decay {0}".format(self.args.weight_decay)
             cmd_args += " --num_warmup_batches {0}".format(self.args.num_warmup_batches)
             cmd_args += " --num_batches {0}".format(self.args.num_train_steps)
+
+            # write checkpoints to the checkpoint dir, if there is one
+            if self.args.checkpoint:
+              cmd_args += " --train_dir={}".format(self.args.checkpoint)
         else:
             # convergence training arguments
             cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
