@@ -54,7 +54,7 @@ git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/
 cd ${MODEL_DIR}
 
 # Run training with one mpi process
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
    --model-source-dir ${TF_MODELS_DIR} \
@@ -67,4 +67,5 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --weight_decay=1e-4 \
    --mpi_num_processes=${MPI_NUM_PROCESSES} \
    --mpi_num_processes_per_socket=1 \
-   --output-dir ${OUTPUT_DIR}
+   --output-dir ${OUTPUT_DIR} \
+   --checkpoint ${OUTPUT_DIR}

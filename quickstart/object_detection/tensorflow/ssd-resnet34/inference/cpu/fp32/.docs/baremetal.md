@@ -10,7 +10,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * numactl
 * python3-dev
 * wget
-* [intel-tensorflow](https://pypi.org/project/intel-tensorflow/)
+* [intel-tensorflow==2.5.0](https://pypi.org/project/intel-tensorflow/)
 * Cython
 * contextlib2
 * horovod==0.19.1

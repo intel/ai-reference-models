@@ -41,14 +41,18 @@ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
 cd ..
 ```
 
-After installing the prerequisites and cloning the required repositories,
-download and untar the model package. The model package includes the
-<model name> <precision> pretrained model and the scripts needed to run
-<mode>.
+Download the <model name> pretrained model for either the 300x300 or 1200x1200
+input size, depending on which [quickstart script](#quick-start-scripts) you are
+going to run. Set the `PRETRAINED_MODEL` environment variable for the path to the
+pretrained model that you'll be using.
 ```
-wget <package url>
-tar -xzf <package name>
-cd <package dir>
+# ssd-resnet34 300x300
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_bs1_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_bs1_pretrained_model.pb
+
+# ssd-resnet34 1200x1200
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 ```
 
 Set an environment variable for the path to an `OUTPUT_DIR`

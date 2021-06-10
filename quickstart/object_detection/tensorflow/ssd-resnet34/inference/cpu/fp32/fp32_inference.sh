@@ -25,9 +25,9 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-FROZEN_GRAPH=${FROZEN_GRAPH-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb"}
+PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb"}
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name ssd-resnet34 \
     --precision fp32 \
@@ -36,7 +36,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --batch-size 1 \
     --socket-id 0 \
     --benchmark-only \
-    --in-graph $FROZEN_GRAPH \
+    --in-graph $PRETRAINED_MODEL \
     --model-source-dir $TF_MODELS_DIR \
     --output-dir ${OUTPUT_DIR} \
     $@
