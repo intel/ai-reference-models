@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -33,15 +35,25 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="$(pwd)/mobilenet_v1_1.0_224_frozen.pb"
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/mobilenet_v1_1.0_224_frozen.pb"
 
-source "$(dirname $0)/common/utils.sh"
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
+
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=mobilenet_v1 \
          --precision=fp32 \
          --mode=inference \
          --framework tensorflow \
-         --in-graph ${MODEL_FILE} \
+         --in-graph ${PRETRAINED_MODEL} \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=100 \
