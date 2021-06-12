@@ -74,6 +74,8 @@ To run with input size of 1200x1200, set the `--in-graph` to the downloaded froz
 To run with input size of 300x300, set the `--in-graph` to the downloaded frozen graph `ssd_resnet34_fp32_bs1_pretrained_model.pb`.
 Use `--benchmark-only` flag to measure performance, and `--accuracy-only` flag to test accuracy.
 If you run in Docker mode, you also need to provide `ssd-resnet-benchmarks` path for `volume` flag.
+Optionally, you can also specify the number of `warmup-steps` and `steps` as
+shown in the example below, the default values are `warmup-steps=200` and `steps=800`.
 
 ```
 cd $MODEL_WORK_DIR/models/benchmarks
@@ -91,7 +93,7 @@ python launch_benchmark.py \
     --docker-image intel/intel-optimized-tensorflow:latest \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --benchmark-only \
-    -- input-size=1200
+    -- input-size=1200 warmup-steps=50 steps=200
 ```
 
 To run the accuracy test, use the following command with `--data-location` set to the tf record file that you generated.
