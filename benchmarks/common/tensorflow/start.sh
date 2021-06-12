@@ -1120,6 +1120,8 @@ function ssd-resnet34() {
           cd ${old_dir}
 
           CMD="${CMD} \
+          $(add_arg "--warmup-steps" ${warmup_steps}) \
+          $(add_arg "--steps" ${steps}) \
           $(add_arg "--input-size" ${input_size})"
           CMD=${CMD} run_model
 

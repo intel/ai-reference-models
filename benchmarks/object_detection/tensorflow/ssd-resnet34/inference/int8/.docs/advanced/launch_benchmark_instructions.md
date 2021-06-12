@@ -22,6 +22,8 @@ path for `volume` flag. To run without docker, omit the `--docker-image` and
 `--volume` flags. By default it runs with input size 300x300, you may
 add `-- input-size=1200` flag to run benchmark with input size 1200x1200.
 Use the 300x300 or 1200x1200 pretrained model, depending on the input size.
+Optionally, you can also specify the number of `warmup-steps` and `steps` as
+shown in the example below, the default values are `warmup-steps=200` and `steps=800`.
 ```
 # benchmarks with input size 300x300
 python launch_benchmark.py \
@@ -36,7 +38,8 @@ python launch_benchmark.py \
     --docker-image <docker image> \
     --volume /home/<user>/ssd-resnet-benchmarks:/workspace/ssd-resnet-benchmarks \
     --output-dir ${OUTPUT_DIR} \
-    --benchmark-only
+    --benchmark-only \
+    -- warmup-steps=50 steps=200
 ```
 
 To run the accuracy test, use the command below. By default it runs with
