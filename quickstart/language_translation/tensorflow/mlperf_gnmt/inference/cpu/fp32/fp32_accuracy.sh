@@ -35,8 +35,20 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="${MODEL_DIR}/mlperf_gnmt_fp32_pretrained_model.pb"
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/mlperf_gnmt_fp32_pretrained_model.pb"
+
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
+
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name mlperf_gnmt \
   --framework tensorflow \
   --precision fp32 \
@@ -44,6 +56,6 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size 32 \
   --socket-id 0 \
   --data-location ${DATASET_DIR} \
-  --in-graph ${MODEL_FILE} \
+  --in-graph ${PRETRAINED_MODEL} \
   --output-dir ${OUTPUT_DIR} \
   --accuracy-only
