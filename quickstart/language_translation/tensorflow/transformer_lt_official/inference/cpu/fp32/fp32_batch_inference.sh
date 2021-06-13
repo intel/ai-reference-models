@@ -35,13 +35,13 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-FROZEN_GRAPH=${FROZEN_GRAPH-"$MODEL_DIR/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb"}
-if [[ ! -f "${FROZEN_GRAPH}" ]]; then
+PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb"}
+if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   # If the frozen graph is not found, check if we have to untar the file
   tar -xvf transformer_lt_official_fp32_pretrained_model.tar.gz
 
-  if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-    echo "The frozen graph could not be found at $FROZEN_GRAPH"
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The frozen graph could not be found at $PRETRAINED_MODEL from the PRETRAINED_MODEL env var"
     exit 1
   fi
 fi
@@ -51,7 +51,7 @@ EN_DATA_FILE=${EN_DATA_FILE-newstest2014.en}
 DE_DATA_FILE=${DE_DATA_FILE-newstest2014.de}
 VOCAB_FILE=${VOCAB_FILE-vocab.txt}
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name transformer_lt_official \
   --precision fp32 \
@@ -59,7 +59,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --framework tensorflow \
   --batch-size 64 \
   --socket-id 0 \
-  --in-graph ${FROZEN_GRAPH} \
+  --in-graph ${PRETRAINED_MODEL} \
   --data-location ${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   $@ \

@@ -26,18 +26,18 @@ You can also use the helper script [download_glue_data.py](https://gist.github.c
 3. Download the fp32 "BERT-Base, Uncased" pre-trained model and unzip it:
 
    ```bash
-   $ cd data/MRPC
-   $ wget https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip
-   $ unzip uncased_L-12_H-768_A-12.zip
-   $ cd ../..
+   cd data/MRPC
+   wget https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip
+   unzip uncased_L-12_H-768_A-12.zip
+   cd ../..
    ```
 
 
 4. Download [google-research/bert](https://github.com/google-research/bert):
 
    ```bash
-   $ git clone --single-branch https://github.com/google-research/bert.git && cd bert/
-   $ git checkout 88a817c37f788702a363ff935fd173b6dc6ac0d6
+   git clone --single-branch https://github.com/google-research/bert.git && cd bert/
+   git checkout 88a817c37f788702a363ff935fd173b6dc6ac0d6
    ```
 
 
@@ -49,12 +49,12 @@ You can also use the helper script [download_glue_data.py](https://gist.github.c
    Run with local TensorFlow:
    ```bash
    # Set dataset dir from step 2
-   $ export MRPC_DIR=/home/<user>/data/MRPC
+   export MRPC_DIR=/home/<user>/data/MRPC
    # Set model source dir from step 4
-   $ export MODEL_SOURCE=/home/<user/bert/
+   export MODEL_SOURCE=/home/<user/bert/
    
-   $ cd models/benchmarks
-   $ python launch_benchmark.py \
+   cd models/benchmarks
+   python launch_benchmark.py \
      --accuracy-only \
      --checkpoint $MRPC_DIR/uncased_L-12_H-768_A-12/ \
      --data-location $MRPC_DIR \
