@@ -37,13 +37,8 @@ The path to the directory with these files should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=64). |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
-
+| [`fp32_online_inference.sh`](/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/fp32_online_inference.sh) | Runs online inference (batch_size=1). |
+| [`fp32_batch_inference.sh`](/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/fp32_batch_inference.sh) | Runs batch inference (batch_size=64). |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -71,7 +66,7 @@ cd transformer-lt-official-fp32-inference
 ```
 
 If you have your own pretrained model, you can specify the path to the frozen
-graph .pb file using the `FROZEN_GRAPH` environment variable.
+graph .pb file using the `PRETRAINED_MODEL` environment variable.
 
 
 <!-- 60. Docker -->

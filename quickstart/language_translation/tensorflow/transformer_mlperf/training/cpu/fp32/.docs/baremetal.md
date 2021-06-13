@@ -42,3 +42,4 @@ OUTPUT_DIR=<directory where log files will be written>
 cd <package dir>
 ./quickstart/fp32_training_mpirun.sh
 ```
+
