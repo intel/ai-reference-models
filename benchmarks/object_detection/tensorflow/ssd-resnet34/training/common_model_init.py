@@ -108,7 +108,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
 
             # write checkpoints to the checkpoint dir, if there is one
             if self.args.checkpoint:
-              cmd_args += " --train_dir={}".format(self.args.checkpoint)
+                cmd_args += " --train_dir={}".format(self.args.checkpoint)
         else:
             # convergence training arguments
             cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
