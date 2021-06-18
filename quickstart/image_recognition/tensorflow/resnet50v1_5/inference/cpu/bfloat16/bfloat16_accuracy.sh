@@ -35,16 +35,21 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="${MODEL_DIR}/resnet50_v1_5_bfloat16.pb"
-if [ ! -f "${MODEL_FILE}" ]; then
-    echo "Following ${MODEL_FILE} frozen graph file does not exists"
-    exit 1
-fi
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/resnet50_v1_5_bfloat16.pb"
 
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
 
 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
-    --in-graph ${MODEL_FILE} \
+    --in-graph ${PRETRAINED_MODEL} \
     --model-name resnet50v1_5 \
     --framework tensorflow \
     --precision bfloat16 \
