@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -43,7 +45,7 @@ num_intra_threads=$(($cores_per_socket - 4))
 BATCH_SIZE="256"
 NUM_INSTANCES="2"
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision=fp32 \
@@ -57,7 +59,6 @@ _command python benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --num-intra-threads ${num_intra_threads} \
   --num-inter-threads 2 \
-  --numa-cores-per-instance socket \
   $@ \
   -- \
   steps=50 train_epochs=1 epochs_between_evals=1 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_fp32_training_bs${BATCH_SIZE}_all_instances.log
