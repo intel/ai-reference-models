@@ -127,8 +127,10 @@ class ModelInitializer(BaseModelInitializer):
                      " --predict_batch_size=" + str(self.args.batch_size) + \
                      " --experimental_gelu=" + str(self.args.experimental_gelu) + \
                      " --optimized_softmax=" + str(self.args.optimized_softmax) + \
-                     " --input_graph=" + str(self.args.input_graph) + \
                      " --do_predict=True "
+
+        if self.args.input_graph:
+            model_args += " --input_graph=" + str(self.args.input_graph)
 
         if self.args.accuracy_only:
             model_args += " --mode=accuracy"
