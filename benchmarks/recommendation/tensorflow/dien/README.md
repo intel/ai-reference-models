@@ -141,7 +141,10 @@ Please specify the `data-location` and `in-graph`.
 To check for latency set the batch-size to 1 and check 
 the time taken. Since the dataset for DIEN has varying 
 sequential length, an additional option to set sequential
-length can be used. The option is ```--exact-max-length```
+length can be used. The option is ```--exact-max-length.```
+Another option is ```num-iterations```. This options can be used
+to run inference multiple times to get average performance over 
+the num of iterations specified.
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
@@ -154,8 +157,9 @@ python launch_benchmark.py \
     --batch-size 1 \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
-    --exact-max-length 100 \
-    --docker-image intel/intel-optimized-tensorflow:latest
+    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    -- exact-max-length 100 \
+       num-iterations 10 
 ```
 
 Since DIEN is not a big model checking for latency for batch-size 1
