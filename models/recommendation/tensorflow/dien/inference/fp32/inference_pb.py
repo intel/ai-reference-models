@@ -23,6 +23,7 @@ parser.add_argument("--batch_size", type=int, default=128, help="batch size")
 parser.add_argument("--data_type", type=str, default='FP32', help="data type: FP32 or FP16")
 parser.add_argument("--num_intra_threads", type=int, default=None, help="num-intra-threads")
 parser.add_argument("--num_inter_threads", type=int, default=None, help="num-inter-threads")
+parser.add_argument("--num_iterations", type=int, default=2, help="num_iterations")
 parser.add_argument("--data_location", type=str, default=None, help="data location")
 parser.add_argument("--timeline", type=bool, default=True, help="obtain timeline")
 parser.add_argument("--input_graph", type=str, default=None, help="pb location")
@@ -100,10 +101,11 @@ def prepare_data(input, target, maxlen=None, return_neg=False):
         return uids, mids, cats, mid_his, cat_his, mid_mask, numpy.array(target), numpy.array(lengths_x)
 
 
-def calculate(sess, test_data, input_tensor, output_tensor, batch_size, exact_max_length=0):
+def filtered_data(test_data, exact_max_length=0):
     nums = 0
     total_data = []
 
+    print("Preparing and filtering Data....")
     prepare_start = time.time()
     for src, tgt in test_data:
 
@@ -122,6 +124,31 @@ def calculate(sess, test_data, input_tensor, output_tensor, batch_size, exact_ma
 
     prepare_end = time.time()
     # print("prepare time   ", prepare_end - prepare_start)
+    print("Preparing and filtering Complete....")
+    return total_data, nums
+
+def calculate(sess, total_data, input_tensor, output_tensor, batch_size):
+    #nums = 0
+    #total_data = []
+
+    #prepare_start = time.time()
+    #for src, tgt in test_data:
+
+    #    sys.stdout.flush()
+    #    #uids, mids, cats, mid_his, cat_his, mid_mask, target, sl, noclk_mids, noclk_cats = prepare_data(
+    #    #    src, tgt, return_neg=True)
+    #    uids, mids, cats, mid_his, cat_his, mid_mask, target, sl, noclk_mids, noclk_cats = prepare_data(
+    #         src, tgt, maxlen=100, return_neg=True)
+
+    #    #if len(mid_his[0]) < exact_max_length:
+    #   if exact_max_length !=0 and len(mid_his[0]) < exact_max_length:
+    #      continue
+
+    #   nums += 1
+    #   total_data.append([uids, mids, cats, mid_his, cat_his, mid_mask, target, sl])
+
+    #repare_end = time.time()
+    ## print("prepare time   ", prepare_end - prepare_start)
 
     loss_sum = 0.
     accuracy_sum = 0.
@@ -171,7 +198,7 @@ def calculate(sess, test_data, input_tensor, output_tensor, batch_size, exact_ma
     test_auc = calc_auc(stored_arr)
     accuracy_sum = accuracy_sum / i
 
-    return test_auc, accuracy_sum, eval_time, nums
+    return test_auc, accuracy_sum, eval_time
 
 
 def inference(data_location,
@@ -229,7 +256,8 @@ def inference(data_location,
 
         approximate_accelerator_time = 0
 
-        test_auc, test_accuracy, eval_time, num_iters = calculate(sess, test_data, input_tensor, output_tensor, batch_size)
+        total_data,num_iters = filtered_data(test_data)
+        test_auc, test_accuracy, eval_time= calculate(sess, total_data, input_tensor, output_tensor, batch_size)
         if args.accuracy_only :
            print('test_auc: %.4f ---- test_accuracy: %.9f ' % (test_auc, test_accuracy))
            return
@@ -239,19 +267,20 @@ def inference(data_location,
         else :
           print("Max length :100")
  
-        niters = 2
-        for i in range(niters):
-            test_auc, test_accuracy, eval_time, num_iters = calculate(
-                sess, test_data, input_tensor, output_tensor, batch_size, args.exact_max_length)
+        total_data, num_iters = filtered_data(test_data, args.exact_max_length)
+        loop_iters = args.num_iterations 
+        for i in range(loop_iters):
+            test_auc, test_accuracy, eval_time  = calculate(
+                sess, total_data, input_tensor, output_tensor, batch_size)
             approximate_accelerator_time += eval_time
-            print('test_auc: %.4f ---- test_accuracy: %.9f ---- eval_time: %.3f' % (test_auc, test_accuracy, eval_time))
-        print("num_iters ", num_iters)
+            print('Iter : %d test_auc: %.4f ---- test_accuracy: %.9f ---- eval_time: %.3f' % (i, test_auc, test_accuracy, eval_time))
         print("batch_size ", batch_size)
-        print("niters ", niters)
+        print("Batch count ", num_iters)
+        print("Number of iterations", loop_iters)
         print("Total recommendations: %d" % (num_iters * batch_size))
-        print("Approximate accelerator time in seconds is %.3f" % (approximate_accelerator_time/niters))
+        print("Approximate accelerator time in seconds is %.3f" % (approximate_accelerator_time/loop_iters))
         print("Approximate accelerator performance in recommendations/second is %.3f" %
-              (float(niters * num_iters * batch_size) / float(approximate_accelerator_time)))
+              (float(loop_iters * num_iters * batch_size) / float(approximate_accelerator_time)))
 
 
 if __name__ == '__main__':
