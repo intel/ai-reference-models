@@ -605,6 +605,9 @@ function dien_options() {
   if [[ -n "${exact_max_length}" && ${exact_max_length} != "" ]]; then
     CMD=" ${CMD} --exact-max-length=${exact_max_length}"
   fi
+  if [[ -n "${num_iterations}" && ${num_iterations} != "" ]]; then
+    CMD=" ${CMD} --num-iterations=${num_iterations}"
+  fi
 }
 
 # DIEN model
