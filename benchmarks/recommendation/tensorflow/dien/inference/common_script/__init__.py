@@ -17,14 +17,3 @@
 #
 
 #
-
-from ..common_script.dien_model_init import DienModelInitializer
-
-
-class ModelInitializer(DienModelInitializer):
-    """ Initialize FP32 model and run benchmark """
-    def __init__(self, args, custom_args=[], platform_util=None):
-        super(ModelInitializer, self).__init__(args, custom_args, platform_util)
-
-        if self.args.precision == "bfloat16":
-            print("Ran inference with bfloat16 data type")

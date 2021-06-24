@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--mode", type=str, default='train', help="mode, train or test")
 parser.add_argument("--seed", type=int, default=3, help="seed value")
 parser.add_argument("--batch_size", type=int, default=128, help="batch size")
-parser.add_argument("--data_type", type=str, default='FP32', help="data type: FP32 or FP16")
+parser.add_argument("--data_type", type=str, default='fp32', help="data type: fp32, fp16 or bfloat16")
 parser.add_argument("--num_intra_threads", type=int, default=None, help="num-intra-threads")
 parser.add_argument("--num_inter_threads", type=int, default=None, help="num-inter-threads")
 parser.add_argument("--num_iterations", type=int, default=2, help="num_iterations")
@@ -29,9 +29,9 @@ parser.add_argument("--timeline", type=bool, default=True, help="obtain timeline
 parser.add_argument("--input_graph", type=str, default=None, help="pb location")
 parser.add_argument("--accuracy_only", action='store_true', help="Show accuracy only")
 parser.add_argument("--exact_max_length", type=int, default=0, help="Show perf for exact max length")
+parser.add_argument("--graph_type", type=str, default='static', help="graph_type: static or dynamic")
 
 args = parser.parse_args()
-
 
 def prepare_data(input, target, maxlen=None, return_neg=False):
     # x: a list of sentences
@@ -76,9 +76,9 @@ def prepare_data(input, target, maxlen=None, return_neg=False):
     cat_his = numpy.zeros((n_samples, maxlen_x)).astype('int64')
     noclk_mid_his = numpy.zeros((n_samples, maxlen_x, neg_samples)).astype('int64')
     noclk_cat_his = numpy.zeros((n_samples, maxlen_x, neg_samples)).astype('int64')
-    if args.data_type == 'FP32':
+    if args.data_type == 'fp32' or args.data_type == 'bfloat16':
         data_type = 'float32'
-    elif args.data_type == 'FP16':
+    elif args.data_type == 'fp16':
         data_type = 'float16'
     else:
         raise ValueError("Invalid model data type: %s" % args.data_type)
@@ -192,7 +192,7 @@ def calculate(sess, total_data, input_tensor, output_tensor, batch_size):
     if args.timeline:
         fetched_timeline = timeline.Timeline(run_metadata.step_stats)
         chrome_trace = fetched_timeline.generate_chrome_trace_format()
-        with open('./dien_timeline_inference.json'.format(i), 'w') as f:
+        with open('./dien_timeline_inference_{}.json'.format(i), 'w') as f:
             f.write(chrome_trace)
 
     test_auc = calc_auc(stored_arr)
@@ -205,7 +205,8 @@ def inference(data_location,
               pb_path,
               batch_size=128,
               maxlen=100,
-              data_type='FP32',
+              data_type='fp32',
+              graph_type='static',
               seed=2):
 
     print("graph location", pb_path)
@@ -233,17 +234,24 @@ def inference(data_location,
                     "Inputs/mid_his_batch_ph",
                     "Inputs/cat_his_batch_ph",
                     "Inputs/mask",
-                    "Inputs/target_ph",
-                    "Inputs/seq_len_ph"]
+                    "Inputs/target_ph"]
+    if (graph_type == 'dynamic'):
+      input_layers.append("Inputs/seq_len_ph")               
     input_tensor = [graph.get_tensor_by_name(x + ":0") for x in input_layers]
     output_layers = ["dien/fcn/add_6",
                      "dien/fcn/Metrics/Mean_1"]
     output_tensor = [graph.get_tensor_by_name(x + ":0") for x in output_layers]
 
     session_config = tf.compat.v1.ConfigProto()
-    graph_options = tf.compat.v1.GraphOptions(rewrite_options=rewriter_config_pb2.RewriterConfig(
+    if data_type == 'bfloat16':
+      graph_options = tf.compat.v1.GraphOptions(rewrite_options=rewriter_config_pb2.RewriterConfig(
+                                              remapping=rewriter_config_pb2.RewriterConfig.AGGRESSIVE,
+                                       auto_mixed_precision_mkl=rewriter_config_pb2.RewriterConfig.ON))
+    if data_type == 'fp32':
+       graph_options = tf.compat.v1.GraphOptions(rewrite_options=rewriter_config_pb2.RewriterConfig(
                                               remapping=rewriter_config_pb2.RewriterConfig.AGGRESSIVE))
-    #                                   auto_mixed_precision_mkl=rewriter_config_pb2.RewriterConfig.ON))
+
+
     session_config = tf.compat.v1.ConfigProto(graph_options=graph_options)
 
     if args.num_intra_threads:
@@ -256,14 +264,16 @@ def inference(data_location,
 
         approximate_accelerator_time = 0
 
-        total_data,num_iters = filtered_data(test_data)
+        total_data,num_iters = filtered_data(test_data) \
+                               if graph_type == 'dynamic'    \
+                               else filtered_data(test_data, args.exact_max_length)
         test_auc, test_accuracy, eval_time= calculate(sess, total_data, input_tensor, output_tensor, batch_size)
         if args.accuracy_only :
            print('test_auc: %.4f ---- test_accuracy: %.9f ' % (test_auc, test_accuracy))
            return
        
         if args.exact_max_length:
-          print("Exact Max length set to :",args.exact_max_length);
+          print("Exact Max length set to :",args.exact_max_length)
         else :
           print("Max length :100")
  
@@ -293,4 +303,4 @@ if __name__ == '__main__':
     random.seed(SEED)
 
     inference(data_location=args.data_location, seed=SEED, batch_size=args.batch_size,
-              data_type=args.data_type, pb_path=args.input_graph)
+              data_type=args.data_type, graph_type=args.graph_type, pb_path=args.input_graph)

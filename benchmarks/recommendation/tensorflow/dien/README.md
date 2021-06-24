@@ -83,6 +83,8 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dien_fp32_
 ### 3. Run inference  with fp32 for throughput 
 Please specify the `data-location` and `in-graph`. 
 Note that --num-intra-threads and --num-inter-threads need to be specified dpending on the requirement/machine.
+Please specify graph_type as `static` if you are using static RNN 
+graph or `dynamic` if using dynamic RNN graph
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
@@ -95,6 +97,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
+    --graph_type $static/dynamic  \
     --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
@@ -145,6 +148,9 @@ length can be used. The option is ```--exact-max-length.```
 Another option is ```num-iterations```. This options can be used
 to run inference multiple times to get average performance over 
 the num of iterations specified.
+
+Please specify graph_type as `static` if you are using static RNN 
+graph or `dynamic` if using dynamic RNN graph
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
@@ -157,6 +163,7 @@ python launch_benchmark.py \
     --batch-size 1 \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
+    --graph_type $static/dynamic  \
     --docker-image intel/intel-optimized-tensorflow:2.4.0 \
     -- exact-max-length 100 \
        num-iterations 10 
@@ -199,6 +206,7 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
+    --graph_type=$static/dynamic \
     --docker-image intel/intel-optimized-tensorflow:latest
 
 
