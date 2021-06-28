@@ -38,19 +38,30 @@ elif [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-MODEL_FILE="$(pwd)/resnet50_v1.pb"
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/resnet50_v1.pb"
+
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
+
 BATCH_SIZE="1"
 CORES_PER_INSTANCE="4"
 PRECISION="fp32"
 MODE="inference"
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision=${PRECISION} \
   --mode=${MODE} \
   --framework tensorflow \
-  --in-graph ${MODEL_FILE} \
+  --in-graph ${PRETRAINED_MODEL} \
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \

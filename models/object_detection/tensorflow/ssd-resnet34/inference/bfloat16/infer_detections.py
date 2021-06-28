@@ -99,6 +99,14 @@ class ssd_resnet34_infer:
                             help="Input image size, 300 or 1200",
                             dest="input_size", type=int, default=300)
 
+    arg_parser.add_argument("--warmup-steps",
+                            help="Number of warmup steps",
+                            dest='warmup_steps', type=int, default=200)
+
+    arg_parser.add_argument("--steps",
+                            help="Number of steps",
+                            dest='steps', type=int, default=800)
+
     # parse the arguments
     self.args = arg_parser.parse_args()
 
@@ -153,8 +161,8 @@ class ssd_resnet34_infer:
       else:
         raise Exception('input size unsupported')
 
-      total_iter = 1000
-      warmup_iter = 200
+      total_iter = self.args.steps + self.args.warmup_steps
+      warmup_iter = self.args.warmup_steps
       ttime = 0.0
 
       print('total iteration is {0}'.format(str(total_iter)))

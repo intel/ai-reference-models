@@ -35,8 +35,18 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  PRETRAINED_MODEL="${MODEL_DIR}/mobilenetv1_int8_pretrained_model.pb"
 
-MODEL_FILE="$(pwd)/mobilenetv1_int8_pretrained_model.pb"
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
+
 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
      --model-name mobilenet_v1 \
      --precision int8 \
@@ -46,7 +56,7 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
      --batch-size 100  \
      --socket-id 0 \
      --output-dir ${OUTPUT_DIR} \
-     --in-graph ${MODEL_FILE} \
+     --in-graph ${PRETRAINED_MODEL} \
      --data-location ${DATASET_DIR} \
      $@ \
      -- input_height=224 input_width=224 \

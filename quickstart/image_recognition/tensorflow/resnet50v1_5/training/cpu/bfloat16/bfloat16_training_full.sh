@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -39,7 +41,7 @@ if [[ -n $MPI_NUM_PROCESSES ]]; then
   mpi_num_proc_arg="--mpi_num_processes=${MPI_NUM_PROCESSES}"
 fi
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \

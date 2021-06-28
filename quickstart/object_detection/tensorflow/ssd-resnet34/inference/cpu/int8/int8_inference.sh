@@ -39,12 +39,14 @@ if [ ! -d "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
+PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_models/ssd_resnet34_int8_bs1_pretrained_model.pb"}
+
 export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}/research
 export PYTHONPATH=${PYTHONPATH}:${TF_BENCHMARKS_DIR}/scripts/tf_cnn_benchmarks
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${MODEL_DIR}/pretrained_models/ssd_resnet34_int8_bs1_pretrained_model.pb \
+    --in-graph ${PRETRAINED_MODEL} \
     --model-source-dir ${TF_MODELS_DIR} \
     --model-name ssd-resnet34 \
     --framework tensorflow \

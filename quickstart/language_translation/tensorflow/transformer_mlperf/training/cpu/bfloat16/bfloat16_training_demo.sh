@@ -41,7 +41,7 @@ if [[ -n $MPI_NUM_PROCESSES ]]; then
 fi
 
 # Run training with fewer training steps, and with evaluation:
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --framework tensorflow \
     --precision bfloat16 \

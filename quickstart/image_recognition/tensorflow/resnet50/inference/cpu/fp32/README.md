@@ -6,28 +6,28 @@
 This document has instructions for running ResNet50 FP32 inference using
 Intel-optimized TensorFlow.
 
-Note that the ImageNet dataset is used in these ResNet50 examples.
-Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
-After running the conversion script you should have a directory with the
-ImageNet dataset in the TF records format.
-
 <!--- 20. Download link -->
 ## Download link
 
 [resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50-fp32-inference.tar.gz)
+
+<!--- 30. Datasets -->
+## Datasets
+
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+Set the `DATASET_DIR` to point to this directory when running ResNet50.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
-| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
+| [`fp32_online_inference.sh`](/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/fp32_online_inference.sh) | Runs online inference (batch_size=1). |
+| [`fp32_batch_inference.sh`](/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/fp32_batch_inference.sh) | Runs batch inference (batch_size=128). |
+| [`fp32_accuracy.sh`](/quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/fp32_accuracy.sh) | Measures the model accuracy (batch_size=100). |
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
 
 
 <!--- 50. Bare Metal -->

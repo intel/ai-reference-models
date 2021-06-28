@@ -59,7 +59,7 @@ if [ ! -d "${CHECKPOINT_DIR}" ]; then
 fi
 
 # Run training with one mpi process
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location ${DATASET_DIR} \
   --model-source-dir ${TF_MODELS_DIR} \

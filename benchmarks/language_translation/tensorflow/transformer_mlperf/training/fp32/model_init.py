@@ -132,6 +132,7 @@ class ModelInitializer(BaseModelInitializer):
         # Model parameter control
         # TODO: need more arguments for full training
         cmd_args = " --data_dir=" + str(self.args.data_location) + \
+                   " --model_dir=" + str(self.args.output_dir) + \
                    " --random_seed=" + str(self.args.random_seed) + \
                    " --params=" + str(self.args.params) + \
                    " --train_steps=" + str(self.args.train_steps) + \

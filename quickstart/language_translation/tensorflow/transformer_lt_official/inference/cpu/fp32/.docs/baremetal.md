@@ -24,5 +24,5 @@ cd <package dir>
 ```
 
 If you have your own pretrained model, you can specify the path to the frozen
-graph .pb file using the `FROZEN_GRAPH` environment variable.
+graph .pb file using the `PRETRAINED_MODEL` environment variable.
 

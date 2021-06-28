@@ -86,13 +86,9 @@ For accuracy testing, download the COCO validation dataset, using the
 
 | Script name | Description |
 |-------------|-------------|
-| [`bfloat16_training_demo.sh`](bfloat16_training_demo.sh) | Executes a demo run with a limited number of training steps to test performance. Set the number of steps using the `TRAIN_STEPS` environment variable (defaults to 100). |
-| [`bfloat16_training.sh`](bfloat16_training.sh) | Runs multi-instance training to convergence. Download the backbone model specified in the instructions below and pass that directory path in the `BACKBONE_MODEL_DIR` environment variable. |
-| [`bfloat16_training_accuracy.sh`](bfloat16_training_accuracy.sh) | Runs the model in eval mode to check accuracy. Specify which checkpoint files to use with the `CHECKPOINT_DIR` environment variable. |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
+| [`bfloat16_training_demo.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/bfloat16_training_demo.sh) | Executes a demo run with a limited number of training steps to test performance. Set the number of steps using the `TRAIN_STEPS` environment variable (defaults to 100). |
+| [`bfloat16_training.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/bfloat16_training.sh) | Runs multi-instance training to convergence. Download the backbone model specified in the instructions below and pass that directory path in the `BACKBONE_MODEL_DIR` environment variable. |
+| [`bfloat16_training_accuracy.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/bfloat16_training_accuracy.sh) | Runs the model in eval mode to check accuracy. Specify which checkpoint files to use with the `CHECKPOINT_DIR` environment variable. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -147,12 +143,13 @@ cd ..
 ```
 
 To run the [`bfloat16_training_demo.sh`](bfloat16_training_demo.sh) quickstart
-script, set the `OUTPUT_DIR` (location where you want log files to be written)
-and `DATASET_DIR` (path to the COCO training dataset). You can optionally
+script, set the `OUTPUT_DIR` (location where you want log and checkpoint files to be written)
+and `DATASET_DIR` (path to the COCO training dataset). Use an empty output
+directory to prevent conflict with checkpoint files from previous runs. You can optionally
 set the `TRAIN_STEPS` (defaults to 100) and `MPI_NUM_PROCESSES` (defaults to 1).
 ```
 export DATASET_DIR=<path to the COCO training data>
-export OUTPUT_DIR=<directory where the log file will be written>
+export OUTPUT_DIR=<directory where the log and checkpoint files will be written>
 export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 
@@ -203,7 +200,8 @@ The model container includes the scripts and libraries needed to run
 SSD-ResNet34 BFloat16 training. To run one of the quickstart scripts 
 using this container, you'll need to provide volume mounts for the dataset 
 and an output directory where the log files and checkpoints will be written.
-To run more than one process, set the `MPI_NUM_PROCESSES` environment
+Use an empty output directory to prevent conflicts with checkpoint files
+from previous runs. To run more than one process, set the `MPI_NUM_PROCESSES` environment
 variable in the container. Depending on which quickstart script is being
 run, other volume mounts or environment variables may be required.
 
@@ -213,7 +211,7 @@ can be set in addition to the `DATASET_DIR` and `OUTPUT_DIR`. The
 `MPI_NUM_PROCESSES` will default to 1 if it is not set.
 ```
 export DATASET_DIR=<path to the COCO training data>
-export OUTPUT_DIR=<directory where the log file will be written>
+export OUTPUT_DIR=<directory where the log and checkpoint file will be written>
 export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 

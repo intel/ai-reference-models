@@ -30,13 +30,14 @@ Clone the [TensorFlow Model Garden](https://github.com/tensorflow/models)
 repo at the commit specified below, and set the `TF_MODELS_DIR` environment
 variable to point to that directory. Set the `DATASET_DIR` to point to the
 directory with COCO training TF records files and the `OUTPUT_DIR` to the
-location where logs will be written. You can optionally set the
-`MPI_NUM_PROCESSES` environment variable (defaults to 1).
+location where log and checkpoint files will be written. Use an empty
+output directory to prevent checkpoint file conflicts from prevouis runs.
+You can optionally set the `MPI_NUM_PROCESSES` environment variable (defaults to 1).
 After all the setup is complete, run the [quickstart script](#quick-start-scripts).
 
 ```
 export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<directory where log and checkpoint files will be written>
 export MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
 
 # Clone the tensorflow/models repo at the specified commit

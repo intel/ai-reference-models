@@ -35,15 +35,11 @@ test uses synthetic dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| [int8_accuracy.sh](int8_accuracy.sh) | Tests accuracy using the COCO dataset in the TF Records format with an input size of 300x300. |
-| [int8_inference.sh](int8_inference.sh) | Run inference using synthetic data with an input size of 300x300 and outputs performance metrics. |
-| [int8_accuracy_1200.sh](int8_accuracy_1200.sh) | Tests accuracy using the COCO dataset in the TF Records format with an input size of 1200x1200. |
-| [multi_instance_batch_inference_1200.sh](multi_instance_batch_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with an input size of 1200x1200 and one instance per socket. Waits for all instances to complete, then prints a summarized throughput value. |
-| [multi_instance_online_inference_1200.sh](multi_instance_online_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with an input size of 1200x1200 and four cores per instance. Waits for all instances to complete, then prints a summarized throughput value. |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
+| [int8_accuracy.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/int8_accuracy.sh) | Tests accuracy using the COCO dataset in the TF Records format with an input size of 300x300. |
+| [int8_inference.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/int8_inference.sh) | Run inference using synthetic data with an input size of 300x300 and outputs performance metrics. |
+| [int8_accuracy_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/int8_accuracy_1200.sh) | Tests accuracy using the COCO dataset in the TF Records format with an input size of 1200x1200. |
+| [multi_instance_batch_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/multi_instance_batch_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with an input size of 1200x1200 and one instance per socket. Waits for all instances to complete, then prints a summarized throughput value. |
+| [multi_instance_online_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/multi_instance_online_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with an input size of 1200x1200 and four cores per instance. Waits for all instances to complete, then prints a summarized throughput value. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -88,14 +84,18 @@ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
 cd ..
 ```
 
-After installing the prerequisites and cloning the required repositories,
-download and untar the model package. The model package includes the
-SSD-ResNet34 Int8 pretrained model and the scripts needed to run
-inference.
+Download the SSD-ResNet34 pretrained model for either the 300x300 or 1200x1200
+input size, depending on which [quickstart script](#quick-start-scripts) you are
+going to run. Set the `PRETRAINED_MODEL` environment variable for the path to the
+pretrained model that you'll be using.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ssd-resnet34-int8-inference.tar.gz
-tar -xzf ssd-resnet34-int8-inference.tar.gz
-cd ssd-resnet34-int8-inference
+# ssd-resnet34 300x300
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_bs1_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_bs1_pretrained_model.pb
+
+# ssd-resnet34 1200x1200
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 ```
 
 Set an environment variable for the path to an `OUTPUT_DIR`
