@@ -51,12 +51,13 @@ cd ..
 ```
 
 To run the [`bfloat16_training_demo.sh`](bfloat16_training_demo.sh) quickstart
-script, set the `OUTPUT_DIR` (location where you want log files to be written)
-and `DATASET_DIR` (path to the COCO training dataset). You can optionally
+script, set the `OUTPUT_DIR` (location where you want log and checkpoint files to be written)
+and `DATASET_DIR` (path to the COCO training dataset). Use an empty output
+directory to prevent conflict with checkpoint files from previous runs. You can optionally
 set the `TRAIN_STEPS` (defaults to 100) and `MPI_NUM_PROCESSES` (defaults to 1).
 ```
 export DATASET_DIR=<path to the COCO training data>
-export OUTPUT_DIR=<directory where the log file will be written>
+export OUTPUT_DIR=<directory where the log and checkpoint files will be written>
 export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 

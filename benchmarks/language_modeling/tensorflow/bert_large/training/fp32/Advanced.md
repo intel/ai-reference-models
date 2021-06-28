@@ -9,10 +9,10 @@ training, which provides more control over the individual parameters that
 are used. For more information on using [`/benchmarks/launch_benchmark.py`](/benchmarks/launch_benchmark.py),
 see the [launch benchmark documentation](/docs/general/tensorflow/LaunchBenchmark.md).
 
-Prior using these instructions, please follow the setup instructions from
+Prior to using these instructions, please follow the setup instructions from
 the model's [README](README.md) and/or the
 [AI Kit documentation](/docs/general/tensorflow/AIKit.md) to get your environment
-setup (if running in bare metal) and download the dataset, pretrained model, etc.
+setup (if running on bare metal) and download the dataset, pretrained model, etc.
 If you are using AI Kit, please exclude the `--docker-image` flag from the
 commands below, since you will be running the the TensorFlow conda environment
 instead of docker.
@@ -20,7 +20,7 @@ instead of docker.
 <!-- 55. Docker arg -->
 Any of the `launch_benchmark.py` commands below can be run on bare metal by
 removing the `--docker-image` arg. Ensure that you have all of the
-[required prerequisites installed](README.md#bare-metal) in your environment
+[required prerequisites installed](README.md#run-the-model) in your environment
 before running without the docker container.
 
 If you are new to docker and are running into issues with the container,

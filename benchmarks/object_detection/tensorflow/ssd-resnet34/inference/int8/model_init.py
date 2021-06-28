@@ -50,6 +50,12 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument(
             "--input-size", help="Size of the input graph ",
             dest="input_size", default=300, type=check_positive_number)
+        arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
+                                type=check_positive_number, default=200,
+                                help="Number of warmup steps")
+        arg_parser.add_argument("--steps", dest='steps',
+                                type=check_positive_number, default=800,
+                                help="Number of steps")
 
         self.additional_args, unknown_args = arg_parser.parse_known_args(custom_args)
         self.run_inference_sanity_checks(self.args, self.custom_args)
@@ -75,6 +81,8 @@ class ModelInitializer(BaseModelInitializer):
         self.run_cmd += " --inter-op-parallelism-threads {0}".format(self.args.num_inter_threads)
         self.run_cmd += " --intra-op-parallelism-threads {0}".format(self.args.num_intra_threads)
         self.run_cmd += " --input-size {0}".format(self.additional_args.input_size)
+        self.run_cmd += " --warmup-steps {0}".format(self.additional_args.warmup_steps)
+        self.run_cmd += " --steps {0}".format(self.additional_args.steps)
 
         if self.args.accuracy_only:
             self.run_cmd += " --accuracy-only "

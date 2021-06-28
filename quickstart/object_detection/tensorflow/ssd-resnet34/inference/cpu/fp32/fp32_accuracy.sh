@@ -35,12 +35,12 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-FROZEN_GRAPH=${FROZEN_GRAPH-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb"}
+PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb"}
 
-source "$(dirname $0)/common/utils.sh"
+source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location $DATASET_DIR \
-    --in-graph $FROZEN_GRAPH \
+    --in-graph $PRETRAINED_MODEL \
     --model-source-dir $TF_MODELS_DIR \
     --model-name ssd-resnet34 \
     --framework tensorflow \

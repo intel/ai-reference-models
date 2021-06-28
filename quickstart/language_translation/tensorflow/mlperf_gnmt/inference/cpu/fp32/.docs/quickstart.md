@@ -3,10 +3,6 @@
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_online_inference.sh`](fp32_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`fp32_batch_inference.sh`](fp32_batch_inference.sh) | Runs batch inference (batch_size=32). |
-| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Runs accuracy |
-
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
+| [`fp32_online_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/fp32_online_inference.sh) | Runs online inference (batch_size=1). |
+| [`fp32_batch_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/fp32_batch_inference.sh) | Runs batch inference (batch_size=32). |
+| [`fp32_accuracy.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/fp32_accuracy.sh) | Runs accuracy |

@@ -153,11 +153,11 @@ fi
 if _running-in-container ; then
   # Call the framework's container_init.sh, if it exists
   if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+    if [[ ${CENTOS_PLATFORM} == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
       yum update -y
       yum install -y numactl
-    else
-     ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+  else
+    ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
     fi
   fi
   # Call the model specific container_init.sh, if it exists
@@ -1059,6 +1059,8 @@ function ssd-resnet34() {
           cd ${old_dir}
 
           CMD="${CMD} \
+          $(add_arg "--warmup-steps" ${warmup_steps}) \
+          $(add_arg "--steps" ${steps}) \
           $(add_arg "--input-size" ${input_size})"
           CMD=${CMD} run_model
 
