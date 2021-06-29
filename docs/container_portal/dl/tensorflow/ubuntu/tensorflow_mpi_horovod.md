@@ -3,7 +3,7 @@
 ## Pull Command
 
 ```
-docker pull intel/intel-optimized-tensorflow:2.2.0-ubuntu-20.04-mpi-horovod
+docker pull intel/intel-optimized-tensorflow:mpi-horovod
 ```
 
 ## Tags & Pull Commands for Other Versions
