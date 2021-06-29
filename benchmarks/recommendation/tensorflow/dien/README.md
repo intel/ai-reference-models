@@ -164,7 +164,7 @@ python launch_benchmark.py \
     --num-intra-threads 26 \
     --num-inter-threads 1  \
     --graph_type $static/dynamic  \
-    --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
     -- exact-max-length 100 \
        num-iterations 10 
 ```

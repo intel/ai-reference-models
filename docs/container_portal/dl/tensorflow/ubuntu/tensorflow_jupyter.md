@@ -3,7 +3,7 @@
 ## Pull Command
 
 ```
-docker pull intel/intel-optimized-tensorflow:2.2.0-ubuntu-20.04-jupyter
+docker pull intel/intel-optimized-tensorflow:jupyter
 ```
 
 ## Tags & Pull Commands for Other Versions

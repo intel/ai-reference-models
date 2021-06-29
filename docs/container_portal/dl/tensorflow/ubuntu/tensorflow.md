@@ -3,7 +3,7 @@
 ## Pull Command
 
 ```
-docker pull intel/intel-optimized-tensorflow:2.2.0-ubuntu-20.04
+docker pull intel/intel-optimized-tensorflow:latest
 ```
 
 ## Tags & Pull Commands for Other Versions
@@ -17,7 +17,7 @@ docker pull intel/intel-optimized-tensorflow:2.2.0-ubuntu-20.04
 Intel® Optimizations for TensorFlow\* is a binary distribution of TensorFlow\* with Intel® oneAPI Deep Neural Network Library(Intel® oneDNN) primitives, a popular performance library for deep learning applications. TensorFlow\* is a widely-used machine learning framework in the deep learning arena, demanding efficient utilization of computational resources. In order to take full advantage of Intel® architecture and to extract maximum performance, the TensorFlow\* framework has been optimized using Intel® oneDNN primitives.
 
 Includes the Python3 interpreter and the following wheel(s) and librarie(s) are pre-installed:
- - [intel-tensorFlow](https://pypi.org/project/intel-tensorflow/2.2.0/)
+ - [intel-tensorFlow](https://pypi.org/project/intel-tensorflow)
 
 ## Documentation and Sources
 
