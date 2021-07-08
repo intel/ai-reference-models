@@ -36,7 +36,7 @@ from tensorflow.python.framework import dtypes
 from tensorflow.core.protobuf import rewriter_config_pb2
 
 INPUTS = 'input'
-OUTPUTS = 'output'
+OUTPUTS = 'Identity'
 
 class unet_3d_tf:
     """Evaluate 3d_unet with optimized TensorFlow graph"""
@@ -80,7 +80,7 @@ class unet_3d_tf:
             tf.import_graph_def(output_graph, name="")
 
         input_tensor = graph.get_tensor_by_name('input:0')
-        output_tensor = graph.get_tensor_by_name('output:0')
+        output_tensor = graph.get_tensor_by_name('Identity:0')
         batch_size = self.args.batch_size
         warmup_steps = self.args.warmup_steps
         steps = self.args.steps
