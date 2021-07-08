@@ -42,7 +42,7 @@ from inference.nnUNet.setup import setup
 from inference.nnUNet.postprocess import postprocess_output
 
 INPUTS = 'input'
-OUTPUTS = 'output'
+OUTPUTS = 'Identity'
 
 class unet_3d_tf:
     """Evaluate 3d_unet with optimized TensorFlow graph"""
@@ -87,7 +87,7 @@ class unet_3d_tf:
             tf.import_graph_def(output_graph, name="")
 
         input_tensor = graph.get_tensor_by_name('input:0')
-        output_tensor = graph.get_tensor_by_name('output:0')
+        output_tensor = graph.get_tensor_by_name('Identity:0')
 
         config = tf.compat.v1.ConfigProto()
         config.intra_op_parallelism_threads=self.args.num_intra_threads
