@@ -6,7 +6,7 @@ This document has instructions for how to run [DIEN](https://arxiv.org/abs/1809.
 following modes/platforms:
 * [FP32 training](#fp32-training)
 * [FP32 inference](#fp32-inference)
-* [BFLOAT16 inference](#fp32-inference)
+* [BFLOAT16 inference](#bfloat16-inference)
 
 
 ## FP32 Training
@@ -96,8 +96,8 @@ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 128 \
     --num-intra-threads 26 \
-    --num-inter-threads 1  \
-    --graph_type $static/dynamic  \
+    --num-inter-threads 1 \
+    --graph_type static \
     --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
@@ -126,8 +126,8 @@ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 128 \
     --num-intra-threads 26 \
-    --num-inter-threads 1  \
-    --accuracy_only  \
+    --num-inter-threads 1 \
+    --accuracy_only \
     --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
@@ -162,11 +162,11 @@ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 1 \
     --num-intra-threads 26 \
-    --num-inter-threads 1  \
-    --graph_type $static/dynamic  \
+    --num-inter-threads 1 \
+    --graph_type static \
     --docker-image intel/intel-optimized-tensorflow:latest \
-    -- exact-max-length 100 \
-       num-iterations 10 
+    -- exact-max-length=100 \
+       num-iterations=10
 ```
 
 Since DIEN is not a big model checking for latency for batch-size 1
@@ -195,6 +195,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dien_bf16_
   Same as fp32 except change the precision to bfloat16. All output log tails are similar
   to those generated for fp32
 
+```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
     --in-graph $PB_DIR/dien_bf16_pretrained_model.pb \
@@ -205,11 +206,12 @@ python launch_benchmark.py \
     --socket-id 0 \
     --batch-size 128 \
     --num-intra-threads 26 \
-    --num-inter-threads 1  \
-    --graph_type=$static/dynamic \
-    --docker-image intel/intel-optimized-tensorflow:latest
-
-
+    --num-inter-threads 1 \
+    --graph_type static \
+    --docker-image intel/intel-optimized-tensorflow:latest \
+    -- exact-max-length=100 \
+       num-iterations=10
+```
 
 Below is a sample log file tail when testing throughput:
 ```
