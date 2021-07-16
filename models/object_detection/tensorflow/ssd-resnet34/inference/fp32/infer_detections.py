@@ -22,6 +22,7 @@ import tensorflow as tf
 import time
 
 from argparse import ArgumentParser
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 import benchmark_cnn
 import datasets
@@ -113,6 +114,7 @@ class ssd_resnet34_infer:
     self.config = tf.compat.v1.ConfigProto()
     self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
+    self.config.graph_options.rewrite_options.remapping=rewriter_config_pb2.RewriterConfig.AGGRESSIVE
 
     if self.args.batch_size == -1:
       self.args.batch_size = 64

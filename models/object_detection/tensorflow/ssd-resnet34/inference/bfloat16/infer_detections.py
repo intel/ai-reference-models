@@ -115,6 +115,7 @@ class ssd_resnet34_infer:
     self.config.intra_op_parallelism_threads = self.args.num_intra_threads
     self.config.inter_op_parallelism_threads = self.args.num_inter_threads
     self.config.graph_options.rewrite_options.auto_mixed_precision_mkl = rewriter_config_pb2.RewriterConfig.ON
+    self.config.graph_options.rewrite_options.remapping=rewriter_config_pb2.RewriterConfig.AGGRESSIVE
 
     if self.args.batch_size == -1:
       self.args.batch_size = 64
