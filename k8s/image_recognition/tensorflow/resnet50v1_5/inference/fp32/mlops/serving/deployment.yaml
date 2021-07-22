@@ -18,7 +18,7 @@ spec:
         fsGroup: 0 # {"$openapi":"FS_ID"}
       containers:
       - name: model-server
-        image: docker.io/intel/intel-optimized-tensorflow-serving:2.4.0 # {"$openapi":"IMAGE"}
+        image: docker.io/intel/intel-optimized-tensorflow-serving:latest # {"$openapi":"IMAGE"}
         envFrom:
         - configMapRef:
             name: resnet50v1-5-fp32-inference # {"$openapi":"MODEL_SERVING_NAME"}
