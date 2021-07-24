@@ -15,7 +15,7 @@ Refer to google reference page for [checkpoints](https://github.com/google-resea
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-fp32-training.tar.gz)
+[bert-large-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/bert-large-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -73,7 +73,7 @@ classifier training or running classifier multiple times, use a new empty
 
 The snippet below shows a quickstart script running with a single instance:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/bert-large-fp32-training.tar.gz
 tar -xvf bert-large-fp32-training.tar.gz
 cd bert-large-fp32-training
 
@@ -111,7 +111,7 @@ installed in your environment:
 * horovod==0.19.1
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/bert-large-fp32-training.tar.gz
 tar -xvf bert-large-fp32-training.tar.gz
 cd bert-large-fp32-training
 

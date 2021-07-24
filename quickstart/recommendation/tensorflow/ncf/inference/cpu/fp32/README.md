@@ -10,7 +10,7 @@ FP32 inference using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ncf-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/ncf-fp32-inference.tar.gz)
+[ncf-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/ncf-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
