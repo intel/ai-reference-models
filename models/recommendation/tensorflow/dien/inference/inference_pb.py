@@ -33,7 +33,7 @@ parser.add_argument("--graph_type", type=str, default='static', help="graph_type
 
 args = parser.parse_args()
 
-def prepare_data(input, target, maxlen=None, return_neg=False):
+def prepare_data(input, target, maxlen=None, return_neg=False, maxlen_padding=False):
     # x: a list of sentences
     lengths_x = [len(s[4]) for s in input]
     seqs_mid = [inp[3] for inp in input]
@@ -70,6 +70,9 @@ def prepare_data(input, target, maxlen=None, return_neg=False):
 
     n_samples = len(seqs_mid)
     maxlen_x = numpy.max(lengths_x)
+    if maxlen_padding:
+      maxlen_x = max(maxlen, maxlen_x)
+
     neg_samples = len(noclk_seqs_mid[0][0])
 
     mid_his = numpy.zeros((n_samples, maxlen_x)).astype('int64')
@@ -104,16 +107,19 @@ def prepare_data(input, target, maxlen=None, return_neg=False):
 def filtered_data(test_data, exact_max_length=0):
     nums = 0
     total_data = []
+    prep_data = []
 
-    print("Preparing and filtering Data....")
+    print("Preparing Data....")
+    mlen_padding = (exact_max_length != 0)
     prepare_start = time.time()
+
     for src, tgt in test_data:
 
         sys.stdout.flush()
         #uids, mids, cats, mid_his, cat_his, mid_mask, target, sl, noclk_mids, noclk_cats = prepare_data(
         #    src, tgt, return_neg=True)
         uids, mids, cats, mid_his, cat_his, mid_mask, target, sl, noclk_mids, noclk_cats = prepare_data(
-             src, tgt, maxlen=100, return_neg=True)
+             src, tgt, maxlen=100, return_neg=True, maxlen_padding=mlen_padding)
 
         #if len(mid_his[0]) < exact_max_length:
         if exact_max_length !=0 and len(mid_his[0]) < exact_max_length:
@@ -123,11 +129,11 @@ def filtered_data(test_data, exact_max_length=0):
         total_data.append([uids, mids, cats, mid_his, cat_his, mid_mask, target, sl])
 
     prepare_end = time.time()
-    # print("prepare time   ", prepare_end - prepare_start)
-    print("Preparing and filtering Complete....")
+    print("Data preperation Complete....!")
+    print("Time taken for data prep :", (prepare_end - prepare_start))
     return total_data, nums
 
-def calculate(sess, total_data, input_tensor, output_tensor, batch_size):
+def calculate(sess, total_data, input_tensor, output_tensor, batch_size, ignore_count=0):
     #nums = 0
     #total_data = []
 
@@ -176,9 +182,10 @@ def calculate(sess, total_data, input_tensor, output_tensor, batch_size):
             prob, acc = sess.run(output_tensor,
                                  feed_dict=dict(zip(input_tensor, feed_data)))
         end_time = time.time()
-        # print("evaluation time of one batch: %.3f" % (end_time - start_time))
-        eval_time += end_time - start_time
-        elapsed_time_records.append(end_time - start_time)
+        if ignore_count <=0 or (ignore_count >0 and i > ignore_count):
+          eval_time += end_time - start_time
+          elapsed_time_records.append(end_time - start_time)
+        #print("evaluation time of one batch: %.3f" % (end_time - start_time))
 
         target = feed_data[6]
 
@@ -265,7 +272,7 @@ def inference(data_location,
         approximate_accelerator_time = 0
 
         total_data,num_iters = filtered_data(test_data) \
-                               if graph_type == 'dynamic'    \
+                               if args.exact_max_length <=0 \
                                else filtered_data(test_data, args.exact_max_length)
         test_auc, test_accuracy, eval_time= calculate(sess, total_data, input_tensor, output_tensor, batch_size)
         if args.accuracy_only :
@@ -277,20 +284,25 @@ def inference(data_location,
         else :
           print("Max length :100")
  
-        total_data, num_iters = filtered_data(test_data, args.exact_max_length)
+        #total_data, num_iters = filtered_data(test_data, args.exact_max_length)
         loop_iters = args.num_iterations 
+        ignore_count = int(num_iters/20)
+        if ignore_count == 0 and num_iters >= 5:
+          ignore_count=1
+
+        print("Info : First 5% batches (time) ignored as warm up:", ignore_count)
         for i in range(loop_iters):
             test_auc, test_accuracy, eval_time  = calculate(
-                sess, total_data, input_tensor, output_tensor, batch_size)
+                sess, total_data, input_tensor, output_tensor, batch_size, ignore_count)
             approximate_accelerator_time += eval_time
             print('Iter : %d test_auc: %.4f ---- test_accuracy: %.9f ---- eval_time: %.3f' % (i, test_auc, test_accuracy, eval_time))
-        print("batch_size ", batch_size)
+        print("Batch_size ", batch_size)
         print("Batch count ", num_iters)
         print("Number of iterations", loop_iters)
         print("Total recommendations: %d" % (num_iters * batch_size))
         print("Approximate accelerator time in seconds is %.3f" % (approximate_accelerator_time/loop_iters))
         print("Approximate accelerator performance in recommendations/second is %.3f" %
-              (float(loop_iters * num_iters * batch_size) / float(approximate_accelerator_time)))
+              (float(loop_iters * (num_iters-ignore_count) * batch_size) / float(approximate_accelerator_time)))
 
 
 if __name__ == '__main__':
