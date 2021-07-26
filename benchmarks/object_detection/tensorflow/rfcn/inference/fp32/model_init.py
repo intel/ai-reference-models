@@ -78,11 +78,7 @@ class ModelInitializer(BaseModelInitializer):
     def run_perf_command(self):
         # Get the command previx, but numactl is added later in run_perf_command()
         command = []
-        num_cores = str(self.platform_util.num_cores_per_socket)
-        if self.args.num_cores != -1:
-            num_cores = str(self.args.num_cores)
-
-        set_env_var("OMP_NUM_THREADS", num_cores)
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         if self.args.socket_id != -1:
             command.append("numactl")
@@ -93,11 +89,12 @@ class ModelInitializer(BaseModelInitializer):
 
             if self.args.num_cores != -1:
                 command.append("-C")
-                command.append("+0")
+                cpuid = "+0"
                 i = 1
                 while i < self.args.num_cores:
-                    command.append(",{}".format(i))
+                    cpuid += ',' + str(i)
                     i += i
+                command.append(cpuid)
 
             command.append("-N")
             command.append("{}".format(socket_id))

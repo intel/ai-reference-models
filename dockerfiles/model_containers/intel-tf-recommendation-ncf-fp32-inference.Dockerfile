@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -53,10 +53,10 @@ RUN pip install \
         google-api-python-client==1.6.7 \
         google-cloud-bigquery==0.31.0 \
         kaggle==1.3.9 \
-        numpy==1.16.1 \
+        numpy==1.16.3 \
         oauth2client==4.1.2 \
         pandas \
-        psutil==5.6.6 \
+        'psutil>=5.6.7' \
         py-cpuinfo==3.3.0 \
         typing
 

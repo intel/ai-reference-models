@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -56,13 +56,13 @@ ENV MODEL_SRC_DIR=${MASK_RCNN_SOURCE_DIR}
 
 RUN pip install \
         IPython[all] \
-        Pillow \
+        'Pillow>=8.1.2' \
         cython \
         h5py \
         imgaug \
         keras==2.0.8 \
         matplotlib \
-        numpy==1.16.0 \
+        numpy==1.16.3 \
         opencv-python \
         pycocotools \
         scikit-image \

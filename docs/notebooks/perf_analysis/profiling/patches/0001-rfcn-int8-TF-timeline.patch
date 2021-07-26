@@ -1,0 +1,55 @@
+From 527d99056afe71e1c3b5d33c6b735888d2af24e7 Mon Sep 17 00:00:00 2001
+From: yhu5 <ying.hu@intel.com>
+Date: Fri, 11 Dec 2020 22:57:21 +0800
+Subject: [PATCH] rfcn int8 TF timeline
+
+---
+ .../rfcn/inference/int8/run_rfcn_inference.py      | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/models/object_detection/tensorflow/rfcn/inference/int8/run_rfcn_inference.py b/models/object_detection/tensorflow/rfcn/inference/int8/run_rfcn_inference.py
+index e2ff30c2..b1c913c9 100644
+--- a/models/object_detection/tensorflow/rfcn/inference/int8/run_rfcn_inference.py
++++ b/models/object_detection/tensorflow/rfcn/inference/int8/run_rfcn_inference.py
+@@ -36,7 +36,9 @@ import time
+ import argparse
+ from tensorflow.python.client import timeline
+ import importlib
+-
++sys.path.append(os.environ['ProfileUtilsRoot'])
++print(sys.path)
++from profile_utils import TimeLiner, ConfigFile, tfSession
+ class RFCNRunner:
+   '''Add code here to detect the environment and set necessary variables before launching the model'''
+   args=None
+@@ -189,11 +191,17 @@ class RFCNRunner:
+           (im_height, im_width, 3)).astype(np.uint8)
+ 
+   def run_inference(self,graph):
++    configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    configf.read_config("rfcn infer int8")
++    infer_many_runs_timeline = TimeLiner()
++    infer_run_metadata = tf.compat.v1.RunMetadata()
+     sess_config = tf.compat.v1.ConfigProto()
+     sess_config.intra_op_parallelism_threads = self.args.num_intra_threads
+     sess_config.inter_op_parallelism_threads = self.args.num_inter_threads
++    
+     with self.detection_graph.as_default():
+-      with tf.compat.v1.Session(config=sess_config) as sess:
++      #with tf.compat.v1.Session(config=sess_config) as sess:
++      with tfSession(config=sess_config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+         # Get handles to input and output tensors
+         tensor_dict = {}
+         if not self.args.evaluate_tensor:
+@@ -277,6 +285,8 @@ class RFCNRunner:
+ 
+           if 'detection_masks' in output_dict:
+             output_dict['detection_masks'] = output_dict['detection_masks'][0]
++    print("json_fname : ",configf.json_fname)
++    infer_many_runs_timeline.save(configf.json_fname)
+     return output_dict, image_np
+ 
+ if __name__ == "__main__":
+-- 
+2.25.1
+

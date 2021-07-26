@@ -1,0 +1,55 @@
+From c56b021eb49ee30f53df0d6934b3ef04585ec02a Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Thu, 24 Dec 2020 00:16:05 +0800
+Subject: [PATCH] transformer_mlperf train fp32
+
+---
+ .../training/fp32/transformer/transformer_main.py     | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
+
+diff --git a/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer/transformer_main.py b/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer/transformer_main.py
+index 0323e3ef..85fe5e22 100644
+--- a/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer/transformer_main.py
++++ b/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer/transformer_main.py
+@@ -25,7 +25,6 @@ import tempfile
+ import random
+ import numpy.random
+ 
+-
+ from six.moves import xrange  # pylint: disable=redefined-builtin
+ import tensorflow as tf
+ #import tensorflow_addons as tfa
+@@ -44,6 +43,9 @@ from utils import dataset
+ from utils import metrics
+ from utils import tokenizer
+ 
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import ConfigFile, tfProfileHook
++
+ tf.compat.v1.disable_eager_execution()
+ #Horovod support
+ global is_mpi 
+@@ -321,6 +323,11 @@ def train_schedule(
+   if FLAGS.save_profile == "Yes":
+     profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file 
+   #profile file will be saved in in profile_dir
++
++  config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  config.read_config("transformer_mlperf train fp32")
++  profile_hook = [tfProfileHook(save_steps=1, json_fname=config.json_fname)]
++
+   #Creating hooks for printing Examples per Second, used with estimator.train
+   train_hooks = hooks_helper.get_train_hooks(
+       ["ExamplesPerSecondHook"],
+@@ -332,7 +339,7 @@ def train_schedule(
+   if FLAGS.save_profile == "Yes":
+     hooks = profile_hooks
+   else:
+-    hooks = train_hooks
++    hooks = train_hooks + profile_hook
+   
+   for i in xrange(train_eval_iterations):
+     print("Starting iteration", i + 1)
+-- 
+2.25.1
+

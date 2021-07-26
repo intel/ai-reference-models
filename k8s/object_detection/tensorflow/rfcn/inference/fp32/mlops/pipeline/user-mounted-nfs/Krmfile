@@ -76,7 +76,7 @@ openAPI:
       x-k8s-cli:
         setter:
           name: IMAGE_VERSION
-          value: tf-2.4.0
+          value: tf-latest
           isSet: true
           setBy: model-builder
     io.k8s.cli.setters.IMAGE_SUFFIX:

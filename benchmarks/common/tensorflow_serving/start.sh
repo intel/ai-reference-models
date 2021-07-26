@@ -166,7 +166,7 @@ function ssd_mobilenet(){
         absl-py \
         contextlib2 \
         lxml \
-        pillow>=7.1.0 \
+        'pillow>=8.1.2' \
         tf_slim
 
     cd ${WORKSPACE}

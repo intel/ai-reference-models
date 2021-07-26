@@ -46,6 +46,7 @@ RUN virtualenv -p python3 ./venv-stock-tf
 
 # Install all the necessary libraries for stock TF
 RUN . ./venv-stock-tf/bin/activate && \
+    pip install --no-binary numpy==1.19.5 numpy==1.19.5 && \
     pip install \
         cxxfilt  \
         gitpython \
@@ -53,7 +54,8 @@ RUN . ./venv-stock-tf/bin/activate && \
         ipykernel \
         matplotlib \
         pandas \
-        psutil && \
+        'psutil>=5.6.7' \
+        pycocotools && \
     deactivate
 
 # Create a Jupyter notebook kernel for stock TF with the name stock-tensorflow
@@ -64,6 +66,7 @@ RUN virtualenv -p python3 ./venv-intel-tf
 
 # Install all the necessary libraries for Intel TF environment
 RUN . ./venv-intel-tf/bin/activate && \
+    pip install --no-binary numpy==1.19.5 numpy==1.19.5 && \
     pip install \
         cxxfilt  \
         gitpython \
@@ -71,11 +74,24 @@ RUN . ./venv-intel-tf/bin/activate && \
         ipykernel \
         matplotlib \
         pandas \
-        psutil && \
+        'psutil>=5.6.7' \
+        pycocotools && \
     deactivate
 
 # Create a Jupyter notebook kernel for Intel TF with the name intel-tensorflow
 RUN venv-intel-tf/bin/python -m ipykernel install --user --name=intel-tensorflow
+
+# Download protoc for object detection
+RUN git clone https://github.com/tensorflow/models.git tensorflow-models-rfcn && \
+    cd tensorflow-models-rfcn && \
+    git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b && \
+    git apply /models/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch && \
+    git clone https://github.com/cocodataset/cocoapi.git && \
+    cd research && \
+    wget --quiet -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip && \
+    unzip -o protobuf.zip && \
+    rm protobuf.zip && \
+    ./bin/protoc object_detection/protos/*.proto --python_out=.
 
 EXPOSE 8888
 
