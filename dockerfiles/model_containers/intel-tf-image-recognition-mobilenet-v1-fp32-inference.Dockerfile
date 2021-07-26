@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -33,6 +33,9 @@ RUN apt-get update && \
         libxext6 \
         python-tk && \
     pip install requests
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
 
 ARG PACKAGE_DIR=model_packages
 

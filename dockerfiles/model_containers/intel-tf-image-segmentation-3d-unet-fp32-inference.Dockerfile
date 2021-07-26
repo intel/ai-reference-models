@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -55,7 +55,7 @@ RUN pip install \
         SimpleITK==1.2.0 \
         nibabel==2.3.3 \
         nilearn==0.6.2 \
-        numpy==1.16.1 \
+        numpy==1.16.3 \
         tables==3.4.4
 
 ENV USER_ID=0

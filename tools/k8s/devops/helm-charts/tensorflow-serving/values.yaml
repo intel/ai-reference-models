@@ -8,7 +8,7 @@ image:
   repository: intel/intel-optimized-tensorflow-serving
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.4.0"
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""

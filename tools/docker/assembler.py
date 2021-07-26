@@ -98,6 +98,9 @@ flags.DEFINE_boolean(
     'generate_documentation', False, 'Do not create README.md', short_name='e')
 
 flags.DEFINE_boolean(
+    'generate_deployments_tests', False, 'Do not create model-builder.bats for generate-deployment tests')
+
+flags.DEFINE_boolean(
     'keep_temp_dockerfiles',
     False,
     'Retain .temp.Dockerfiles created while building images.',
@@ -212,6 +215,12 @@ flags.DEFINE_string(
     'structure cannot be used to infer the use case.')
 
 flags.DEFINE_string(
+    'device',
+    'cpu',
+    'Name of the device folder to be used.'
+)
+
+flags.DEFINE_string(
     'generate_new_spec',
     None,
     'Used to auto generate a spec with model package files. Specify the name '
@@ -259,23 +268,26 @@ slice_sets:
             type: string
             ispartial: true
         documentation:
-          type: dict
+          type: list
+          default: []
           schema:
-            name:
-              type: string
-            uri:
-              type: string
-            text_replace:
-              type: dict
-            docs:
-              type: list
-              schema:
+            type: dict
+            schema:
+              name:
+                type: string
+              uri:
+                type: string
+              text_replace:
                 type: dict
+              docs:
+                type: list
                 schema:
-                  name:
-                    type: string
-                  uri:
-                    type: string
+                  type: dict
+                  schema:
+                    name:
+                      type: string
+                    uri:
+                      type: string
         test_runtime:
           type: string
           required: false
@@ -348,6 +360,22 @@ slice_sets:
                     type: string
                   value:
                     type: string
+            tests:
+              type: list
+              schema:
+                type: dict
+                schema:
+                  uri:
+                    type: string
+                  args:
+                    type: list
+                    schema:
+                      type: dict
+                      schema:
+                        name:
+                          type: string
+                        value:
+                          type: string
 
 releases:
   type: dict
@@ -386,7 +414,7 @@ slice_set_template = [
         'add_to_name': '',
         'dockerfile_subdirectory': 'model_containers',
         'partials': ['model_package', 'entrypoint'],
-        'documentation': {'text_replace': {}},
+        'documentation': [{'text_replace': {}}],
         'args': [],
         'files': [],
         'downloads': []
@@ -579,14 +607,10 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             tag_spec, slices, tag_args, is_dockerfile=True)
         used_partials = gather_slice_list_items(slices, 'partials')
         used_tests = gather_slice_list_items(slices, 'tests')
-        documentation = {}
+        documentation = []
         if 'documentation' in slices[len(slices)-1]:
             documentation = slices[len(slices)-1]['documentation']
-            docs_list = gather_slice_list_items([documentation], 'docs')
-            documentation_contents = merge_docs(docs_list)
-            documentation.update({ 'contents': documentation_contents })
-        else:
-            docs_list = []
+            documentation = merge_docs(documentation)
         files_list = gather_slice_list_items(slices, 'files')
         downloads_list = gather_slice_list_items(slices, 'downloads')
         test_runtime = find_first_slice_value(slices, 'test_runtime')
@@ -644,15 +668,17 @@ def doc_contents(path):
   return contents
 
 def merge_docs(docs_list, package_type='model'):
-  """Build the README.md document"""
-  contents=''
+  """Build the documents and fills in the contents for each doc entry"""
   for doc in docs_list:
+    contents = ''
+    for doc_partial in doc["docs"]:
       uri = ''
-      if package_type == 'model' and 'uri' in doc:
-        uri = doc['uri']
+      if package_type == 'model' and 'uri' in doc_partial:
+        uri = doc_partial['uri']
       if uri:
         contents += '\n'.join([doc_contents(uri) + '\n'])
-  return contents
+    doc.update({'contents': contents})
+  return docs_list
 
 def upload_in_background(hub_repository, dock, image, tag):
   """Upload a docker image (to be used by multiprocessing)."""
@@ -757,6 +783,20 @@ def run(cmd):
     )
     stdout, stderr = proc.communicate()
     return proc.returncode, stdout, stderr
+
+def set_test_args(tag_def, test, test_uri):
+  with open(test_uri, 'r') as f:
+    test_file = f.read()
+    if 'args' in test:
+      for arg in test['args']:
+        if arg['value'] and not arg['value'].startswith('$'):
+          test_file = test_file.replace('${}'.format(arg['name']), arg['value'])
+        else:
+          # look up test arg value in env vars
+          for env in tag_def['runtime']['env']:
+            if env['name'] == arg['name']:
+              test_file = test_file.replace(arg['value'], env['value'])
+    return test_file
 
 def cfg_set_namespace(package, dir, tag_def):
   for env in tag_def['runtime']['env']:
@@ -998,7 +1038,7 @@ def get_model_name_directory(framework, model_name):
     return zoo_model_name
 
 
-def auto_generate_package_file_list(framework, use_case, model_name, precision, mode):
+def auto_generate_package_file_list(framework, use_case, model_name, precision, mode, device):
     """
     Auto-generates the list of model package files for the specified model.
     Files that are included are:
@@ -1074,7 +1114,7 @@ def auto_generate_package_file_list(framework, use_case, model_name, precision, 
 
     # add the model's quickstart folder
     quickstart_folder = os.path.join('quickstart', use_case, framework,
-                                   model_name, mode, precision)
+                                   model_name, mode, device, precision)
     quickstart_folder_full_path = os.path.join(model_dir, quickstart_folder)
     if not os.path.exists(quickstart_folder_full_path):
         os.makedirs(quickstart_folder_full_path)
@@ -1106,34 +1146,34 @@ def auto_generate_package_file_list(framework, use_case, model_name, precision, 
     return sorted(model_package_files, key=lambda f: f['source'])
 
 
-def auto_generate_documentation_list(framework, use_case, model_name, precision, mode):
+def auto_generate_documentation_list(framework, use_case, model_name, precision, mode, device):
     """
     Auto-generates the list of model documentation entries {name: <section>, uri: <uri>} for the specified model.
     Entries that are included are:
       - name: Title
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/title.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/title.md
       - name: Description
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/description.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/description.md
       - name: Download link
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/download.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/download.md
       - name: Datasets
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/datasets.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/datasets.md
       - name: Quick Start Scripts
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/quickstart.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/quickstart.md
       - name: Bare Metal
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/baremetal.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/baremetal.md
       - name: Docker
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/docker.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/docker.md
       - name: Kubernetes
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/kubernetes.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/kubernetes.md
       - name: License link
-        uri: models/quickstart/use_case/tensorflow/model_name/mode/docs/license.md
+        uri: models/quickstart/use_case/tensorflow/model_name/mode/device/precision/docs/license.md
     """
     model_dir = os.path.join(os.getcwd(), FLAGS.model_dir)
 
     # the model's documentation folder
     docs_folder = os.path.join('quickstart', use_case, framework,
-                                   model_name, mode, precision, ".docs")
+                                   model_name, mode, device, precision, ".docs")
     docs_folder_full_path = os.path.join(model_dir, docs_folder)
     if os.path.exists(docs_folder_full_path) == False:
       shutil.copytree("./docs", docs_folder_full_path)
@@ -1141,7 +1181,7 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
     markdowns = os.listdir(docs_folder_full_path)
 
     readme_folder = os.path.join(os.path.basename(model_dir), 'quickstart', use_case, framework,
-                                   model_name, mode, precision)
+                                   model_name, mode, device, precision)
 
     documentation = {"name": "README.md", "uri": readme_folder, "docs": []}
     doc_partials = []
@@ -1165,7 +1205,7 @@ def auto_generate_documentation_list(framework, use_case, model_name, precision,
     for doc_partial in doc_partials_sorted:
       if 'name' in doc_partial and 'uri' in doc_partial:
         documentation['docs'].append({"name": doc_partial['name'], "uri": doc_partial['uri']})
-    return documentation
+    return [documentation]
 
 def generate_doc_text_replace_options(use_case, model_name, precision, mode):
     """
@@ -1235,6 +1275,7 @@ def auto_generate_model_spec(spec_name):
     precision = matched_groups[1]
     mode = matched_groups[2]
     framework = FLAGS.framework
+    device = FLAGS.device
 
     if not FLAGS.use_case:
         zoo_use_case, zoo_model_name = get_use_case_directory(framework, model_name, precision, mode)
@@ -1288,14 +1329,14 @@ def auto_generate_model_spec(spec_name):
     model_slice_set[0]['add_to_name'] = '-{}'.format(spec_name)
     model_slice_set[0]['args'].append("PACKAGE_NAME={}".format(spec_name))
     model_slice_set[0]['files'] = auto_generate_package_file_list(
-        framework, zoo_use_case, zoo_model_name, precision, mode)
+        framework, zoo_use_case, zoo_model_name, precision, mode, device)
     model_slice_set[0]['documentation'] = auto_generate_documentation_list(
-        framework, zoo_use_case, zoo_model_name, precision, mode)
+        framework, zoo_use_case, zoo_model_name, precision, mode, device)
 
     # add text replace options for the documentation
     text_replace_dict = generate_doc_text_replace_options(
         zoo_use_case, zoo_model_name, precision, mode)
-    model_slice_set[0]['documentation']['text_replace'] = text_replace_dict
+    model_slice_set[0]['documentation'][0]['text_replace'] = text_replace_dict
 
     # add a download, if there's one defined
     if FLAGS.model_download:
@@ -1314,8 +1355,8 @@ def auto_generate_model_spec(spec_name):
     # print out info for the user to see the spec and file name
     eprint(yaml.dump(model_spec), verbose=FLAGS.verbose)
     eprint("\nWrote the spec file to your directory at "
-           "tools/docker/specs/{}\nPlease edit the file if additional "
-           "files, partials, or downloads are needed.\n".format(spec_file_name))
+           "tools/docker/specs/{}/{}\nPlease edit the file if additional "
+           "files, partials, or downloads are needed.\n".format(framework, spec_file_name))
 
     # print out the documentation text_replace options
     eprint("The spec file has documentation text replacement setup for the following key/values:")
@@ -1330,7 +1371,7 @@ def auto_generate_model_spec(spec_name):
            "directory at:\n{}\nPlease edit these files to fill in the "
            "information for your model.\n".format(
                os.path.join('quickstart', zoo_use_case, framework, zoo_model_name,
-                            mode, precision, ".docs")))
+                            mode, device, precision, ".docs")))
 
 def get_tag_spec(spec_dir, partials):
   """ Reads in a spec files under spec_dir """
@@ -1354,6 +1395,16 @@ def get_tag_spec(spec_dir, partials):
   tag_spec = v.normalized(tag_spec)
   return tag_spec
 
+def merge_dir(dir_1, dir_2):
+  merged_dir = '/tmp/partials'
+  if os.path.exists(merged_dir):
+    shutil.rmtree(merged_dir)
+  if not os.path.exists(merged_dir):
+    os.makedirs(merged_dir)
+  copy_tree(dir_1, merged_dir)
+  copy_tree(dir_2, merged_dir)
+  return merged_dir
+
 
 def main(argv):
   if len(argv) > 1:
@@ -1366,10 +1417,16 @@ def main(argv):
     # we can't build dockerfiles/images in the same run as creating the spec
     sys.exit(0)
 
-  # Get existing partial contents
-  partials = gather_existing_partials(FLAGS.partial_dir)
+  # Get existing partial contents for centos or ubuntu
+  common_partials = os.path.join(FLAGS.partial_dir, 'common')
+  os_partials = os.path.join(FLAGS.partial_dir, 'ubuntu')
+  if any("centos" in arg for arg in FLAGS.arg):
+    os_partials = os.path.join(FLAGS.partial_dir, 'centos')
 
-  # read in all spec files 
+  partials_dir = merge_dir(os_partials, common_partials)
+  partials = gather_existing_partials(partials_dir)
+
+  # read in all spec files
   tag_spec = get_tag_spec(FLAGS.spec_dir, partials)
 
   # characters for underlining headers
@@ -1490,11 +1547,42 @@ def main(argv):
         eprint('> Generating deployment for {}'.format(tag), verbose=FLAGS.verbose)
         write_deployment(tag_def)
 
+      if FLAGS.generate_deployments_tests:
+        eprint('> Generating tests for K8s packages and deployments {}'.format(tag), verbose=FLAGS.verbose)
+        model_dir = os.path.join(os.getcwd(), "models")
+        tests_bats = os.path.join(model_dir, 'tools', 'tests', 'model-builder.bats')
+        model_name = get_package_name(tag_def)
+        model_deployments_dir = os.path.join(os.getcwd(), FLAGS.deployment_dir, model_name)
+        try:
+          eprint('>> Writing {}...'.format(tests_bats), verbose=FLAGS.verbose)
+          with open(tests_bats, 'w') as f:
+            # add at the beginning of the test
+            f.write('#!/usr/bin/env tools/tests/bin/bats\npushd {}\n'.format(model_dir))
+            # get test uri from the model spec file and append it to model-builder.bats file
+            for test in tag_def['runtime']['tests']:
+              if not 'uri' in test:
+                eprint("uri missing in tests values for {}".format(model_name))
+                continue
+              test_uri = os.path.join(model_dir, test['uri'])
+              f.write(set_test_args(tag_def, test, test_uri))
+              f.write('\n')
+        except Exception as e:
+          eprint("Error while writing tests for {}".format(tag))
+          eprint(e)
+
       if FLAGS.generate_documentation:
-        documentation = tag_def['documentation']
-        text_replace = tag_def['documentation']['text_replace'] \
-            if 'text_replace' in tag_def['documentation'] else {}
-        if 'contents' in documentation:
+        documentation_list = tag_def['documentation']
+        doc_paths = [os.path.join(doc['uri'], doc['name']) for doc in documentation_list]
+        if len(doc_paths) != len(set(doc_paths)):
+            eprint('ERROR: The documentation for {} has more than one item with the same uri/name '
+                   'path, which means that one doc would overwrite the other.'.format(tag))
+            eprint('\n'.join(doc_paths))
+            sys.exit(1)
+
+        for documentation in documentation_list:
+          text_replace = documentation['text_replace'] \
+            if 'text_replace' in documentation else {}
+          if 'contents' in documentation:
             readme = os.path.join(documentation['uri'], documentation['name'])
             eprint('>> Writing {}...'.format(readme), verbose=FLAGS.verbose)
             try:
@@ -1504,7 +1592,7 @@ def main(argv):
                 f.write(documentation['contents'])
               succeeded_docs.append(readme)
             except Exception as e:
-              eprint("Error while writing documentation for {}".format(tag))
+              eprint("Error while writing documentation file ({}) for {}".format(readme, tag))
               eprint(e)
               failed_docs.append(readme)
 

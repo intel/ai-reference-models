@@ -66,9 +66,9 @@ def sample_images(image_size):
 
 
 def main(_):
-    if FLAGS.model == 'resnet50':
+    if 'resnet50' in FLAGS.model:
         image_size = 224
-    elif FLAGS.model == 'inceptionv3':
+    elif 'inceptionv3' in FLAGS.model:
         image_size = 299
     else:
         print('Please specify model as either resnet50 or inceptionv3.')
@@ -99,14 +99,14 @@ def main(_):
         request.inputs['input'].CopyFrom(
             tf.make_tensor_proto(image_np, shape=[FLAGS.batch_size, image_size, image_size, 3]))
         start_time = time.time()
-        stub.Predict(request, 10.0)  # 10 secs timeout
+        stub.Predict(request, 500.0)  # 500 sec timeout
         time_consume = time.time() - start_time
         print('Iteration %d: %.3f sec' % (i, time_consume))
         if i > warm_up_iteration:
             total_time += time_consume
 
     time_average = total_time / (num_iteration - warm_up_iteration)
-    print('Average time: %.3f sec' % (time_average))
+    print("Total: {} Average: {:.3f}".format(total_time, time_average))
 
     print('Batch size = %d' % FLAGS.batch_size)
     if (FLAGS.batch_size == 1):

@@ -223,7 +223,7 @@ _model_builder._sort_unique()
 #
 _model_builder._init()
 {
-  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home
+  local _asm_images _file _generator _i _ii _parallel _release=$1 _spec_folder _xdg_config_home _platform
   _xdg_config_home=${XDG_CONFIG_HOME:-$HOME/.config}
   declare -g _spec_home=${_xdg_config_home}/$(basename $0)/specs
 
@@ -231,7 +231,7 @@ _model_builder._init()
 
   declare -g -r MODEL_DIR=${MODEL_DIR-$PWD}
   # Tag to use for the 'versioned' images
-  declare -g -r TENSORFLOW_TAG=${TENSORFLOW_TAG:=2.4.0-ubuntu-20.04}
+  declare -g -r TENSORFLOW_TAG=${TENSORFLOW_TAG:=latest}
   # Image name to use for the 'versioned' images
   declare -g -r TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE:=intel/intel-optimized-tensorflow}
   # Local container repo used for building images
@@ -258,6 +258,18 @@ _model_builder._init()
   _model_builder._root 1>/dev/null
 
   _spec_folder=$(_model_builder._root)/docker/specs
+  _spec_dir_mounted='./specs'
+
+  # add platforms other than ubuntu:
+  _platform='centos'
+  if [[ ${TAG_PREFIX} == *"${_platform}"* ]]; then
+    _spec_folder=${_spec_folder}/${_platform}
+    _spec_home=${_spec_home}/${_platform}
+    _spec_dir_mounted=${_spec_dir_mounted}/${_platform}
+  fi
+
+  declare -g _spec_dir_mounted=${_spec_dir_mounted}
+
   if [[ ! -d $_spec_folder ]]; then
     echo "Error: The spec folder does not exist ($_spec_folder)."
     exit 1
@@ -276,7 +288,7 @@ _model_builder._init()
 
     cat $(find ${_spec_folder} -name '*.yml') > $_all_specs
 
-    _all_commands=(generate-documentation package generate-dockerfile build)
+    _all_commands=(generate-deployment generate-documentation package generate-dockerfile build)
     eval $'__model_builder_frameworks_function() { [[ -d ${_spec_folder} ]] && echo $(ls $_spec_folder); }'
 
     eval "_model_builder_frameworks_function() { echo $(__model_builder_frameworks_function); }"
@@ -377,7 +389,7 @@ _model_builder._subcommand_show_frameworks()
               _first_framework=false
             fi
             ;;
-          -*) 
+          -*)
             ;;
           *)
             if [[ "${_remaining_frameworks[@]}" =~ $s ]]; then
@@ -491,7 +503,14 @@ _model_builder._subcommand_show_commands_frameworks_and_models()
               _show_command_options=false
             fi
             ;;
-          -*) 
+          -*)
+            if [[ "${_remaining_commands[@]}" =~ $s ]]; then
+              _current_commands+=( $s )
+              _model_builder._remove_item _remaining_commands $s
+              if (( ${#_remaining_commands[@]} == 0 )); then
+                _show_command_options=false
+              fi
+            fi
             ;;
           *)
             if [[ "${_remaining_commands[@]}" =~ $s ]]; then
@@ -758,7 +777,7 @@ _model_builder.init_spec()
   _model_builder._echo_command ${_asm_new_spec} \
       --arg http_proxy=${http_proxy} \
       --arg https_proxy=${https_proxy} \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_new_spec=${_new_model} \
       --framework=${_current_framework} \
       ${_use_case} \
@@ -882,7 +901,7 @@ _model_builder.build()
       --arg https_proxy=${https_proxy} \
       --arg PACKAGE_DIR=${_model_package_folder} \
       --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --repository ${LOCAL_REPO} \
       --release ${_release_group} \
       ${TEST_DIR:+"--run_tests_path" "$TEST_DIR"} \
@@ -992,7 +1011,7 @@ _model_builder.package()
     # Call the assembler to build model packages
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --build_packages \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1060,7 +1079,7 @@ _model_builder.generate_deployment()
     # Call the assembler to generate deployments
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_deployments \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1128,7 +1147,7 @@ _model_builder.generate_dockerfile()
     # Call the assembler to construct dockerfiles
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --construct_dockerfiles \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1202,7 +1221,7 @@ _model_builder.generate_documentation()
     # Call the assembler to generate documentation
     _model_builder._echo_command ${_asm_dockerfiles} \
       --release $_release_group \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_documentation \
       ${_release_args[@]} \
       ${_args[@]}
@@ -1286,7 +1305,7 @@ _model_builder.images()
       --release ${_release_group} \
       --repository ${LOCAL_REPO} \
       --list_images \
-      --spec_dir=./specs/${_current_framework} \
+      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       ${_release_args[@]} \
       ${_args[@]} 2>&1 | sort | column -c 2 -t
     if [[ $_dry_run == false ]]; then
@@ -1365,7 +1384,7 @@ _model_builder.packages()
 
   # Call the assembler to list packages
   _model_builder._echo_command ${_asm_dockerfiles} \
-    --spec_dir=./specs/${_current_framework} \
+    --spec_dir=${_spec_dir_mounted}/${_current_framework} \
     --repository ${LOCAL_REPO} \
     --list_packages \
     --arg _TAG_PREFIX=${TAG_PREFIX} \
@@ -1515,7 +1534,7 @@ _model_builder._parse_model_name()
     __precision=int8
   else 
     echo 'Unknown precision specified in model: '$_model >&2
-    exit 1
+    return 1
   fi
   _lprefix=${_model%-${__precision}-*}
   _suffix=${_model/${_lprefix}-/}
@@ -1529,6 +1548,8 @@ _model_builder._parse_model_name()
     __dir=quickstart
   fi
   __mode=${_lmode%%-*}
+
+  return 0
 }
 
 #
@@ -1536,7 +1557,7 @@ _model_builder._parse_model_name()
 #
 _model_builder._tests.generate_documentation()
 {
-  local _dir='' _docdir _framework='' _image_name _image_names _mode _model _precision _prefix
+  local _dir='' _docdir _framework='' _image_name _image_names _mode _model _precision _prefix _re="[[:space:]]+"
   while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
     case "$1" in
       --arg)
@@ -1563,8 +1584,17 @@ _model_builder._tests.generate_documentation()
   echo ''  >> $_g_root'/tests/model-builder.bats'
   for _model in "$@"; do
     _model_builder._parse_model_name $_model $_framework _prefix _precision _mode _dir
+    ret_val=$?
+    if (( $ret_val != 0 )); then
+      echo "Skipping validation of generate-documentation for $_model"
+      continue
+    fi
     _docdir=$(find $_dir -type d | grep $_prefix | grep $_mode | grep $_precision'$')
     if [[ -n $_docdir ]]; then
+      if [[ $_docdir =~ $_re ]]; then
+        echo "More than one path returned from \`find $_dir -type d ' | grep '$_prefix' | grep '$_mode' | grep '$_precision'$'\`: $(echo $_docdir). Skipping." >&2
+        continue
+      fi
       _readme=$_docdir/README.md
       echo $'@test "validate generate-documentation for '$_model$' in framework '$_framework$' creates '$_readme$'" {
   run model-builder generate-documentation -f '$_framework$' '$_model$'
@@ -1645,6 +1675,48 @@ _model_builder._tests.generate_dockerfile()
 }' >> $_g_root'/tests/model-builder.bats'
    fi
  done
+}
+
+#
+# Generates tests for model-builder generate-deployment models...
+#
+_model_builder._tests.generate_deployment()
+{
+  local _asm_dockerfiles _model _framework
+  while [[ "$#" -gt "0" && $1 =~ ^- ]]; do
+    case "$1" in
+      --arg)
+        shift
+        ;;
+      -h|--help)
+        echo -e 'generate-deployment tests\n'
+        exit 0
+        ;;
+      --model_dir=|--output_dir=|--dry_run)
+        ;;
+      --framework)
+        shift
+        _framework=$1
+        ;;
+      *)
+        ;;
+    esac
+    shift
+  done
+  pushd $_g_root/docker 1>/dev/null 2>/dev/null
+  # Check for the tf-tool container and build it if it doesn't exist
+  _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
+  _model_dir=$_g_root/..
+  _model_dir_mount='-v $_model_dir:$_model_dir'
+  # Note: Run as user so that the generated deployment(s) have the right permissions
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) -e MODEL_BUILDER_SPEC_HOME=/specs $(_model_builder._get-proxy-env-vars) -v ${_spec_home}:/specs -v $(pwd):$_model_dir/.. -w $_model_dir/.. $_model_dir_mount imz-tf-tools python3 assembler.py "
+  _model_builder._echo_command ${_asm_dockerfiles} \
+    --release $_release_group \
+    --spec_dir=./specs/$_framework \
+    --generate_deployments_tests \
+    ${_release_args[@]} \
+    ${_args[@]}
+  popd 1>/dev/null 2>/dev/null
 }
 
 #
@@ -1761,7 +1833,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.build \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1773,7 +1845,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.generate_documentation \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1783,6 +1855,20 @@ _model_builder.run_test_suite()
       generate-dockerfile)
         _model_builder._echo_command \
           _model_builder._tests.generate_dockerfile \
+          --arg http_proxy=${http_proxy} \
+          --arg https_proxy=${https_proxy} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
+          --framework ${_current_framework} \
+          ${_release_args[@]} \
+          ${_args[@]} \
+          $_dry_run \
+          ${_selected_models[@]}
+        ;;
+      generate-deployment)
+        rm -f $_g_root'/tests/model-builder.bats'
+        _current_framework=k8s
+        _model_builder._echo_command \
+          _model_builder._tests.generate_deployment \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
           --spec_dir=./specs/${_current_framework} \
@@ -1797,7 +1883,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.package \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1810,7 +1896,6 @@ _model_builder.run_test_suite()
   _model_builder._echo_command \
     $_g_root/tests/bin/bats \
     $_g_root/tests/model-builder.bats \
-    ${_args[@]} \
     $_dry_run
 
   result=$?
@@ -2225,9 +2310,10 @@ _model_builder_main()
           _model_builder._set_current_models
           _model_builder._validate_frameworks $@ || exit 0
           _model_builder._validate_models $@ || exit 0
-          _model_builder.run_test_suite $_verbose $_dry_run $@
+          _only_tags_matching="$(_model_builder._build_only_tags_matching_args $@)"
+          _model_builder.run_test_suite $_only_tags_matching $_verbose $_dry_run $@
           if (( $? != 0 )); then
-            echo "There was an error building model packages."
+            echo "There was an error while running tests."
             exit 1
           fi
           ;;

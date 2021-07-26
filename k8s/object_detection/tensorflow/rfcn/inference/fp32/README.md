@@ -9,7 +9,7 @@ Intel® Optimizations for TensorFlow* on Kubernetes*.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-fp32-inference-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/rfcn-fp32-inference-k8s.tar.gz)
+[rfcn-fp32-inference-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/rfcn-fp32-inference-k8s.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -39,7 +39,7 @@ These quickstart scripts can be run in the following environment:
 
 Download and untar the RFCN FP32 inference package.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/rfcn-fp32-inference-k8s.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/rfcn-fp32-inference-k8s.tar.gz
 tar -xvf rfcn-fp32-inference-k8s.tar.gz
 ```
 
@@ -270,9 +270,9 @@ the Argo user inferface or from the command line using kubectl or argo.
 The commands below describe how to use kubectl to see the workflow, pods,
 and log files:
 ```
-$ kubectl get wf
-$ kubectl get pods
-$ kubectl logs <pod name> main
+kubectl get wf
+kubectl get pods
+kubectl logs <pod name> main
 ```
 
 ##### Cleanup

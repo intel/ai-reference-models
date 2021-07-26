@@ -6,34 +6,34 @@ slice_sets:
   rfcn-fp32-inference-k8s:
     - add_to_name: -rfcn-fp32-inference-k8s
       documentation:
-        name: README.md
-        uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32
-        text_replace:
-          <model name>: RFCN
-          <precision>: FP32
-          <mode>: inference
-          <use case>: object_detection
-          <docker image>: intel/object-detection:tf-2.4.0-rfcn-fp32-inference
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/rfcn-fp32-inference-k8s.tar.gz
-          <package name>: rfcn-fp32-inference-k8s.tar.gz
-          <package dir>: rfcn-fp32-inference-k8s
-        docs:
-          - name: Title
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/title.md
-          - name: Description
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/description.md
-          - name: Download link
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/download.md
-          - name: Datasets
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/datasets.md
-          - name: Quick Start Scripts
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/quickstart.md
-          - name: Kubernetes
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/kubernetes.md
-          - name: Trouble Shooting
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/troubleshooting.md
-          - name: License link
-            uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/license.md
+        - name: README.md
+          uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32
+          text_replace:
+            <model name>: RFCN
+            <precision>: FP32
+            <mode>: inference
+            <use case>: object_detection
+            <docker image>: intel/object-detection:tf-latest-rfcn-fp32-inference
+            <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/rfcn-fp32-inference-k8s.tar.gz
+            <package name>: rfcn-fp32-inference-k8s.tar.gz
+            <package dir>: rfcn-fp32-inference-k8s
+          docs:
+            - name: Title
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/title.md
+            - name: Description
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/description.md
+            - name: Download link
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/download.md
+            - name: Datasets
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/datasets.md
+            - name: Quick Start Scripts
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/quickstart.md
+            - name: Kubernetes
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/kubernetes.md
+            - name: Trouble Shooting
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/troubleshooting.md
+            - name: License link
+              uri: models/k8s/object_detection/tensorflow/rfcn/inference/fp32/.docs/license.md
       args:
         - PACKAGE_NAME=rfcn-fp32-inference-k8s
       files:
@@ -58,7 +58,7 @@ slice_sets:
           - name: GROUP_NAME
             value: root
           - name: IMAGE_VERSION
-            value: tf-2.4.0
+            value: tf-latest
           - name: NAME_SPACE
             value: default
           - name: NFS_PATH
@@ -89,3 +89,10 @@ slice_sets:
             value: "5G"
           - name: RESOURCE_REQUESTS_CPU
             value: "10"
+        tests:
+          - uri: k8s/object_detection/tensorflow/rfcn/inference/fp32/.tests/deployments-yml-exist.sh
+          - uri: k8s/object_detection/tensorflow/rfcn/inference/fp32/.tests/namespace-exists.sh
+            args:
+              - name: USER_NAME
+                value: $USER_NAME
+          - uri: k8s/object_detection/tensorflow/rfcn/inference/fp32/.tests/serving_deployment.sh

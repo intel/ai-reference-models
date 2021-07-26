@@ -188,7 +188,7 @@ in the container at `custom_folder_1` and `/home/<user>/custom_folder_2`
 in the container at `custom_folder_2`:
 
 ```
-$ python launch_benchmark.py \
+python launch_benchmark.py \
         --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
         --model-name resnet50 \
         --framework tensorflow \
@@ -197,7 +197,7 @@ $ python launch_benchmark.py \
         --batch-size 1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+        --docker-image intel/intel-optimized-tensorflow:latest \
         --volume /home/<user>/custom_folder_1:/custom_folder_1 \
         --volume /home/<user>/custom_folder_2:/custom_folder_2
 ```
@@ -225,7 +225,7 @@ Below is an example showing how to use the `--debug` flag:
    `start.sh` file:
 
    ```
-   $ python launch_benchmark.py \
+   python launch_benchmark.py \
         --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
         --model-name resnet50 \
         --framework tensorflow \
@@ -234,7 +234,7 @@ Below is an example showing how to use the `--debug` flag:
         --batch-size=1 \
         --socket-id 0 \
         --data-location /home/<user>/Imagenet_Validation \
-        --docker-image intel/intel-optimized-tensorflow:2.4.0 \
+        --docker-image intel/intel-optimized-tensorflow:latest \
         --debug
 
    # ls
@@ -397,10 +397,10 @@ bare metal.
 
 | Use Case                | Framework    | Model              | Mode      | Run from the Model Zoo repository |
 | ----------------------- | ------------ | ------------------ | --------- | --------------------------------- |
-| Image Recognition       | TensorFlow   | [DenseNet169](https://arxiv.org/pdf/1608.06993.pdf) | Inference | [FP32](image_recognition/tensorflow/densenet169/README.md#fp32-inference-instructions) |
-| Image Recognition       | TensorFlow   | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | [Int8](image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
-| Image Recognition       | TensorFlow   | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf) | Inference | [Int8](image_recognition/tensorflow/inceptionv4/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/inceptionv4/README.md#fp32-inference-instructions) |
-| Image Recognition       | TensorFlow   | [MobileNet V1*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](image_recognition/tensorflow/mobilenet_v1/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/mobilenet_v1/README.md#fp32-inference-instructions) |
-| Image Recognition       | TensorFlow   | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf) | Inference | [Int8](image_recognition/tensorflow/resnet101/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet101/README.md#fp32-inference-instructions) |
-| Image Recognition       | TensorFlow   | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf) | Inference  | [Int8](image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet50/README.md#fp32-inference-instructions) |
-| Image Recognition       | TensorFlow   | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | Inference | [Int8](image_recognition/tensorflow/resnet50v1_5/README.md#int8-inference-instructions) [FP32](image_recognition/tensorflow/resnet50v1_5/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [DenseNet169](https://arxiv.org/pdf/1608.06993.pdf) | Inference | [FP32](/benchmarks/image_recognition/tensorflow/densenet169/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/inceptionv3/README.md#int8-inference-instructions) [FP32](/benchmarks/image_recognition/tensorflow/inceptionv3/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/inceptionv4/README.md#int8-inference-instructions) [FP32](/benchmarks/image_recognition/tensorflow/inceptionv4/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [MobileNet V1*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/mobilenet_v1/README.md#int8-inference-instructions) [FP32](/benchmarks/image_recognition/tensorflow/mobilenet_v1/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/resnet101/README.md#int8-inference-instructions) [FP32](/benchmarks/image_recognition/tensorflow/resnet101/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf) | Inference  | [Int8](/benchmarks/image_recognition/tensorflow/resnet50/README.md#int8-inference-instructions) [FP32](/benchmarks/image_recognition/tensorflow/resnet50/README.md#fp32-inference-instructions) |
+| Image Recognition       | TensorFlow   | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md#int8-inference-instructions) [FP32](/benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md#fp32-inference-instructions) |

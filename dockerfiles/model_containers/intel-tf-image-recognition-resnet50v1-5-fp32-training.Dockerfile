@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -92,6 +92,9 @@ RUN pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
 #     cmake
 #
 # RUN pip install horovod==${HOROVOD_VERSION}
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
 
 ARG PACKAGE_DIR=model_packages
 

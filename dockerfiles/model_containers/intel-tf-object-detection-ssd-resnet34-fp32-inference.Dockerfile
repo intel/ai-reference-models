@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -64,7 +64,7 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy==1.17.4 \
-        'pillow>=7.1.0' && \
+        'pillow>=8.1.2' && \
     pip install pycocotools
 
 ARG TF_MODELS_DIR=/tensorflow/models
@@ -82,6 +82,9 @@ RUN cd ${TF_MODELS_DIR}/research && \
         unzip \
         wget && \
     apt-get autoremove -y
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \

@@ -10,12 +10,12 @@ following modes/precisions:
 repository:
 
 ```
-$ git clone https://github.com/IntelAI/models.git
+git clone https://github.com/IntelAI/models.git
 ```
 
 2. Download the pre-trained model.
 ```
-$ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_fp32_pretrained_model.pb
 ```
 
 3. Navigate to the `benchmarks` directory in your local clone of
@@ -42,7 +42,7 @@ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --batch-size=1 \
-    --docker-image=intel/intel-optimized-tensorflow-serving:2.4.0 \
+    --docker-image=intel/intel-optimized-tensorflow-serving:latest \
     --benchmark-only
 ```
 Example log tail when running for online inference:
@@ -71,7 +71,7 @@ python launch_benchmark.py \
     --precision fp32 \
     --mode inference \
     --batch-size=128 \
-    --docker-image=intel/intel-optimized-tensorflow-serving:2.4.0 \
+    --docker-image=intel/intel-optimized-tensorflow-serving:latest \
     --benchmark-only
 ```
 Example log tail when running for batch inference:

@@ -251,6 +251,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
             env_var_dict[split_arg[0]] = split_arg[1]
 
+        # For TF 2.5, int8 models must be run with TF_ENABLE_MKL_NATIVE_FORMAT=0
+        if self.args.precision == "int8":
+            env_var_dict["TF_ENABLE_MKL_NATIVE_FORMAT"] = "0"
+            print("Warning: Running int8 inference with blocked format. Native format will be supported in future "
+                  "TensorFlow releases. Please don't define TF_ENABLE_MKL_NATIVE_FORMAT in CLI unless native format "
+                  "is enabled for your installed TensorFlow version.")
+
         return env_var_dict
 
     def run_bare_metal(self, benchmark_scripts, intelai_models,

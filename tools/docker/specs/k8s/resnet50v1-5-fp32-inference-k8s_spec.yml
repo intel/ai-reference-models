@@ -13,34 +13,34 @@ slice_sets:
         - destination: quickstart
           source: k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
       documentation:
-        name: README.md
-        uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
-        text_replace:
-          <model name>: ResNet50 v1.5
-          <precision>: FP32
-          <mode>: inference
-          <use case>: image_recognition
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50v1-5-fp32-inference-k8s.tar.gz
-          <package name>: resnet50v1-5-fp32-inference-k8s.tar.gz
-          <package dir>: resnet50v1-5-fp32-inference-k8s
-          <docker image>: intel/image-recognition:tf-2.4.0-resnet50v1-5-fp32-inference
-        docs:
-          - name: Title
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/title.md
-          - name: Description
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/description.md
-          - name: Download link
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/download.md
-          - name: Datasets
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/datasets.md
-          - name: Quick Start Scripts
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/quickstart.md
-          - name: Kubernetes
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/kubernetes.md
-          - name: Trouble Shooting
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/troubleshooting.md
-          - name: License link
-            uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/license.md
+        - name: README.md
+          uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32
+          text_replace:
+            <model name>: ResNet50 v1.5
+            <precision>: FP32
+            <mode>: inference
+            <use case>: image_recognition
+            <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/resnet50v1-5-fp32-inference-k8s.tar.gz
+            <package name>: resnet50v1-5-fp32-inference-k8s.tar.gz
+            <package dir>: resnet50v1-5-fp32-inference-k8s
+            <docker image>: intel/image-recognition:tf-latest-resnet50v1-5-fp32-inference
+          docs:
+            - name: Title
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/title.md
+            - name: Description
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/description.md
+            - name: Download link
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/download.md
+            - name: Datasets
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/datasets.md
+            - name: Quick Start Scripts
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/quickstart.md
+            - name: Kubernetes
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/kubernetes.md
+            - name: Trouble Shooting
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/troubleshooting.md
+            - name: License link
+              uri: models/k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/license.md
       runtime:
         command:
           - kubectl
@@ -58,7 +58,7 @@ slice_sets:
           - name: GROUP_NAME
             value: root
           - name: IMAGE_VERSION
-            value: tf-2.4.0
+            value: tf-latest
           - name: NAME_SPACE
             value: default
           - name: NFS_PATH
@@ -89,3 +89,10 @@ slice_sets:
             value: "5G"
           - name: RESOURCE_REQUESTS_CPU
             value: "10"
+        tests:
+          - uri: k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.tests/deployments-yml-exist.sh
+          - uri: k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.tests/namespace-exists.sh
+            args:
+              - name: USER_NAME
+                value: $USER_NAME
+          - uri: k8s/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.tests/serving_deployment.sh

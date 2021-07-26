@@ -30,7 +30,7 @@ packages and containers.
 |----------|---------------|-------------|
 | `MODEL_PACKAGE_DIR` | `../output` | Directory where model package .tar.gz files are located |
 | `LOCAL_REPO` | `model-zoo` | Local images will be built as `${LOCAL_REPO}:tag`. Tags are defined by the spec yml files |
-| `TENSORFLOW_TAG` | `2.4.0-ubuntu-20.04` | Tag of the intel-optimized-tensorflow image to use as the base for versioned containers |
+| `TENSORFLOW_TAG` | `latest` | Tag of the intel-optimized-tensorflow image to use as the base for versioned containers |
 | `TAG_PREFIX` | `${TENSORFLOW_TAG}` | Prefix used for the image tags (typically this will be the TF version) |
 | `MODEL_WORKSPACE` | `/workspace` | Location where the model package will be extracted in the model container |
 | `IMAGE_LIST_FILE` | None | Specify a file path where the list of built image/tags will be written. This is used by automated build scripts. |
@@ -43,7 +43,12 @@ settings. For example:
 ```
 MODEL_PACKAGE_DIR=/tmp/model_packages model-builder
 ```
-
+`model-builder` supports `CentOS` or `Ubuntu` based TensorFlow tags. Use the environment variable `TENSORFLOW_TAG` to specify the tag for the base `intel-optimized-tensorflow` image.
+For example:
+```
+TENSORFLOW_TAG=centos-8 model-builder make mobilenet-v1-int8-inference
+```
+You can find the list of supported models on CentOS in `tools/docker/specs/centos`.
 ## Documentation text replacement
 
 When `init-spec` is run, model spec yaml file's documentation section has
@@ -175,7 +180,7 @@ The model-builder command will build images by calling docker run on the imz-tf-
 in arguments to assembler.py. This internal call looks like the following:
 
 ```
-docker run --rm -v <path-to-models-repo>/tools/docker:/tf -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py --arg _TAG_PREFIX=2.4.0 --arg http_proxy= --arg https_proxy= --arg TENSORFLOW_TAG=2.4.0-ubuntu-20.04 --arg PACKAGE_DIR=model_packages --arg MODEL_WORKSPACE=/workspace --repository model-zoo --release versioned --build_images --only_tags_matching=.*bert-large-fp32-training$ --quiet
+docker run --rm -v <path-to-models-repo>/tools/docker:/tf -v /var/run/docker.sock:/var/run/docker.sock imz-tf-tools python3 assembler.py --arg _TAG_PREFIX=latest --arg http_proxy= --arg https_proxy= --arg TENSORFLOW_TAG=latest --arg PACKAGE_DIR=model_packages --arg MODEL_WORKSPACE=/workspace --repository model-zoo --release versioned --build_images --only_tags_matching=.*bert-large-fp32-training$ --quiet
 ```
 
 For single targets such as `bert-large-fp32-training` the model-builder adds an argument:
@@ -204,7 +209,7 @@ The model-builder's run-test-suit subcommand will generate tests for one or more
 The syntax is shown below:
 
 ```
-model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|package] --release-group <release-group> <model> ...
+model-builder run-test-suite --command [build|generate-dockerfile|generate-documentation|generate-deployment|package] --release-group <release-group> <model> ...
 ```
 
 The run-test-suite subcommand generates test cases using syntax compatible with [bats-core](https://github.com/bats-core/bats-core). After generation, it calls bats providing the generated script. Several examples with output are shown below

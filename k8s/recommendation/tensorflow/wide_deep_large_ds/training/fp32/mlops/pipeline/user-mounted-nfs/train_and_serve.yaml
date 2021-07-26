@@ -44,7 +44,7 @@ spec:
       runAsGroup: 0 # {"$openapi":"GROUP_ID"}
       fsGroup: 0 # {"$openapi":"FS_ID"}
     container:
-      image: docker.io/intel/recommendation:tf-2.4.0-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
+      image: docker.io/intel/recommendation:tf-latest-wide-deep-large-ds-fp32-training # {"$openapi":"IMAGE"}
       imagePullPolicy: IfNotPresent
       workingDir: /workspace/wide-deep-large-ds-fp32-training # {"$openapi":"MODEL_DIR"}
       command: # {"$openapi":"MODEL_COMMAND"}
@@ -99,7 +99,7 @@ spec:
                 fsGroup: {{workflow.parameters.FS_ID}}
               containers:
               - name: {{workflow.parameters.SERVER_NAME}}
-                image: intel/intel-optimized-tensorflow-serving:2.4.0
+                image: intel/intel-optimized-tensorflow-serving:latest
                 env:
                 - name: MODEL_BASE_PATH
                   value: {{workflow.parameters.OUTPUT_DIR}}

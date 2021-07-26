@@ -33,7 +33,7 @@ can be used with other model packages.
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50_fp32_inference.tar.gz
 
 cd resnet50_fp32_inference/benchmarks
@@ -71,7 +71,7 @@ docker run \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --privileged --init -t \
-  intel/image-recognition:tf-2.4.0-resnet50-fp32-inference \
+  intel/image-recognition:tf-latest-resnet50-fp32-inference \
   python benchmarks/launch_benchmark.py \
     --model-name resnet50 \
     --precision fp32 \
@@ -104,7 +104,7 @@ docker run \
   --env https_proxy=${https_proxy} \
   <mark><b>--cpuset-cpus="0-27" --cpuset-mems="0"</b></mark> \
   --privileged --init -t \
-  intel/image-recognition:tf-2.4.0-resnet50-fp32-inference \
+  intel/image-recognition:tf-latest-resnet50-fp32-inference \
   python benchmarks/launch_benchmark.py \
     --model-name resnet50 \
     --precision fp32 \
@@ -140,7 +140,7 @@ model.
 DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
 OUTPUT_DIR=&lt;directory where log files will be written&gt;
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50_fp32_inference.tar.gz
 
 docker run \
@@ -152,7 +152,7 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -w /workspace -t \
-  <mark><b>intel/image-recognition:tf-2.4.0-resnet50-fp32-inference</b></mark> \
+  <mark><b>intel/image-recognition:tf-latest-resnet50-fp32-inference</b></mark> \
   /bin/bash /workspace/quickstart/&lt;script name&gt;.sh
 </pre>
 
@@ -167,7 +167,7 @@ following env variables shown below, the user can run the model with their uid:g
 DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
 OUTPUT_DIR=&lt;directory where log files will be written&gt;
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50_fp32_inference.tar.gz
 
 docker run \
@@ -183,6 +183,6 @@ docker run \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -w /workspace -t \
-  <mark><b>intel/image-recognition:tf-2.4.0-resnet50-fp32-inference</b></mark> \
+  <mark><b>intel/image-recognition:tf-latest-resnet50-fp32-inference</b></mark> \
   /bin/bash /workspace/quickstart/&lt;script name&gt;.sh
 </pre>

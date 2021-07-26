@@ -174,7 +174,7 @@ class eval_classifier_optimized_graph:
 
     num_processed_images = 0
     num_remaining_images = dataset.num_examples_per_epoch(subset=subset) - num_processed_images \
-        if self.args.data_location else datasets.IMAGENET_NUM_VAL_IMAGES
+        if self.args.data_location else (self.args.steps * self.args.batch_size)
 
     if (not self.args.accuracy_only):
       iteration = 0
