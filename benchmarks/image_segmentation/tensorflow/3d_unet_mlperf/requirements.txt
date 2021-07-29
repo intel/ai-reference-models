@@ -1,4 +1,3 @@
-Keras==2.4.3
 numpy==1.19.5
 nilearn==0.7.1
 tables==3.6.1
