@@ -17,7 +17,6 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from mlperf_compliance import mlperf_log
 
 import argparse
 import os
@@ -25,6 +24,14 @@ import sys
 import time
 
 from six.moves import xrange  # pylint: disable=redefined-builtin
+
+from tensorflow.python.ops import state_ops
+from tensorflow.python.training import training_util
+from tensorflow.python.training import session_run_hook
+from tensorflow.python.training.basic_session_run_hooks import StopAtStepHook, ProfilerHook
+
+from mlperf_compliance import mlperf_log
+
 import tensorflow as tf
 
 from data_download import VOCAB_FILE
@@ -37,6 +44,24 @@ _EXTRA_DECODE_LENGTH = 100
 _BEAM_SIZE = 4
 _ALPHA = 0.6
 
+class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
+  def __init__(self):
+    pass
+
+  def begin(self):
+    self._global_step_tensor = training_util.get_global_step()
+    if self._global_step_tensor is None:
+      raise RuntimeError("Global step should be created to use UpdateGlobalStepHook.")
+    tf.compat.v1.get_default_graph()._unsafe_unfinalize()
+    self._updated_global_step = state_ops.assign_add(self._global_step_tensor, 1, use_locking=True)
+  def after_create_session(self, session, coord):
+    pass
+
+  def before_run(self, run_context):
+    return session_run_hook.SessionRunArgs(self._updated_global_step)
+
+  def after_run(self, run_context, run_values):
+    pass
 
 def _get_sorted_inputs(filename):
   """Read and sort lines from the file sorted by decreasing length.
@@ -106,7 +131,6 @@ def translate_file(
       if i % batch_size == 0:
         batch_num = (i // batch_size) + 1
 
-#        print("Decoding batch %d out of %d." % (batch_num, num_decode_batches))
       yield _encode_and_add_eos(line, subtokenizer)
 
   def input_fn():
@@ -116,33 +140,62 @@ def translate_file(
     ds = ds.padded_batch(batch_size, [None])
     return ds
 
-  translations = []
-  start_time = time.time()
-  for i, prediction in enumerate(estimator.predict(input_fn)):
-    translation = _trim_and_decode(prediction["outputs"], subtokenizer)
-    translations.append(translation)
+  if FLAGS.test_mode == 'accuracy':
+    translations = []
+    start_time = time.time()
+    for i, prediction in enumerate(estimator.predict(input_fn)):
+      translation = _trim_and_decode(prediction["outputs"], subtokenizer)
+      translations.append(translation)
+      if print_all_translations:
+        print("Translating:")
+        print("\tInput: %s" % sorted_inputs[i])
+        print("\tOutput: %s\n" % translation)
+        print("=" * 100)
 
-    if print_all_translations:
-      print("Translating:")
-      print("\tInput: %s" % sorted_inputs[i])
-      print("\tOutput: %s\n" % translation)
-      print("=" * 100)
+    duration = time.time() - start_time
+    num_sentences = len(sorted_inputs)
+    print('Total inferencing time:%s' %(duration))
+    print('Throughput:{} sentences/second'.format(num_sentences/duration))
 
-  duration = time.time() - start_time
-  num_sentences = len(sorted_inputs)
-  print('Total inferencing time:%s' %(duration))
-  print('Throughput:{} sentences/second'.format(num_sentences/duration))
+    # Write translations in the order they appeared in the original file.
+    if output_file is not None:
+      if tf.io.gfile.isdir(output_file):
+        raise ValueError("File output is a directory, will not save outputs to "
+                         "file.")
+      tf.compat.v1.logging.info("Writing to file %s" % output_file)
+      with tf.io.gfile.GFile(output_file, "w") as f:
+        for index in xrange(len(sorted_keys)):
+          f.write("%s\n" % translations[sorted_keys[index]])
+  else:
+    # Create hooks
+    total_steps = FLAGS.warmup_steps + FLAGS.steps
+    if FLAGS.test_mode == 'benchmark':
+      hooks = [UpdateGlobalStepHook(),
+               StopAtStepHook(total_steps)]
+    elif FLAGS.test_mode == 'profile':
+      hooks = [UpdateGlobalStepHook(),
+               StopAtStepHook(total_steps),
+               ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
+    else:
+      hooks = []
 
-  # Write translations in the order they appeared in the original file.
-  if output_file is not None:
-    if tf.io.gfile.isdir(output_file):
-      raise ValueError("File output is a directory, will not save outputs to "
-                       "file.")
-    tf.compat.v1.logging.info("Writing to file %s" % output_file)
-    with tf.io.gfile.GFile(output_file, "w") as f:
-      for index in xrange(len(sorted_keys)):
-        f.write("%s\n" % translations[sorted_keys[index]])
+    if FLAGS.steps is 0:
+        hooks =[]
+    translations = []
+    start_time = time.time()
+    for i, prediction in enumerate(estimator.predict(input_fn, hooks=hooks)):
+      if i == FLAGS.warmup_steps:
+        start_time = time.time()
+      translation = _trim_and_decode(prediction["outputs"], subtokenizer)
+      if i >= FLAGS.warmup_steps:
+        translations.append(translation)
+      if FLAGS.test_mode != 'benchmark' and i%10 == 9:
+        tf.compat.v1.logging.info('Number of examples processed: {}'.format(len(translations)))
 
+    duration = time.time() - start_time
+    num_sentences = len(translations)
+    print('Total inferencing time:%s seconds' %(duration))
+    print('Throughput:{} sentences/second'.format(num_sentences/duration))
 
 def translate_text(estimator, subtokenizer, txt):
   """Translate a single string."""
@@ -183,6 +236,7 @@ def main(unused_argv):
   params.alpha = _ALPHA
   params.extra_decode_length = _EXTRA_DECODE_LENGTH
   params.batch_size = FLAGS.batch_size
+  params.frozen_graph = FLAGS.input_graph
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
@@ -260,6 +314,19 @@ if __name__ == "__main__":
   parser.add_argument(
       "--batch_size", "-batch", type=int, default=_DECODE_BATCH_SIZE,
       help="the batch size for inference", metavar="<INTER>")
+  parser.add_argument(
+      "--output_dir", "-od", type=str, default=os.path.abspath(os.curdir),
+      help="[default: %(default)s] Directory for frozen_graph.",
+      metavar="<OD>")
+  parser.add_argument("--test_mode", type=str, default="benchmark",
+      choices=["benchmark", "profile", "accuracy"],
+      help="One of three options: 'benchmark'/'profile'/'accuracy'.")
+  parser.add_argument("--warmup_steps", type=int, default=0,
+      help="Number of steps for warmup.")
+  parser.add_argument("--steps", type=int, default=0,
+      help="Number of steps for benchmark.")
+  parser.add_argument("--input_graph", type=str, default=None,
+      help="Frozen graph path.")
 
   FLAGS, unparsed = parser.parse_known_args()
   main(sys.argv)

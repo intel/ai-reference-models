@@ -1280,7 +1280,7 @@ function transformer_lt_official() {
     fi
 
     CMD="${CMD}
-    --in_graph=${IN_GRAPH} \
+    --input_graph=${input_graph} \
     --vocab_file=${DATASET_LOCATION}/${vocab_file} \
     --file=${DATASET_LOCATION}/${file} \
     --file_out=${OUTPUT_DIR}/${file_out} \
@@ -1342,6 +1342,11 @@ function transformer_mlperf() {
   if [[ ${MODE} == "inference" ]]; then
     if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]; then
 
+      if [[ -z "${params}" ]]; then
+          echo "transformer-language requires --params arg to be defined"
+          exit 1
+      fi
+
       if [[ -z "${file}" ]]; then
           echo "transformer-language requires -- file arg to be defined"
           exit 1
@@ -1355,12 +1360,13 @@ function transformer_mlperf() {
           exit 1
       fi
 
-      CMD="${CMD}
-      --checkpoint=${CHECKPOINT_DIRECTORY} \
-      --data_dir=${DATASET_LOCATION} \
-      --file=${DATASET_LOCATION}/${file} \
-      --file_out=${OUTPUT_DIR}/${file_out} \
-      --reference=${DATASET_LOCATION}/${reference}"
+      CMD="${CMD} $(add_steps_args) $(add_arg "--params" ${params}) \
+           $(add_arg "--file" ${DATASET_LOCATION}/${file}) \
+           $(add_arg "--vocab_file" ${DATASET_LOCATION}/${vocab_file}) \
+           $(add_arg "--file_out" ${OUTPUT_DIR}/${file_out}) \
+           $(add_arg "--reference" ${DATASET_LOCATION}/${reference})"
+      echo $CMD
+
       PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 

@@ -33,37 +33,25 @@ class ModelInitializer(BaseModelInitializer):
         self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
 
-        self.set_num_inter_intra_threads()
-
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
         MODEL_EXEC_DIR = os.path.join(self.args.intelai_models, self.args.mode, self.args.precision)
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
-        if self.args.socket_id != -1:
-            if self.args.num_cores != -1:
-                self.cmd += "--physcpubind=0-" + \
-                            (str(self.args.num_cores - 1)) + " "
         self.cmd += self.python_exe
 
         run_script = os.path.join(MODEL_EXEC_DIR, "transformer/translate.py")
 
         # Model args
         arg_parser = ArgumentParser(description='process custom_args')
-        arg_parser.add_argument('--param',
-                                help='hparameter setting',
-                                dest="param_set",
+        arg_parser.add_argument('--params',
+                                help='transformer model setting',
+                                dest="params",
                                 default="big")
-        arg_parser.add_argument('--data_dir',
-                                help='input vocable file for translation',
-                                dest="data_dir",
-                                default="vocab.txt")
-        arg_parser.add_argument('--model_dir',
-                                help='input fp32 checkpoint for inference',
-                                dest="model_dir",
+        arg_parser.add_argument('--vocab_file',
+                                help='input vocab file for inference directory',
+                                dest="vocab_file",
                                 default="")
         arg_parser.add_argument('--file',
                                 help='decode input file with path',
@@ -77,6 +65,12 @@ class ModelInitializer(BaseModelInitializer):
                                 help='inference ref file with path',
                                 dest="reference",
                                 default="")
+        arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
+                                type=int, default=3,
+                                help="number of warmup steps")
+        arg_parser.add_argument("--steps", dest='steps',
+                                type=int, default=100,
+                                help="number of steps")
 
         self.args = arg_parser.parse_args(self.custom_args,
                                           namespace=self.args)
@@ -84,14 +78,24 @@ class ModelInitializer(BaseModelInitializer):
         # Model parameter control
         translate_file = os.path.join(self.args.output_dir,
                                       self.args.decode_to_file)
-        cmd_args = " --param_set=" + self.args.param_set + \
-                   " --model_dir=" + self.args.checkpoint + \
+        if self.args.benchmark_only:
+           testmode = 'benchmark'
+        elif self.args.accuracy_only:
+           testmode = 'accuracy'
+        else:
+           testmode=self.args.mode
+        cmd_args = " --params=" + self.args.params+ \
+                   " --input_graph=" + self.args.input_graph + \
                    " --batch_size=" + \
                    (str(self.args.batch_size)
                     if self.args.batch_size != -1 else "1") + \
+                   " --test_mode=" + testmode + \
+                   " --warmup_steps=" + str(self.args.warmup_steps) + \
+                   " --steps=" + str(self.args.steps) + \
+                   " --vocab_file=" + self.args.vocab_file + \
                    " --file=" + self.args.decode_from_file + \
                    " --file_out=" + translate_file + \
-                   " --data_dir=" + self.args.data_dir + \
+                   " --data_dir=" + self.args.data_location + \
                    " --num_inter=" + str(self.args.num_inter_threads) + \
                    " --num_intra=" + str(self.args.num_intra_threads)
 
@@ -100,12 +104,14 @@ class ModelInitializer(BaseModelInitializer):
 
         self.cmd += " " + run_script + cmd_args
         compute_bleu_script = os.path.join(MODEL_EXEC_DIR, "transformer/compute_bleu.py")
-        self.bleucmd = self.python_exe + " " + compute_bleu_script \
-            + self.bleu_params
+        if self.args.accuracy_only:
+          self.bleucmd = self.python_exe + " " + compute_bleu_script \
+                         + self.bleu_params
+        else:
+          self.bleucmd = ''
 
     def run(self):
         original_dir = os.getcwd()
-        # os.chdir(self.args.model_source_dir)
         print(self.cmd)
         self.run_command(self.cmd)
 
