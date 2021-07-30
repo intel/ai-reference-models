@@ -29,7 +29,6 @@ import numpy.random
 from six.moves import xrange  # pylint: disable=redefined-builtin
 import tensorflow as tf
 #import tensorflow_addons as tfa
-tf.compat.v1.disable_eager_execution()
 from tensorflow.python.training import adam
 
 from mlperf_compliance import mlperf_log
@@ -49,39 +48,57 @@ DEFAULT_TRAIN_EPOCHS = 10
 BLEU_DIR = "bleu"
 INF = 10000
 
+tf.compat.v1.disable_eager_execution()
+
 
 def model_fn(features, labels, mode, params):
   """Defines how to train, evaluate and predict from the transformer model."""
-  with tf.compat.v1.variable_scope("model"):
-    inputs, targets = features, labels
+  if params.frozen_graph and mode == tf.estimator.ModeKeys.PREDICT:
+    print("Reading***** From *** pb", flush=True)
+    input_map = {'input_tokens': features}
+    output_names = ['model/Transformer/strided_slice_19',
+                    'model/Transformer/strided_slice_20']
 
-    # Create model and get output logits.
-    model = transformer.Transformer(params, mode == tf.estimator.ModeKeys.TRAIN)
+    with tf.io.gfile.GFile(params.frozen_graph, "rb") as f:
+      graph_def = tf.compat.v1.GraphDef()
+      graph_def.ParseFromString(f.read())
+    tf.graph_util.import_graph_def(graph_def, input_map, output_names, name="")
+    output_tensors = [tf.compat.v1.get_default_graph().get_tensor_by_name(name + ":0") for name in output_names]
+    output = {'outputs': output_tensors[0] , 'scores': output_tensors[1]}
+    return tf.estimator.EstimatorSpec(
+        tf.estimator.ModeKeys.PREDICT,
+        predictions=output)
+  else:
+    with tf.compat.v1.variable_scope("model"):
+      inputs, targets = features, labels
 
-    output = model(inputs, targets)
+      # Create model and get output logits.
+      model = transformer.Transformer(params, mode == tf.estimator.ModeKeys.TRAIN)
 
-    # When in prediction mode, the labels/targets is None. The model output
-    # is the prediction
-    if mode == tf.estimator.ModeKeys.PREDICT:
-      return tf.estimator.EstimatorSpec(
-          tf.estimator.ModeKeys.PREDICT,
-          predictions=output)
+      output = model(inputs, targets)
 
-    logits = output
+      # When in prediction mode, the labels/targets is None. The model output
+      # is the prediction
+      if mode == tf.estimator.ModeKeys.PREDICT:
+        return tf.estimator.EstimatorSpec(
+            tf.estimator.ModeKeys.PREDICT,
+            predictions=output)
 
-    # Calculate model loss.
-    xentropy, weights = metrics.padded_cross_entropy_loss(
-        logits, targets, params.label_smoothing, params.vocab_size)
-    loss = tf.reduce_sum(input_tensor=xentropy * weights) / tf.reduce_sum(input_tensor=weights)
+      logits = output
 
-    if mode == tf.estimator.ModeKeys.EVAL:
-      return tf.estimator.EstimatorSpec(
-          mode=mode, loss=loss, predictions={"predictions": logits},
-          eval_metric_ops=metrics.get_eval_metrics(logits, labels, params))
-    else:
-      train_op = get_train_op(loss, params)
-      logging_hook = tf.compat.v1.train.LoggingTensorHook({"loss" : loss }, every_n_iter=FLAGS.print_iter) 
-      return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks = [logging_hook])
+      # Calculate model loss.
+      xentropy, weights = metrics.padded_cross_entropy_loss(
+          logits, targets, params.label_smoothing, params.vocab_size)
+      loss = tf.reduce_sum(input_tensor=xentropy * weights) / tf.reduce_sum(input_tensor=weights)
+
+      if mode == tf.estimator.ModeKeys.EVAL:
+        return tf.estimator.EstimatorSpec(
+            mode=mode, loss=loss, predictions={"predictions": logits},
+            eval_metric_ops=metrics.get_eval_metrics(logits, labels, params))
+      else:
+        train_op = get_train_op(loss, params)
+        logging_hook = tf.compat.v1.train.LoggingTensorHook({"loss" : loss }, every_n_iter=FLAGS.print_iter) 
+        return tf.estimator.EstimatorSpec(mode=mode, loss=loss, train_op=train_op, training_hooks = [logging_hook])
 
 
 def get_learning_rate(learning_rate, hidden_size, learning_rate_warmup_steps):
