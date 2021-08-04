@@ -90,7 +90,14 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         cmd_args += " --model=ssd300 --data_name coco"
         cmd_args += " --mkl=True --device=cpu --data_format=NHWC"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
-
+        # check if user has any kmp related environmental variables set
+        # if set, then pass those parameter to the training script
+        if os.environ["KMP_AFFINITY"]:
+            cmd_args += " --kmp_affinity={0}".format(os.environ["KMP_AFFINITY"])
+        if os.environ["KMP_SETTINGS"]:
+            cmd_args += " --kmp_settings={0}".format(os.environ["KMP_SETTINGS"])
+        if os.environ["KMP_BLOCKTIME"]:
+            cmd_args += " --kmp_blocktime={0}".format(os.environ["KMP_BLOCKTIME"])
         if (self.args.timeline is not None):
             cmd_args += " --use_chrome_trace_format=True --trace_file={0}".format(self.args.timeline)
 
