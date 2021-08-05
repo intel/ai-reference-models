@@ -63,8 +63,8 @@ class Subtokenizer(object):
 
   def __init__(self, vocab_file, reserved_tokens=None):
     """Initializes class, creating a vocab file if data_files is provided."""
-    tf.compat.v1.logging.info("Initializing Subtokenizer from file %s." %
-                              vocab_file)
+#    tf.compat.v1.logging.info("Initializing Subtokenizer from file %s." %
+#                              vocab_file)
 
     if reserved_tokens is None:
       reserved_tokens = RESERVED_TOKENS
