@@ -1,4 +1,4 @@
-node('skx') {
+node(params.NODE) {
     deleteDir()
     // Create a workspace path.  We need this to be 79 chars max, otherwise some nodes fail.
     // The workspace path varies by node so get that path, and then add on 10 chars of a UUID string.
