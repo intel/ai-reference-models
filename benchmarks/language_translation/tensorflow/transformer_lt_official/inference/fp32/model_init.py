@@ -18,6 +18,7 @@
 #
 
 import os
+import sys
 from argparse import ArgumentParser
 
 from common.base_model_init import BaseModelInitializer
@@ -26,10 +27,22 @@ from common.base_model_init import set_env_var
 
 class ModelInitializer(BaseModelInitializer):
     """Model initializer for Transformer LT FP32 inference"""
+    def run_inference_sanity_checks(self, args, custom_args):
+        if not args.input_graph:
+            sys.exit("Please provide a path to the frozen graph directory"
+                     " via the '--in-graph' flag.")
+        if not args.data_location:
+            sys.exit("Please provide a path to the data directory via the "
+                     "'--data-location' flag.")
+        if args.socket_id == -1 and args.num_cores == -1:
+            print("***Warning***: Running inference on all cores could degrade"
+                  " performance. Pass a '--socket-id' to specify running on a"
+                  " single socket instead.\n")
 
     def __init__(self, args, custom_args, platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
+        self.run_inference_sanity_checks(self.args, self.custom_args)
         self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
 
@@ -61,10 +74,6 @@ class ModelInitializer(BaseModelInitializer):
                                 help='input vocable file for translation',
                                 dest="vocab_file",
                                 default="vocab.txt")
-        arg_parser.add_argument('--in_graph',
-                                help='input fp32 frozen graph file for inference',
-                                dest="fp32_graph",
-                                default="fp32_graphdef.pb")
         arg_parser.add_argument('--file',
                                 help='decode input file with path',
                                 dest="decode_from_file",
@@ -85,7 +94,7 @@ class ModelInitializer(BaseModelInitializer):
         translate_file = os.path.join(self.args.output_dir,
                                       self.args.decode_to_file)
         cmd_args = " --param_set=" + self.args.param_set + \
-                   " --in_graph=" + self.args.fp32_graph + \
+                   " --in_graph=" + self.args.input_graph + \
                    " --batch_size=" + \
                    (str(self.args.batch_size)
                     if self.args.batch_size != -1 else "1") + \

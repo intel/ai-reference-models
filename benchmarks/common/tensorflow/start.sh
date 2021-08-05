@@ -1280,7 +1280,6 @@ function transformer_lt_official() {
     fi
 
     CMD="${CMD}
-    --input_graph=${input_graph} \
     --vocab_file=${DATASET_LOCATION}/${vocab_file} \
     --file=${DATASET_LOCATION}/${file} \
     --file_out=${OUTPUT_DIR}/${file_out} \
