@@ -45,4 +45,4 @@ slice_sets:
               - intel-python
           args:
               - PY_VERSION=3
-              - INTEL_PY_BUILD=2020.2
+              - INTEL_PY_BUILD=2021.3.0
