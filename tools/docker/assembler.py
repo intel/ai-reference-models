@@ -311,6 +311,15 @@ slice_sets:
                 type: string
               destination:
                 type: string
+        wrapper_package_files:
+          type: list
+          schema:
+            type: dict
+            schema:
+              source:
+                type: string
+              destination:
+                type: string
         downloads:
           type: list
           schema:
@@ -612,6 +621,7 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             documentation = slices[len(slices)-1]['documentation']
             documentation = merge_docs(documentation)
         files_list = gather_slice_list_items(slices, 'files')
+        wrapper_files_list = gather_slice_list_items(slices, 'wrapper_package_files')
         downloads_list = gather_slice_list_items(slices, 'downloads')
         test_runtime = find_first_slice_value(slices, 'test_runtime')
         dockerfile_subdirectory = find_first_slice_value(
@@ -636,6 +646,7 @@ def assemble_tags(spec, cli_args, enabled_releases, all_partials):
             'test_runtime': test_runtime,
             'dockerfile_contents': dockerfile_contents,
             'files': files_list,
+            'wrapper_package_files': wrapper_files_list,
             'downloads': downloads_list,
             'documentation': documentation,
             'dockerfile_tag_name': dockerfile_tag_name,
@@ -909,6 +920,55 @@ def write_package(package_def, succeeded_packages, failed_packages):
       with tarfile.open(tar_file, "w:gz") as tar:
         tar.add(temp_dir, arcname=package)
       succeeded_packages.append(tar_file)
+
+      # Create wrapper package (optional)
+      wrapper_temp_dir = None
+      wrapper_packages_output_dir = os.path.join(FLAGS.output_dir, "wrapper_packages")
+      if "wrapper_package_files" in package_def.keys() and \
+              len(package_def["wrapper_package_files"]) > 0:
+          wrapper_tar_file = os.path.join(wrapper_packages_output_dir,
+                                          "{}.tar.gz".format(package))
+          wrapper_temp_dir = tempfile.mkdtemp()
+
+          if not os.path.isdir(wrapper_packages_output_dir):
+            os.mkdir(wrapper_packages_output_dir)
+
+          # update tar_file string so that the error output is correct in case this fails
+          tar_file += "/" + wrapper_tar_file
+
+          for item in package_def["wrapper_package_files"]:
+            if not item["source"] and "info.txt" in item["destination"]:
+              # Special case to create the info.txt file
+              info_file_path = os.path.join(wrapper_temp_dir, item["destination"])
+              try:
+                model_branch = os.environ["GIT_BRANCH"] if "GIT_BRANCH" in os.environ else ""
+                model_commit = os.environ["GIT_COMMIT"] if "GIT_COMMIT" in os.environ else ""
+
+                if not model_branch or not model_commit:
+                  from git import Repo
+                  repo = Repo("/tf/models").head.reference
+                  if not model_branch:
+                    model_branch = str(repo.name)
+                  if not model_commit:
+                    model_commit = str(repo.commit.hexsha)
+                  eprint("Write info.txt to {}".format(info_file_path), verbose=FLAGS.verbose)
+                with open(info_file_path, "w") as f:
+                  f.write("model_zoo_branch: {}\n".format(model_branch))
+                  f.write("model_zoo_commit: {}\n".format(model_commit))
+              except Exception as e:
+                  eprint("Error while creating the info.txt file")
+                  eprint(e)
+            else:
+              source = os.path.join(model_dir, item["source"])
+              destination = os.path.join(wrapper_temp_dir, item["destination"])
+              get_file(source, destination)
+
+          eprint("Writing {} to {}".format(wrapper_temp_dir, wrapper_tar_file),
+                 verbose=FLAGS.verbose)
+          with tarfile.open(wrapper_tar_file, "w:gz") as tar:
+              tar.add(wrapper_temp_dir, arcname=package)
+          succeeded_packages.append(wrapper_tar_file)
+
     except Exception as e:
       failed_packages.append(tar_file)
       eprint("Error when writing package: {}".format(tar_file))
@@ -916,6 +976,11 @@ def write_package(package_def, succeeded_packages, failed_packages):
     finally:
       eprint("Deleting temp directory: {}".format(temp_dir), verbose=FLAGS.verbose)
       shutil.rmtree(temp_dir)
+
+      if wrapper_temp_dir:
+          eprint("Deleting temp directory: {}".format(wrapper_temp_dir),
+                 verbose=FLAGS.verbose)
+          shutil.rmtree(wrapper_temp_dir)
 
 def extract_tar(tar_file, temp_dir):
     """ Extract tar.gz """
@@ -1254,7 +1319,10 @@ def auto_generate_model_spec(spec_name):
     """
     # check if spec file for this model/precision/mode already exists
     if FLAGS.framework == "tensorflow":
-        spec_file_name = '{}_spec.yml'.format(spec_name)
+        if FLAGS.device == "cpu":
+            spec_file_name = '{}_spec.yml'.format(spec_name)
+        else:
+            spec_file_name = '{}-{}_spec.yml'.format(FLAGS.device, spec_name)
     else:
         spec_file_name = '{}-{}_spec.yml'.format(FLAGS.framework, spec_name)
     spec_file_path = os.path.join(FLAGS.spec_dir, spec_file_name)

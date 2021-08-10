@@ -991,9 +991,18 @@ _model_builder.package()
 
   # Check for the imz-tf-tools container and build it if it doesn't exist
   _model_builder._check-for-imz-tf-tools $_quiet || _model_builder._build-imz-tf-tools $_g_root/docker
+
+  # Check for git branch/commit env vars (normally from Jenkins) for the wrapper package info.txt
+  _git_vars=""
+  if [[ ! -z "${GIT_BRANCH}" ]]; then
+    _git_vars=" --env GIT_BRANCH=${GIT_BRANCH}"
+  fi
+  if [[ ! -z "${GIT_COMMIT}" ]]; then
+    _git_vars="${_git_vars} --env GIT_COMMIT=${GIT_COMMIT}"
+  fi
   
   # Note: Run as user so that the dockerfiles have the right permissions
-  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
+  _asm_dockerfiles="docker run --rm -u $(id -u):$(id -g) $(_model_builder._get-proxy-env-vars) ${_git_vars} -v $(pwd):/tf $_model_dir_mount imz-tf-tools python3 assembler.py "
 
   for _release_group in "${_release_groups[@]}"
   do
