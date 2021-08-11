@@ -13,3 +13,4 @@ data/
 output/
 **/**.whl
 **/**.tar.gz
+tools/docker/models*
