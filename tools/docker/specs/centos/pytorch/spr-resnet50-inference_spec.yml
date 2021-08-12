@@ -1,0 +1,69 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-resnet50-inference}'
+slice_sets:
+  spr-resnet50-inference:
+    - add_to_name: -spr-resnet50-inference
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-resnet50-inference
+      partials:
+        - pytorch/torch-vision-from-source
+        - pytorch/spr-model-installs
+        - model_package
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/spr-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/resnet-ww32
+          destination: models/resnet50
+        - source: quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_realtime.sh
+          destination: quickstart/inference_realtime.sh
+        - source: quickstart/image_recognition/pytorch/resnet50/inference/cpu/inference_throughput.sh
+          destination: quickstart/inference_throughput.sh
+        - source: quickstart/image_recognition/pytorch/resnet50/inference/cpu/accuracy.sh
+          destination: quickstart/accuracy.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-resnet50-inference.tar.gz
+          destination: model_packages/pytorch-spr-resnet50-inference.tar.gz
+        - source: quickstart/image_recognition/pytorch/resnet50/inference/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/image_recognition/pytorch/resnet50/inference/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-resnet50-inference.Dockerfile
+          destination: pytorch-spr-resnet50-inference.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/image_recognition/pytorch/resnet50/inference/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: ResNet50
+            <mode>: inference
+            <package name>: pytorch-spr-resnet50-inference.tar.gz
+            <package dir>: pytorch-spr-resnet50-inference
+            <docker image>: model-zoo:pytorch-spr-resnet50-inference
+          uri: models/quickstart/image_recognition/pytorch/resnet50/inference/cpu
