@@ -549,6 +549,32 @@ function 3d_unet() {
   fi
 }
 
+# MLPerf 3D UNet model
+function 3d_unet_mlperf() {
+  # For accuracy, dataset location is required
+  # if [ "${DATASET_LOCATION_VOL}" == None ] && [ ${ACCURACY_ONLY} == "True" ]; then
+  #   echo "No dataset directory specified, accuracy cannot be calculated."
+  #   exit 1
+  # fi
+  CMD="${CMD} $(add_steps_args)"
+  if [ ${MODE} == "inference" ]; then
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "int8" ]; then
+      if [ ${NOINSTALL} != "True" ]; then
+        echo "Installing requirements"
+        python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
+      fi
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/inference/${PRECISION}
+      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+    else
+      echo "${PRECISION} ${MODE} is not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+  else
+    echo "${MODE} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 #BERT model
 function bert() {
    if [ ${PRECISION} == "fp32" ]; then
@@ -572,6 +598,47 @@ function bert() {
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
     exit 1
+  fi
+}
+
+function dien_options() {
+  if [[ -n "${exact_max_length}" && ${exact_max_length} != "" ]]; then
+    CMD=" ${CMD} --exact-max-length=${exact_max_length}"
+  fi
+  if [[ -n "${graph_type}" && ${graph_type} != "" ]]; then
+    CMD=" ${CMD} --graph_type=${graph_type}"
+  fi
+  if [[ -n "${num_iterations}" && ${num_iterations} != "" ]]; then
+    CMD=" ${CMD} --num-iterations=${num_iterations}"
+  fi
+}
+
+# DIEN model
+function dien() {
+  if [ ${MODE} == "inference" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+      if [ ${NOINSTALL} != "True" ]; then
+        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/dien/requirements.txt
+      fi
+      dien_options
+      CMD=${CMD} run_model
+
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
+    fi
+  elif [ ${MODE} == "training" ]; then
+    if [ ${PRECISION} == "fp32" ]; then
+      if [ ${NOINSTALL} != "True" ]; then
+        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/dien/requirements.txt
+      fi
+      dien_options
+      CMD=${CMD} run_model
+
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}"
+      exit 1
+    fi
   fi
 }
 
@@ -1354,7 +1421,7 @@ function bert_base() {
 # BERT Large model
 function bert_large() {
     # Change if to support fp32
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       bert_options
       CMD=${CMD} run_model
@@ -1450,6 +1517,8 @@ LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
 if [ ${MODEL_NAME} == "3d_unet" ]; then
   3d_unet
+elif [ ${MODEL_NAME} == "3d_unet_mlperf" ]; then
+  3d_unet_mlperf
 elif [ ${MODEL_NAME} == "bert" ]; then
   bert
 elif [ ${MODEL_NAME} == "dcgan" ]; then
@@ -1504,6 +1573,8 @@ elif [ ${MODEL_NAME} == "bert_base" ]; then
   bert_base
 elif [ ${MODEL_NAME} == "bert_large" ]; then
   bert_large
+elif [ ${MODEL_NAME} == "dien" ]; then
+  dien
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
