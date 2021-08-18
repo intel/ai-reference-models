@@ -4,6 +4,7 @@ This document has instructions for how to run MLPerf 3D U-Net model for the foll
 modes/precisions:
 * [FP32 inference](#fp32-inference-instructions)
 * [BFloat16 inference](#bfloat16-inference-instructions)
+* [Int8 inference](#int8-inference-instructions)
 
 ## FP32 Inference Instructions
 
@@ -90,3 +91,7 @@ modes/precisions:
 
 3D-Unet BFloat16 inference depends on Auto-Mixed_precision to convert graph from FP32 to BFloat16 online.
 The instructions are same as FP32 inference instructions, except you need to change the `--precision=fp32` to `--precision=bfloat16` in the above commands.
+
+## Int8 Inference Instructions
+
+3D-Unet Int8 inference instructions are same as FP32 inference instructions, except you need use `--precision=int8` and  `--in-graph=/home/<user>/3dunet_int8_fully_quantized_perchannel.pb` in the above commands.

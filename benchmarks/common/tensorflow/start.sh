@@ -558,7 +558,7 @@ function 3d_unet_mlperf() {
   # fi
   CMD="${CMD} $(add_steps_args)"
   if [ ${MODE} == "inference" ]; then
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "int8" ]; then
       if [ ${NOINSTALL} != "True" ]; then
         echo "Installing requirements"
         python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
