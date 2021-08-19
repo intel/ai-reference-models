@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="1.15.2"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -34,9 +34,9 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG TF_WAVENET_BRANCH
+ARG TF_WAVENET_BRANCH="cpu_optimized"
 
-ARG FETCH_PR
+ARG FETCH_PR="pull/352/head:cpu_optimized"
 
 ARG CODE_DIR=/tensorflow-wavenet
 
@@ -53,7 +53,7 @@ RUN pip install librosa==0.5
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="wavenet-fp32-inference"
 
 ARG MODEL_WORKSPACE
 

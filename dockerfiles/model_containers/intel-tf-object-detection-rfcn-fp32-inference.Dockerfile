@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="latest"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -34,14 +34,14 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION=3
+ARG PY_VERSION="3.8"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
         build-essential \
         python${PY_VERSION}-dev
 
-ARG TF_MODELS_BRANCH
+ARG TF_MODELS_BRANCH="6c21084503b27a9ab118e1db25f79957d5ef540b"
 
 ARG FETCH_PR
 
@@ -85,7 +85,7 @@ RUN cd ${TF_MODELS_DIR}/research && \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="rfcn-fp32-inference"
 
 ARG MODEL_WORKSPACE
 

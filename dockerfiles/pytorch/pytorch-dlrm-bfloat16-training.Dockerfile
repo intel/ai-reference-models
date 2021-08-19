@@ -19,7 +19,7 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG UBUNTU_VERSION
+ARG UBUNTU_VERSION="20.04"
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -40,8 +40,8 @@ RUN apt-get update && \
 
 ENV PATH="${CONDA_INSTALL_PATH}/bin:${PATH}"
 
-ARG PY_VERSION
-ARG INTEL_PY_BUILD
+ARG PY_VERSION="3"
+ARG INTEL_PY_BUILD="2020.2"
 
 RUN conda config --add channels intel && \
     conda install  -y -q intelpython${PY_VERSION}_core==${INTEL_PY_BUILD} python=${PY_VERSION}
@@ -51,7 +51,7 @@ RUN conda install -y -c intel/label/oneapibeta pytorch
 RUN conda install -y -c intel/label/oneapibeta intel-extension-for-pytorch
 
 RUN conda install -y -c intel/label/oneapibeta torch_ccl
-ARG PYTHON_VERSION=3.7
+ARG PYTHON_VERSION="3.7"
 ENV LD_LIBRARY_PATH="/opt/conda/lib/python${PYTHON_VERSION}/site-packages/ccl/lib/:${LD_LIBRARY_PATH}"
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -66,7 +66,7 @@ RUN apt-get -y update && \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="dlrm-bfloat16-training"
 
 ARG MODEL_WORKSPACE
 

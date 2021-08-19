@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,15 +21,26 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG="latest"
+ARG TENSORFLOW_TAG="2.5.0-ubuntu-20.04"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-ENV DEBIAN_FRONTEND=noninteractive
+ARG PY_VERSION="3.8"
 
 RUN apt-get update && \
-    apt-get install --no-install-recommends --fix-missing -y \
-        libsm6 \
-        libxext6 \
-        python-tk && \
-    pip install requests
+    apt-get install -y --no-install-recommends --fix-missing \
+        build-essential \
+        python${PY_VERSION}-dev
+
+RUN pip install lpot
+
+ARG LPOT_SOURCE_DIR=/src/lpot
+ARG LPOT_BRANCH=master
+
+ENV LPOT_SOURCE_DIR=$LPOT_SOURCE_DIR
+
+RUN apt-get update && \
+    apt-get install --no-install-recommends --fix-missing -y git && \
+    git clone --single-branch --branch ${LPOT_BRANCH} https://github.com/intel/lpot.git ${LPOT_SOURCE_DIR}
+
+WORKDIR ${LPOT_SOURCE_DIR}
