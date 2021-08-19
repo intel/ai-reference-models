@@ -1604,8 +1604,17 @@ def main(argv):
         eprint('>> Writing {}...'.format(path), verbose=FLAGS.verbose)
         if not FLAGS.dry_run:
           mkdir_p(os.path.dirname(path))
+          dockerfile_contents = tag_def['dockerfile_contents']
+
+          # Go through our dict of build args and fill in the values in the dockerfile
+          for build_arg_name, build_arg_value in tag_def['cli_args'].items():
+            search_string = 'ARG {}[\S]*'.format(build_arg_name)
+            replace_string = 'ARG {}="{}"'.format(build_arg_name, build_arg_value)
+            dockerfile_contents = re.sub(search_string, replace_string, dockerfile_contents)
+
           with open(path, 'w') as f:
-            f.write(tag_def['dockerfile_contents'])
+            f.write(dockerfile_contents)
+
           if os.path.exists(path):
               succeeded_dockerfiles.append(os.path.relpath(path, FLAGS.dockerfile_dir))
           else:

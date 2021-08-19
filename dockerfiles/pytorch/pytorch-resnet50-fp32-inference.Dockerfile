@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,13 +20,13 @@
 # for more information.
 
 ARG PYTORCH_IMAGE="intel/intel-optimized-pytorch"
-ARG PYTORCH_TAG
+ARG PYTORCH_TAG="1.5.0-rc3-ipex-latest"
 
 FROM ${PYTORCH_IMAGE}:${PYTORCH_TAG}
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="pytorch-resnet50-fp32-inference"
 
 ARG MODEL_WORKSPACE
 

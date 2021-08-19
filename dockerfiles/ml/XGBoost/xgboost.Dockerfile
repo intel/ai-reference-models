@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG UBUNTU_VERSION
+ARG UBUNTU_VERSION="20.04"
 
 FROM ubuntu:${UBUNTU_VERSION}
 
 ARG CONDA_INSTALL_PATH=/opt/conda
 
-ARG MINICONDA_VERSION=4.7.12
+ARG MINICONDA_VERSION="4.7.12"
 
 RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y \
@@ -40,8 +40,8 @@ RUN apt-get update && \
 
 ENV PATH="${CONDA_INSTALL_PATH}/bin:${PATH}"
 
-ARG PY_VERSION
-ARG INTEL_PY_BUILD
+ARG PY_VERSION="3"
+ARG INTEL_PY_BUILD="2021.3.0"
 
 RUN conda config --add channels intel && \
     conda install  -y -q intelpython${PY_VERSION}_core==${INTEL_PY_BUILD} python=${PY_VERSION}

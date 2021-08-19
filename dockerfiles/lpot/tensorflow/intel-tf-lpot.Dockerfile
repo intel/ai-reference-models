@@ -21,11 +21,11 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="latest"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-ARG PY_VERSION=3
+ARG PY_VERSION="3.7"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \

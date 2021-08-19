@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG UBUNTU_VERSION
+ARG UBUNTU_VERSION="20.04"
 
 FROM ubuntu:${UBUNTU_VERSION}
 
@@ -45,7 +45,7 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION=3
+ARG PY_VERSION="3.6"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \

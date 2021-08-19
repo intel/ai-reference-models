@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG IPEX_CONTAINER_TAG=ipex-icx-dlrm-base:centos7
+ARG IPEX_CONTAINER_TAG="intel/recommendation:pytorch-1.5.0-rc3-icx-a37fb5e8"
 FROM $IPEX_CONTAINER_TAG
 
 SHELL ["/bin/bash", "-c"]
@@ -28,7 +28,7 @@ RUN echo "source activate pytorch" >> ~/.bash_profile
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="icx-dlrm-fp32-inference"
 
 ARG MODEL_WORKSPACE
 
