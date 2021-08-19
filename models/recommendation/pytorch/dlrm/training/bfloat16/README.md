@@ -1,4 +1,4 @@
-﻿# DLRM MLPerf BF16 Training v0.7 Intel Submission
+# DLRM MLPerf BF16 Training v0.7 Intel Submission
 For License, Contribution and Code of conduct, please see here: https://github.com/facebookresearch/dlrm/tree/mlperf
 
 ## HW and SW requirements
