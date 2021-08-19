@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="latest"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -34,9 +34,9 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG TF_MODELS_BRANCH
+ARG TF_MODELS_BRANCH="wide-deep-tf2"
 
-ARG FETCH_PR
+ARG FETCH_PR="pull/7461/head:wide-deep-tf2"
 
 ARG CODE_DIR=/tensorflow/models
 
@@ -51,7 +51,7 @@ RUN apt-get update && \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="wide-deep-fp32-inference"
 
 ARG MODEL_WORKSPACE
 

@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="1.15.2"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -34,9 +34,9 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG TF_UNET_BRANCH
+ARG TF_UNET_BRANCH="cpu_optimized"
 
-ARG FETCH_PR
+ARG FETCH_PR="pull/276/head:cpu_optimized"
 
 ARG CODE_DIR=/tensorflow-unet
 
@@ -57,7 +57,7 @@ RUN pip install \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="unet-fp32-inference"
 
 ARG MODEL_WORKSPACE
 

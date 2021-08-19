@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Intel Corporation
+# Copyright (c) 2020-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="latest"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -34,14 +34,14 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION=3
+ARG PY_VERSION="3.8"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
         build-essential \
         python${PY_VERSION}-dev
 
-ARG TF_MODELS_BRANCH
+ARG TF_MODELS_BRANCH="8110bb64ca63c48d0caee9d565e5b4274db2220a"
 
 ARG FETCH_PR
 
@@ -83,7 +83,7 @@ RUN cd ${TF_MODELS_DIR}/research && \
         wget && \
     apt-get autoremove -y
 
-ARG PY_VERSION=3
+ARG PY_VERSION="3.8"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
@@ -122,7 +122,7 @@ RUN apt-get install --no-install-recommends --fix-missing -y \
     systemd && \
     systemctl enable ssh
 
-ARG HOROVOD_VERSION=0.21.0
+ARG HOROVOD_VERSION="0.21.1"
 
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \
@@ -151,7 +151,7 @@ RUN pip install opencv-python
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="ssd-resnet34-bfloat16-training"
 
 ARG MODEL_WORKSPACE
 
