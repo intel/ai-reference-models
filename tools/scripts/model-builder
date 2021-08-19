@@ -138,8 +138,14 @@ _model_builder._build-imz-tf-tools()
 DOCKERIGNORE
   pushd $_dir 2>/dev/null 1>/dev/null
   docker build $_quiet $_proxy_build --tag imz-tf-tools:latest -f tools.Dockerfile . && echo '> Build successful' >&2
+  docker_exit_code=$?
   rm -f .dockerignore
   popd 2>/dev/null 1>/dev/null
+
+  if [[ $docker_exit_code != 0 ]]; then
+    echo "ERROR: Unable to build the imz-tf-tools container to run the assembler"
+    exit $docker_exit_code
+  fi
 }
 
 #

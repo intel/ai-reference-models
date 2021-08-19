@@ -1,0 +1,67 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-maskrcnn-training}'
+slice_sets:
+  spr-maskrcnn-training:
+    - add_to_name: -spr-maskrcnn-training
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-maskrcnn-training
+        - MASKRCNN_DIR=/workspace/pytorch-spr-maskrcnn-training/models/maskrcnn
+      partials:
+        - pytorch/torch-vision-from-source
+        - pytorch/spr-model-installs
+        - model_package
+        - pytorch/models/maskrcnn-dependencies
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/spr-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/maskrcnn-ww32
+          destination: models/maskrcnn
+        - source: quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/training.sh
+          destination: quickstart/training.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-maskrcnn-training.tar.gz
+          destination: model_packages/pytorch-spr-maskrcnn-training.tar.gz
+        - source: quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-maskrcnn-training.Dockerfile
+          destination: pytorch-spr-maskrcnn-training.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: Mask R-CNN
+            <mode>: training
+            <package name>: pytorch-spr-maskrcnn-training.tar.gz
+            <package dir>: pytorch-spr-maskrcnn-training
+            <docker image>: model-zoo:pytorch-spr-maskrcnn-training
+          uri: models/quickstart/image_segmentation/pytorch/maskrcnn/training/cpu
