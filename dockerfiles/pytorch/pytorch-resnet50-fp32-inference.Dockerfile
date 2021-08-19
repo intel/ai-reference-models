@@ -20,13 +20,13 @@
 # for more information.
 
 ARG PYTORCH_IMAGE="intel/intel-optimized-pytorch"
-ARG PYTORCH_TAG
+ARG PYTORCH_TAG="1.5.0-rc3-ipex-latest"
 
 FROM ${PYTORCH_IMAGE}:${PYTORCH_TAG} AS intel-optimized-pytorch
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="pytorch-resnet50-fp32-inference"
 
 ARG MODEL_WORKSPACE
 

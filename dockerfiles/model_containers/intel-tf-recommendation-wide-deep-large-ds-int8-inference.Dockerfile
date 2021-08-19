@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="1.15.2"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -38,7 +38,7 @@ RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="wide-deep-large-ds-int8-inference"
 
 ARG MODEL_WORKSPACE
 

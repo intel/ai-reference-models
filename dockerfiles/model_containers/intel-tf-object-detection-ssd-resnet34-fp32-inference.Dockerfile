@@ -21,7 +21,7 @@
 
 ARG TENSORFLOW_IMAGE="intel/intel-optimized-tensorflow"
 
-ARG TENSORFLOW_TAG
+ARG TENSORFLOW_TAG="latest"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
@@ -34,14 +34,14 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION=3
+ARG PY_VERSION="3.8"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
         build-essential \
         python${PY_VERSION}-dev
 
-ARG TF_MODELS_BRANCH
+ARG TF_MODELS_BRANCH="f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc"
 
 ARG FETCH_PR
 
@@ -95,9 +95,9 @@ RUN pip install opencv-python
 
 RUN pip install tensorflow-addons==0.11.0
 
-ARG TF_BENCHMARKS_BRANCH
+ARG TF_BENCHMARKS_BRANCH="509b9d288937216ca7069f31cfb22aaa7db6a4a7"
 
-ARG TF_BENCHMARKS_DIR=/tensorflow/benchmarks
+ARG TF_BENCHMARKS_DIR="/tensorflow/ssd-resnet-benchmarks"
 
 ENV TF_BENCHMARKS_DIR=${TF_BENCHMARKS_DIR}
 
@@ -108,7 +108,7 @@ RUN apt-get install --no-install-recommends --fix-missing -y git && \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME
+ARG PACKAGE_NAME="ssd-resnet34-fp32-inference"
 
 ARG MODEL_WORKSPACE
 
