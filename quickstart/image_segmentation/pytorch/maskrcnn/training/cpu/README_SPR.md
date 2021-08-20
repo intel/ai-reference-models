@@ -83,7 +83,7 @@ tar -xzf pytorch-spr-maskrcnn-training.tar.gz
 cd pytorch-spr-maskrcnn-training
 
 # Build the container
-./build
+./build.sh
 ```
 
 After the build completes, you should have a container called

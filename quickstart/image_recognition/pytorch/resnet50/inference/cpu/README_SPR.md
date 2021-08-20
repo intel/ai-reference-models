@@ -18,13 +18,9 @@ pytorch-spr-resnet50-inference
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
-│       ├── Intel_Model_Zoo_v2.4_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.4_ML_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.4_PyTorch.txt
-│       └── licenses.txt
 ├── model_packages
 │   └── pytorch-spr-resnet50-inference.tar.gz
-├──pytorch-spr-resnet50-inference.Dockerfile
+├── pytorch-spr-resnet50-inference.Dockerfile
 └── run.sh
 ```
 
@@ -85,7 +81,7 @@ tar -xzf pytorch-spr-resnet50-inference.tar.gz
 cd pytorch-spr-resnet50-inference
 
 # Build the container
-./build
+./build.sh
 ```
 
 After the build completes, you should have a container called
