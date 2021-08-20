@@ -18,15 +18,18 @@ pytorch-spr-resnet50-training
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
-│       ├── Intel_Model_Zoo_v2.4_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.4_ML_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.4_PyTorch.txt
-│       └── licenses.txt
 ├── model_packages
 │   └── pytorch-spr-resnet50-training.tar.gz
-├──pytorch-spr-resnet50-training.Dockerfile
+├── pytorch-spr-resnet50-training.Dockerfile
 └── run.sh
 ```
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| `training.sh` | Trains using one node for one epoch for the specified precision (fp32 or bf16). |
 
 ## Datasets
 
@@ -79,7 +82,7 @@ tar -xzf pytorch-spr-resnet50-training.tar.gz
 cd pytorch-spr-resnet50-training
 
 # Build the container
-./build
+./build.sh
 ```
 
 After the build completes, you should have a container called

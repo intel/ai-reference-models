@@ -80,7 +80,7 @@ tar -xzf pytorch-spr-maskrcnn-inference.tar.gz
 cd pytorch-spr-maskrcnn-inference
 
 # Build the container
-./build
+./build.sh
 ```
 
 After the build completes, you should have a container called

@@ -19,7 +19,7 @@ tar -xzf <package name>
 cd <package dir>
 
 # Build the container
-./build
+./build.sh
 ```
 
 After the build completes, you should have a container called

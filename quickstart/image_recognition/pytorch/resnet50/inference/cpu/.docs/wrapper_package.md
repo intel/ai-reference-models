@@ -9,12 +9,8 @@ run <model name> <mode> in a container.
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
-│       ├── Intel_Model_Zoo_v2.4_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.4_ML_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.4_PyTorch.txt
-│       └── licenses.txt
 ├── model_packages
 │   └── <package name>
-├──<package dir>.Dockerfile
+├── <package dir>.Dockerfile
 └── run.sh
 ```
