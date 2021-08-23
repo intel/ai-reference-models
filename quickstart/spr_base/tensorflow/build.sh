@@ -17,7 +17,7 @@
 
 set -e
 
-IMAGE_NAME=tensorflow-ww22-spr:243fa30a-centos-8
+IMAGE_NAME=model-zoo:tensorflow-spr
 docker build --build-arg http_proxy=$http_proxy \
              --build-arg https_proxy=$https_proxy  \
              --build-arg no_proxy=$no_proxy \

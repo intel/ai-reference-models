@@ -1,0 +1,85 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{spr-resnet50v1-5-training}'
+slice_sets:
+  spr-resnet50v1-5-training:
+    - add_to_name: tf-spr-resnet50v1-5-training
+      dockerfile_subdirectory: tensorflow-spr
+      args:
+        - PACKAGE_NAME=tf-spr-resnet50v1-5-training
+        - TENSORFLOW_IMAGE=model-zoo
+        - TENSORFLOW_TAG=tensorflow-spr
+      partials:
+        - tensorflow/tensorflow-base
+        - model_package
+        - numactl
+        - python-build
+        - gcc-8
+        - openmpi-2.1.1-8
+        - horovod
+        - entrypoint
+      files:
+        - source: benchmarks/common
+          destination: benchmarks/common
+        - source: benchmarks/launch_benchmark.py
+          destination: benchmarks/launch_benchmark.py
+        - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training
+          destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training
+        - source: benchmarks/image_recognition/__init__.py
+          destination: benchmarks/image_recognition/__init__.py
+        - source: benchmarks/image_recognition/tensorflow/__init__.py
+          destination: benchmarks/image_recognition/tensorflow/__init__.py
+        - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+          destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+        - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
+          destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training.sh
+          destination: quickstart/training.sh
+        - destination: models/common
+          source: models/common
+        - destination: models/image_recognition/tensorflow/resnet50v1_5
+          source: models/image_recognition/tensorflow/resnet50v1_5
+        - destination: quickstart/common
+          source: quickstart/common
+      wrapper_package_files:
+        - source: output/tf-spr-resnet50v1-5-training.tar.gz
+          destination: model_packages/tf-spr-resnet50v1-5-training.tar.gz
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/tensorflow-spr/tf-spr-resnet50v1-5-training.Dockerfile
+          destination: tf-spr-resnet50v1-5-training.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: ResNet50 v1.5
+            <mode>: training
+            <package name>: tf-spr-resnet50v1-5-training.tar.gz
+            <package dir>: tf-spr-resnet50v1-5-training
+            <docker image>: model-zoo:tf-spr-resnet50v1-5-training
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu

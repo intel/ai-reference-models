@@ -16,15 +16,11 @@ tensorflow-spr
 ├── README.md
 ├── build.sh
 ├── licenses
-│   ├── LICENSE
-│   └── third_party
-│       ├── Intel_Model_Zoo_v2.0_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.0_ML_Container_tpps.txt
-│       ├── Intel_Model_Zoo_v2.3_PyTorch.txt
-│       └── licenses.txt
+│   ├── LICENSE
+│   └── third_party
 ├── tensorflow-spr.Dockerfile
 └── whls
-    └── tf_nightly-2.6.0-cp36-cp36m-linux_x86_64.whl
+    └── tf_nightly-2.7.0-cp36-cp36m-linux_x86_64.whl
 ```
 
 ## Docker
@@ -32,7 +28,7 @@ tensorflow-spr
 ### Build the container
 
 Extract the `tensorflow-spr.tar.gz` package and then run the `build.sh` script
-to build the `tensorflow-ww22-spr:243fa30a-centos-8` container:
+to build the `model-zoo:tensorflow-spr` container:
 
 ```
 tar -xzf tensorflow-spr.tar.gz
@@ -51,7 +47,7 @@ docker run \
     -e http_proxy=${http_proxy} \
     -e https_proxy=${https_proxy} \
     -e no_proxy=${no_proxy} \
-    -it tensorflow-ww22-spr:243fa30a-centos-8 /bin/bash
+    -it model-zoo:tensorflow-spr /bin/bash
 ```
 
 Once you're in the container, Run the following command to verify that you're able to import tensorflow
@@ -68,4 +64,3 @@ script in the container.
 ## License
 
 Licenses can be found in the container package, in the `licenses` directory.
-
