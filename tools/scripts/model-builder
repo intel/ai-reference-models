@@ -268,7 +268,7 @@ _model_builder._init()
 
   # add platforms other than ubuntu:
   _platform='centos'
-  if [[ ${TAG_PREFIX} == *"${_platform}"* ]]; then
+  if [[ ${TAG_PREFIX} == *"${_platform}"* ]] || [[ ${TAG_PREFIX} == *"spr"* ]] ; then
     _spec_folder=${_spec_folder}/${_platform}
     _spec_home=${_spec_home}/${_platform}
     _spec_dir_mounted=${_spec_dir_mounted}/${_platform}

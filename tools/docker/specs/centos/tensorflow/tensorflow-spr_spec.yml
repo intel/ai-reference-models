@@ -5,18 +5,19 @@ releases:
 slice_sets:
   tensorflow-spr:
     - add_to_name: tensorflow-spr
-      dockerfile_subdirectory: spr_ww22_containers
+      dockerfile_subdirectory: tensorflow-spr
       args:
-        - TENSORFLOW_WHEEL=tf_nightly-2.6.0-cp36-cp36m-linux_x86_64.whl
+        - TENSORFLOW_WHEEL=tf_nightly-2.7.0-cp36-cp36m-linux_x86_64.whl
         - PACKAGE_NAME=tensorflow-spr
       partials:
         - centos8.3.2011-base
         - tensorflow/spr-dnnl-max-var
+        - tensorflow/spr-mkl-native-format-var
         - tensorflow/tf-installs
       files:
         - source: quickstart/spr_base/tensorflow/build.sh
           destination: build.sh
-        - source: dockerfiles/spr_ww22_containers/tensorflow-spr.Dockerfile
+        - source: dockerfiles/tensorflow-spr/tensorflow-spr.Dockerfile
           destination: tensorflow-spr.Dockerfile
         - source: tools/docker/whls
           destination: whls
@@ -42,5 +43,5 @@ slice_sets:
           text_replace:
             <package name>: tensorflow-spr.tar.gz
             <package dir>: tensorflow-spr
-            <docker image>: tensorflow-ww22-spr:243fa30a-centos-8
+            <docker image>: model-zoo:tensorflow-spr
           uri: models/quickstart/spr_base/tensorflow

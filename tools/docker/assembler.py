@@ -1488,7 +1488,7 @@ def main(argv):
   # Get existing partial contents for centos or ubuntu
   common_partials = os.path.join(FLAGS.partial_dir, 'common')
   os_partials = os.path.join(FLAGS.partial_dir, 'ubuntu')
-  if any("centos" in arg for arg in FLAGS.arg):
+  if any("centos" or "spr" in arg for arg in FLAGS.arg):
     os_partials = os.path.join(FLAGS.partial_dir, 'centos')
 
   partials_dir = merge_dir(os_partials, common_partials)
