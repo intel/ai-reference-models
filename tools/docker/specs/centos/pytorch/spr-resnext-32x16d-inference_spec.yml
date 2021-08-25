@@ -1,0 +1,70 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-resnext-32x16d-inference}'
+slice_sets:
+  spr-resnext-32x16d-inference:
+    - add_to_name: -spr-resnext-32x16d-inference
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-resnext-32x16d-inference
+      partials:
+        - pytorch/gcc-and-utils
+        - pytorch/torch-vision-from-source
+        - pytorch/spr-model-installs
+        - model_package
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/spr-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/resnet-ww32
+          destination: models/resnext-32x16d
+        - source: quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/inference_realtime.sh
+          destination: quickstart/inference_realtime.sh
+        - source: quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/inference_throughput.sh
+          destination: quickstart/inference_throughput.sh
+        - source: quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/accuracy.sh
+          destination: quickstart/accuracy.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-resnext-32x16d-inference.tar.gz
+          destination: model_packages/pytorch-spr-resnext-32x16d-inference.tar.gz
+        - source: quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-resnext-32x16d-inference.Dockerfile
+          destination: pytorch-spr-resnext-32x16d-inference.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: ResNext 32x16d
+            <mode>: inference
+            <package name>: pytorch-spr-resnext-32x16d-inference.tar.gz
+            <package dir>: pytorch-spr-resnext-32x16d-inference
+            <docker image>: model-zoo:pytorch-spr-resnext-32x16d-inference
+          uri: models/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu

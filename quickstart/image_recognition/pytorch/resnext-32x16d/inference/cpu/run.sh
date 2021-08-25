@@ -33,9 +33,9 @@ if [ ! -z "${DATASET_DIR}" ]; then
   dataset_env="--env DATASET_DIR=${DATASET_DIR}"
 fi
 
-IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-resnet50-inference}
+IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-resnext-32x16d-inference}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
-WORKDIR=/workspace/pytorch-spr-resnet50-inference
+WORKDIR=/workspace/pytorch-spr-resnext-32x16d-inference
 
 # inference scripts:
 # inference_realtime.sh
@@ -46,6 +46,7 @@ export SCRIPT="${SCRIPT:-inference_realtime.sh}"
 if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
 fi
+echo "Run $SCRIPT"
 
 docker run --rm \
   ${dataset_env} \

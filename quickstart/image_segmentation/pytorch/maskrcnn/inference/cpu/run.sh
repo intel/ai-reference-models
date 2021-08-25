@@ -62,6 +62,7 @@ docker run --rm \
   --volume ${PRETRAINED_MODEL}:${WORKDIR}/models/maskrcnn/maskrcnn-benchmark/ImageNetPretrained/MSRA/e2e_mask_rcnn_R_50_FPN_1x.pth \
   --volume ${DATASET_DIR}:${WORKDIR}/models/maskrcnn/maskrcnn-benchmark/datasets/coco \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
