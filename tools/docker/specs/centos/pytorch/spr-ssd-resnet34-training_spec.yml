@@ -1,0 +1,68 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-ssd-resnet34-training}'
+slice_sets:
+  spr-ssd-resnet34-training:
+    - add_to_name: -spr-ssd-resnet34-training
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-ssd-resnet34-training
+        - SSD_RESNET34_TRAIN_DIR=/workspace/pytorch-spr-ssd-resnet34-training/models/ssd-training
+      partials:
+        - pytorch/spr-model-installs
+        - model_package
+        - pytorch/models/ssd-resnet34-train-dependencies
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/spr-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/ssd-training-ww32
+          destination: models/ssd-training
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/train_performance.sh
+          destination: quickstart/train_performance.sh
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/train_accuracy.sh
+          destination: quickstart/train_accuracy.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-ssd-resnet34-training.tar.gz
+          destination: model_packages/pytorch-spr-ssd-resnet34-training.tar.gz
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-ssd-resnet34-training.Dockerfile
+          destination: pytorch-spr-ssd-resnet34-training.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: ssd-resnet34
+            <mode>: training
+            <package name>: pytorch-spr-ssd-resnet34-training.tar.gz
+            <package dir>: pytorch-spr-ssd-resnet34-training
+            <docker image>: model-zoo:pytorch-spr-ssd-resnet34-training
+          uri: models/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu
