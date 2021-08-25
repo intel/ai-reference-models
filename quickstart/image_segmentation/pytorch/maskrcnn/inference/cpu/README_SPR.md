@@ -69,7 +69,7 @@ the `pytorch-ipex-spr.tar.gz` container prior to building this model container.
 Use `docker images` to verify that you have the base container built. For example:
 ```
 $ docker images | grep pytorch-ipex-spr
-model-zoo         pytorch-ipex-spr         fecc7096a11e        40 minutes ago      8.31GB
+model-zoo         pytorch-ipex-spr         f5b473554295        2 hours ago         4.08GB
 ```
 
 To build the Mask R-CNN inference container, extract the package and

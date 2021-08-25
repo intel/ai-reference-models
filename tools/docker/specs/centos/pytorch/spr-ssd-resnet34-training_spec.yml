@@ -12,6 +12,7 @@ slice_sets:
         - PACKAGE_NAME=pytorch-spr-ssd-resnet34-training
         - SSD_RESNET34_TRAIN_DIR=/workspace/pytorch-spr-ssd-resnet34-training/models/ssd-training
       partials:
+        - pytorch/gcc-and-utils
         - pytorch/spr-model-installs
         - model_package
         - pytorch/models/ssd-resnet34-train-dependencies
@@ -19,8 +20,8 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/spr-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/ssd-training-ww32
-          destination: models/ssd-training
+        - source: tools/docker/models/cpu-models/ssd-training-ww32/training/single_stage_detector/ssd
+          destination: models/ssd-training/training/single_stage_detector/ssd
         - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/train_performance.sh
           destination: quickstart/train_performance.sh
         - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/train_accuracy.sh

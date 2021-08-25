@@ -11,6 +11,7 @@ slice_sets:
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-ssd-resnet34-inference
       partials:
+        - pytorch/gcc-and-utils
         - pytorch/torch-vision-from-source
         - pytorch/spr-model-installs
         - model_package
@@ -18,8 +19,8 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/spr-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/ssd-ww32
-          destination: models/ssd
+        - source: tools/docker/models/cpu-models/ssd-ww32/inference/others/cloud/single_stage_detector
+          destination: models/ssd/inference/others/cloud/single_stage_detector
         - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_realtime.sh
           destination: quickstart/inference_realtime.sh
         - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_throughput.sh

@@ -12,6 +12,7 @@ slice_sets:
         - PACKAGE_NAME=pytorch-spr-maskrcnn-inference
         - MASKRCNN_DIR=/workspace/pytorch-spr-maskrcnn-inference/models/maskrcnn
       partials:
+        - pytorch/gcc-and-utils
         - pytorch/torch-vision-from-source
         - pytorch/spr-model-installs
         - model_package
