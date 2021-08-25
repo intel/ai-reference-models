@@ -11,6 +11,7 @@ slice_sets:
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-resnet50-inference
       partials:
+        - pytorch/gcc-and-utils
         - pytorch/torch-vision-from-source
         - pytorch/spr-model-installs
         - model_package

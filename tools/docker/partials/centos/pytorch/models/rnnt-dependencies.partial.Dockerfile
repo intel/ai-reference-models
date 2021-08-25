@@ -1,6 +1,6 @@
 ARG RNNT_DIR
 
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     conda install intel-openmp && \
     yum install -y libsndfile && \
     cd ${RNNT_DIR} && \
@@ -8,7 +8,7 @@ RUN source ~/anaconda3/bin/activate pytorch && \
     pip install -r requirements.txt && \
     pip install unidecode inflect
 
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     cd /workspace && \
     git clone https://github.com/HawkAaron/warp-transducer && \
     cd warp-transducer && \

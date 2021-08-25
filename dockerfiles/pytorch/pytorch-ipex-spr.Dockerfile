@@ -51,35 +51,34 @@ RUN yum --enablerepo=extras install -y epel-release && \
     make install
 
 # Prepare the Conda environment
-RUN wget --quiet https://repo.continuum.io/archive/Anaconda3-5.0.0-Linux-x86_64.sh -O anaconda3.sh && \
-    chmod +x anaconda3.sh && \
-    ./anaconda3.sh -b -p ~/anaconda3 && \
-    rm ./anaconda3.sh && \
-    ~/anaconda3/bin/conda create -yn pytorch python=3.7 && \
-    export PATH=~/anaconda3/bin/:${PATH} && \
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh && \
+    chmod +x miniconda.sh && \
+    ./miniconda.sh -b -p ~/conda && \
+    rm ./miniconda.sh && \
+    ~/conda/bin/conda create -yn pytorch python=3.7 && \
+    export PATH=~/conda/bin/:${PATH} && \
     source activate pytorch && \
     pip install pip==21.0.1 && \
-    pip install sklearn onnx && \
     conda config --add channels intel && \
-    conda install -y ninja pyyaml setuptools cmake cffi typing intel-openmp && \
+    conda install -y ninja pyyaml setuptools cmake cffi typing intel-openmp psutil && \
     conda install -y mkl mkl-include numpy -c intel --no-update-deps
 
-ENV PATH ~/anaconda3/bin/:${PATH}
-ENV LD_LIBRARY_PATH /lib64/:/usr/lib64/:/usr/local/lib64:/root/anaconda3/envs/pytorch/lib:${LD_LIBRARY_PATH}
+ENV PATH ~/conda/bin/:${PATH}
+ENV LD_LIBRARY_PATH /lib64/:/usr/lib64/:/usr/local/lib64:/root/conda/envs/pytorch/lib:${LD_LIBRARY_PATH}
 
 # Install PyTorch and IPEX wheels
-ARG PYTORCH_WHEEL
-ARG IPEX_WHEEL
+ARG PYTORCH_WHEEL="torch-1.10.0a0+git6f40371-cp37-cp37m-linux_x86_64.whl"
+ARG IPEX_WHEEL="torch_ipex-1.1.0-cp37-cp37m-linux_x86_64.whl"
 
 COPY ./whls/* /tmp/pip3/
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     pip install /tmp/pip3/${PYTORCH_WHEEL} && \
     pip install /tmp/pip3/${IPEX_WHEEL}
 
 # Build Jemalloc
 ARG JEMALLOC_SHA=c8209150f9d219a137412b06431c9d52839c7272
 
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     git clone  https://github.com/jemalloc/jemalloc.git && \
     cd jemalloc && \
     git checkout ${JEMALLOC_SHA} && \
@@ -88,3 +87,17 @@ RUN source ~/anaconda3/bin/activate pytorch && \
     ./configure --prefix=/workspace/lib/jemalloc/ && \
     make && \
     make install
+
+FROM centos-intel-base AS release
+COPY --from=ipex-dev-base /root/conda /root/conda
+COPY --from=ipex-dev-base /workspace/lib /workspace/lib
+
+ENV LD_LIBRARY_PATH /lib64/:/usr/lib64/:/usr/local/lib64:/root/conda/envs/pytorch/lib:${LD_LIBRARY_PATH}
+ENV PATH="~/conda/bin:${PATH}"
+ENV DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+ENV BASH_ENV=/root/.bash_profile
+WORKDIR /workspace/
+RUN yum install -y numactl mesa-libGL && \
+    yum clean all && \
+    echo "source activate pytorch" >> /root/.bash_profile

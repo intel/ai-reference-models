@@ -24,10 +24,24 @@ ARG PYTORCH_TAG="pytorch-ipex-spr"
 
 FROM ${PYTORCH_IMAGE}:${PYTORCH_TAG} AS intel-optimized-pytorch
 
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN yum --enablerepo=extras install -y epel-release && \
+    yum install -y \
+    ca-certificates \
+    git \
+    wget \
+    make \
+    cmake \
+    gcc-c++ \
+    gcc \
+    autoconf \
+    bzip2 \
+    tar
+
+RUN source activate pytorch && \
     pip install matplotlib Pillow pycocotools && \
     pip install yacs opencv-python cityscapesscripts transformers && \
-    conda install -y libopenblas psutil && \
+    conda install -y libopenblas && \
+    mkdir -p /workspace/installs && \
     cd /workspace/installs && \
     wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
     tar -xzf gperftools-2.7.90.tar.gz && \
@@ -53,7 +67,7 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     pip install --upgrade pip && \
     pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip && \
     pip install --no-cache-dir \
@@ -72,13 +86,13 @@ RUN source ~/anaconda3/bin/activate pytorch && \
         pycocotools==2.0.2
 
 FROM intel-optimized-pytorch AS release
-COPY --from=intel-optimized-pytorch /root/anaconda3 /root/anaconda3
+COPY --from=intel-optimized-pytorch /root/conda /root/conda
 COPY --from=intel-optimized-pytorch /workspace/lib/ /workspace/lib/
 COPY --from=intel-optimized-pytorch /root/.local/ /root/.local/
 
 ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
 
-ENV PATH="~/anaconda3/bin:${PATH}"
+ENV PATH="~/conda/bin:${PATH}"
 ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:$LD_PRELOAD"
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 ENV BASH_ENV=/root/.bash_profile

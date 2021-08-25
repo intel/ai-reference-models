@@ -1,7 +1,8 @@
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     pip install matplotlib Pillow pycocotools && \
     pip install yacs opencv-python cityscapesscripts transformers && \
-    conda install -y libopenblas psutil && \
+    conda install -y libopenblas && \
+    mkdir -p /workspace/installs && \
     cd /workspace/installs && \
     wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
     tar -xzf gperftools-2.7.90.tar.gz && \

@@ -1,4 +1,4 @@
-RUN source ~/anaconda3/bin/activate pytorch && \
+RUN source activate pytorch && \
     pip install --upgrade pip && \
     pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip && \
     pip install --no-cache-dir \
