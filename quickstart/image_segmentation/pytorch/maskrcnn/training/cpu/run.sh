@@ -53,6 +53,7 @@ docker run --rm \
   --env no_proxy=${no_proxy} \
   --volume ${DATASET_DIR}:${WORKDIR}/models/maskrcnn/maskrcnn-benchmark/datasets/coco \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
+  --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
