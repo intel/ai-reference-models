@@ -1,0 +1,75 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-rnnt-inference}'
+slice_sets:
+  spr-rnnt-inference:
+    - add_to_name: -spr-rnnt-inference
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-rnnt-inference
+        - RNNT_DIR=/workspace/pytorch-spr-rnnt-inference/models/rnnt
+      partials:
+        - pytorch/gcc-and-utils
+        - pytorch/torch-vision-from-source
+        - pytorch/spr-model-installs
+        - pytorch/tcmalloc
+        - model_package
+        - pytorch/models/rnnt-dependencies
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/models/rnnt-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/rnnt-ww32
+          destination: models/rnnt
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/inference_realtime.sh
+          destination: quickstart/inference_realtime.sh
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/inference_throughput.sh
+          destination: quickstart/inference_throughput.sh
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/accuracy.sh
+          destination: quickstart/accuracy.sh
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_inference_dataset.sh
+          destination: quickstart/download_inference_dataset.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-rnnt-inference.tar.gz
+          destination: model_packages/pytorch-spr-rnnt-inference.tar.gz
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-rnnt-inference.Dockerfile
+          destination: pytorch-spr-rnnt-inference.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/language_modeling/pytorch/rnnt/inference/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/quickstart.md
+          - name: Container build
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/container_build.md
+          - name: Datasets
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/datasets.md
+          - name: Docker
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: RNN-T
+            <mode>: inference
+            <package name>: pytorch-spr-rnnt-inference.tar.gz
+            <package dir>: pytorch-spr-rnnt-inference
+            <docker image>: model-zoo:pytorch-spr-rnnt-inference
+          uri: models/quickstart/language_modeling/pytorch/rnnt/inference/cpu
