@@ -6,7 +6,8 @@ RUN source activate pytorch && \
     cd ${RNNT_DIR} && \
     cd training/rnn_speech_recognition/pytorch && \
     pip install -r requirements.txt && \
-    pip install unidecode inflect
+    pip install unidecode inflect && \
+    mkdir -p /root/.local
 
 RUN source activate pytorch && \
     cd /workspace && \
@@ -18,3 +19,4 @@ RUN source activate pytorch && \
     make && \
     cd ../pytorch_binding && \
     python setup.py install
+
