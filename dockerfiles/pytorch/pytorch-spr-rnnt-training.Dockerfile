@@ -57,7 +57,7 @@ RUN source activate pytorch && \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="pytorch-spr-rnnt-inference"
+ARG PACKAGE_NAME="pytorch-spr-rnnt-training"
 
 ARG MODEL_WORKSPACE
 
@@ -71,7 +71,7 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ARG RNNT_DIR="/workspace/pytorch-spr-rnnt-inference/models/rnnt"
+ARG RNNT_DIR="/workspace/pytorch-spr-rnnt-training/models/rnnt-training"
 
 RUN source activate pytorch && \
     conda install intel-openmp && \

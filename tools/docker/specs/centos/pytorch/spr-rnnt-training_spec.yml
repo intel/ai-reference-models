@@ -1,0 +1,70 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-rnnt-training}'
+slice_sets:
+  spr-rnnt-training:
+    - add_to_name: -spr-rnnt-training
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-rnnt-training
+        - RNNT_DIR=/workspace/pytorch-spr-rnnt-training/models/rnnt-training
+      partials:
+        - pytorch/gcc-and-utils
+        - pytorch/torch-vision-from-source
+        - pytorch/tcmalloc
+        - model_package
+        - pytorch/models/rnnt-dependencies
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/models/rnnt-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/rnnt-training-ww32
+          destination: models/rnnt-training
+        - source: quickstart/language_modeling/pytorch/rnnt/training/cpu/training.sh
+          destination: quickstart/training.sh
+        - source: quickstart/language_modeling/pytorch/rnnt/training/cpu/download_training_dataset.sh
+          destination: quickstart/download_training_dataset.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-rnnt-training.tar.gz
+          destination: model_packages/pytorch-spr-rnnt-training.tar.gz
+        - source: quickstart/language_modeling/pytorch/rnnt/training/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/language_modeling/pytorch/rnnt/training/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-rnnt-training.Dockerfile
+          destination: pytorch-spr-rnnt-training.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/language_modeling/pytorch/rnnt/training/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/quickstart.md
+          - name: Container build
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/container_build.md
+          - name: Datasets
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/datasets.md
+          - name: Docker
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: RNN-T
+            <mode>: training
+            <package name>: pytorch-spr-rnnt-training.tar.gz
+            <package dir>: pytorch-spr-rnnt-training
+            <docker image>: model-zoo:pytorch-spr-rnnt-training
+          uri: models/quickstart/language_modeling/pytorch/rnnt/training/cpu
