@@ -54,11 +54,11 @@ export MODEL_DIR=${PRETRAINED_MODEL}
 export work_space=${OUTPUT_DIR}
 
 if [[ $PRECISION == "int8" ]]; then
-    bash run_multi_instance_ipex.sh int8 jit ./pytorch_default_recipe_ssd_configure.json 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-throughput-int8.log
+    bash run_multi_instance_latency_ipex.sh int8 jit ./pytorch_default_recipe_ssd_configure.json 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-realtime-int8.log
 elif [[ $PRECISION == "bf16" ]]; then
-    bash run_multi_instance_ipex.sh bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-throughput-bf16.log
+    bash run_multi_instance_latency_ipex.sh bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-realtime-bf16.log
 elif [[ $PRECISION == "fp32" ]]; then
-    bash run_multi_instance_ipex.sh fp32 jit 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-throughput-fp32.log
+    bash run_multi_instance_latency_ipex.sh fp32 jit 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-realtime-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
     echo "Supported precisions are: fp32, bf16, and int8"
