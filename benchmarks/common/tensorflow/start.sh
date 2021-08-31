@@ -105,14 +105,14 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=4bc6df80
+      export HOROVOD_VERSION=87094a4
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       yum install -y git make
       yum clean all
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      # python3 -m pip install horovod==${HOROVOD_VERSION}
+      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
   else
     apt-get update -y
@@ -130,7 +130,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       ## Installing OpenMPI
       apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
       # Horovod Installation
-      export HOROVOD_VERSION=4bc6df80
+      export HOROVOD_VERSION=87094a4
 
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
@@ -142,7 +142,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       apt-get install -y --no-install-recommends --fix-missing cmake git
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
       # apt-get install -y --no-install-recommends --fix-missing cmake
-      # python3 -m pip install horovod==${HOROVOD_VERSION}
+      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
   fi
   python3 -m pip install --upgrade pip==20.3.4
