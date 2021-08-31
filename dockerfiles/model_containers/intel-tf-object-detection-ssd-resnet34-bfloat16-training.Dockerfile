@@ -134,13 +134,13 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
     cmake \
     git
-RUN pip install git+https://github.com/horovod/horovod.git@v${HOROVOD_VERSION}
+RUN pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
 
 # RUN apt-get update && \
 #     apt-get install -y --no-install-recommends --fix-missing \
 #     cmake
 #
-# RUN pip install horovod==${HOROVOD_VERSION}
+# RUN pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
 
 RUN apt-get update && \
     apt-get install -y cpio
