@@ -2063,7 +2063,7 @@ _model_builder._validate_frameworks()
 
   _release_groups=("versioned")
   if [[ ${_current_framework} == "tensorflow" ]]; then
-    if [[ ${TAG_PREFIX} != *"centos"* ]]; then
+    if [[ ${TAG_PREFIX} != *"centos"* ]] && [[ ${TAG_PREFIX} != *"spr"* ]]; then
       _release_groups+=("tf_1.15.2_containers")
     fi
   fi
