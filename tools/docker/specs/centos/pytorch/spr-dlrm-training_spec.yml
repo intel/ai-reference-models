@@ -1,0 +1,69 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-multistage}{spr-dlrm-training}'
+slice_sets:
+  spr-dlrm-training:
+    - add_to_name: -spr-dlrm-training
+      dockerfile_subdirectory: pytorch
+      args:
+        - PYTORCH_IMAGE=model-zoo
+        - PYTORCH_TAG=pytorch-ipex-spr
+        - PACKAGE_NAME=pytorch-spr-dlrm-training
+        - DLRM_DIR=/workspace/pytorch-spr-dlrm-training/models/dlrm
+      partials:
+        - pytorch/gcc-and-utils
+        - pytorch/spr-model-installs
+        - model_package
+        - pytorch/models/dlrm-dependencies
+        - pytorch/spr-release-conda-env
+        - pytorch/spr-dnnl-max-var
+        - pytorch/spr-entrypoint
+      files:
+        - source: tools/docker/models/cpu-models/dlrm-ww32
+          destination: models/dlrm
+        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training_convergence.sh
+          destination: quickstart/training_convergence.sh
+        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training_performance.sh
+          destination: quickstart/training_performance.sh
+      wrapper_package_files:
+        - source: output/pytorch-spr-dlrm-training.tar.gz
+          destination: model_packages/pytorch-spr-dlrm-training.tar.gz
+        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/pytorch/pytorch-spr-dlrm-training.Dockerfile
+          destination: pytorch-spr-dlrm-training.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: DLRM
+            <mode>: training
+            <package name>: pytorch-spr-dlrm-training.tar.gz
+            <package dir>: pytorch-spr-dlrm-training
+            <docker image>: model-zoo:pytorch-spr-dlrm-training
+          uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu
