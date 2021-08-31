@@ -138,8 +138,14 @@ _model_builder._build-imz-tf-tools()
 DOCKERIGNORE
   pushd $_dir 2>/dev/null 1>/dev/null
   docker build $_quiet $_proxy_build --tag imz-tf-tools:latest -f tools.Dockerfile . && echo '> Build successful' >&2
+  docker_exit_code=$?
   rm -f .dockerignore
   popd 2>/dev/null 1>/dev/null
+
+  if [[ $docker_exit_code != 0 ]]; then
+    echo "ERROR: Unable to build the imz-tf-tools container to run the assembler"
+    exit $docker_exit_code
+  fi
 }
 
 #
@@ -262,7 +268,7 @@ _model_builder._init()
 
   # add platforms other than ubuntu:
   _platform='centos'
-  if [[ ${TAG_PREFIX} == *"${_platform}"* ]]; then
+  if [[ ${TAG_PREFIX} == *"${_platform}"* ]] || [[ ${TAG_PREFIX} == *"spr"* ]] ; then
     _spec_folder=${_spec_folder}/${_platform}
     _spec_home=${_spec_home}/${_platform}
     _spec_dir_mounted=${_spec_dir_mounted}/${_platform}
@@ -2057,7 +2063,9 @@ _model_builder._validate_frameworks()
 
   _release_groups=("versioned")
   if [[ ${_current_framework} == "tensorflow" ]]; then
-    _release_groups+=("tf_1.15.2_containers")
+    if [[ ${TAG_PREFIX} != *"centos"* ]] && [[ ${TAG_PREFIX} != *"spr"* ]]; then
+      _release_groups+=("tf_1.15.2_containers")
+    fi
   fi
 }
 
