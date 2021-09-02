@@ -19,7 +19,7 @@ slice_sets:
         - pytorch/models/rnnt-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/models/rnnt-entrypoint
+        - pytorch/tcmalloc-entrypoint
       files:
         - source: tools/docker/models/cpu-models/rnnt-training-ww32
           destination: models/rnnt-training

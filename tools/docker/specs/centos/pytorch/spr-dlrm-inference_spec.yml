@@ -18,7 +18,7 @@ slice_sets:
         - pytorch/models/dlrm-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/spr-entrypoint
+        - pytorch/jemalloc-entrypoint
       files:
         - source: tools/docker/models/cpu-models/dlrm-ww32
           destination: models/dlrm

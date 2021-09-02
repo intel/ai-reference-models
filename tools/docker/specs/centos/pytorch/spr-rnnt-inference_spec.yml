@@ -14,12 +14,11 @@ slice_sets:
       partials:
         - pytorch/gcc-and-utils
         - pytorch/torch-vision-from-source
-        - pytorch/tcmalloc
         - model_package
         - pytorch/models/rnnt-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/models/rnnt-entrypoint
+        - pytorch/jemalloc-entrypoint
       files:
         - source: tools/docker/models/cpu-models/rnnt-ww32
           destination: models/rnnt
