@@ -17,7 +17,7 @@ slice_sets:
         - model_package
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/spr-entrypoint
+        - pytorch/jemalloc-entrypoint
       files:
         - source: tools/docker/models/cpu-models/ssd-ww32/inference/others/cloud/single_stage_detector
           destination: models/ssd/inference/others/cloud/single_stage_detector

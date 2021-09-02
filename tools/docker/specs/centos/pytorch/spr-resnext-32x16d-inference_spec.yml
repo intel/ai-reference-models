@@ -17,7 +17,7 @@ slice_sets:
         - model_package
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/spr-entrypoint
+        - pytorch/jemalloc-entrypoint
       files:
         - source: tools/docker/models/cpu-models/resnet-ww32
           destination: models/resnext-32x16d
