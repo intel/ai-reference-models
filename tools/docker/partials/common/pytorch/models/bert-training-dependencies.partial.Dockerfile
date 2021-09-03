@@ -8,7 +8,8 @@ RUN source activate pytorch && \
     pip install datasets accelerate tfrecord && \
     conda install openblas && \
     conda install faiss-cpu -c pytorch && \
-    pip install transformers==4.9.0
+    pip install transformers==4.9.0 && \
+    mkdir -p /root/.local
 
 RUN cd .. && \
     rm -rf ${BERT_DIR}

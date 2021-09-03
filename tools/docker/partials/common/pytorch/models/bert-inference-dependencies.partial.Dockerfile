@@ -5,4 +5,5 @@ RUN source activate pytorch && \
     cd bert && \
     pip install -r examples/requirements.txt && \
     pip install -e . && \
-    conda install -c conda-forge "llvm-openmp"
+    conda install intel-openmp && \
+    mkdir -p /root/.local

@@ -38,18 +38,13 @@ RUN yum --enablerepo=extras install -y epel-release && \
     tar
 
 RUN source activate pytorch && \
-    pip install matplotlib Pillow pycocotools && \
-    pip install yacs opencv-python cityscapesscripts transformers && \
-    conda install -y libopenblas && \
-    mkdir -p /workspace/installs && \
-    cd /workspace/installs && \
     wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz && \
     tar -xzf gperftools-2.7.90.tar.gz && \
     cd gperftools-2.7.90 && \
-    ./configure --prefix=$HOME/.local && \
+    mkdir -p /workspace/lib/ && \
+    ./configure --prefix=/workspace/lib/tcmalloc/ && \
     make && \
-    make install && \
-    rm -rf /workspace/installs/
+    make install
 
 ARG PACKAGE_DIR=model_packages
 
@@ -74,7 +69,8 @@ RUN source activate pytorch && \
     cd bert && \
     pip install -r examples/requirements.txt && \
     pip install -e . && \
-    conda install -c conda-forge "llvm-openmp"
+    conda install intel-openmp && \
+    mkdir -p /root/.local
 
 FROM intel-optimized-pytorch AS release
 COPY --from=intel-optimized-pytorch /root/conda /root/conda
@@ -84,7 +80,7 @@ COPY --from=intel-optimized-pytorch /root/.local/ /root/.local/
 ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
 
 ENV PATH="~/conda/bin:${PATH}"
-ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:$LD_PRELOAD"
+ENV LD_PRELOAD="/workspace/lib/tcmalloc/lib/libtcmalloc.so:/root/conda/envs/pytorch/lib/libiomp5.so:$LD_PRELOAD"
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 ENV BASH_ENV=/root/.bash_profile
 WORKDIR /workspace/
