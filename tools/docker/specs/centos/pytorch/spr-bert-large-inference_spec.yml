@@ -13,12 +13,12 @@ slice_sets:
         - BERT_DIR=/workspace/pytorch-spr-bert-large-inference/models/bert
       partials:
         - pytorch/gcc-and-utils
-        - pytorch/spr-model-installs
+        - pytorch/tcmalloc
         - model_package
         - pytorch/models/bert-inference-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/jemalloc-entrypoint
+        - pytorch/tcmalloc-entrypoint
       files:
         - source: tools/docker/models/cpu-models/bert-ww32
           destination: models/bert
