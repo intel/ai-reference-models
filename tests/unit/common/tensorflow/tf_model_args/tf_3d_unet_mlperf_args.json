@@ -1,0 +1,32 @@
+[
+  {
+    "_comment": "3d_unet_mlperf_fp32_inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet_mlperf --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --benchmark-only --in-graph=/in_graph/3dunet_dynamic_ndhwc.pb --warmup-steps=20 --steps=100",
+    "output": "python /workspace/intelai_models/inference/fp32/brats/run_performance.py --input-graph=/in_graph/3dunet_dynamic_ndhwc.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=1 --model-name=3d_unet_mlperf --steps=100 --warmup-steps=20"
+  },
+  {
+    "_comment": "3d_unet_mlperf_fp32_inference_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet_mlperf --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --accuracy-only --in-graph=/in_graph/3dunet_dynamic_ndhwc.pb --data-location=/dataset/MICCAI_BraTS_2019_Data_Training",
+    "output": "python /workspace/intelai_models/inference/fp32/brats/run_accuracy.py --input-graph=/in_graph/3dunet_dynamic_ndhwc.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=1 --model-name=3d_unet_mlperf --data-location=/dataset/MICCAI_BraTS_2019_Data_Training --accuracy-only"
+  },
+  {
+    "_comment": "3d_unet_mlperf_int8_inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet_mlperf --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --benchmark-only --in-graph=/in_graph/3dunet_int8_fully_quantized_perchannel.pb --warmup-steps=20 --steps=100",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/int8/brats/run_performance.py --input-graph=/in_graph/3dunet_int8_fully_quantized_perchannel.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=1 --model-name=3d_unet_mlperf --steps=100 --warmup-steps=20"
+  },
+  {
+    "_comment": "3d_unet_mlperf_int8_inference_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet_mlperf --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --accuracy-only --in-graph=/in_graph/3dunet_int8_fully_quantized_perchannel.pb --data-location=/dataset/MICCAI_BraTS_2019_Data_Training",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/int8/brats/run_accuracy.py --input-graph=/in_graph/3dunet_int8_fully_quantized_perchannel.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=1 --model-name=3d_unet_mlperf --data-location=/dataset/MICCAI_BraTS_2019_Data_Training --accuracy-only"
+  },
+  {
+    "_comment": "3d_unet_mlperf_bfloat16_inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet_mlperf --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --benchmark-only --in-graph=/in_graph/3dunet_dynamic_ndhwc.pb --warmup-steps=20 --steps=100",
+    "output": "python /workspace/intelai_models/inference/bfloat16/brats/run_performance.py --input-graph=/in_graph/3dunet_dynamic_ndhwc.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=1 --model-name=3d_unet_mlperf --steps=100 --warmup-steps=20"
+  },
+  {
+    "_comment": "3d_unet_mlperf_bfloat16_inference_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=3d_unet_mlperf --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --accuracy-only --in-graph=/in_graph/3dunet_dynamic_ndhwc.pb --data-location=/dataset/MICCAI_BraTS_2019_Data_Training",
+    "output": "python /workspace/intelai_models/inference/bfloat16/brats/run_accuracy.py --input-graph=/in_graph/3dunet_dynamic_ndhwc.pb --num-inter-threads=2 --num-intra-threads=56 --batch-size=1 --model-name=3d_unet_mlperf --data-location=/dataset/MICCAI_BraTS_2019_Data_Training --accuracy-only"
+  }
+]
