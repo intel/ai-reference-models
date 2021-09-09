@@ -87,16 +87,22 @@ def test_run_benchmark(mock_run_command, mock_subprocess, mock_platform, mock_os
     test_args and verifying that the model_init file calls run_command with
     the expected_cmd string.
     """
-    if comment in ["tf_ssd_resnet34_args.json :: ssd_resnet34_fp32_training",
-                   "tf_gnmt_args.json :: gnmt_fp32_throughput",
-                   "tf_gnmt_args.json :: gnmt_fp32_latency"]:
-        pytest.skip()
 
     print("****** Running The {} test ******".format(comment))
     os.environ["PYTHON_EXE"] = "python"
-    if "mpi" not in mock_run_command:
+    if "mpi" not in test_args:
         os.environ["MPI_NUM_PROCESSES"] = "None"
         os.environ["MPI_HOSTNAMES"] = "None"
+    else:
+        if "--mpi_num_processes=" in test_args:
+            match_mpi_procs = re.search('--mpi_num_processes=([0-9]+)', test_args)
+            if match_mpi_procs and match_mpi_procs.lastindex >= 1:
+                os.environ["MPI_NUM_PROCESSES"] = match_mpi_procs.group(1)
+        if "--mpi_num_processes_per_socket=" in test_args:
+            match_per_socket = re.search('--mpi_num_processes_per_socket=([0-9]+)', test_args)
+            if match_per_socket and match_per_socket.lastindex >= 1:
+                os.environ["MPI_NUM_PROCESSES_PER_SOCKET"] = match_per_socket.group(1)
+
     mock_path_exists.return_value = True
     mock_is_dir.return_value = True
     mock_is_file.return_value = True
