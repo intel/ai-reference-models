@@ -52,16 +52,15 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 # Subtract 4 to use as the num_intra_threads
 num_intra_threads=$(($cores_per_socket - 4))
 
-BATCH_SIZE="128"
+BATCH_SIZE="1024"
 NUM_INSTANCES="2"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-  --model-name=resnet50v1_5 \
+  --model-name=transformer_mlperf \
   --precision=${PRECISION} \
   --mode=training \
   --framework tensorflow \
-  --checkpoint ${OUTPUT_DIR} \
   --data-location=${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --mpi_num_processes=${NUM_INSTANCES} \
@@ -70,14 +69,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --num-intra-threads ${num_intra_threads} \
   --num-inter-threads 2 \
   $@ \
-  -- \
-  train_epochs=1 epochs_between_evals=1 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
+  -- random_seed=11 train_steps=100 \
+  steps_between_eval=100 params=big \
+  save_checkpoints='No' do_eval='No' print_iter=10 2>&1 | tee ${OUTPUT_DIR}/transformer_mlperf${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
 
 if [[ $? == 0 ]]; then
-  global_steps=`cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log | grep "global_step/sec:" | sed -e s"/.*: //" | tail -n 1`
-  summary=`python -c "print(${global_steps}*${NUM_INSTANCES}*${BATCH_SIZE})"`
-  echo "Throughput summary:"
-  echo $summary
+  cat ${OUTPUT_DIR}/transformer_mlperf${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log | grep "INFO:tensorflow:Batch" | tail -n 2 | sed -e "s/.* = //"
   exit 0
 else
   exit 1
