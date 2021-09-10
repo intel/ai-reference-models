@@ -1,0 +1,85 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{spr-transformer-mlperf-training}'
+slice_sets:
+  spr-transformer-mlperf-training:
+    - add_to_name: tf-spr-transformer-mlperf-training
+      dockerfile_subdirectory: tensorflow-spr
+      args:
+        - PACKAGE_NAME=tf-spr-transformer-mlperf-training
+        - TENSORFLOW_IMAGE=model-zoo
+        - TENSORFLOW_TAG=tensorflow-spr
+      partials:
+        - tensorflow/tensorflow-base
+        - model_package
+        - numactl
+        - python-build
+        - gcc-8
+        - openmpi-2.1.1-8
+        - horovod
+        - entrypoint
+      files:
+        - destination: benchmarks/common
+          source: benchmarks/common
+        - destination: benchmarks/language_translation/__init__.py
+          source: benchmarks/language_translation/__init__.py
+        - destination: benchmarks/language_translation/tensorflow/__init__.py
+          source: benchmarks/language_translation/tensorflow/__init__.py
+        - destination: benchmarks/language_translation/tensorflow/transformer_mlperf/README.md
+          source: benchmarks/language_translation/tensorflow/transformer_mlperf/README.md
+        - destination: benchmarks/language_translation/tensorflow/transformer_mlperf/training/__init__.py
+          source: benchmarks/language_translation/tensorflow/transformer_mlperf/training/__init__.py
+        - destination: benchmarks/language_translation/tensorflow/transformer_mlperf/training
+          source: benchmarks/language_translation/tensorflow/transformer_mlperf/training
+        - destination: benchmarks/launch_benchmark.py
+          source: benchmarks/launch_benchmark.py
+        - destination: models/common
+          source: models/common
+        - destination: models/language_translation/tensorflow/transformer_mlperf/training
+          source: models/language_translation/tensorflow/transformer_mlperf/training
+        - destination: quickstart/common
+          source: quickstart/common
+        - destination: quickstart/training.sh
+          source: quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/training.sh
+      wrapper_package_files:
+        - source: output/tf-spr-transformer-mlperf-training.tar.gz
+          destination: model_packages/tf-spr-transformer-mlperf-training.tar.gz
+        - source: quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/build.sh
+          destination: build.sh
+        - source: quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/tensorflow-spr/tf-spr-transformer-mlperf-training.Dockerfile
+          destination: tf-spr-transformer-mlperf-training.Dockerfile
+        - source: LICENSE
+          destination: licenses/LICENSE
+        - source: third_party
+          destination: licenses/third_party
+        - source: quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/README_SPR.md
+          destination: README.md
+      documentation:
+        - docs:
+          - name: Title
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/description.md
+          - name: Model Package
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/wrapper_package.md
+          - name: Quickstart
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/datasets.md
+          - name: Container build
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/container_build.md
+          - name: Docker
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/docker_spr.md
+          - name: License
+            uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/.docs/license.md
+          name: README_SPR.md
+          text_replace:
+            <model name>: Transformer Language
+            <mode>: training
+            <package name>: tf-spr-transformer-mlperf-training.tar.gz
+            <package dir>: tf-spr-transformer-mlperf-training
+            <docker image>: model-zoo:tf-spr-transformer-mlperf-training
+          uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu
