@@ -238,7 +238,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "TCMALLOC_LARGE_ALLOC_REPORT_THRESHOLD": args.tcmalloc_large_alloc_report_threshold,
             "TF_SERVING_VERSION": args.tf_serving_version,
             "USE_CASE": str(use_case),
-            "VERBOSE": args.verbose
+            "VERBOSE": args.verbose,
+            "WEIGHT_SHARING": args.weight_sharing
         }
 
         # Add custom model args as env vars)
