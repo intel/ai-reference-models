@@ -29,11 +29,6 @@ ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
 # set env var as we moved from block format to native format
 ENV TF_ENABLE_MKL_NATIVE_FORMAT=1
 
-# Intel Optimizations specific Envs
-ENV KMP_AFFINITY='granularity=fine,verbose,compact,1,0' \
-    KMP_BLOCKTIME=1 \
-    KMP_SETTINGS=1
-
 # See http://bugs.python.org/issue19846
 ENV LANG C.UTF-8
 ARG PYTHON=python3

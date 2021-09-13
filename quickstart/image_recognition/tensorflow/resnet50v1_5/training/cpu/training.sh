@@ -56,6 +56,7 @@ BATCH_SIZE="128"
 NUM_INSTANCES="2"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision=${PRECISION} \

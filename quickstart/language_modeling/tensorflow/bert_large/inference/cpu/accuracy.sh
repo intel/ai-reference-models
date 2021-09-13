@@ -88,6 +88,7 @@ fi
 MODE="inference"
 BATCH_SIZE="32"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \
@@ -102,4 +103,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive \
   init_checkpoint=model.ckpt-3649 infer_option=SQuAD \
-  experimental-gelu=True
+  experimental-gelu=True 2>&1 | tee ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_accuracy.log
+
+if [[ $? == 0 ]]; then
+  echo "Accuracy:"
+  cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_accuracy.log | grep -ie "exact_match.*f1" | tail -n 1 | awk \'/\{.*:.*\,.*:.*\}$/{print $2 $4}\' | sed s"/\}//"
+  exit 0
+else
+  exit 1
+fi

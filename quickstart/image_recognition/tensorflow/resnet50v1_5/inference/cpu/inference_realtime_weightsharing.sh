@@ -27,7 +27,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to int8 or bfloat16."
   exit 1
 fi
 
@@ -46,11 +46,9 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_int8_pretrained_model.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_bfloat16_pretrained_model.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_fp32_pretrained_model.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: bfloat16, and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -62,8 +60,12 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+# Get number of cores per socket line from lscpu
+export OMP_NUM_THREADS=4
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+sockets=$(lscpu |grep 'Socket(s):' |sed 's/[^0-9]//g')
+number_of_cores=$(($cores_per_socket * $sockets))
 MODE="inference"
-CORES_PER_INSTANCE="4"
 BATCH_SIZE="1"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
@@ -77,18 +79,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --numa-cores-per-instance ${CORES_PER_INSTANCE} \
-  --data-num-intra-threads ${CORES_PER_INSTANCE} --data-num-inter-threads 1 \
+  --num-intra-threads ${number_of_cores} --num-inter-threads -1 \
+  --data-num-intra-threads ${number_of_cores} --data-num-inter-threads -1 \
+  --weight-sharing \
   $@ \
   -- \
-  warmup_steps=50 \
+  warmup_steps=100 \
   steps=1500
-
-if [[ $? == 0 ]]; then
-  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep Throughput: | sed -e s"/.*: //"
-  echo "Throughput summary:"
-  grep 'Throughput' ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
-  exit 0
-else
-  exit 1
-fi

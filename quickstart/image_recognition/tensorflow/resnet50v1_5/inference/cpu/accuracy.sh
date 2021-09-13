@@ -65,6 +65,7 @@ fi
 MODE="inference"
 BATCH_SIZE="100"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
@@ -75,4 +76,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --accuracy-only \
-  $@
+  $@ 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
+
+if [[ $? == 0 ]]; then
+  echo "Accuracy summary:"
+  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Processed 50000 images" | sed -e "s/.* = //"
+  exit 0
+else
+  exit 1
+fi

@@ -27,7 +27,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to fp32 or bfloat16."
   exit 1
 fi
 
@@ -42,13 +42,11 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-    if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_int8_fully_quantized_perchannel.pb"
-    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
+    if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_dynamic_ndhwc.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: fp32 and bfloat16"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -63,6 +61,7 @@ fi
 MODE="inference"
 BATCH_SIZE="1"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=3d_unet_mlperf \
   --precision ${PRECISION} \
@@ -74,4 +73,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --accuracy-only \
   $@ \
-  -- DEBIAN_FRONTEND=noninteractive
+  -- DEBIAN_FRONTEND=noninteractive 2>&1 | tee ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
+
+if [[ $? == 0 ]]; then
+  echo "Throughput images/sec:"
+  cat ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Accuracy:" | head -n 1 | sed -e "s/.*Accuracy: mean = //"
+  exit 0
+else
+  exit 1
+fi

@@ -53,6 +53,7 @@ BATCH_SIZE="1"
 
 if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
     source "${MODEL_DIR}/quickstart/common/utils.sh"
+    _ht_status_spr
     _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --model-name ssd-mobilenet \
       --precision ${PRECISION} \

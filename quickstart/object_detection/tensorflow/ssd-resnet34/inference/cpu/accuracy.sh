@@ -74,6 +74,7 @@ fi
 MODE="inference"
 BATCH_SIZE="1"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-source-dir ${TF_MODELS_DIR} \
   --model-name ssd-resnet34 \
@@ -86,4 +87,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --accuracy-only \
   $@ \
-  -- input-size=1200
+  -- input-size=1200 2>&1 | tee ${OUTPUT_DIR}/ssd-resnet34_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
+
+if [[ $? == 0 ]]; then
+  echo "Average Precision:"
+  cat ${OUTPUT_DIR}/ssd-resnet34_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Average Precision" | head -n 1 | sed -e "s/.*] = //"
+  exit 0
+else
+  exit 1
+fi

@@ -39,6 +39,7 @@ WORKDIR=/workspace/tf-spr-resnet50v1-5-inference
 
 # inference scripts:
 # inference_realtime.sh
+# inference_realtime_weightsharing.sh
 # inference_throughput.sh
 # accuracy.sh
 export SCRIPT="${SCRIPT:-inference_realtime.sh}"

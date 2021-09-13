@@ -76,8 +76,12 @@ fi
 
 MODE="inference"
 CORES_PER_INSTANCE="socket"
+# Get number of cores per socket line from lscpu
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
@@ -88,12 +92,14 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
+  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads 1 \
   $@ \
   -- \
   warmup_steps=50 \
   steps=1500
 
 if [[ $? == 0 ]]; then
+  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep Throughput: | sed -e s"/.*: //"
   echo "Throughput summary:"
   grep 'Throughput' ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
   exit 0

@@ -63,6 +63,7 @@ CORES_PER_INSTANCE="socket"
 BATCH_SIZE="65536"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=dien \
   --precision ${PRECISION} \

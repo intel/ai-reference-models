@@ -86,6 +86,7 @@ CORES_PER_INSTANCE="socket"
 BATCH_SIZE="128"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \
@@ -97,8 +98,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
   --checkpoint ${CHECKPOINT_DIR} \
-  --num-intra-threads 8 \
-  --num-inter-threads 3 \
   --warmup-steps=50 --steps=350 \
   --benchmark-only \
   $@ \
@@ -108,8 +107,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   experimental-gelu=True
 
 if [[ $? == 0 ]]; then
+  cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
   echo "Throughput:"
-  grep 'Throughput:' ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log  | awk -F' ' '{sum+=$2;} END{print sum} '
+  grep 'Throughput:' ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
+  exit 0
 else
   exit 1
 fi
