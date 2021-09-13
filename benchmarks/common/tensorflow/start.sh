@@ -171,6 +171,10 @@ if [ ${VERBOSE} == "True" ]; then
   verbose_arg="--verbose"
 fi
 
+weight_sharing_arg=""
+if [ ${WEIGHT_SHARING} == "True" ]; then
+  weight_sharing_arg="--weight-sharing"
+fi
 accuracy_only_arg=""
 if [ ${ACCURACY_ONLY} == "True" ]; then
   accuracy_only_arg="--accuracy-only"
@@ -265,6 +269,7 @@ ${numa_cores_per_instance_arg} \
 ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
+${weight_sharing_arg} \
 ${verbose_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then

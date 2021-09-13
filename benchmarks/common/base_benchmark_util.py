@@ -144,8 +144,9 @@ class BaseBenchmarkUtil(object):
             help="Specify the number of threads within the layer",
             dest="num_intra_threads", default=None)
 
+        # removing the check_positive_number test to support weight-sharing
         self._common_arg_parser.add_argument(
-            "-e", "--num-inter-threads", type=check_positive_number,
+            "-e", "--num-inter-threads",
             help="Specify the number threads between layers",
             dest="num_inter_threads", default=None)
 
@@ -159,10 +160,16 @@ class BaseBenchmarkUtil(object):
             help="The number intra op threads for the data layer config",
             dest="data_num_intra_threads", default=None)
 
+        # removing the check_positive_number test to support weight-sharing
         self._common_arg_parser.add_argument(
-            "--data-num-inter-threads", type=check_positive_number,
+            "--data-num-inter-threads",
             help="The number inter op threads for the data layer config",
             dest="data_num_inter_threads", default=None)
+
+        self._common_arg_parser.add_argument(
+            "--weight-sharing",
+            help="Enables experimental weight-sharing feature for RN50 int8/bf16 inference only",
+            dest="weight_sharing", action="store_true")
 
         self._common_arg_parser.add_argument(
             "-c", "--checkpoint",
@@ -268,6 +275,8 @@ class BaseBenchmarkUtil(object):
         # check if socket id is in socket number range
         num_numas = self._platform_util.num_numa_nodes
         args = self.args
+        if (args.weight_sharing is True and (args.model_name != "resnet50v1_5" or args.precision == "fp32")):
+            print("Warning: Weight sharing support available only for RN50 int8 and bfloat16 models")
         if not -1 <= args.socket_id < num_numas:
             if num_numas > 0:
                 raise ValueError("Socket id must be within NUMA number range: "
