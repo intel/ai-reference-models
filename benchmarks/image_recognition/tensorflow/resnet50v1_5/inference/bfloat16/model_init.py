@@ -67,9 +67,15 @@ class ModelInitializer(BaseModelInitializer):
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode,
-            "eval_image_classifier_inference.py")
+        # If weight-sharing flag is ON, then use the weight-sharing script.
+        if self.args.weight_sharing and not self.args.accuracy_only:
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode,
+                "eval_image_classifier_inference_weight_sharing.py")
+        else:
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode,
+                "eval_image_classifier_inference.py")
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
