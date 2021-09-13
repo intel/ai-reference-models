@@ -66,6 +66,7 @@ CORES_PER_INSTANCE="4"
 BATCH_SIZE="1"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-source-dir ${TF_MODELS_DIR} \
   --model-name ssd-resnet34 \
@@ -80,8 +81,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   -- input-size=1200
 
 if [[ $? == 0 ]]; then
+  cat ${OUTPUT_DIR}/ssd-resnet34_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | grep "Total samples/sec:" | sed -e s"/.*: *//;s/samples\/s//"
   echo "Summary total samples/sec:"
   grep 'Total samples/sec' ${OUTPUT_DIR}/ssd-resnet34_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log  | awk -F' ' '{sum+=$3;} END{print sum} '
+  exit 0
 else
   exit 1
 fi
