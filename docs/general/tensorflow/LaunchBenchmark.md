@@ -163,6 +163,9 @@ optional arguments:
                         bare metal (default --noinstall='True')
   --dry-run             Shows the call to the model without actually running
                         it
+  --weight-sharing      Supports experimental weight-sharing feature for RN50
+                        int8/bf16 inference only
+                      
 ```
 
 ## Volume mounts
