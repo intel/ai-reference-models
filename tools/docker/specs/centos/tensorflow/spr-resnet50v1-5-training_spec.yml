@@ -12,12 +12,13 @@ slice_sets:
         - TENSORFLOW_TAG=tensorflow-spr
       partials:
         - tensorflow/tensorflow-base
-        - model_package
-        - numactl
         - python-build
         - gcc-8
-        - openmpi-2.1.1-8
+        - openmpi-4.1.0
+        - openssh
         - horovod
+        - model_package
+        - numactl
         - entrypoint
       files:
         - source: benchmarks/common

@@ -55,3 +55,8 @@ ARG TF_WHEEL=tf_nightly-2.7.0-cp36-cp36m-linux_x86_64.whl
 COPY ./whls/${TF_WHEEL} /tmp/pip3/
 
 RUN python3 -m pip install --no-cache-dir /tmp/pip3/${TF_WHEEL}
+
+# fix keras-nightly and tf-estimator-nightly versions
+RUN pip uninstall -y keras-nightly tf-estimator-nightly
+RUN pip install tf-estimator-nightly==2.7.0.dev2021080801 \
+                keras-nightly==2.7.0.dev2021080800
