@@ -8,8 +8,8 @@ slice_sets:
     dockerfile_subdirectory: lpot/tensorflow
     args:
       - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
-      - TENSORFLOW_TAG=2.3.0-ubuntu-20.04
-      - PY_VERSION=3.7
+      - TENSORFLOW_TAG=2.5.0-ubuntu-20.04
+      - PY_VERSION=3.8
     partials:
       - wget
       - lpot/tf_inceptionv3
