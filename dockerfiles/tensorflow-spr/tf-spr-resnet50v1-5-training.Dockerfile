@@ -25,6 +25,67 @@ ARG TENSORFLOW_TAG="tensorflow-spr"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
+RUN yum install -y gcc gcc-c++ && \
+    yum install -y python3-devel && \
+    yum clean all
+
+RUN yum update -y && \
+    yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM && \
+    yum clean all
+
+ARG OPENMPI_VERSION="openmpi-4.1.0"
+ARG OPENMPI_DOWNLOAD_URL="https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-4.1.0.tar.gz"
+
+RUN yum install -y perl && \
+    yum clean all
+
+# Install OpenMPI
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    curl -fSsL -O ${OPENMPI_DOWNLOAD_URL} && \
+    tar zxf ${OPENMPI_VERSION}.tar.gz && \
+    cd ${OPENMPI_VERSION} && \
+    ./configure --enable-mpirun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    cd / && \
+    rm -rf /tmp/openmpi
+
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install OpenSSH for MPI to communicate between containers
+RUN yum update -y && yum install -y  \
+    openssh-server \
+    openssh-clients \
+    cmake && \
+    yum clean all
+
+ARG HOROVOD_VERSION=0.22.1
+ENV HOROVOD_WITHOUT_MXNET=1 \
+    HOROVOD_WITHOUT_PYTORCH=1 \
+    HOROVOD_WITH_TENSORFLOW=1 \
+    HOROVOD_CPU_OPERATIONS=MPI \
+    HOROVOD_WITH_MPI=1 \
+    HOROVOD_WITHOUT_GLOO=1
+
+# Install Horovod
+RUN python3 -m pip install --no-cache-dir horovod==${HOROVOD_VERSION}
+
+# In case installing released versions of Horovod fail,and there is
+# a working commit replace next set of RUN commands with something like:
+# ARG HOROVOD_VERSION=87094a4
+# RUN yum update -y && yum install -y git make && \
+#    yum clean all
+# RUN python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="tf-spr-resnet50v1-5-training"
@@ -42,33 +103,6 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
 RUN yum update -y && yum install -y numactl
-
-RUN yum install -y gcc gcc-c++ && \
-    yum install -y python3-devel && \
-    yum clean all
-
-RUN yum update -y && \
-    yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
-
-RUN yum update -y && \
-    yum install -y openmpi openmpi-devel openssh openssh-server && \
-    yum clean all
-
-ENV PATH="/usr/lib64/openmpi/bin:${PATH}"
-
-ARG HOROVOD_VERSION=87094a4
-
-ENV HOROVOD_WITHOUT_MXNET=1 \
-    HOROVOD_WITHOUT_PYTORCH=1 \
-    HOROVOD_WITH_TENSORFLOW=1
-
-# In case installing released versions of Horovod fail,and there is
-# a working commit replace next set of RUN commands with something like:
-RUN yum update -y && yum install -y git make && \
-    yum clean all
-RUN python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-
-# RUN python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
 
 ENV USER_ID=0
 

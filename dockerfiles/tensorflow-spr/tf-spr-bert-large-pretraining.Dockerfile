@@ -88,7 +88,7 @@ RUN python3 -m pip install --no-cache-dir horovod==${HOROVOD_VERSION}
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="tf-spr-transformer-mlperf-training"
+ARG PACKAGE_NAME="tf-spr-bert-large-pretraining"
 
 ARG MODEL_WORKSPACE
 
