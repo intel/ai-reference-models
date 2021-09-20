@@ -1344,7 +1344,7 @@ function transformer_mlperf() {
   fi
 
   if [[ ${MODE} == "inference" ]]; then
-    if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]; then
+    if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") || ( ${PRECISION} == "int8") ]]; then
 
       if [[ -z "${params}" ]]; then
           echo "transformer-language requires --params arg to be defined"

@@ -215,69 +215,6 @@ Translation is defined in [translate.py](translate.py). First, `Subtokenizer` to
 [compute_bleu.py](compute_bleu.py): Implementation from [https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/bleu_hook.py](https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/bleu_hook.py).
 
 
-## Intel Optimized model
-
-### Run fp32 inference:
-In order to improve the performance, we add a new script to generate a frozen model from a fully trained model checkpoint. 
-To generate the frozen model, users need to run the following command in the tranformer model directory:
-
-```
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_MODEL_ZOO_ROOT>/models/common/tensorflow
-
-python export_transformer.py --model_dir=<checkpoint_dir> --pb_path=<frozen_graph_full_path>
-```
-
-### Inference from a given input file with launch_benchmark api
-
-To translate the newstest2014 dataset, download the dataset as described [in an earlier section](#compute-bleu-score-during-model-evaluation). The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
-
-#### Benchmark mode run:
-```
-  python3 ./benchmarks/launch_benchmark.py    \
-     --benchmark-only --framework tensorflow  \
-     --in-graph=$PB_FILE \
-     --model-name transformer_mlperf \
-     --mode inference --precision fp32 \
-     --batch-size 64 \
-     --num-intra-threads 32 --num-inter-threads 1 \
-     --verbose \
-     --data-location $DATA_DIR \
-     -- params=big \
-        file=newstest2014.en \
-        vocab_file=vocab.ende.32768 \
-        file_out=translation.en \
-        reference=newstest2014.de \
-        warmup_steps=3 \
-        steps=100
-```
-With benchmark mode, if batch_size > 1, the througput results will be printed out; if batch_size = 1, the latency results will be printed out.
-
-#### Accuracy mode run:
-
-```
-  python3 ./benchmarks/launch_benchmark.py    \
-     --accuracy-only --framework tensorflow  \
-     --in-graph=$PB_FILE \
-     --model-name transformer_mlperf \
-     --mode inference --precision fp32 \
-     --batch-size 64 \
-     --num-intra-threads 32 --num-inter-threads 1 \
-     --verbose \
-     --data-location $DATA_DIR \
-     -- params=big \
-        file=newstest2014.en \
-        vocab_file=vocab.ende.32768 \
-        file_out=translation.en \
-        reference=newstest2014.de 
-```
-
-where:
-   * $DATA_DIR -- the input data directory, which should include newstest2014.en and newstest2014.de
-   * $PB_FILE  -- the path of the frozen model generated with the script
-
-With accuracy mode, the official BLEU score will be printed
-
-
 ## Term definitions
 
 **Steps / Epochs**:
