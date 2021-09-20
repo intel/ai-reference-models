@@ -107,7 +107,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 
 if [[ $? == 0 ]]; then
   echo "Accuracy:"
-  cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_accuracy.log | grep -ie "exact_match.*f1" | tail -n 1 | awk \'/\{.*:.*\,.*:.*\}$/{print $2 $4}\' | sed s"/\}//"
+  cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_accuracy.log | grep -ie "exact_match.*f1" | tail -n 1
   exit 0
 else
   exit 1
