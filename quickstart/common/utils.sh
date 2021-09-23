@@ -33,3 +33,19 @@ _ht_status_spr()
   echo "Setting env var KMP_AFFINITY=${KMP_AFFINITY}"
   echo ""
 }
+
+_get_numa_cores_lists()
+{
+  cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+  sockets=$(lscpu |grep 'Socket(s):' |sed 's/[^0-9]//g')
+  number_of_cores=$(($cores_per_socket * $sockets))
+  echo "number of physical cores: ${number_of_cores}"
+  numa_nodes_num=$(lscpu |grep 'NUMA node(s):' |sed 's/[^0-9]//g')
+  echo "number of NUMA nodes: ${numa_nodes_num}"
+  cores_per_node=$((number_of_cores/numa_nodes_num))
+  cores_arr=()
+  for ((i=0;i<${numa_nodes_num};i++)); do
+    node_cores=$(numactl -H |grep 'node '$i' cpus:' |sed 's/.*node '$i' cpus: *//')
+    cores_arr[$i]=${node_cores// /,}
+  done
+}

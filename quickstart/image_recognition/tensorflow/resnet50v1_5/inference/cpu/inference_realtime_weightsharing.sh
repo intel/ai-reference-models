@@ -62,15 +62,14 @@ fi
 
 # Get number of cores per socket line from lscpu
 export OMP_NUM_THREADS=4
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-sockets=$(lscpu |grep 'Socket(s):' |sed 's/[^0-9]//g')
-number_of_cores=$(($cores_per_socket * $sockets))
+export KMP_BLOCKTIME=1
 MODE="inference"
 BATCH_SIZE="1"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_get_numa_cores_lists
+_command numactl --localalloc --physcpubind=${cores_arr[0]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -85,4 +84,21 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   $@ \
   -- \
   warmup_steps=100 \
-  steps=1500
+  steps=1500 >> ${OUTPUT_DIR}/ResNet-50-v1.5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
+numactl --localalloc --physcpubind=${cores_arr[1]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  --model-name=resnet50v1_5 \
+  --precision ${PRECISION} \
+  --mode=${MODE} \
+  --framework tensorflow \
+  --in-graph ${PRETRAINED_MODEL} \
+  ${dataset_arg} \
+  --output-dir ${OUTPUT_DIR} \
+  --batch-size ${BATCH_SIZE} \
+  --num-intra-threads ${number_of_cores} --num-inter-threads -1 \
+  --data-num-intra-threads ${number_of_cores} --data-num-inter-threads -1 \
+  --weight-sharing \
+  $@ \
+  -- \
+  warmup_steps=100 \
+  steps=1500 >> ${OUTPUT_DIR}/ResNet-50-v1.5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_1.log 2>&1 & \
+  wait
