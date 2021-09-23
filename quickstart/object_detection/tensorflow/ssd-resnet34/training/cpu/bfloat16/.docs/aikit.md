@@ -23,7 +23,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>numpy==1.17.4
+        <li>numpy>=1.17.4
         <li>opencv-python
         <li>openmpi
         <li>openssh
@@ -42,7 +42,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>git
         <li>numactl
         <li>wget
-        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow==2.5.0</a>
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>contextlib2
         <li>cpio
         <li>Cython
@@ -50,7 +50,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>numpy==1.17.4
+        <li>numpy>=1.17.4
         <li>opencv-python
         <li>openmpi
         <li>openssh
