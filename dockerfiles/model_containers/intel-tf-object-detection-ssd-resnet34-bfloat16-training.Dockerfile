@@ -63,7 +63,7 @@ RUN pip install \
         jupyter \
         lxml \
         matplotlib \
-        numpy==1.17.4 \
+        numpy>=1.17.4 \
         'pillow>=8.1.2' && \
     pip install pycocotools
 
@@ -122,7 +122,7 @@ RUN apt-get install --no-install-recommends --fix-missing -y \
     systemd && \
     systemctl enable ssh
 
-ARG HOROVOD_VERSION="0.21.1"
+ARG HOROVOD_VERSION="87094a4"
 
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \

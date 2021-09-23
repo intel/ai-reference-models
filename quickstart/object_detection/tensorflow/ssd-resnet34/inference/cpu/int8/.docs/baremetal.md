@@ -8,7 +8,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * git
 * libgl1-mesa-glx
 * libglib2.0-0
-* numpy==1.17.4
+* numpy>=1.17.4
 * Cython
 * contextlib2
 * pillow>=8.1.2
