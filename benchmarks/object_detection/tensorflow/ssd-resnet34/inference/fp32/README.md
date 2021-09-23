@@ -62,7 +62,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>numpy==1.17.4
+        <li>numpy>=1.17.4
         <li>opencv-python
         <li>pillow>=8.1.2
         <li>pycocotools
@@ -82,14 +82,14 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>numactl
         <li>python3-dev
         <li>wget
-        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow==2.5.0</a>
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>Cython
         <li>contextlib2
         <li>horovod==0.19.1
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>numpy==1.17.4
+        <li>numpy>=1.17.4
         <li>opencv-python
         <li>pillow>=8.1.2
         <li>pycocotools
