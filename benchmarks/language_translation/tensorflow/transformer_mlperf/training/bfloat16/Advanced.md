@@ -49,7 +49,7 @@ python launch_benchmark.py \
     --mode training \
     --model-name transformer_mlperf \
     --socket-id 0 \
-    --data-location ${DATASET_DIR \
+    --data-location ${DATASET_DIR} \
     --docker-image intel/intel-optimized-tensorflow:latest \
     --output-dir ${OUTPUT_DIR} \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
