@@ -14,3 +14,5 @@ output/
 **/**.whl
 **/**.tar.gz
 tools/docker/models*
+.ipynb_checkpoints
+
