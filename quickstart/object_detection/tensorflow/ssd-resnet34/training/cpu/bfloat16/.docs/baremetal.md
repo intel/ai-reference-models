@@ -11,7 +11,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * jupyter
 * lxml
 * matplotlib
-* numpy==1.17.4
+* numpy>=1.17.4
 * opencv
 * openmpi
 * openssh
