@@ -119,7 +119,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
     apt-get install gcc-8 g++-8 cmake python-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
-    apt-get install -y libsm6 libxext6
+    apt-get install -y libsm6 libxext6 python3-dev
 
     # install google-perftools for tcmalloc
     if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
@@ -145,7 +145,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
   fi
-  python3 -m pip install --upgrade pip==20.3.4
+  python3 -m pip install --upgrade 'pip>=20.3.4'
   python3 -m pip install requests
 fi
 
