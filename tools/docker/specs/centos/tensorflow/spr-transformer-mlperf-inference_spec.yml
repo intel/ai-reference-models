@@ -45,6 +45,8 @@ slice_sets:
           destination: pretrained_model/mlperf_transformer_bf16.pb
         - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww32/ww32-pbfiles/tf_dataset/pre-trained-models/transformer_mlperf/graph/mlperf_transformer_fp32.pb
           destination: pretrained_model/mlperf_transformer_fp32.pb
+        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww32/ww32-pbfiles/tf_dataset/pre-trained-models/transformer_mlperf/graph/mlperf_transformer_int8.pb
+          destination: pretrained_model/mlperf_transformer_int8.pb
       wrapper_package_files:
         - source: output/tf-spr-transformer-mlperf-inference.tar.gz
           destination: model_packages/tf-spr-transformer-mlperf-inference.tar.gz

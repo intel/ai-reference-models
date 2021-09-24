@@ -5,7 +5,7 @@
 ## Description
 
 This document has instructions for building and running the Intel-optimized
-Tensorflow container using the container package.
+TensorFlow container using the container package.
 
 ## Container Package
 
@@ -20,7 +20,7 @@ tensorflow-spr
 │   └── third_party
 ├── tensorflow-spr.Dockerfile
 └── whls
-    └── tf_nightly-2.7.0-cp36-cp36m-linux_x86_64.whl
+    └── tf_nightly-2.7.0.202138-cp36-cp36m-linux_x86_64.whl
 ```
 
 ## Docker

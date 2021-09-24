@@ -11,5 +11,5 @@ The container package includes wheel for Tensorflow, a Dockerfile, and a script 
 │   └── third_party
 ├── tensorflow-spr.Dockerfile
 └── whls
-    └── tf_nightly-2.7.0-cp36-cp36m-linux_x86_64.whl
+    └── tf_nightly-2.7.0.202138-cp36-cp36m-linux_x86_64.whl
 ```

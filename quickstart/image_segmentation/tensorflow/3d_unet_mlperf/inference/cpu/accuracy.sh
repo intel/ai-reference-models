@@ -25,12 +25,6 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-if [ -z "${PRECISION}" ]; then
-  echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
-  exit 1
-fi
-
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"
   exit 1
@@ -41,12 +35,20 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to int8, fp32 or bfloat16."
+  exit 1
+fi
+
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_dynamic_ndhwc.pb"
+    elif [[ $PRECISION == "int8" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_int8_fully_quantized_perchannel.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32 and bfloat16"
+        echo "Supported precisions are: int8, fp32 and bfloat16"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -76,7 +78,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   -- DEBIAN_FRONTEND=noninteractive 2>&1 | tee ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
 
 if [[ $? == 0 ]]; then
-  echo "Throughput images/sec:"
+  echo "Accuracy:"
   cat ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Accuracy:" | head -n 1 | sed -e "s/.*Accuracy: mean = //"
   exit 0
 else
