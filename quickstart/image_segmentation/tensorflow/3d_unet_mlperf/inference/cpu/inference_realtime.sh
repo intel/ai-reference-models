@@ -27,16 +27,18 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to int8, fp32 or bfloat16."
   exit 1
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_dynamic_ndhwc.pb"
+    elif [[ $PRECISION == "int8" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_int8_fully_quantized_perchannel.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32 and bfloat16"
+        echo "Supported precisions are: int8, fp32 and bfloat16"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -68,7 +70,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   -- warmup_steps=50 steps=100
 
 if [[ $? == 0 ]]; then
-  echo "Throughput images/sec:"
+  echo "Throughput samples/sec:"
   cat ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | grep "Throughput:.*samples/sec" | sed -e s"/.*://;s/samples\/sec//"
   exit 0
 else

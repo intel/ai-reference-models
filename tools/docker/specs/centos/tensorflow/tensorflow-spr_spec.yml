@@ -7,10 +7,10 @@ slice_sets:
     - add_to_name: tensorflow-spr
       dockerfile_subdirectory: tensorflow-spr
       args:
-        - TENSORFLOW_WHEEL=tf_nightly-2.7.0-cp36-cp36m-linux_x86_64.whl
+        - TENSORFLOW_WHEEL=tf_nightly-2.7.0.202138-cp36-cp36m-linux_x86_64.whl
         - PACKAGE_NAME=tensorflow-spr
       partials:
-        - centos8.3.2011-base
+        - centos8-base
         - tensorflow/spr-dnnl-max-var
         - tensorflow/spr-mkl-native-format-var
         - tensorflow/tf-installs

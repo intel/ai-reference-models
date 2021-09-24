@@ -72,14 +72,4 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --num-inter-threads 2 \
   $@ \
   -- \
-  train_epochs=1 epochs_between_evals=1 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
-
-if [[ $? == 0 ]]; then
-  global_steps=`cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log | grep "global_step/sec:" | sed -e s"/.*: //" | tail -n 1`
-  summary=`python -c "print(${global_steps}*${NUM_INSTANCES}*${BATCH_SIZE})"`
-  echo "Throughput summary:"
-  echo $summary
-  exit 0
-else
-  exit 1
-fi
+  train_epochs=1 epochs_between_evals=1
