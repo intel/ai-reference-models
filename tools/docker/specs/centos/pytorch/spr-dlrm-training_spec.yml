@@ -18,9 +18,9 @@ slice_sets:
         - pytorch/models/dlrm-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/jemalloc-entrypoint
+        - pytorch/models/dlrm-jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/dlrm-ww32
+        - source: tools/docker/models/cpu-models/dlrm-ww38
           destination: models/dlrm
         - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training_convergence.sh
           destination: quickstart/training_convergence.sh

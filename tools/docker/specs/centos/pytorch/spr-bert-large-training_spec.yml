@@ -20,9 +20,9 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/tcmalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/bert_pre_train-ww32
+        - source: tools/docker/models/cpu-models/bert_pre_train-ww38
           destination: models/bert_pre_train
-        - source: tools/docker/models/cpu-models/bert-ww32
+        - source: tools/docker/models/cpu-models/bert-ww38
           destination: models/bert
         - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/pretrain_phase1.sh
           destination: quickstart/pretrain_phase1.sh

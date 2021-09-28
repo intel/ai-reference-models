@@ -19,7 +19,7 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/ssd-ww32/inference/others/cloud/single_stage_detector
+        - source: tools/docker/models/cpu-models/ssd-ww38/inference/others/cloud/single_stage_detector
           destination: models/ssd/inference/others/cloud/single_stage_detector
         - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_realtime.sh
           destination: quickstart/inference_realtime.sh
