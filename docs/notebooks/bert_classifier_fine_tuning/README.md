@@ -2,7 +2,9 @@
 
 This notebook uses the BERT BFloat16 classifier training scripts from the model zoo to
 do fine tuning. The [IMDB dataset](https://ai.stanford.edu/~amaas/data/sentiment/)
-is used to do sentiment analysis on movie reviews.
+is used to do sentiment analysis on movie reviews. For more information on the
+large movie review dataset, please see the
+[ACL 2011 paper](https://aclanthology.org/P11-1015/).
 
 Steps that the notebook follows:
 * Downloads the IMDB dataset
