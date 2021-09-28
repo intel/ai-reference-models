@@ -17,9 +17,9 @@ slice_sets:
         - model_package
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/jemalloc-entrypoint
+        - pytorch/jemalloc-libiomp5-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/resnet-ww32
+        - source: tools/docker/models/cpu-models/resnet-ww38
           destination: models/resnet50
         - source: quickstart/image_recognition/pytorch/resnet50/training/cpu/training.sh
           destination: quickstart/training.sh

@@ -5,7 +5,7 @@ RUN source activate pytorch && \
     pip install --upgrade pip && \
     pip install -r examples/requirements.txt && \
     pip install -e . && \
-    pip install datasets accelerate tfrecord && \
+    pip install datasets==1.11.0 accelerate tfrecord && \
     conda install openblas && \
     conda install faiss-cpu -c pytorch && \
     pip install transformers==4.9.0 && \

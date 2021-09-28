@@ -20,7 +20,7 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/ssd-training-ww32/training/single_stage_detector/ssd
+        - source: tools/docker/models/cpu-models/ssd-training-ww38/training/single_stage_detector/ssd
           destination: models/ssd-training/training/single_stage_detector/ssd
         - source: quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/train_performance.sh
           destination: quickstart/train_performance.sh

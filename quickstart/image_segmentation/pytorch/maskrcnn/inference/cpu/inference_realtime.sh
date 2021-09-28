@@ -30,7 +30,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bf16."
+  echo "Please set PRECISION to fp32, int8, avx-int8, or bf16."
   exit 1
 fi
 
@@ -38,7 +38,10 @@ cd ${MODEL_DIR}/models/maskrcnn/maskrcnn-benchmark
 
 export work_space=${OUTPUT_DIR}
 
-if [[ $PRECISION == "int8" ]]; then
+if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
+    if [[ $PRECISION == "avx-int8" ]]; then
+        unset DNNL_MAX_CPU_ISA
+    fi
     bash run_inference_cpu_multi_instance_latency.sh int8 2>&1 | tee -a ${OUTPUT_DIR}/maskrcnn-inference-realtime-int8.log
 elif [[ $PRECISION == "bf16" ]]; then
     bash run_inference_cpu_multi_instance_latency.sh bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/maskrcnn-inference-realtime-bf16.log
@@ -46,6 +49,6 @@ elif [[ $PRECISION == "fp32" ]]; then
     bash run_inference_cpu_multi_instance_latency.sh fp32 jit 2>&1 | tee -a ${OUTPUT_DIR}/maskrcnn-inference-realtime-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, bf16, and int8"
+    echo "Supported precisions are: fp32, bf16, int8, and avx-int8"
     exit 1
 fi
