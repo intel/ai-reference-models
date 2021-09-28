@@ -21,7 +21,6 @@ import os
 from argparse import ArgumentParser
 
 from common.base_model_init import BaseModelInitializer
-from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -79,12 +78,12 @@ class ModelInitializer(BaseModelInitializer):
         translate_file = os.path.join(self.args.output_dir,
                                       self.args.decode_to_file)
         if self.args.benchmark_only:
-           testmode = 'benchmark'
+            testmode = 'benchmark'
         elif self.args.accuracy_only:
-           testmode = 'accuracy'
+            testmode = 'accuracy'
         else:
-           testmode=self.args.mode
-        cmd_args = " --params=" + self.args.params+ \
+            testmode = self.args.mode
+        cmd_args = " --params=" + self.args.params + \
                    " --input_graph=" + self.args.input_graph + \
                    " --batch_size=" + \
                    (str(self.args.batch_size)
@@ -105,10 +104,9 @@ class ModelInitializer(BaseModelInitializer):
         self.cmd += " " + run_script + cmd_args
         compute_bleu_script = os.path.join(MODEL_EXEC_DIR, "transformer/compute_bleu.py")
         if self.args.accuracy_only:
-          self.bleucmd = self.python_exe + " " + compute_bleu_script \
-                         + self.bleu_params
+            self.bleucmd = self.python_exe + " " + compute_bleu_script + self.bleu_params
         else:
-          self.bleucmd = ''
+            self.bleucmd = ''
 
     def run(self):
         original_dir = os.getcwd()
