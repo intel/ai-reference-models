@@ -10,7 +10,7 @@ This document has instructions for running ResNet50 FP32 inference using
 <!--- 20. Download link -->
 ## Download link
 
-[pytorch-resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/pytorch-resnet50-fp32-inference.tar.gz)
+[pytorch-resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/pytorch-resnet50-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -71,7 +71,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 
 # Download and extract the model package
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/pytorch-resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/pytorch-resnet50-fp32-inference.tar.gz
 tar -xzf pytorch-resnet50-fp32-inference.tar.gz
 cd pytorch-resnet50-fp32-inference
 
@@ -81,12 +81,14 @@ cd pytorch-resnet50-fp32-inference
 <!--- 60. Docker -->
 ## Docker
 
-The model container includes the scripts and libraries needed to run 
-ResNet50 FP32 inference.
+Use the base [PyTorch 1.8 container](https://hub.docker.com/layers/intel/intel-optimized-pytorch/1.8.0/images/sha256-5ca5d619b33bc6abc42cef654e9ee119ed0959c65f37de22a0bd8764c71412dd?context=explore)
+`intel/intel-optimized-pytorch:1.8.0` to run ResNet50 FP32 inference.
+To run the model quickstart scripts using the base PyTorch 1.8 container,
+you will need to provide a volume mount for the pytorch-resnet50-fp32-inference package.
 
 To run the accuracy test, you will need
 mount a volume and set the `DATASET_DIR` environment variable to point
-to the prepped [ImageNet validation dataset](#dataset). The accuracy
+to the [ImageNet validation dataset](#dataset). The accuracy
 script also downloads the pretrained model at runtime, so provide proxy
 environment variables, if necessary.
 
@@ -98,9 +100,9 @@ docker run \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --privileged --init -t \
-  intel/image-recognition:pytorch-1.5.0-rc3-resnet50-fp32-inference \
-  /bin/bash quickstart/fp32_accuracy.sh
+  --volume <path to the model package directory>:/pytorch-resnet50-fp32-inference \
+  --privileged --init -it \
+  intel/intel-optimized-pytorch:1.8.0 /bin/bash
 ```
 
 Synthetic data is used when running batch or online inference, so no
@@ -108,9 +110,15 @@ dataset mount is needed.
 
 ```
 docker run \
-  --privileged --init -t \
-  intel/image-recognition:pytorch-1.5.0-rc3-resnet50-fp32-inference \
-  /bin/bash quickstart/<script name>.sh
+  --privileged --init -it \
+  --volume <path to the model package directory>:/pytorch-resnet50-fp32-inference \
+  intel/intel-optimized-pytorch:1.8.0 /bin/bash
+```
+
+Run quickstart scripts:
+```
+cd /pytorch-resnet50-fp32-inference
+bash quickstart/<script name>.sh
 ```
 
 If you are new to docker and are running into issues with the container,
@@ -121,4 +129,3 @@ for troubleshooting tips.
 ## License
 
 [LICENSE](/LICENSE)
-
