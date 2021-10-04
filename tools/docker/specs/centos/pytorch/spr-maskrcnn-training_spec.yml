@@ -19,7 +19,7 @@ slice_sets:
         - pytorch/models/maskrcnn-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/jemalloc-entrypoint
+        - pytorch/jemalloc-libiomp5-entrypoint
       files:
         - source: tools/docker/models/cpu-models/maskrcnn-ww38
           destination: models/maskrcnn
