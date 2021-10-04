@@ -92,7 +92,7 @@ COPY --from=intel-optimized-pytorch /root/.local/ /root/.local/
 ENV DNNL_MAX_CPU_ISA="AVX512_CORE_AMX"
 
 ENV PATH="~/conda/bin:${PATH}"
-ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:$LD_PRELOAD"
+ENV LD_PRELOAD="/workspace/lib/jemalloc/lib/libjemalloc.so:/root/conda/envs/pytorch/lib/libiomp5.so:$LD_PRELOAD"
 ENV MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 ENV BASH_ENV=/root/.bash_profile
 WORKDIR /workspace/
