@@ -134,7 +134,7 @@ class TensorflowUtils:
     def is_mkl_enabled(self):
         major_version = int(tf.__version__.split(".")[0])
         if major_version >= 2:
-            from tensorflow.python import _pywrap_util_port
+            from tensorflow.python.util import _pywrap_util_port
             return _pywrap_util_port.IsMklEnabled()
         else:
             return tf.pywrap_tensorflow.IsMklEnabled()
