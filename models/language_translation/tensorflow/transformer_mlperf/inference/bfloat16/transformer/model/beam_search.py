@@ -292,9 +292,18 @@ class SequenceBeamSearch(object):
     # Extract the alive sequences that generate the highest log probabilities
     # after being extended.
     topk_beam_indices = topk_indices // self.vocab_size
-    topk_seq, new_cache = _gather_beams(
-        [alive_seq, new_cache], topk_beam_indices, self.batch_size,
-        beams_to_keep)
+    beam_indices = topk_beam_indices + tf.expand_dims(
+        tf.range(0, self.batch_size*self.beam_size, self.beam_size), axis=1)
+    flatten_beam_indices = _flatten_beam_dim(beam_indices) #tf.reshape(beam_indices, [batch_size*new_beam_size])
+
+    def _test(state):
+      state = _flatten_beam_dim(state)
+      state = tf.gather(state, flatten_beam_indices, axis=0)
+      state = _unflatten_beam_dim(state, self.batch_size, beams_to_keep)
+      return state
+
+    topk_seq, new_cache = nest.map_structure(
+        lambda state: _test(state), [alive_seq, new_cache])
 
     # Append the most probable IDs to the topk sequences
     topk_ids = topk_indices % self.vocab_size
@@ -322,9 +331,20 @@ class SequenceBeamSearch(object):
     new_finished_flags = tf.equal(new_seq[:, :, -1], self.eos_id)
     new_log_probs += tf.cast(new_finished_flags, dtype=tf.float32) * -INF
 
-    top_alive_seq, top_alive_log_probs, top_alive_cache = _gather_topk_beams(
-        [new_seq, new_log_probs, new_cache], new_log_probs, self.batch_size,
-        self.beam_size)
+    _, topk_indices = tf.nn.top_k(new_log_probs, k=self.beam_size)
+    beam_indices = topk_indices + tf.expand_dims(
+        tf.range(0, self.batch_size*2*self.beam_size, 2*self.beam_size), axis=1)
+    flatten_beam_indices = _flatten_beam_dim(beam_indices) #tf.reshape(beam_indices, [batch_size*new_beam_size])
+
+    def _test(state):
+      state = _flatten_beam_dim(state)
+      state = tf.gather(state, flatten_beam_indices, axis=0)
+      state = _unflatten_beam_dim(state, self.batch_size, self.beam_size)
+      return state
+
+    top_alive_seq, top_alive_log_probs, top_alive_cache = nest.map_structure(
+        lambda state: _test(state), [new_seq, new_log_probs, new_cache])
+
 
     return {
         _StateKeys.ALIVE_SEQ: top_alive_seq,
@@ -372,10 +392,19 @@ class SequenceBeamSearch(object):
     finished_scores = tf.concat([finished_scores, new_scores], axis=1)
     finished_flags = tf.concat([finished_flags, new_finished_flags], axis=1)
 
-    # Return the finished sequences with the best scores.
-    top_finished_seq, top_finished_scores, top_finished_flags = (
-        _gather_topk_beams([finished_seq, finished_scores, finished_flags],
-                           finished_scores, self.batch_size, self.beam_size))
+    _, topk_indices = tf.nn.top_k(finished_scores, k=self.beam_size)
+    beam_indices = topk_indices + tf.expand_dims(
+        tf.range(0, self.batch_size*3*self.beam_size, 3*self.beam_size), axis=1)
+    flatten_beam_indices = _flatten_beam_dim(beam_indices) #tf.reshape(beam_indices, [batch_size*new_beam_size])
+
+    def _test(state):
+      state = _flatten_beam_dim(state)
+      state = tf.gather(state, flatten_beam_indices, axis=0)
+      state = _unflatten_beam_dim(state, self.batch_size, self.beam_size)
+      return state
+
+    top_finished_seq, top_finished_scores, top_finished_flags = nest.map_structure(
+        lambda state: _test(state), [finished_seq, finished_scores, finished_flags])
 
     return {
         _StateKeys.FINISHED_SEQ: top_finished_seq,
