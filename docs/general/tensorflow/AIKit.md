@@ -41,7 +41,7 @@ To activate a general use TensorFlow conda environment use the instructions belo
 As a sanity check, use the following command to verify that TensorFlow can be imported and
 oneDNN optimizations are enabled (this should print `oneDNN optimizations enabled: True`).
 ```
-python -c "from tensorflow.python import _pywrap_util_port; print('oneDNN optimizations enabled:', _pywrap_util_port.IsMklEnabled())"
+python -c "from tensorflow.python.util import _pywrap_util_port; print('oneDNN optimizations enabled:', _pywrap_util_port.IsMklEnabled())"
 ```
 
 ## Navigate to the Model Zoo
@@ -52,7 +52,7 @@ for the Intel AI Analytics toolkit:
 
 ```
 ls /opt/intel/oneapi/modelzoo
-2.2.0  latest
+2.4.0  latest
 ```
 
 Then browse to the `models` directory in your preferred Intel Model Zoo release version location

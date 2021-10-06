@@ -17,6 +17,9 @@ ARG UBUNTU_VERSION=20.04
 
 FROM ubuntu:${UBUNTU_VERSION}
 
+ARG TF_VERSION=2.6.0
+ARG MODEL_ZOO_VERSION=v2.4.0
+
 RUN apt-get -y update && \
     apt-get install -y \
         python3-dev \
@@ -35,18 +38,15 @@ RUN pip3 -q install pip --upgrade && \
 RUN git config --global user.email "you@example.com" && \
     git config --global user.name "Your Name"
 
-RUN git clone https://github.com/IntelAI/models.git
+RUN git clone --single-branch --branch=${MODEL_ZOO_VERSION} https://github.com/IntelAI/models.git
 
 WORKDIR models/docs/notebooks/perf_analysis
-
-ARG TF_VERSION=2.4.0
 
 # Create a virtual environment for stock TF
 RUN virtualenv -p python3 ./venv-stock-tf 
 
 # Install all the necessary libraries for stock TF
 RUN . ./venv-stock-tf/bin/activate && \
-    pip install --no-binary numpy==1.19.5 numpy==1.19.5 && \
     pip install \
         cxxfilt  \
         gitpython \
@@ -66,7 +66,6 @@ RUN virtualenv -p python3 ./venv-intel-tf
 
 # Install all the necessary libraries for Intel TF environment
 RUN . ./venv-intel-tf/bin/activate && \
-    pip install --no-binary numpy==1.19.5 numpy==1.19.5 && \
     pip install \
         cxxfilt  \
         gitpython \
@@ -82,9 +81,10 @@ RUN . ./venv-intel-tf/bin/activate && \
 RUN venv-intel-tf/bin/python -m ipykernel install --user --name=intel-tensorflow
 
 # Download protoc for object detection
+ARG RFCN_COMMIT=6c21084503b27a9ab118e1db25f79957d5ef540b
 RUN git clone https://github.com/tensorflow/models.git tensorflow-models-rfcn && \
     cd tensorflow-models-rfcn && \
-    git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b && \
+    git reset --hard ${RFCN_COMMIT} && \
     git apply /models/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch && \
     git clone https://github.com/cocodataset/cocoapi.git && \
     cd research && \
