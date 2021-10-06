@@ -48,8 +48,8 @@ def main(unused_argv):
 
   # Freeze the graph
   graph_def = sess.graph.as_graph_def()
-  output_names = ['model/Transformer/strided_slice_19',
-                  'model/Transformer/strided_slice_20']
+  output_names = ['model/Transformer/strided_slice_15',
+                  'model/Transformer/strided_slice_16']
   graph_def = tf.compat.v1.graph_util.convert_variables_to_constants(sess,
         graph_def, output_names)
   print("pb_path is", FLAGS.pb_path)
