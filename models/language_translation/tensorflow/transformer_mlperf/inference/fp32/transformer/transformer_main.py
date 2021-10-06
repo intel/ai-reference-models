@@ -56,8 +56,8 @@ def model_fn(features, labels, mode, params):
   if params.frozen_graph and mode == tf.estimator.ModeKeys.PREDICT:
     print("Reading***** From *** pb", flush=True)
     input_map = {'input_tokens': features}
-    output_names = ['model/Transformer/strided_slice_19',
-                    'model/Transformer/strided_slice_20']
+    output_names = ['model/Transformer/strided_slice_15',
+                    'model/Transformer/strided_slice_16']
 
     with tf.io.gfile.GFile(params.frozen_graph, "rb") as f:
       graph_def = tf.compat.v1.GraphDef()

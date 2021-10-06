@@ -93,7 +93,7 @@ class Attention(tf.compat.v1.layers.Layer):
       x = tf.transpose(a=x, perm=[0, 2, 1, 3])  # --> [batch, length, num_heads, depth]
       return tf.reshape(x, [batch_size, length, self.hidden_size])
 
-  def call(self, x, y, bias, cache=None):
+  def call(self, x, y, bias, cache=None, encdec_cache=None):
     """Apply attention mechanism to x and y.
 
     Args:
@@ -114,8 +114,12 @@ class Attention(tf.compat.v1.layers.Layer):
     # multiple heads. Multi-head attention uses multiple queries, keys, and
     # values rather than regular attention (which uses a single q, k, v).
     q = self.q_dense_layer(x)
-    k = self.k_dense_layer(y)
-    v = self.v_dense_layer(y)
+    if encdec_cache is not None:
+      k = encdec_cache["k"]
+      v = encdec_cache["v"]
+    else:
+      k = self.k_dense_layer(y)
+      v = self.v_dense_layer(y)
 
     if cache is not None:
       # Combine cached keys and values with new keys and values.

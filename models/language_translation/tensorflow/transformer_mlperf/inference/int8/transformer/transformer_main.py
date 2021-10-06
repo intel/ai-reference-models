@@ -56,14 +56,15 @@ def model_fn(features, labels, mode, params):
   if params.frozen_graph and mode == tf.estimator.ModeKeys.PREDICT:
     print("Reading***** From *** pb", flush=True)
     input_map = {'input_tokens': features}
-    output_names = ['model/Transformer/strided_slice_19']
+    output_names = ['model/Transformer/strided_slice_15',
+                    'model/Transformer/strided_slice_16']
 
     with tf.io.gfile.GFile(params.frozen_graph, "rb") as f:
       graph_def = tf.compat.v1.GraphDef()
       graph_def.ParseFromString(f.read())
     tf.graph_util.import_graph_def(graph_def, input_map, output_names, name="")
     output_tensors = [tf.compat.v1.get_default_graph().get_tensor_by_name(name + ":0") for name in output_names]
-    output = {'outputs': output_tensors[0]}
+    output = {'outputs': output_tensors[0] , 'scores': output_tensors[1]}
     return tf.estimator.EstimatorSpec(
         tf.estimator.ModeKeys.PREDICT,
         predictions=output)
