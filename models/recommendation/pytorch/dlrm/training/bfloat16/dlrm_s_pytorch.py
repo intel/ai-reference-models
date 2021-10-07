@@ -772,7 +772,7 @@ if __name__ == "__main__":
             ngpus = torch.cuda.device_count()  # 1
         print("Using {} GPU(s)...".format(ngpus))
     elif use_ipex:
-        device = torch.device("dpcpp")
+        device = torch.device("xpu")
         print("Using IPEX...")
     else:
         device = torch.device("cpu")
