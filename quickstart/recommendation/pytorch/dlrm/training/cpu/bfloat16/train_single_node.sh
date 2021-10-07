@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-$PWD}
+export MODEL_DIR=${MODEL_DIR-$PWD}
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
