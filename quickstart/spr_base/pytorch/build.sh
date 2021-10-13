@@ -18,9 +18,7 @@
 set -e
 
 IMAGE_NAME=model-zoo:pytorch-ipex-spr
-docker build --build-arg PYTORCH_WHEEL=torch-1.10.0a0+git32a4642-cp37-cp37m-linux_x86_64.whl \
-             --build-arg IPEX_WHEEL=intel_extension_for_pytorch-0.0.0-cp37-cp37m-linux_x86_64.whl \
-             --build-arg http_proxy=$http_proxy \
+docker build --build-arg http_proxy=$http_proxy \
              --build-arg https_proxy=$https_proxy  \
              --build-arg no_proxy=$no_proxy \
              -t $IMAGE_NAME \

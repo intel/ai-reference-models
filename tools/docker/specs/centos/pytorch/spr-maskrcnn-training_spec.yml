@@ -21,7 +21,7 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-libiomp5-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/maskrcnn-ww38
+        - source: tools/docker/models/cpu-models/maskrcnn
           destination: models/maskrcnn
         - source: quickstart/image_segmentation/pytorch/maskrcnn/training/cpu/training.sh
           destination: quickstart/training.sh

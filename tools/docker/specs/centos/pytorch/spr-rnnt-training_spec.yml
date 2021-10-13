@@ -20,7 +20,7 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-libiomp5-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/rnnt-training-ww38
+        - source: tools/docker/models/cpu-models/rnnt-training
           destination: models/rnnt-training
         - source: quickstart/language_modeling/pytorch/rnnt/training/cpu/training.sh
           destination: quickstart/training.sh

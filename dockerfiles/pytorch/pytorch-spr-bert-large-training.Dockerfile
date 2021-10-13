@@ -63,6 +63,8 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
 ARG BERT_DIR="/workspace/pytorch-spr-bert-large-training/models/bert/bert"
+ARG BERT_PRE_TRAIN_DIR="/workspace/pytorch-spr-bert-large-training/models/bert_pre_train"
+ARG TRANSFORMERS_COMMIT="91758e399f8c4bf81820a8af6a257682ccea0223"
 
 RUN source activate pytorch && \
     cd ${BERT_DIR} && \
@@ -72,7 +74,16 @@ RUN source activate pytorch && \
     pip install datasets==1.11.0 accelerate tfrecord && \
     conda install openblas && \
     conda install faiss-cpu -c pytorch && \
-    pip install transformers==4.9.0 && \
+    cd ${BERT_PRE_TRAIN_DIR} && \
+    rm -rf transformers && \
+    git clone https://github.com/huggingface/transformers.git && \
+    cd transformers && \
+    git reset --hard ${TRANSFORMERS_COMMIT} && \
+    wget https://github.com/huggingface/transformers/pull/13714.diff && \
+    git apply 13714.diff && \
+    python -m pip install --upgrade pip && \
+    pip uninstall transformers -y && \
+    pip install -e . && \
     mkdir -p /root/.local
 
 RUN cd .. && \

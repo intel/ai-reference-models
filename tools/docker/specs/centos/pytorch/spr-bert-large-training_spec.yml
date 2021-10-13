@@ -11,6 +11,8 @@ slice_sets:
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-bert-large-training
         - BERT_DIR=/workspace/pytorch-spr-bert-large-training/models/bert/bert
+        - BERT_PRE_TRAIN_DIR=/workspace/pytorch-spr-bert-large-training/models/bert_pre_train
+        - TRANSFORMERS_COMMIT=91758e399f8c4bf81820a8af6a257682ccea0223
       partials:
         - pytorch/gcc-and-utils
         - pytorch/tcmalloc
@@ -20,9 +22,9 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/tcmalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/bert_pre_train-ww38
+        - source: tools/docker/models/cpu-models/bert_pre_train
           destination: models/bert_pre_train
-        - source: tools/docker/models/cpu-models/bert-ww38
+        - source: tools/docker/models/cpu-models/bert
           destination: models/bert
         - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/pretrain_phase1.sh
           destination: quickstart/pretrain_phase1.sh

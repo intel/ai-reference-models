@@ -20,9 +20,9 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/models/dlrm-jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/dlrm-ww38
+        - source: tools/docker/models/cpu-models/dlrm
           destination: models/dlrm
-        - source: tools/docker/models/cpu-models/dlrm-int8-ww38
+        - source: tools/docker/models/cpu-models/dlrm-int8
           destination: models/dlrm-int8
         - source: quickstart/recommendation/pytorch/dlrm/inference/cpu/inference_performance.sh
           destination: quickstart/inference_performance.sh
