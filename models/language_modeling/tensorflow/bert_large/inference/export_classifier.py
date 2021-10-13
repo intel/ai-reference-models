@@ -12,6 +12,9 @@ tf.compat.v1.disable_v2_behavior()
 tf.compat.v1.flags.DEFINE_bool("saved_model",
                                False,
                                "whether export saved model or not")
+tf.compat.v1.flags.DEFINE_string("signature_def_name",
+                                 default="eval",
+                                 help="If a saved model is being exported, define the signature def key")
 FLAGS = tf.compat.v1.flags.FLAGS
 
 # We just import classifier here for `create_model` and some processors such as
@@ -84,9 +87,9 @@ class ClassifierExporter:
   def __exit__(self, exc_type, exc_value, exc_tb):
     self.session.close()
 
-  def export(self, saved_model: bool):
+  def export(self, saved_model: bool, signature_def_name: str):
     if saved_model:
-      self.export_saved_model()
+      self.export_saved_model(signature_def_name=signature_def_name)
 
     self.export_frozen_graph()
 
@@ -155,7 +158,7 @@ def main(_):
                           FLAGS.task_name,
                           FLAGS.bert_config_file,
                           FLAGS.max_seq_length) as exporter:
-    exporter.export(FLAGS.saved_model)
+    exporter.export(FLAGS.saved_model, FLAGS.signature_def_name)
 
 if __name__ == "__main__":
   tf.compat.v1.flags.mark_flag_as_required("task_name")
