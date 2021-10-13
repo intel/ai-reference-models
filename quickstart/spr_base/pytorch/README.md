@@ -22,8 +22,6 @@ pytorch-ipex-spr
 │   └── third_party
 ├── pytorch-ipex-spr.Dockerfile
 └── whls
-    ├── torch-1.10.0a0+git32a4642-cp37-cp37m-linux_x86_64.whl
-    └── intel_extension_for_pytorch-0.0.0-cp37-cp37m-linux_x86_64.whl
 ```
 
 ## Docker

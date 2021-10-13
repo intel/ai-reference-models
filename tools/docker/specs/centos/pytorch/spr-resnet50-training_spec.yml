@@ -19,7 +19,7 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-libiomp5-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/resnet-ww38
+        - source: tools/docker/models/cpu-models/resnet
           destination: models/resnet50
         - source: quickstart/image_recognition/pytorch/resnet50/training/cpu/training.sh
           destination: quickstart/training.sh

@@ -20,7 +20,7 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/models/dlrm-jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/dlrm-ww38
+        - source: tools/docker/models/cpu-models/dlrm
           destination: models/dlrm
         - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training_convergence.sh
           destination: quickstart/training_convergence.sh
