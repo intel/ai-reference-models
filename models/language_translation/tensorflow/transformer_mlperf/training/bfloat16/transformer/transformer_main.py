@@ -319,15 +319,17 @@ def train_schedule(
   # Loop training/evaluation/bleu cycles
   mlperf_log.transformer_print(key=mlperf_log.TRAIN_LOOP)
   # Profiling with timeline
-  # profile file will be saved in in profile_dir
   if FLAGS.save_profile == "Yes":
     profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file 
-
-  # Creating hooks for printing Examples per Second, used with estimator.train
+  #profile file will be saved in in profile_dir
+  #Creating hooks for printing Examples per Second, used with estimator.train
+  training_batch_size = estimator.params.batch_size
+  if FLAGS.batch_size is not -1:
+    training_batch_size = FLAGS.batch_size
   train_hooks = hooks_helper.get_train_hooks(
       ["ExamplesPerSecondHook"],
       model_dir=FLAGS.model_dir,
-      batch_size=estimator.params.batch_size,
+      batch_size=training_batch_size,
       every_n_steps=FLAGS.print_iter,
       warm_steps=50
   )
@@ -343,7 +345,7 @@ def train_schedule(
       mlperf_log.transformer_print(key=mlperf_log.TRAIN_EPOCH,
                                  value=i * single_iteration_train_epochs + 1)
 
-    # Can we move the following out of the loop
+    #Can we move the following out of the loop
     if is_mpi:
       train_hooks.append(hvd.BroadcastGlobalVariablesHook(0))
     # Train the model for single_iteration_train_steps or until the input fn
@@ -441,7 +443,7 @@ def main(_):
   else:
     run_config = tf.estimator.RunConfig(session_config=session_config)
 
-  if is_mpi :
+  if is_mpi:
     FLAGS.model_dir = FLAGS.model_dir + str(hvd.rank())
   estimator = tf.estimator.Estimator(
       model_fn=model_fn, model_dir=FLAGS.model_dir, params=params, config=run_config)
@@ -548,6 +550,9 @@ if __name__ == "__main__":
   parser.add_argument(
       "--random_seed", "-rs", type=int, default=None,
       help="the random seed to use", metavar="<SEED>")
+  parser.add_argument(
+      "--batch_size", "-bat", type=int, default=-1,
+      help="change the training batch_size", metavar="<BATCH>")
   parser.add_argument(
       "--intra_op_parallelism_threads", "-intra", type=int, default=None,
       help="the intra op parallelism thread to use", metavar="<INTRA>")

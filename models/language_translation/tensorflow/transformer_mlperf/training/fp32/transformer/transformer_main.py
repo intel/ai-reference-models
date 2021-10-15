@@ -322,10 +322,13 @@ def train_schedule(
     profile_hooks = [tf.compat.v1.train.ProfilerHook(save_steps=1, output_dir=FLAGS.profile_dir)] # the json file 
   #profile file will be saved in in profile_dir
   #Creating hooks for printing Examples per Second, used with estimator.train
+  training_batch_size = estimator.params.batch_size
+  if FLAGS.batch_size is not -1:
+    training_batch_size = FLAGS.batch_size
   train_hooks = hooks_helper.get_train_hooks(
       ["ExamplesPerSecondHook"],
       model_dir=FLAGS.model_dir,
-      batch_size=estimator.params.batch_size,
+      batch_size=training_batch_size,
       every_n_steps=FLAGS.print_iter,
       warm_steps=50
   )
@@ -547,6 +550,9 @@ if __name__ == "__main__":
       "--random_seed", "-rs", type=int, default=None,
       help="the random seed to use", metavar="<SEED>")
   parser.add_argument(
+      "--batch_size", "-bat", type=int, default=-1,
+      help="change the training batch_size", metavar="<BATCH>")
+  parser.add_argument(
       "--intra_op_parallelism_threads", "-intra", type=int, default=None,
       help="the intra op parallelism thread to use", metavar="<INTRA>")
   parser.add_argument(
@@ -557,7 +563,6 @@ if __name__ == "__main__":
       help="print_iteration to print loss and timing", metavar="<PI>")
   # additional data_dir to save timeline
   parser.add_argument(
-      #"--output_dir", "-od", type=str, default="/root/mbhuiyan/bf16-timeline/NameChangeMklCast_ln_bf16softmax",
       "--profile_dir", "-od", type=str, default="/tmp/fp32profile",
       help="prifile dir", metavar="<OD>")
   parser.add_argument(

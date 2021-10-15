@@ -172,11 +172,18 @@ def translate_file(
     if FLAGS.test_mode == 'benchmark':
       hooks = [UpdateGlobalStepHook(),
                StopAtStepHook(total_steps)]
+      #Added warmup_steps data into input data so that it won't affect througput measurement results
+      if FLAGS.warmup_steps > 0:
+        available_steps = len(sorted_inputs) // FLAGS.batch_size + 1
+        if FLAGS.warmup_steps > available_steps:
+          FLAGS.warmup_steps = available_steps
+        num_lines_added = FLAGS.warmup_steps * FLAGS.batch_size
+        sorted_inputs = sorted_inputs[0:num_lines_added] + sorted_inputs
+
     elif FLAGS.test_mode == 'profile':
-        hooks = [UpdateGlobalStepHook(),
-                 StopAtStepHook(total_steps),
-                 ProfilerHook(save_steps=5, output_dir="./")]
-#               ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
+      hooks = [UpdateGlobalStepHook(),
+               StopAtStepHook(total_steps),
+               ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
     else:
       hooks = []
 
@@ -185,10 +192,10 @@ def translate_file(
     translations = []
     start_time = time.time()
     for i, prediction in enumerate(estimator.predict(input_fn, hooks=hooks)):
-      if i == FLAGS.warmup_steps:
+      if i == FLAGS.warmup_steps * FLAGS.batch_size:
         start_time = time.time()
       translation = _trim_and_decode(prediction["outputs"], subtokenizer)
-      if i >= FLAGS.warmup_steps:
+      if i >= FLAGS.warmup_steps * FLAGS.batch_size:
         translations.append(translation)
       if FLAGS.test_mode != 'benchmark' and i%10 == 9:
         tf.compat.v1.logging.info('Number of examples processed: {}'.format(len(translations)))

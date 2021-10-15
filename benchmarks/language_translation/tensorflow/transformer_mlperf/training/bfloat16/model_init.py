@@ -132,6 +132,7 @@ class ModelInitializer(BaseModelInitializer):
                    " --model_dir=" + str(self.args.output_dir) + \
                    " --random_seed=" + str(self.args.random_seed) + \
                    " --params=" + str(self.args.params) + \
+                   " --batch_size=" + str(self.args.batch_size) + \
                    " --train_steps=" + str(self.args.train_steps) + \
                    " --steps_between_eval=" + str(self.args.steps_between_eval) + \
                    " --do_eval=" + str(self.args.do_eval) + \
