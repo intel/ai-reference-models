@@ -41,6 +41,8 @@ Transformer Language in mlperf benchmark can run with full training or
 fewer training steps. During training we can control if it will do the evaluation
 or not.
 
+Note users can specify batch size suitable to their systems with command option --batch-size to achieve the best performance. If users don't specify the batch size, then the model will choose default batch size for training, which is set to 5120 in the model.
+
 For training with all epochs, with evaluation, and with saving checkpoints (for convergence):
 ```
 python launch_benchmark.py \
@@ -51,6 +53,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --data-location ${DATASET_DIR} \
     --docker-image intel/intel-optimized-tensorflow:latest  \
+    --batch-size $BATCH_SIZE \
     --output-dir ${OUTPUT_DIR} \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
 ```
@@ -65,6 +68,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --data-location ${DATASET_DIR} \
     --docker-image intel/intel-optimized-tensorflow:latest  \
+    --batch-size $BATCH_SIZE \
     --output-dir ${OUTPUT_DIR} \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="No" print_iter=50
 ```
@@ -79,6 +83,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --data-location ${DATASET_DIR} \
     --docker-image intel/intel-optimized-tensorflow:latest  \
+    --batch-size $BATCH_SIZE \
     --output-dir ${OUTPUT_DIR} \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50 \
     bleu_source=/home/<user>/newstest2014.en --bleu_ref=/home/<user>/newstest2014.de
@@ -95,6 +100,7 @@ python launch_benchmark.py \
     --socket-id 0 \
     --data-location ${DATASET_DIR} \
     --docker-image intel/intel-optimized-tensorflow:latest  \
+    --batch-size $BATCH_SIZE \
     --output-dir ${OUTPUT_DIR} \
     -- random_seed=11 train_steps=200 steps_between_eval=200 params=big save_checkpoints="No" do_eval="No" print_iter=50
 ```
@@ -113,6 +119,7 @@ python launch_benchmark.py \
     --docker-image intel/intel-optimized-tensorflow:latest \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
+    --batch-size $BATCH_SIZE \
     --output-dir ${OUTPUT_DIR} \
     -- random_seed=11 train_steps=0 steps_between_eval=0 params=big save_checkpoints="Yes" do_eval="Yes" print_iter=50
 ```
@@ -127,6 +134,7 @@ python launch_benchmark.py \
     --model-name transformer_mlperf \
     --data-location ${DATASET_DIR} \
     --docker-image intel/intel-optimized-tensorflow:latest  \
+    --batch-size $BATCH_SIZE \
     --num-intra-threads=26 --num-inter-threads=1 \
     --mpi_num_processes=2 \
     --output-dir ${OUTPUT_DIR} \
