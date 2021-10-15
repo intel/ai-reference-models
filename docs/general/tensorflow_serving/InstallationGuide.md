@@ -56,7 +56,7 @@ If you pulled the image and cloned the repository, you can move on to step 2. Al
     **NOTE**: It is recommended that you build an official release version using `--build-arg TF_SERVING_VERSION_GIT_BRANCH="<release_number>"`, but if you wish to build the (unstable) head of master, omit the build argument and master will be used by default.
 	
 	```bash
-    export TF_SERVING_VERSION_GIT_BRANCH="2.5.1"
+    export TF_SERVING_VERSION_GIT_BRANCH="2.6.0"
     export TF_SERVING_VERSION_GIT_COMMIT="HEAD"
     export TF_SERVING_BUILD_IMAGE="intel/intel-optimized-tensorflow-serving:${TF_SERVING_VERSION_GIT_BRANCH}"
 
@@ -93,8 +93,8 @@ If you pulled the image and cloned the repository, you can move on to step 2. Al
 	```
 	docker images
 	REPOSITORY                                 TAG                 IMAGE ID            CREATED             SIZE
-	intel/intel-optimized-tensorflow-serving   2.5.1               d33c8d849aa3        7 minutes ago       325MB
-	intel/intel-optimized-tensorflow-serving   2.5.1-devel         a2e69840d5cc        8 minutes ago       6.58GB
+	intel/intel-optimized-tensorflow-serving   2.6.0               d33c8d849aa3        7 minutes ago       325MB
+	intel/intel-optimized-tensorflow-serving   2.6.0-devel         a2e69840d5cc        8 minutes ago       6.58GB
 	ubuntu                                     18.04               20bb25d32758        13 days ago         87.5MB
 	hello-world                                latest              fce289e99eb9        5 weeks ago         1.84kB
 	```
