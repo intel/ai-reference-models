@@ -19,7 +19,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>Python 3.6 or 3.7
         <li><a href="https://pypi.org/project/intel-tensorflow/1.15.2/">intel-tensorflow==1.15.2</a>
         <li>numactl
-        <li>Keras==2.2.4
+        <li>Keras==2.6.0rc3
         <li>numpy==1.16.3
         <li>nilearn==0.6.2
         <li>tables==3.4.4
