@@ -34,7 +34,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * Python 3.6 or 3.7
 * [intel-tensorflow==1.15.2](https://pypi.org/project/intel-tensorflow/1.15.2/)
 * numactl
-* Keras==2.2.4
+* Keras==2.6.0rc3
 * numpy==1.16.3
 * nilearn==0.6.2
 * tables==3.4.4
