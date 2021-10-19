@@ -9,7 +9,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/wide-deep-fp32-inference.tar.gz)
+[wide-deep-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -42,7 +42,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 1. Download and untar the Wide & Deep FP32 inference model package:
 
     ```
-    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/wide-deep-fp32-inference.tar.gz
+    wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-fp32-inference.tar.gz
     tar -xvf wide-deep-fp32-inference.tar.gz
     ```
 

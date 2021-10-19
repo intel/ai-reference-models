@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-bfloat16-training.tar.gz)
+[bert-large-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/bert-large-bfloat16-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -67,7 +67,7 @@ training or running classifier training multiple times, use a new empty
 
 The snippet below shows a quickstart script running with a single instance:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/bert-large-bfloat16-training.tar.gz
 tar -xvf bert-large-bfloat16-training.tar.gz
 cd bert-large-bfloat16-training
 
@@ -105,7 +105,7 @@ installed in your environment:
 * horovod==0.19.1
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/bert-large-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/bert-large-bfloat16-training.tar.gz
 tar -xvf bert-large-bfloat16-training.tar.gz
 cd bert-large-bfloat16-training
 
