@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[3d-unet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/3d-unet-fp32-inference.tar.gz)
+[3d-unet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/3d-unet-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -54,7 +54,7 @@ Follow the [instructions above for downloading the BraTS dataset](#dataset).
    will be written), and then run the [quickstart script](#quick-start-scripts).
 
    ```
-   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/3d-unet-fp32-inference.tar.gz
+   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/3d-unet-fp32-inference.tar.gz
    tar -xzf 3d-unet-fp32-inference.tar.gz
    cd 3d-unet-fp32-inference
 
