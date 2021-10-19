@@ -83,7 +83,7 @@ export CHECKPOINT_DIR=$(pwd)/bert_large_checkpoints
 Download the frozen graph. The path to this file should be set in the
 `PRETRAINED_MODEL` environment variable before running the model.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_4_0/fp32_bert_squad.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/fp32_bert_squad.pb
 export PRETRAINED_MODEL=$(pwd)/fp32_bert_squad.pb
 ```
 
