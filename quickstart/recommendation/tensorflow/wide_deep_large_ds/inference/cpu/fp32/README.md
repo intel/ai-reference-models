@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/wide-deep-large-ds-fp32-inference.tar.gz)
+[wide-deep-large-ds-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -89,7 +89,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_3_0/wide-deep-large-ds-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-fp32-inference.tar.gz
 tar -xzf wide-deep-large-ds-fp32-inference.tar.gz
 cd wide-deep-large-ds-fp32-inference
 ```

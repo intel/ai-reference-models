@@ -13,7 +13,7 @@ modes/precisions:
    passed to the launch script when running the benchmarking script.
 
 2. Download the pre-trained model from the
-   [3DUnetCNN](http://algo-buildstore.intel.com/builds/TF-DO/releases/spr-internal-releases/ww29/tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb).
+   [3DUnetCNN](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/3dunet_dynamic_ndhwc.pb).
    In this example, we are using the model,
    trained using the fold 1 BRATS 2019 data.
    The validation files have been copied from [here](https://github.com/mlcommons/inference/tree/r0.7/vision/medical_imaging/3d-unet/folds)
@@ -93,5 +93,6 @@ modes/precisions:
 The instructions are same as FP32 inference instructions, except you need to change the `--precision=fp32` to `--precision=bfloat16` in the above commands.
 
 ## Int8 Inference Instructions
+Download the pre-trained model from the [3DUnetCNN](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/3dunet_int8_fully_quantized_perchannel.pb).
 
-3D-Unet Int8 inference instructions are same as FP32 inference instructions, except you need use `--precision=int8` and  `--in-graph=/home/<user>/3dunet_int8_fully_quantized_perchannel.pb` in the above commands.
+The rest of 3D-Unet Int8 inference instructions are same as FP32 inference instructions, except you need use `--precision=int8` and  `--in-graph=/home/<user>/3dunet_int8_fully_quantized_perchannel.pb` in the above commands.
