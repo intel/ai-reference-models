@@ -154,10 +154,12 @@ if _running-in-container ; then
   # Call the framework's container_init.sh, if it exists
   if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
     if [[ ${CENTOS_PLATFORM} == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
-      yum update -y
-      yum install -y numactl
-  else
-    ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+      if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != "-1" ]]; then
+        yum update -y
+        yum install -y numactl
+      fi
+    else
+      ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
     fi
   fi
   # Call the model specific container_init.sh, if it exists

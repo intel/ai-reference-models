@@ -33,6 +33,10 @@ def parse_json_files(json_dir_path):
         with open(file_path) as f:
             data = json.load(f)
             for x in data:
+                # Use 0-111 as the default cpuset, if it's not specified in the json
+                cpuset = "0-111"
+                if 'cpuset' in x.keys():
+                    cpuset = x['cpuset']
                 values.append(
-                    tuple((x['input'], x['output'], model_file + " :: " + x['_comment'])))
+                    tuple((x['input'], x['output'], model_file + " :: " + x['_comment'], cpuset)))
     return values

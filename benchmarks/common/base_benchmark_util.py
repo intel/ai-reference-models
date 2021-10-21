@@ -315,21 +315,34 @@ class BaseBenchmarkUtil(object):
             if args.mpi:
                 raise ValueError("--mpi_num_processes cannot be used together with --numa-cores-per-instance.")
 
-            if args.numa_cores_per_instance == "socket":
-                args.numa_cores_per_instance = self._platform_util.num_cores_per_socket
+            if args.numa_cores_per_instance != "socket":
+                if args.socket_id != -1:
+                    if int(args.numa_cores_per_instance) > self._platform_util.num_cores_per_socket:
+                        raise ValueError("The number of --numa-cores-per-instance ({}) cannot exceed the "
+                                         "number of cores per socket {} when a single socket (--socket-id {}) "
+                                         "is being used.".format(args.numa_cores_per_instance,
+                                                                 self._platform_util.num_cores_per_socket,
+                                                                 args.socket_id))
+                else:
+                    if int(args.numa_cores_per_instance) > system_num_cores:
+                        raise ValueError("The number of --numa-cores-per-instance ({}) cannot exceed the "
+                                         "number of system cores ({}).".format(args.numa_cores_per_instance,
+                                                                               system_num_cores))
 
-            if args.socket_id != -1:
-                if int(args.numa_cores_per_instance) > self._platform_util.num_cores_per_socket:
-                    raise ValueError("The number of --numa-cores-per-instance ({}) cannot exceed the "
-                                     "number of cores per socket {} when a single socket (--socket-id {}) "
-                                     "is being used.".format(args.numa_cores_per_instance,
-                                                             self._platform_util.num_cores_per_socket,
-                                                             args.socket_id))
-            else:
-                if int(args.numa_cores_per_instance) > system_num_cores:
-                    raise ValueError("The number of --numa-cores-per-instance ({}) cannot exceed the "
-                                     "number of system cores ({}).".format(args.numa_cores_per_instance,
-                                                                           system_num_cores))
+        # If socket id is specified and we have a cpuset, make sure that there are some cores in the specified socket.
+        # If cores are limited, then print out a note about that.
+        if args.socket_id != -1 and self._platform_util.cpuset_cpus:
+            cpuset_len_for_socket = 0
+
+            if args.socket_id in self._platform_util.cpuset_cpus.keys():
+                cpuset_len_for_socket = len(self._platform_util.cpuset_cpus[args.socket_id])
+
+            if cpuset_len_for_socket == 0:
+                sys.exit("ERROR: There are no socket id {} cores in the cpuset.".format(args.socket_id))
+            elif cpuset_len_for_socket < self._platform_util.num_cores_per_socket:
+                print("Note: Socket id {} is specified, but the cpuset has limited this socket to {} cores. "
+                      "This is less than the number of cores per socket on the system ({})".
+                      format(args.socket_id, cpuset_len_for_socket, self._platform_util.num_cores_per_socket))
 
     def initialize_model(self, args, unknown_args):
         """Create model initializer for the specified model"""
@@ -340,7 +353,13 @@ class BaseBenchmarkUtil(object):
                 os.path.dirname(os.path.realpath(__file__)))
 
             if args.numa_cores_per_instance == "socket":
-                args.numa_cores_per_instance = self._platform_util.num_cores_per_socket
+                if self._platform_util.cpuset_cpus:
+                    if args.socket_id != -1:
+                        args.numa_cores_per_instance = len(self._platform_util.cpuset_cpus[args.socket_id])
+                    else:
+                        args.numa_cores_per_instance = "socket"
+                else:
+                    args.numa_cores_per_instance = self._platform_util.num_cores_per_socket
 
             # find the path to the model_init.py file
             filename = "{}.py".format(self.MODEL_INITIALIZER)
