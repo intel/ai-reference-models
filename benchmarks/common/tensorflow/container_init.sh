@@ -16,10 +16,12 @@
 #
 
 # This file includes runtime installs for model containers
-
-if (( $(id -u) == 0 )); then
-  apt-get install numactl -y
-else
-  echo "Please run as root"
-  exit 1
+if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != "-1" ]]; then
+  if (( $(id -u) == 0 )); then
+    apt-get install numactl -y
+  else
+    echo "Please run as root"
+    exit 1
+  fi
 fi
+

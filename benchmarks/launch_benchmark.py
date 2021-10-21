@@ -449,9 +449,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if args.debug:
             docker_run_cmd.append("-it")
 
+        if args.numa_cores_per_instance is not None or args.socket_id != -1 or \
+                args.num_cores != -1 or args.mpi is not None or args.num_mpi > 1:
+            docker_run_cmd.append("--privileged")
+
         docker_shm_size = "--shm-size={}".format(args.shm_size)
         docker_run_cmd = docker_run_cmd + env_vars + volume_mounts + [
-            docker_shm_size, "--privileged", "-u", "root:root", "-w",
+            docker_shm_size, "-u", "root:root", "-w",
             workspace, args.docker_image, "/bin/bash"]
 
         if not args.debug:
