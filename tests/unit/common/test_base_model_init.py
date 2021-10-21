@@ -328,3 +328,46 @@ def test_numa_multi_instance_run_command(
     for cpu_bind in expected_cpu_bind:
         assert "numactl --localalloc --physcpubind={} {} >> {}".\
             format(cpu_bind, test_run_command, test_output_dir) in system_call_args
+
+
+@pytest.mark.parametrize('test_num_instances,test_socket_id,test_num_cores,test_cpu_list,test_cpuset,'
+                         'expected_inter_threads,expected_intra_threads',
+                         [[2, -1, -1, [['0', '1'], ['2', '3']], {0: ['0', '1'], 1: ['2', '3']}, 1, 2],
+                          [None, 0, -1, [['1', '2', '3'], ['10', '11']], {0: ['1', '2', '3'], 1: ['10', '11']}, 1, 3],
+                          [None, 1, -1, [['1', '2', '3'], ['10', '11']], {0: ['1', '2', '3'], 1: ['10', '11']}, 1, 2],
+                          [None, 1, -1, [['1', '2', '3'], ['10', '11']], None, 1, 3],
+                          [None, 1, 8, [['1', '2', '3'], ['10', '11']], {0: ['1', '2', '3'], 1: ['10', '11']}, 1, 8]])
+@patch("os.path.exists")
+@patch("benchmarks.common.base_model_init.open")
+@patch("common.platform_util.os")
+@patch("common.platform_util.system_platform")
+@patch("common.platform_util.subprocess")
+@patch("os.system")
+def test_num_inter_intra_threads_settings(
+        mock_system, mock_subprocess, mock_platform, mock_os, mock_open,
+        mock_path_exists, test_num_instances, test_socket_id, test_num_cores,
+        test_cpu_list, test_cpuset, expected_inter_threads, expected_intra_threads):
+    """
+    Tests the base model init function that determines the num_inter_threads and
+    num_intra_thread values.
+    """
+    platform_util = MagicMock(cpu_core_list=test_cpu_list, cpuset_cpus=test_cpuset,
+                              num_cores_per_socket=len(test_cpu_list[0]))
+    test_output_dir = "/tmp/output"
+    args = MagicMock(verbose=True, model_name=test_model_name, batch_size=100,
+                     numa_cores_per_instance=test_num_instances, precision="fp32",
+                     output_dir=test_output_dir, socket_id=test_socket_id, num_cores=test_num_cores,
+                     num_inter_threads=None, num_intra_threads=None)
+    os.environ["PYTHON_EXE"] = "python"
+    os.environ["MPI_HOSTNAMES"] = "None"
+    os.environ["MPI_NUM_PROCESSES"] = "None"
+    base_model_init = BaseModelInitializer(args, [], platform_util)
+
+    mock_path_exists.return_value = True
+
+    # Get the number of inter/intra threads and compared to the expected values
+    base_model_init.set_num_inter_intra_threads()
+    print(base_model_init.args.num_inter_threads)
+    print(base_model_init.args.num_intra_threads)
+    assert base_model_init.args.num_inter_threads == expected_inter_threads
+    assert base_model_init.args.num_intra_threads == expected_intra_threads

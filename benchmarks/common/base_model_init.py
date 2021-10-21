@@ -152,26 +152,38 @@ class BaseModelInitializer(object):
         swap out that path for a path with the instance number in the folder name
         so that each instance uses a unique output folder.
         """
-        # Get the cores list and group them according to the number of cores per instance
-        cores_per_instance = int(self.args.numa_cores_per_instance)
-        cpu_cores_list = self.platform_util.cpu_core_list
 
-        if self.args.socket_id != -1:
-            # If it's specified to just use a single socket, then only use the cores from that socket
-            if len(cpu_cores_list) > self.args.socket_id:
-                cpu_cores_list = cpu_cores_list[self.args.socket_id]
+        if self.args.numa_cores_per_instance != "socket":
+            # Get the cores list and group them according to the number of cores per instance
+            cores_per_instance = int(self.args.numa_cores_per_instance)
+            cpu_cores_list = self.platform_util.cpu_core_list
+
+            if self.args.socket_id != -1:
+                # If it's specified to just use a single socket, then only use the cores from that socket
+                if len(cpu_cores_list) > self.args.socket_id:
+                    cpu_cores_list = cpu_cores_list[self.args.socket_id]
+                else:
+                    raise ValueError("Error while trying to get the core list for socket {0}. "
+                                     "The core list does not have cores for socket {0}.\n "
+                                     "Core list: {1}\n".format(self.args.socket_id, str(cpu_cores_list)))
             else:
-                raise ValueError("Error while trying to get the core list for socket {0}. "
-                                 "The core list does not have cores for socket {0}.\n "
-                                 "Core list: {1}\n".format(self.args.socket_id, str(cpu_cores_list)))
-        else:
-            # Using cores from all sockets
-            combined_core_list = []
-            for socket_cores in cpu_cores_list:
-                combined_core_list += socket_cores
-            cpu_cores_list = combined_core_list
+                # Using cores from all sockets
+                combined_core_list = []
+                for socket_cores in cpu_cores_list:
+                    combined_core_list += socket_cores
+                cpu_cores_list = combined_core_list
 
-        instance_cores_list = self.group_cores(cpu_cores_list, cores_per_instance)
+            instance_cores_list = self.group_cores(cpu_cores_list, cores_per_instance)
+        else:
+            instance_cores_list = []
+            cores_per_instance = "socket"
+            # Cores should be grouped based on the cores for each socket
+            if self.args.socket_id != -1:
+                # Only using cores from one socket
+                instance_cores_list[0] = self.platform_util.cpu_core_list[self.args.socket_id]
+            else:
+                # Get the cores for each socket
+                instance_cores_list = self.platform_util.cpu_core_list
 
         # Setup the log file name with the model name, precision, mode, batch size (if there is one),
         # number of cores per instance. An extra {} is intentionally left in the log_filename_format
@@ -188,9 +200,12 @@ class BaseModelInitializer(object):
         # Loop through each instance and add that instance's command to a string
         multi_instance_command = ""
         for instance_num, core_list in enumerate(instance_cores_list):
-            if len(core_list) < int(cores_per_instance):
+            if cores_per_instance != "socket" and len(core_list) < int(cores_per_instance):
                 print("NOTE: Skipping remainder of {} cores for instance {}"
                       .format(len(core_list), instance_num))
+                continue
+
+            if len(core_list) == 0:
                 continue
 
             prefix = ("OMP_NUM_THREADS={0} "
@@ -340,21 +355,36 @@ class BaseModelInitializer(object):
 
         if self.args.numa_cores_per_instance:
             # Set default num inter/intra threads if the user didn't provide specific values
+            if self.args.numa_cores_per_instance == "socket":
+                if self.args.socket_id != -1:
+                    inter_threads = len(self.platform_util.cpu_core_list[self.args.socket_id])
+                else:
+                    # since we can only have one value for inter threads and the number of cores
+                    # per socket can vary, if the cpuset is limited, get the lowest core count
+                    # per socket and use that as the num inter threads
+                    inter_threads = min([len(i) for i in self.platform_util.cpu_core_list if len(i) > 0])
+            else:
+                inter_threads = self.args.numa_cores_per_instance
+
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
-                self.args.num_intra_threads = self.args.numa_cores_per_instance
+                self.args.num_intra_threads = inter_threads
             if not self.args.data_num_inter_threads:
                 self.args.data_num_inter_threads = 1
             if not self.args.data_num_intra_threads:
-                self.args.data_num_intra_threads = self.args.numa_cores_per_instance
+                self.args.data_num_intra_threads = inter_threads
         elif self.args.socket_id != -1:
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
-                self.args.num_intra_threads = \
-                    self.platform_util.num_cores_per_socket \
-                    if self.args.num_cores == -1 else self.args.num_cores
+                if self.args.num_cores != -1:
+                    self.args.num_intra_threads = self.args.num_cores
+                elif self.platform_util.cpuset_cpus and \
+                        self.args.socket_id in self.platform_util.cpuset_cpus.keys():
+                    self.args.num_intra_threads = len(self.platform_util.cpuset_cpus[self.args.socket_id])
+                else:
+                    self.args.num_intra_threads = self.platform_util.num_cores_per_socket
         else:
             if not self.args.num_inter_threads:
                 self.args.num_inter_threads = self.platform_util.num_cpu_sockets
@@ -362,9 +392,14 @@ class BaseModelInitializer(object):
                     self.args.num_inter_threads = 1
             if not self.args.num_intra_threads:
                 if self.args.num_cores == -1:
-                    self.args.num_intra_threads = \
-                        int(self.platform_util.num_cores_per_socket *
-                            self.platform_util.num_cpu_sockets)
+                    if self.platform_util.cpuset_cpus and len(self.platform_util.cpuset_cpus.keys()) > 0:
+                        # Total up the number of cores in the cpuset
+                        self.args.num_intra_threads = sum([len(self.platform_util.cpuset_cpus[socket_id])
+                                                           for socket_id in self.platform_util.cpuset_cpus.keys()])
+                    else:
+                        self.args.num_intra_threads = \
+                            int(self.platform_util.num_cores_per_socket *
+                                self.platform_util.num_cpu_sockets)
                     if os.environ["MPI_NUM_PROCESSES"] != "None":
                         self.args.num_intra_threads = self.platform_util.num_cores_per_socket - 2
                 else:
