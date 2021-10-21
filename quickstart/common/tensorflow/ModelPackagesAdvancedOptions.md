@@ -116,6 +116,46 @@ docker run \
     --data-location ${DATASET_DIR}
 </pre>
 
+If a cpuset is specified along with `--numa-cores-per-instance`, the cores
+used for each instance will be limited to those specified as part of the cpuset.
+Also, note that since `--numa-cores-per-instance` uses `numactl`, it needs to
+be run with `--privilege`.
+
+<pre>
+$MODEL_ZOO_DIR=&lt;path to the model zoo directory&gt;
+DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
+OUTPUT_DIR=&lt;directory where log files will be written&gt;
+
+docker run --rm --privileged --init \
+    --volume $PRETRAINED_MODEL:$PRETRAINED_MODEL \
+    --volume $MODEL_ZOO_DIR:$MODEL_ZOO_DIR \
+    --volume $OUTPUT_DIR:$OUTPUT_DIR \
+    --env http_proxy=$http_proxy \
+    --env https_proxy=$https_proxy \
+    --env PRETRAINED_MODEL=$PRETRAINED_MODEL \
+    --env OUTPUT_DIR=$OUTPUT_DIR \
+    -w $MODEL_ZOO_DIR \
+    <mark><b>--cpuset-cpus "0-7,28-35"</b></mark> \
+    -it intel/intel-optimized-tensorflow:latest \
+    python benchmarks/launch_benchmark.py \
+    --in-graph ${PRETRAINED_MODEL} \
+    --model-name resnet50v1_5 \
+    --framework tensorflow \
+    --precision bfloat16 \
+    --mode inference \
+    --batch-size=1 \
+    --output-dir ${OUTPUT_DIR} \
+    --benchmark-only \
+    <mark><b>--numa-cores-per-instance 4</b></mark>
+
+# The command above ends up running the following instances:
+# OMP_NUM_THREADS=4 numactl --localalloc --physcpubind=0,1,2,3 python eval_image_classifier_inference.py --input-graph=resnet50_v1_5_bfloat16.pb --num-inter-threads=1 --num-intra-threads=4 --num-cores=28 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4 >> resnet50v1_5_bfloat16_inference_bs1_cores4_instance0.log 2>&1 & \
+# OMP_NUM_THREADS=4 numactl --localalloc --physcpubind=4,5,6,7 python eval_image_classifier_inference.py --input-graph=resnet50_v1_5_bfloat16.pb --num-inter-threads=1 --num-intra-threads=4 --num-cores=28 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4 >> resnet50v1_5_bfloat16_inference_bs1_cores4_instance1.log 2>&1 & \
+# OMP_NUM_THREADS=4 numactl --localalloc --physcpubind=28,29,30,31 python eval_image_classifier_inference.py --input-graph=resnet50_v1_5_bfloat16.pb --num-inter-threads=1 --num-intra-threads=4 --num-cores=28 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4 >> resnet50v1_5_bfloat16_inference_bs1_cores4_instance2.log 2>&1 & \
+# OMP_NUM_THREADS=4 numactl --localalloc --physcpubind=32,33,34,35 python eval_image_classifier_inference.py --input-graph=resnet50_v1_5_bfloat16.pb --num-inter-threads=1 --num-intra-threads=4 --num-cores=28 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4 >> resnet50v1_5_bfloat16_inference_bs1_cores4_instance3.log 2>&1 & \
+# wait
+</pre>
+
 ## Mounting local model packages in docker
 
 A download of the model package can be run in a docker container by mounting the
