@@ -76,19 +76,19 @@ mv data2/* .
 ### 2. Prepare pretrained model
 ```
 export PB_DIR=/path/to/dien-pretrained-folder
-# download frozen pb
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dien_fp32_pretrained_model.pb
+# download frozen pb(s)
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dien_fp32_static_rnn_graph.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dien_fp32_pretrained_opt_model.pb
 ```
 
 ### 3. Run inference  with fp32 for throughput 
 Please specify the `data-location` and `in-graph`. 
-Note that --num-intra-threads and --num-inter-threads need to be specified dpending on the requirement/machine.
-Please specify graph_type as `static` if you are using static RNN 
-graph or `dynamic` if using dynamic RNN graph
+Note that --num-intra-threads and --num-inter-threads need to be specified depending on the requirement/machine.
+Please specify graph_type as `static` if you are using static RNN graph along with `dien_fp32_static_rnn_graph.pb`
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
-    --in-graph $PB_DIR/dien_fp32_pretrained_model.pb \
+    --in-graph $PB_DIR/dien_fp32_static_rnn_graph.pb \
     --model-name dien \
     --framework tensorflow \
     --precision fp32 \
@@ -97,8 +97,26 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1 \
-    --graph_type static \
+    --graph_type=static \
+    --exact-max-length=100 \
     --docker-image intel/intel-optimized-tensorflow:latest
+```
+
+or `dynamic` if using dynamic RNN graph along with `dien_fp32_pretrained_opt_model.pb`
+```
+python launch_benchmark.py \
+    --data-location $DATASET_DIR \
+    --in-graph $PB_DIR/dien_fp32_pretrained_opt_model.pb \
+    --model-name dien \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --socket-id 0 \
+    --batch-size 128 \
+    --num-intra-threads 26 \
+    --num-inter-threads 1 \
+    --graph_type=dynamic \
+    --docker-image intel/intel-optimized-tensorflow:latest \
 ```
 
 Output is as below. Performance is reported as recommendations/second
@@ -118,7 +136,7 @@ Please specify the `data-location` and `in-graph`.
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
-    --in-graph $PB_DIR/dien_fp32_pretrained_model.pb \
+    --in-graph $PB_DIR/dien_fp32_static_rnn_graph.pb \
     --model-name dien \
     --framework tensorflow \
     --precision fp32 \
@@ -127,7 +145,8 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1 \
-    --accuracy_only \
+    --accuracy-only \
+    --exact-max-length=100 \
     --docker-image intel/intel-optimized-tensorflow:latest
 ```
 
@@ -149,12 +168,11 @@ Another option is ```num-iterations```. This options can be used
 to run inference multiple times to get average performance over 
 the num of iterations specified.
 
-Please specify graph_type as `static` if you are using static RNN 
-graph or `dynamic` if using dynamic RNN graph
+Please specify graph_type as `static` if you are using static RNN graph along with `dien_fp32_static_rnn_graph.pb` 
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
-    --in-graph $PB_DIR/dien_fp32_pretrained_model.pb \
+    --in-graph $PB_DIR/dien_fp32_static_rnn_graph.pb \
     --model-name dien \
     --framework tensorflow \
     --precision fp32 \
@@ -163,10 +181,29 @@ python launch_benchmark.py \
     --batch-size 1 \
     --num-intra-threads 26 \
     --num-inter-threads 1 \
-    --graph_type static \
+    --graph_type=static \
+    --exact-max-length=100 \
     --docker-image intel/intel-optimized-tensorflow:latest \
-    -- exact-max-length=100 \
-       num-iterations=10
+    -- num-iterations=10
+```
+
+or `dynamic` if using dynamic RNN graph along with `dien_fp32_pretrained_opt_model.pb`
+```
+python launch_benchmark.py \
+    --data-location $DATASET_DIR \
+    --in-graph $PB_DIR/dien_fp32_pretrained_opt_model.pb \
+    --model-name dien \
+    --framework tensorflow \
+    --precision fp32 \
+    --mode inference \
+    --socket-id 0 \
+    --batch-size 1 \
+    --num-intra-threads 26 \
+    --num-inter-threads 1 \
+    --graph_type=dynamic \
+    --exact-max-length=100 \
+    --docker-image intel/intel-optimized-tensorflow:latest \
+    -- num-iterations=10
 ```
 
 Since DIEN is not a big model checking for latency for batch-size 1
@@ -188,7 +225,7 @@ Approximate accelerator performance in recommendations/second is 142.231
 
 ### 2. Download pretrained bfloat16 model file
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dien_bf16_pretrained_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dien_bf16_pretrained_opt_model.pb
 
 ### 3. Run inference with precision set to bfloat16 for throughput, accuracy and latency 
        
@@ -198,7 +235,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/dien_bf16_
 ```
 python launch_benchmark.py \
     --data-location $DATASET_DIR \
-    --in-graph $PB_DIR/dien_bf16_pretrained_model.pb \
+    --in-graph $PB_DIR/dien_bf16_pretrained_opt_model.pb \
     --model-name dien \
     --framework tensorflow \
     --precision bfloat16 \
@@ -207,10 +244,10 @@ python launch_benchmark.py \
     --batch-size 128 \
     --num-intra-threads 26 \
     --num-inter-threads 1 \
-    --graph_type static \
+    --graph_type=dynamic \
+    --exact-max-length=100 \
     --docker-image intel/intel-optimized-tensorflow:latest \
-    -- exact-max-length=100 \
-       num-iterations=10
+    -- num-iterations=10
 ```
 
 Below is a sample log file tail when testing throughput:
