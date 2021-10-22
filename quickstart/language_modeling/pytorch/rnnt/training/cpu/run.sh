@@ -69,3 +69,4 @@ docker run --rm \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
   /bin/bash $SCRIPT
+  

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,17 +15,12 @@
 # limitations under the License.
 #
 
-MODEL_DIR=$(pwd)/models/rnnt-training/training/rnn_speech_recognition/pytorch
-cd $MODEL_DIR
+MODEL_DIR=${MODEL_DIR-$PWD}
+DATASET_DIR=${DATASET_DIR-$PWD}
 
-# Install requirements
-pip install -r requirements.txt
-pip install --upgrade pip
-pip install librosa sox
-yum install -y libsndfile
-
-# Go to the dataset directory
-cd $DATASET_DIR
+cd $MODEL_DIR/models/language_modeling/pytorch/rnnt/training/cpu
+dir=$(pwd)
+mkdir -p ${DATASET_DIR}/dataset; cd ${DATASET_DIR}/dataset
 
 WORKDIR=`pwd`
 mkdir $WORKDIR/local
@@ -38,7 +33,7 @@ cd third_party && tar xf flac-1.3.2.tar.xz && cd flac-1.3.2
 cd $WORKDIR
 wget https://sourceforge.net/projects/sox/files/sox/14.4.2/sox-14.4.2.tar.gz -O third_party/sox-14.4.2.tar.gz
 cd third_party && tar zxf sox-14.4.2.tar.gz && cd sox-14.4.2
-LDFLAGS="-L${install_dir}/lib" CFLAGS="-I${install_dir}/include" ./configure --prefix=$install_dir --with-flac && make && make install
+LDFLAGS="-L${install_dir}/lib" CFLAGS="-I${install_dir}/include" ./configure --prefix=$install_dir --with-flac && make &&    make install
 
 cd $WORKDIR
 wget http://www.mega-nerd.com/libsndfile/files/libsndfile-1.0.28.tar.gz -O third_party/libsndfile-1.0.28.tar.gz
@@ -47,23 +42,10 @@ cd third_party && tar zxf libsndfile-1.0.28.tar.gz && cd libsndfile-1.0.28
 
 export LD_LIBRARY_PATH=$WORKDIR/local/lib:$LD_LIBRARY_PATH
 
-cd $MODEL_DIR
-python utils/download_librispeech.py utils/librispeech.csv $DATASET_DIR -e $DATASET_DIR
+cd $MODEL_DIR/models/language_modeling/pytorch/rnnt/training/cpu
+python utils/download_librispeech.py utils/librispeech.csv $DATASET_DIR/dataset/ -e $DATASET_DIR/dataset/
 
 export PATH=$WORKDIR/local/bin:$PATH
-python utils/convert_librispeech.py --input_dir $DATASET_DIR/LibriSpeech/dev-clean --dest_dir $DATASET_DIR/LibriSpeech/dev-clean-wav --output_json $DATASET_DIR/LibriSpeech/librispeech-dev-clean-wav.json
-python utils/convert_librispeech.py --input_dir $DATASET_DIR/LibriSpeech/train-clean-100 --dest_dir $DATASET_DIR/LibriSpeech/train-clean-100-wav  --output_json $DATASET_DIR/LibriSpeech/librispeech-train-clean-100-wav.json --speed 0.9 1.1
-
-# clean up
-cd $DATASET_DIR
-rm dev-clean.tar.gz
-rm dev-other.tar.gz
-rm test-clean.tar.gz
-rm test-other.tar.gz
-rm train-clean-100.tar.gz
-rm train-clean-360.tar.gz
-rm train-other-500.tar.gz
-rm -rf local
-rm -rf third_party
-
-echo "Finished downloading the dataset to ${DATASET_DIR}"
+python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/dev-clean --dest_dir $DATASET_DIR/dataset/LibriSpeech/dev-clean-wav --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-dev-clean-wav.json
+python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/train-clean-100 --dest_dir $DATASET_DIR/dataset/LibriSpeech/train-clean-100-wav  --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json --speed 0.9 1.1
+cd $dir
