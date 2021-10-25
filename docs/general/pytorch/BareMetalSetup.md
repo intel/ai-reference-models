@@ -39,6 +39,14 @@
     make
     make install
 
+### build tcmalloc 
+    wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz
+    tar -xzf gperftools-2.7.90.tar.gz 
+    cd gperftools-2.7.90
+    ./configure --prefix=$HOME/.local
+    make
+    make install
+
 ### build vision
     cd ..
     git clone https://github.com/pytorch/vision
