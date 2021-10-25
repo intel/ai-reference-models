@@ -34,7 +34,6 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
-cd ${MODEL_DIR}/models/bert/bert/examples/question-answering
 export work_space=${OUTPUT_DIR}
 
 if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then

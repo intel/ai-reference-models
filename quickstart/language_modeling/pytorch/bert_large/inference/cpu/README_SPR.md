@@ -4,10 +4,16 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running BERT Large inference using
+This document has instructions for running BERT Large SQuAD1.1 inference using
 Intel-optimized PyTorch.
 
-## Model Package
+## Bare Metal
+### General setup
+
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+
+
+## Docker Model Package
 
 The model package includes the Dockerfile and scripts needed to build and
 run BERT Large inference in a container.
