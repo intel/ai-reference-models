@@ -16,7 +16,7 @@
 #
 
 # This file includes runtime installs for model containers
-if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != "-1" ]]; then
+if [[ $INSTALL_NUMACTL == "True" ]]; then
   if (( $(id -u) == 0 )); then
     apt-get install numactl -y
   else
