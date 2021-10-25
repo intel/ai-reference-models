@@ -149,17 +149,27 @@ if [[ ${NOINSTALL} != "True" ]]; then
   python3 -m pip install requests
 fi
 
+# Determine if numactl needs to be installed
+INSTALL_NUMACTL="False"
+if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != "-1" ]]; then
+  # The --numa-cores-per-instance, --socket-id, and --num-cores args use numactl
+  INSTALL_NUMACTL="True"
+elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES != "None" ]]; then
+  # BERT large training with MPI uses numactl
+  INSTALL_NUMACTL="True"
+fi
+
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
   # Call the framework's container_init.sh, if it exists
   if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
     if [[ ${CENTOS_PLATFORM} == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
-      if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != "-1" ]]; then
+      if [[ $INSTALL_NUMACTL == "True" ]]; then
         yum update -y
         yum install -y numactl
       fi
     else
-      ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
     fi
   fi
   # Call the model specific container_init.sh, if it exists
