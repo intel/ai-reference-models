@@ -3,12 +3,12 @@
 The <model name> <mode> package has scripts and a Dockerfile that are
 used to build a workload container that runs the model. This container
 uses the TensorFlow SPR container as it's base, so ensure that you have built
-the `tensorflow-spr.tar.gz` container prior to building this model container.
+the `tensorflow-spr-3dunet-base.tar.gz` container prior to building this model container.
 
 Use `docker images` to verify that you have the base container built. For example:
 ```
-$ docker images | grep tensorflow-spr
-model-zoo     tensorflow-spr    a5f08b0abf25     23 seconds ago   1.58GB
+$ docker images | grep tensorflow-spr-3dunet-base
+model-zoo     tensorflow-spr-3dunet-base    a5f08b0abf25     23 seconds ago   1.58GB
 ```
 
 To build the <model name> <mode> container, extract the package and

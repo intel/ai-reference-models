@@ -44,17 +44,15 @@ fi
 if [[ $PRECISION == "fp32" ]]; then
   BATCH_SIZE="32"
 elif [[ $PRECISION == "bfloat16" ]]; then
-  BATCH_SIZE="56"
+  BATCH_SIZE="128"
 else
   echo "The specified precision '${PRECISION}' is unsupported."
   echo "Supported precisions are: fp32 and bfloat16"
   exit 1
 fi
 
-# Get number of cores per socket line from lscpu
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
-
+export OMP_NUM_THREADS=${cores_per_socket}
 NUM_INSTANCES="2"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
@@ -69,8 +67,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --mpi_num_processes=${NUM_INSTANCES} \
   --mpi_num_processes_per_socket=1 \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${cores_per_socket} \
-  --num-inter-threads 4 \
+  --num-intra-threads 64 \
+  --num-inter-threads 1 \
   --num-train-steps=20 \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive \

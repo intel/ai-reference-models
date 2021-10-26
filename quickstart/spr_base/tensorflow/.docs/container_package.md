@@ -1,6 +1,6 @@
 ## Container Package
 
-The container package includes wheel for Tensorflow, a Dockerfile, and a script to build the container.
+The container package includes wheel for TensorFlow, a Dockerfile, and a script to build the container.
 
 ```
 <package dir>
@@ -9,7 +9,7 @@ The container package includes wheel for Tensorflow, a Dockerfile, and a script 
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
-├── tensorflow-spr.Dockerfile
+├── <package dir>.Dockerfile
 └── whls
-    └── tf_nightly-2.7.0.202138-cp36-cp36m-linux_x86_64.whl
+    └── <wheel name>
 ```

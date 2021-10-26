@@ -29,7 +29,7 @@ tf-spr-ssd-resnet34-training
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Uses mpirun to execute 2 processes with 1 process per socket with a batch size of 32 for the specified precision (fp32 or bfloat16). Logs for each instance are saved to the output directory. |
+| `training.sh` | Uses mpirun to execute 2 processes with 1 process per socket with a batch size of 56 for the specified precision (fp32 or bfloat16). Logs for each instance are saved to the output directory. |
 
 <!--- 30. Datasets -->
 ## Datasets

@@ -52,7 +52,7 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 # Subtract 4 to use as the num_intra_threads
 num_intra_threads=$(($cores_per_socket - 4))
 
-BATCH_SIZE="128"
+BATCH_SIZE="512"
 NUM_INSTANCES="2"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"

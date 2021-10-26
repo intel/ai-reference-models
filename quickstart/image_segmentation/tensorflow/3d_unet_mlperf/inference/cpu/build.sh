@@ -20,11 +20,11 @@ set -e
 PACKAGE_NAME=tf-spr-3d-unet-mlperf-inference
 DOCKERFILE=tf-spr-3d-unet-mlperf-inference.Dockerfile
 TF_SPR_BASE_IMAGE=${TF_SPR_BASE_IMAGE:-model-zoo}
-TF_SPR_BASE_TAG=${TF_SPR_BASE_TAG:-tensorflow-spr}
+TF_SPR_BASE_TAG=${TF_SPR_BASE_TAG:-tensorflow-spr-3dunet}
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:tf-spr-3d-unet-mlperf-inference}
 
 if [ "$(docker images -q ${TF_SPR_BASE_IMAGE}:${TF_SPR_BASE_TAG})" == "" ]; then
-  echo "The Intel(R) TensorFlow SPR container (${TF_SPR_BASE_IMAGE}:${TF_SPR_BASE_TAG}) was not found."
+  echo "The Intel(R) TensorFlow SPR base container for 3D-UNet (${TF_SPR_BASE_IMAGE}:${TF_SPR_BASE_TAG}) was not found."
   echo "This container is required, as it is used as the base for building the MLPerf 3D U-Net inference container."
   echo "Please download the TensorFlow SPR container package and build the image and then retry this build."
   exit 1

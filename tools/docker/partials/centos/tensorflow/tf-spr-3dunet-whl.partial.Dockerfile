@@ -19,7 +19,7 @@ RUN ln -sf $(which ${PYTHON}) /usr/local/bin/python && \
     ln -sf $(which ${PYTHON}) /usr/bin/python
 
 # Installs the latest version by default.
-ARG TF_WHEEL=tf_nightly-2.7.0.202142-cp36-cp36m-linux_x86_64.whl
+ARG TF_WHEEL=tf_nightly-2.7.0.202140-cp36-cp36m-linux_x86_64.whl
 
 COPY ./whls/${TF_WHEEL} /tmp/pip3/
 

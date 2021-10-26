@@ -98,7 +98,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
   --checkpoint ${CHECKPOINT_DIR} \
-  --warmup-steps=50 --steps=350 \
   --benchmark-only \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive \
