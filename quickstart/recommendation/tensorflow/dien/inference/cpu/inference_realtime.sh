@@ -60,7 +60,7 @@ fi
 
 MODE="inference"
 CORES_PER_INSTANCE="4"
-BATCH_SIZE="16"
+BATCH_SIZE="8"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr

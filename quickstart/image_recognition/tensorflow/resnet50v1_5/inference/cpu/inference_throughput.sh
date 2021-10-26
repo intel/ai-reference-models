@@ -62,18 +62,7 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-if [[ $PRECISION == "int8" ]]; then
-    BATCH_SIZE="32"
-elif [[ $PRECISION == "bfloat16" ]]; then
-    BATCH_SIZE="112"
-elif [[ $PRECISION == "fp32" ]]; then
-    BATCH_SIZE="112"
-else
-    echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, bfloat16, and int8"
-    exit 1
-fi
-
+BATCH_SIZE="256"
 MODE="inference"
 CORES_PER_INSTANCE="socket"
 # Get number of cores per socket line from lscpu

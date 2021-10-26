@@ -34,8 +34,11 @@ fi
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_dynamic_ndhwc.pb"
+        if [ $PRECISION == "bfloat16" ]; then
+            export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="Mul"
+        fi
     elif [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_int8_fully_quantized_perchannel.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_fused_pad_int8.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
         echo "Supported precisions are: int8, fp32 and bfloat16"

@@ -12,27 +12,27 @@ TensorFlow container using the container package.
 The container package includes wheel for TensorFlow, a Dockerfile, and a script to build the container.
 
 ```
-tensorflow-spr
+tensorflow-spr-3dunet
 ├── README.md
 ├── build.sh
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
-├── tensorflow-spr.Dockerfile
+├── tensorflow-spr-3dunet.Dockerfile
 └── whls
-    └── tf_nightly-2.7.0.202142-cp36-cp36m-linux_x86_64.whl
+    └── tf_nightly-2.7.0.202140-cp36-cp36m-linux_x86_64.whl
 ```
 
 ## Docker
 
 ### Build the container
 
-Extract the `tensorflow-spr.tar.gz` package and then run the `build.sh` script
-to build the `model-zoo:tensorflow-spr` container:
+Extract the `tensorflow-spr-3dunet.tar.gz` package and then run the `build.sh` script
+to build the `model-zoo:tensorflow-spr-3dunet` container:
 
 ```
-tar -xzf tensorflow-spr.tar.gz
-cd tensorflow-spr
+tar -xzf tensorflow-spr-3dunet.tar.gz
+cd tensorflow-spr-3dunet
 ./build.sh
 ```
 
@@ -47,7 +47,7 @@ docker run \
     -e http_proxy=${http_proxy} \
     -e https_proxy=${https_proxy} \
     -e no_proxy=${no_proxy} \
-    -it model-zoo:tensorflow-spr /bin/bash
+    -it model-zoo:tensorflow-spr-3dunet /bin/bash
 ```
 
 Once you're in the container, Run the following command to verify that you're able to import tensorflow

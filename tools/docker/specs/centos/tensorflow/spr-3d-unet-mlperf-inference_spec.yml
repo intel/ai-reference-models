@@ -42,8 +42,8 @@ slice_sets:
       downloads:
       - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww32/ww32-pbfiles/tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
         destination: pretrained_model/3dunet_dynamic_ndhwc.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww32/ww32-pbfiles/tf_dataset/pre-trained-models/3DUNet/3dunet_int8_fully_quantized_perchannel.pb
-        destination: pretrained_model/3dunet_int8_fully_quantized_perchannel.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/spr-ww42/tensorflow/models/3DUNet/3dunet_fused_pad_int8.pb
+        destination: pretrained_model/3dunet_fused_pad_int8.pb
       wrapper_package_files:
         - source: output/tf-spr-3d-unet-mlperf-inference.tar.gz
           destination: model_packages/tf-spr-3d-unet-mlperf-inference.tar.gz
