@@ -15,4 +15,5 @@ output/
 **/**.tar.gz
 tools/docker/models*
 .ipynb_checkpoints
+nc_workspace
 
