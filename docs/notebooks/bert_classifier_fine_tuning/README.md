@@ -1,9 +1,11 @@
 # BERT Classifier fine tuning using IMDB
 
-This notebook uses the BERT BFloat16 classifier training scripts from the model zoo to
-do fine tuning. The [IMDB dataset](https://ai.stanford.edu/~amaas/data/sentiment/)
-is used to do sentiment analysis on movie reviews. For more information on the
-large movie review dataset, please see the
+This notebook uses the BERT classifier training scripts from the model zoo to
+do fine tuning using the [IMDB movie review sentiment analysis dataset](https://ai.stanford.edu/~amaas/data/sentiment/).
+After fine tuning, the [Intel® Neural Compressor](https://github.com/intel/neural-compressor)
+is used to do quantization.
+
+For more information on the large movie review dataset, please see the
 [ACL 2011 paper](https://aclanthology.org/P11-1015/).
 
 Steps that the notebook follows:
@@ -13,10 +15,52 @@ Steps that the notebook follows:
 * Runs BERT classifier fine tuning using the IMDB tsv files
 * Exports the saved model
 * Loads the saved model to test predictions
+* Uses the [Intel® Neural Compressor](https://github.com/intel/neural-compressor) for quantization
 
 ## Running the notebook
 
-1. Since this notebook scripts from the Model Zoo, clone the repo:
+The instructions below explain how to run the notebook on [bare metal](#bare-metal) using a
+virtual environment or in a [docker container](#using-docker).
+
+### Bare Metal
+
+1. Since this notebook requires scripts from the Model Zoo, clone the repo:
+   ```
+   git clone https://github.com/IntelAI/models.git intelai_models
+   export MODEL_ZOO_DIR=$(pwd)/intelai_models
+   ```
+2. Create a Python3 virtual environment and install `intel-tensorflow` and
+   the `notebook`:
+   ```
+   python3 -m venv intel-tf-venv
+   source intel-tf-venv/bin/activate
+   pip install --upgrade pip
+   pip install intel-tensorflow notebook
+   ```
+3. Set environment variables for the path to the IMDB dataset folder, the BERT base
+   initial checkpoint folder, and an empty output directory. The dataset and checkpoint
+   files will be downloaded when the notebook is run, so the folders can be empty.
+   ```
+   export DATASET_DIR=<directory to download the IMDB dataset>
+   export CHECKPOINT_DIR=<directory to download the BERT base initial checkpoints>
+   export OUTPUT_DIR=<empty output directory>
+
+   mkdir -p $OUTPUT_DIR
+   mkdir -p $CHECKPOINT_DIR
+   mkdir -p $DATASET_DIR
+   ```
+4. Navigate to the notebook directory in your clone of the model zoo repo, and then
+   start the [notebook server](https://jupyter.readthedocs.io/en/latest/running.html#starting-the-notebook-server):
+   ```
+   cd ${MODEL_ZOO_DIR}/docs/notebooks/bert_classifier_fine_tuning
+   jupyter notebook --port 8888
+   ```
+5. Copy and paste the URL from the terminal to your browser to view and run
+   the notebook.
+
+### Using Docker
+
+1. Since this notebook requires scripts from the Model Zoo, clone the repo:
    ```
    git clone https://github.com/IntelAI/models.git intelai_models
    export MODEL_ZOO_DIR=$(pwd)/intelai_models
