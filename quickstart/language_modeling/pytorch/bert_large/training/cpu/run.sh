@@ -44,23 +44,25 @@ if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
 fi
 
+config_file_env=""
 config_file_mount=""
+checkpoint_env=""
 checkpoint_mount=""
 
-if [[ ${SCRIPT} = *phase1* ]]; then
-  if [ ! -z "${CONFIG_FILE}" ]; then
-    echo "CONFIG_FILE: ${CONFIG_FILE}"
-    config_file_mount="--volume ${CONFIG_FILE}:/pyt_dataset/enwiki-20200101/training/language_model/tensorflow/bert/cleanup_scripts/wiki/config.json"
-  else
-    echo "The required environment variable CONFIG_FILE has not been set to run phase1 pretraining."
-    exit 1
-  fi
+if [ ! -z "${CONFIG_FILE}" ]; then
+  echo "CONFIG_FILE: ${CONFIG_FILE}"
+  config_file_env="--env bert_config_name=${CONFIG_FILE}"
+  config_file_mount="--volume ${CONFIG_FILE}:${CONFIG_FILE}"
+else
+  echo "The required environment variable CONFIG_FILE has not been set to run pretraining."
+  exit 1
 fi
 
 if [[ ${SCRIPT} = *phase2* ]]; then
   if [ ! -z "${CHECKPOINT_DIR}" ]; then
     echo "CHECKPOINT_DIR: ${CHECKPOINT_DIR}"
-    checkpoint_mount="--volume ${CHECKPOINT_DIR}:/pyt_dataset/enwiki-20200101/bert_large_mlperf_checkpoint/checkpoint"
+    checkpoint_env="--env bert_model_path=${CHECKPOINT_DIR}"
+    checkpoint_mount="--volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR}"
   else
     echo "The required environment variable CHECKPOINT_DIR has not been set to run phase2 pretraining."
     echo "Please set the CHECKPOINT_DIR var to point to the model_save directory from the phase 1 output directory."
@@ -71,12 +73,14 @@ fi
 docker run --rm \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env DATASET_DIR=${DATASET_DIR} \
+  --env bert_dataset=${DATASET_DIR} \
+  ${config_file_env} \
+  ${checkpoint_env} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --volume ${DATASET_DIR}:/pyt_dataset/enwiki-20200101/dataset/tfrecord_dir \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
   ${config_file_mount} \
   ${checkpoint_mount} \
   --shm-size 8G \

@@ -67,7 +67,7 @@ ENV PATH ~/conda/bin/:${PATH}
 ENV LD_LIBRARY_PATH /lib64/:/usr/lib64/:/usr/local/lib64:/root/conda/envs/pytorch/lib:${LD_LIBRARY_PATH}
 
 # Install PyTorch and IPEX wheels
-ARG PYTORCH_WHEEL="torch-1.10.0a0+git4dd5ed7-cp37-cp37m-linux_x86_64.whl"
+ARG PYTORCH_WHEEL="torch-1.10.0a0+git86ee571-cp37-cp37m-linux_x86_64.whl"
 ARG IPEX_WHEEL="intel_extension_for_pytorch-0.0.0-cp37-cp37m-linux_x86_64.whl"
 
 COPY ./whls/* /tmp/pip3/

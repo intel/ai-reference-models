@@ -19,6 +19,9 @@ MODEL_DIR=${MODEL_DIR-$PWD}
 
 echo "PRECISION: ${PRECISION}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
+echo "bert_config_name: ${bert_config_name}"
+echo "bert_dataset: ${bert_dataset}"
+echo "bert_model_path: ${bert_model_path}"
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
