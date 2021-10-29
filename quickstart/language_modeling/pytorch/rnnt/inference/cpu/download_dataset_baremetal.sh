@@ -14,9 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+MODEL_DIR=${MODEL_DIR-$PWD}
+if [ ! -e "${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py" ]; then
+  echo "Could not find the script of inference.py. Please set environment variable '\${MODEL_DIR}'."
+  echo "From which the inference.py exist at the: \${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py"
+  exit 1
+fi
 
 DATASET_DIR=${DATASET_DIR-$PWD}
 
+cd ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu
 dir=$(pwd)
 mkdir -p ${DATASET_DIR}/dataset; cd ${DATASET_DIR}/dataset
 
@@ -40,9 +47,9 @@ cd third_party && tar zxf libsndfile-1.0.28.tar.gz && cd libsndfile-1.0.28
 
 export LD_LIBRARY_PATH=$WORKDIR/local/lib:$LD_LIBRARY_PATH
 
-cd $WORKDIR/..
-python utils/download_librispeech.py utils/inference_librispeech.csv dataset/ -e dataset/
+cd ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu
+python utils/download_librispeech.py utils/inference_librispeech.csv $DATASET_DIR/dataset/ -e $DATASET_DIR/dataset/
 
 export PATH=$WORKDIR/local/bin:$PATH
-python utils/convert_librispeech.py --input_dir dataset/LibriSpeech/dev-clean --dest_dir dataset/LibriSpeech/dev-clean-wav --output_json dataset/LibriSpeech/librispeech-dev-clean-wav.json
+python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/dev-clean --dest_dir $DATASET_DIR/dataset/LibriSpeech/dev-clean-wav --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-dev-clean-wav.json
 cd $dir
