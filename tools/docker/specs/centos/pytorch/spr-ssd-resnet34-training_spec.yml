@@ -18,7 +18,7 @@ slice_sets:
         - pytorch/models/ssd-resnet34-train-dependencies
         - pytorch/spr-release-conda-env
         - pytorch/spr-dnnl-max-var
-        - pytorch/jemalloc-entrypoint
+        - pytorch/jemalloc-libiomp5-entrypoint
       files:
         - source: tools/docker/models/cpu-models/ssd-training/training/single_stage_detector/ssd
           destination: models/ssd-training/training/single_stage_detector/ssd
