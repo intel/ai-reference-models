@@ -1,0 +1,17 @@
+# rest
+requests
+
+# grpc
+tensorflow-serving-api
+
+# object detection api
+Cython
+contextlib2
+jupyter
+matplotlib
+pillow>=8.1.2
+lxml
+absl-py
+notebook>=6.1.5
+
+pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability

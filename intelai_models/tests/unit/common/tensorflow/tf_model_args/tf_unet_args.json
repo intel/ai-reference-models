@@ -1,0 +1,5 @@
+[
+  { "_comment": "FP32 benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_segmentation --model-name=unet --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0  --benchmark-only --verbose --checkpoint=/checkpoints --checkpoint_name=model.ckpt",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/benchmarks/image_segmentation/tensorflow/unet/inference/fp32/unet_infer.py -bs 1 -cp /checkpoints/model.ckpt --num_inter_threads 1 --num_intra_threads 28 -nw 80 -nb 400"}
+]

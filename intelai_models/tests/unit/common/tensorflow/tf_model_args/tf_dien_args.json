@@ -1,0 +1,37 @@
+[
+  {
+    "_comment": "dien_fp32_training",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=fp32 --mode=training --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --socket-id=0 --batch-size 128",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/training/fp32/train.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 28 --data_location /dataset/dien-dataset-folder --mode train"
+  },
+  {
+    "_comment": "dien_fp32_inference_throughput",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --in-graph=/workspace/dien_fp32_static_rnn_graph.pb --socket-id 0 --batch-size 128 --num-intra-threads 26 --num-inter-threads 1 --graph_type=static",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/inference_pb.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 26 --data_location /dataset/dien-dataset-folder --data_type fp32 --input_graph /workspace/dien_fp32_static_rnn_graph.pb --graph_type static"
+  },
+  {
+    "_comment": "dien_fp32_inference_latency",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --in-graph=/workspace/dien_fp32_static_rnn_graph.pb --socket-id 0 --batch-size 1 --num-intra-threads 26 --num-inter-threads 1 --graph_type=dynamic --exact-max-length=100 --num-iterations=10",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/inference_pb.py --batch_size 1 --num_inter_threads 1 --num_intra_threads 26 --data_location /dataset/dien-dataset-folder --data_type fp32 --input_graph /workspace/dien_fp32_static_rnn_graph.pb --graph_type dynamic --exact_max_length 100 --num_iterations 10"
+  },
+  {
+    "_comment": "dien_fp32_inference_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --in-graph=/workspace/dien_fp32_static_rnn_graph.pb --socket-id 0 --batch-size 128 --num-intra-threads 26 --num-inter-threads 1 --accuracy-only --graph_type=static",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/inference_pb.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 26 --data_location /dataset/dien-dataset-folder --data_type fp32 --input_graph /workspace/dien_fp32_static_rnn_graph.pb --accuracy_only --graph_type static"
+  },
+  {
+    "_comment": "dien_bfloat16_inference_throughput",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --in-graph=/workspace/dien_bfloat16_pretrained_model.pb --socket-id 0 --batch-size 128 --num-intra-threads 26 --num-inter-threads 1 --graph_type=static",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/inference_pb.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 26 --data_location /dataset/dien-dataset-folder --data_type bfloat16 --input_graph /workspace/dien_bfloat16_pretrained_model.pb --graph_type static"
+  },
+  {
+    "_comment": "dien_bfloat16_inference_latency",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --in-graph=/workspace/dien_bfloat16_pretrained_model.pb --socket-id 0 --batch-size 1 --num-intra-threads 26 --num-inter-threads 1 --graph_type=dynamic --exact-max-length=100 --num-iterations=10",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/inference_pb.py --batch_size 1 --num_inter_threads 1 --num_intra_threads 26 --data_location /dataset/dien-dataset-folder --data_type bfloat16 --input_graph /workspace/dien_bfloat16_pretrained_model.pb --graph_type dynamic --exact_max_length 100 --num_iterations 10"
+  },
+  {
+    "_comment": "dien_bfloat16_inference_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --in-graph=/workspace/dien_bfloat16_pretrained_model.pb --socket-id 0 --batch-size 128 --num-intra-threads 26 --num-inter-threads 1 --accuracy-only --graph_type=static",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/inference_pb.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 26 --data_location /dataset/dien-dataset-folder --data_type bfloat16 --input_graph /workspace/dien_bfloat16_pretrained_model.pb --accuracy_only --graph_type static"
+  }
+]

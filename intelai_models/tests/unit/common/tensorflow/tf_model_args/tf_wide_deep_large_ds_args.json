@@ -1,0 +1,38 @@
+[
+  { "_comment": "wide_deep_large_int8",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/inference.py --data_location=/dataset --input_graph=/in_graph/wide_deep_int8_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_int8_28_cores",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=28 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/inference.py --batch_size=1 --data_location=/dataset --input_graph=/in_graph/wide_deep_int8_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_int8_latency",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/inference.py --batch_size=1 --data_location=/dataset --input_graph=/in_graph/wide_deep_int8_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_int8_throughput",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=512 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_int8_pretrained_model.pb --data-location=/dataset",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/inference.py --batch_size=512 --data_location=/dataset --input_graph=/in_graph/wide_deep_int8_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_fp32",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/inference/inference.py --data_location=/dataset --input_graph=/in_graph/wide_deep_fp32_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_fp32_28_cores",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=28 --batch-size=512 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/inference/inference.py --batch_size=512 --data_location=/dataset --input_graph=/in_graph/wide_deep_fp32_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_fp32_throughput",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=512 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/inference/inference.py --batch_size=512 --data_location=/dataset --input_graph=/in_graph/wide_deep_fp32_pretrained_model.pb"},
+
+  { "_comment": "wide_deep_large_fp32_latency",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/wide_deep_fp32_pretrained_model.pb --data-location=/dataset",
+    "output": "python /workspace/intelai_models/inference/inference.py --batch_size=1 --data_location=/dataset --input_graph=/in_graph/wide_deep_fp32_pretrained_model.pb"},
+  { "_comment": "wide_deep_large_ds_fp32training",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=wide_deep_large_ds --precision=fp32 --mode=training --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=512 --output-dir=/workspace/logs --mode training --checkpoint /checkpoint_dir --data-location=/dataset",
+    "output": "python /workspace/intelai_models/training/train.py --batch_size=512 --data_location=/dataset --checkpoint=/checkpoint_dir --output_dir=/workspace/logs"}
+]
+
+

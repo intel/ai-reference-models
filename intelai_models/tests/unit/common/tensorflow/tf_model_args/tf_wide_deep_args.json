@@ -1,0 +1,9 @@
+[
+  { "_comment": "wide_deep_small_fp32_batch_inference",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name wide_deep --batch-size 1024 --data-location /dataset --checkpoint /checkpoints --intelai-models . --verbose",
+    "output": "OMP_NUM_THREADS=1 numactl --cpunodebind=0 --membind=0  python inference/fp32/wide_deep_inference.py --data_dir=/dataset --model_dir=/checkpoints --batch_size=1024"},
+
+  { "_comment": "wide_deep_small_fp32_online_inference",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name wide_deep --data-location /dataset --checkpoint /checkpoints --intelai-models /workspace/models --verbose",
+    "output": "OMP_NUM_THREADS=1 numactl --cpunodebind=0 --membind=0 python inference/fp32/wide_deep_inference.py --data_dir=/dataset --model_dir=/checkpoints --batch_size=1"}
+]

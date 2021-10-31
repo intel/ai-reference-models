@@ -1,0 +1,41 @@
+From 11ee0867181419245b9b54f704d3592464b31767 Mon Sep 17 00:00:00 2001
+From: ltsai1 <louie.tsai@intel.com>
+Date: Fri, 31 Jul 2020 09:47:18 -0700
+Subject: [PATCH] bert_large infer fp32
+
+---
+ .../tensorflow/bert_large/inference/run_squad.py         | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/models/language_modeling/tensorflow/bert_large/inference/run_squad.py b/models/language_modeling/tensorflow/bert_large/inference/run_squad.py
+index 2932bc49..28fc0f3f 100644
+--- a/models/language_modeling/tensorflow/bert_large/inference/run_squad.py
++++ b/models/language_modeling/tensorflow/bert_large/inference/run_squad.py
+@@ -1188,6 +1188,8 @@ def validate_flags_or_throw(bert_config):
+ def main(_):
+   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+ 
++  FLAGS.mode = 'profile'
++
+   if (FLAGS.accum_steps >1 ):
+     tf.compat.v1.logging.info(" Accum steps not yet supported in SQuAD")
+     exit(0)
+@@ -1347,9 +1349,14 @@ def main(_):
+       hooks = [UpdateGlobalStepHook(),
+                StopAtStepHook(30)]
+     elif FLAGS.mode == 'profile':
++      import sys
++      sys.path.append(os.environ['ProfileUtilsRoot'])
++      from profile_utils import ConfigFile, tfProfileHook
++      config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++      config.read_config('bert_large infer fp32')
+       hooks = [UpdateGlobalStepHook(),
+                StopAtStepHook(30),
+-               ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
++               tfProfileHook(save_steps=10, output_dir=FLAGS.output_dir, json_fname=config.json_fname)]
+     else:
+       hooks = []
+     warm_up_steps = 5
+-- 
+2.22.1
+

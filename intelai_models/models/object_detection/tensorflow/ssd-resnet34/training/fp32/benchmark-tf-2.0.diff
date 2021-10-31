@@ -1,0 +1,3848 @@
+diff --git a/perfzero/lib/cloud_manager.py b/perfzero/lib/cloud_manager.py
+old mode 100755
+new mode 100644
+diff --git a/perfzero/scripts/generate-readme-header.sh b/perfzero/scripts/generate-readme-header.sh
+old mode 100755
+new mode 100644
+diff --git a/perfzero/scripts/plot_process_info.py b/perfzero/scripts/plot_process_info.py
+old mode 100755
+new mode 100644
+diff --git a/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py b/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py
+index acb1bc4..fe12990 100644
+--- a/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py
++++ b/scripts/tf_cnn_benchmarks/all_reduce_benchmark.py
+@@ -62,9 +62,9 @@ def get_var_shapes(model):
+   """Returns the list of variable shapes for a tf_cnn_benchmarks Model."""
+   with tf.Graph().as_default():
+     # The variable shapes do not depend on the batch size.
+-    images = tf.placeholder(tf.float32, model.get_input_shapes('train')[0])
++    images = tf.compat.v1.placeholder(tf.float32, model.get_input_shapes('train')[0])
+     model.build_network([images])
+-    return [[int(d) for d in v.shape.dims] for v in tf.trainable_variables()]
++    return [[int(d) for d in v.shape.dims] for v in tf.compat.v1.trainable_variables()]
+ 
+ 
+ def all_reduce(all_device_tensors, variable_mgr):
+@@ -110,9 +110,9 @@ def build_all_reduce_iterations(all_device_tensors, tower_devices, variable_mgr,
+     An op that when run, causes the all-reduce ops to run.
+   """
+   for i in range(num_iters):
+-    with tf.name_scope('iteration_%d' % i):
++    with tf.compat.v1.name_scope('iteration_%d' % i):
+       # Step 1: Do the aggregation.
+-      with tf.name_scope('tensor_aggregation'):
++      with tf.compat.v1.name_scope('tensor_aggregation'):
+         all_device_tensors = all_reduce(all_device_tensors, variable_mgr)
+ 
+       # Step 2. Create identity ops, to bring the aggregated results back to
+@@ -146,7 +146,7 @@ def build_all_reduce_iterations(all_device_tensors, tower_devices, variable_mgr,
+     with tf.device(device):
+       for t in device_tensors:
+         # The placeholder initial value is never run.
+-        var = tf.Variable(tf.placeholder(tf.float32, t.shape), collections=[])
++        var = tf.Variable(tf.compat.v1.placeholder(tf.float32, t.shape), collections=[])
+         ops_to_run.append(var.assign(t))
+   return tf.group(*ops_to_run)
+ 
+@@ -169,7 +169,7 @@ def build_graph(tower_devices, tensor_shapes, variable_mgr, num_iters):
+     with tf.device(tower_device):
+       device_tensors = []
+       for j, shape in enumerate(tensor_shapes):
+-        tensor = tf.Variable(tf.random_normal(shape, dtype=tf.float32),
++        tensor = tf.Variable(tf.random.normal(shape, dtype=tf.float32),
+                              name='tensor_%d_on_device_%d' % (j, i))
+         device_tensors.append(tensor)
+     all_device_tensors.append(device_tensors)
+@@ -194,7 +194,7 @@ def run_graph(benchmark_op, bench_cnn, init_ops, dummy_loss_op):
+       actually used.
+   """
+   config = benchmark_cnn.create_config_proto(bench_cnn.params)
+-  with tf.Session(config=config) as sess:
++  with tf.compat.v1.Session(config=config) as sess:
+     for op in init_ops:
+       sess.run(op)
+     step_train_times = []
+@@ -249,7 +249,7 @@ def run_benchmark(bench_cnn, num_iters):
+                              get_var_shapes(bench_cnn.model),
+                              bench_cnn.variable_mgr, num_iters)
+   init_ops = [
+-      tf.global_variables_initializer(),
++      tf.compat.v1.global_variables_initializer(),
+       bench_cnn.variable_mgr.get_post_init_ops()
+   ]
+   loss_op = tf.no_op()
+@@ -259,7 +259,7 @@ def run_benchmark(bench_cnn, num_iters):
+     as_text = filename.endswith('txt')
+     log_fn('Writing GraphDef as %s to %s' % (
+         'text' if as_text else 'binary', bench_cnn.graph_file))
+-    tf.train.write_graph(tf.get_default_graph().as_graph_def(add_shapes=True),
++    tf.io.write_graph(tf.compat.v1.get_default_graph().as_graph_def(add_shapes=True),
+                          path, filename, as_text)
+ 
+   run_graph(benchmark_op, bench_cnn, init_ops, loss_op)
+diff --git a/scripts/tf_cnn_benchmarks/allreduce.py b/scripts/tf_cnn_benchmarks/allreduce.py
+index 56d8c88..72e34ea 100644
+--- a/scripts/tf_cnn_benchmarks/allreduce.py
++++ b/scripts/tf_cnn_benchmarks/allreduce.py
+@@ -24,7 +24,8 @@ import re
+ from six.moves import xrange  # pylint: disable=redefined-builtin
+ import tensorflow as tf
+ 
+-from tensorflow.contrib.all_reduce.python import all_reduce
++from tensorflow.python.distribute.v1 import all_reduce
++#from tensorflow.contrib.all_reduce.python import all_reduce
+ from tensorflow.python.framework import device as pydev
+ from tensorflow.python.framework import ops
+ from tensorflow.python.ops import collective_ops
+@@ -333,7 +334,7 @@ def sum_grad_and_var_all_reduce(single_session,
+     summed_grads = build_collective_reduce(
+         scaled_grads, num_workers, num_shards, 'Add', 'Id')
+   else:
+-    with tf.name_scope('allreduce'):
++    with tf.compat.v1.name_scope('allreduce'):
+       # Note that each grad_and_vars looks like the following:
+       #   ((grad0_gpu0, var0_gpu0), ... , (grad0_gpuN, var0_gpuN))
+       if alg == 'nccl':
+@@ -448,7 +449,7 @@ def sum_gradients_all_reduce(single_session,
+   chunked_gv = [gv[x:x + merge_scope]
+                 for x in xrange(0, len(gv), merge_scope)]
+   for chunk in chunked_gv:
+-    with tf.name_scope('allreduce'):
++    with tf.compat.v1.name_scope('allreduce'):
+       for grad_and_vars in chunk:
+         reduced_gv_list.append(sum_grad_and_var_all_reduce(
+             single_session,
+@@ -521,7 +522,7 @@ def pack_range(key, packing, grad_vars, rng):
+   members = []
+   variables = []
+   restore_shapes = []
+-  with tf.name_scope('pack'):
++  with tf.compat.v1.name_scope('pack'):
+     for g, v in to_pack:
+       variables.append(v)
+       restore_shapes.append(g.shape)
+@@ -549,7 +550,7 @@ def unpack_grad_tuple(gv, gpt):
+   """
+   elt_widths = [x.num_elements() for x in gpt.shapes]
+   with tf.device(gv[0][0].device):
+-    with tf.name_scope('unpack'):
++    with tf.compat.v1.name_scope('unpack'):
+       splits = tf.split(gv[0], elt_widths)
+       unpacked_gv = []
+       for idx, s in enumerate(splits):
+diff --git a/scripts/tf_cnn_benchmarks/batch_allreduce.py b/scripts/tf_cnn_benchmarks/batch_allreduce.py
+index c70dabf..4370c26 100644
+--- a/scripts/tf_cnn_benchmarks/batch_allreduce.py
++++ b/scripts/tf_cnn_benchmarks/batch_allreduce.py
+@@ -420,7 +420,7 @@ def _apply_to_all_device_tensors(all_device_tensors, apply_func, colocate=True):
+     new_device_tensors = []
+     for tensor_index, t in enumerate(device_tensors):
+       if colocate:
+-        with tf.colocate_with(t):
++        with tf.compat.v1.colocate_with(t):
+           new_t = apply_func(t, device_index, tensor_index)
+       else:
+         new_t = apply_func(t, device_index, tensor_index)
+diff --git a/scripts/tf_cnn_benchmarks/benchmark_cnn.py b/scripts/tf_cnn_benchmarks/benchmark_cnn.py
+index 04f793f..139daff 100644
+--- a/scripts/tf_cnn_benchmarks/benchmark_cnn.py
++++ b/scripts/tf_cnn_benchmarks/benchmark_cnn.py
+@@ -703,12 +703,12 @@ class GlobalStepWatcher(threading.Thread):
+         # Use tf.logging.info instead of log_fn, since print (which is log_fn)
+         # is not thread safe and may interleave the outputs from two parallel
+         # calls to print, which can break tests.
+-        tf.logging.info('Starting real work at step %s at time %s' %
++        tf.compat.v1.logging.info('Starting real work at step %s at time %s' %
+                         (global_step_val, time.ctime()))
+         self.start_time = time.time()
+         self.start_step = global_step_val
+       if self.finish_time == 0 and global_step_val >= self.end_at_global_step:
+-        tf.logging.info('Finishing real work at step %s at time %s' %
++        tf.compat.v1.logging.info('Finishing real work at step %s at time %s' %
+                         (global_step_val, time.ctime()))
+         self.finish_time = time.time()
+         self.finish_step = global_step_val
+@@ -734,7 +734,7 @@ def create_config_proto(params):
+     params: Params tuple, typically created by make_params or
+             make_params_from_flags.
+   """
+-  config = tf.ConfigProto()
++  config = tf.compat.v1.ConfigProto()
+   config.allow_soft_placement = True
+   if params.num_intra_threads is None:
+     if params.device == 'gpu':
+@@ -771,13 +771,13 @@ def create_config_proto(params):
+         params.gpu_kt_max_pending)
+   if params.xla:
+     config.graph_options.optimizer_options.global_jit_level = (
+-        tf.OptimizerOptions.ON_1)
++        tf.compat.v1.OptimizerOptions.ON_1)
+   if params.rewriter_config:
+     rewriter_config = rewriter_config_pb2.RewriterConfig()
+     text_format.Merge(params.rewriter_config, rewriter_config)
+     config.graph_options.rewrite_options.CopyFrom(rewriter_config)
+   elif not params.enable_optimizations:
+-    config.graph_options.optimizer_options.opt_level = tf.OptimizerOptions.L0
++    config.graph_options.optimizer_options.opt_level = tf.compat.v1.OptimizerOptions.L0
+     config.graph_options.rewrite_options.disable_meta_optimizer = True
+   elif params.variable_update == 'collective_all_reduce':
+     rewrite_options = config.graph_options.rewrite_options
+@@ -851,14 +851,14 @@ def benchmark_one_step(sess,
+       ((trace_filename or partitioned_graph_file_prefix) and step == -2)
+   )
+   if need_options_and_metadata:
+-    run_options = tf.RunOptions()
++    run_options = tf.compat.v1.RunOptions()
+     if (trace_filename and step == -2) or should_profile:
+-      run_options.trace_level = tf.RunOptions.FULL_TRACE
++      run_options.trace_level = tf.compat.v1.RunOptions.FULL_TRACE
+     if partitioned_graph_file_prefix and step == -2:
+       run_options.output_partition_graphs = True
+     if collective_graph_key > 0:
+       run_options.experimental.collective_graph_key = collective_graph_key
+-    run_metadata = tf.RunMetadata()
++    run_metadata = tf.compat.v1.RunMetadata()
+   else:
+     run_options = None
+     run_metadata = None
+@@ -927,7 +927,7 @@ def benchmark_one_step(sess,
+         log_fn('Writing partitioned GraphDef as %s to %s' % (
+             'text' if as_text else 'binary',
+             os.path.join(path, graph_filename)))
+-        tf.train.write_graph(graph_def, path, graph_filename, as_text)
++        tf.io.write_graph(graph_def, path, graph_filename, as_text)
+   return (summary_str, lossval)
+ 
+ 
+@@ -1150,7 +1150,7 @@ def get_piecewise_learning_rate(piecewise_learning_rate_schedule,
+         boundaries.append(int(int(piece) * num_batches_per_epoch) - 1)
+       except ValueError:
+         raise ValueError('Invalid epoch: ' + piece)
+-  return tf.train.piecewise_constant(global_step, boundaries, values,
++  return tf.compat.v1.train.piecewise_constant(global_step, boundaries, values,
+                                      name='piecewise_learning_rate')
+ 
+ 
+@@ -1174,7 +1174,7 @@ def get_learning_rate(params, global_step, num_examples_per_epoch, model,
+   Raises:
+     ValueError: Invalid or unsupported params.
+   """
+-  with tf.name_scope('learning_rate'):
++  with tf.compat.v1.name_scope('learning_rate'):
+     num_batches_per_epoch = num_examples_per_epoch / batch_size
+ 
+     if params.piecewise_learning_rate_schedule:
+@@ -1194,7 +1194,7 @@ def get_learning_rate(params, global_step, num_examples_per_epoch, model,
+         decay_steps = int(num_batches_per_epoch * params.num_epochs_per_decay)
+ 
+         # Decay the learning rate exponentially based on the number of steps.
+-        learning_rate = tf.train.exponential_decay(
++        learning_rate = tf.compat.v1.train.exponential_decay(
+             params.init_learning_rate,
+             global_step,
+             decay_steps,
+@@ -1216,8 +1216,8 @@ def get_learning_rate(params, global_step, num_examples_per_epoch, model,
+         init_lr = float(params.piecewise_learning_rate_schedule.split(';')[0])
+       warmup_lr = init_lr * tf.cast(global_step, tf.float32) / tf.cast(
+           warmup_steps, tf.float32)
+-      learning_rate = tf.cond(global_step < warmup_steps,
+-                              lambda: warmup_lr, lambda: learning_rate)
++      learning_rate = tf.cond(pred=global_step < warmup_steps,
++                              true_fn=lambda: warmup_lr, false_fn=lambda: learning_rate)
+ 
+     learning_rate = mlperf.logger.log_deferred_tensor_value(
+         mlperf.tags.OPT_LR, learning_rate, global_step, every_n=100)
+@@ -1230,19 +1230,19 @@ def get_optimizer(params, learning_rate):
+     mlperf.logger.log(key=mlperf.tags.OPT_NAME,
+                       value=mlperf.tags.SGD_WITH_MOMENTUM)
+     mlperf.logger.log(key=mlperf.tags.OPT_MOMENTUM, value=params.momentum)
+-    opt = tf.train.MomentumOptimizer(
++    opt = tf.compat.v1.train.MomentumOptimizer(
+         learning_rate, params.momentum, use_nesterov=True)
+   elif params.optimizer == 'sgd':
+     mlperf.logger.log(key=mlperf.tags.OPT_NAME, value=mlperf.tags.SGD)
+-    opt = tf.train.GradientDescentOptimizer(learning_rate)
++    opt = tf.compat.v1.train.GradientDescentOptimizer(learning_rate)
+   elif params.optimizer == 'rmsprop':
+-    opt = tf.train.RMSPropOptimizer(
++    opt = tf.compat.v1.train.RMSPropOptimizer(
+         learning_rate,
+         params.rmsprop_decay,
+         momentum=params.rmsprop_momentum,
+         epsilon=params.rmsprop_epsilon)
+   elif params.optimizer == 'adam':
+-    opt = tf.train.AdamOptimizer(learning_rate, params.adam_beta1,
++    opt = tf.compat.v1.train.AdamOptimizer(learning_rate, params.adam_beta1,
+                                  params.adam_beta2, params.adam_epsilon)
+   else:
+     raise ValueError('Optimizer "{}" was not recognized'.
+@@ -1267,7 +1267,7 @@ def generate_tfprof_profile(profiler, tfprof_file):
+   # information can also be obtained with the dumped ProfileProto, but
+   # printing it means tfprof doesn't have to be used if all the user wants
+   # is the top ops.
+-  options = tf.profiler.ProfileOptionBuilder.time_and_memory()
++  options = tf.compat.v1.profiler.ProfileOptionBuilder.time_and_memory()
+   options['max_depth'] = _NUM_OPS_TO_PRINT
+   options['order_by'] = 'accelerator_micros'
+   profiler.profile_operations(options)
+@@ -1484,7 +1484,7 @@ class BenchmarkCNN(object):
+ 
+       worker_prefix = '/job:worker/replica:0/task:%s' % self.task_index
+       if use_ps_server:
+-        self.param_server_device = tf.train.replica_device_setter(
++        self.param_server_device = tf.compat.v1.train.replica_device_setter(
+             worker_device=worker_prefix + '/cpu:0',
+             cluster=self.cluster_manager.get_cluster_spec())
+         # This device on which the queues for managing synchronization between
+@@ -1725,7 +1725,7 @@ class BenchmarkCNN(object):
+       try:
+         from official.utils.logs import logger as models_logger  # pylint: disable=g-import-not-at-top
+       except ImportError:
+-        tf.logging.fatal('Please include tensorflow/models to the PYTHONPATH '
++        tf.compat.v1.logging.fatal('Please include tensorflow/models to the PYTHONPATH '
+                          'in order to use BenchmarkLogger. Configured '
+                          'benchmark_log_dir: %s'
+                          % self.params.benchmark_log_dir)
+@@ -1891,13 +1891,13 @@ class BenchmarkCNN(object):
+     if self.params.train_dir is None:
+       raise ValueError('Trained model directory not specified')
+     graph_info = self._build_eval_graph()
+-    saver = tf.train.Saver(self.variable_mgr.savable_variables())
+-    summary_writer = tf.summary.FileWriter(self.params.eval_dir,
+-                                           tf.get_default_graph())
++    saver = tf.compat.v1.train.Saver(self.variable_mgr.savable_variables())
++    summary_writer = tf.compat.v1.summary.FileWriter(self.params.eval_dir,
++                                           tf.compat.v1.get_default_graph())
+     target = ''
+     # TODO(huangyp): Check if checkpoints haven't updated for hours and abort.
+     while True:
+-      with tf.Session(
++      with tf.compat.v1.Session(
+           target=target, config=create_config_proto(self.params)) as sess:
+         image_producer = None
+         try:
+@@ -1931,8 +1931,8 @@ class BenchmarkCNN(object):
+     """
+     with self._do_eval():
+       input_producer_op, enqueue_ops, fetches = self._build_model()
+-      local_var_init_op = tf.local_variables_initializer()
+-      table_init_ops = tf.tables_initializer()
++      local_var_init_op = tf.compat.v1.local_variables_initializer()
++      table_init_ops = tf.compat.v1.tables_initializer()
+       variable_mgr_init_ops = [local_var_init_op]
+       if table_init_ops:
+         variable_mgr_init_ops.extend([table_init_ops])
+@@ -1940,7 +1940,7 @@ class BenchmarkCNN(object):
+         variable_mgr_init_ops.extend(self.variable_mgr.get_post_init_ops())
+       local_var_init_op_group = tf.group(*variable_mgr_init_ops)
+ 
+-      summary_op = tf.summary.merge_all(scope=scope_name)
++      summary_op = tf.compat.v1.summary.merge_all(scope=scope_name)
+       # The eval graph has no execution barrier because it doesn't run in
+       # distributed mode.
+       execution_barrier = None
+@@ -1973,7 +1973,7 @@ class BenchmarkCNN(object):
+         # during training. This is OK.
+         sess.run(local_var_init_op_group)
+       if self.dataset.queue_runner_required():
+-        tf.train.start_queue_runners(sess=sess)
++        tf.compat.v1.train.start_queue_runners(sess=sess)
+       image_producer = None
+       if input_producer_op is not None:
+         image_producer = cnn_util.ImageProducer(
+@@ -2022,7 +2022,7 @@ class BenchmarkCNN(object):
+       loop_end_time = time.time()
+       accuracy_at_1 = top_1_accuracy_sum / self.num_batches
+       accuracy_at_5 = top_5_accuracy_sum / self.num_batches
+-      summary = tf.Summary()
++      summary = tf.compat.v1.Summary()
+       summary.value.add(tag='eval/Accuracy@1', simple_value=accuracy_at_1)
+       summary.value.add(tag='eval/Accuracy@5', simple_value=accuracy_at_5)
+       for result_key, result_value in results.items():
+@@ -2047,7 +2047,7 @@ class BenchmarkCNN(object):
+             'eval_top_1_accuracy', accuracy_at_1,
+             'eval_top_5_accuracy', accuracy_at_5,
+             'eval_average_examples_per_sec', images_per_sec,
+-            tf.GraphKeys.GLOBAL_STEP, global_step,
++            tf.compat.v1.GraphKeys.GLOBAL_STEP, global_step,
+         }
+         self.benchmark_logger.log_evaluation_result(eval_result)
+       mlperf.logger.log_eval_epoch(
+@@ -2075,7 +2075,7 @@ class BenchmarkCNN(object):
+       build_result = self._build_graph()
+       if self.mode == constants.BenchmarkMode.TRAIN_AND_EVAL:
+         with self.variable_mgr.reuse_variables():
+-          with tf.name_scope('Evaluation') as ns:
++          with tf.compat.v1.name_scope('Evaluation') as ns:
+             eval_build_results = self._build_eval_graph(ns)
+       else:
+         eval_build_results = None
+@@ -2088,7 +2088,7 @@ class BenchmarkCNN(object):
+   def _unfreezable_local_variables(self, graph):
+     """Get the local variables that we don't want to freeze."""
+     return graph.get_collection(
+-        tf.GraphKeys.LOCAL_VARIABLES,
++        tf.compat.v1.GraphKeys.LOCAL_VARIABLES,
+         # We don't freeze the gpu_cached_images local variable so it won't get
+         # constant folded with ops which process the input.
+         scope='.*' + BenchmarkCNN.GPU_CACHED_INPUT_VARIABLE_NAME)
+@@ -2115,8 +2115,8 @@ class BenchmarkCNN(object):
+       execution_barrier = self.add_sync_queues_and_barrier(
+           'execution_barrier_', [])
+ 
+-    global_step = tf.train.get_global_step()
+-    with tf.device(self.global_step_device), tf.name_scope('inc_global_step'):
++    global_step = tf.compat.v1.train.get_global_step()
++    with tf.device(self.global_step_device), tf.compat.v1.name_scope('inc_global_step'):
+       with tf.control_dependencies([main_fetch_group]):
+         fetches['inc_global_step'] = global_step.assign_add(1)
+ 
+@@ -2128,13 +2128,13 @@ class BenchmarkCNN(object):
+ 
+     # Skips the init ops for freezable local variables in forward_only mode so
+     # we can remove all the assign ops when converting variables to constants.
+-    with tf.name_scope('local_variable_initialization'):
++    with tf.compat.v1.name_scope('local_variable_initialization'):
+       if self.forward_only_and_freeze:
+-        local_var_init_op = tf.variables_initializer(
+-            self._unfreezable_local_variables(tf.get_default_graph()))
++        local_var_init_op = tf.compat.v1.variables_initializer(
++            self._unfreezable_local_variables(tf.compat.v1.get_default_graph()))
+       else:
+-        local_var_init_op = tf.local_variables_initializer()
+-    table_init_ops = tf.tables_initializer()
++        local_var_init_op = tf.compat.v1.local_variables_initializer()
++    table_init_ops = tf.compat.v1.tables_initializer()
+ 
+     variable_manager_init_ops = [local_var_init_op]
+     if table_init_ops:
+@@ -2151,7 +2151,7 @@ class BenchmarkCNN(object):
+                                            variable_manager_init_ops))
+     local_var_init_op_group = tf.group(*variable_manager_init_ops,
+                                        name='local_var_init_op_group')
+-    summary_op = tf.summary.merge_all()
++    summary_op = tf.compat.v1.summary.merge_all()
+ 
+     return GraphInfo(
+         input_producer_op=input_producer_op,
+@@ -2187,8 +2187,8 @@ class BenchmarkCNN(object):
+     summary_writer = None
+     if (is_chief and self.params.summary_verbosity and self.params.train_dir and
+         self.params.save_summaries_steps > 0):
+-      summary_writer = tf.summary.FileWriter(self.params.train_dir,
+-                                             tf.get_default_graph())
++      summary_writer = tf.compat.v1.summary.FileWriter(self.params.train_dir,
++                                             tf.compat.v1.get_default_graph())
+ 
+     # We want to start the benchmark timer right after a image_producer barrier
+     # and avoids undesired waiting times on barriers.
+@@ -2208,7 +2208,7 @@ class BenchmarkCNN(object):
+     # Running summaries and training operations in parallel could run out of
+     # GPU memory.
+     if is_chief and not self.forward_only_and_freeze:
+-      saver = tf.train.Saver(
++      saver = tf.compat.v1.train.Saver(
+           self.variable_mgr.savable_variables(),
+           save_relative_paths=True,
+           max_to_keep=self.params.max_ckpts_to_keep)
+@@ -2223,8 +2223,8 @@ class BenchmarkCNN(object):
+       # don't set this in non-distributed mode, because in non-distributed mode,
+       # local_var_init_op_group may itself initialize global variables (such as
+       # in replicated mode).
+-      ready_for_local_init_op = tf.report_uninitialized_variables(
+-          tf.global_variables())
++      ready_for_local_init_op = tf.compat.v1.report_uninitialized_variables(
++          tf.compat.v1.global_variables())
+     if self.params.variable_update == 'horovod':
+       import horovod.tensorflow as hvd  # pylint: disable=g-import-not-at-top
+       bcast_global_variables_op = hvd.broadcast_global_variables(0)
+@@ -2234,10 +2234,10 @@ class BenchmarkCNN(object):
+     if self.params.variable_update == 'collective_all_reduce':
+       # It doesn't matter what this collective_graph_key value is,
+       # so long as it's > 0 and the same at every worker.
+-      init_run_options = tf.RunOptions()
++      init_run_options = tf.compat.v1.RunOptions()
+       init_run_options.experimental.collective_graph_key = 6
+     else:
+-      init_run_options = tf.RunOptions()
++      init_run_options = tf.compat.v1.RunOptions()
+     local_var_init_ops = [graph_info.local_var_init_op_group]
+     if eval_graph_info:
+       # `eval_graph_info.local_var_init_op_group` also includes some of the
+@@ -2247,7 +2247,7 @@ class BenchmarkCNN(object):
+       # same time can cause race conditions.
+       with tf.control_dependencies(local_var_init_ops):
+         local_var_init_ops.append(eval_graph_info.local_var_init_op_group)
+-    sv = tf.train.Supervisor(
++    sv = tf.compat.v1.train.Supervisor(
+         # For the purpose of Supervisor, all Horovod workers are 'chiefs',
+         # since we want session to be initialized symmetrically on all the
+         # workers.
+@@ -2265,13 +2265,13 @@ class BenchmarkCNN(object):
+         summary_writer=summary_writer,
+         local_init_run_options=init_run_options)
+ 
+-    profiler = tf.profiler.Profiler() if self.params.tfprof_file else None
++    profiler = tf.compat.v1.profiler.Profiler() if self.params.tfprof_file else None
+     if self.graph_file is not None:
+       path, filename = os.path.split(self.graph_file)
+       as_text = filename.endswith('txt')
+       log_fn('Writing GraphDef as %s to %s' % (  # pyformat break
+           'text' if as_text else 'binary', self.graph_file))
+-      tf.train.write_graph(tf.get_default_graph().as_graph_def(add_shapes=True),
++      tf.io.write_graph(tf.compat.v1.get_default_graph().as_graph_def(add_shapes=True),
+                            path, filename, as_text)
+ 
+     start_standard_services = (
+@@ -2592,9 +2592,9 @@ class BenchmarkCNN(object):
+     # Get variables that we don't want to freeze.
+     # Only keep unfreezable variables in forward_only_and_freeze mode.
+     # TODO(laigd): consider making global_step a constant.
+-    variables_to_keep = {graph_info.global_step: tf.GraphKeys.GLOBAL_VARIABLES}
++    variables_to_keep = {graph_info.global_step: tf.compat.v1.GraphKeys.GLOBAL_VARIABLES}
+     variables_to_keep.update({
+-        local_variable: tf.GraphKeys.LOCAL_VARIABLES
++        local_variable: tf.compat.v1.GraphKeys.LOCAL_VARIABLES
+         for local_variable in self._unfreezable_local_variables(graph)
+     })
+ 
+@@ -2610,9 +2610,9 @@ class BenchmarkCNN(object):
+ 
+     # Freeze the graph.
+     with graph.as_default():
+-      with tf.Session(config=create_config_proto(self.params)) as sess:
+-        sess.run(tf.global_variables_initializer())
+-        sess.run(tf.local_variables_initializer())
++      with tf.compat.v1.Session(config=create_config_proto(self.params)) as sess:
++        sess.run(tf.compat.v1.global_variables_initializer())
++        sess.run(tf.compat.v1.local_variables_initializer())
+         graphdef = graph_util.convert_variables_to_constants(
+             sess,
+             graphdef,
+@@ -2667,7 +2667,7 @@ class BenchmarkCNN(object):
+       # Update the variables
+       for variable in variables_to_keep:
+         updated_variable = tf.Variable.from_proto(variable.to_proto())
+-        tf.add_to_collection(variables_to_keep[variable], updated_variable)
++        tf.compat.v1.add_to_collection(variables_to_keep[variable], updated_variable)
+         if variable is graph_info.global_step:
+           updated_global_step = updated_variable
+ 
+@@ -2764,13 +2764,13 @@ class BenchmarkCNN(object):
+       self.loss_scale = None
+       self.loss_scale_normal_steps = None
+       if self.enable_auto_loss_scale or init_loss_scale_val != 1:
+-        self.loss_scale = tf.get_variable(
++        self.loss_scale = tf.compat.v1.get_variable(
+             name='loss_scale',
+             initializer=init_loss_scale_val,
+             dtype=tf.float32,
+             trainable=False)
+       if self.enable_auto_loss_scale:
+-        self.loss_scale_normal_steps = tf.get_variable(
++        self.loss_scale_normal_steps = tf.compat.v1.get_variable(
+             name='loss_scale_normal_steps', initializer=0, trainable=False)
+ 
+   def _build_model(self):
+@@ -2787,7 +2787,7 @@ class BenchmarkCNN(object):
+       seed_adjustment = 0
+     mlperf.logger.log(key=mlperf.tags.RUN_SET_RANDOM_SEED,
+                       value=self.params.tf_random_seed + seed_adjustment)
+-    tf.set_random_seed(self.params.tf_random_seed + seed_adjustment)
++    tf.compat.v1.set_random_seed(self.params.tf_random_seed + seed_adjustment)
+     mlperf.logger.log(key=mlperf.tags.RUN_SET_RANDOM_SEED,
+                       value=4321 + seed_adjustment)
+     np.random.seed(4321 + seed_adjustment)
+@@ -2807,12 +2807,12 @@ class BenchmarkCNN(object):
+     gpu_grad_stage_ops = []
+ 
+     with tf.device(self.global_step_device):
+-      global_step = tf.train.get_or_create_global_step()
++      global_step = tf.compat.v1.train.get_or_create_global_step()
+       self._maybe_initialize_fp16()
+ 
+     # Build the processing and model for the worker.
+     input_producer_op = None
+-    with tf.name_scope('input_processing'):
++    with tf.compat.v1.name_scope('input_processing'):
+       input_processing_info = self._build_input_processing(shift_ratio=0)
+       if input_processing_info.input_producer_op is not None:
+         input_producer_op = tf.group(*input_processing_info.input_producer_op)
+@@ -2820,7 +2820,7 @@ class BenchmarkCNN(object):
+     staging_delta_ops = []
+ 
+     for device_num in range(len(self.devices)):
+-      with tf.name_scope('tower_%i' % device_num) as name_scope, (
++      with tf.compat.v1.name_scope('tower_%i' % device_num) as name_scope, (
+           self.variable_mgr.create_outer_variable_scope(device_num)):
+         results = self.add_forward_pass_and_gradients(
+             phase_train, device_num, device_num, input_processing_info,
+@@ -2853,7 +2853,7 @@ class BenchmarkCNN(object):
+           # the moving averages for one tower. In parameter server mode, all
+           # towers share a copy of the variables so we also only need to update
+           # and save the moving averages once.
+-          update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS, name_scope)
++          update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, name_scope)
+           if self.datasets_use_prefetch:
+             assert not self.variable_mgr.staging_delta_ops
+           else:
+@@ -2880,7 +2880,7 @@ class BenchmarkCNN(object):
+       # averages.
+       # TODO(reedwm): Have each tower read from the first tower's moving
+       # averages for a slight performance gain.
+-      update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
++      update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
+       mlperf.logger.log(key=mlperf.tags.INPUT_BN_SPAN,
+                         value=self.batch_size // len(self.raw_devices))
+ 
+@@ -2902,9 +2902,9 @@ class BenchmarkCNN(object):
+         key = name[len(constants.UNREDUCED_ACCURACY_OP_PREFIX):]
+         fetches[key] = tf.concat(ops, 0)
+       else:
+-        fetches[name] = tf.reduce_sum(ops) / self.batch_size
++        fetches[name] = tf.reduce_sum(input_tensor=ops) / self.batch_size
+         if self.task_index == 0 and self.params.summary_verbosity >= 1:
+-          tf.summary.scalar(name, fetches[name])
++          tf.compat.v1.summary.scalar(name, fetches[name])
+ 
+     if not phase_train:
+       if self.params.forward_only:
+@@ -2931,9 +2931,9 @@ class BenchmarkCNN(object):
+     training_ops = []
+     for d, device in enumerate(apply_gradient_devices):
+       with tf.device(device):
+-        with tf.name_scope('average_loss'):
+-          average_loss = tf.reduce_mean(losses)
+-        with tf.name_scope('get_gradients_to_apply'):
++        with tf.compat.v1.name_scope('average_loss'):
++          average_loss = tf.reduce_mean(input_tensor=losses)
++        with tf.compat.v1.name_scope('get_gradients_to_apply'):
+           avg_grads = self.variable_mgr.get_gradients_to_apply(d,
+                                                                gradient_state)
+ 
+@@ -2945,7 +2945,7 @@ class BenchmarkCNN(object):
+               self.model, examples_per_step)
+         gradient_clip = self.params.gradient_clip
+         if gradient_clip is not None:
+-          with tf.name_scope('clip_gradients'):
++          with tf.compat.v1.name_scope('clip_gradients'):
+             clipped_grads = [(tf.clip_by_value(grad, -gradient_clip,
+                                                +gradient_clip), var)
+                              for grad, var in avg_grads]
+@@ -2961,7 +2961,7 @@ class BenchmarkCNN(object):
+             inc_loss_scale_every_n=self.params.fp16_inc_loss_scale_every_n,
+             is_chief=not self.job_name or self.task_index == 0)
+ 
+-        with tf.name_scope('append_apply_gradient_ops'):
++        with tf.compat.v1.name_scope('append_apply_gradient_ops'):
+           self.variable_mgr.append_apply_gradients_ops(
+               gradient_state, opt, clipped_grads, training_ops,
+               loss_scale_params)
+@@ -2969,12 +2969,12 @@ class BenchmarkCNN(object):
+ 
+     with tf.device(self.cpu_device):
+       if self.task_index == 0 and self.params.summary_verbosity >= 1:
+-        tf.summary.scalar('learning_rate', learning_rate)
+-        tf.summary.scalar(self.params.loss_type_to_report, average_loss)
++        tf.compat.v1.summary.scalar('learning_rate', learning_rate)
++        tf.compat.v1.summary.scalar(self.params.loss_type_to_report, average_loss)
+         if self.loss_scale is not None:
+-          tf.summary.scalar('loss_scale', self.loss_scale)
++          tf.compat.v1.summary.scalar('loss_scale', self.loss_scale)
+         if self.loss_scale_normal_steps:
+-          tf.summary.scalar('loss_scale_normal_steps',
++          tf.compat.v1.summary.scalar('loss_scale_normal_steps',
+                             self.loss_scale_normal_steps)
+ 
+         if self.params.summary_verbosity >= 2:
+@@ -2983,9 +2983,9 @@ class BenchmarkCNN(object):
+         if self.params.summary_verbosity >= 3:
+           for grad, var in avg_grads:
+             if grad is not None:
+-              tf.summary.histogram(var.op.name + '/gradients', grad)
+-          for var in tf.trainable_variables():
+-            tf.summary.histogram(var.op.name, var)
++              tf.compat.v1.summary.histogram(var.op.name + '/gradients', grad)
++          for var in tf.compat.v1.trainable_variables():
++            tf.compat.v1.summary.histogram(var.op.name, var)
+ 
+     fetches['train_op'] = train_op
+     fetches['average_loss'] = average_loss
+@@ -2993,16 +2993,16 @@ class BenchmarkCNN(object):
+ 
+   def gradient_histogram_summary(self, avg_grads):
+     """Create histogram of log values of all non-zero gradients."""
+-    with tf.name_scope('log_gradients_summary'):
++    with tf.compat.v1.name_scope('log_gradients_summary'):
+       all_grads = []
+       for grad, _ in avg_grads:
+         all_grads.append(tf.reshape(grad, [-1]))
+       grads = tf.abs(tf.concat(all_grads, 0))
+       # exclude grads with zero values.
+-      indices_for_non_zero_grads = tf.where(tf.not_equal(grads, 0))
++      indices_for_non_zero_grads = tf.compat.v1.where(tf.not_equal(grads, 0))
+       log_grads = tf.reshape(
+-          tf.log(tf.gather(grads, indices_for_non_zero_grads)), [-1])
+-      tf.summary.histogram('log_gradients', log_grads)
++          tf.math.log(tf.gather(grads, indices_for_non_zero_grads)), [-1])
++      tf.compat.v1.summary.histogram('log_gradients', log_grads)
+ 
+   def _build_model_single_session(self):
+     """Build the TensorFlow graph for multiple replicas in a single_session.
+@@ -3024,7 +3024,7 @@ class BenchmarkCNN(object):
+     assert not self.params.forward_only
+     assert not self.params.staged_vars
+ 
+-    tf.set_random_seed(self.params.tf_random_seed)
++    tf.compat.v1.set_random_seed(self.params.tf_random_seed)
+     np.random.seed(4321)
+     phase_train = True
+ 
+@@ -3037,7 +3037,7 @@ class BenchmarkCNN(object):
+     gpu_grad_stage_ops = []
+ 
+     with tf.device(self.global_step_device):
+-      global_step = tf.train.get_or_create_global_step()
++      global_step = tf.compat.v1.train.get_or_create_global_step()
+ 
+     update_ops = []
+     global_input_producer_op = []
+@@ -3050,7 +3050,7 @@ class BenchmarkCNN(object):
+       # belonging to the next worker (task).
+       self.reset_devices_for_task(task_num, is_local)
+       # Build the per-worker image processing
+-      with tf.name_scope('input_processing'):
++      with tf.compat.v1.name_scope('input_processing'):
+         input_processing_info = self._build_input_processing(
+             shift_ratio=(task_num / self.num_workers))
+       if input_processing_info.input_producer_op is not None:
+@@ -3059,7 +3059,7 @@ class BenchmarkCNN(object):
+       for rel_device_num in range(len(self.devices)):
+         abs_device_num = task_num * len(self.devices) + rel_device_num
+         with self.variable_mgr.create_outer_variable_scope(
+-            abs_device_num), tf.name_scope(
++            abs_device_num), tf.compat.v1.name_scope(
+                 'task_%i_tower_%i' % (task_num, rel_device_num)) as name_scope:
+           task_results = self.add_forward_pass_and_gradients(
+               phase_train, rel_device_num, abs_device_num,
+@@ -3095,7 +3095,7 @@ class BenchmarkCNN(object):
+             # of the variables so we also only need to update and save
+             # the moving averages once.
+             update_ops.extend(
+-                tf.get_collection(tf.GraphKeys.UPDATE_OPS, name_scope))
++                tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, name_scope))
+             assert not self.variable_mgr.staging_delta_ops
+ 
+     enqueue_ops = []
+@@ -3161,8 +3161,8 @@ class BenchmarkCNN(object):
+       # hack is enabled.
+       if labels_device_placement_hack and tensor.dtype == tf.int32:
+         device = ''
+-      with tf.device(device):
+-        return tf.reshape(tensor, shape=shape)
++      # with tf.device(device):
++      return tf.reshape(tensor, shape=shape)
+ 
+     subset = 'validation' if self._doing_eval else 'train'
+     input_shapes = self.model.get_input_shapes(subset)
+@@ -3206,7 +3206,7 @@ class BenchmarkCNN(object):
+           rel_device_num, abs_device_num)
+       l2_loss = None
+       total_loss = base_loss
+-      with tf.name_scope('l2_loss'):
++      with tf.compat.v1.name_scope('l2_loss'):
+         fp32_params = params
+         if self.model.data_type == tf.float16 and self.params.fp16_vars:
+           # fp16 reductions are very slow on GPUs, so cast to fp32 before
+@@ -3241,12 +3241,12 @@ class BenchmarkCNN(object):
+       aggmeth = tf.AggregationMethod.DEFAULT
+       scaled_loss = (total_loss if self.loss_scale is None
+                      else total_loss * self.loss_scale)
+-      grads = tf.gradients(scaled_loss, params, aggregation_method=aggmeth)
++      grads = tf.gradients(ys=scaled_loss, xs=params, aggregation_method=aggmeth)
+       if self.params.sparse_to_dense_grads:
+         # Passing a sparse gradient to convert_to_tensor turns it into a dense
+         # gradient. A sparse gradient is an instance of tf.IndexedSlices.
+         # convert_to_tensor does not modify dense tensors.
+-        grads = [tf.convert_to_tensor(g) for g in grads]
++        grads = [tf.convert_to_tensor(value=g) for g in grads]
+       if self.loss_scale is not None:
+         # TODO(reedwm): If automatic loss scaling is not used, we could avoid
+         # these multiplications by directly modifying the learning rate instead.
+@@ -3340,10 +3340,10 @@ class BenchmarkCNN(object):
+ 
+       return results
+ 
+-    with tf.device(self.devices[rel_device_num]):
+-      outputs = maybe_compile(forward_pass_and_gradients, self.params)
+-      logits, loss, grads = unpack_forward_pass_and_gradients_output(outputs)
+-      return make_results(logits, loss, grads)
++    # with tf.device(self.devices[rel_device_num]):
++    outputs = maybe_compile(forward_pass_and_gradients, self.params)
++    logits, loss, grads = unpack_forward_pass_and_gradients_output(outputs)
++    return make_results(logits, loss, grads)
+ 
+   def get_input_preprocessor(self):
+     """Returns the image preprocessor to used, based on the model.
+@@ -3390,7 +3390,7 @@ class BenchmarkCNN(object):
+     with tf.device(self.sync_queue_devices[(
+         self.sync_queue_counter % len(self.sync_queue_devices))]):
+       sync_queues = [
+-          tf.FIFOQueue(self.num_workers, [tf.bool], shapes=[[]],
++          tf.queue.FIFOQueue(self.num_workers, [tf.bool], shapes=[[]],
+                        shared_name='%s%s' % (name_prefix, i))
+           for i in range(self.num_workers)]
+       queue_ops = []
+@@ -3417,7 +3417,7 @@ def _is_mkl_flag_absent(mkl_flag):
+ 
+ 
+ def _print_os_env_ignored_warning(mkl_flag, flag_default_val, os_env_var):
+-  tf.logging.warn(
++  tf.compat.v1.logging.warn(
+       ('OS ENV variable %s=%s is ignored and script default: '
+        '%s is used. Use --%s to override.') %
+       (os_env_var, os.environ[os_env_var], flag_default_val, mkl_flag))
+@@ -3528,7 +3528,7 @@ def setup(params):
+     # is not legal to create distributed session after local session. It is also
+     # not possible to create distributed session here as that results in
+     # multiple creation of ClusterManager and Server.
+-    with tf.Session(config=create_config_proto(params)) as sess:
++    with tf.compat.v1.Session(config=create_config_proto(params)) as sess:
+       del sess
+ 
+   return params
+diff --git a/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test.py b/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test.py
+index fe828a0..565a533 100644
+--- a/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test.py
++++ b/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test.py
+@@ -91,7 +91,7 @@ def _create_task_process(job_name, task_index, args, env, output_dir):
+   args += ['--task_index=%s' % task_index, '--job_name=%s' % job_name]
+   name_prefix = job_name or 'local'
+   process_name = '%s_%s' % (name_prefix, task_index)
+-  tf.logging.info('Spawning %s process: %s' % (process_name, ' '.join(args)))
++  tf.compat.v1.logging.info('Spawning %s process: %s' % (process_name, ' '.join(args)))
+   stdout_filename = os.path.join(output_dir, '%s_stdout.txt' % process_name)
+   stderr_filename = os.path.join(output_dir, '%s_stderr.txt' % process_name)
+   stdout_file = open(stdout_filename, 'w+')
+@@ -125,14 +125,14 @@ def _wait_for_processes(wait_processes, kill_processes):
+       ret_code = wait_process.popen.poll()
+       if ret_code is None:
+         continue
+-      tf.logging.info('{} finished'.format(wait_process.name))
++      tf.compat.v1.logging.info('{} finished'.format(wait_process.name))
+       wait_process.stdout.seek(0)
+       wait_process_stdouts[i] = wait_process.stdout.read()
+-      tf.logging.info('stdout for {} (last {} chars): {}\n'.format(
++      tf.compat.v1.logging.info('stdout for {} (last {} chars): {}\n'.format(
+           wait_process.name, MAX_OUTPUT_CHARS,
+           wait_process_stdouts[i][-MAX_OUTPUT_CHARS:]))
+       wait_process.stderr.seek(0)
+-      tf.logging.info('stderr for {} (last {} chars): {}\n'.format(
++      tf.compat.v1.logging.info('stderr for {} (last {} chars): {}\n'.format(
+           wait_process.name, MAX_OUTPUT_CHARS,
+           wait_process.stderr.read()[-MAX_OUTPUT_CHARS:]))
+       assert ret_code == 0, 'Process failed with return code %d' % ret_code
+@@ -142,17 +142,17 @@ def _wait_for_processes(wait_processes, kill_processes):
+       # kill processes should not end until we kill them.
+       assert ret_code is None, 'Process returned early with code %d' % ret_code
+     time.sleep(0.25)
+-  tf.logging.info('All wait processes finished')
++  tf.compat.v1.logging.info('All wait processes finished')
+   for i, kill_process in enumerate(kill_processes):
+     # Kill each kill process.
+     kill_process.popen.kill()
+     kill_process.popen.wait()
+     kill_process.stdout.seek(0)
+-    tf.logging.info('stdout for {} (last {} chars): {}\n'.format(
++    tf.compat.v1.logging.info('stdout for {} (last {} chars): {}\n'.format(
+         kill_process.name, MAX_OUTPUT_CHARS,
+         kill_process.stdout.read()[-MAX_OUTPUT_CHARS:]))
+     kill_process.stderr.seek(0)
+-    tf.logging.info('stderr for {} (last {} chars): {}\n'.format(
++    tf.compat.v1.logging.info('stderr for {} (last {} chars): {}\n'.format(
+         kill_process.name, MAX_OUTPUT_CHARS,
+         kill_process.stderr.read()[-MAX_OUTPUT_CHARS:]))
+   return wait_process_stdouts
+@@ -188,7 +188,7 @@ def _spawn_benchmark_processes(output_dir_path, num_workers, num_ps,
+   output_base_dir = platforms_util.get_test_output_dir()
+   output_dir = os.path.join(output_base_dir, output_dir_path)
+   os.makedirs(output_dir)
+-  tf.logging.info('Outputs of processes will be outputted to: %s' % output_dir)
++  tf.compat.v1.logging.info('Outputs of processes will be outputted to: %s' % output_dir)
+ 
+   args = platforms_util.get_command_to_run_python_module(
+       'benchmark_cnn_distributed_test_runner')
+diff --git a/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test_runner.py b/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test_runner.py
+index 6be754b..8c5a1fd 100644
+--- a/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test_runner.py
++++ b/scripts/tf_cnn_benchmarks/benchmark_cnn_distributed_test_runner.py
+@@ -118,4 +118,4 @@ def main(_):
+ 
+ 
+ if __name__ == '__main__':
+-  tf.app.run()
++  tf.compat.v1.app.run()
+diff --git a/scripts/tf_cnn_benchmarks/benchmark_cnn_test.py b/scripts/tf_cnn_benchmarks/benchmark_cnn_test.py
+index 6d9d65a..7b6980c 100644
+--- a/scripts/tf_cnn_benchmarks/benchmark_cnn_test.py
++++ b/scripts/tf_cnn_benchmarks/benchmark_cnn_test.py
+@@ -95,7 +95,7 @@ class TfCnnBenchmarksModelTest(tf.test.TestCase):
+     bench.run()
+     self.assertEquals(bench.init_global_step, 0)
+     # Clear the default graph.
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     # Test if checkpoint had been saved.
+     ckpt = tf.train.get_checkpoint_state(params.train_dir)
+     match = re.match(os.path.join(params.train_dir, r'model.ckpt-(\d+).index'),
+@@ -117,12 +117,12 @@ class TfCnnBenchmarksModelTest(tf.test.TestCase):
+     with tf.Graph().as_default():
+       bench = benchmark_cnn.BenchmarkCNN(params)
+       bench._build_model()
+-      saver = tf.train.Saver(bench.variable_mgr.savable_variables())
+-      with tf.Session(config=benchmark_cnn.create_config_proto(params)) as sess:
++      saver = tf.compat.v1.train.Saver(bench.variable_mgr.savable_variables())
++      with tf.compat.v1.Session(config=benchmark_cnn.create_config_proto(params)) as sess:
+         benchmark_cnn.load_checkpoint(saver, sess, params.train_dir)
+         sess.run(bench.variable_mgr.get_post_init_ops())
+         bn_moving_vars = [
+-            v for v in tf.global_variables()
++            v for v in tf.compat.v1.global_variables()
+             if '/batchnorm' in v.name and '/moving' in v.name
+         ]
+         self.assertGreater(len(bn_moving_vars), 0)
+@@ -254,10 +254,10 @@ class TfCnnBenchmarksModelTest(tf.test.TestCase):
+       bench._build_model()
+ 
+       # Rough validation of variable type and placement, depending on mode.
+-      all_vars = tf.global_variables() + tf.local_variables()
++      all_vars = tf.compat.v1.global_variables() + tf.compat.v1.local_variables()
+       if params.variable_update == 'parameter_server':
+         for v in all_vars:
+-          tf.logging.debug('var: %s' % v.name)
++          tf.compat.v1.logging.debug('var: %s' % v.name)
+           match = re.match(r'tower_(\d+)/v/gpu_cached_inputs:0', v.name)
+           if match:
+             self.assertEquals(v.device, '/device:GPU:%s' % match.group(1))
+@@ -300,7 +300,7 @@ class TfCnnBenchmarksModelTest(tf.test.TestCase):
+         self.assertEquals(v0_count, v1_count)
+ 
+       # Validate summary ops in the model depending on verbosity level
+-      summary_ops = tf.get_collection(tf.GraphKeys.SUMMARIES)
++      summary_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.SUMMARIES)
+       num_summary_ops = len(summary_ops)
+       self.assertEquals(num_summary_ops > 0, summary_verbosity > 0)
+       if summary_verbosity > 0:
+@@ -799,7 +799,7 @@ class TfCnnBenchmarksTest(tf.test.TestCase):
+       bench._build_model()
+       savable_vars = bench.variable_mgr.savable_variables()
+       # Assert all global variables are in savable_vars
+-      for v in tf.global_variables():
++      for v in tf.compat.v1.global_variables():
+         if not v.name.startswith(
+             variable_mgr_util.PS_SHADOW_VAR_PREFIX + '/v0'):
+           self.assertEqual(v.name, 'global_step:0')
+@@ -807,9 +807,9 @@ class TfCnnBenchmarksTest(tf.test.TestCase):
+         if name.startswith(variable_mgr_util.PS_SHADOW_VAR_PREFIX):
+           name = name[len(variable_mgr_util.PS_SHADOW_VAR_PREFIX + '/'):]
+         self.assertIn(name, savable_vars)
+-        self.assertIn(savable_vars[name], tf.global_variables())
++        self.assertIn(savable_vars[name], tf.compat.v1.global_variables())
+       # Assert all local variables on the first tower are in savable_vars
+-      for v in tf.local_variables():
++      for v in tf.compat.v1.local_variables():
+         if v.name.startswith('v0/'):
+           name = bench.variable_mgr._strip_port(v.name)
+           self.assertIn(name, savable_vars)
+@@ -1033,11 +1033,11 @@ class TfCnnBenchmarksTest(tf.test.TestCase):
+         # Reduce the image to a single number. The number should be (-1 + 100)
+         # during training and 1 during testing.
+         cnn.top_layer = tf.reshape(cnn.top_layer, (cnn.top_layer.shape[0], -1))
+-        cnn.top_layer = tf.reduce_mean(cnn.top_layer, axis=1)
++        cnn.top_layer = tf.reduce_mean(input_tensor=cnn.top_layer, axis=1)
+         cnn.top_layer = tf.reshape(cnn.top_layer,
+                                    (cnn.top_layer.shape[0], 1, 1, 1))
+         cnn.top_size = 1
+-        trainable_vars = tf.trainable_variables()
++        trainable_vars = tf.compat.v1.trainable_variables()
+ 
+         # The super method will compute image*A*B, where A=1 and B=2.
+         super(TestModel, self).add_inference(cnn)
+@@ -1045,7 +1045,7 @@ class TfCnnBenchmarksTest(tf.test.TestCase):
+         if not cnn.phase_train:
+           # Assert no new variables were added, since they should be reused from
+           # training.
+-          assert len(trainable_vars) == len(tf.trainable_variables())
++          assert len(trainable_vars) == len(tf.compat.v1.trainable_variables())
+ 
+     model = TestModel()
+     dataset = datasets.ImagenetDataset(params.data_dir)
+@@ -1407,9 +1407,9 @@ class VariableMgrLocalReplicatedTest(tf.test.TestCase):
+         # agg_device_grads[i] can be a list or tuple.
+         expected_grad_vars = tuple(expected_grad_vars)
+       expected_device_grads.append(expected_grad_vars)
+-    config = tf.ConfigProto(allow_soft_placement=True)
+-    with tf.Session(config=config) as sess:
+-      sess.run(tf.initialize_all_variables())
++    config = tf.compat.v1.ConfigProto(allow_soft_placement=True)
++    with tf.compat.v1.Session(config=config) as sess:
++      sess.run(tf.compat.v1.initialize_all_variables())
+       sess.run(variable_mgr._warmup_ops)
+       if deferred_grads:
+         # With deferred grads, the result of a session run is always the summed
+diff --git a/scripts/tf_cnn_benchmarks/cnn_util.py b/scripts/tf_cnn_benchmarks/cnn_util.py
+index 1ca3313..119856c 100644
+--- a/scripts/tf_cnn_benchmarks/cnn_util.py
++++ b/scripts/tf_cnn_benchmarks/cnn_util.py
+@@ -239,7 +239,7 @@ class GrpcClusterManager(BaseClusterManager):
+     if params.job_name == 'controller':
+       self._target = 'grpc://%s' % self._cluster_spec.job_tasks('worker')[0]
+     else:
+-      self._server = tf.train.Server(self._cluster_spec,
++      self._server = tf.distribute.Server(self._cluster_spec,
+                                      job_name=params.job_name,
+                                      task_index=params.task_index,
+                                      config=config_proto,
+diff --git a/scripts/tf_cnn_benchmarks/cnn_util_test.py b/scripts/tf_cnn_benchmarks/cnn_util_test.py
+index 0a24838..4c87a49 100644
+--- a/scripts/tf_cnn_benchmarks/cnn_util_test.py
++++ b/scripts/tf_cnn_benchmarks/cnn_util_test.py
+@@ -75,7 +75,7 @@ class ImageProducerTest(tf.test.TestCase):
+     def slow_func(v):
+       time.sleep(0.1)
+       return v
+-    return tf.py_func(slow_func, [tf.constant(0.)], tf.float32).op
++    return tf.compat.v1.py_func(slow_func, [tf.constant(0.)], tf.float32).op
+ 
+   def _test_image_producer(self, batch_group_size, put_slower_than_get):
+     # We use the variable x to simulate a staging area of images. x represents
+@@ -92,7 +92,7 @@ class ImageProducerTest(tf.test.TestCase):
+     with tf.control_dependencies([get_dep]):
+       get_op = x.assign_sub(1, use_locking=True)
+     with self.test_session() as sess:
+-      sess.run(tf.variables_initializer([x]))
++      sess.run(tf.compat.v1.variables_initializer([x]))
+       image_producer = cnn_util.ImageProducer(sess, put_op, batch_group_size,
+                                               use_python32_barrier=False)
+       image_producer.start()
+diff --git a/scripts/tf_cnn_benchmarks/coco_metric.py b/scripts/tf_cnn_benchmarks/coco_metric.py
+index e373fc6..8e2e2a0 100644
+--- a/scripts/tf_cnn_benchmarks/coco_metric.py
++++ b/scripts/tf_cnn_benchmarks/coco_metric.py
+@@ -72,10 +72,10 @@ def compute_map(predictions, val_json_file):
+ 
+   if val_json_file.startswith("gs://"):
+     _, local_val_json = tempfile.mkstemp(suffix=".json")
+-    tf.gfile.Remove(local_val_json)
++    tf.io.gfile.remove(local_val_json)
+ 
+-    tf.gfile.Copy(val_json_file, local_val_json)
+-    atexit.register(tf.gfile.Remove, local_val_json)
++    tf.io.gfile.copy(val_json_file, local_val_json)
++    atexit.register(tf.io.gfile.remove, local_val_json)
+   else:
+     local_val_json = val_json_file
+ 
+@@ -182,7 +182,7 @@ def decode_single(bboxes_in, scores_in, criteria, max_output, max_num=200):
+     labels_out.extend([i]*len(candidates))
+ 
+   if len(scores_out) == 0:
+-    tf.logging.info("No objects detected. Returning dummy values.")
++    tf.compat.v1.logging.info("No objects detected. Returning dummy values.")
+     return (
+         np.zeros(shape=(1, 4), dtype=np.float32),
+         np.zeros(shape=(1,), dtype=np.int32),
+diff --git a/scripts/tf_cnn_benchmarks/convnet_builder.py b/scripts/tf_cnn_benchmarks/convnet_builder.py
+index 81bb0e8..b357297 100644
+--- a/scripts/tf_cnn_benchmarks/convnet_builder.py
++++ b/scripts/tf_cnn_benchmarks/convnet_builder.py
+@@ -117,7 +117,7 @@ class ConvNetBuilder(object):
+     # devices and machines as type `dtype`, not `cast_dtype`. In particular,
+     # this means in fp16 mode, variables are transferred as fp32 values, not
+     # fp16 values, which uses extra bandwidth.
+-    var = tf.get_variable(name, shape, dtype, *args, **kwargs)
++    var = tf.compat.v1.get_variable(name, shape, dtype, *args, **kwargs)
+     return tf.cast(var, cast_dtype)
+ 
+   def _conv2d_impl(self, input_layer, num_channels_in, filters, kernel_size,
+@@ -140,7 +140,7 @@ class ConvNetBuilder(object):
+         strides = [1] + strides + [1]
+       else:
+         strides = [1, 1] + strides
+-      return tf.nn.conv2d(input_layer, weights, strides, padding,
++      return tf.nn.conv2d(input=input_layer, filters=weights, strides=strides, padding=padding,
+                           data_format=self.data_format)
+ 
+   def conv(self,
+@@ -163,12 +163,12 @@ class ConvNetBuilder(object):
+     if num_channels_in is None:
+       num_channels_in = self.top_size
+     if stddev is not None and kernel_initializer is None:
+-      kernel_initializer = tf.truncated_normal_initializer(stddev=stddev)
++      kernel_initializer = tf.compat.v1.truncated_normal_initializer(stddev=stddev)
+     if kernel_initializer is None:
+-      kernel_initializer = tf.variance_scaling_initializer()
++      kernel_initializer = tf.compat.v1.variance_scaling_initializer()
+     name = 'conv' + str(self.counts['conv'])
+     self.counts['conv'] += 1
+-    with tf.variable_scope(name):
++    with tf.compat.v1.variable_scope(name):
+       strides = [1, d_height, d_width, 1]
+       if self.data_format == 'NCHW':
+         strides = [strides[0], strides[3], strides[1], strides[2]]
+@@ -196,7 +196,7 @@ class ConvNetBuilder(object):
+                      [pad_w_beg, pad_w_end], [0, 0]]
+           if self.data_format == 'NCHW':
+             padding = [padding[0], padding[3], padding[1], padding[2]]
+-          padded_input_layer = tf.pad(input_layer, padding)
++          padded_input_layer = tf.pad(tensor=input_layer, paddings=padding)
+           conv = self._conv2d_impl(padded_input_layer, num_channels_in,
+                                    num_out_channels,
+                                    kernel_size=[k_height, k_width],
+@@ -213,7 +213,7 @@ class ConvNetBuilder(object):
+         if bias is not None:
+           biases = self.get_variable('biases', [num_out_channels],
+                                      self.variable_dtype, self.dtype,
+-                                     initializer=tf.constant_initializer(bias))
++                                     initializer=tf.compat.v1.constant_initializer(bias))
+           biased = tf.reshape(
+               tf.nn.bias_add(conv, biases, data_format=self.data_format),
+               conv.get_shape())
+@@ -266,7 +266,7 @@ class ConvNetBuilder(object):
+       else:
+         ksize = [1, 1, k_height, k_width]
+         strides = [1, 1, d_height, d_width]
+-      pool = tf.nn.max_pool(input_layer, ksize, strides, padding=mode,
++      pool = tf.nn.max_pool2d(input=input_layer, ksize=ksize, strides=strides, padding=mode,
+                             data_format=self.data_format, name=name)
+     if pool_name == 'mpool':
+       mlperf.logger.log_max_pool(input_tensor=input_layer,
+@@ -319,19 +319,19 @@ class ConvNetBuilder(object):
+       num_channels_in = self.top_size
+     name = 'affine' + str(self.counts['affine'])
+     self.counts['affine'] += 1
+-    with tf.variable_scope(name):
++    with tf.compat.v1.variable_scope(name):
+       init_factor = 2. if activation == 'relu' else 1.
+       stddev = stddev or np.sqrt(init_factor / num_channels_in)
+       kernel = self.get_variable(
+           'weights', [num_channels_in, num_out_channels],
+           self.variable_dtype, self.dtype,
+-          initializer=tf.truncated_normal_initializer(stddev=stddev))
++          initializer=tf.compat.v1.truncated_normal_initializer(stddev=stddev))
+       biases = self.get_variable('biases', [num_out_channels],
+                                  self.variable_dtype, self.dtype,
+-                                 initializer=tf.constant_initializer(bias))
++                                 initializer=tf.compat.v1.constant_initializer(bias))
+       mlperf.logger.log(key=mlperf.tags.MODEL_HP_DENSE,
+                         value=num_out_channels)
+-      logits = tf.nn.xw_plus_b(input_layer, kernel, biases)
++      logits = tf.compat.v1.nn.xw_plus_b(input_layer, kernel, biases)
+       if activation == 'relu':
+         mlperf.logger.log(key=mlperf.tags.MODEL_HP_RELU)
+         affine1 = tf.nn.relu(logits, name=name)
+@@ -350,7 +350,7 @@ class ConvNetBuilder(object):
+       in_size = self.top_size
+     name += str(self.counts[name])
+     self.counts[name] += 1
+-    with tf.variable_scope(name):
++    with tf.compat.v1.variable_scope(name):
+       col_layers = []
+       col_layer_sizes = []
+       for c, col in enumerate(cols):
+@@ -386,7 +386,7 @@ class ConvNetBuilder(object):
+     self.counts['spatial_mean'] += 1
+     axes = [1, 2] if self.data_format == 'NHWC' else [2, 3]
+     self.top_layer = tf.reduce_mean(
+-        self.top_layer, axes, keepdims=keep_dims, name=name)
++        input_tensor=self.top_layer, axis=axes, keepdims=keep_dims, name=name)
+     return self.top_layer
+ 
+   def dropout(self, keep_prob=0.5, input_layer=None):
+@@ -395,14 +395,14 @@ class ConvNetBuilder(object):
+     else:
+       self.top_size = None
+     name = 'dropout' + str(self.counts['dropout'])
+-    with tf.variable_scope(name):
++    with tf.compat.v1.variable_scope(name):
+       if not self.phase_train:
+         keep_prob = 1.0
+       if self.use_tf_layers:
+         dropout = core_layers.dropout(input_layer, 1. - keep_prob,
+                                       training=self.phase_train)
+       else:
+-        dropout = tf.nn.dropout(input_layer, keep_prob)
++        dropout = tf.nn.dropout(input_layer, 1 - (keep_prob))
+       self.top_layer = dropout
+       return dropout
+ 
+@@ -414,35 +414,35 @@ class ConvNetBuilder(object):
+     shape = input_layer.shape
+     num_channels = shape[3] if self.data_format == 'NHWC' else shape[1]
+     beta = self.get_variable('beta', [num_channels], tf.float32, tf.float32,
+-                             initializer=tf.zeros_initializer())
++                             initializer=tf.compat.v1.zeros_initializer())
+     if use_scale:
+       gamma = self.get_variable('gamma', [num_channels], tf.float32,
+-                                tf.float32, initializer=tf.ones_initializer())
++                                tf.float32, initializer=tf.compat.v1.ones_initializer())
+     else:
+       gamma = tf.constant(1.0, tf.float32, [num_channels])
+     # For moving variables, we use tf.get_variable instead of self.get_variable,
+     # since self.get_variable returns the result of tf.cast which we cannot
+     # assign to.
+-    moving_mean = tf.get_variable('moving_mean', [num_channels],
++    moving_mean = tf.compat.v1.get_variable('moving_mean', [num_channels],
+                                   tf.float32,
+-                                  initializer=tf.zeros_initializer(),
++                                  initializer=tf.compat.v1.zeros_initializer(),
+                                   trainable=False)
+-    moving_variance = tf.get_variable('moving_variance', [num_channels],
++    moving_variance = tf.compat.v1.get_variable('moving_variance', [num_channels],
+                                       tf.float32,
+-                                      initializer=tf.ones_initializer(),
++                                      initializer=tf.compat.v1.ones_initializer(),
+                                       trainable=False)
+     if self.phase_train:
+-      bn, batch_mean, batch_variance = tf.nn.fused_batch_norm(
++      bn, batch_mean, batch_variance = tf.compat.v1.nn.fused_batch_norm(
+           input_layer, gamma, beta, epsilon=epsilon,
+           data_format=self.data_format, is_training=True)
+       mean_update = moving_averages.assign_moving_average(
+           moving_mean, batch_mean, decay=decay, zero_debias=False)
+       variance_update = moving_averages.assign_moving_average(
+           moving_variance, batch_variance, decay=decay, zero_debias=False)
+-      tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, mean_update)
+-      tf.add_to_collection(tf.GraphKeys.UPDATE_OPS, variance_update)
++      tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, mean_update)
++      tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.UPDATE_OPS, variance_update)
+     else:
+-      bn, _, _ = tf.nn.fused_batch_norm(
++      bn, _, _ = tf.compat.v1.nn.fused_batch_norm(
+           input_layer, gamma, beta, mean=moving_mean,
+           variance=moving_variance, epsilon=epsilon,
+           data_format=self.data_format, is_training=False)
+@@ -459,7 +459,8 @@ class ConvNetBuilder(object):
+     self.counts['batchnorm'] += 1
+ 
+     center = True
+-    with tf.variable_scope(name) as scope:
++    with tf.compat.v1.variable_scope(name) as scope:
++      '''
+       if self.use_tf_layers:
+         bn = tf.contrib.layers.batch_norm(
+             input_layer,
+@@ -473,6 +474,8 @@ class ConvNetBuilder(object):
+             center=center)
+       else:
+         bn = self._batch_norm_without_layers(input_layer, decay, scale, epsilon)
++      '''
++      bn = self._batch_norm_without_layers(input_layer, decay, scale, epsilon)
+     self.top_layer = bn
+     self.top_size = bn.shape[3] if self.data_format == 'NHWC' else bn.shape[1]
+     self.top_size = int(self.top_size)
+diff --git a/scripts/tf_cnn_benchmarks/datasets.py b/scripts/tf_cnn_benchmarks/datasets.py
+index 58c0f0d..23933d9 100644
+--- a/scripts/tf_cnn_benchmarks/datasets.py
++++ b/scripts/tf_cnn_benchmarks/datasets.py
+@@ -52,10 +52,10 @@ class Dataset(object):
+     self._num_classes = num_classes
+ 
+   def tf_record_pattern(self, subset):
+-    return os.path.join(self.data_dir, '%s-*-of-*' % subset)
++    return os.path.join(self.data_dir, '*%s*-*-of-*' % subset)
+ 
+   def reader(self):
+-    return tf.TFRecordReader()
++    return tf.compat.v1.TFRecordReader()
+ 
+   @property
+   def num_classes(self):
+diff --git a/scripts/tf_cnn_benchmarks/leading_indicators_test.py b/scripts/tf_cnn_benchmarks/leading_indicators_test.py
+index 94fad82..0deec0d 100644
+--- a/scripts/tf_cnn_benchmarks/leading_indicators_test.py
++++ b/scripts/tf_cnn_benchmarks/leading_indicators_test.py
+@@ -111,10 +111,10 @@ class BenchmarkBase(tf.test.Benchmark):
+     params = params._replace(num_batches=10, num_warmup_batches=0)
+ 
+     # Find high_batch_size first.
+-    tf.logging.info(
++    tf.compat.v1.logging.info(
+         'Looking for upper bound to batch size, starting with %d' % batch_size)
+     while high_batch_size is None:
+-      tf.logging.info('Trying batch_size %d' % batch_size)
++      tf.compat.v1.logging.info('Trying batch_size %d' % batch_size)
+       params = params._replace(batch_size=batch_size)
+       bench = benchmark_cnn.BenchmarkCNN(params)
+       bench.print_info()
+@@ -126,12 +126,12 @@ class BenchmarkBase(tf.test.Benchmark):
+         high_batch_size = batch_size - 1
+ 
+     # Binary Search
+-    tf.logging.info(
++    tf.compat.v1.logging.info(
+         'Max batch size is in range (%d, %d].  Starting binary search to find '
+         'exact max batch size.' % (low_batch_size, batch_size))
+     while low_batch_size < high_batch_size:
+       batch_size = (low_batch_size + high_batch_size + 1) // 2
+-      tf.logging.info('Trying batch_size %d' % batch_size)
++      tf.compat.v1.logging.info('Trying batch_size %d' % batch_size)
+       params = params._replace(batch_size=batch_size)
+       bench = benchmark_cnn.BenchmarkCNN(params)
+       bench.print_info()
+diff --git a/scripts/tf_cnn_benchmarks/mlperf.py b/scripts/tf_cnn_benchmarks/mlperf.py
+index 654960a..39e67b3 100644
+--- a/scripts/tf_cnn_benchmarks/mlperf.py
++++ b/scripts/tf_cnn_benchmarks/mlperf.py
+@@ -109,8 +109,8 @@ class MlPerfLogger(object):
+                       tf.timestamp(), caller, key,
+                       ': { "deferred": true, "value":', tensor_value, '}',
+                       output_stream=sys.stdout)
+-    maybe_print = tf.cond(tf.equal(global_step % every_n, 0), create_print_op,
+-                          tf.no_op)
++    maybe_print = tf.cond(pred=tf.equal(global_step % every_n, 0), true_fn=create_print_op,
++                          false_fn=tf.no_op)
+     with tf.control_dependencies([maybe_print]):
+       return tf.identity(tensor_value)
+ 
+@@ -138,11 +138,11 @@ class MlPerfLogger(object):
+           '--ml_perf_compliance_logging does not support convolutions where '
+           'the stride height is not equal to the stride width. '
+           'stride_height=%d, stride_width=%d' % (stride_height, stride_width))
+-      if isinstance(initializer, tf.truncated_normal_initializer) or (
+-          isinstance(initializer, tf.variance_scaling_initializer) and
++      if isinstance(initializer, tf.compat.v1.truncated_normal_initializer) or (
++          isinstance(initializer, tf.compat.v1.variance_scaling_initializer) and
+           initializer.distribution == 'truncated_normal'):
+         initializer = tags.TRUNCATED_NORMAL
+-      elif (isinstance(initializer, tf.glorot_uniform_initializer) or
++      elif (isinstance(initializer, tf.compat.v1.glorot_uniform_initializer) or
+             initializer is None):
+         initializer = 'glorot_uniform'
+       resnet_log_helper.log_conv2d(input_tensor, output_tensor, stride_width,
+diff --git a/scripts/tf_cnn_benchmarks/mlperf_test.py b/scripts/tf_cnn_benchmarks/mlperf_test.py
+index 1dd1ce9..dffe4d6 100644
+--- a/scripts/tf_cnn_benchmarks/mlperf_test.py
++++ b/scripts/tf_cnn_benchmarks/mlperf_test.py
+@@ -50,7 +50,7 @@ class _MlPerfTestModel(model.CNNModel):
+     cnn.affine(1, activation=None)
+ 
+     # Assert that the batch norm variables are filtered out for L2 loss.
+-    variables = tf.global_variables() + tf.local_variables()
++    variables = tf.compat.v1.global_variables() + tf.compat.v1.local_variables()
+     assert len(variables) > len(self.filter_l2_loss_vars(variables))
+ 
+ 
+diff --git a/scripts/tf_cnn_benchmarks/models/alexnet_model.py b/scripts/tf_cnn_benchmarks/models/alexnet_model.py
+index 98a9aff..d27f5b5 100644
+--- a/scripts/tf_cnn_benchmarks/models/alexnet_model.py
++++ b/scripts/tf_cnn_benchmarks/models/alexnet_model.py
+@@ -85,7 +85,7 @@ class AlexnetCifar10Model(model.CNNModel):
+     decay_steps = (
+         num_epochs_per_decay * num_examples_per_epoch // batch_size)
+     decay_factor = 0.1
+-    return tf.train.exponential_decay(
++    return tf.compat.v1.train.exponential_decay(
+         self.learning_rate,
+         global_step,
+         decay_steps,
+diff --git a/scripts/tf_cnn_benchmarks/models/densenet_model.py b/scripts/tf_cnn_benchmarks/models/densenet_model.py
+index dc4436d..082f7b0 100644
+--- a/scripts/tf_cnn_benchmarks/models/densenet_model.py
++++ b/scripts/tf_cnn_benchmarks/models/densenet_model.py
+@@ -85,7 +85,7 @@ class DensenetCifar10Model(model_lib.CNNModel):
+                                                   dtype=np.int64)
+     boundaries = [x for x in boundaries]
+     values = [0.1, 0.01, 0.001, 0.0001]
+-    return tf.train.piecewise_constant(global_step, boundaries, values)
++    return tf.compat.v1.train.piecewise_constant(global_step, boundaries, values)
+ 
+ 
+ def create_densenet40_k12_model():
+diff --git a/scripts/tf_cnn_benchmarks/models/experimental/deepspeech.py b/scripts/tf_cnn_benchmarks/models/experimental/deepspeech.py
+index b85dafb..7de92e2 100644
+--- a/scripts/tf_cnn_benchmarks/models/experimental/deepspeech.py
++++ b/scripts/tf_cnn_benchmarks/models/experimental/deepspeech.py
+@@ -127,9 +127,9 @@ class DeepSpeech2Model(model_lib.Model):
+ 
+   # Supported rnn cells.
+   SUPPORTED_RNNS = {
+-      'lstm': tf.nn.rnn_cell.BasicLSTMCell,
+-      'rnn': tf.nn.rnn_cell.RNNCell,
+-      'gru': tf.nn.rnn_cell.GRUCell,
++      'lstm': tf.compat.v1.nn.rnn_cell.BasicLSTMCell,
++      'rnn': tf.compat.v1.nn.rnn_cell.RNNCell,
++      'gru': tf.compat.v1.nn.rnn_cell.GRUCell,
+   }
+ 
+   # Parameters for batch normalization.
+@@ -190,7 +190,7 @@ class DeepSpeech2Model(model_lib.Model):
+     Returns:
+       tensor output from batch norm layer.
+     """
+-    return tf.layers.batch_normalization(
++    return tf.compat.v1.layers.batch_normalization(
+         inputs=inputs,
+         momentum=DeepSpeech2Model.BATCH_NORM_DECAY,
+         epsilon=DeepSpeech2Model.BATCH_NORM_EPSILON,
+@@ -218,9 +218,9 @@ class DeepSpeech2Model(model_lib.Model):
+     # This step is required to avoid issues when RNN output sequence is shorter
+     # than the label length.
+     inputs = tf.pad(
+-        inputs,
+-        [[0, 0], [padding[0], padding[0]], [padding[1], padding[1]], [0, 0]])
+-    inputs = tf.layers.conv2d(
++        tensor=inputs,
++        paddings=[[0, 0], [padding[0], padding[0]], [padding[1], padding[1]], [0, 0]])
++    inputs = tf.compat.v1.layers.conv2d(
+         inputs=inputs,
+         filters=filters,
+         kernel_size=kernel_size,
+@@ -260,7 +260,7 @@ class DeepSpeech2Model(model_lib.Model):
+     if is_bidirectional:
+       bw_cell = rnn_cell(
+           num_units=rnn_hidden_size, name='rnn_bw_{}'.format(layer_id))
+-      outputs, _ = tf.nn.bidirectional_dynamic_rnn(
++      outputs, _ = tf.compat.v1.nn.bidirectional_dynamic_rnn(
+           cell_fw=fw_cell,
+           cell_bw=bw_cell,
+           inputs=inputs,
+@@ -268,7 +268,7 @@ class DeepSpeech2Model(model_lib.Model):
+           swap_memory=True)
+       rnn_outputs = tf.concat(outputs, -1)
+     else:
+-      rnn_outputs = tf.nn.dynamic_rnn(
++      rnn_outputs = tf.compat.v1.nn.dynamic_rnn(
+           fw_cell, inputs, dtype=tf.float32, swap_memory=True)
+ 
+     return rnn_outputs
+@@ -289,15 +289,15 @@ class DeepSpeech2Model(model_lib.Model):
+     ]
+ 
+   def get_synthetic_inputs(self, input_name, nclass):
+-    inputs = tf.random_uniform(self.get_input_shapes('train')[0],
++    inputs = tf.random.uniform(self.get_input_shapes('train')[0],
+                                dtype=self.get_input_data_types('train')[0])
+     inputs = tf.contrib.framework.local_variable(inputs, name=input_name)
+     labels = tf.convert_to_tensor(
+-        np.random.randint(28, size=[self.batch_size, self.max_label_length]))
++        value=np.random.randint(28, size=[self.batch_size, self.max_label_length]))
+     input_lengths = tf.convert_to_tensor(
+-        [self.max_time_steps] * self.batch_size)
++        value=[self.max_time_steps] * self.batch_size)
+     label_lengths = tf.convert_to_tensor(
+-        [self.max_label_length] * self.batch_size)
++        value=[self.max_label_length] * self.batch_size)
+     return [inputs, labels, input_lengths, label_lengths]
+ 
+   # TODO(laigd): support fp16.
+@@ -356,7 +356,7 @@ class DeepSpeech2Model(model_lib.Model):
+ 
+     # FC layer with batch norm.
+     inputs = self._batch_norm(inputs, phase_train)
+-    logits = tf.layers.dense(inputs, nclass, use_bias=self.use_bias)
++    logits = tf.compat.v1.layers.dense(inputs, nclass, use_bias=self.use_bias)
+ 
+     return model_lib.BuildNetworkResult(logits=logits, extra_info=None)
+ 
+@@ -373,30 +373,30 @@ class DeepSpeech2Model(model_lib.Model):
+     logits = build_network_result.logits
+     actual_time_steps = inputs[2]
+     probs = tf.nn.softmax(logits)
+-    ctc_time_steps = tf.shape(probs)[1]
+-    ctc_input_length = tf.to_float(
+-        tf.multiply(actual_time_steps, ctc_time_steps))
+-    ctc_input_length = tf.to_int32(
+-        tf.floordiv(ctc_input_length, tf.to_float(self.max_time_steps)))
++    ctc_time_steps = tf.shape(input=probs)[1]
++    ctc_input_length = tf.cast(
++        tf.multiply(actual_time_steps, ctc_time_steps), dtype=tf.float32)
++    ctc_input_length = tf.cast(
++        tf.math.floordiv(ctc_input_length, tf.cast(self.max_time_steps, dtype=tf.float32)), dtype=tf.int32)
+ 
+     label_length = inputs[3]
+-    label_length = tf.to_int32(tf.squeeze(label_length))
+-    ctc_input_length = tf.to_int32(tf.squeeze(ctc_input_length))
++    label_length = tf.cast(tf.squeeze(label_length), dtype=tf.int32)
++    ctc_input_length = tf.cast(tf.squeeze(ctc_input_length), dtype=tf.int32)
+ 
+     labels = inputs[1]
+-    sparse_labels = tf.to_int32(
+-        tf.keras.backend.ctc_label_dense_to_sparse(labels, label_length))
+-    y_pred = tf.log(
+-        tf.transpose(probs, perm=[1, 0, 2]) + tf.keras.backend.epsilon())
++    sparse_labels = tf.cast(
++        tf.keras.backend.ctc_label_dense_to_sparse(labels, label_length), dtype=tf.int32)
++    y_pred = tf.math.log(
++        tf.transpose(a=probs, perm=[1, 0, 2]) + tf.keras.backend.epsilon())
+ 
+     losses = tf.expand_dims(
+-        tf.nn.ctc_loss(
++        tf.compat.v1.nn.ctc_loss(
+             labels=sparse_labels,
+             inputs=y_pred,
+             sequence_length=ctc_input_length,
+             ignore_longer_outputs_than_inputs=True),
+         axis=1)
+-    loss = tf.reduce_mean(losses)
++    loss = tf.reduce_mean(input_tensor=losses)
+     return loss
+ 
+   PROBABILITY_TENSOR = 'deepspeech2_prob'
+diff --git a/scripts/tf_cnn_benchmarks/models/experimental/official_ncf_model.py b/scripts/tf_cnn_benchmarks/models/experimental/official_ncf_model.py
+index 97e1cf4..75bcf2d 100644
+--- a/scripts/tf_cnn_benchmarks/models/experimental/official_ncf_model.py
++++ b/scripts/tf_cnn_benchmarks/models/experimental/official_ncf_model.py
+@@ -113,7 +113,7 @@ class NcfModel(model.Model):
+     logits = tf.concat([tf.ones(logits.shape, dtype=logits.dtype), logits],
+                        axis=1)
+ 
+-    return tf.losses.sparse_softmax_cross_entropy(
++    return tf.compat.v1.losses.sparse_softmax_cross_entropy(
+         labels=inputs[2],
+         logits=logits
+     )
+@@ -121,23 +121,23 @@ class NcfModel(model.Model):
+   def get_synthetic_inputs(self, input_name, nclass):
+     """Returns the ops to generate synthetic inputs and labels."""
+     def users_init_val():
+-      return tf.random_uniform((self.batch_size,), minval=0,
++      return tf.random.uniform((self.batch_size,), minval=0,
+                                maxval=_NUM_USERS_20M, dtype=tf.int32)
+     users = tf.Variable(users_init_val, dtype=tf.int32, trainable=False,
+-                        collections=[tf.GraphKeys.LOCAL_VARIABLES],
++                        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES],
+                         name='synthetic_users')
+     def items_init_val():
+-      return tf.random_uniform((self.batch_size,), minval=0,
++      return tf.random.uniform((self.batch_size,), minval=0,
+                                maxval=_NUM_ITEMS_20M, dtype=tf.int32)
+     items = tf.Variable(items_init_val, dtype=tf.int32, trainable=False,
+-                        collections=[tf.GraphKeys.LOCAL_VARIABLES],
++                        collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES],
+                         name='synthetic_items')
+ 
+     def labels_init_val():
+-      return tf.random_uniform((self.batch_size,), minval=0, maxval=2,
++      return tf.random.uniform((self.batch_size,), minval=0, maxval=2,
+                                dtype=tf.int32)
+     labels = tf.Variable(labels_init_val, dtype=tf.int32, trainable=False,
+-                         collections=[tf.GraphKeys.LOCAL_VARIABLES],
++                         collections=[tf.compat.v1.GraphKeys.LOCAL_VARIABLES],
+                          name='synthetic_labels')
+ 
+     return [users, items, labels]
+diff --git a/scripts/tf_cnn_benchmarks/models/mobilenet.py b/scripts/tf_cnn_benchmarks/models/mobilenet.py
+index 4e9b2d0..134a070 100644
+--- a/scripts/tf_cnn_benchmarks/models/mobilenet.py
++++ b/scripts/tf_cnn_benchmarks/models/mobilenet.py
+@@ -53,7 +53,7 @@ def _fixed_padding(inputs, kernel_size, rate=1):
+   pad_total = [kernel_size_effective[0] - 1, kernel_size_effective[1] - 1]
+   pad_beg = [pad_total[0] // 2, pad_total[1] // 2]
+   pad_end = [pad_total[0] - pad_beg[0], pad_total[1] - pad_beg[1]]
+-  padded_inputs = tf.pad(inputs, [[0, 0], [pad_beg[0], pad_end[0]],
++  padded_inputs = tf.pad(tensor=inputs, paddings=[[0, 0], [pad_beg[0], pad_end[0]],
+                                   [pad_beg[1], pad_end[1]], [0, 0]])
+   return padded_inputs
+ 
+@@ -295,8 +295,8 @@ def mobilenet_base(  # pylint: disable=invalid-name
+ 
+ @contextlib.contextmanager
+ def _scope_all(scope, default_scope=None):
+-  with tf.variable_scope(scope, default_name=default_scope) as s,\
+-       tf.name_scope(s.original_name_scope):
++  with tf.compat.v1.variable_scope(scope, default_name=default_scope) as s,\
++       tf.compat.v1.name_scope(s.original_name_scope):
+     yield s
+ 
+ 
+@@ -352,7 +352,7 @@ def mobilenet(inputs,
+   if len(input_shape) != 4:
+     raise ValueError('Expected rank 4 input, was: %d' % len(input_shape))
+ 
+-  with tf.variable_scope(scope, 'Mobilenet', reuse=reuse) as scope:
++  with tf.compat.v1.variable_scope(scope, 'Mobilenet', reuse=reuse) as scope:
+     inputs = tf.identity(inputs, 'input')
+     net, end_points = mobilenet_base(inputs, scope=scope, **mobilenet_args)
+     if base_only:
+@@ -360,7 +360,7 @@ def mobilenet(inputs,
+ 
+     net = tf.identity(net, name='embedding')
+ 
+-    with tf.variable_scope('Logits'):
++    with tf.compat.v1.variable_scope('Logits'):
+       net = global_pool(net)
+       end_points['global_pool'] = net
+       if not num_classes:
+@@ -373,7 +373,7 @@ def mobilenet(inputs,
+           num_classes, [1, 1],
+           activation_fn=None,
+           normalizer_fn=None,
+-          biases_initializer=tf.zeros_initializer(),
++          biases_initializer=tf.compat.v1.zeros_initializer(),
+           scope='Conv2d_1c_1x1')
+ 
+       logits = tf.squeeze(logits, [1, 2])
+@@ -385,7 +385,7 @@ def mobilenet(inputs,
+   return logits, end_points
+ 
+ 
+-def global_pool(input_tensor, pool_op=tf.nn.avg_pool):
++def global_pool(input_tensor, pool_op=tf.nn.avg_pool2d):
+   """Applies avg pool to produce 1x1 output.
+ 
+   NOTE: This function is funcitonally equivalenet to reduce_mean, but it has
+@@ -400,8 +400,8 @@ def global_pool(input_tensor, pool_op=tf.nn.avg_pool):
+   shape = input_tensor.get_shape().as_list()
+   if shape[1] is None or shape[2] is None:
+     kernel_size = tf.convert_to_tensor(
+-        [1, tf.shape(input_tensor)[1],
+-         tf.shape(input_tensor)[2], 1])
++        value=[1, tf.shape(input=input_tensor)[1],
++         tf.shape(input=input_tensor)[2], 1])
+   else:
+     kernel_size = [1, shape[1], shape[2], 1]
+   output = pool_op(
+@@ -449,7 +449,7 @@ def training_scope(is_training=True,
+   if stddev < 0:
+     weight_intitializer = slim.initializers.xavier_initializer()
+   else:
+-    weight_intitializer = tf.truncated_normal_initializer(stddev=stddev)
++    weight_intitializer = tf.compat.v1.truncated_normal_initializer(stddev=stddev)
+ 
+   # Set weight_decay for weights in Conv and FC layers.
+   with slim.arg_scope(
+@@ -461,6 +461,6 @@ def training_scope(is_training=True,
+       safe_arg_scope([slim.dropout], is_training=is_training,
+                      keep_prob=dropout_keep_prob), \
+       slim.arg_scope([slim.conv2d], \
+-                     weights_regularizer=slim.l2_regularizer(weight_decay)), \
++                     weights_regularizer=tf.keras.regularizers.l2(0.5 * (weight_decay))), \
+       slim.arg_scope([slim.separable_conv2d], weights_regularizer=None) as s:
+     return s
+diff --git a/scripts/tf_cnn_benchmarks/models/mobilenet_conv_blocks.py b/scripts/tf_cnn_benchmarks/models/mobilenet_conv_blocks.py
+index 19aa41c..8be6280 100644
+--- a/scripts/tf_cnn_benchmarks/models/mobilenet_conv_blocks.py
++++ b/scripts/tf_cnn_benchmarks/models/mobilenet_conv_blocks.py
+@@ -47,7 +47,7 @@ def _fixed_padding(inputs, kernel_size, rate=1):
+   pad_total = [kernel_size_effective[0] - 1, kernel_size_effective[1] - 1]
+   pad_beg = [pad_total[0] // 2, pad_total[1] // 2]
+   pad_end = [pad_total[0] - pad_beg[0], pad_total[1] - pad_beg[1]]
+-  padded_inputs = tf.pad(inputs, [[0, 0], [pad_beg[0], pad_end[0]],
++  padded_inputs = tf.pad(tensor=inputs, paddings=[[0, 0], [pad_beg[0], pad_end[0]],
+                                   [pad_beg[1], pad_end[1]], [0, 0]])
+   return padded_inputs
+ 
+@@ -83,8 +83,8 @@ def _split_divisible(num, num_ways, divisible_by=8):
+ @contextlib.contextmanager
+ def _v1_compatible_scope_naming(scope):
+   if scope is None:  # Create uniqified separable blocks.
+-    with tf.variable_scope(None, default_name='separable') as s, \
+-         tf.name_scope(s.original_name_scope):
++    with tf.compat.v1.variable_scope(None, default_name='separable') as s, \
++         tf.compat.v1.name_scope(s.original_name_scope):
+       yield ''
+   else:
+     # We use scope_depthwise, scope_pointwise for compatibility with V1 ckpts.
+@@ -229,8 +229,8 @@ def expanded_conv(input_tensor,
+   Raises:
+     TypeError: on inval
+   """
+-  with tf.variable_scope(scope, default_name='expanded_conv') as s, \
+-       tf.name_scope(s.original_name_scope):
++  with tf.compat.v1.variable_scope(scope, default_name='expanded_conv') as s, \
++       tf.compat.v1.name_scope(s.original_name_scope):
+     prev_depth = input_tensor.get_shape().as_list()[3]
+     if  depthwise_location not in [None, 'input', 'output', 'expansion']:
+       raise TypeError('%r is unknown value for depthwise_location' %
+diff --git a/scripts/tf_cnn_benchmarks/models/mobilenet_test.py b/scripts/tf_cnn_benchmarks/models/mobilenet_test.py
+index f94101b..69670e3 100644
+--- a/scripts/tf_cnn_benchmarks/models/mobilenet_test.py
++++ b/scripts/tf_cnn_benchmarks/models/mobilenet_test.py
+@@ -38,19 +38,19 @@ def find_ops(optype):
+   Returns:
+      List of operations.
+   """
+-  gd = tf.get_default_graph()
++  gd = tf.compat.v1.get_default_graph()
+   return [var for var in gd.get_operations() if var.type == optype]
+ 
+ 
+ class MobilenetV2Test(tf.test.TestCase):
+ 
+   def setUp(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+ 
+   def testCreation(self):
+     spec = dict(mobilenet_v2.V2_DEF)
+     _, ep = mobilenet.mobilenet(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)), conv_defs=spec)
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)), conv_defs=spec)
+     num_convs = len(find_ops('Conv2D'))
+ 
+     # This is mostly a sanity test. No deep reason for these particular
+@@ -66,16 +66,16 @@ class MobilenetV2Test(tf.test.TestCase):
+   def testCreationNoClasses(self):
+     spec = copy.deepcopy(mobilenet_v2.V2_DEF)
+     net, ep = mobilenet.mobilenet(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)), conv_defs=spec,
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)), conv_defs=spec,
+         num_classes=None)
+     self.assertIs(net, ep['global_pool'])
+ 
+   def testImageSizes(self):
+     for input_size, output_size in [(224, 7), (192, 6), (160, 5),
+                                     (128, 4), (96, 3)]:
+-      tf.reset_default_graph()
++      tf.compat.v1.reset_default_graph()
+       _, ep = mobilenet_v2.mobilenet(
+-          tf.placeholder(tf.float32, (10, input_size, input_size, 3)))
++          tf.compat.v1.placeholder(tf.float32, (10, input_size, input_size, 3)))
+ 
+       self.assertEqual(ep['layer_18/output'].get_shape().as_list()[1:3],
+                        [output_size] * 2)
+@@ -86,7 +86,7 @@ class MobilenetV2Test(tf.test.TestCase):
+         (ops.expanded_conv,): dict(split_expansion=2),
+     }
+     _, _ = mobilenet.mobilenet(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)), conv_defs=spec)
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)), conv_defs=spec)
+     num_convs = len(find_ops('Conv2D'))
+     # All but 3 op has 3 conv operatore, the remainign 3 have one
+     # and there is one unaccounted.
+@@ -94,16 +94,16 @@ class MobilenetV2Test(tf.test.TestCase):
+ 
+   def testWithOutputStride8(self):
+     out, _ = mobilenet.mobilenet_base(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)),
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)),
+         conv_defs=mobilenet_v2.V2_DEF,
+         output_stride=8,
+         scope='MobilenetV2')
+     self.assertEqual(out.get_shape().as_list()[1:3], [28, 28])
+ 
+   def testDivisibleBy(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     mobilenet_v2.mobilenet(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)),
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)),
+         conv_defs=mobilenet_v2.V2_DEF,
+         divisible_by=16,
+         min_depth=32)
+@@ -113,24 +113,24 @@ class MobilenetV2Test(tf.test.TestCase):
+                              1001], s)
+ 
+   def testDivisibleByWithArgScope(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     # Verifies that depth_multiplier arg scope actually works
+     # if no default min_depth is provided.
+     with slim.arg_scope((mobilenet.depth_multiplier,), min_depth=32):
+       mobilenet_v2.mobilenet(
+-          tf.placeholder(tf.float32, (10, 224, 224, 2)),
++          tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 2)),
+           conv_defs=mobilenet_v2.V2_DEF, depth_multiplier=0.1)
+       s = [op.outputs[0].get_shape().as_list()[-1] for op in find_ops('Conv2D')]
+       s = set(s)
+       self.assertSameElements(s, [32, 192, 128, 1001])
+ 
+   def testFineGrained(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     # Verifies that depth_multiplier arg scope actually works
+     # if no default min_depth is provided.
+ 
+     mobilenet_v2.mobilenet(
+-        tf.placeholder(tf.float32, (10, 224, 224, 2)),
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 2)),
+         conv_defs=mobilenet_v2.V2_DEF, depth_multiplier=0.01,
+         finegrain_classification_mode=True)
+     s = [op.outputs[0].get_shape().as_list()[-1] for op in find_ops('Conv2D')]
+@@ -139,26 +139,26 @@ class MobilenetV2Test(tf.test.TestCase):
+     self.assertSameElements(s, [8, 48, 1001, 1280])
+ 
+   def testMobilenetBase(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     # Verifies that mobilenet_base returns pre-pooling layer.
+     with slim.arg_scope((mobilenet.depth_multiplier,), min_depth=32):
+       net, _ = mobilenet_v2.mobilenet_base(
+-          tf.placeholder(tf.float32, (10, 224, 224, 16)),
++          tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)),
+           conv_defs=mobilenet_v2.V2_DEF, depth_multiplier=0.1)
+       self.assertEqual(net.get_shape().as_list(), [10, 7, 7, 128])
+ 
+   def testWithOutputStride16(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     out, _ = mobilenet.mobilenet_base(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)),
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)),
+         conv_defs=mobilenet_v2.V2_DEF,
+         output_stride=16)
+     self.assertEqual(out.get_shape().as_list()[1:3], [14, 14])
+ 
+   def testWithOutputStride8AndExplicitPadding(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     out, _ = mobilenet.mobilenet_base(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)),
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)),
+         conv_defs=mobilenet_v2.V2_DEF,
+         output_stride=8,
+         use_explicit_padding=True,
+@@ -166,9 +166,9 @@ class MobilenetV2Test(tf.test.TestCase):
+     self.assertEqual(out.get_shape().as_list()[1:3], [28, 28])
+ 
+   def testWithOutputStride16AndExplicitPadding(self):
+-    tf.reset_default_graph()
++    tf.compat.v1.reset_default_graph()
+     out, _ = mobilenet.mobilenet_base(
+-        tf.placeholder(tf.float32, (10, 224, 224, 16)),
++        tf.compat.v1.placeholder(tf.float32, (10, 224, 224, 16)),
+         conv_defs=mobilenet_v2.V2_DEF,
+         output_stride=16,
+         use_explicit_padding=True)
+diff --git a/scripts/tf_cnn_benchmarks/models/model.py b/scripts/tf_cnn_benchmarks/models/model.py
+index 138e294..959195a 100644
+--- a/scripts/tf_cnn_benchmarks/models/model.py
++++ b/scripts/tf_cnn_benchmarks/models/model.py
+@@ -242,14 +242,14 @@ class CNNModel(Model):
+   def get_synthetic_inputs(self, input_name, nclass):
+     # Synthetic input should be within [0, 255].
+     image_shape, label_shape = self.get_input_shapes('train')
+-    inputs = tf.truncated_normal(
++    inputs = tf.random.truncated_normal(
+         image_shape,
+         dtype=self.data_type,
+         mean=127,
+         stddev=60,
+         name=self.model_name + '_synthetic_inputs')
+     inputs = tf.contrib.framework.local_variable(inputs, name=input_name)
+-    labels = tf.random_uniform(
++    labels = tf.random.uniform(
+         label_shape,
+         minval=0,
+         maxval=nclass - 1,
+@@ -279,14 +279,14 @@ class CNNModel(Model):
+     images = inputs[0]
+     images = self.gpu_preprocess_nhwc(images, phase_train)
+     if self.data_format == 'NCHW':
+-      images = tf.transpose(images, [0, 3, 1, 2])
++      images = tf.transpose(a=images, perm=[0, 3, 1, 2])
+     var_type = tf.float32
+     if self.data_type == tf.float16 and self.fp16_vars:
+       var_type = tf.float16
+     network = convnet_builder.ConvNetBuilder(
+         images, self.depth, phase_train, self.use_tf_layers, self.data_format,
+         self.data_type, var_type)
+-    with tf.variable_scope('cg', custom_getter=network.get_custom_getter()):
++    with tf.compat.v1.variable_scope('cg', custom_getter=network.get_custom_getter()):
+       self.add_inference(network)
+       # Add the final fully-connected class layer
+       logits = (
+@@ -314,16 +314,16 @@ class CNNModel(Model):
+     # which could call super.loss_function twice, once with the normal logits
+     # and once with the aux logits.
+     aux_logits = build_network_result.extra_info
+-    with tf.name_scope('xentropy'):
++    with tf.compat.v1.name_scope('xentropy'):
+       mlperf.logger.log(key=mlperf.tags.MODEL_HP_LOSS_FN, value=mlperf.tags.CCE)
+-      cross_entropy = tf.losses.sparse_softmax_cross_entropy(
++      cross_entropy = tf.compat.v1.losses.sparse_softmax_cross_entropy(
+           logits=logits, labels=labels)
+-      loss = tf.reduce_mean(cross_entropy, name='xentropy_mean')
++      loss = tf.reduce_mean(input_tensor=cross_entropy, name='xentropy_mean')
+     if aux_logits is not None:
+-      with tf.name_scope('aux_xentropy'):
+-        aux_cross_entropy = tf.losses.sparse_softmax_cross_entropy(
++      with tf.compat.v1.name_scope('aux_xentropy'):
++        aux_cross_entropy = tf.compat.v1.losses.sparse_softmax_cross_entropy(
+             logits=aux_logits, labels=labels)
+-        aux_loss = 0.4 * tf.reduce_mean(aux_cross_entropy, name='aux_loss')
++        aux_loss = 0.4 * tf.reduce_mean(input_tensor=aux_cross_entropy, name='aux_loss')
+         loss = tf.add_n([loss, aux_loss])
+     return loss
+ 
+@@ -331,7 +331,7 @@ class CNNModel(Model):
+     """Returns the ops to measure the accuracy of the model."""
+     _, labels = inputs
+     top_1_op = tf.reduce_sum(
+-        tf.cast(tf.nn.in_top_k(logits, labels, 1), self.data_type))
++        input_tensor=tf.cast(tf.nn.in_top_k(predictions=logits, targets=labels, k=1), self.data_type))
+     top_5_op = tf.reduce_sum(
+-        tf.cast(tf.nn.in_top_k(logits, labels, 5), self.data_type))
++        input_tensor=tf.cast(tf.nn.in_top_k(predictions=logits, targets=labels, k=5), self.data_type))
+     return {'top_1_accuracy': top_1_op, 'top_5_accuracy': top_5_op}
+diff --git a/scripts/tf_cnn_benchmarks/models/model_config.py b/scripts/tf_cnn_benchmarks/models/model_config.py
+index 9b8a8f6..6ef2bf6 100644
+--- a/scripts/tf_cnn_benchmarks/models/model_config.py
++++ b/scripts/tf_cnn_benchmarks/models/model_config.py
+@@ -27,15 +27,15 @@ from models import densenet_model
+ from models import googlenet_model
+ from models import inception_model
+ from models import lenet_model
+-from models import mobilenet_v2
+-from models import nasnet_model
++#from models import mobilenet_v2
++#from models import nasnet_model
+ from models import official_resnet_model
+ from models import overfeat_model
+ from models import resnet_model
+ from models import ssd_model
+ from models import trivial_model
+ from models import vgg_model
+-from models.experimental import deepspeech
++#from models.experimental import deepspeech
+ from models.experimental import official_ncf_model
+ 
+ 
+@@ -81,9 +81,9 @@ _model_name_to_imagenet_model = {
+     'resnet101_v2': resnet_model.create_resnet101_v2_model,
+     'resnet152': resnet_model.create_resnet152_model,
+     'resnet152_v2': resnet_model.create_resnet152_v2_model,
+-    'nasnet': nasnet_model.NasnetModel,
+-    'nasnetlarge': nasnet_model.NasnetLargeModel,
+-    'mobilenet': mobilenet_v2.MobilenetModel,
++    #'nasnet': nasnet_model.NasnetModel,
++    #'nasnetlarge': nasnet_model.NasnetLargeModel,
++    #'mobilenet': mobilenet_v2.MobilenetModel,
+     'ncf': official_ncf_model.NcfModel,
+ }
+ 
+@@ -104,7 +104,7 @@ _model_name_to_cifar_model = {
+     'densenet40_k12': densenet_model.create_densenet40_k12_model,
+     'densenet100_k12': densenet_model.create_densenet100_k12_model,
+     'densenet100_k24': densenet_model.create_densenet100_k24_model,
+-    'nasnet': nasnet_model.NasnetCifarModel,
++    #'nasnet': nasnet_model.NasnetCifarModel,
+ }
+ 
+ 
+@@ -120,8 +120,8 @@ def _get_model_map(dataset_name):
+     return _model_name_to_cifar_model
+   elif dataset_name in ('imagenet', 'synthetic'):
+     return _model_name_to_imagenet_model
+-  elif dataset_name == 'librispeech':
+-    return {'deepspeech2': deepspeech.DeepSpeech2Model}
++  #elif dataset_name == 'librispeech':
++  #  return {'deepspeech2': deepspeech.DeepSpeech2Model}
+   elif dataset_name == 'coco':
+     return _model_name_to_object_detection_model
+   else:
+diff --git a/scripts/tf_cnn_benchmarks/models/nasnet_model.py b/scripts/tf_cnn_benchmarks/models/nasnet_model.py
+index f8a14a8..7220cba 100644
+--- a/scripts/tf_cnn_benchmarks/models/nasnet_model.py
++++ b/scripts/tf_cnn_benchmarks/models/nasnet_model.py
+@@ -131,9 +131,9 @@ def nasnet_cifar_arg_scope(weight_decay=5e-4,
+       'scale': True,
+       'fused': True,
+   }
+-  weights_regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
+-  weights_initializer = tf.contrib.layers.variance_scaling_initializer(
+-      mode='FAN_OUT')
++  weights_regularizer = tf.keras.regularizers.l2(0.5 * (weight_decay))
++  weights_initializer = tf.compat.v1.keras.initializers.VarianceScaling(
++      scale=2.0, mode=('FAN_OUT').lower())
+   with arg_scope(
+       [slim.fully_connected, slim.conv2d, slim.separable_conv2d],
+       weights_regularizer=weights_regularizer,
+@@ -168,9 +168,9 @@ def nasnet_mobile_arg_scope(weight_decay=4e-5,
+       'scale': True,
+       'fused': True,
+   }
+-  weights_regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
+-  weights_initializer = tf.contrib.layers.variance_scaling_initializer(
+-      mode='FAN_OUT')
++  weights_regularizer = tf.keras.regularizers.l2(0.5 * (weight_decay))
++  weights_initializer = tf.compat.v1.keras.initializers.VarianceScaling(
++      scale=2.0, mode=('FAN_OUT').lower())
+   with arg_scope(
+       [slim.fully_connected, slim.conv2d, slim.separable_conv2d],
+       weights_regularizer=weights_regularizer,
+@@ -205,9 +205,9 @@ def nasnet_large_arg_scope(weight_decay=5e-5,
+       'scale': True,
+       'fused': True,
+   }
+-  weights_regularizer = tf.contrib.layers.l2_regularizer(weight_decay)
+-  weights_initializer = tf.contrib.layers.variance_scaling_initializer(
+-      mode='FAN_OUT')
++  weights_regularizer = tf.keras.regularizers.l2(0.5 * (weight_decay))
++  weights_initializer = tf.compat.v1.keras.initializers.VarianceScaling(
++      scale=2.0, mode=('FAN_OUT').lower())
+   with arg_scope(
+       [slim.fully_connected, slim.conv2d, slim.separable_conv2d],
+       weights_regularizer=weights_regularizer,
+@@ -223,9 +223,9 @@ def nasnet_large_arg_scope(weight_decay=5e-5,
+ 
+ def _build_aux_head(net, end_points, num_classes, hparams, scope):
+   """Auxiliary head used for all models across all datasets."""
+-  with tf.variable_scope(scope):
++  with tf.compat.v1.variable_scope(scope):
+     aux_logits = tf.identity(net)
+-    with tf.variable_scope('aux_logits'):
++    with tf.compat.v1.variable_scope('aux_logits'):
+       aux_logits = slim.avg_pool2d(
+           aux_logits, [5, 5], stride=3, padding='VALID')
+       aux_logits = slim.conv2d(aux_logits, 128, [1, 1], scope='proj')
+@@ -293,7 +293,7 @@ def build_nasnet_cifar(images,
+       is_training=is_training, data_format=data_format, total_steps=total_steps)
+ 
+   if tf.test.is_gpu_available() and hparams.data_format == 'NHWC':
+-    tf.logging.info('A GPU is available on the machine, consider using NCHW '
++    tf.compat.v1.logging.info('A GPU is available on the machine, consider using NCHW '
+                     'data format for increased speed on GPU.')
+ 
+   # Calculate the total number of cells in the network
+@@ -341,7 +341,7 @@ def build_nasnet_mobile(images,
+       data_format=data_format, total_steps=total_steps)
+ 
+   if tf.test.is_gpu_available() and hparams.data_format == 'NHWC':
+-    tf.logging.info('A GPU is available on the machine, consider using NCHW '
++    tf.compat.v1.logging.info('A GPU is available on the machine, consider using NCHW '
+                     'data format for increased speed on GPU.')
+ 
+   # Calculate the total number of cells in the network
+@@ -392,7 +392,7 @@ def build_nasnet_large(images,
+       is_training=is_training, data_format=data_format, total_steps=total_steps)
+ 
+   if tf.test.is_gpu_available() and hparams.data_format == 'NHWC':
+-    tf.logging.info('A GPU is available on the machine, consider using NCHW '
++    tf.compat.v1.logging.info('A GPU is available on the machine, consider using NCHW '
+                     'data format for increased speed on GPU.')
+ 
+   # Calculate the total number of cells in the network
+@@ -515,7 +515,7 @@ def _build_nasnet_base(images,
+     cell_outputs.append(net)
+ 
+   # Final softmax layer
+-  with tf.variable_scope('final_layer'):
++  with tf.compat.v1.variable_scope('final_layer'):
+     net = tf.nn.relu(net)
+     net = nasnet_utils.global_avg_pool(net)
+     if add_and_check_endpoint('global_pool', net) or num_classes is None:
+@@ -539,7 +539,7 @@ class NasnetModel(model.CNNModel):
+     super(NasnetModel, self).__init__('nasnet', 224, 32, 0.005, params=params)
+ 
+   def add_inference(self, cnn):
+-    tf.logging.info('input_image_shape: {}'.format(cnn.top_layer.shape))
++    tf.compat.v1.logging.info('input_image_shape: {}'.format(cnn.top_layer.shape))
+     cnn.top_layer, _ = build_nasnet_mobile(
+         images=cnn.top_layer,
+         is_training=cnn.phase_train,
+@@ -555,7 +555,7 @@ class NasnetLargeModel(model.CNNModel):
+         'nasnet', 331, 16, 0.005, params=params)
+ 
+   def add_inference(self, cnn):
+-    tf.logging.info('input_image_shape: {}'.format(cnn.top_layer.shape))
++    tf.compat.v1.logging.info('input_image_shape: {}'.format(cnn.top_layer.shape))
+     cnn.top_layer, _ = build_nasnet_large(
+         images=cnn.top_layer,
+         is_training=cnn.phase_train,
+@@ -571,7 +571,7 @@ class NasnetCifarModel(model.CNNModel):
+         'nasnet', 32, 32, 0.025, params=params)
+ 
+   def add_inference(self, cnn):
+-    tf.logging.info('input_image_shape: {}'.format(cnn.top_layer.shape))
++    tf.compat.v1.logging.info('input_image_shape: {}'.format(cnn.top_layer.shape))
+     cnn.top_layer, _ = build_nasnet_cifar(
+         images=cnn.top_layer,
+         is_training=cnn.phase_train,
+diff --git a/scripts/tf_cnn_benchmarks/models/nasnet_test.py b/scripts/tf_cnn_benchmarks/models/nasnet_test.py
+index 115aa6c..d1df31b 100644
+--- a/scripts/tf_cnn_benchmarks/models/nasnet_test.py
++++ b/scripts/tf_cnn_benchmarks/models/nasnet_test.py
+@@ -30,8 +30,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 32, 32
+     num_classes = 10
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_cifar_arg_scope()):
+       logits, end_points = nasnet.build_nasnet_cifar(inputs, num_classes)
+     auxlogits = end_points['AuxLogits']
+@@ -47,8 +47,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 224, 224
+     num_classes = 1000
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+       logits, end_points = nasnet.build_nasnet_mobile(inputs, num_classes)
+     auxlogits = end_points['AuxLogits']
+@@ -64,8 +64,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 331, 331
+     num_classes = 1000
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_large_arg_scope()):
+       logits, end_points = nasnet.build_nasnet_large(inputs, num_classes)
+     auxlogits = end_points['AuxLogits']
+@@ -81,8 +81,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 32, 32
+     num_classes = None
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_cifar_arg_scope()):
+       net, end_points = nasnet.build_nasnet_cifar(inputs, num_classes)
+     self.assertFalse('AuxLogits' in end_points)
+@@ -94,8 +94,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 224, 224
+     num_classes = None
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+       net, end_points = nasnet.build_nasnet_mobile(inputs, num_classes)
+     self.assertFalse('AuxLogits' in end_points)
+@@ -107,8 +107,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 331, 331
+     num_classes = None
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_large_arg_scope()):
+       net, end_points = nasnet.build_nasnet_large(inputs, num_classes)
+     self.assertFalse('AuxLogits' in end_points)
+@@ -120,8 +120,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 32, 32
+     num_classes = 10
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_cifar_arg_scope()):
+       _, end_points = nasnet.build_nasnet_cifar(inputs, num_classes)
+     endpoints_shapes = {'Stem': [batch_size, 32, 32, 96],
+@@ -152,7 +152,7 @@ class NASNetTest(tf.test.TestCase):
+                         'Predictions': [batch_size, num_classes]}
+     self.assertItemsEqual(endpoints_shapes.keys(), end_points.keys())
+     for endpoint_name in endpoints_shapes:
+-      tf.logging.info('Endpoint name: {}'.format(endpoint_name))
++      tf.compat.v1.logging.info('Endpoint name: {}'.format(endpoint_name))
+       expected_shape = endpoints_shapes[endpoint_name]
+       self.assertTrue(endpoint_name in end_points)
+       self.assertListEqual(end_points[endpoint_name].get_shape().as_list(),
+@@ -162,8 +162,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 224, 224
+     num_classes = 1000
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+       _, end_points = nasnet.build_nasnet_mobile(inputs, num_classes)
+     endpoints_shapes = {'Stem': [batch_size, 28, 28, 88],
+@@ -188,7 +188,7 @@ class NASNetTest(tf.test.TestCase):
+                         'Predictions': [batch_size, num_classes]}
+     self.assertItemsEqual(endpoints_shapes.keys(), end_points.keys())
+     for endpoint_name in endpoints_shapes:
+-      tf.logging.info('Endpoint name: {}'.format(endpoint_name))
++      tf.compat.v1.logging.info('Endpoint name: {}'.format(endpoint_name))
+       expected_shape = endpoints_shapes[endpoint_name]
+       self.assertTrue(endpoint_name in end_points)
+       self.assertListEqual(end_points[endpoint_name].get_shape().as_list(),
+@@ -198,8 +198,8 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 331, 331
+     num_classes = 1000
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     with slim.arg_scope(nasnet.nasnet_large_arg_scope()):
+       _, end_points = nasnet.build_nasnet_large(inputs, num_classes)
+     endpoints_shapes = {'Stem': [batch_size, 42, 42, 336],
+@@ -230,7 +230,7 @@ class NASNetTest(tf.test.TestCase):
+                         'Predictions': [batch_size, num_classes]}
+     self.assertItemsEqual(endpoints_shapes.keys(), end_points.keys())
+     for endpoint_name in endpoints_shapes:
+-      tf.logging.info('Endpoint name: {}'.format(endpoint_name))
++      tf.compat.v1.logging.info('Endpoint name: {}'.format(endpoint_name))
+       expected_shape = endpoints_shapes[endpoint_name]
+       self.assertTrue(endpoint_name in end_points)
+       self.assertListEqual(end_points[endpoint_name].get_shape().as_list(),
+@@ -240,18 +240,18 @@ class NASNetTest(tf.test.TestCase):
+     batch_size = 5
+     height, width = 224, 224
+     num_classes = 1000
+-    inputs = tf.random_uniform((batch_size, height, width, 3))
+-    tf.train.create_global_step()
++    inputs = tf.random.uniform((batch_size, height, width, 3))
++    tf.compat.v1.train.create_global_step()
+     # Force all Variables to reside on the device.
+-    with tf.variable_scope('on_cpu'), tf.device('/cpu:0'):
++    with tf.compat.v1.variable_scope('on_cpu'), tf.device('/cpu:0'):
+       with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+         nasnet.build_nasnet_mobile(inputs, num_classes)
+-    with tf.variable_scope('on_gpu'), tf.device('/gpu:0'):
++    with tf.compat.v1.variable_scope('on_gpu'), tf.device('/gpu:0'):
+       with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+         nasnet.build_nasnet_mobile(inputs, num_classes)
+-    for v in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='on_cpu'):
++    for v in tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES, scope='on_cpu'):
+       self.assertDeviceEqual(v.device, '/cpu:0')
+-    for v in tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope='on_gpu'):
++    for v in tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES, scope='on_gpu'):
+       self.assertDeviceEqual(v.device, '/gpu:0')
+ 
+   def testUnknownBatchSizeMobileModel(self):
+@@ -259,13 +259,13 @@ class NASNetTest(tf.test.TestCase):
+     height, width = 224, 224
+     num_classes = 1000
+     with self.test_session() as sess:
+-      inputs = tf.placeholder(tf.float32, (None, height, width, 3))
++      inputs = tf.compat.v1.placeholder(tf.float32, (None, height, width, 3))
+       with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+         logits, _ = nasnet.build_nasnet_mobile(inputs, num_classes)
+       self.assertListEqual(logits.get_shape().as_list(),
+                            [None, num_classes])
+-      images = tf.random_uniform((batch_size, height, width, 3))
+-      sess.run(tf.global_variables_initializer())
++      images = tf.random.uniform((batch_size, height, width, 3))
++      sess.run(tf.compat.v1.global_variables_initializer())
+       output = sess.run(logits, {inputs: images.eval()})
+       self.assertEquals(output.shape, (batch_size, num_classes))
+ 
+@@ -274,13 +274,13 @@ class NASNetTest(tf.test.TestCase):
+     height, width = 224, 224
+     num_classes = 1000
+     with self.test_session() as sess:
+-      eval_inputs = tf.random_uniform((batch_size, height, width, 3))
++      eval_inputs = tf.random.uniform((batch_size, height, width, 3))
+       with slim.arg_scope(nasnet.nasnet_mobile_arg_scope()):
+         logits, _ = nasnet.build_nasnet_mobile(eval_inputs,
+                                                num_classes,
+                                                is_training=False)
+-      predictions = tf.argmax(logits, 1)
+-      sess.run(tf.global_variables_initializer())
++      predictions = tf.argmax(input=logits, axis=1)
++      sess.run(tf.compat.v1.global_variables_initializer())
+       output = sess.run(predictions)
+       self.assertEquals(output.shape, (batch_size,))
+ 
+diff --git a/scripts/tf_cnn_benchmarks/models/nasnet_utils.py b/scripts/tf_cnn_benchmarks/models/nasnet_utils.py
+index afe2edd..4ea5369 100644
+--- a/scripts/tf_cnn_benchmarks/models/nasnet_utils.py
++++ b/scripts/tf_cnn_benchmarks/models/nasnet_utils.py
+@@ -77,9 +77,9 @@ def global_avg_pool(x, data_format=INVALID):
+   assert data_format in ['NHWC', 'NCHW']
+   assert x.shape.ndims == 4
+   if data_format == 'NHWC':
+-    return tf.reduce_mean(x, [1, 2])
++    return tf.reduce_mean(input_tensor=x, axis=[1, 2])
+   else:
+-    return tf.reduce_mean(x, [2, 3])
++    return tf.reduce_mean(input_tensor=x, axis=[2, 3])
+ 
+ 
+ @tf.contrib.framework.add_arg_scope
+@@ -98,8 +98,8 @@ def factorized_reduction(net, output_filters, stride, data_format=INVALID):
+     stride_spec = [1, 1, stride, stride]
+ 
+   # Skip path 1
+-  path1 = tf.nn.avg_pool(
+-      net, [1, 1, 1, 1], stride_spec, 'VALID', data_format=data_format)
++  path1 = tf.nn.avg_pool2d(
++      input=net, ksize=[1, 1, 1, 1], strides=stride_spec, padding='VALID', data_format=data_format)
+   path1 = slim.conv2d(path1, int(output_filters / 2), 1, scope='path1_conv')
+ 
+   # Skip path 2
+@@ -107,15 +107,15 @@ def factorized_reduction(net, output_filters, stride, data_format=INVALID):
+   # include those 0's that were added.
+   if data_format == 'NHWC':
+     pad_arr = [[0, 0], [0, 1], [0, 1], [0, 0]]
+-    path2 = tf.pad(net, pad_arr)[:, 1:, 1:, :]
++    path2 = tf.pad(tensor=net, paddings=pad_arr)[:, 1:, 1:, :]
+     concat_axis = 3
+   else:
+     pad_arr = [[0, 0], [0, 0], [0, 1], [0, 1]]
+-    path2 = tf.pad(net, pad_arr)[:, :, 1:, 1:]
++    path2 = tf.pad(tensor=net, paddings=pad_arr)[:, :, 1:, 1:]
+     concat_axis = 1
+ 
+-  path2 = tf.nn.avg_pool(
+-      path2, [1, 1, 1, 1], stride_spec, 'VALID', data_format=data_format)
++  path2 = tf.nn.avg_pool2d(
++      input=path2, ksize=[1, 1, 1, 1], strides=stride_spec, padding='VALID', data_format=data_format)
+   path2 = slim.conv2d(path2, int(output_filters / 2), 1, scope='path2_conv')
+ 
+   # Concat and apply BN
+@@ -128,13 +128,13 @@ def factorized_reduction(net, output_filters, stride, data_format=INVALID):
+ def drop_path(net, keep_prob, is_training=True):
+   """Drops out a whole example hiddenstate with the specified probability."""
+   if is_training:
+-    batch_size = tf.shape(net)[0]
++    batch_size = tf.shape(input=net)[0]
+     noise_shape = [batch_size, 1, 1, 1]
+     keep_prob = tf.cast(keep_prob, dtype=net.dtype)
+     random_tensor = keep_prob
+-    random_tensor += tf.random_uniform(noise_shape, dtype=net.dtype)
++    random_tensor += tf.random.uniform(noise_shape, dtype=net.dtype)
+     binary_tensor = tf.floor(random_tensor)
+-    net = tf.div(net, keep_prob) * binary_tensor
++    net = tf.compat.v1.div(net, keep_prob) * binary_tensor
+   return net
+ 
+ 
+@@ -312,10 +312,10 @@ class NasNetABaseCell(object):
+     self._filter_size = int(self._num_conv_filters * filter_scaling)
+ 
+     i = 0
+-    with tf.variable_scope(scope):
++    with tf.compat.v1.variable_scope(scope):
+       net = self._cell_base(net, prev_layer)
+       for iteration in range(5):
+-        with tf.variable_scope('comb_iter_{}'.format(iteration)):
++        with tf.compat.v1.variable_scope('comb_iter_{}'.format(iteration)):
+           left_hiddenstate_idx, right_hiddenstate_idx = (
+               self._hiddenstate_indices[i], self._hiddenstate_indices[i + 1])
+           original_input_left = left_hiddenstate_idx < 2
+@@ -327,21 +327,21 @@ class NasNetABaseCell(object):
+           operation_right = self._operations[i + 1]
+           i += 2
+           # Apply conv operations
+-          with tf.variable_scope('left'):
++          with tf.compat.v1.variable_scope('left'):
+             h1 = self._apply_conv_operation(h1, operation_left, stride,
+                                             original_input_left)
+-          with tf.variable_scope('right'):
++          with tf.compat.v1.variable_scope('right'):
+             h2 = self._apply_conv_operation(h2, operation_right, stride,
+                                             original_input_right)
+ 
+           # Combine hidden states using 'add'.
+-          with tf.variable_scope('combine'):
++          with tf.compat.v1.variable_scope('combine'):
+             h = h1 + h2
+ 
+           # Add hiddenstate to the list of hiddenstates we can choose from
+           net.append(h)
+ 
+-      with tf.variable_scope('cell_output'):
++      with tf.compat.v1.variable_scope('cell_output'):
+         net = self._combine_unused_states(net)
+ 
+       return net
+@@ -392,7 +392,7 @@ class NasNetABaseCell(object):
+       should_reduce = should_reduce and not used_h
+       if should_reduce:
+         stride = 2 if final_height != curr_height else 1
+-        with tf.variable_scope('reduction_{}'.format(idx)):
++        with tf.compat.v1.variable_scope('reduction_{}'.format(idx)):
+           net[idx] = factorized_reduction(net[idx], final_num_filters, stride)
+ 
+     states_to_combine = ([
+@@ -436,23 +436,23 @@ class NasNetABaseCell(object):
+         layer_ratio = (self._cell_num + 1) / float(num_cells)
+         if use_summaries:
+           with tf.device('/cpu:0'):
+-            tf.summary.scalar('layer_ratio', layer_ratio)
++            tf.compat.v1.summary.scalar('layer_ratio', layer_ratio)
+         drop_path_keep_prob = 1 - layer_ratio * (1 - drop_path_keep_prob)
+       if drop_connect_version in ['v1', 'v3']:
+         # Decrease the keep probability over time
+         if not current_step:
+-          current_step = tf.cast(tf.train.get_or_create_global_step(),
++          current_step = tf.cast(tf.compat.v1.train.get_or_create_global_step(),
+                                  tf.float32)
+         drop_path_burn_in_steps = self._total_training_steps
+         current_ratio = current_step / drop_path_burn_in_steps
+         current_ratio = tf.minimum(1.0, current_ratio)
+         if use_summaries:
+           with tf.device('/cpu:0'):
+-            tf.summary.scalar('current_ratio', current_ratio)
++            tf.compat.v1.summary.scalar('current_ratio', current_ratio)
+         drop_path_keep_prob = (1 - current_ratio * (1 - drop_path_keep_prob))
+       if use_summaries:
+         with tf.device('/cpu:0'):
+-          tf.summary.scalar('drop_path_keep_prob', drop_path_keep_prob)
++          tf.compat.v1.summary.scalar('drop_path_keep_prob', drop_path_keep_prob)
+       net = drop_path(net, drop_path_keep_prob)
+     return net
+ 
+diff --git a/scripts/tf_cnn_benchmarks/models/official_resnet_model.py b/scripts/tf_cnn_benchmarks/models/official_resnet_model.py
+index fb0d55b..d29f646 100644
+--- a/scripts/tf_cnn_benchmarks/models/official_resnet_model.py
++++ b/scripts/tf_cnn_benchmarks/models/official_resnet_model.py
+@@ -55,7 +55,7 @@ class ImagenetResnetModel(model_lib.CNNModel):
+     adjusted_learning_rate = (
+         self.learning_rate / self.default_batch_size * batch_size)
+     values = [v * adjusted_learning_rate for v in values]
+-    return tf.train.piecewise_constant(global_step, boundaries, values)
++    return tf.compat.v1.train.piecewise_constant(global_step, boundaries, values)
+ 
+   def build_network(self, images, phase_train=True, nclass=1001,
+                     data_type=tf.float32):
+@@ -63,7 +63,7 @@ class ImagenetResnetModel(model_lib.CNNModel):
+     try:
+       from official.resnet.imagenet_main import ImagenetModel
+     except ImportError:
+-      tf.logging.fatal('Please include tensorflow/models to the PYTHONPATH.')
++      tf.compat.v1.logging.fatal('Please include tensorflow/models to the PYTHONPATH.')
+       raise
+     images = tf.cast(images, data_type)
+     model_class = ImagenetModel(resnet_size=self.resnet_size,
+diff --git a/scripts/tf_cnn_benchmarks/models/resnet_model.py b/scripts/tf_cnn_benchmarks/models/resnet_model.py
+index 2af4132..c0a4e12 100644
+--- a/scripts/tf_cnn_benchmarks/models/resnet_model.py
++++ b/scripts/tf_cnn_benchmarks/models/resnet_model.py
+@@ -57,7 +57,7 @@ def bottleneck_block_v1(cnn, depth, depth_bottleneck, stride):
+   name = name_key + str(cnn.counts[name_key])
+   cnn.counts[name_key] += 1
+ 
+-  with tf.variable_scope(name):
++  with tf.compat.v1.variable_scope(name):
+     if depth == in_size:
+       if stride == 1:
+         shortcut = input_layer
+@@ -109,7 +109,7 @@ def bottleneck_block_v1_5(cnn, depth, depth_bottleneck, stride):
+   name = name_key + str(cnn.counts[name_key])
+   cnn.counts[name_key] += 1
+ 
+-  with tf.variable_scope(name):
++  with tf.compat.v1.variable_scope(name):
+     if depth == in_size:
+       if stride == 1:
+         shortcut = input_layer
+@@ -162,7 +162,7 @@ def bottleneck_block_v2(cnn, depth, depth_bottleneck, stride):
+   preact = cnn.batch_norm()
+   mlperf.logger.log(key=mlperf.tags.MODEL_HP_RELU)
+   preact = tf.nn.relu(preact)
+-  with tf.variable_scope(name):
++  with tf.compat.v1.variable_scope(name):
+     if depth == in_size:
+       if stride == 1:
+         shortcut = input_layer
+@@ -240,10 +240,10 @@ def residual_block(cnn, depth, stride, version, projection_shortcut=False):
+     padding = (depth - in_size) // 2
+     if cnn.channel_pos == 'channels_last':
+       shortcut = tf.pad(
+-          shortcut, [[0, 0], [0, 0], [0, 0], [padding, padding]])
++          tensor=shortcut, paddings=[[0, 0], [0, 0], [0, 0], [padding, padding]])
+     else:
+       shortcut = tf.pad(
+-          shortcut, [[0, 0], [padding, padding], [0, 0], [0, 0]])
++          tensor=shortcut, paddings=[[0, 0], [padding, padding], [0, 0], [0, 0]])
+   else:
+     shortcut = input_layer
+   if pre_activation:
+@@ -330,13 +330,13 @@ class ResnetModel(model_lib.CNNModel):
+     boundaries = [int(num_batches_per_epoch * x) for x in [30, 60, 80, 90]]
+     values = [1, 0.1, 0.01, 0.001, 0.0001]
+     values = [rescaled_lr * v for v in values]
+-    lr = tf.train.piecewise_constant(global_step, boundaries, values)
++    lr = tf.compat.v1.train.piecewise_constant(global_step, boundaries, values)
+     warmup_steps = int(num_batches_per_epoch * 5)
+     mlperf.logger.log(key=mlperf.tags.OPT_LR_WARMUP_STEPS, value=warmup_steps)
+     warmup_lr = (
+         rescaled_lr * tf.cast(global_step, tf.float32) / tf.cast(
+             warmup_steps, tf.float32))
+-    return tf.cond(global_step < warmup_steps, lambda: warmup_lr, lambda: lr)
++    return tf.cond(pred=global_step < warmup_steps, true_fn=lambda: warmup_lr, false_fn=lambda: lr)
+ 
+   def get_scaled_base_learning_rate(self, batch_size):
+     """Calculates base learning rate for creating lr schedule.
+@@ -437,7 +437,7 @@ class ResnetCifar10Model(model_lib.CNNModel):
+                                                   dtype=np.int64)
+     boundaries = [x for x in boundaries]
+     values = [0.1, 0.01, 0.001, 0.0002]
+-    return tf.train.piecewise_constant(global_step, boundaries, values)
++    return tf.compat.v1.train.piecewise_constant(global_step, boundaries, values)
+ 
+ 
+ def create_resnet20_cifar_model(params):
+diff --git a/scripts/tf_cnn_benchmarks/models/ssd_model.py b/scripts/tf_cnn_benchmarks/models/ssd_model.py
+index b934976..f3ac9bb 100644
+--- a/scripts/tf_cnn_benchmarks/models/ssd_model.py
++++ b/scripts/tf_cnn_benchmarks/models/ssd_model.py
+@@ -184,7 +184,7 @@ class SSD300Model(model_lib.CNNModel):
+                              'epsilon': ssd_constants.BATCH_NORM_EPSILON,
+                              'scale': True}
+ 
+-    with tf.variable_scope(BACKBONE_MODEL_SCOPE_NAME):
++    with tf.compat.v1.variable_scope(BACKBONE_MODEL_SCOPE_NAME):
+       self.add_backbone_model(cnn)
+ 
+     # --------------------------------------------------------------------------
+@@ -194,7 +194,7 @@ class SSD300Model(model_lib.CNNModel):
+     def add_ssd_layer(cnn, depth, k_size, stride, mode):
+       return cnn.conv(depth, k_size, k_size, stride, stride,
+                       mode=mode, use_batch_norm=False,
+-                      kernel_initializer=tf.contrib.layers.xavier_initializer())
++                      kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
+ 
+     # Activations for feature maps of different layers
+     self.activations = [cnn.top_layer]
+@@ -229,23 +229,23 @@ class SSD300Model(model_lib.CNNModel):
+     for nd, ac, oc in zip(self.num_dboxes, self.activations, self.out_chan):
+       l = cnn.conv(nd * 4, 3, 3, 1, 1, input_layer=ac,
+                    num_channels_in=oc, activation=None, use_batch_norm=False,
+-                   kernel_initializer=tf.contrib.layers.xavier_initializer())
++                   kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
+       scale = l.get_shape()[-1]
+       # shape = [batch_size, nd * 4, scale, scale]
+       l = tf.reshape(l, [self.batch_size, nd, 4, scale, scale])
+       # shape = [batch_size, nd, 4, scale, scale]
+-      l = tf.transpose(l, [0, 1, 3, 4, 2])
++      l = tf.transpose(a=l, perm=[0, 1, 3, 4, 2])
+       # shape = [batch_size, nd, scale, scale, 4]
+       self.loc.append(tf.reshape(l, [self.batch_size, -1, 4]))
+       # shape = [batch_size, nd * scale * scale, 4]
+ 
+       c = cnn.conv(nd * self.label_num, 3, 3, 1, 1, input_layer=ac,
+                    num_channels_in=oc, activation=None, use_batch_norm=False,
+-                   kernel_initializer=tf.contrib.layers.xavier_initializer())
++                   kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
+       # shape = [batch_size, nd * label_num, scale, scale]
+       c = tf.reshape(c, [self.batch_size, nd, self.label_num, scale, scale])
+       # shape = [batch_size, nd, label_num, scale, scale]
+-      c = tf.transpose(c, [0, 1, 3, 4, 2])
++      c = tf.transpose(a=c, perm=[0, 1, 3, 4, 2])
+       # shape = [batch_size, nd, scale, scale, label_num]
+       self.conf.append(tf.reshape(c, [self.batch_size, -1, self.label_num]))
+       # shape = [batch_size, nd * scale * scale, label_num]
+@@ -270,12 +270,12 @@ class SSD300Model(model_lib.CNNModel):
+     boundaries = [b * self.base_lr_batch_size // batch_size for b in boundaries]
+     decays = [1, 0.1, 0.01]
+     learning_rates = [rescaled_lr * d for d in decays]
+-    lr = tf.train.piecewise_constant(global_step, boundaries, learning_rates)
++    lr = tf.compat.v1.train.piecewise_constant(global_step, boundaries, learning_rates)
+     warmup_steps = int(118287 / batch_size * 5)
+     warmup_lr = (
+         rescaled_lr * tf.cast(global_step, tf.float32) / tf.cast(
+             warmup_steps, tf.float32))
+-    return tf.cond(global_step < warmup_steps, lambda: warmup_lr, lambda: lr)
++    return tf.cond(pred=global_step < warmup_steps, true_fn=lambda: warmup_lr, false_fn=lambda: lr)
+ 
+   def get_scaled_base_learning_rate(self, batch_size):
+     """Calculates base learning rate for creating lr schedule.
+@@ -297,8 +297,8 @@ class SSD300Model(model_lib.CNNModel):
+     return scaled_lr
+ 
+   def _collect_backbone_vars(self):
+-    backbone_vars = tf.get_collection(
+-        tf.GraphKeys.GLOBAL_VARIABLES, scope='.*'+ BACKBONE_MODEL_SCOPE_NAME)
++    backbone_vars = tf.compat.v1.get_collection(
++        tf.compat.v1.GraphKeys.GLOBAL_VARIABLES, scope='.*'+ BACKBONE_MODEL_SCOPE_NAME)
+     var_list = {}
+ 
+     # Assume variables in the checkpoint are following the naming convention of
+@@ -356,8 +356,8 @@ class SSD300Model(model_lib.CNNModel):
+     box_loss = self._localization_loss(pred_loc, gt_loc, gt_label, num_gt)
+     class_loss = self._classification_loss(pred_label, gt_label, num_gt)
+ 
+-    tf.summary.scalar('box_loss', tf.reduce_mean(box_loss))
+-    tf.summary.scalar('class_loss', tf.reduce_mean(class_loss))
++    tf.compat.v1.summary.scalar('box_loss', tf.reduce_mean(input_tensor=box_loss))
++    tf.compat.v1.summary.scalar('class_loss', tf.reduce_mean(input_tensor=class_loss))
+     return class_loss + box_loss
+ 
+   def _localization_loss(self, pred_loc, gt_loc, gt_label, num_matched_boxes):
+@@ -379,14 +379,14 @@ class SSD300Model(model_lib.CNNModel):
+     mask = tf.greater(tf.squeeze(gt_label), 0)
+     float_mask = tf.cast(mask, tf.float32)
+ 
+-    smooth_l1 = tf.reduce_sum(tf.losses.huber_loss(
++    smooth_l1 = tf.reduce_sum(input_tensor=tf.compat.v1.losses.huber_loss(
+         gt_loc, pred_loc,
+-        reduction=tf.losses.Reduction.NONE
++        reduction=tf.compat.v1.losses.Reduction.NONE
+     ), axis=2)
+     smooth_l1 = tf.multiply(smooth_l1, float_mask)
+-    box_loss = tf.reduce_sum(smooth_l1, axis=1)
++    box_loss = tf.reduce_sum(input_tensor=smooth_l1, axis=1)
+ 
+-    return tf.reduce_mean(box_loss / num_matched_boxes)
++    return tf.reduce_mean(input_tensor=box_loss / num_matched_boxes)
+ 
+   def _classification_loss(self, pred_label, gt_label, num_matched_boxes):
+     """Computes the classification loss.
+@@ -402,19 +402,19 @@ class SSD300Model(model_lib.CNNModel):
+     Returns:
+       box_loss: a float32 representing total box regression loss.
+     """
+-    cross_entropy = tf.losses.sparse_softmax_cross_entropy(
+-        gt_label, pred_label, reduction=tf.losses.Reduction.NONE)
++    cross_entropy = tf.compat.v1.losses.sparse_softmax_cross_entropy(
++        gt_label, pred_label, reduction=tf.compat.v1.losses.Reduction.NONE)
+ 
+     mask = tf.greater(tf.squeeze(gt_label), 0)
+     float_mask = tf.cast(mask, tf.float32)
+ 
+     # Hard example mining
+     neg_masked_cross_entropy = cross_entropy * (1 - float_mask)
+-    relative_position = tf.contrib.framework.argsort(
+-        tf.contrib.framework.argsort(
++    relative_position = tf.argsort(
++        tf.argsort(
+             neg_masked_cross_entropy, direction='DESCENDING'))
+     num_neg_boxes = tf.minimum(
+-        tf.to_int32(num_matched_boxes) * ssd_constants.NEGS_PER_POSITIVE,
++        tf.cast(num_matched_boxes, dtype=tf.int32) * ssd_constants.NEGS_PER_POSITIVE,
+         ssd_constants.NUM_SSD_BOXES)
+     top_k_neg_mask = tf.cast(tf.less(
+         relative_position,
+@@ -422,15 +422,15 @@ class SSD300Model(model_lib.CNNModel):
+     ), tf.float32)
+ 
+     class_loss = tf.reduce_sum(
+-        tf.multiply(cross_entropy, float_mask + top_k_neg_mask), axis=1)
++        input_tensor=tf.multiply(cross_entropy, float_mask + top_k_neg_mask), axis=1)
+ 
+-    return tf.reduce_mean(class_loss / num_matched_boxes)
++    return tf.reduce_mean(input_tensor=class_loss / num_matched_boxes)
+ 
+   def add_backbone_saver(self):
+     # Create saver with mapping from variable names in checkpoint of backbone
+     # model to variables in SSD model
+     backbone_var_list = self._collect_backbone_vars()
+-    self.backbone_savers.append(tf.train.Saver(backbone_var_list))
++    self.backbone_savers.append(tf.compat.v1.train.Saver(backbone_var_list))
+ 
+   def load_backbone_model(self, sess, backbone_model_path):
+     for saver in self.backbone_savers:
+@@ -498,7 +498,7 @@ class SSD300Model(model_lib.CNNModel):
+     ssd_box_coder = faster_rcnn_box_coder.FasterRcnnBoxCoder(
+         scale_factors=ssd_constants.BOX_CODER_SCALES)
+     anchors = box_list.BoxList(
+-        tf.convert_to_tensor(ssd_dataloader.DefaultBoxes()('ltrb')))
++        tf.convert_to_tensor(value=ssd_dataloader.DefaultBoxes()('ltrb')))
+     pred_boxes = box_coder.batch_decode(
+         encoded_boxes=pred_locs, box_coder=ssd_box_coder, anchors=anchors)
+ 
+@@ -639,14 +639,14 @@ class SSD300Model(model_lib.CNNModel):
+ 
+   def get_synthetic_inputs(self, input_name, nclass):
+     """Generating synthetic data matching real data shape and type."""
+-    inputs = tf.random_uniform(
++    inputs = tf.random.uniform(
+         self.get_input_shapes('train')[0], dtype=self.data_type)
+     inputs = tf.contrib.framework.local_variable(inputs, name=input_name)
+-    boxes = tf.random_uniform(
++    boxes = tf.random.uniform(
+         [self.batch_size, ssd_constants.NUM_SSD_BOXES, 4], dtype=tf.float32)
+-    classes = tf.random_uniform(
++    classes = tf.random.uniform(
+         [self.batch_size, ssd_constants.NUM_SSD_BOXES, 1], dtype=tf.float32)
+-    nboxes = tf.random_uniform(
++    nboxes = tf.random.uniform(
+         [self.batch_size], minval=1, maxval=10, dtype=tf.float32)
+     return (inputs, boxes, classes, nboxes)
+ 
+diff --git a/scripts/tf_cnn_benchmarks/preprocessing.py b/scripts/tf_cnn_benchmarks/preprocessing.py
+index a6ceb7c..bb40b30 100644
+--- a/scripts/tf_cnn_benchmarks/preprocessing.py
++++ b/scripts/tf_cnn_benchmarks/preprocessing.py
+@@ -25,8 +25,10 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
+ import tensorflow as tf
+ 
+ import cnn_util
+-from tensorflow.contrib.data.python.ops import threadpool
+-from tensorflow.contrib.image.python.ops import distort_image_ops
++from tensorflow.python.data.experimental.ops import threadpool
++#from tensorflow.contrib.data.python.ops import threadpool
++from tensorflow_addons.image import distort_image_ops
++#from tensorflow.contrib.image.python.ops import distort_image_ops
+ from tensorflow.python.data.ops import multi_device_iterator_ops
+ from tensorflow.python.framework import function
+ from tensorflow.python.layers import utils
+@@ -34,6 +36,7 @@ from tensorflow.python.ops import data_flow_ops
+ from tensorflow.python.platform import gfile
+ import mlperf
+ 
++tf.compat.v1.disable_eager_execution()
+ 
+ def parse_example_proto(example_serialized):
+   """Parses an Example proto containing a training example of an image.
+@@ -72,14 +75,14 @@ def parse_example_proto(example_serialized):
+   """
+   # Dense features in Example proto.
+   feature_map = {
+-      'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
++      'image/encoded': tf.io.FixedLenFeature([], dtype=tf.string,
+                                           default_value=''),
+-      'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
++      'image/class/label': tf.io.FixedLenFeature([1], dtype=tf.int64,
+                                               default_value=-1),
+-      'image/class/text': tf.FixedLenFeature([], dtype=tf.string,
++      'image/class/text': tf.io.FixedLenFeature([], dtype=tf.string,
+                                              default_value=''),
+   }
+-  sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
++  sparse_float32 = tf.io.VarLenFeature(dtype=tf.float32)
+   # Sparse features in Example proto.
+   feature_map.update(
+       {k: sparse_float32 for k in ['image/object/bbox/xmin',
+@@ -87,7 +90,7 @@ def parse_example_proto(example_serialized):
+                                    'image/object/bbox/xmax',
+                                    'image/object/bbox/ymax']})
+ 
+-  features = tf.parse_single_example(example_serialized, feature_map)
++  features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
+   label = tf.cast(features['image/class/label'], dtype=tf.int32)
+ 
+   xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 0)
+@@ -101,7 +104,7 @@ def parse_example_proto(example_serialized):
+   # Force the variable number of bounding boxes into the shape
+   # [1, num_boxes, coords].
+   bbox = tf.expand_dims(bbox, 0)
+-  bbox = tf.transpose(bbox, [0, 2, 1])
++  bbox = tf.transpose(a=bbox, perm=[0, 2, 1])
+ 
+   return features['image/encoded'], label, bbox, features['image/class/text']
+ 
+@@ -167,7 +170,7 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
+   """
+   # with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
+   # with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
+-  with tf.name_scope(scope or 'decode_jpeg'):
++  with tf.compat.v1.name_scope(scope or 'decode_jpeg'):
+     # Decode the string as an RGB JPEG.
+     # Note that the resulting image contains an unknown height and width
+     # that is set dynamically by decode_jpeg. In other words, the height
+@@ -227,12 +230,12 @@ def eval_image(image,
+   """
+   # TODO(reedwm): Currently we resize then crop. Investigate if it's faster to
+   # crop then resize.
+-  with tf.name_scope('eval_image'):
++  with tf.compat.v1.name_scope('eval_image'):
+     if summary_verbosity >= 3:
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'original_image', tf.expand_dims(image, 0))
+ 
+-    shape = tf.shape(image)
++    shape = tf.shape(input=image)
+     image_height = shape[0]
+     image_width = shape[1]
+     image_height_float = tf.cast(image_height, tf.float32)
+@@ -259,10 +262,9 @@ def eval_image(image,
+ 
+     # Resize the image to shape (`resize_height`, `resize_width`)
+     image_resize_method = get_image_resize_method(resize_method, batch_position)
+-    distorted_image = tf.image.resize_images(image,
++    distorted_image = tf.image.resize(image,
+                                              [resize_height, resize_width],
+-                                             image_resize_method,
+-                                             align_corners=False)
++                                             image_resize_method)
+ 
+     # Do a central crop of the image to size (height, width).
+     # MLPerf requires us to log (height, width) with two different keys.
+@@ -277,7 +279,7 @@ def eval_image(image,
+ 
+     distorted_image.set_shape([height, width, 3])
+     if summary_verbosity >= 3:
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'cropped_resized_image', tf.expand_dims(distorted_image, 0))
+     image = distorted_image
+   return image
+@@ -322,7 +324,7 @@ def train_image(image_buffer,
+   """
+   # with tf.op_scope([image, height, width, bbox], scope, 'distort_image'):
+   # with tf.name_scope(scope, 'distort_image', [image, height, width, bbox]):
+-  with tf.name_scope(scope or 'distort_image'):
++  with tf.compat.v1.name_scope(scope or 'distort_image'):
+     # A large fraction of image datasets contain a human-annotated bounding box
+     # delineating the region of the image containing the object of interest.  We
+     # choose to create a new bounding box for the object which is a randomly
+@@ -344,7 +346,7 @@ def train_image(image_buffer,
+                       value=max_attempts)
+ 
+     sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
+-        tf.image.extract_jpeg_shape(image_buffer),
++        image_size=tf.image.extract_jpeg_shape(image_buffer),
+         bounding_boxes=bbox,
+         min_object_covered=min_object_covered,
+         aspect_ratio_range=aspect_ratio_range,
+@@ -358,7 +360,7 @@ def train_image(image_buffer,
+       image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+       image_with_distorted_box = tf.image.draw_bounding_boxes(
+           tf.expand_dims(image, 0), distort_bbox)
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'images_with_distorted_bounding_box',
+           image_with_distorted_box)
+ 
+@@ -381,15 +383,14 @@ def train_image(image_buffer,
+     # ratio is not respected.
+     mlperf.logger.log(key=mlperf.tags.INPUT_RESIZE, value=[height, width])
+     image_resize_method = get_image_resize_method(resize_method, batch_position)
+-    distorted_image = tf.image.resize_images(
++    distorted_image = tf.image.resize(
+         distorted_image, [height, width],
+-        image_resize_method,
+-        align_corners=False)
++        image_resize_method)
+     # Restore the shape since the dynamic slice based upon the bbox_size loses
+     # the third dimension.
+     distorted_image.set_shape([height, width, 3])
+     if summary_verbosity >= 3:
+-      tf.summary.image('cropped_resized_maybe_flipped_image',
++      tf.compat.v1.summary.image('cropped_resized_maybe_flipped_image',
+                        tf.expand_dims(distorted_image, 0))
+ 
+     if distortions:
+@@ -404,7 +405,7 @@ def train_image(image_buffer,
+       distorted_image *= 255
+ 
+     if summary_verbosity >= 3:
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'final_distorted_image',
+           tf.expand_dims(distorted_image, 0))
+     return distorted_image
+@@ -429,7 +430,7 @@ def distort_color(image, batch_position=0, distort_color_in_yiq=False,
+   Returns:
+     color-distorted image
+   """
+-  with tf.name_scope(scope or 'distort_color'):
++  with tf.compat.v1.name_scope(scope or 'distort_color'):
+ 
+     def distort_fn_0(image=image):
+       """Variant 0 of distort function."""
+@@ -495,7 +496,7 @@ class InputPreprocessor(object):
+     """Creates a MultiDeviceIterator."""
+     assert self.supports_datasets()
+     assert num_splits == len(gpu_devices)
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       if doing_eval:
+         subset = 'validation'
+       else:
+@@ -522,7 +523,7 @@ class InputPreprocessor(object):
+           gpu_devices,
+           source_device=cpu_device,
+           max_buffer_size=params.multi_device_iterator_max_buffer_size)
+-      tf.add_to_collection(tf.GraphKeys.TABLE_INITIALIZERS,
++      tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS,
+                            multi_device_iterator.initializer)
+       return multi_device_iterator
+ 
+@@ -544,7 +545,7 @@ class InputPreprocessor(object):
+ 
+   def create_iterator(self, ds):
+     ds_iterator = tf.compat.v1.data.make_initializable_iterator(ds)
+-    tf.add_to_collection(tf.GraphKeys.TABLE_INITIALIZERS,
++    tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS,
+                          ds_iterator.initializer)
+     return ds_iterator
+ 
+@@ -558,7 +559,7 @@ class InputPreprocessor(object):
+     assert self.supports_datasets()
+     batch_size_per_split = batch_size // num_splits
+     assert batch_size_per_split == model_input_shapes[0][0]
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       ds = self.create_dataset(batch_size, num_splits, batch_size_per_split,
+                                dataset, subset, train,
+                                datasets_repeat_cached_sample, num_threads,
+@@ -572,7 +573,7 @@ class InputPreprocessor(object):
+ 
+       @function.Defun(tf.string)
+       def _fn(h):
+-        remote_iterator = tf.data.Iterator.from_string_handle(
++        remote_iterator = tf.compat.v1.data.Iterator.from_string_handle(
+             h, ds_iterator.output_types, ds_iterator.output_shapes)
+         input_list = remote_iterator.get_next()
+         reshaped_input_list = [
+@@ -730,7 +731,7 @@ class RecordInputImagePreprocessor(BaseImagePreprocessor):
+                 shift_ratio=-1):
+     if shift_ratio < 0:
+       shift_ratio = self.shift_ratio
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       # Build final results per split.
+       images = [[] for _ in range(self.num_splits)]
+       labels = [[] for _ in range(self.num_splits)]
+@@ -795,7 +796,7 @@ class ImagenetPreprocessor(RecordInputImagePreprocessor):
+     try:
+       from official.resnet.imagenet_preprocessing import preprocess_image
+     except ImportError:
+-      tf.logging.fatal('Please include tensorflow/models to the PYTHONPATH.')
++      tf.compat.v1.logging.fatal('Please include tensorflow/models to the PYTHONPATH.')
+       raise
+     if self.train:
+       image = preprocess_image(
+@@ -824,28 +825,28 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+     Returns:
+       distorted image.
+     """
+-    image = tf.image.resize_image_with_crop_or_pad(
++    image = tf.image.resize_with_crop_or_pad(
+         image, self.height + 8, self.width + 8)
+-    distorted_image = tf.random_crop(image,
++    distorted_image = tf.image.random_crop(image,
+                                      [self.height, self.width, self.depth])
+     # Randomly flip the image horizontally.
+     distorted_image = tf.image.random_flip_left_right(distorted_image)
+     if self.summary_verbosity >= 3:
+-      tf.summary.image('distorted_image', tf.expand_dims(distorted_image, 0))
++      tf.compat.v1.summary.image('distorted_image', tf.expand_dims(distorted_image, 0))
+     return distorted_image
+ 
+   def _eval_image(self, image):
+     """Get the image for model evaluation."""
+-    distorted_image = tf.image.resize_image_with_crop_or_pad(
++    distorted_image = tf.image.resize_with_crop_or_pad(
+         image, self.width, self.height)
+     if self.summary_verbosity >= 3:
+-      tf.summary.image('cropped.image', tf.expand_dims(distorted_image, 0))
++      tf.compat.v1.summary.image('cropped.image', tf.expand_dims(distorted_image, 0))
+     return distorted_image
+ 
+   def preprocess(self, raw_image):
+     """Preprocessing raw image."""
+     if self.summary_verbosity >= 3:
+-      tf.summary.image('raw.image', tf.expand_dims(raw_image, 0))
++      tf.compat.v1.summary.image('raw.image', tf.expand_dims(raw_image, 0))
+     if self.train and self.distortions:
+       image = self._distort_image(raw_image)
+     else:
+@@ -860,11 +861,11 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+                 shift_ratio=-1):
+     # TODO(jsimsa): Implement datasets code path
+     del shift_ratio, params
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       all_images, all_labels = dataset.read_data_files(subset)
+       all_images = tf.constant(all_images)
+       all_labels = tf.constant(all_labels)
+-      input_image, input_label = tf.train.slice_input_producer(
++      input_image, input_label = tf.compat.v1.train.slice_input_producer(
+           [all_images, all_labels])
+       input_image = tf.cast(input_image, self.dtype)
+       input_label = tf.cast(input_label, tf.int32)
+@@ -872,7 +873,7 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+       min_fraction_of_examples_in_queue = 0.4
+       min_queue_examples = int(dataset.num_examples_per_epoch(subset) *
+                                min_fraction_of_examples_in_queue)
+-      raw_images, raw_labels = tf.train.shuffle_batch(
++      raw_images, raw_labels = tf.compat.v1.train.shuffle_batch(
+           [input_image, input_label], batch_size=self.batch_size,
+           capacity=min_queue_examples + 3 * self.batch_size,
+           min_after_dequeue=min_queue_examples)
+@@ -891,7 +892,7 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+         # reshape to the format returned by minibatch.
+         raw_image = tf.reshape(raw_images[i],
+                                [dataset.depth, dataset.height, dataset.width])
+-        raw_image = tf.transpose(raw_image, [1, 2, 0])
++        raw_image = tf.transpose(a=raw_image, perm=[1, 2, 0])
+         image = self.preprocess(raw_image)
+         images[split_index].append(image)
+ 
+@@ -912,7 +913,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+                 params,
+                 shift_ratio=-1):
+     del shift_ratio  # Not used when using datasets instead of data_flow_ops
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       ds = self.create_dataset(
+           self.batch_size, self.num_splits, self.batch_size_per_split,
+           dataset, subset, self.train, params.datasets_repeat_cached_sample)
+@@ -946,13 +947,13 @@ class COCOPreprocessor(BaseImagePreprocessor):
+     image_buffer = data['image_buffer']
+     boxes = data['groundtruth_boxes']
+     classes = tf.reshape(data['groundtruth_classes'], [-1, 1])
+-    source_id = tf.string_to_number(data['source_id'])
++    source_id = tf.strings.to_number(data['source_id'])
+     raw_shape = data['raw_shape']
+ 
+     ssd_encoder = ssd_dataloader.Encoder()
+ 
+     # Only 80 of the 90 COCO classes are used.
+-    class_map = tf.convert_to_tensor(ssd_constants.CLASS_MAP)
++    class_map = tf.convert_to_tensor(value=ssd_constants.CLASS_MAP)
+     classes = tf.gather(class_map, classes)
+     classes = tf.cast(classes, dtype=tf.float32)
+ 
+@@ -984,7 +985,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+ 
+     else:
+       image = tf.image.decode_jpeg(image_buffer)
+-      image = tf.image.resize_images(
++      image = tf.image.resize(
+           image, size=(ssd_constants.IMAGE_SIZE, ssd_constants.IMAGE_SIZE))
+       # resize_image returns image of dtype float32 and does not change its
+       # range. Divide by 255 to convert image to [0, 1] range.
+@@ -996,8 +997,8 @@ class COCOPreprocessor(BaseImagePreprocessor):
+       def trim_and_pad(inp_tensor):
+         """Limit the number of boxes, and pad if necessary."""
+         inp_tensor = inp_tensor[:ssd_constants.MAX_NUM_EVAL_BOXES]
+-        num_pad = ssd_constants.MAX_NUM_EVAL_BOXES - tf.shape(inp_tensor)[0]
+-        inp_tensor = tf.pad(inp_tensor, [[0, num_pad], [0, 0]])
++        num_pad = ssd_constants.MAX_NUM_EVAL_BOXES - tf.shape(input=inp_tensor)[0]
++        inp_tensor = tf.pad(tensor=inp_tensor, paddings=[[0, num_pad], [0, 0]])
+         return tf.reshape(inp_tensor, [ssd_constants.MAX_NUM_EVAL_BOXES,
+                                        inp_tensor.get_shape()[1]])
+ 
+@@ -1017,7 +1018,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+                      subset,
+                      train,
+                      datasets_repeat_cached_sample,
+-                     num_threads=None,
++                     num_threads=28,
+                      datasets_use_caching=False,
+                      datasets_parallel_interleave_cycle_length=None,
+                      datasets_sloppy_parallel_interleave=False,
+@@ -1064,7 +1065,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+ 
+     ds = ds.map(ssd_dataloader.ssd_parse_example_proto, num_parallel_calls=64)
+     ds = ds.filter(
+-        lambda data: tf.greater(tf.shape(data['groundtruth_boxes'])[0], 0))
++        lambda data: tf.greater(tf.shape(input=data['groundtruth_boxes'])[0], 0))
+     ds = ds.apply(
+         tf.data.experimental.map_and_batch(
+             map_func=self.preprocess,
+@@ -1142,12 +1143,12 @@ class TestImagePreprocessor(BaseImagePreprocessor):
+     fake_labels = cnn_util.roll_numpy_batches(self.fake_labels, self.batch_size,
+                                               shift_ratio)
+ 
+-    with tf.name_scope('batch_processing'):
+-      image_slice, label_slice = tf.train.slice_input_producer(
++    with tf.compat.v1.name_scope('batch_processing'):
++      image_slice, label_slice = tf.compat.v1.train.slice_input_producer(
+           [fake_images, fake_labels],
+           shuffle=False,
+           name='image_slice')
+-      raw_images, raw_labels = tf.train.batch(
++      raw_images, raw_labels = tf.compat.v1.train.batch(
+           [image_slice, label_slice], batch_size=self.batch_size,
+           name='image_batch')
+       images = [[] for _ in range(self.num_splits)]
+@@ -1247,7 +1248,7 @@ class LibrispeechPreprocessor(InputPreprocessor):
+     # TODO(laigd): in distributed mode we use shift_ratio so different workers
+     # won't work on same inputs, so we should respect that.
+     del shift_ratio
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       ds = self.create_dataset(
+           self.batch_size,
+           self.num_splits,
+@@ -1287,14 +1288,14 @@ class LibrispeechPreprocessor(InputPreprocessor):
+     del batch_position
+     assert self.supports_datasets()
+     context_features = {
+-        'labels': tf.VarLenFeature(dtype=tf.int64),
+-        'input_length': tf.FixedLenFeature([], dtype=tf.int64),
+-        'label_length': tf.FixedLenFeature([], dtype=tf.int64),
++        'labels': tf.io.VarLenFeature(dtype=tf.int64),
++        'input_length': tf.io.FixedLenFeature([], dtype=tf.int64),
++        'label_length': tf.io.FixedLenFeature([], dtype=tf.int64),
+     }
+     sequence_features = {
+-        'features': tf.FixedLenSequenceFeature([161], dtype=tf.float32)
++        'features': tf.io.FixedLenSequenceFeature([161], dtype=tf.float32)
+     }
+-    context_parsed, sequence_parsed = tf.parse_single_sequence_example(
++    context_parsed, sequence_parsed = tf.io.parse_single_sequence_example(
+         serialized=value,
+         context_features=context_features,
+         sequence_features=sequence_features,
+@@ -1306,7 +1307,7 @@ class LibrispeechPreprocessor(InputPreprocessor):
+         # Label
+         tf.cast(
+             tf.reshape(
+-                tf.sparse_tensor_to_dense(context_parsed['labels']), [-1]),
++                tf.sparse.to_dense(context_parsed['labels']), [-1]),
+             dtype=tf.int32),
+         # Input length
+         tf.cast(
+diff --git a/scripts/tf_cnn_benchmarks/ssd_dataloader.py b/scripts/tf_cnn_benchmarks/ssd_dataloader.py
+index b4fe986..887f1da 100644
+--- a/scripts/tf_cnn_benchmarks/ssd_dataloader.py
++++ b/scripts/tf_cnn_benchmarks/ssd_dataloader.py
+@@ -105,17 +105,17 @@ def calc_iou_tensor(boxes1, boxes2):
+   b2_left, b2_top, b2_right, b2_bottom = tf.split(boxes2, 4, axis=1)
+ 
+   # Shape of intersect_* (N, M)
+-  intersect_left = tf.maximum(b1_left, tf.transpose(b2_left))
+-  intersect_top = tf.maximum(b1_top, tf.transpose(b2_top))
+-  intersect_right = tf.minimum(b1_right, tf.transpose(b2_right))
+-  intersect_bottom = tf.minimum(b1_bottom, tf.transpose(b2_bottom))
++  intersect_left = tf.maximum(b1_left, tf.transpose(a=b2_left))
++  intersect_top = tf.maximum(b1_top, tf.transpose(a=b2_top))
++  intersect_right = tf.minimum(b1_right, tf.transpose(a=b2_right))
++  intersect_bottom = tf.minimum(b1_bottom, tf.transpose(a=b2_bottom))
+ 
+   boxes1_area = (b1_right - b1_left) * (b1_bottom - b1_top)
+   boxes2_area = (b2_right - b2_left) * (b2_bottom - b2_top)
+ 
+   intersect = tf.multiply(tf.maximum((intersect_right - intersect_left), 0),
+                           tf.maximum((intersect_bottom - intersect_top), 0))
+-  union = boxes1_area + tf.transpose(boxes2_area) - intersect
++  union = boxes1_area + tf.transpose(a=boxes2_area) - intersect
+   iou = intersect / union
+ 
+   return iou
+@@ -155,18 +155,18 @@ def ssd_parse_example_proto(example_serialized):
+     raw_shape: [height, width, 3].
+   """
+   feature_map = {
+-      'image/encoded': tf.FixedLenFeature(
++      'image/encoded': tf.io.FixedLenFeature(
+           (), dtype=tf.string, default_value=''),
+-      'image/source_id': tf.FixedLenFeature((), tf.string, default_value=''),
+-      'image/height': tf.FixedLenFeature((), tf.int64, default_value=1),
+-      'image/width': tf.FixedLenFeature((), tf.int64, default_value=1),
+-      'image/object/bbox/xmin': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/bbox/ymin': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/bbox/xmax': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/bbox/ymax': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/class/label': tf.VarLenFeature(dtype=tf.int64),
++      'image/source_id': tf.io.FixedLenFeature((), tf.string, default_value=''),
++      'image/height': tf.io.FixedLenFeature((), tf.int64, default_value=1),
++      'image/width': tf.io.FixedLenFeature((), tf.int64, default_value=1),
++      'image/object/bbox/xmin': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/bbox/ymin': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/bbox/xmax': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/bbox/ymax': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/class/label': tf.io.VarLenFeature(dtype=tf.int64),
+   }
+-  features = tf.parse_single_example(example_serialized, feature_map)
++  features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
+ 
+   xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 1)
+   ymin = tf.expand_dims(features['image/object/bbox/ymin'].values, 1)
+@@ -214,21 +214,21 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+     cropped_classes: class labels for objects in the cropped region.
+   """
+ 
+-  num_boxes = tf.shape(boxes)[0]
++  num_boxes = tf.shape(input=boxes)[0]
+ 
+   def no_crop_check():
+-    return (tf.random_uniform(shape=(), minval=0, maxval=1, dtype=tf.float32)
++    return (tf.random.uniform(shape=(), minval=0, maxval=1, dtype=tf.float32)
+             < ssd_constants.P_NO_CROP_PER_PASS)
+ 
+   def no_crop_proposal():
+     return (
+         tf.ones((), tf.bool),
+-        tf.convert_to_tensor([0, 0, 1, 1], dtype=tf.float32),
++        tf.convert_to_tensor(value=[0, 0, 1, 1], dtype=tf.float32),
+         tf.ones((num_boxes,), tf.bool),
+     )
+ 
+   def crop_proposal():
+-    rand_vec = lambda minval, maxval: tf.random_uniform(
++    rand_vec = lambda minval, maxval: tf.random.uniform(
+         shape=(ssd_constants.NUM_CROP_PASSES, 1), minval=minval, maxval=maxval,
+         dtype=tf.float32)
+ 
+@@ -240,14 +240,14 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+ 
+     ltrb = tf.concat([left, top, right, bottom], axis=1)
+ 
+-    min_iou = tf.random_shuffle(ssd_constants.CROP_MIN_IOU_CHOICES)[0]
++    min_iou = tf.random.shuffle(ssd_constants.CROP_MIN_IOU_CHOICES)[0]
+     ious = calc_iou_tensor(ltrb, boxes)
+ 
+     # discard any bboxes whose center not in the cropped image
+     xc, yc = [tf.tile(0.5 * (boxes[:, i + 0] + boxes[:, i + 2])[tf.newaxis, :],
+                       (ssd_constants.NUM_CROP_PASSES, 1)) for i in range(2)]
+ 
+-    masks = tf.reduce_all(tf.stack([
++    masks = tf.reduce_all(input_tensor=tf.stack([
+         tf.greater(xc, tf.tile(left, (1, num_boxes))),
+         tf.less(xc, tf.tile(right, (1, num_boxes))),
+         tf.greater(yc, tf.tile(top, (1, num_boxes))),
+@@ -257,22 +257,22 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+     # Checks of whether a crop is valid.
+     valid_aspect = tf.logical_and(tf.less(height/width, 2),
+                                   tf.less(width/height, 2))
+-    valid_ious = tf.reduce_all(tf.greater(ious, min_iou), axis=1, keepdims=True)
+-    valid_masks = tf.reduce_any(masks, axis=1, keepdims=True)
++    valid_ious = tf.reduce_all(input_tensor=tf.greater(ious, min_iou), axis=1, keepdims=True)
++    valid_masks = tf.reduce_any(input_tensor=masks, axis=1, keepdims=True)
+ 
+-    valid_all = tf.cast(tf.reduce_all(tf.concat(
++    valid_all = tf.cast(tf.reduce_all(input_tensor=tf.concat(
+         [valid_aspect, valid_ious, valid_masks], axis=1), axis=1), tf.int32)
+ 
+     # One indexed, as zero is needed for the case of no matches.
+     index = tf.range(1, 1 + ssd_constants.NUM_CROP_PASSES, dtype=tf.int32)
+ 
+     # Either one-hot, or zeros if there is no valid crop.
+-    selection = tf.equal(tf.reduce_max(index * valid_all), index)
++    selection = tf.equal(tf.reduce_max(input_tensor=index * valid_all), index)
+ 
+-    use_crop = tf.reduce_any(selection)
+-    output_ltrb = tf.reduce_sum(tf.multiply(ltrb, tf.tile(tf.cast(
++    use_crop = tf.reduce_any(input_tensor=selection)
++    output_ltrb = tf.reduce_sum(input_tensor=tf.multiply(ltrb, tf.tile(tf.cast(
+         selection, tf.float32)[:, tf.newaxis], (1, 4))), axis=0)
+-    output_masks = tf.reduce_any(tf.logical_and(masks, tf.tile(
++    output_masks = tf.reduce_any(input_tensor=tf.logical_and(masks, tf.tile(
+         selection[:, tf.newaxis], (1, num_boxes))), axis=0)
+ 
+     return use_crop, output_ltrb, output_masks
+@@ -290,7 +290,7 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+       loop_vars=[tf.zeros((), tf.bool), tf.zeros((4,), tf.float32), tf.zeros((num_boxes,), tf.bool)],
+   )
+ 
+-  filtered_boxes = tf.boolean_mask(boxes, box_masks, axis=0)
++  filtered_boxes = tf.boolean_mask(tensor=boxes, mask=box_masks, axis=0)
+ 
+   mlperf.logger.log(key=mlperf.tags.NUM_CROPPING_ITERATIONS,
+                     value=ssd_constants.NUM_CROP_PASSES)
+@@ -330,19 +330,19 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+       image_buffer, crop_window, channels=3)
+ 
+   # Resize converts image dtype from uint8 to float32, without rescaling values.
+-  resized_image = tf.image.resize_images(
++  resized_image = tf.image.resize(
+       cropped_image, [ssd_constants.IMAGE_SIZE, ssd_constants.IMAGE_SIZE])
+   mlperf.logger.log(key=mlperf.tags.INPUT_SIZE,
+                     value=ssd_constants.IMAGE_SIZE)
+ 
+-  cropped_classes = tf.boolean_mask(classes, box_masks, axis=0)
++  cropped_classes = tf.boolean_mask(tensor=classes, mask=box_masks, axis=0)
+ 
+   return resized_image, cropped_boxes, cropped_classes
+ 
+ 
+ def color_jitter(image, brightness=0, contrast=0, saturation=0, hue=0):
+   """Distort the color of the image."""
+-  with tf.name_scope('distort_color'):
++  with tf.compat.v1.name_scope('distort_color'):
+     if brightness > 0:
+       image = tf.image.random_brightness(image, max_delta=brightness)
+     if contrast > 0:
+@@ -392,7 +392,7 @@ class Encoder(object):
+ 
+     self.default_boxes = DefaultBoxes()('ltrb')
+     self.default_boxes = box_list.BoxList(
+-        tf.convert_to_tensor(self.default_boxes))
++        tf.convert_to_tensor(value=self.default_boxes))
+     self.assigner = target_assigner.TargetAssigner(
+         similarity_calc, matcher, box_coder)
+ 
+@@ -401,5 +401,5 @@ class Encoder(object):
+     encoded_classes, _, encoded_boxes, _, matches = self.assigner.assign(
+         self.default_boxes, target_boxes, gt_labels)
+     num_matched_boxes = tf.reduce_sum(
+-        tf.cast(tf.not_equal(matches, -1), tf.float32))
++        input_tensor=tf.cast(tf.not_equal(matches, -1), tf.float32))
+     return encoded_classes, encoded_boxes, num_matched_boxes
+diff --git a/scripts/tf_cnn_benchmarks/test_data/tfrecord_image_generator.py b/scripts/tf_cnn_benchmarks/test_data/tfrecord_image_generator.py
+index 05b62e4..7676a9f 100644
+--- a/scripts/tf_cnn_benchmarks/test_data/tfrecord_image_generator.py
++++ b/scripts/tf_cnn_benchmarks/test_data/tfrecord_image_generator.py
+@@ -131,10 +131,10 @@ class ImageCoder(object):
+ 
+   def __init__(self):
+     # Create a single Session to run all image coding calls.
+-    self._sess = tf.Session()
++    self._sess = tf.compat.v1.Session()
+ 
+     # Initializes function that converts PNG to JPEG data.
+-    self._image = tf.placeholder(dtype=tf.uint8)
++    self._image = tf.compat.v1.placeholder(dtype=tf.uint8)
+     self._encode_jpeg = tf.image.encode_jpeg(
+         self._image, format='rgb', quality=100)
+ 
+@@ -185,7 +185,7 @@ def _process_dataset(output_directory, num_classes, coder, name, num_images,
+   for shard in range(num_shards):
+     output_filename = '%s-%.5d-of-%.5d' % (name, shard, num_shards)
+     output_file = os.path.join(output_directory, output_filename)
+-    with tf.python_io.TFRecordWriter(output_file) as writer:
++    with tf.io.TFRecordWriter(output_file) as writer:
+       for i in range(files_per_shard):
+         index = shard * files_per_shard + i
+         image_buffer, height, width = _process_image(coder, name)
+diff --git a/scripts/tf_cnn_benchmarks/test_util.py b/scripts/tf_cnn_benchmarks/test_util.py
+index 34fea0c..06ad95f 100644
+--- a/scripts/tf_cnn_benchmarks/test_util.py
++++ b/scripts/tf_cnn_benchmarks/test_util.py
+@@ -239,7 +239,7 @@ def train_and_eval(testcase,
+   assert not skip or skip in {'eval', 'eval_and_train_from_checkpoint'}
+ 
+   # Part 1: Train from scratch.
+-  tf.logging.info('Training model from scratch')
++  tf.compat.v1.logging.info('Training model from scratch')
+   print_training_accuracy = (params.print_training_accuracy or
+                              params.forward_only)
+   initial_train_logs = run_fn('InitialTraining', params)
+@@ -264,7 +264,7 @@ def train_and_eval(testcase,
+ 
+   # Part 2: Train from the loaded checkpoint.
+   testcase.assertIsNotNone(train_dir_entries)
+-  tf.logging.info('Training model from loaded checkpoint')
++  tf.compat.v1.logging.info('Training model from loaded checkpoint')
+   # Run for same number of batches as before.
+   params = params._replace(num_batches=params.num_batches * 2)
+   train_logs_from_ckpt = run_fn('TrainingFromCheckpoint', params)
+@@ -287,7 +287,7 @@ def train_and_eval(testcase,
+     return
+ 
+   # Part 3: Evaluate from the loaded checkpoint.
+-  tf.logging.info('Evaluating model from checkpoint')
++  tf.compat.v1.logging.info('Evaluating model from checkpoint')
+   params = params._replace(num_batches=params.num_batches // 2, eval=True)
+   eval_logs = run_fn('Evaluation', params)
+   testcase.assertGreaterEqual(len(eval_logs), 1)
+@@ -395,7 +395,7 @@ def manually_compute_losses(numpy_inputs, inputs_placeholder, loss, num_workers,
+   """
+   batch_size = params.batch_size * params.num_gpus
+   assert numpy_inputs.shape[0] % (num_workers * batch_size) == 0
+-  l2_loss = tf.add_n([tf.nn.l2_loss(x) for x in tf.trainable_variables()])
++  l2_loss = tf.add_n([tf.nn.l2_loss(x) for x in tf.compat.v1.trainable_variables()])
+   total_loss = loss + params.weight_decay * l2_loss
+   reported_loss = (loss if params.loss_type_to_report == 'base_loss'
+                    else total_loss)
+@@ -414,7 +414,7 @@ def manually_compute_losses(numpy_inputs, inputs_placeholder, loss, num_workers,
+   # We apply gradients from a placeholder. That way, we can first compute the
+   # gradients from each worker, then afterwards apply them one by one by feeding
+   # them into the placeholder.
+-  placeholder_grad_vars = [(tf.placeholder(g.dtype, g.shape), v)
++  placeholder_grad_vars = [(tf.compat.v1.placeholder(g.dtype, g.shape), v)
+                            for g, v in grad_vars]
+   placeholder_grads = [g for g, _ in placeholder_grad_vars]
+   apply_grads_op = opt.apply_gradients(placeholder_grad_vars)
+@@ -424,11 +424,11 @@ def manually_compute_losses(numpy_inputs, inputs_placeholder, loss, num_workers,
+                      for i in range(num_workers)]
+   # Set the GPU count to 0, to avoid taking all the GPU memory. Unfortunately,
+   # doing so still takes up about ~1GB for some reason.
+-  config = tf.ConfigProto(device_count={'GPU': 0})
++  config = tf.compat.v1.ConfigProto(device_count={'GPU': 0})
+   config.graph_options.rewrite_options.pin_to_host_optimization = (
+       rewriter_config_pb2.RewriterConfig.OFF)
+-  with tf.Session(config=config) as sess:
+-    sess.run(tf.global_variables_initializer())
++  with tf.compat.v1.Session(config=config) as sess:
++    sess.run(tf.compat.v1.global_variables_initializer())
+     losses = [[] for _ in range(num_workers)]
+     for i in range(params.num_batches):
+       computed_grads = []
+@@ -471,16 +471,16 @@ class TestCNNModel(model.CNNModel):
+     # This model only supports 1x1 images with 1 channel
+     assert cnn.top_layer.shape[1:] == (1, 1, 1)
+     # Multiply by variable A.
+-    with tf.name_scope('mult_by_var_A'):
++    with tf.compat.v1.name_scope('mult_by_var_A'):
+       cnn.conv(1, 1, 1, 1, 1, use_batch_norm=None, activation=None, bias=None,
+-               kernel_initializer=tf.constant_initializer(
++               kernel_initializer=tf.compat.v1.constant_initializer(
+                    self.VAR_A_INITIAL_VALUE))
+     # Multiply by variable B.
+-    with tf.name_scope('mult_by_var_B'):
++    with tf.compat.v1.name_scope('mult_by_var_B'):
+       cnn.conv(1, 1, 1, 1, 1, use_batch_norm=None, activation=None, bias=None,
+-               kernel_initializer=tf.constant_initializer(
++               kernel_initializer=tf.compat.v1.constant_initializer(
+                    self.VAR_B_INITIAL_VALUE))
+-    with tf.name_scope('reshape_to_scalar'):
++    with tf.compat.v1.name_scope('reshape_to_scalar'):
+       cnn.reshape([-1, 1])
+ 
+   def skip_final_affine_layer(self):
+@@ -488,13 +488,13 @@ class TestCNNModel(model.CNNModel):
+ 
+   def loss_function(self, inputs, build_network_result):
+     del inputs
+-    return tf.reduce_mean(build_network_result.logits)
++    return tf.reduce_mean(input_tensor=build_network_result.logits)
+ 
+   def manually_compute_losses(self, inputs, num_workers, params):
+     with tf.Graph().as_default(), tf.device('/cpu:0'):
+       a = tf.Variable(self.VAR_A_INITIAL_VALUE, name='A')
+       b = tf.Variable(self.VAR_B_INITIAL_VALUE, name='B')
+-      inputs_placeholder = tf.placeholder(tf.float32,
++      inputs_placeholder = tf.compat.v1.placeholder(tf.float32,
+                                           (None, 1, 1, 1),
+                                           name='inputs_placeholder')
+       inputs_reshaped = tf.reshape(inputs_placeholder, (-1, 1))
+diff --git a/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py b/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py
+index 707dd60..5fdfa88 100644
+--- a/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py
++++ b/scripts/tf_cnn_benchmarks/tf_cnn_benchmarks.py
+@@ -25,6 +25,7 @@ from __future__ import print_function
+ from absl import app
+ from absl import flags as absl_flags
+ import tensorflow as tf
++tf.compat.v1.disable_eager_execution()
+ 
+ import benchmark_cnn
+ import cnn_util
+diff --git a/scripts/tf_cnn_benchmarks/variable_mgr.py b/scripts/tf_cnn_benchmarks/variable_mgr.py
+index 354d38f..ae80649 100644
+--- a/scripts/tf_cnn_benchmarks/variable_mgr.py
++++ b/scripts/tf_cnn_benchmarks/variable_mgr.py
+@@ -121,7 +121,7 @@ class VariableMgr(object):
+ 
+   def savable_variables(self):
+     """Returns a list/dict of savable variables to pass to tf.train.Saver."""
+-    return tf.global_variables()
++    return tf.compat.v1.global_variables()
+ 
+   def trainable_variables_on_device(self,
+                                     rel_device_num,
+@@ -140,11 +140,11 @@ class VariableMgr(object):
+     del rel_device_num, writable
+     if self.each_tower_has_variables():
+       params = [
+-          v for v in tf.trainable_variables()
++          v for v in tf.compat.v1.trainable_variables()
+           if v.name.startswith('v%s/' % abs_device_num)
+       ]
+     else:
+-      params = tf.trainable_variables()
++      params = tf.compat.v1.trainable_variables()
+     return params
+ 
+   @contextlib.contextmanager
+@@ -180,7 +180,7 @@ class VariableMgrIndependent(VariableMgr):
+     return True
+ 
+   def create_outer_variable_scope(self, device_num):
+-    return tf.variable_scope('v%s' % device_num, reuse=self._reuse_vars,
++    return tf.compat.v1.variable_scope('v%s' % device_num, reuse=self._reuse_vars,
+                              use_resource=self.use_resource_vars)
+ 
+   def preprocess_device_grads(self, device_grads):
+@@ -196,8 +196,8 @@ class VariableMgrIndependent(VariableMgr):
+       # NaNs on the first GPU.
+       has_inf_nan_list = []
+       for grad, _ in tower_grad:
+-        has_inf_nan_list.append(tf.reduce_all(tf.is_finite(grad)))
+-      self.grad_has_inf_nan = tf.logical_not(tf.reduce_all(has_inf_nan_list))
++        has_inf_nan_list.append(tf.reduce_all(input_tensor=tf.math.is_finite(grad)))
++      self.grad_has_inf_nan = tf.logical_not(tf.reduce_all(input_tensor=has_inf_nan_list))
+ 
+     return tower_grad
+ 
+@@ -217,7 +217,7 @@ class VariableMgrLocalFetchFromPS(VariableMgr):
+     return False
+ 
+   def create_outer_variable_scope(self, device_num):
+-    return tf.variable_scope('v', reuse=bool(device_num) or self._reuse_vars,
++    return tf.compat.v1.variable_scope('v', reuse=bool(device_num) or self._reuse_vars,
+                              use_resource=self.use_resource_vars)
+ 
+   def preprocess_device_grads(self, device_grads):
+@@ -243,7 +243,7 @@ class VariableMgrLocalFetchFromPS(VariableMgr):
+       ]
+     else:
+       return [
+-          tf.train.replica_device_setter(
++          tf.compat.v1.train.replica_device_setter(
+               worker_device=d,
+               ps_device=self.benchmark_cnn.param_server_device,
+               ps_tasks=1) for d in raw_devices
+@@ -270,7 +270,7 @@ class VariableMgrLocalFetchFromStagedPS(VariableMgrLocalFetchFromPS):
+   def create_outer_variable_scope(self, device_num):
+     self._custom_getter = variable_mgr_util.StagedVariableGetter(
+         device_num, self.benchmark_cnn.raw_devices, None, self)
+-    return tf.variable_scope(
++    return tf.compat.v1.variable_scope(
+         'v', reuse=bool(device_num) or self._reuse_vars,
+         custom_getter=self._custom_getter, use_resource=self.use_resource_vars)
+ 
+@@ -313,7 +313,7 @@ class VariableMgrLocalReplicated(VariableMgr):
+     return True
+ 
+   def create_outer_variable_scope(self, device_num):
+-    return tf.variable_scope('v%s' % device_num, reuse=self._reuse_vars,
++    return tf.compat.v1.variable_scope('v%s' % device_num, reuse=self._reuse_vars,
+                              use_resource=self.use_resource_vars)
+ 
+   def preprocess_device_grads(self, device_grads):
+@@ -329,15 +329,15 @@ class VariableMgrLocalReplicated(VariableMgr):
+     if self.benchmark_cnn.enable_auto_loss_scale:
+       # Check for infs or nans
+       is_finite_list = []
+-      with tf.name_scope('check_for_inf_and_nan'):
++      with tf.compat.v1.name_scope('check_for_inf_and_nan'):
+         for tower_grads in reduced_grads:
+-          with tf.colocate_with(tower_grads[0]):
++          with tf.compat.v1.colocate_with(tower_grads[0]):
+             # TODO(tanmingxing): Create fused op that takes in a list of tensors
+             # as input and returns scalar boolean True if there are any
+             # infs/nans.
+             is_finite_list.append(tf.reduce_all(
+-                [tf.reduce_all(tf.is_finite(g)) for g in tower_grads]))
+-        self.grad_has_inf_nan = tf.logical_not(tf.reduce_all(is_finite_list))
++                input_tensor=[tf.reduce_all(input_tensor=tf.math.is_finite(g)) for g in tower_grads]))
++        self.grad_has_inf_nan = tf.logical_not(tf.reduce_all(input_tensor=is_finite_list))
+     reduced_device_grads = [[
+         (g, v) for g, (_, v) in zip(grads, grad_vars)
+     ] for grads, grad_vars in zip(reduced_grads, device_grads)]
+@@ -349,7 +349,7 @@ class VariableMgrLocalReplicated(VariableMgr):
+ 
+   def get_post_init_ops(self):
+     # Copy initialized values for variables on GPU 0 to other GPUs.
+-    global_vars = tf.global_variables()
++    global_vars = tf.compat.v1.global_variables()
+     var_by_name = dict([(v.name, v) for v in global_vars])
+     post_init_ops = []
+     for v in global_vars:
+@@ -366,7 +366,7 @@ class VariableMgrLocalReplicated(VariableMgr):
+   def savable_variables(self):
+     """Return the set of variables used for saving/loading the model."""
+     params = []
+-    for v in tf.global_variables():
++    for v in tf.compat.v1.global_variables():
+       split_name = v.name.split('/')
+       if split_name[0] == 'v0' or not v.name.startswith('v'):
+         params.append(v)
+@@ -416,7 +416,7 @@ class VariableMgrDistributedAllReduce(VariableMgr):
+     Returns:
+       the requested variable_scope
+     """
+-    return tf.variable_scope('v%s' % device_num, reuse=self._reuse_vars,
++    return tf.compat.v1.variable_scope('v%s' % device_num, reuse=self._reuse_vars,
+                              use_resource=self.use_resource_vars)
+ 
+   def preprocess_device_grads(self, device_grads):
+@@ -464,7 +464,7 @@ class VariableMgrDistributedAllReduce(VariableMgr):
+ 
+   def get_post_init_ops(self):
+     """Copy initialized values for variables to other devices."""
+-    global_vars = tf.global_variables()
++    global_vars = tf.compat.v1.global_variables()
+     var_by_name = dict([(v.name, v) for v in global_vars])
+     post_init_ops = []
+     for v in global_vars:
+@@ -480,7 +480,7 @@ class VariableMgrDistributedAllReduce(VariableMgr):
+   def savable_variables(self):
+     """Return the set of variables used for saving/loading the model."""
+     params = []
+-    for v in tf.global_variables():
++    for v in tf.compat.v1.global_variables():
+       split_name = v.name.split('/')
+       if split_name[0] == 'v0' or not v.name.startswith('v'):
+         params.append(v)
+@@ -539,7 +539,7 @@ class VariableMgrCollectiveAllReduce(VariableMgr):
+     Returns:
+       the requested variable_scope
+     """
+-    return tf.variable_scope('v%s' % device_num, reuse=self._reuse_vars)
++    return tf.compat.v1.variable_scope('v%s' % device_num, reuse=self._reuse_vars)
+ 
+   def preprocess_device_grads(self, device_grads):
+     reduced_grads = allreduce.sum_gradients_all_reduce(
+@@ -578,7 +578,7 @@ class VariableMgrCollectiveAllReduce(VariableMgr):
+       At task 0 device 0, broadcast_send.
+       At all other devices and tasks, broadcast_recv.
+     """
+-    global_vars = tf.global_variables()
++    global_vars = tf.compat.v1.global_variables()
+     group_size = self._num_workers * self._num_gpus
+     post_init_ops = []
+     # Gather variables into same-var-different-device groups.
+@@ -623,7 +623,7 @@ class VariableMgrCollectiveAllReduce(VariableMgr):
+     """Return the set of variables used for saving/loading the model."""
+     params = []
+     if self._task_id == 0:
+-      for v in tf.global_variables():
++      for v in tf.compat.v1.global_variables():
+         split_name = v.name.split('/')
+         if split_name[0] == 'v0' or not v.name.startswith('v'):
+           params.append(v)
+@@ -651,7 +651,7 @@ class VariableMgrDistributedFetchFromPS(VariableMgr):
+       caching_devices = [self.benchmark_cnn.cpu_device]
+     custom_getter = variable_mgr_util.OverrideCachingDevice(
+         caching_devices, self.benchmark_cnn.cpu_device, 1024 * 64)
+-    return tf.variable_scope(
++    return tf.compat.v1.variable_scope(
+         'v', reuse=bool(device_num) or self._reuse_vars,
+         custom_getter=custom_getter, use_resource=self.use_resource_vars)
+ 
+@@ -672,7 +672,7 @@ class VariableMgrDistributedFetchFromPS(VariableMgr):
+     ps_strategy = tf.contrib.training.GreedyLoadBalancingStrategy(
+         self.benchmark_cnn.num_ps, tf.contrib.training.byte_size_load_fn)
+     return [
+-        tf.train.replica_device_setter(
++        tf.compat.v1.train.replica_device_setter(
+             worker_device=d,
+             cluster=self.benchmark_cnn.cluster_manager.get_cluster_spec(),
+             ps_strategy=ps_strategy) for d in self.benchmark_cnn.raw_devices
+@@ -694,7 +694,7 @@ class VariableMgrDistributedFetchFromStagedPS(
+     self._custom_getter = variable_mgr_util.StagedVariableGetter(
+         device_num, self.benchmark_cnn.raw_devices,
+         self.benchmark_cnn.cpu_device, self)
+-    return tf.variable_scope(
++    return tf.compat.v1.variable_scope(
+         'v', reuse=bool(device_num) or self._reuse_vars,
+         custom_getter=self._custom_getter, use_resource=self.use_resource_vars)
+ 
+@@ -722,7 +722,7 @@ class VariableMgrDistributedReplicated(VariableMgr):
+     return True
+ 
+   def create_outer_variable_scope(self, device_num):
+-    return tf.variable_scope(
++    return tf.compat.v1.variable_scope(
+         'v%s' % device_num, reuse=self._reuse_vars,
+         custom_getter=variable_mgr_util.OverrideToLocalVariableIfNotPsVar(),
+         use_resource=self.use_resource_vars)
+@@ -746,7 +746,7 @@ class VariableMgrDistributedReplicated(VariableMgr):
+       my_name = variable_mgr_util.PS_SHADOW_VAR_PREFIX + '/' + v.name
+       if my_name.endswith(':0'):
+         my_name = my_name[:-2]
+-      new_v = tf.get_variable(
++      new_v = tf.compat.v1.get_variable(
+           my_name,
+           dtype=v.dtype.base_dtype,
+           initializer=v.initial_value,
+@@ -788,11 +788,11 @@ class VariableMgrDistributedReplicated(VariableMgr):
+     # Copy initialized variables for variables on the parameter server
+     # to the local copy of the variable.
+ 
+-    local_vars = tf.local_variables()
++    local_vars = tf.compat.v1.local_variables()
+     local_var_by_name = dict(
+         [(self._strip_port(v.name), v) for v in local_vars])
+     post_init_ops = []
+-    for v in tf.global_variables():
++    for v in tf.compat.v1.global_variables():
+       if v.name.startswith(variable_mgr_util.PS_SHADOW_VAR_PREFIX + '/v0/'):
+         prefix = self._strip_port(
+             v.name[len(variable_mgr_util.PS_SHADOW_VAR_PREFIX + '/v0'):])
+@@ -815,7 +815,7 @@ class VariableMgrDistributedReplicated(VariableMgr):
+   def savable_variables(self):
+     """Returns a list/dict of savable variables to pass to tf.train.Saver."""
+     params = {}
+-    for v in tf.global_variables():
++    for v in tf.compat.v1.global_variables():
+       assert (v.name.startswith(variable_mgr_util.PS_SHADOW_VAR_PREFIX + '/v0/')
+               or v.name in ('global_step:0', 'loss_scale:0',
+                             'loss_scale_normal_steps:0')), (
+@@ -826,12 +826,12 @@ class VariableMgrDistributedReplicated(VariableMgr):
+       # distributed_replicated mode.
+       name = self._strip_port(self._remove_shadow_var_prefix_if_present(v.name))
+       params[name] = v
+-    for v in tf.local_variables():
++    for v in tf.compat.v1.local_variables():
+       # Non-trainable variables, such as batch norm moving averages, do not have
+       # corresponding global shadow variables, so we add them here. Trainable
+       # local variables have corresponding global shadow variables, which were
+       # added in the global variable loop above.
+-      if v.name.startswith('v0/') and v not in tf.trainable_variables():
++      if v.name.startswith('v0/') and v not in tf.compat.v1.trainable_variables():
+         params[self._strip_port(v.name)] = v
+     return params
+ 
+diff --git a/scripts/tf_cnn_benchmarks/variable_mgr_util.py b/scripts/tf_cnn_benchmarks/variable_mgr_util.py
+index 9b063de..e3b1600 100644
+--- a/scripts/tf_cnn_benchmarks/variable_mgr_util.py
++++ b/scripts/tf_cnn_benchmarks/variable_mgr_util.py
+@@ -82,13 +82,13 @@ def get_loss_scale_update_op(loss_scale, loss_scale_normal_steps,
+ 
+   def increase_loss_scale_func():
+     return tf.group(
+-        tf.assign(loss_scale_normal_steps, 0),
+-        tf.assign(loss_scale, loss_scale * 2))
++        tf.compat.v1.assign(loss_scale_normal_steps, 0),
++        tf.compat.v1.assign(loss_scale, loss_scale * 2))
+ 
+   # true_fn and false_fn must have the same type.
+-  return tf.cond(loss_scale_normal_steps < inc_loss_scale_every_n,
+-                 increment_loss_scale_normal_steps_func,
+-                 increase_loss_scale_func)
++  return tf.cond(pred=loss_scale_normal_steps < inc_loss_scale_every_n,
++                 true_fn=increment_loss_scale_normal_steps_func,
++                 false_fn=increase_loss_scale_func)
+ 
+ 
+ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
+@@ -119,8 +119,8 @@ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
+     def update_op_if_nan_or_inf():
+       """Update loss_scale and discard gradients if nans/infs occurred."""
+       return tf.group(
+-          tf.assign(loss_scale, loss_scale / 2.),
+-          tf.assign(loss_scale_normal_steps, 0))
++          tf.compat.v1.assign(loss_scale, loss_scale / 2.),
++          tf.compat.v1.assign(loss_scale_normal_steps, 0))
+ 
+     # Otherwise, apply gradients, and update loss_scale and
+     # loss_scale_normal_steps.
+@@ -134,9 +134,9 @@ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
+     # TODO(tanmingxing): Add support for independent and distributed all_reduce.
+     assert grad_has_inf_nan is not None
+     update_op = tf.cond(
+-        grad_has_inf_nan,
+-        update_op_if_nan_or_inf,
+-        update_op_if_no_nan_or_inf,
++        pred=grad_has_inf_nan,
++        true_fn=update_op_if_nan_or_inf,
++        false_fn=update_op_if_no_nan_or_inf,
+         name='cond_if_grad_has_inf_nan'
+     )
+     training_ops.append(update_op)
+@@ -198,11 +198,11 @@ class OverrideToLocalVariableIfNotPsVar(object):
+     if 'collections' in kwargs:
+       collections = kwargs['collections']
+     if not collections:
+-      collections = [tf.GraphKeys.GLOBAL_VARIABLES]
++      collections = [tf.compat.v1.GraphKeys.GLOBAL_VARIABLES]
+     else:
+       collections = collections[:]
+-    collections.remove(tf.GraphKeys.GLOBAL_VARIABLES)
+-    collections.append(tf.GraphKeys.LOCAL_VARIABLES)
++    collections.remove(tf.compat.v1.GraphKeys.GLOBAL_VARIABLES)
++    collections.append(tf.compat.v1.GraphKeys.LOCAL_VARIABLES)
+     kwargs['collections'] = list(collections)
+     return getter(name, *args, **kwargs)
+ 
+@@ -384,7 +384,7 @@ class StagedVariableGetter(object):
+       Return the set of trainable variables on the specified device.
+     """
+     del abs_device_num
+-    params_refs = tf.trainable_variables()
++    params_refs = tf.compat.v1.trainable_variables()
+     if writable:
+       return params_refs
+     params = []
+@@ -425,7 +425,7 @@ def aggregate_gradients_using_copy_with_device_selection(
+       agg_grads.append(grad_and_var)
+       has_nan_or_inf_list.append(has_nan_or_inf)
+   if check_inf_nan:
+-    return agg_grads, tf.reduce_any(has_nan_or_inf_list)
++    return agg_grads, tf.reduce_any(input_tensor=has_nan_or_inf_list)
+   else:
+     return agg_grads, None
+ 
+@@ -464,7 +464,7 @@ def aggregate_gradients_using_copy_with_variable_colocation(
+       has_nan_or_inf_list.append(has_nan_or_inf)
+ 
+   if check_inf_nan:
+-    return agg_grads, tf.reduce_any(has_nan_or_inf_list)
++    return agg_grads, tf.reduce_any(input_tensor=has_nan_or_inf_list)
+   else:
+     return agg_grads, None
+ 
+@@ -495,7 +495,7 @@ def aggregate_gradients_using_copy(tower_grads, use_mean, check_inf_nan):
+     has_nan_or_inf_list.append(has_nan_or_inf)
+ 
+   if check_inf_nan:
+-    return agg_grads, tf.reduce_any(has_nan_or_inf_list)
++    return agg_grads, tf.reduce_any(input_tensor=has_nan_or_inf_list)
+   else:
+     return agg_grads, None
+ 
+@@ -531,8 +531,8 @@ def aggregate_single_gradient_using_copy(grad_and_vars, use_mean,
+ 
+   v = grad_and_vars[0][1]
+   if check_inf_nan:
+-    with tf.name_scope('check_for_inf_and_nan'):
+-      has_nan_or_inf = tf.logical_not(tf.reduce_all(tf.is_finite(grads)))
++    with tf.compat.v1.name_scope('check_for_inf_and_nan'):
++      has_nan_or_inf = tf.logical_not(tf.reduce_all(input_tensor=tf.math.is_finite(grads)))
+     return (grad, v), has_nan_or_inf
+   else:
+     return (grad, v), None
+diff --git a/scripts/tf_cnn_benchmarks/variable_mgr_util_test.py b/scripts/tf_cnn_benchmarks/variable_mgr_util_test.py
+index e883505..d79ef3c 100644
+--- a/scripts/tf_cnn_benchmarks/variable_mgr_util_test.py
++++ b/scripts/tf_cnn_benchmarks/variable_mgr_util_test.py
+@@ -33,7 +33,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+         loss_scale, loss_scale_normal_steps, inc_loss_scale_every_n)
+ 
+     with self.test_session() as sess:
+-      sess.run(tf.global_variables_initializer())
++      sess.run(tf.compat.v1.global_variables_initializer())
+       sess.run(update_op)
+ 
+       self.assertEqual(sess.run(loss_scale), 8)
+@@ -48,7 +48,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+         loss_scale, loss_scale_normal_steps, inc_loss_scale_every_n)
+ 
+     with self.test_session() as sess:
+-      sess.run(tf.global_variables_initializer())
++      sess.run(tf.compat.v1.global_variables_initializer())
+       sess.run(update_op)
+ 
+       self.assertEqual(sess.run(loss_scale), 4)
+@@ -57,7 +57,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+   def testAppendGradientsWithLossScaleWithAutoScaleDisabled(self):
+     v = tf.Variable(0)
+     training_ops = []
+-    get_apply_gradients_ops_func = lambda: [tf.assign(v, v + 1)]
++    get_apply_gradients_ops_func = lambda: [tf.compat.v1.assign(v, v + 1)]
+     loss_scale_params = variable_mgr_util.AutoLossScaleParams(
+         enable_auto_loss_scale=False,  # no auto loss scale.
+         loss_scale=tf.Variable(4),
+@@ -71,7 +71,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+         grad_has_inf_nan=True)
+ 
+     with self.test_session() as sess:
+-      sess.run(tf.global_variables_initializer())
++      sess.run(tf.compat.v1.global_variables_initializer())
+       sess.run(training_ops)
+       self.assertEqual(sess.run(v), 1)
+       self.assertEqual(sess.run(loss_scale_params.loss_scale), 4)
+@@ -80,7 +80,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+   def testAppendGradientsWithLossScaleForNonChiefWorker(self):
+     v = tf.Variable(0)
+     training_ops = []
+-    get_apply_gradients_ops_func = lambda: [tf.assign(v, v + 1)]
++    get_apply_gradients_ops_func = lambda: [tf.compat.v1.assign(v, v + 1)]
+     loss_scale_params = variable_mgr_util.AutoLossScaleParams(
+         enable_auto_loss_scale=True,
+         loss_scale=tf.Variable(4),
+@@ -94,7 +94,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+         grad_has_inf_nan=False)
+ 
+     with self.test_session() as sess:
+-      sess.run(tf.global_variables_initializer())
++      sess.run(tf.compat.v1.global_variables_initializer())
+       sess.run(training_ops)
+       self.assertEqual(sess.run(v), 1)
+       self.assertEqual(sess.run(loss_scale_params.loss_scale), 4)
+@@ -103,7 +103,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+   def testAppendGradientsWithLossScaleWithoutNan(self):
+     v = tf.Variable(0)
+     training_ops = []
+-    get_apply_gradients_ops_func = lambda: [tf.assign(v, v + 1)]
++    get_apply_gradients_ops_func = lambda: [tf.compat.v1.assign(v, v + 1)]
+     loss_scale_params = variable_mgr_util.AutoLossScaleParams(
+         enable_auto_loss_scale=True,
+         loss_scale=tf.Variable(4, dtype=tf.float32),
+@@ -117,7 +117,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+         grad_has_inf_nan=tf.constant(False))
+ 
+     with self.test_session() as sess:
+-      sess.run(tf.global_variables_initializer())
++      sess.run(tf.compat.v1.global_variables_initializer())
+       sess.run(training_ops)
+       self.assertEqual(sess.run(v), 1)
+       self.assertEqual(sess.run(loss_scale_params.loss_scale), 8)
+@@ -126,7 +126,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+   def testAppendGradientsWithLossScaleWithtNan(self):
+     v = tf.Variable(0)
+     training_ops = []
+-    get_apply_gradients_ops_func = lambda: [tf.assign(v, v + 1)]
++    get_apply_gradients_ops_func = lambda: [tf.compat.v1.assign(v, v + 1)]
+     loss_scale_params = variable_mgr_util.AutoLossScaleParams(
+         enable_auto_loss_scale=True,
+         loss_scale=tf.Variable(4, dtype=tf.float32),
+@@ -140,7 +140,7 @@ class VariableMgrUtilTest(tf.test.TestCase):
+         grad_has_inf_nan=tf.constant(True))
+ 
+     with self.test_session() as sess:
+-      sess.run(tf.global_variables_initializer())
++      sess.run(tf.compat.v1.global_variables_initializer())
+       sess.run(training_ops)
+       self.assertEqual(sess.run(v), 0)  # Skip updating for v.
+       # halve loss_scale and reset local_scale_normal_steps.

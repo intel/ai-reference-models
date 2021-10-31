@@ -1,0 +1,50 @@
+From 8a77eb75af7425856a301cf0c2bd1db36d1f755b Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Mon, 11 Jan 2021 18:00:45 -0800
+Subject: [PATCH] mobilenet_v1 int8 TF timeline
+
+---
+ .../mobilenet_v1/inference/int8/benchmark.py       | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/models/image_recognition/tensorflow/mobilenet_v1/inference/int8/benchmark.py b/models/image_recognition/tensorflow/mobilenet_v1/inference/int8/benchmark.py
+index 55a1679a..2a96c2a9 100644
+--- a/models/image_recognition/tensorflow/mobilenet_v1/inference/int8/benchmark.py
++++ b/models/image_recognition/tensorflow/mobilenet_v1/inference/int8/benchmark.py
+@@ -46,6 +46,9 @@ import numpy as np
+ from google.protobuf import text_format
+ import tensorflow as tf
+ 
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ def load_graph(model_file):
+   graph = tf.Graph()
+   graph_def = tf.compat.v1.GraphDef()
+@@ -114,7 +117,12 @@ if __name__ == "__main__":
+   config.inter_op_parallelism_threads = num_inter_threads
+   config.intra_op_parallelism_threads = num_intra_threads
+ 
+-  with tf.compat.v1.Session(graph=graph, config=config) as sess:
++  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  configf.read_config('mobilenet_v1 infer int8')
++  infer_many_runs_timeline = TimeLiner()
++  infer_run_metadata = tf.compat.v1.RunMetadata()
++
++  with tfSession(graph=graph, config=config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+     input_shape = [batch_size, input_height, input_width, 3]
+     images = tf.random.truncated_normal(
+           input_shape,
+@@ -146,4 +154,6 @@ if __name__ == "__main__":
+         print("steps = {0}, {1} images/sec"
+               "".format(t+1, batch_size/elapsed_time));
+ 
+-    print('Average Throughput: %0.2f images/s on %d iterations'%(batch_size * steps / total_time, steps))
+\ No newline at end of file
++    print('Average Throughput: %0.2f images/s on %d iterations'%(batch_size * steps / total_time, steps))
++    print("json_fname : ",configf.json_fname)
++    infer_many_runs_timeline.save(configf.json_fname)
+\ No newline at end of file
+-- 
+2.17.1
+

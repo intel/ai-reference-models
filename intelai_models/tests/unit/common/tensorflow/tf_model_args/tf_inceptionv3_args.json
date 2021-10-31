@@ -1,0 +1,44 @@
+[
+  { "_comment": "inceptionv3_int8_accuracy",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name inceptionv3 --batch-size 100 --in-graph /final_int8_inceptionv3.pb --intelai-models . --accuracy-only --verbose",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python ./int8/accuracy.py --num_intra_threads=56 --num_inter_threads=2 --batch_size=100 --input_graph=/final_int8_inceptionv3.pb"},
+
+  { "_comment": "inception_v3_int8_latency_default_inter_intra",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name inceptionv3 --batch-size 1 --in-graph /final_int8_inceptionv3.pb --intelai-models . --benchmark-only --socket-id 0 --verbose",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python ./int8/benchmark.py --warmup_steps=10 --num_intra_threads=28 --num_inter_threads=1 --batch_size=1 --input_graph=/final_int8_inceptionv3.pb --steps=50 --num_cores=28"},
+
+  { "_comment": "inceptionv3_int8_throughput",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name inceptionv3 --batch-size 128 --in-graph /final_int8_inceptionv3.pb --intelai-models . --benchmark-only --socket-id 0 --verbose",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python ./int8/benchmark.py --warmup_steps=10 --num_intra_threads=28 --num_inter_threads=1 --batch_size=128 --input_graph=/final_int8_inceptionv3.pb --steps=50 --num_cores=28"},
+
+  { "_comment": "inceptionv3_int8_throughput_steps_warmup-steps",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inceptionv3 --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/inception_frozen_max_min.pb --steps=200 --warmup-steps=20",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --warmup_steps=20 --num_intra_threads=28 --num_inter_threads=1 --batch_size=128 --input_graph=/in_graph/inception_frozen_max_min.pb --steps=200 --num_cores=28"},
+
+  { "_comment": "inceptionv3_int8_latency_steps_warmup-steps",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=inceptionv3 --precision=int8 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --benchmark-only --verbose --in-graph=/in_graph/inception_frozen_max_min.pb --steps=200 --warmup-steps=20",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/int8/benchmark.py --warmup_steps=20 --num_intra_threads=28 --num_inter_threads=1 --batch_size=1 --input_graph=/in_graph/inception_frozen_max_min.pb --steps=200 --num_cores=28"},
+
+  { "_comment": "inceptionv3_int8_throughput_disable-tcmalloc",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name inceptionv3 --batch-size 128 --in-graph /final_int8_inceptionv3.pb --intelai-models . --benchmark-only --socket-id 0 --disable-tcmalloc=True",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./int8/benchmark.py --warmup_steps=10 --num_intra_threads=28 --num_inter_threads=1 --batch_size=128 --input_graph=/final_int8_inceptionv3.pb --steps=50 --num_cores=28"},
+
+  { "_comment": "inceptionv3_fp32_accuracy",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name inceptionv3 --batch-size 100 --accuracy-only --data-location /dataset --in-graph /inceptionv3_fp32_pretrained_model.pb --intelai-models . --verbose",
+    "output": "python ./fp32/eval_image_classifier_inference.py --input-graph=/inceptionv3_fp32_pretrained_model.pb --num-inter-threads=2 --num-intra-threads=56 --num-cores=28 --batch-size=100 --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only"},
+
+  { "_comment": "inceptionv3_fp32_latency",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name inceptionv3 --batch-size 1 --in-graph /inceptionv3_fp32_pretrained_model.pb --intelai-models . --socket-id 0 --verbose",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./fp32/eval_image_classifier_inference.py --input-graph=/inceptionv3_fp32_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=1 --warmup-steps=10 --steps=50 --num-cores=28"
+  },
+
+  { "_comment": "inceptionv3_fp32_throughput",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name inceptionv3 --batch-size 128 --in-graph /inceptionv3_fp32_pretrained_model.pb --intelai-models . --socket-id 0 --verbose",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./fp32/eval_image_classifier_inference.py --input-graph=/inceptionv3_fp32_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=128 --warmup-steps=10 --steps=50 --num-cores=28"},
+
+  { "_comment": "inceptionv3_fp32_throughput_inter_intra",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name inceptionv3 --batch-size 128 --in-graph /inceptionv3_fp32_pretrained_model.pb --intelai-models . --socket-id 0 --verbose --num-inter-threads 4 --num-intra-threads 16",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./fp32/eval_image_classifier_inference.py --input-graph=/inceptionv3_fp32_pretrained_model.pb  --num-inter-threads=4 --num-intra-threads=16 --batch-size=128 --warmup-steps=10 --steps=50 --num-cores=28"}
+]
+
+

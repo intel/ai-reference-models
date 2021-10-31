@@ -1,0 +1,15 @@
+pycocotools
+numpy>=1.16.3
+scipy==1.2.0
+Pillow>=8.1.2
+cython
+matplotlib
+scikit-image
+intel-tensorflow==1.15.2
+keras==2.0.8
+opencv-python
+h5py==2.10.0
+imgaug
+IPython[all]
+
+pygments>=2.7.4 # not directly required, pinned by Snyk to avoid a vulnerability

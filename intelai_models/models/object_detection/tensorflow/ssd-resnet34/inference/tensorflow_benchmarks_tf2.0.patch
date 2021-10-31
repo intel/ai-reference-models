@@ -1,0 +1,655 @@
+diff --git a/scripts/tf_cnn_benchmarks/allreduce.py b/scripts/tf_cnn_benchmarks/allreduce.py
+index 56d8c88..dddf57d 100644
+--- a/scripts/tf_cnn_benchmarks/allreduce.py
++++ b/scripts/tf_cnn_benchmarks/allreduce.py
+@@ -24,7 +24,7 @@ import re
+ from six.moves import xrange  # pylint: disable=redefined-builtin
+ import tensorflow as tf
+ 
+-from tensorflow.contrib.all_reduce.python import all_reduce
++from tensorflow.python.distribute.v1 import all_reduce
+ from tensorflow.python.framework import device as pydev
+ from tensorflow.python.framework import ops
+ from tensorflow.python.ops import collective_ops
+diff --git a/scripts/tf_cnn_benchmarks/models/model_config.py b/scripts/tf_cnn_benchmarks/models/model_config.py
+index 9b8a8f6..6ef2bf6 100644
+--- a/scripts/tf_cnn_benchmarks/models/model_config.py
++++ b/scripts/tf_cnn_benchmarks/models/model_config.py
+@@ -27,15 +27,15 @@ from models import densenet_model
+ from models import googlenet_model
+ from models import inception_model
+ from models import lenet_model
+-from models import mobilenet_v2
+-from models import nasnet_model
++#from models import mobilenet_v2
++#from models import nasnet_model
+ from models import official_resnet_model
+ from models import overfeat_model
+ from models import resnet_model
+ from models import ssd_model
+ from models import trivial_model
+ from models import vgg_model
+-from models.experimental import deepspeech
++#from models.experimental import deepspeech
+ from models.experimental import official_ncf_model
+ 
+ 
+@@ -81,9 +81,9 @@ _model_name_to_imagenet_model = {
+     'resnet101_v2': resnet_model.create_resnet101_v2_model,
+     'resnet152': resnet_model.create_resnet152_model,
+     'resnet152_v2': resnet_model.create_resnet152_v2_model,
+-    'nasnet': nasnet_model.NasnetModel,
+-    'nasnetlarge': nasnet_model.NasnetLargeModel,
+-    'mobilenet': mobilenet_v2.MobilenetModel,
++    #'nasnet': nasnet_model.NasnetModel,
++    #'nasnetlarge': nasnet_model.NasnetLargeModel,
++    #'mobilenet': mobilenet_v2.MobilenetModel,
+     'ncf': official_ncf_model.NcfModel,
+ }
+ 
+@@ -104,7 +104,7 @@ _model_name_to_cifar_model = {
+     'densenet40_k12': densenet_model.create_densenet40_k12_model,
+     'densenet100_k12': densenet_model.create_densenet100_k12_model,
+     'densenet100_k24': densenet_model.create_densenet100_k24_model,
+-    'nasnet': nasnet_model.NasnetCifarModel,
++    #'nasnet': nasnet_model.NasnetCifarModel,
+ }
+ 
+ 
+@@ -120,8 +120,8 @@ def _get_model_map(dataset_name):
+     return _model_name_to_cifar_model
+   elif dataset_name in ('imagenet', 'synthetic'):
+     return _model_name_to_imagenet_model
+-  elif dataset_name == 'librispeech':
+-    return {'deepspeech2': deepspeech.DeepSpeech2Model}
++  #elif dataset_name == 'librispeech':
++  #  return {'deepspeech2': deepspeech.DeepSpeech2Model}
+   elif dataset_name == 'coco':
+     return _model_name_to_object_detection_model
+   else:
+diff --git a/scripts/tf_cnn_benchmarks/preprocessing.py b/scripts/tf_cnn_benchmarks/preprocessing.py
+index a6ceb7c..b2c48e9 100644
+--- a/scripts/tf_cnn_benchmarks/preprocessing.py
++++ b/scripts/tf_cnn_benchmarks/preprocessing.py
+@@ -25,8 +25,8 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
+ import tensorflow as tf
+ 
+ import cnn_util
+-from tensorflow.contrib.data.python.ops import threadpool
+-from tensorflow.contrib.image.python.ops import distort_image_ops
++from tensorflow.python.data.experimental.ops import threadpool
++from tensorflow_addons.image import distort_image_ops
+ from tensorflow.python.data.ops import multi_device_iterator_ops
+ from tensorflow.python.framework import function
+ from tensorflow.python.layers import utils
+@@ -34,6 +34,7 @@ from tensorflow.python.ops import data_flow_ops
+ from tensorflow.python.platform import gfile
+ import mlperf
+ 
++tf.compat.v1.disable_eager_execution()
+ 
+ def parse_example_proto(example_serialized):
+   """Parses an Example proto containing a training example of an image.
+@@ -72,14 +73,14 @@ def parse_example_proto(example_serialized):
+   """
+   # Dense features in Example proto.
+   feature_map = {
+-      'image/encoded': tf.FixedLenFeature([], dtype=tf.string,
++      'image/encoded': tf.io.FixedLenFeature([], dtype=tf.string,
+                                           default_value=''),
+-      'image/class/label': tf.FixedLenFeature([1], dtype=tf.int64,
++      'image/class/label': tf.io.FixedLenFeature([1], dtype=tf.int64,
+                                               default_value=-1),
+-      'image/class/text': tf.FixedLenFeature([], dtype=tf.string,
++      'image/class/text': tf.io.FixedLenFeature([], dtype=tf.string,
+                                              default_value=''),
+   }
+-  sparse_float32 = tf.VarLenFeature(dtype=tf.float32)
++  sparse_float32 = tf.io.VarLenFeature(dtype=tf.float32)
+   # Sparse features in Example proto.
+   feature_map.update(
+       {k: sparse_float32 for k in ['image/object/bbox/xmin',
+@@ -87,7 +88,7 @@ def parse_example_proto(example_serialized):
+                                    'image/object/bbox/xmax',
+                                    'image/object/bbox/ymax']})
+ 
+-  features = tf.parse_single_example(example_serialized, feature_map)
++  features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
+   label = tf.cast(features['image/class/label'], dtype=tf.int32)
+ 
+   xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 0)
+@@ -101,7 +102,7 @@ def parse_example_proto(example_serialized):
+   # Force the variable number of bounding boxes into the shape
+   # [1, num_boxes, coords].
+   bbox = tf.expand_dims(bbox, 0)
+-  bbox = tf.transpose(bbox, [0, 2, 1])
++  bbox = tf.transpose(a=bbox, perm=[0, 2, 1])
+ 
+   return features['image/encoded'], label, bbox, features['image/class/text']
+ 
+@@ -167,7 +168,7 @@ def decode_jpeg(image_buffer, scope=None):  # , dtype=tf.float32):
+   """
+   # with tf.op_scope([image_buffer], scope, 'decode_jpeg'):
+   # with tf.name_scope(scope, 'decode_jpeg', [image_buffer]):
+-  with tf.name_scope(scope or 'decode_jpeg'):
++  with tf.compat.v1.name_scope(scope or 'decode_jpeg'):
+     # Decode the string as an RGB JPEG.
+     # Note that the resulting image contains an unknown height and width
+     # that is set dynamically by decode_jpeg. In other words, the height
+@@ -227,12 +228,12 @@ def eval_image(image,
+   """
+   # TODO(reedwm): Currently we resize then crop. Investigate if it's faster to
+   # crop then resize.
+-  with tf.name_scope('eval_image'):
++  with tf.compat.v1.name_scope('eval_image'):
+     if summary_verbosity >= 3:
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'original_image', tf.expand_dims(image, 0))
+ 
+-    shape = tf.shape(image)
++    shape = tf.shape(input=image)
+     image_height = shape[0]
+     image_width = shape[1]
+     image_height_float = tf.cast(image_height, tf.float32)
+@@ -259,10 +260,9 @@ def eval_image(image,
+ 
+     # Resize the image to shape (`resize_height`, `resize_width`)
+     image_resize_method = get_image_resize_method(resize_method, batch_position)
+-    distorted_image = tf.image.resize_images(image,
++    distorted_image = tf.image.resize(image,
+                                              [resize_height, resize_width],
+-                                             image_resize_method,
+-                                             align_corners=False)
++                                             image_resize_method)
+ 
+     # Do a central crop of the image to size (height, width).
+     # MLPerf requires us to log (height, width) with two different keys.
+@@ -277,7 +277,7 @@ def eval_image(image,
+ 
+     distorted_image.set_shape([height, width, 3])
+     if summary_verbosity >= 3:
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'cropped_resized_image', tf.expand_dims(distorted_image, 0))
+     image = distorted_image
+   return image
+@@ -322,7 +322,7 @@ def train_image(image_buffer,
+   """
+   # with tf.op_scope([image, height, width, bbox], scope, 'distort_image'):
+   # with tf.name_scope(scope, 'distort_image', [image, height, width, bbox]):
+-  with tf.name_scope(scope or 'distort_image'):
++  with tf.compat.v1.name_scope(scope or 'distort_image'):
+     # A large fraction of image datasets contain a human-annotated bounding box
+     # delineating the region of the image containing the object of interest.  We
+     # choose to create a new bounding box for the object which is a randomly
+@@ -344,7 +344,7 @@ def train_image(image_buffer,
+                       value=max_attempts)
+ 
+     sample_distorted_bounding_box = tf.image.sample_distorted_bounding_box(
+-        tf.image.extract_jpeg_shape(image_buffer),
++        image_size=tf.image.extract_jpeg_shape(image_buffer),
+         bounding_boxes=bbox,
+         min_object_covered=min_object_covered,
+         aspect_ratio_range=aspect_ratio_range,
+@@ -358,7 +358,7 @@ def train_image(image_buffer,
+       image = tf.image.convert_image_dtype(image, dtype=tf.float32)
+       image_with_distorted_box = tf.image.draw_bounding_boxes(
+           tf.expand_dims(image, 0), distort_bbox)
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'images_with_distorted_bounding_box',
+           image_with_distorted_box)
+ 
+@@ -381,15 +381,14 @@ def train_image(image_buffer,
+     # ratio is not respected.
+     mlperf.logger.log(key=mlperf.tags.INPUT_RESIZE, value=[height, width])
+     image_resize_method = get_image_resize_method(resize_method, batch_position)
+-    distorted_image = tf.image.resize_images(
++    distorted_image = tf.image.resize(
+         distorted_image, [height, width],
+-        image_resize_method,
+-        align_corners=False)
++        image_resize_method)
+     # Restore the shape since the dynamic slice based upon the bbox_size loses
+     # the third dimension.
+     distorted_image.set_shape([height, width, 3])
+     if summary_verbosity >= 3:
+-      tf.summary.image('cropped_resized_maybe_flipped_image',
++      tf.compat.v1.summary.image('cropped_resized_maybe_flipped_image',
+                        tf.expand_dims(distorted_image, 0))
+ 
+     if distortions:
+@@ -404,7 +403,7 @@ def train_image(image_buffer,
+       distorted_image *= 255
+ 
+     if summary_verbosity >= 3:
+-      tf.summary.image(
++      tf.compat.v1.summary.image(
+           'final_distorted_image',
+           tf.expand_dims(distorted_image, 0))
+     return distorted_image
+@@ -429,7 +428,7 @@ def distort_color(image, batch_position=0, distort_color_in_yiq=False,
+   Returns:
+     color-distorted image
+   """
+-  with tf.name_scope(scope or 'distort_color'):
++  with tf.compat.v1.name_scope(scope or 'distort_color'):
+ 
+     def distort_fn_0(image=image):
+       """Variant 0 of distort function."""
+@@ -495,7 +494,7 @@ class InputPreprocessor(object):
+     """Creates a MultiDeviceIterator."""
+     assert self.supports_datasets()
+     assert num_splits == len(gpu_devices)
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       if doing_eval:
+         subset = 'validation'
+       else:
+@@ -522,7 +521,7 @@ class InputPreprocessor(object):
+           gpu_devices,
+           source_device=cpu_device,
+           max_buffer_size=params.multi_device_iterator_max_buffer_size)
+-      tf.add_to_collection(tf.GraphKeys.TABLE_INITIALIZERS,
++      tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS,
+                            multi_device_iterator.initializer)
+       return multi_device_iterator
+ 
+@@ -544,7 +543,7 @@ class InputPreprocessor(object):
+ 
+   def create_iterator(self, ds):
+     ds_iterator = tf.compat.v1.data.make_initializable_iterator(ds)
+-    tf.add_to_collection(tf.GraphKeys.TABLE_INITIALIZERS,
++    tf.compat.v1.add_to_collection(tf.compat.v1.GraphKeys.TABLE_INITIALIZERS,
+                          ds_iterator.initializer)
+     return ds_iterator
+ 
+@@ -558,7 +557,7 @@ class InputPreprocessor(object):
+     assert self.supports_datasets()
+     batch_size_per_split = batch_size // num_splits
+     assert batch_size_per_split == model_input_shapes[0][0]
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       ds = self.create_dataset(batch_size, num_splits, batch_size_per_split,
+                                dataset, subset, train,
+                                datasets_repeat_cached_sample, num_threads,
+@@ -572,7 +571,7 @@ class InputPreprocessor(object):
+ 
+       @function.Defun(tf.string)
+       def _fn(h):
+-        remote_iterator = tf.data.Iterator.from_string_handle(
++        remote_iterator = tf.compat.v1.data.Iterator.from_string_handle(
+             h, ds_iterator.output_types, ds_iterator.output_shapes)
+         input_list = remote_iterator.get_next()
+         reshaped_input_list = [
+@@ -730,7 +729,7 @@ class RecordInputImagePreprocessor(BaseImagePreprocessor):
+                 shift_ratio=-1):
+     if shift_ratio < 0:
+       shift_ratio = self.shift_ratio
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       # Build final results per split.
+       images = [[] for _ in range(self.num_splits)]
+       labels = [[] for _ in range(self.num_splits)]
+@@ -795,7 +794,7 @@ class ImagenetPreprocessor(RecordInputImagePreprocessor):
+     try:
+       from official.resnet.imagenet_preprocessing import preprocess_image
+     except ImportError:
+-      tf.logging.fatal('Please include tensorflow/models to the PYTHONPATH.')
++      tf.compat.v1.logging.fatal('Please include tensorflow/models to the PYTHONPATH.')
+       raise
+     if self.train:
+       image = preprocess_image(
+@@ -824,28 +823,28 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+     Returns:
+       distorted image.
+     """
+-    image = tf.image.resize_image_with_crop_or_pad(
++    image = tf.image.resize_with_crop_or_pad(
+         image, self.height + 8, self.width + 8)
+-    distorted_image = tf.random_crop(image,
++    distorted_image = tf.image.random_crop(image,
+                                      [self.height, self.width, self.depth])
+     # Randomly flip the image horizontally.
+     distorted_image = tf.image.random_flip_left_right(distorted_image)
+     if self.summary_verbosity >= 3:
+-      tf.summary.image('distorted_image', tf.expand_dims(distorted_image, 0))
++      tf.compat.v1.summary.image('distorted_image', tf.expand_dims(distorted_image, 0))
+     return distorted_image
+ 
+   def _eval_image(self, image):
+     """Get the image for model evaluation."""
+-    distorted_image = tf.image.resize_image_with_crop_or_pad(
++    distorted_image = tf.image.resize_with_crop_or_pad(
+         image, self.width, self.height)
+     if self.summary_verbosity >= 3:
+-      tf.summary.image('cropped.image', tf.expand_dims(distorted_image, 0))
++      tf.compat.v1.summary.image('cropped.image', tf.expand_dims(distorted_image, 0))
+     return distorted_image
+ 
+   def preprocess(self, raw_image):
+     """Preprocessing raw image."""
+     if self.summary_verbosity >= 3:
+-      tf.summary.image('raw.image', tf.expand_dims(raw_image, 0))
++      tf.compat.v1.summary.image('raw.image', tf.expand_dims(raw_image, 0))
+     if self.train and self.distortions:
+       image = self._distort_image(raw_image)
+     else:
+@@ -860,11 +859,11 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+                 shift_ratio=-1):
+     # TODO(jsimsa): Implement datasets code path
+     del shift_ratio, params
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       all_images, all_labels = dataset.read_data_files(subset)
+       all_images = tf.constant(all_images)
+       all_labels = tf.constant(all_labels)
+-      input_image, input_label = tf.train.slice_input_producer(
++      input_image, input_label = tf.compat.v1.train.slice_input_producer(
+           [all_images, all_labels])
+       input_image = tf.cast(input_image, self.dtype)
+       input_label = tf.cast(input_label, tf.int32)
+@@ -872,7 +871,7 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+       min_fraction_of_examples_in_queue = 0.4
+       min_queue_examples = int(dataset.num_examples_per_epoch(subset) *
+                                min_fraction_of_examples_in_queue)
+-      raw_images, raw_labels = tf.train.shuffle_batch(
++      raw_images, raw_labels = tf.compat.v1.train.shuffle_batch(
+           [input_image, input_label], batch_size=self.batch_size,
+           capacity=min_queue_examples + 3 * self.batch_size,
+           min_after_dequeue=min_queue_examples)
+@@ -891,7 +890,7 @@ class Cifar10ImagePreprocessor(BaseImagePreprocessor):
+         # reshape to the format returned by minibatch.
+         raw_image = tf.reshape(raw_images[i],
+                                [dataset.depth, dataset.height, dataset.width])
+-        raw_image = tf.transpose(raw_image, [1, 2, 0])
++        raw_image = tf.transpose(a=raw_image, perm=[1, 2, 0])
+         image = self.preprocess(raw_image)
+         images[split_index].append(image)
+ 
+@@ -912,7 +911,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+                 params,
+                 shift_ratio=-1):
+     del shift_ratio  # Not used when using datasets instead of data_flow_ops
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       ds = self.create_dataset(
+           self.batch_size, self.num_splits, self.batch_size_per_split,
+           dataset, subset, self.train, params.datasets_repeat_cached_sample)
+@@ -946,13 +945,13 @@ class COCOPreprocessor(BaseImagePreprocessor):
+     image_buffer = data['image_buffer']
+     boxes = data['groundtruth_boxes']
+     classes = tf.reshape(data['groundtruth_classes'], [-1, 1])
+-    source_id = tf.string_to_number(data['source_id'])
++    source_id = tf.strings.to_number(data['source_id'])
+     raw_shape = data['raw_shape']
+ 
+     ssd_encoder = ssd_dataloader.Encoder()
+ 
+     # Only 80 of the 90 COCO classes are used.
+-    class_map = tf.convert_to_tensor(ssd_constants.CLASS_MAP)
++    class_map = tf.convert_to_tensor(value=ssd_constants.CLASS_MAP)
+     classes = tf.gather(class_map, classes)
+     classes = tf.cast(classes, dtype=tf.float32)
+ 
+@@ -984,7 +983,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+ 
+     else:
+       image = tf.image.decode_jpeg(image_buffer)
+-      image = tf.image.resize_images(
++      image = tf.image.resize(
+           image, size=(ssd_constants.IMAGE_SIZE, ssd_constants.IMAGE_SIZE))
+       # resize_image returns image of dtype float32 and does not change its
+       # range. Divide by 255 to convert image to [0, 1] range.
+@@ -996,8 +995,8 @@ class COCOPreprocessor(BaseImagePreprocessor):
+       def trim_and_pad(inp_tensor):
+         """Limit the number of boxes, and pad if necessary."""
+         inp_tensor = inp_tensor[:ssd_constants.MAX_NUM_EVAL_BOXES]
+-        num_pad = ssd_constants.MAX_NUM_EVAL_BOXES - tf.shape(inp_tensor)[0]
+-        inp_tensor = tf.pad(inp_tensor, [[0, num_pad], [0, 0]])
++        num_pad = ssd_constants.MAX_NUM_EVAL_BOXES - tf.shape(input=inp_tensor)[0]
++        inp_tensor = tf.pad(tensor=inp_tensor, paddings=[[0, num_pad], [0, 0]])
+         return tf.reshape(inp_tensor, [ssd_constants.MAX_NUM_EVAL_BOXES,
+                                        inp_tensor.get_shape()[1]])
+ 
+@@ -1064,7 +1063,7 @@ class COCOPreprocessor(BaseImagePreprocessor):
+ 
+     ds = ds.map(ssd_dataloader.ssd_parse_example_proto, num_parallel_calls=64)
+     ds = ds.filter(
+-        lambda data: tf.greater(tf.shape(data['groundtruth_boxes'])[0], 0))
++        lambda data: tf.greater(tf.shape(input=data['groundtruth_boxes'])[0], 0))
+     ds = ds.apply(
+         tf.data.experimental.map_and_batch(
+             map_func=self.preprocess,
+@@ -1142,12 +1141,12 @@ class TestImagePreprocessor(BaseImagePreprocessor):
+     fake_labels = cnn_util.roll_numpy_batches(self.fake_labels, self.batch_size,
+                                               shift_ratio)
+ 
+-    with tf.name_scope('batch_processing'):
+-      image_slice, label_slice = tf.train.slice_input_producer(
++    with tf.compat.v1.name_scope('batch_processing'):
++      image_slice, label_slice = tf.compat.v1.train.slice_input_producer(
+           [fake_images, fake_labels],
+           shuffle=False,
+           name='image_slice')
+-      raw_images, raw_labels = tf.train.batch(
++      raw_images, raw_labels = tf.compat.v1.train.batch(
+           [image_slice, label_slice], batch_size=self.batch_size,
+           name='image_batch')
+       images = [[] for _ in range(self.num_splits)]
+@@ -1247,7 +1246,7 @@ class LibrispeechPreprocessor(InputPreprocessor):
+     # TODO(laigd): in distributed mode we use shift_ratio so different workers
+     # won't work on same inputs, so we should respect that.
+     del shift_ratio
+-    with tf.name_scope('batch_processing'):
++    with tf.compat.v1.name_scope('batch_processing'):
+       ds = self.create_dataset(
+           self.batch_size,
+           self.num_splits,
+@@ -1287,14 +1286,14 @@ class LibrispeechPreprocessor(InputPreprocessor):
+     del batch_position
+     assert self.supports_datasets()
+     context_features = {
+-        'labels': tf.VarLenFeature(dtype=tf.int64),
+-        'input_length': tf.FixedLenFeature([], dtype=tf.int64),
+-        'label_length': tf.FixedLenFeature([], dtype=tf.int64),
++        'labels': tf.io.VarLenFeature(dtype=tf.int64),
++        'input_length': tf.io.FixedLenFeature([], dtype=tf.int64),
++        'label_length': tf.io.FixedLenFeature([], dtype=tf.int64),
+     }
+     sequence_features = {
+-        'features': tf.FixedLenSequenceFeature([161], dtype=tf.float32)
++        'features': tf.io.FixedLenSequenceFeature([161], dtype=tf.float32)
+     }
+-    context_parsed, sequence_parsed = tf.parse_single_sequence_example(
++    context_parsed, sequence_parsed = tf.io.parse_single_sequence_example(
+         serialized=value,
+         context_features=context_features,
+         sequence_features=sequence_features,
+@@ -1306,7 +1305,7 @@ class LibrispeechPreprocessor(InputPreprocessor):
+         # Label
+         tf.cast(
+             tf.reshape(
+-                tf.sparse_tensor_to_dense(context_parsed['labels']), [-1]),
++                tf.sparse.to_dense(context_parsed['labels']), [-1]),
+             dtype=tf.int32),
+         # Input length
+         tf.cast(
+diff --git a/scripts/tf_cnn_benchmarks/ssd_dataloader.py b/scripts/tf_cnn_benchmarks/ssd_dataloader.py
+index b4fe986..887f1da 100644
+--- a/scripts/tf_cnn_benchmarks/ssd_dataloader.py
++++ b/scripts/tf_cnn_benchmarks/ssd_dataloader.py
+@@ -105,17 +105,17 @@ def calc_iou_tensor(boxes1, boxes2):
+   b2_left, b2_top, b2_right, b2_bottom = tf.split(boxes2, 4, axis=1)
+ 
+   # Shape of intersect_* (N, M)
+-  intersect_left = tf.maximum(b1_left, tf.transpose(b2_left))
+-  intersect_top = tf.maximum(b1_top, tf.transpose(b2_top))
+-  intersect_right = tf.minimum(b1_right, tf.transpose(b2_right))
+-  intersect_bottom = tf.minimum(b1_bottom, tf.transpose(b2_bottom))
++  intersect_left = tf.maximum(b1_left, tf.transpose(a=b2_left))
++  intersect_top = tf.maximum(b1_top, tf.transpose(a=b2_top))
++  intersect_right = tf.minimum(b1_right, tf.transpose(a=b2_right))
++  intersect_bottom = tf.minimum(b1_bottom, tf.transpose(a=b2_bottom))
+ 
+   boxes1_area = (b1_right - b1_left) * (b1_bottom - b1_top)
+   boxes2_area = (b2_right - b2_left) * (b2_bottom - b2_top)
+ 
+   intersect = tf.multiply(tf.maximum((intersect_right - intersect_left), 0),
+                           tf.maximum((intersect_bottom - intersect_top), 0))
+-  union = boxes1_area + tf.transpose(boxes2_area) - intersect
++  union = boxes1_area + tf.transpose(a=boxes2_area) - intersect
+   iou = intersect / union
+ 
+   return iou
+@@ -155,18 +155,18 @@ def ssd_parse_example_proto(example_serialized):
+     raw_shape: [height, width, 3].
+   """
+   feature_map = {
+-      'image/encoded': tf.FixedLenFeature(
++      'image/encoded': tf.io.FixedLenFeature(
+           (), dtype=tf.string, default_value=''),
+-      'image/source_id': tf.FixedLenFeature((), tf.string, default_value=''),
+-      'image/height': tf.FixedLenFeature((), tf.int64, default_value=1),
+-      'image/width': tf.FixedLenFeature((), tf.int64, default_value=1),
+-      'image/object/bbox/xmin': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/bbox/ymin': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/bbox/xmax': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/bbox/ymax': tf.VarLenFeature(dtype=tf.float32),
+-      'image/object/class/label': tf.VarLenFeature(dtype=tf.int64),
++      'image/source_id': tf.io.FixedLenFeature((), tf.string, default_value=''),
++      'image/height': tf.io.FixedLenFeature((), tf.int64, default_value=1),
++      'image/width': tf.io.FixedLenFeature((), tf.int64, default_value=1),
++      'image/object/bbox/xmin': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/bbox/ymin': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/bbox/xmax': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/bbox/ymax': tf.io.VarLenFeature(dtype=tf.float32),
++      'image/object/class/label': tf.io.VarLenFeature(dtype=tf.int64),
+   }
+-  features = tf.parse_single_example(example_serialized, feature_map)
++  features = tf.io.parse_single_example(serialized=example_serialized, features=feature_map)
+ 
+   xmin = tf.expand_dims(features['image/object/bbox/xmin'].values, 1)
+   ymin = tf.expand_dims(features['image/object/bbox/ymin'].values, 1)
+@@ -214,21 +214,21 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+     cropped_classes: class labels for objects in the cropped region.
+   """
+ 
+-  num_boxes = tf.shape(boxes)[0]
++  num_boxes = tf.shape(input=boxes)[0]
+ 
+   def no_crop_check():
+-    return (tf.random_uniform(shape=(), minval=0, maxval=1, dtype=tf.float32)
++    return (tf.random.uniform(shape=(), minval=0, maxval=1, dtype=tf.float32)
+             < ssd_constants.P_NO_CROP_PER_PASS)
+ 
+   def no_crop_proposal():
+     return (
+         tf.ones((), tf.bool),
+-        tf.convert_to_tensor([0, 0, 1, 1], dtype=tf.float32),
++        tf.convert_to_tensor(value=[0, 0, 1, 1], dtype=tf.float32),
+         tf.ones((num_boxes,), tf.bool),
+     )
+ 
+   def crop_proposal():
+-    rand_vec = lambda minval, maxval: tf.random_uniform(
++    rand_vec = lambda minval, maxval: tf.random.uniform(
+         shape=(ssd_constants.NUM_CROP_PASSES, 1), minval=minval, maxval=maxval,
+         dtype=tf.float32)
+ 
+@@ -240,14 +240,14 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+ 
+     ltrb = tf.concat([left, top, right, bottom], axis=1)
+ 
+-    min_iou = tf.random_shuffle(ssd_constants.CROP_MIN_IOU_CHOICES)[0]
++    min_iou = tf.random.shuffle(ssd_constants.CROP_MIN_IOU_CHOICES)[0]
+     ious = calc_iou_tensor(ltrb, boxes)
+ 
+     # discard any bboxes whose center not in the cropped image
+     xc, yc = [tf.tile(0.5 * (boxes[:, i + 0] + boxes[:, i + 2])[tf.newaxis, :],
+                       (ssd_constants.NUM_CROP_PASSES, 1)) for i in range(2)]
+ 
+-    masks = tf.reduce_all(tf.stack([
++    masks = tf.reduce_all(input_tensor=tf.stack([
+         tf.greater(xc, tf.tile(left, (1, num_boxes))),
+         tf.less(xc, tf.tile(right, (1, num_boxes))),
+         tf.greater(yc, tf.tile(top, (1, num_boxes))),
+@@ -257,22 +257,22 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+     # Checks of whether a crop is valid.
+     valid_aspect = tf.logical_and(tf.less(height/width, 2),
+                                   tf.less(width/height, 2))
+-    valid_ious = tf.reduce_all(tf.greater(ious, min_iou), axis=1, keepdims=True)
+-    valid_masks = tf.reduce_any(masks, axis=1, keepdims=True)
++    valid_ious = tf.reduce_all(input_tensor=tf.greater(ious, min_iou), axis=1, keepdims=True)
++    valid_masks = tf.reduce_any(input_tensor=masks, axis=1, keepdims=True)
+ 
+-    valid_all = tf.cast(tf.reduce_all(tf.concat(
++    valid_all = tf.cast(tf.reduce_all(input_tensor=tf.concat(
+         [valid_aspect, valid_ious, valid_masks], axis=1), axis=1), tf.int32)
+ 
+     # One indexed, as zero is needed for the case of no matches.
+     index = tf.range(1, 1 + ssd_constants.NUM_CROP_PASSES, dtype=tf.int32)
+ 
+     # Either one-hot, or zeros if there is no valid crop.
+-    selection = tf.equal(tf.reduce_max(index * valid_all), index)
++    selection = tf.equal(tf.reduce_max(input_tensor=index * valid_all), index)
+ 
+-    use_crop = tf.reduce_any(selection)
+-    output_ltrb = tf.reduce_sum(tf.multiply(ltrb, tf.tile(tf.cast(
++    use_crop = tf.reduce_any(input_tensor=selection)
++    output_ltrb = tf.reduce_sum(input_tensor=tf.multiply(ltrb, tf.tile(tf.cast(
+         selection, tf.float32)[:, tf.newaxis], (1, 4))), axis=0)
+-    output_masks = tf.reduce_any(tf.logical_and(masks, tf.tile(
++    output_masks = tf.reduce_any(input_tensor=tf.logical_and(masks, tf.tile(
+         selection[:, tf.newaxis], (1, num_boxes))), axis=0)
+ 
+     return use_crop, output_ltrb, output_masks
+@@ -290,7 +290,7 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+       loop_vars=[tf.zeros((), tf.bool), tf.zeros((4,), tf.float32), tf.zeros((num_boxes,), tf.bool)],
+   )
+ 
+-  filtered_boxes = tf.boolean_mask(boxes, box_masks, axis=0)
++  filtered_boxes = tf.boolean_mask(tensor=boxes, mask=box_masks, axis=0)
+ 
+   mlperf.logger.log(key=mlperf.tags.NUM_CROPPING_ITERATIONS,
+                     value=ssd_constants.NUM_CROP_PASSES)
+@@ -330,19 +330,19 @@ def ssd_decode_and_crop(image_buffer, boxes, classes, raw_shape):
+       image_buffer, crop_window, channels=3)
+ 
+   # Resize converts image dtype from uint8 to float32, without rescaling values.
+-  resized_image = tf.image.resize_images(
++  resized_image = tf.image.resize(
+       cropped_image, [ssd_constants.IMAGE_SIZE, ssd_constants.IMAGE_SIZE])
+   mlperf.logger.log(key=mlperf.tags.INPUT_SIZE,
+                     value=ssd_constants.IMAGE_SIZE)
+ 
+-  cropped_classes = tf.boolean_mask(classes, box_masks, axis=0)
++  cropped_classes = tf.boolean_mask(tensor=classes, mask=box_masks, axis=0)
+ 
+   return resized_image, cropped_boxes, cropped_classes
+ 
+ 
+ def color_jitter(image, brightness=0, contrast=0, saturation=0, hue=0):
+   """Distort the color of the image."""
+-  with tf.name_scope('distort_color'):
++  with tf.compat.v1.name_scope('distort_color'):
+     if brightness > 0:
+       image = tf.image.random_brightness(image, max_delta=brightness)
+     if contrast > 0:
+@@ -392,7 +392,7 @@ class Encoder(object):
+ 
+     self.default_boxes = DefaultBoxes()('ltrb')
+     self.default_boxes = box_list.BoxList(
+-        tf.convert_to_tensor(self.default_boxes))
++        tf.convert_to_tensor(value=self.default_boxes))
+     self.assigner = target_assigner.TargetAssigner(
+         similarity_calc, matcher, box_coder)
+ 
+@@ -401,5 +401,5 @@ class Encoder(object):
+     encoded_classes, _, encoded_boxes, _, matches = self.assigner.assign(
+         self.default_boxes, target_boxes, gt_labels)
+     num_matched_boxes = tf.reduce_sum(
+-        tf.cast(tf.not_equal(matches, -1), tf.float32))
++        input_tensor=tf.cast(tf.not_equal(matches, -1), tf.float32))
+     return encoded_classes, encoded_boxes, num_matched_boxes
