@@ -164,16 +164,16 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
     if args.int8:
         model = model.eval()
         # enable LLGA optimization
-        ipex.core._jit_set_llga_enabled(True)
+        ipex._C._jit_set_llga_enabled(True)
         # disable IPEX JIT optimization
-        ipex.core.disable_jit_opt()
+        ipex._C.disable_jit_opt()
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model.model = optimization.fuse(model.model, inplace=False)
 
             if args.calibration:
                 print("runing int8 LLGA calibration step\n")
-                conf = ipex.QuantConf(qscheme=torch.per_tensor_affine)  # qscheme can is torch.per_tensor_affine, torch.per_tensor_symmetric
+                conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)  # qscheme can is torch.per_tensor_affine, torch.per_tensor_symmetric
                 with torch.no_grad():
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         print("nbatch:{}".format(nbatch))
@@ -187,7 +187,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
             else:
                 print("INT8 LLGA start trace")
                 # insert quant/dequant based on configure.json
-                conf = ipex.QuantConf(configure_file=args.configure)
+                conf = ipex.quantization.QuantConf(configure_file=args.configure)
                 model = ipex.quantization.convert(model, conf, torch.randn(args.batch_size, 3, 1200, 1200))
                 print("done ipex default recipe.......................")
                 # freeze the module
@@ -261,6 +261,8 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
             print('runing real inputs path')
             if args.autocast:
                 print('bf16 autocast enabled')
+                print('enable nhwc')
+                model = model.to(memory_format=torch.channels_last)
                 if use_ipex:
                     print('bf16 block format weights cache enabled')
                     model.model = ipex.optimize(model.model, dtype=torch.bfloat16, inplace=False)
@@ -269,8 +271,6 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     from oob_utils import conv_bn_fuse
                     print('OOB bf16 conv_bn_fusion enabled')
                     model.model = conv_bn_fuse(model.model)
-                print('enable nhwc')
-                model = model.to(memory_format=torch.channels_last)
 
                 if args.jit:
                     if use_ipex:
@@ -459,15 +459,16 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                             break
             else:
                 print('autocast disabled, fp32 is used')
+                print('enable nhwc')
+                model = model.to(memory_format=torch.channels_last)
                 if use_ipex:
                     print('fp32 block format weights cache enabled')
                     model.model = ipex.optimize(model.model, dtype=torch.float32, inplace=False)
-                print('enable nhwc')
-                model = model.to(memory_format=torch.channels_last)
                 if args.jit:
                     print("enable jit")
                     with torch.no_grad():
                         model = torch.jit.trace(model, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                    model = torch.jit.freeze(model)
                 with torch.no_grad():
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         if nbatch >= args.warmup_iterations:

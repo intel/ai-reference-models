@@ -271,11 +271,14 @@ def lr_warmup(optim, wb, iter_num, base_lr, args):
 		for param_group in optim.param_groups:
 			param_group['lr'] = new_lr
 
-def data_preprocess(img, bbox, label, loss_func):
+def data_preprocess(img, bbox, label, loss_func, use_autocast):
     trans_bbox = bbox.transpose(1,2).contiguous()
     # image to NHWC
     img = img.contiguous(memory_format=torch.channels_last)
-    trans_bbox = loss_func._loc_vec(trans_bbox).to(torch.bfloat16)
+    if use_autocast:
+        trans_bbox = loss_func._loc_vec(trans_bbox).to(torch.bfloat16)
+    else:
+        trans_bbox = loss_func._loc_vec(trans_bbox).to(torch.float32)
     mask = label > 0
     pos_num = mask.sum(dim=1)
     neg_num = torch.clamp(3*pos_num, max=mask.size(1)).unsqueeze(-1)
@@ -458,7 +461,7 @@ def train300_mlperf_coco(args):
             naive_train_case = True # img.shape[0] == fragment_size
             if naive_train_case:
                 # Naive train case
-                fimg, gloc, glabel, mask, pos_num, neg_num, num_mask = data_preprocess(img, bbox, label, loss_func)
+                fimg, gloc, glabel, mask, pos_num, neg_num, num_mask = data_preprocess(img, bbox, label, loss_func, args.autocast)
 
                 if args.performance_only and iter_num >= args.warmup_iterations:
                     start_time = time.time()
@@ -467,7 +470,7 @@ def train300_mlperf_coco(args):
                     with torch.profiler.profile(on_trace_ready=trace_handler) as prof:
                         with torch.cpu.amp.autocast(enabled=args.autocast):
                             ploc, plabel = ssd300(fimg)
-                            loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
+                            loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask, args.autocast)
                         loss.backward()
 
                         warmup_step(iter_num, current_lr)
@@ -477,7 +480,7 @@ def train300_mlperf_coco(args):
                     # Non Profile Mode
                     with torch.cpu.amp.autocast(enabled=args.autocast):
                         ploc, plabel = ssd300(fimg)
-                        loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
+                        loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask, args.autocast)
                     loss.backward()
 
                     warmup_step(iter_num, current_lr)

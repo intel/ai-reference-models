@@ -44,7 +44,7 @@ use_ipex = False
 softmax_optimizaed_in_last_second_dim = False
 if os.environ.get('USE_IPEX') == "1":
     import intel_extension_for_pytorch as ipex
-    from intel_extension_for_pytorch import batch_score_nms, parallel_scale_back_batch
+    from intel_extension_for_pytorch.nn.functional import batch_score_nms, parallel_scale_back_batch
     use_ipex = True
 
 # This function is from https://github.com/kuangliu/pytorch-ssd.

@@ -60,7 +60,7 @@ BATCH_SIZE=16
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --throughput_mode \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
