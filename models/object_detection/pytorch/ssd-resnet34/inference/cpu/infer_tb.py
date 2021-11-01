@@ -23,7 +23,6 @@ import os
 from argparse import ArgumentParser
 from re import M
 
-from intel_extension_for_pytorch.ops import roi_align
 from utils import DefaultBoxes, Encoder, COCODetection
 from base_model import Loss
 from utils import SSDTransformer
@@ -189,9 +188,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
         model = model.eval()
         model_decode = SSD_R34_NMS(model, encoder)
         # enable LLGA optimization
-        ipex.core._jit_set_llga_enabled(True)
+        ipex._C._jit_set_llga_enabled(True)
         # disable IPEX JIT optimization
-        ipex.core.disable_jit_opt()
+        ipex._C.disable_jit_opt()
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model_decode.model.model = optimization.fuse(model_decode.model.model, inplace=False)
@@ -201,7 +200,8 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
             else:
                 print("INT8 LLGA start trace")
                 # insert quant/dequant based on configure.json
-                conf = ipex.QuantConf(configure_file=args.configure)
+                conf = ipex.quantization.QuantConf(configure_file=args.configure)
+                model_decode.eval()
                 model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(args.batch_size, 3, 1200, 1200))
                 print("done ipex default recipe.......................")
                 # freeze the module
@@ -273,13 +273,13 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
             model_decode = SSD_R34_NMS(model, encoder)
             if args.autocast:
                 print('bf16 autocast enabled')
+                print('enable nhwc')
+                # model = model.to(memory_format=torch.channels_last)
+                model_decode.model = model_decode.model.to(memory_format=torch.channels_last)
                 if use_ipex:
                     print('bf16 block format weights cache enabled')
                     # model.model = ipex.optimize(model.model, dtype=torch.bfloat16, level='O0')
                     model_decode.model.model = ipex.optimize(model_decode.model.model, dtype=torch.bfloat16, inplace=False)
-                print('enable nhwc')
-                # model = model.to(memory_format=torch.channels_last)
-                model_decode.model = model_decode.model.to(memory_format=torch.channels_last)
 
                 if args.jit:
                     print('enable jit')
@@ -335,11 +335,11 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         exit(-1)
             else:
                 print('autocast disabled, fp32 is used')
+                print('enable nhwc')
+                model_decode.model = model_decode.model.to(memory_format=torch.channels_last)
                 if use_ipex:
                     print('fp32 block format weights cache enabled')
                     model_decode.model.model = ipex.optimize(model_decode.model.model, dtype=torch.float32, inplace=False)
-                print('enable nhwc')
-                model_decode.model = model_decode.model.to(memory_format=torch.channels_last)
                 if args.jit:
                     print("enable jit")
                     with torch.no_grad():

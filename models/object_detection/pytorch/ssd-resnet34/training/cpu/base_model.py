@@ -189,7 +189,7 @@ class Loss(nn.Module):
 
         return torch.cat((gxy, gwh), dim=1).contiguous()
 
-    def forward(self, ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask):
+    def forward(self, ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask, use_autocast):
         """
             ploc, plabel: Nx4x8732, Nxlabel_numx8732
                 predicted location and labels
@@ -212,7 +212,10 @@ class Loss(nn.Module):
 
         # sum on four coordinates, and mask
         sl1 = self.sl1_loss(ploc, gloc).sum(dim=1)
-        sl1 = (mask.bfloat16()*sl1).sum(dim=1)
+        if use_autocast:
+            sl1 = (mask.bfloat16()*sl1).sum(dim=1)
+        else:
+            sl1 = (mask.float()*sl1).sum(dim=1)
 
         # hard negative mining
 
@@ -234,11 +237,17 @@ class Loss(nn.Module):
         # number of negative three times positive
         neg_mask = con_rank < neg_num
 
-        closs = (con*(mask.bfloat16() + neg_mask.bfloat16())).sum(dim=1)
+        if use_autocast:
+            closs = (con*(mask.bfloat16() + neg_mask.bfloat16())).sum(dim=1)
+        else:
+            closs = (con*(mask.float() + neg_mask.float())).sum(dim=1)
 
         # avoid no object detected
         total_loss = sl1 + closs
-        pos_num = pos_num.bfloat16().clamp(min=1e-6)
+        if use_autocast:
+            pos_num = pos_num.bfloat16().clamp(min=1e-6)
+        else:
+            pos_num = pos_num.float().clamp(min=1e-6)
 
         ret = (total_loss*num_mask/pos_num).mean(dim=0)
         return ret
