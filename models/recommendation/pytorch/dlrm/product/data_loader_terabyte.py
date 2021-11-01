@@ -1,17 +1,3 @@
-# Copyright 2019-2020 Intel Corporation
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-# ****************************************************************************
 # Copyright (c) 2019, NVIDIA CORPORATION.  All rights reserved.
 #
 # This source code is licensed under the MIT license found in the
@@ -189,10 +175,12 @@ def _batch_generator(
 def _test():
     generator = _batch_generator(
         data_filename='day',
-        data_directory='/input',
+        data_directory='./input',
         days=range(23),
         split="train",
-        batch_size=2048
+        batch_size=2048,
+        drop_last=True,
+        max_ind_range=-1
     )
     t1 = time.time()
     for x_int, lS_o, x_cat, y in generator:
@@ -247,6 +235,9 @@ class CriteoBinDataset(Dataset):
                                    y_batch=tensor[:, 0],
                                    max_ind_range=self.max_ind_range,
                                    flag_input_torch_tensor=True)
+
+    def __del__(self):
+        self.file.close()
 
 
 def numpy_to_binary(input_files, output_file_path, split='train'):
@@ -316,7 +307,7 @@ def _test_bin():
                         required=True)
     args = parser.parse_args()
 
-    # _preprocess(args)
+    _preprocess(args)
 
     binary_data_file = os.path.join(args.output_directory,
                                     '{}_data.bin'.format(args.split))
@@ -325,7 +316,8 @@ def _test_bin():
     dataset_binary = CriteoBinDataset(data_file=binary_data_file,
                                             counts_file=counts_file,
                                             batch_size=2048,)
-    from dlrm_data_pytorch import CriteoDataset, collate_wrapper_criteo
+    from dlrm_data_pytorch import CriteoDataset 
+    from dlrm_data_pytorch import collate_wrapper_criteo_offset as collate_wrapper_criteo
 
     binary_loader = torch.utils.data.DataLoader(
         dataset_binary,
@@ -373,4 +365,4 @@ def _test_bin():
 
 if __name__ == '__main__':
     _test()
-    _test_bin
+    _test_bin()
