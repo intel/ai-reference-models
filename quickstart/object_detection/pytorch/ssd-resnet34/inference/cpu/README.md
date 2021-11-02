@@ -51,9 +51,9 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash batch_inference.sh fp32 | bash online_inference.sh fp32 | bash accuracy.sh fp32 |
-| BF16        | bash batch_inference.sh bf16 | bash online_inference.sh bf16 | bash accuracy.sh bf16 |
-| INT8        | bash batch_inference.sh int8 | bash online_inference.sh int8 | bash accuracy.sh int8 |
+| FP32        | bash bare_metal_batch_inference.sh fp32 | bash bare_metal_online_inference.sh fp32 | bash bare_metal_accuracy.sh fp32 |
+| BF16        | bash bare_metal_batch_inference.sh bf16 | bash bare_metal_online_inference.sh bf16 | bash bare_metal_accuracy.sh bf16 |
+| INT8        | bash bare_metal_batch_inference.sh int8 | bash bare_metal_online_inference.sh int8 | bash bare_metal_accuracy.sh int8 |
 
 ## Docker
 
