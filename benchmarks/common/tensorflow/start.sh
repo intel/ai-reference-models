@@ -65,7 +65,9 @@ fi
 # Determines if we are running in a container by checking for .dockerenv
 function _running-in-container()
 {
-  [ -f /.dockerenv ]
+  # .dockerenv is a legacy mount populated by Docker engine and at some point it may go away.
+  # Also if users shell into a container we should treat that senario like running on bare-metal
+  [ ! -z "${DOCKER}" ] && [ -f /.dockerenv ]
 }
 
 # Check the Linux platform distribution if CentOS or Ubuntu
@@ -161,21 +163,21 @@ fi
 
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
-  # Call the framework's container_init.sh, if it exists
-  if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-    if [[ ${CENTOS_PLATFORM} == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
+  if [[ ${NOINSTALL} != "True" ]]; then
+    # For running inside a real CentOS container
+    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
       if [[ $INSTALL_NUMACTL == "True" ]]; then
         yum update -y
         yum install -y numactl
       fi
-    else
-      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+    # Call the framework's container_init.sh, if it exists
+    elif [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+        INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+    # Call the model specific container_init.sh, if it exists
+    elif [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+      ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
     fi
-  fi
-  # Call the model specific container_init.sh, if it exists
-  if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
-    ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
-  fi
+    fi
 fi
 
 verbose_arg=""
