@@ -3,7 +3,7 @@ from torch import nn
 from torch.nn import functional as F
 
 from torch.nn import Conv2d
-from maskrcnn_benchmark.layers import ConvTranspose2d
+from torch.nn import ConvTranspose2d
 from maskrcnn_benchmark.modeling import registry
 
 
