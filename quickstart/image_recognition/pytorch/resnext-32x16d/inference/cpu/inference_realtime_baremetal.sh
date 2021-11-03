@@ -73,7 +73,7 @@ export OMP_NUM_THREADS=$CORES_PER_INSTANCE
 
 NUMBER_INSTANCE=`expr $CORES / $CORES_PER_INSTANCE`
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --ninstance ${SOCKETS} \
     --log_path=${OUTPUT_DIR} \
