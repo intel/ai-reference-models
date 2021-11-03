@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..cbecf791e 100644
+index 2bd4e90ff..fe56c5d40 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -48,7 +48,7 @@ index 2bd4e90ff..cbecf791e 100644
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
 +    if args.int8:
-+        conf = ipex.QuantConf(configure_file=args.int8_config)
++        conf = ipex.quantization.QuantConf(configure_file=args.int8_config)
 +        # convert model to trace model.
 +        if args.int8_fp32:
 +            model = ipex.quantization.convert(model, conf, jit_inputs)
@@ -143,7 +143,7 @@ index 2bd4e90ff..cbecf791e 100644
 -
 +    
 +    if args.do_calibration:
-+        conf = ipex.QuantConf(qscheme=torch.per_tensor_affine)
++        conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)
 +        for step, batch in enumerate(eval_dataloader):
 +            print("calibration step: {}".format(step))
 +            batch = {
