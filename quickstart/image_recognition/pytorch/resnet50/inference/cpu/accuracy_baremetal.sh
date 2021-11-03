@@ -79,7 +79,7 @@ else
     exit 1
 fi
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
     $ARGS \

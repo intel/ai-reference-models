@@ -71,7 +71,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=`expr $CORES_PER_INSTANCE \* 2`
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --ninstance ${SOCKETS} \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
