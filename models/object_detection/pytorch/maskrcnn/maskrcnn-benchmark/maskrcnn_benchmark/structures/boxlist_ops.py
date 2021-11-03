@@ -3,7 +3,7 @@ import torch
 
 from .bounding_box import BoxList
 
-from intel_extension_for_pytorch import nms as _box_nms
+from intel_extension_for_pytorch.nn.functional import nms as _box_nms
 
 
 def boxlist_nms(boxlist, nms_thresh, max_proposals=-1, score_field="scores"):
