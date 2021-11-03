@@ -8,6 +8,8 @@ datasets @ashahba @claynerobison @dzungductran
 docs @claynerobison @mhbuehler
 k8s  @ashahba @dzungductran @kkasravi
 models @agramesh1 @ashraf-bhuiyan @riverliuintel @wei-v-wang
+models/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
+quickstart/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
 
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners
