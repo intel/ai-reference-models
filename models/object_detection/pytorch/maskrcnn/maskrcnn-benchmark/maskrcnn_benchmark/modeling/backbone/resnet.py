@@ -24,7 +24,7 @@ from torch import nn
 
 import os
 if os.environ.get('TRAIN') == "1":
-    from intel_extension_for_pytorch import FrozenBatchNorm2d
+    from intel_extension_for_pytorch.nn import FrozenBatchNorm2d
 else:
     from torch.nn import BatchNorm2d as FrozenBatchNorm2d
 

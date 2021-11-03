@@ -62,7 +62,7 @@ BATCH_SIZE=56
 
 rm -rf ${OUTPUT_DIR}/train_throughput_log*
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --ninstances 1 \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
