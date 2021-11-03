@@ -45,7 +45,7 @@ BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG-/pyt_dataset/enwiki-20200101/training/lang
 TRAIN_SCRIPT=${TRAIN_SCRIPT:-${HOME}/frameworks.ai.models.intel-models/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
-python -m intel_extension_for_pytorch.launch --socket_id 0 --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
+python -m intel_extension_for_pytorch.cpu.launch --socket_id 0 --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
     --train_file ${DATASET_DIR}/seq_128/part-00000-of-00500_128 \
     --validation_file ${DATASET_DIR}/seq_128/part-00000-of-00500_128 \
     --model_type 'bert' \

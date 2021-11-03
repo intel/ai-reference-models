@@ -42,7 +42,7 @@ OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
 rm -rf ./throughput_log_phase2_*
 
-python -m intel_extension_for_pytorch.launch --socket_id 0  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+python -m intel_extension_for_pytorch.cpu.launch --socket_id 0  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
     --train_file ${DATASET_DIR}/seq_512/part-00000-of-00500 \
     --validation_file ${DATASET_DIR}/seq_512/part-00000-of-00500 \
     --model_type 'bert' \
