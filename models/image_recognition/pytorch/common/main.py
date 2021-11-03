@@ -364,7 +364,7 @@ def main_worker(gpu, ngpus_per_node, args):
             if args.int8:
                 if not args.calibration:
                     model = optimization.fuse(model, inplace=True)
-                    conf = ipex.QuantConf(args.configure_dir)
+                    conf = ipex.quantization.QuantConf(args.configure_dir)
                     x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
                     model = ipex.quantization.convert(model, conf, x)
                     with torch.no_grad():
