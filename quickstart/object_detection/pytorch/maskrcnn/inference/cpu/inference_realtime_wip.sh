@@ -72,7 +72,7 @@ BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/lantency_log*
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --latency_mode \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/test_net.py \

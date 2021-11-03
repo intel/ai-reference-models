@@ -43,12 +43,8 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
 
     model = model.to(memory_format=torch.channels_last)
     model.backbone = ipex.optimize(model.backbone, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
-    # will be removed
-    if bf16:
-        model.rpn, _, _ = ipex.weight_cast._weight_dtype_convert_with_ipex(model.rpn, None, {}, True)
-        model.roi_heads, _, _ = ipex.weight_cast._weight_dtype_convert_with_ipex(model.roi_heads, None, {}, True)
-    model.rpn, _, _ = ipex.weight_prepack._weight_prepack_with_ipex(model.rpn, None, {}, False)
-    model.roi_heads, _, _ = ipex.weight_prepack._weight_prepack_with_ipex(model.roi_heads, None, {}, False)
+    model.rpn = ipex.optimize(model.rpn, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
+    model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
 
     with torch.cpu.amp.autocast(enabled=bf16), torch.no_grad():
         # generate trace model
@@ -57,6 +53,7 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
             for i, batch in enumerate(tqdm(data_loader)):
                 images, targets, image_ids = batch
                 model.backbone = torch.jit.trace(model.backbone, images.tensors.to(memory_format=torch.channels_last))
+                model.backbone = torch.jit.freeze(model.backbone)
                 trace_graph = model.backbone.graph_for(images.tensors.to(memory_format=torch.channels_last))
                 print(trace_graph)
                 break
