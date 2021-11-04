@@ -56,9 +56,9 @@ CREATE_LOGFILE=${8:-"true"}
 CUDNN_BENCHMARK=${9:-"true"}
 NUM_GPUS=${10:-0}
 PRECISION=${11:-"fp32"}
-EPOCHS=${12:-2}
+EPOCHS=${12:-1}
 SEED=${13:-2021}
-BATCH_SIZE=${14:-32}
+BATCH_SIZE=${14:-64}
 EVAL_BATCH_SIZE=${15:-2}
 LEARNING_RATE=${16:-"0.001"}
 LEARNING_RATE_WARMUP=${17:-"8000"}
@@ -82,7 +82,12 @@ fi
 
 IPEX="--ipex"
 
-WARMUP=2
+PROFILE=""
+if [ "$3" = profiling ]; then
+    PROFILE="--profiling"
+fi
+
+WARMUP=20
 
 if [ "$CHECKPOINT" = "none" ] ; then
    CHECKPOINT=""
@@ -93,7 +98,7 @@ fi
 CMD=" --batch_size=$BATCH_SIZE"
 CMD+=" --eval_batch_size=$EVAL_BATCH_SIZE"
 CMD+=" --num_epochs=$EPOCHS"
-CMD+=" --num_steps=250"
+# CMD+=" --num_steps=250"
 CMD+=" --output_dir=$RESULT_DIR"
 CMD+=" --model_toml=$MODEL_CONFIG"
 CMD+=" --lr=$LEARNING_RATE"
@@ -113,6 +118,7 @@ CMD+=" $CHECKPOINT"
 CMD+=" $PREC"
 CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
+CMD+=" $PROFILE"
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
@@ -120,7 +126,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --throughput_mode \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py \
