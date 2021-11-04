@@ -211,9 +211,7 @@ def train(
             batch_counter = 0
             average_loss = 0
             for data in tqdm(train_dataloader):
-
                 if batch_counter == 0:
-
                     adjusted_lr = fn_lr_policy(step)
                     for param_group in optimizer.param_groups:
                             param_group['lr'] = adjusted_lr
@@ -223,34 +221,65 @@ def train(
                 t_audio_signal_t, t_a_sig_length_t, t_transcript_t, t_transcript_len_t = data_transforms(data)
                 model.train()
 
-                if (step - start_step) >= args.warmup:
-                    t0 = time.perf_counter()
-                if args.bf16:
-                    with torch.cpu.amp.autocast():
+                if args.profiling and (step - start_step) >= args.warmup:
+                    with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
+                        if (step - start_step) >= args.warmup:
+                            t0 = time.perf_counter()
+                        if args.bf16:
+                            with torch.cpu.amp.autocast():
+                                t_log_probs_t, (x_len, y_len) = model(
+                                    ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
+                                )
+                        elif args.fp32:
+                            t_log_probs_t, (x_len, y_len) = model(
+                                ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
+                            )
+                        if args.bf16:
+                            t_log_probs_t = t_log_probs_t.to(torch.float32)
+                        t_loss_t = loss_fn(
+                            (t_log_probs_t, x_len), (t_transcript_t, y_len)
+                        )
+                        logger.log_scalar('loss', t_loss_t.item(), step)
+                        del t_log_probs_t
+                        if args.gradient_accumulation_steps > 1:
+                            t_loss_t = t_loss_t / args.gradient_accumulation_steps
+
+                        if args.cuda and optim_level in AmpOptimizations:
+                            assert False, "not supported in ipex"
+                        else:
+                            t_loss_t.backward()
+                        t1 = time.perf_counter()
+                        if (step - start_step) >= args.warmup:
+                            total_time += (t1 - t0)
+                else:
+                    if (step - start_step) >= args.warmup:
+                        t0 = time.perf_counter()
+                    if args.bf16:
+                        with torch.cpu.amp.autocast():
+                            t_log_probs_t, (x_len, y_len) = model(
+                                ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
+                            )
+                    elif args.fp32:
                         t_log_probs_t, (x_len, y_len) = model(
                             ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                         )
-                elif args.fp32:
-                    t_log_probs_t, (x_len, y_len) = model(
-                        ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
+                    if args.bf16:
+                        t_log_probs_t = t_log_probs_t.to(torch.float32)
+                    t_loss_t = loss_fn(
+                        (t_log_probs_t, x_len), (t_transcript_t, y_len)
                     )
-                if args.bf16:
-                    t_log_probs_t = t_log_probs_t.to(torch.float32)
-                t_loss_t = loss_fn(
-                    (t_log_probs_t, x_len), (t_transcript_t, y_len)
-                )
-                logger.log_scalar('loss', t_loss_t.item(), step)
-                del t_log_probs_t
-                if args.gradient_accumulation_steps > 1:
-                    t_loss_t = t_loss_t / args.gradient_accumulation_steps
+                    logger.log_scalar('loss', t_loss_t.item(), step)
+                    del t_log_probs_t
+                    if args.gradient_accumulation_steps > 1:
+                        t_loss_t = t_loss_t / args.gradient_accumulation_steps
 
-                if args.cuda and optim_level in AmpOptimizations:
-                    assert False, "not supported in ipex"
-                else:
-                    t_loss_t.backward()
-                t1 = time.perf_counter()
-                if (step - start_step) >= args.warmup:
-                    total_time += (t1 - t0)
+                    if args.cuda and optim_level in AmpOptimizations:
+                        assert False, "not supported in ipex"
+                    else:
+                        t_loss_t.backward()
+                    t1 = time.perf_counter()
+                    if (step - start_step) >= args.warmup:
+                        total_time += (t1 - t0)
 
                 batch_counter += 1
                 average_loss += t_loss_t.item()
@@ -283,6 +312,9 @@ def train(
                 save(model, optimizer, epoch, output_dir=args.output_dir)
             if args.num_steps is None and epoch >= args.num_epochs:
                 break
+        if args.profiling:
+            print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+
         print_once("Done in {0}".format(time.time() - start_time))
         if args.num_steps is not None:
             total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
@@ -553,8 +585,10 @@ def main(args):
     if args.ipex:
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+            ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
         else:
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
+            ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
 
     print_once(model)
     print_once("# parameters: {}".format(sum(p.numel() for p in model.parameters())))
@@ -616,6 +650,7 @@ def parse_args():
     parser.add_argument('--bf16', action='store_true', default=False, help='enable ipex bf16 path')
     parser.add_argument('--fp32', action='store_true', default=False, help='enable ipex fp32 path')
     parser.add_argument("--warmup", type=int, default=0, help='if provided, will warm up steps. Only measure the performance from step=warmup')
+    parser.add_argument("--profiling", action='store_true', help='do profiling', default=False)
     args=parser.parse_args()
     return args
 
