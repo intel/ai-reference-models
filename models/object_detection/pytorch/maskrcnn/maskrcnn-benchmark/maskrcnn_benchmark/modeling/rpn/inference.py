@@ -10,7 +10,8 @@ from maskrcnn_benchmark.structures.boxlist_ops import remove_small_boxes
 from ..utils import cat
 from .utils import permute_and_flatten
 
-from intel_extension_for_pytorch.nn.functional import rpn_nms
+import intel_extension_for_pytorch as ipex
+rpn_nms = torch.ops.torch_ipex.rpn_nms
 
 class RPNPostProcessor(torch.nn.Module):
     """
