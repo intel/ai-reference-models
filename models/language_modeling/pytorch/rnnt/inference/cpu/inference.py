@@ -377,6 +377,7 @@ def main(args):
             else:
                 with torch.no_grad():
                     model.joint_net = torch.jit.trace(model.joint_net, torch.randn(args.batch_size, 1, 1, model_definition['rnnt']['encoder_n_hidden'] + model_definition['rnnt']['pred_n_hidden']), check_trace=False)
+            model.joint_net = torch.jit.freeze(model.joint_net)
     else:
         model = model.to("cpu")
 
@@ -421,7 +422,7 @@ def main(args):
 
     model.eval()
     if args.ipex:
-        ipex.utils._replace_lstm_with_ipex_lstm(model)
+        ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
 
     greedy_decoder = RNNTGreedyDecoder(len(ctc_vocab) - 1, model.module if multi_gpu else model)
 
