@@ -270,7 +270,7 @@ class DLRM_Net(nn.Module):
     def interact_features(self, x, ly):
         if args.ipex_interaction:
             T = [x] + ly
-            R = ipex.interaction(*T)
+            R = ipex.nn.functional.interaction(*T)
         else:
             # concatenate dense and sparse features
             (batch_size, d) = x.shape
@@ -353,7 +353,7 @@ def trace_model(args, dlrm, test_ld):
         elif args.int8:
             ipex.core.disable_jit_opt()
             ipex.core._jit_set_llga_enabled(True)
-            conf = ipex.QuantConf(args.int8_configure)
+            conf = ipex.quantization.QuantConf(args.int8_configure)
             dlrm = ipex.quantization.convert(dlrm, conf, (X, lS_o, lS_i))
         else:
             dlrm = ipex.optimize(dlrm, dtype=torch.float, inplace=True)
