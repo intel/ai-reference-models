@@ -54,7 +54,7 @@ BATCH_SIZE=448
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
 
-python -m intel_extension_for_pytorch.launch \
+python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --throughput_mode \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py \
