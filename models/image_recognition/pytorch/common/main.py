@@ -517,14 +517,13 @@ def run_weights_sharing_model(m, tid, args):
     start_time = time.time()
     num_images = 0
     time_consume = 0
+    if args.bf16:
+        x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last).to(torch.bfloat16)
+    else:
+        x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
+
     with torch.no_grad():
         while num_images < steps:
-            if args.bf16:
-                for i in range(24):
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last).to(torch.bfloat16)
-            else:
-                for i in range(24):
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
             start_time = time.time()
             y = m(x)
             end_time = time.time()
