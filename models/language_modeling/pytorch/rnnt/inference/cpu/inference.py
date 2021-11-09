@@ -366,7 +366,7 @@ def main(args):
         import intel_extension_for_pytorch as ipex
         model.joint_net.eval()
         data_type = torch.bfloat16 if args.mix_precision else torch.float32
-        model.joint_net = ipex.optimize(model.joint_net, dtype=data_type)
+        model.joint_net = ipex.optimize(model.joint_net, dtype=data_type, auto_kernel_selection=True)
         model.prediction["embed"] = model.prediction["embed"].to(data_type)
         if args.jit:
             print("running jit path")
