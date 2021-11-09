@@ -312,7 +312,11 @@ class PlatformUtil:
         # numa_cores_per_instance we can't count on numactl being installed otherwise and
         # this list is only used for the numactl multi-instance runs.
         num_physical_cores = self.num_cpu_sockets * self.num_cores_per_socket
-        cores_per_node = int(num_physical_cores / self.num_numa_nodes)
+        if self.num_numa_nodes > 0:
+            cores_per_node = int(num_physical_cores / self.num_numa_nodes)
+        else:
+            cores_per_node = self.num_cores_per_socket
+
         if self.num_numa_nodes > 0 and self.args.numa_cores_per_instance is not None:
             try:
                 # Get the list of cores
