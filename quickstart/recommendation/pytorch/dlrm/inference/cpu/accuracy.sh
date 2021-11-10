@@ -52,7 +52,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, avx-int8, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
   exit 1
 fi
 
@@ -60,20 +60,21 @@ fi
 export DATASET_PATH=${DATASET_DIR}
 export work_space=${OUTPUT_DIR}
 
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 if [[ $PRECISION == "bf16" ]]; then
     cd ${MODEL_DIR}/models/dlrm/dlrm
     bash run_accuracy.sh bf16 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-accuracy-bf16.log
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     cd ${MODEL_DIR}/models/dlrm/dlrm
     bash run_accuracy.sh 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-accuracy-fp32.log
 elif [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
     cd ${MODEL_DIR}/models/dlrm-int8/dlrm
-    if [[ $PRECISION == "avx-int8" ]]; then
-        unset DNNL_MAX_CPU_ISA
-    fi
     bash run_accuracy.sh int8 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-accuracy-int8.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, int8, avx-int8, and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, int8, avx-int8, and bf16"
     exit 1
 fi

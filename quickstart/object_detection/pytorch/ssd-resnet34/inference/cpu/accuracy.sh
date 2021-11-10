@@ -42,7 +42,7 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, avx-int8, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
   exit 1
 fi
 
@@ -53,14 +53,15 @@ export DATA_DIR=${DATASET_DIR}
 export MODEL_DIR=${PRETRAINED_MODEL}
 export work_space=${OUTPUT_DIR}
 
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    if [[ $PRECISION == "avx-int8" ]]; then
-        unset DNNL_MAX_CPU_ISA
-    fi
     bash run_and_time_accuracy_cpu.sh int8 jit ./pytorch_default_recipe_ssd_configure.json 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-accuracy-int8.log
 elif [[ $PRECISION == "bf16" ]]; then
     bash run_and_time_accuracy_cpu.sh bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-accuracy-bf16.log
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     bash run_and_time_accuracy_cpu.sh fp32 jit 2>&1 | tee -a ${OUTPUT_DIR}/ssd-resnet34-inference-accuracy-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."

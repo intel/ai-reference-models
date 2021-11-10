@@ -52,7 +52,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, avx-int8, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
   exit 1
 fi
 
@@ -64,23 +64,23 @@ export KMP_SETTINGS=1
 export KMP_AFFINITY="granularity=fine,compact,1,0"
 export KMP_BLOCKTIME=1
 
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+else
+    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+fi
+
 if [[ $PRECISION == "bf16" ]]; then
     cd ${MODEL_DIR}/models/dlrm/dlrm
-    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
     bash run_inference_performance.sh bf16 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-performance-bf16.log
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     cd ${MODEL_DIR}/models/dlrm/dlrm
     bash run_inference_performance.sh 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-performance-fp32.log
 elif [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
     cd ${MODEL_DIR}/models/dlrm-int8/dlrm
-    if [[ $PRECISION == "avx-int8" ]]; then
-        unset DNNL_MAX_CPU_ISA
-    else
-        export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-    fi
     bash run_inference_performance.sh int8 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-performance-int8.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, int8, avx-int8, and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, int8, avx-int8, and bf16"
     exit 1
 fi

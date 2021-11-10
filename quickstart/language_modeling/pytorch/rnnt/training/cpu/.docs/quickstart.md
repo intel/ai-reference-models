@@ -4,4 +4,8 @@
 | Script name | Description |
 |-------------|-------------|
 | `download_training_dataset.sh` | Download and prepare the LibriSpeech training dataset |
-| `training.sh` | Runs RNN-T training for the specified precision (fp32 or bf16). |
+| `training.sh` | Runs RNN-T training for the specified precision (fp32, avx-fp32, or bf16). |
+
+> Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
+> `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
+> otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
