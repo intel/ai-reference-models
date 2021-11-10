@@ -351,8 +351,6 @@ def trace_model(args, dlrm, test_ld):
                 dlrm.emb_l.bfloat16()
             dlrm = ipex.optimize(dlrm, dtype=torch.bfloat16, inplace=True)
         elif args.int8:
-            ipex.core.disable_jit_opt()
-            ipex.core._jit_set_llga_enabled(True)
             conf = ipex.quantization.QuantConf(args.int8_configure)
             dlrm = ipex.quantization.convert(dlrm, conf, (X, lS_o, lS_i))
         else:
