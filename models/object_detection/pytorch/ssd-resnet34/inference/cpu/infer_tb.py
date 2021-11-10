@@ -187,10 +187,6 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
     if args.int8:
         model = model.eval()
         model_decode = SSD_R34_NMS(model, encoder)
-        # enable LLGA optimization
-        ipex._C._jit_set_llga_enabled(True)
-        # disable IPEX JIT optimization
-        ipex._C.disable_jit_opt()
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model_decode.model.model = optimization.fuse(model_decode.model.model, inplace=False)
