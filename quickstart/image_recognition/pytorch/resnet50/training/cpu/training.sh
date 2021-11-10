@@ -38,7 +38,7 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
   exit 1
 fi
 
@@ -50,12 +50,16 @@ python hub_help.py --url https://download.pytorch.org/models/resnet50-0676ba61.p
 export work_space=${OUTPUT_DIR}
 export TRAINING_EPOCHS=${TRAINING_EPOCHS}
 
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 if [[ $PRECISION == "bf16" ]]; then
     bash run_training_ipex_spr.sh resnet50 $DATASET_DIR bf16 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-training-bf16.log
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     bash run_training_ipex_spr.sh resnet50 $DATASET_DIR fp32 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-training-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32 and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, and bf16"
     exit 1
 fi

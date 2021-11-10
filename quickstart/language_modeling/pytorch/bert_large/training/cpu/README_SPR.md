@@ -1,33 +1,13 @@
 <!--- 0. Title -->
 # PyTorch BERT Large training
+
 <!-- 10. Description -->
 ## Description
 
 This document has instructions for running BERT Large pre-training using
 Intel-optimized PyTorch.
 
-## Datasets
-
-BERT Large training uses the config file and enwiki-20200101 dataset from the
-[MLCommons training GitHub repo](https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert).
-
-Follow the instructions in their documentation to download the files and
-preprocess the dataset to create TF records files. Set the `DATASET_DIR`
-environment variable to the path to the TF records directory. Your directory
-should look similar like this:
-```
-<DATASET_DIR>
-├── seq_128
-│   └── part-00000-of-00500_128
-└── seq_512
-    └── part-00000-of-00500
-```
-
-### General setup
-
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
-
-## Docker Model Package
+## Model Package
 
 The model package includes the Dockerfile and scripts needed to build and
 run BERT Large training in a container.
@@ -49,9 +29,29 @@ pytorch-spr-bert-large-training
 
 | Script name | Description |
 |-------------|-------------|
-| `pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32 or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
-| `pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32 or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
+| `pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32, avx-fp32, or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
+| `pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32, avx-fp32, or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
 
+> Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
+> `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
+> otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
+
+# Datasets
+
+BERT Large training uses the config file and enwiki-20200101 dataset from the
+[MLCommons training GitHub repo](https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert).
+
+Follow the instructions in their documentation to download the files and
+preprocess the dataset to create TF records files. Set the `DATASET_DIR`
+environment variable to the path to the TF records directory. Your directory
+should look similar like this:
+```
+<DATASET_DIR>
+├── seq_128
+│   └── part-00000-of-00500_128
+└── seq_512
+    └── part-00000-of-00500
+```
 
 Download the `bert_config.json` file from the Google drive that is linked at the
 [MLCommons BERT README](https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert#location-of-the-input-files).

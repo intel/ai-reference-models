@@ -33,20 +33,24 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
   exit 1
 fi
 
 cd ${MODEL_DIR}/models/bert_pre_train
 export work_space=${OUTPUT_DIR}
 
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 if [[ $PRECISION == "bf16" ]]; then
     bash run_bert_pretrain_phase2.sh bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/bert-large-training-phase2-bf16.log
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     bash run_bert_pretrain_phase2.sh 2>&1 | tee -a ${OUTPUT_DIR}/bert-large-training-phase2-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32 and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, and bf16"
     exit 1
 fi
 

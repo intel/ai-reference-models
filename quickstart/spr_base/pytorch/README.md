@@ -68,14 +68,8 @@ IPEX from python:
 ```
 python -c "import torch"
 
-python -c "import intel_pytorch_extension"
+python -c "import intel_extension_for_pytorch"
 ```
-
-> NOTE: It is expected that warnings will be displayed after importing the Intel
-> PyTorch Extension (IPEX), due to redefining the autocast operation inside IPEX. The
-> autocast inside IPEX has more functionalities such as: jit support, int8 support,
-> verbose debug etc., compared to stock PyTorch. The warnings will not affect functionality
-> or performance.
 
 After verifying that PyTorch and IPEX are available, you can run your own
 script in the container.

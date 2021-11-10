@@ -45,21 +45,25 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
   exit 1
 fi
 
 export DATASET_PATH=${DATASET_DIR}
 export work_space=${OUTPUT_DIR}
 
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 cd ${MODEL_DIR}/models/dlrm/dlrm
 
 if [[ $PRECISION == "bf16" ]]; then
     NUM_BATCH=${NUM_BATCH} bash run_traininig.sh bf16 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-training-performance-bf16.log
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     NUM_BATCH=${NUM_BATCH} bash run_traininig.sh 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-training-performance-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32 and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, and bf16"
     exit 1
 fi
