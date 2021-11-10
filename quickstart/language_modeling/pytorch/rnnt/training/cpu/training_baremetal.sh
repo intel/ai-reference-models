@@ -42,4 +42,4 @@ else
     echo "### running fp32 datatype"
 fi
 
-bash models/language_modeling/pytorch/rnnt/training/cpu/train.sh $ARGS
+bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.sh $ARGS
