@@ -163,10 +163,6 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
     start = time.time()
     if args.int8:
         model = model.eval()
-        # enable LLGA optimization
-        ipex._C._jit_set_llga_enabled(True)
-        # disable IPEX JIT optimization
-        ipex._C.disable_jit_opt()
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model.model = optimization.fuse(model.model, inplace=False)
