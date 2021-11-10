@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..fe56c5d40 100644
+index 2bd4e90ff..5cd7312df 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -43,7 +43,7 @@ index 2bd4e90ff..fe56c5d40 100644
  
 +def wrap_model(model, args):
 +    model.eval()
-+    ipex.utils._replace_dropout_with_identity(model)
++    ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
 +    dumpy_tensor = torch.ones((128, 384), dtype=torch.long)
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
