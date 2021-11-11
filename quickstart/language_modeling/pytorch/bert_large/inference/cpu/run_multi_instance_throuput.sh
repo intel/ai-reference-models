@@ -41,7 +41,7 @@ OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/question-answering/run_squad.py"}
 work_space=${work_space:-${OUTPUT_DIR}}
 
-rm -rf ./throughput_log*
+rm -rf ${OUTPUT_DIR}/throughput_log*
 python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${precision}" ${EVAL_SCRIPT} $ARGS --model_type bert --model_name_or_path ${FINETUNED_MODEL} --tokenizer_name bert-large-uncased-whole-word-masking-finetuned-squad  --do_eval --do_lower_case --predict_file $EVAL_DATA_FILE --per_gpu_eval_batch_size $BATCH_SIZE --learning_rate 3e-5 --num_train_epochs 2.0 --max_seq_length 384 --doc_stride 128 --output_dir ./tmp --perf_run_iters 20 --int8_config ${INT8_CONFIG}
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
