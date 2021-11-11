@@ -34,7 +34,7 @@ then
     echo "### running int8 mode"
 fi
 
-rm -rf ./latency_log*
+rm -rf ${OUTPUT_DIR}/latency_log*
 export OMP_NUM_THREADS=4
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`

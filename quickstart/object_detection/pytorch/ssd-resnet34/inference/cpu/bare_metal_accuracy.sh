@@ -24,7 +24,7 @@ if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/c
 fi
 
 if [ ! -e "${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth" ]; then
-  echo "The pretrained model \${CHECKPOINT_DIR}/resnet34-ssd1200.pth does not exist"
+  echo "The pretrained model \${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth does not exist"
   exit 1
 fi
 
