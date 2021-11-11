@@ -32,7 +32,7 @@ then
     precision=int8
     echo "### running int8 mode"
 fi
-rm -f accuracy_log*
+rm -f ${OUTPUT_DIR}/accuracy_log*
 INT8_CONFIG=${INT8_CONFIG:-"configure.json"}
 BATCH_SIZE=${BATCH_SIZE:-128}
 EVAL_DATA_FILE=${EVAL_DATA_FILE:-"${PWD}/squad1.1/dev-v1.1.json"}
