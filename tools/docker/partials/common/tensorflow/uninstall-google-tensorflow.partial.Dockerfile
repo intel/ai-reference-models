@@ -1,1 +1,3 @@
-RUN python -m pip uninstall -y tensorflow
+RUN python -m pip uninstall -y tensorflow \
+    tensorflow-cpu \
+    tensorflow-gpu

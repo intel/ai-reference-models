@@ -10,15 +10,9 @@ slice_sets:
           dockerfile_exclusive_name: "nightly-tf-tfx-cuda"
           dockerfile_subdirectory: "tfx"
           partials:
-               - ubuntu-base
-               - python-3.6
+               - tensorflow/google-tensorflow-base
                - python3-pip
-               - common
-               - python-build
-               - tensorflow/tfx-install
                - tensorflow/uninstall-google-tensorflow
+               - tensorflow/tfx-install
                - tensorflow/nightly-tf-cuda
                - tensorflow/dependencies-for-tfx-examples
-          args:
-               - UBUNTU_VERSION=20.04
-               - PY_VERSION=3.6
