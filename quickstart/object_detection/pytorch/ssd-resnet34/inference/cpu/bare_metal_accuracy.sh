@@ -75,5 +75,5 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-accuracy=$(grep 'Accuracy:' ./accuracy_log* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/accuracy_log* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
 echo ""SSD-RN34";"accuracy";$1; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log

@@ -57,4 +57,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo ""BERT";"throughput";${precision}; ${BATCH_SIZE};${throughput}" | tee -a ${work_space}/summary.log
+echo ""BERT";"throughput";${precision}; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

@@ -42,7 +42,7 @@ DATASET_DIR=${DATASET_DIR-/pyt_dataset/enwiki-20200101/dataset/tfrecord_dir}
 TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
-rm -rf ./throughput_log_phase2_*
+rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
 
 python -m intel_extension_for_pytorch.cpu.launch --socket_id 0  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
     --train_file ${DATASET_DIR}/seq_512/part-00000-of-00500 \
@@ -54,7 +54,7 @@ python -m intel_extension_for_pytorch.cpu.launch --socket_id 0  --log_path=${OUT
     $ARGS \
     --per_device_train_batch_size ${batch_size} \
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase2_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;
@@ -67,4 +67,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo ""BERT";"training phase2 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${work_space}/summary.log
+echo ""BERT";"training phase2 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

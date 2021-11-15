@@ -59,7 +59,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=100
 
-rm -rf ./train_accuracy_log*
+rm -rf ${OUTPUT_DIR}/train_accuracy_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
@@ -80,5 +80,5 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-accuracy=$(grep 'Accuracy:' ./train_accuracy_log* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/train_accuracy_log* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
 echo ""SSD-RN34";"accuracy";$1; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
