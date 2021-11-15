@@ -99,6 +99,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-throughput=$(grep 'Training throughput:' ./resnet50_training_log_${PRECISION}.log |sed -e 's/.Trainng throughput//;s/[^0-9.]//g')
+throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}.log |sed -e 's/.Trainng throughput//;s/[^0-9.]//g')
 
 echo "resnet50;"training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
