@@ -229,8 +229,8 @@ class PlatformUtil:
                 start, end = section.split("-")
                 section_list = range(int(start), int(end) + 1)
                 result_list += section_list
-            else:
-                # This section is just a single number, not a range
+            elif(len(section)):
+                # This section is either empty or just a single number and not a range
                 result_list.append(int(section))
 
         # Remove duplicates
