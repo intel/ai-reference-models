@@ -102,7 +102,7 @@ $numa_cmd python -u $MODEL_SCRIPT \
   $ARGS |tee $LOG_0
 wait
 
-throughput=$(grep 'Throughput:' $LOG/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;

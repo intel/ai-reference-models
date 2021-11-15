@@ -67,4 +67,4 @@ sum = sum / i * INSTANCES_PER_SOCKET;
 }')
 
 echo $INSTANCES_PER_SOCKET
-echo ""BERT";"latency";${precision}; ${BATCH_SIZE};${throughput}" | tee -a ${work_space}/summary.log
+echo ""BERT";"latency";${precision}; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

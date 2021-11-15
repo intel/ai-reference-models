@@ -38,7 +38,7 @@ else
     echo "Supported precisions are: fp32, bf16"
     exit 1
 fi
-rm -rf ./throughput_log_phase1*
+rm -rf ${OUTPUT_DIR}/throughput_log_phase1*
 #this is the path of model and enwiki-20200101 on mlp-sdp-spr-4150 machine 
 #you can also refer to https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert
 DATASET_DIR=${DATASET_DIR-/pyt_dataset/enwiki-20200101/dataset/tfrecord_dir}
@@ -56,7 +56,7 @@ python -m intel_extension_for_pytorch.cpu.launch --socket_id 0 --log_path=${OUTP
     --config_name ${BERT_MODEL_CONFIG} \
     --per_device_train_batch_size ${batch_size} \
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase1_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;
@@ -69,4 +69,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo ""BERT";"training phase1 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${work_space}/summary.log
+echo ""BERT";"training phase1 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
