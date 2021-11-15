@@ -78,7 +78,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-throughput=$(grep 'Throughput:' ./throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
 i = 0;

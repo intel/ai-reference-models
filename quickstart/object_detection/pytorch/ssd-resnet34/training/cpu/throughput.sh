@@ -60,7 +60,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=100
 
-rm -rf ./train_throughput_log*
+rm -rf ${OUTPUT_DIR}/train_throughput_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
@@ -84,7 +84,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-throughput=$(grep 'Throughput:' ./train_throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/train_throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
 i = 0;
