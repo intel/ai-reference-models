@@ -186,7 +186,9 @@ def test_platform_util_wmic_parsing(platform_mock, subprocess_mock, os_mock):
                           ['0-3,7,6', [0, 1, 2, 3, 6, 7]],
                           ['2-3,7,9-11,20', [2, 3, 7, 9, 10, 11, 20]],
                           ['0-3,7-6,11,11', [0, 1, 2, 3, 11]],
-                          ['7-9,5-10,6,4', [4, 5, 6, 7, 8, 9, 10]]])
+                          ['7-9,5-10,6,4', [4, 5, 6, 7, 8, 9, 10]],
+                          ['0', [0]],
+                          ['', []]])
 def test_get_list_from_string_ranges(get_cpuset_mock, platform_mock, subprocess_mock, os_mock,
                                      cpuset_range, expected_list,):
     """
