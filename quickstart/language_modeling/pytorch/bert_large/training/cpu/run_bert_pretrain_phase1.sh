@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 
 ARGS="--benchmark"
@@ -42,7 +43,7 @@ rm -rf ./throughput_log_phase1*
 #you can also refer to https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert
 DATASET_DIR=${DATASET_DIR-/pyt_dataset/enwiki-20200101/dataset/tfrecord_dir}
 BERT_MODEL_CONFIG=${BERT_MODEL_CONFIG-/pyt_dataset/enwiki-20200101/training/language_model/tensorflow/bert/cleanup_scripts/wiki/config.json}
-TRAIN_SCRIPT=${TRAIN_SCRIPT:-${HOME}/frameworks.ai.models.intel-models/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
+TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
 python -m intel_extension_for_pytorch.cpu.launch --socket_id 0 --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase1_${precision}" ${TRAIN_SCRIPT} \
