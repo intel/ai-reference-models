@@ -15,6 +15,8 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ARGS="--benchmark"
 precision=fp32
@@ -37,7 +39,7 @@ fi
 #you can also refer to https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert
 PRETRAINED_MODEL=${PRETRAINED_MODEL-/pyt_dataset/enwiki-20200101/bert_large_mlperf_checkpoint/checkpoint/}
 DATASET_DIR=${DATASET_DIR-/pyt_dataset/enwiki-20200101/dataset/tfrecord_dir}
-TRAIN_SCRIPT=${TRAIN_SCRIPT:-${HOME}/frameworks.ai.models.intel-models/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
+TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
