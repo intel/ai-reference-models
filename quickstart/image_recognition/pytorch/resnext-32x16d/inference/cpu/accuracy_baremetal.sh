@@ -66,7 +66,7 @@ if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
         unset DNNL_MAX_CPU_ISA
     fi
     echo "running int8 path"
-    ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnet50_configure_sym.json"
+    ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnext101_configure_sym.json"
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16 --jit"
     echo "running bf16 path"
