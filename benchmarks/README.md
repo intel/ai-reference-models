@@ -88,13 +88,6 @@ For information on running more advanced use cases using the workload containers
 | Image Recognition       | [VGG-11 with batch normalization](https://arxiv.org/abs/1409.1556) | Inference | | [FP32 BFloat16**](/quickstart/image_recognition/pytorch/vgg11_bn/inference/cpu/README.md) |
 | Image Recognition       | [Wide ResNet-50-2](https://arxiv.org/pdf/1605.07146.pdf)   | Inference | | [FP32 BFloat16**](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md) |
 | Image Recognition       | [Wide ResNet-101-2](https://arxiv.org/pdf/1605.07146.pdf)  | Inference | | [FP32 BFloat16**](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md) |
-| Language Modeling       | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) |
-| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Inference | | [FP32 Int8 BFloat16**](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
-| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Training  | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md) |
-| Language Modeling       | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/README.md) |
-| Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/rnnt/inference/cpu/README.md) |
-| Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Training  | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) |
-| Language Modeling       | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
 | Object Detection        | [Faster R-CNN ResNet50 FPN](https://arxiv.org/abs/1506.01497) | Inference  | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/README.md) |
 | Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README.md) |
 | Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Training   | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/maskrcnn/training/cpu/README.md) |
@@ -102,8 +95,7 @@ For information on running more advanced use cases using the workload containers
 | Object Detection        | [RetinaNet ResNet-50 FPN](https://arxiv.org/abs/1708.02002)   | Inference  | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md) |
 | Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Inference  | | [FP32 Int8 BFloat16**](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md) |
 | Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Training   | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md) |
-| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Inference | | [FP32 Int8 BFloat16**](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md) |
-| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Training  | Model Packages: [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/dlrm-bfloat16-training-pytorch-model.html) | [FP32 BFloat16**](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) |
+| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)        | Training  | Model Packages: [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/dlrm-bfloat16-training-pytorch-model.html) | [BFloat16**](/quickstart/recommendation/pytorch/dlrm/training/cpu/bfloat16/README.md) |
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
 
