@@ -14,23 +14,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 ### Model Specific Setup
 
-* [Datasets](#dataset)
-```
-    export DATASET_DIR=#Where_to_save_Dataset
-```
-
-* Setup the Output dir to store the log
-```
-    export OUTPUT_DIR=$Where_to_save_log
-```
-* Setup trainig epochs
-```
-    export TRAINING_EPOCHS=$epoch_number(90 or other number)
-```
-* Setup runnning precision
-```
-    export PRECISION=$Data_type(fp32 or bf16)
-```
 * Set Jemalloc Preload for better performance
 
 The jemalloc should be built from the [General setup](#general-setup) section.
@@ -50,13 +33,6 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 ```
     export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ```
-
-<!--- 40. Quick Start Scripts -->
-## Quick Start Scripts
-
-| Script name | Description |
-|-------------|-------------|
-| `training_baremetal.sh` | Trains using one node for one epoch for the specified precision (fp32 or bf16). |
 
 ## Datasets
 
@@ -88,31 +64,37 @@ imagenet
 The folder that contains the `val` and `train` directories should be set as the
 `DATASET_DIR` (for example: `export DATASET_DIR=/home/<user>/imagenet`).
 
-## Docker
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
 
-Make sure, you have all the requirements pre-setup in your Container as the [Bare Metal](#bare-metal) Setup section.
+| Script name | Description |
+|-------------|-------------|
+| `training_baremetal.sh` | Trains using one node for one epoch for the specified precision (fp32 or bf16). |
 
-### Download dataset
+## Run the model
 
-Refer to the corresponding Bare Mental Section to download the dataset.
+Follow the instructions above to setup your bare metal environment, download and
+preprocess the dataset, and do the model specific setup. Once all the setup is done,
+the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+Ensure that you have enviornment variables set to point to the dataset directory,
+an output directory, precision, and the number of training epochs.
 
-### Running CMD
 ```
-DATASET_DIR=$dir/imagenet
-OUTPUT_DIR=$Where_to_save_the_log
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --privileged --init -t \
-  intel/image_recognition:pytorch-latest-resnet50-training
+# Clone the model zoo repo and set the MODEL_DIR
+git clone https://github.com/IntelAI/models.git
+cd models
+export MODEL_DIR=$(pwd)
+
+# Env vars
+export DATASET_DIR=<path_to_Imagenet_Dataset>
+export OUTPUT_DIR=<Where_to_save_log>
+export PRECISION=<precision to run (fp32 or bf16)>
+export TRAINING_EPOCHS=<epoch_number(90 or other number)>
+
+# Run the training quickstart script
+cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
+bash training_baremetal.sh
 ```
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
 
 <!--- 80. License -->
 ## License
