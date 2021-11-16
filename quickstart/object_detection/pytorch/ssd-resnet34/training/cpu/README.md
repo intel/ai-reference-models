@@ -1,7 +1,7 @@
-# SSD-ResNet34 Inference
+# SSD-ResNet34 Training
 
 ## Description
-This document has instructions for running SSD-ResNet34 Inference using Intel-optimized PyTorch.
+This document has instructions for running SSD-ResNet34 training using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -11,13 +11,16 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 ### Model Specific Setup
 * Install dependencies
   ```
+  pip install --no-cache-dir cython
+  pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip
   pip install matplotlib Pillow pycocotools
+  pip install --no-cache-dir pytz==2018.5
   ```
 
 * Download pretrained model
   ```
-  cd <path to your clone of the model zoo>/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu
-  export CHECKPOINT_DIR=<directory where to save the pretrained model>
+  cd <path to your clone of the model zoo>/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu
+  export CHECKPOINT_DIR=<directory where the pretrained model will be saved>
   bash download_model.sh
   ```
 
@@ -47,26 +50,25 @@ Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_da
 Export the `DATASET_DIR` environment variable to specify the directory where the dataset
 will be downloaded. This environment variable will be used again when running quickstart scripts.
 ```
-cd <path to your clone of the model zoo>/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu
+cd <path to your clone of the model zoo>/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu
 export DATASET_DIR=<directory where the dataset will be saved>
 bash download_dataset.sh
 ```
 
 ## Quick Start Scripts
 
-|  DataType   | Throughput  |  Latency    |   Accuracy  |
-| ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash bare_metal_batch_inference.sh fp32 | bash bare_metal_online_inference.sh fp32 | bash bare_metal_accuracy.sh fp32 |
-| BF16        | bash bare_metal_batch_inference.sh bf16 | bash bare_metal_online_inference.sh bf16 | bash bare_metal_accuracy.sh bf16 |
-| INT8        | bash bare_metal_batch_inference.sh int8 | bash bare_metal_online_inference.sh int8 | bash bare_metal_accuracy.sh int8 |
+|  DataType   | Throughput  |   Accuracy  |
+| ----------- | ----------- | ----------- |
+| FP32        | bash throughput.sh fp32 | bash accuracy.sh fp32 |
+| BF16        | bash throughput.sh bf16 | bash accuracy.sh bf16 |
 
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
 preprocess the dataset, and do the model specific setup. Once all the setup is done,
 the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
-Ensure that you have an enviornment variables set to point to the dataset directory,
-the downloaded pretrained model, and an output directory.
+Ensure that you have an enviornment variables set to point to the dataset directory
+and an output directory.
 
 ```
 # Clone the model zoo repo and set the MODEL_DIR
@@ -79,9 +81,9 @@ export DATASET_DIR=<path to the COCO dataset>
 export CHECKPOINT_DIR=<path to the pretrained model>
 export OUTPUT_DIR=<path to an output directory>
 
-# Run a quickstart script (for example, FP32 batch inference)
-cd ${MODEL_DIR}/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu
-bash bare_metal_batch_inference.sh fp32
+# Run a quickstart script (for example, FP32 throughput inference)
+cd ${MODEL_DIR}/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu
+bash throughput.sh fp32
 ```
 
 <!--- 80. License -->
