@@ -57,13 +57,44 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   run_calibration.sh
 ```
 
-### Inference CMD
+## Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
 | FP32        | bash run_multi_instance_throuput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
 | BF16        | bash run_multi_instance_throuput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
 | INT8        | bash run_multi_instance_throuput.sh int8 | bash run_multi_instance_realtime.sh int8 | bash run_accuracy.sh int8 |
+
+## Run the model
+
+Follow the instructions above to setup your bare metal environment, download and
+preprocess the dataset, and do the model specific setup. Once all the setup is done,
+the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+Ensure that you have enviornment variables set to point to the dataset directory
+and an output directory.
+
+```
+# Clone the model zoo repo and set the MODEL_DIR
+git clone https://github.com/IntelAI/models.git
+cd models
+export MODEL_DIR=$(pwd)
+
+# Clone the Transformers repo in the BERT large inference directory
+cd quickstart/language_modeling/pytorch/bert_large/inference/cpu
+git clone https://github.com/huggingface/transformers.git
+cd transformers
+git checkout v4.10.0
+git apply ../enable_ipex_for_bert-base.diff
+pip install -e ./
+
+# Env vars
+export FINETUNED_MODEL=<path to the fine tuned model>
+export EVAL_DATA_FILE=<path to dev-v1.1.json file>
+export OUTPUT_DIR=<path to an output directory>
+
+# Run a quickstart script (for example, FP32 multi-instance realtime inference)
+bash run_multi_instance_realtime.sh fp32
+```
 
 <!--- 80. License -->
 ## License
