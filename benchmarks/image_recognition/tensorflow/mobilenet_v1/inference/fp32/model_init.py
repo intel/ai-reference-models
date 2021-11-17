@@ -47,7 +47,8 @@ class ModelInitializer(BaseModelInitializer):
             self.args.intelai_models, self.args.mode, script_name)
         self.command_prefix = "{} {}".format(self.python_exe, script_path)
 
-        if self.args.socket_id != -1:
+        num_numas = self.platform_util.num_numa_nodes
+        if self.args.socket_id != -1 and num_numas > 0:
             self.command_prefix = "numactl --cpunodebind={} -l {}".format(
                 str(self.args.socket_id), self.command_prefix)
 
