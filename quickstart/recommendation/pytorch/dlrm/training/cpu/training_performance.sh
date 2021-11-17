@@ -59,9 +59,9 @@ fi
 cd ${MODEL_DIR}/models/dlrm/dlrm
 
 if [[ $PRECISION == "bf16" ]]; then
-    NUM_BATCH=${NUM_BATCH} bash run_traininig.sh bf16 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-training-performance-bf16.log
+    NUM_BATCH=${NUM_BATCH} bash run_training.sh bf16 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-training-performance-bf16.log
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
-    NUM_BATCH=${NUM_BATCH} bash run_traininig.sh 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-training-performance-fp32.log
+    NUM_BATCH=${NUM_BATCH} bash run_training.sh 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-training-performance-fp32.log
 else
     echo "The specified precision '${PRECISION}' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, and bf16"
