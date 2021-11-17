@@ -65,6 +65,8 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --batch_size $BATCH_SIZE \
     --ipex \
     --jit \
+    --warm_up 3 \
+    --sort_by_duration \
     $ARGS 2>&1 | tee ${OUTPUT_DIR}/throughput_log.txt
 
 # For the summary of results
