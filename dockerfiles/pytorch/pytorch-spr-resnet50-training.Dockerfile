@@ -38,7 +38,7 @@ RUN yum --enablerepo=extras install -y epel-release && \
     tar
 
 # Build Torch Vision
-ARG TORCHVISION_VERSION=v0.8.0
+ARG TORCHVISION_VERSION="81fe60cc258f49ccfb0f9f32d78b4825754cff7b"
 
 RUN source activate pytorch && \
     git clone https://github.com/pytorch/vision && \

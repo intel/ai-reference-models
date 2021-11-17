@@ -67,13 +67,14 @@ ENV PATH ~/conda/bin/:${PATH}
 ENV LD_LIBRARY_PATH /lib64/:/usr/lib64/:/usr/local/lib64:/root/conda/envs/pytorch/lib:${LD_LIBRARY_PATH}
 
 # Install PyTorch and IPEX wheels
-ARG PYTORCH_WHEEL="torch-1.11.0a0+git3e4ffd3-cp37-cp37m-linux_x86_64.whl"
-ARG IPEX_WHEEL="intel_extension_for_pytorch-0.0.0-cp37-cp37m-linux_x86_64.whl"
+ARG PYTORCH_WHEEL="torch-1.11.0a0+git593f818-cp37-cp37m-linux_x86_64.whl"
+ARG IPEX_WHEEL="intel_extension_for_pytorch-1.10.0+cpu-cp37-cp37m-linux_x86_64.whl"
 
 COPY ./whls/* /tmp/pip3/
 RUN source activate pytorch && \
-    pip install /tmp/pip3/${PYTORCH_WHEEL} && \
-    pip install /tmp/pip3/${IPEX_WHEEL}
+    pip install /tmp/pip3/${IPEX_WHEEL} && \
+    pip install /tmp/pip3/${PYTORCH_WHEEL}
+
 
 # Build Jemalloc
 ARG JEMALLOC_SHA=c8209150f9d219a137412b06431c9d52839c7272

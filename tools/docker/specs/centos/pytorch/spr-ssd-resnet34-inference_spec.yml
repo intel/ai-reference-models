@@ -10,6 +10,7 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-ssd-resnet34-inference
+        - TORCHVISION_VERSION=81fe60cc258f49ccfb0f9f32d78b4825754cff7b
       partials:
         - pytorch/gcc-and-utils
         - pytorch/torch-vision-from-source
