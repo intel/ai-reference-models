@@ -65,6 +65,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --batch_size $BATCH_SIZE \
     --ipex \
     --jit \
+    --warm_up 10 \
     $ARGS 2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
 
 # For the summary of results
