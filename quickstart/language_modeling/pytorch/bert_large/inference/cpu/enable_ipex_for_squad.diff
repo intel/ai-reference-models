@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..5cd7312df 100644
+index 2bd4e90..e18a296 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -44,7 +44,7 @@ index 2bd4e90ff..5cd7312df 100644
 +def wrap_model(model, args):
 +    model.eval()
 +    ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
-+    dumpy_tensor = torch.ones((128, 384), dtype=torch.long)
++    dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
 +    if args.int8:
@@ -121,13 +121,13 @@ index 2bd4e90ff..5cd7312df 100644
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
 -
-+    model = wrap_model(model, args)
      if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
          os.makedirs(args.output_dir)
 -
 + 
      args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
  
++    model = wrap_model(model, args)
      # Note that DistributedSampler samples randomly
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
@@ -185,11 +185,11 @@ index 2bd4e90ff..5cd7312df 100644
 +        "--bf16",
 +        action="store_true",
 +        help="Whether to use 16-bit (mixed) precision  instead of 32-bit")
-+    parser.add_argument("--perf_begin_iter", type=int, default=10,
++    parser.add_argument("--perf_begin_iter", type=int, default=15,
 +                        help="Number iterations to warm up")
 +    parser.add_argument("--perf_run_iters", type=int, default=100,
 +                        help="Number iterations to collection performance data begin from perf_begin_iter")
-+    parser.add_argument("--iter_num", type=int, default=20,
++    parser.add_argument("--iter_num", type=int, default=40,
 +                        help="Number iterations to collect time")
 +    parser.add_argument("--benchmark", action='store_true',
 +                        help="Bench the model speed")
@@ -215,7 +215,7 @@ index 2bd4e90ff..5cd7312df 100644
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
 diff --git a/src/transformers/modeling_bert.py b/src/transformers/modeling_bert.py
-index 23d25cfa0..b281147af 100644
+index 23d25cf..b281147 100644
 --- a/src/transformers/modeling_bert.py
 +++ b/src/transformers/modeling_bert.py
 @@ -139,7 +139,7 @@ def mish(x):
