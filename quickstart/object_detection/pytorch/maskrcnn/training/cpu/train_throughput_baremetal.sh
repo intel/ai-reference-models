@@ -58,6 +58,8 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
+export TRAIN=1
+
 BATCH_SIZE=56
 
 rm -rf ${OUTPUT_DIR}/train_throughput_log*
