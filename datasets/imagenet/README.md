@@ -8,9 +8,10 @@ to allow for offline preprocessing with cloud storage. Note that downloading
 the original images from ImageNet requires registering for an account and
 logging in.
 
-1. Go to the [ImageNet 2012 page](http://www.image-net.org/challenges/LSVRC/2012/downloads)
-   and log in. After logging in, check the URL to ensure that you are still on
-   the 2012 download page (if not, correct the URL to say 2012).
+1. Go to the [ImageNet webpage (https://image-net.org)](https://image-net.org)
+   and log in (or create an account, if you don't have one). After logging in,
+   click the link at the top to get to the "Download" page. Select "2012" from
+   the list of available datasets.
    Download the following tar files and save it to the compute system
    (e.g. `/home/<user>/imagenet_raw_data`), 500GB disk space is required:
 
