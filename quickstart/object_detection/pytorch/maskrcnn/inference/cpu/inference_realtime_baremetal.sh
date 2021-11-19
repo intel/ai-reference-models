@@ -70,7 +70,7 @@ export TRAIN=0
 
 BATCH_SIZE=1
 
-rm -rf ${OUTPUT_DIR}/lantency_log*
+rm -rf ${OUTPUT_DIR}/latency_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
@@ -83,7 +83,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     TEST.IMS_PER_BATCH ${BATCH_SIZE} \
     MODEL.WEIGHT '"${CHECKPOINT_DIR}/e2e_mask_rcnn_R_50_FPN_1x.pth"' \
     MODEL.DEVICE cpu \
-    2>&1 | tee ${OUTPUT_DIR}/lantency_log.txt
+    2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
 
 # For the summary of results
 wait
@@ -93,7 +93,7 @@ CORES_PER_INSTANCE=4
 
 INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/lantency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
 BEGIN {
         sum = 0;
         i = 0;
@@ -106,4 +106,4 @@ END   {
         sum = sum / i * INSTANCES_PER_SOCKET;
         printf("%.3f", sum);
 }')
-echo ""maskrcnn";"lantency";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""maskrcnn";"latency";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

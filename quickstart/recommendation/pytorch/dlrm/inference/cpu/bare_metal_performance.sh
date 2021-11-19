@@ -107,7 +107,7 @@ BEGIN {
         i = 0;
       }
       {
-        sum = sum + PRECISION;
+        sum = sum + $1;
         i++;
       }
 END   {
