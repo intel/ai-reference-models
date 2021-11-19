@@ -90,5 +90,5 @@ python -m intel_extension_for_pytorch.cpu.launch \
 
 wait
 
-accuracy=$(grep 'Accuracy:' ./resnext101_accuracy_log_${PRECISION}.log |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnext101_accuracy_log_${PRECISION}.log |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
 echo "resnext101;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
