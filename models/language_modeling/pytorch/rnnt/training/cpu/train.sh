@@ -98,7 +98,6 @@ fi
 CMD=" --batch_size=$BATCH_SIZE"
 CMD+=" --eval_batch_size=$EVAL_BATCH_SIZE"
 CMD+=" --num_epochs=$EPOCHS"
-# CMD+=" --num_steps=250"
 CMD+=" --output_dir=$RESULT_DIR"
 CMD+=" --model_toml=$MODEL_CONFIG"
 CMD+=" --lr=$LEARNING_RATE"
@@ -119,6 +118,9 @@ CMD+=" $PREC"
 CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
+if [ "$1" = "fp32" ] ; then
+    CMD+=" --num_steps=100"
+fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
