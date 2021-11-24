@@ -108,9 +108,9 @@ def time_wrap():
     return time.time()
 
 
-def dlrm_wrap(X, *emb_args):
+def dlrm_wrap(X, lS_o, lS_i):
     with record_function("DLRM forward"):
-        return dlrm(X, *emb_args)
+        return dlrm(X, lS_o, lS_i)
 
 
 def loss_fn_wrap(Z, T):
@@ -241,16 +241,14 @@ class DLRM_Net(nn.Module):
         # approach 2: use Sequential container to wrap all layers
         return layers(x)
 
-    def apply_emb(self, emb_l, *emb_args):
+    def apply_emb(self, lS_o, lS_i, emb_l):
         # WARNING: notice that we are processing the batch at once. We implicitly
         # assume that the data is laid out such that:
         # 1. each embedding is indexed with a group of sparse indices,
         #   corresponding to a single lookup
         # 2. for each embedding the lookups are further organized into a batch
         # 3. for a list of embedding tables there is a list of batched lookups
-        if isinstance(emb_l, ipex.nn.modules.MergedEmbeddingBag):
-            return emb_l(emb_args)
-        lS_o, lS_i = emb_args
+
         ly = []
         for k, sparse_index_group_batch in enumerate(lS_i):
             sparse_offset_group_batch = lS_o[k]
@@ -271,7 +269,7 @@ class DLRM_Net(nn.Module):
 
     def interact_features(self, x, ly):
         if args.ipex_interaction:
-            T = [x] + list(ly)
+            T = [x] + ly
             R = ipex.nn.functional.interaction(*T)
         else:
             # concatenate dense and sparse features
@@ -296,10 +294,10 @@ class DLRM_Net(nn.Module):
             R = torch.cat([x] + [Zflat], dim=1)
         return R
 
-    def forward(self, dense_x, *emb_args):
-        return self.sequential_forward(dense_x, *emb_args)
+    def forward(self, dense_x, lS_o, lS_i):
+        return self.sequential_forward(dense_x, lS_o, lS_i)
 
-    def sequential_forward(self, dense_x, *emb_args):
+    def sequential_forward(self, dense_x, lS_o, lS_i):
         # process dense features (using bottom mlp), resulting in a row vector
         x = self.apply_mlp(dense_x, self.bot_l)
         # debug prints
@@ -307,7 +305,7 @@ class DLRM_Net(nn.Module):
         # print(x.detach().cpu().numpy())
 
         # process sparse features(using embeddings), resulting in a list of row vectors
-        ly = self.apply_emb(self.emb_l, *emb_args)
+        ly = self.apply_emb(lS_o, lS_i, self.emb_l)
         # for y in ly:
         #     print(y.detach().cpu().numpy())
 
@@ -602,7 +600,6 @@ def run():
     parser.add_argument("--bf16", action="store_true", default=False)
     parser.add_argument("--share-weight-instance", type=int, default=0)
     parser.add_argument("--ipex-interaction", action="store_true", default=False)
-    parser.add_argument("--ipex-merged-emb", action="store_true", default=False)
     parser.add_argument("--num-warmup-iters", type=int, default=100)
     parser.add_argument("--int8", action="store_true", default=False)
     parser.add_argument("--int8-configure", type=str, default="./int8_configure.json")
@@ -679,8 +676,6 @@ def run():
         sigmoid_top=ln_top.size - 2,
         loss_threshold=args.loss_threshold,
     )
-    if args.ipex_merged_emb:
-        dlrm.emb_l = ipex.nn.modules.MergedEmbeddingBag.from_embeddingbag_list(dlrm.emb_l, lr=args.learning_rate)
 
     if not args.inference_only:
         optimizer = torch.optim.SGD(dlrm.parameters(), lr=args.learning_rate)
@@ -741,8 +736,6 @@ def run():
     print("time/loss/accuracy (if enabled):")
 
     if args.bf16 and not args.inference_only:
-        if args.ipex_merged_emb:
-            dlrm.emb_l.bfloat16()
         dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)
 
     training_record = [0, 0]
@@ -775,15 +768,6 @@ def run():
                         continue
 
                     X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
-                    data_process_t = 0
-                    if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBag):
-                        data_t0 = time.time()
-                        n_tables = lS_i.shape[0]
-                        idx = [lS_i[i] for i in range(n_tables)]
-                        offset = [lS_o[i] for i in range(n_tables)]
-                        include_last = [False for i in range(n_tables)]
-                        indices, offsets, indices_with_row_offsets = dlrm.emb_l.prepare_input(idx, offset, include_last)
-                        data_process_t = time.time() - data_t0
 
                     t1 = time_wrap()
 
@@ -795,19 +779,11 @@ def run():
 
                     # forward pass
                     with torch.cpu.amp.autocast(enabled=args.bf16):
-                        if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBag):
-                            Z = dlrm_wrap(
-                                X,
-                                indices,
-                                offsets,
-                                indices_with_row_offsets
-                            ).float()
-                        else:
-                            Z = dlrm_wrap(
-                                X,
-                                lS_o,
-                                lS_i,
-                            ).float()
+                        Z = dlrm_wrap(
+                            X,
+                            lS_o,
+                            lS_i,
+                        ).float()
 
                     # loss
                     E = loss_fn_wrap(Z, T)
@@ -818,7 +794,7 @@ def run():
                     with record_function("DLRM backward"):
                         # scaled error gradient propagation
                         # (where we do not accumulate gradients across mini-batches)
-                        optimizer.zero_grad(set_to_none=True)
+                        optimizer.zero_grad()
                         # backward pass
                         E.backward()
 
@@ -827,7 +803,7 @@ def run():
                         lr_scheduler.step()
 
                     t2 = time_wrap()
-                    total_time += (t2 - t1 - data_process_t)
+                    total_time += t2 - t1
 
                     total_loss += L * mbs
                     total_iter += 1
