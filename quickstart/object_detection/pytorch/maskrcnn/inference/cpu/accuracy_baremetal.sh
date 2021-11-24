@@ -73,7 +73,7 @@ BATCH_SIZE=56
 rm -rf ${OUTPUT_DIR}/accuracy_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --enable_jemalloc \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/test_net.py \
     $ARGS \
     --config-file '"${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_inf.yaml"' \
