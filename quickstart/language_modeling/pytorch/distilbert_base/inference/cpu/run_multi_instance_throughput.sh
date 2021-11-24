@@ -79,4 +79,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo ""BERT-base";"throughput mode";"Precision:"${precision};"Batch size:"${BATCH_SIZE};"Result:"${throughput}"fps"" | tee -a ${WORK_SPACE}/summary.log
+echo "distilbert-base";"throughput";${precision};${BATCH_SIZE};${throughput} | tee -a ${WORK_SPACE}/summary.log
