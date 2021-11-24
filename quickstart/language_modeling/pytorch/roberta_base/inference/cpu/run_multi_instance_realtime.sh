@@ -90,4 +90,4 @@ sum = sum / i * INSTANCES_PER_SOCKET;
 }')
 
 echo $INSTANCES_PER_SOCKET
-echo "roberta-base";"latency";${precision};${BATCH_SIZE};${throughput} | tee -a ${WORK_SPACE}/summary.log
+echo ""roberta-base";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log

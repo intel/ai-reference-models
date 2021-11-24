@@ -80,4 +80,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo "roberta-base";"throughput";${precision};${BATCH_SIZE};${throughput} | tee -a ${WORK_SPACE}/summary.log
+echo ""roberta-base";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
