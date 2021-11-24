@@ -74,4 +74,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo "BERT-base";"throughput";${precision};${BATCH_SIZE};${throughput} | tee -a ${WORK_SPACE}/summary.log
+echo ""BERT-base";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
