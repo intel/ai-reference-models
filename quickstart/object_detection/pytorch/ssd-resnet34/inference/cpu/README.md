@@ -60,6 +60,8 @@ bash download_dataset.sh
 | BF16        | bash bare_metal_batch_inference.sh bf16 | bash bare_metal_online_inference.sh bf16 | bash bare_metal_accuracy.sh bf16 |
 | INT8        | bash bare_metal_batch_inference.sh int8 | bash bare_metal_online_inference.sh int8 | bash bare_metal_accuracy.sh int8 |
 
+To do the int8 calibration `bash bare_metal_int8_calibration.sh int8 <file where to save the calibrated model> <steps to run calibration>`, for example `bash bare_metal_int8_calibration.sh int8 test.json 100`.
+
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
