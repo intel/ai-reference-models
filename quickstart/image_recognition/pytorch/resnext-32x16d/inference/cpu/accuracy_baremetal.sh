@@ -86,7 +86,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --ipex \
     --pretrained \
     -j 0 \
-    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnext101_accuracy_log_${PRECISION}.txt
+    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnext101_accuracy_log_${PRECISION}.log
 
 wait
 
