@@ -38,16 +38,12 @@ mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
 PRECISION="fp32"
-if [ "$1" == "bf16" ]; then
-  ARGS="$ARGS --precision bf16"
-  PRECISION="bf16"
-  echo "### running bf16 datatype"
-elif [ "$1" == "fp32" ]; then
+if [ "$1" == "fp32" ]; then
   ARGS="$ARGS --precision fp32"
   echo "### running fp32 datatype"
 else
   echo "The specified precision '$1' is unsupported."
-  echo "Supported precisions are: fp32 and bf16"
+  echo "Supported precisions: fp32"
   exit 1
 fi
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
