@@ -38,7 +38,7 @@ mode="jit"
 ARGS="$ARGS --jit_mode"
 echo "### running with jit mode"
 
-rm -f accuracy_log*
+
 CORES=`lscpu | grep Core | awk '{print $4}'`
 BATCH_SIZE=${BATCH_SIZE:-`expr 4 \* $CORES`}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"csarron/bert-base-uncased-squad-v1"}
@@ -48,6 +48,7 @@ if [ -z "${OUTPUT_DIR}" ]; then
 fi
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/question-answering/run_qa.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
+rm -rf ${OUTPUT_DIR}/accuracy_log*
 python -m intel_extension_for_pytorch.cpu.launch --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="accuracy_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \

@@ -45,7 +45,6 @@ ARGS="$ARGS --jit_mode"
 echo "### running with jit mode"
 
 
-rm -rf ./latency_log*
 export OMP_NUM_THREADS=4
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -55,10 +54,9 @@ if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
 fi
-OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/question-answering/run_qa.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-
+rm -rf ${OUTPUT_DIR}/latency_log*
 python -m intel_extension_for_pytorch.cpu.launch --latency_mode --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
