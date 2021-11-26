@@ -55,7 +55,7 @@ fi
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/question-answering/run_qa.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 
-rm -rf ./throughput_log*
+rm -rf ${OUTPUT_DIR}/throughput_log*
 python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
