@@ -30,7 +30,7 @@ fi
 if [[ "$1" == "int8" ]]
 then
     precision=int8
-    ARGS="$ARGS --int8"
+    ARGS="$ARGS --int8 --int8_fp32"
     echo "### running int8 mode"
 fi
 
