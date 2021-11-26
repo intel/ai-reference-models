@@ -97,7 +97,7 @@ def inference(model, dataloader, datatype, args):
                 images = batch[0]
                 if not args.ipex and not args.jit:
                     images = list(img.to(datatype) for img in images)
-                if args.ipex and args.precision == "bf16" and not args.jit:
+                if args.ipex and args.precision == "bf16":
                     with torch.cpu.amp.autocast():
                         if i == warmup_iters:
                             with profile(activities=[ProfilerActivity.CPU], record_shapes=True) as prof, record_function("model_inference"):
@@ -117,7 +117,7 @@ def inference(model, dataloader, datatype, args):
                 end = time.time()
                 if not args.ipex and not args.jit:
                     images = list(img.to(datatype) for img in images)
-                if args.ipex and args.precision == "bf16" and not args.jit:
+                if args.ipex and args.precision == "bf16":
                     with torch.cpu.amp.autocast():
                         output = model(images)
                 else:
