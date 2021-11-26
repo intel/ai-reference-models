@@ -92,7 +92,7 @@ index 7f98eba23..96887b25e 100644
 +                        self.model = torch.jit.trace(self.model, jit_inputs, strict=False)
 +                    self.model = torch.jit.freeze(self.model)
 +                else:
-+                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.float32, level="O1")
++                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.float32, level="O1", auto_kernel_selection=True)
 +                    with torch.no_grad():
 +                        self.model = torch.jit.trace(self.model, jit_inputs, strict=False)
 +                    self.model = torch.jit.freeze(self.model)
