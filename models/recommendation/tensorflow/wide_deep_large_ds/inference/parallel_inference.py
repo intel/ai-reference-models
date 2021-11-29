@@ -145,6 +145,7 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
     dataset = dataset.map(_parse_function, num_parallel_calls=28)
     dataset = dataset.cache()
     dataset = dataset.prefetch(1)
+    dataset = dataset.repeat()
     return dataset
 
 
@@ -206,6 +207,7 @@ with graph.as_default():
     array_gather = arr.gather(tf.range(0, int(no_of_batches), delta=1, dtype=None, name='range'))
 
 with tf.compat.v1.Session(config=config, graph=graph) as sess:
+    num_correct_predictions_batch = sess.run(array_gather)
     inference_start = time.time()
     try:
         num_correct_predictions_batch = sess.run(array_gather)
