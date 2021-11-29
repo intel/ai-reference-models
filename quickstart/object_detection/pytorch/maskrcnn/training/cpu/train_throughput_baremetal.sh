@@ -60,7 +60,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=1
 
-BATCH_SIZE=56
+BATCH_SIZE=112
 
 rm -rf ${OUTPUT_DIR}/train_throughput_log*
 
@@ -70,8 +70,8 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/train_net.py \
     $ARGS \
-    --iter-warmup 4 \
-    -i 30 \
+    --iter-warmup 10 \
+    -i 20 \
     --config-file '"${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml"' \
     --skip-test \
     SOLVER.IMS_PER_BATCH ${BATCH_SIZE} \

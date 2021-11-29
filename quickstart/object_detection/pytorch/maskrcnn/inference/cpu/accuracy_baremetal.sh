@@ -68,7 +68,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=0
 
-BATCH_SIZE=56
+BATCH_SIZE=112
 
 rm -rf ${OUTPUT_DIR}/accuracy_log*
 

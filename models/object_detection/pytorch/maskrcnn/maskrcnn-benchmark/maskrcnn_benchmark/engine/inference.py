@@ -61,28 +61,30 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
         print("runing inference step")
         with torch.autograd.profiler.profile(enable_profiling) as prof:
             for i, batch in enumerate(tqdm(data_loader)):
+                images, targets, image_ids = batch
+                images = images.to(memory_format=torch.channels_last)
+                if bf16:
+                    images = images.to(torch.bfloat16)
+
                 # warm-up step
                 if iter_warmup > 0 and i < iter_warmup:
-                    images, targets, image_ids = batch
                     if bbox_aug:
                         output = im_detect_bbox_aug(model, images, device)
                     else:
-                        output = model(images.to(memory_format=torch.channels_last))
+                        output = model(images)
                     output = [o.to(cpu_device) for o in output]
                     results_dict.update(
                         {img_id: result for img_id, result in zip(image_ids, output)}
                     )
                     continue
-                images, targets, image_ids = batch
+
                 if timer:
                     timer.tic()
                 if bbox_aug:
                     output = im_detect_bbox_aug(model, images, device)
                 else:
-                    output = model(images.to(memory_format=torch.channels_last))
+                    output = model(images)
                 if timer:
-                    if not device.type == 'cpu':
-                        torch.cuda.synchronize()
                     timer.toc()
                 output = [o.to(cpu_device) for o in output]
                 results_dict.update(
