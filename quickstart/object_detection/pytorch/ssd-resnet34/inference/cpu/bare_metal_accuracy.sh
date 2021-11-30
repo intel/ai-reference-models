@@ -56,24 +56,61 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=16
-
 rm -rf ${OUTPUT_DIR}/accuracy_log*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
-    --data ${DATASET_DIR}/coco \
-    --device 0 \
-    --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
-    -j 0 \
-    --no-cuda \
-    --batch-size ${BATCH_SIZE} \
-    --jit \
-    $ARGS 2>&1 | tee ${OUTPUT_DIR}/accuracy_log.txt
+weight_sharing=false
 
+if [ "$weight_sharing" = true ]; then
+    CORES=`lscpu | grep Core | awk '{print $4}'`
+    SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+    TOTAL_CORES=`expr $CORES \* $SOCKETS`
+    CORES_PER_INSTANCE=$CORES
+    INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
+    LAST_INSTANCE=`expr $INSTANCES - 1`
+    INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
+
+    BATCH_PER_STREAM=1
+    CORES_PER_STREAM=4
+    STREAM_PER_INSTANCE=`expr $CORES / $CORES_PER_STREAM`
+    BATCH_SIZE=`expr $BATCH_PER_STREAM \* $STREAM_PER_INSTANCE`
+
+    export OMP_NUM_THREADS=$CORES_PER_STREAM
+
+    numa_node_i=0
+    start_core_i=0
+    end_core_i=`expr 0 + $CORES_PER_INSTANCE - 1`
+
+    echo "### running on instance 0, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
+    numactl --physcpubind=$start_core_i-$end_core_i --membind=$numa_node_i python -u \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_tb.py \
+        --data ${DATASET_DIR}/coco \
+        --device 0 \
+        --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
+        -j 0 \
+        --no-cuda \
+        --batch-size ${BATCH_SIZE} \
+        --jit \
+        --number-instance $STREAM_PER_INSTANCE \
+        --use-multi-stream-module \
+        --instance-number 0 \
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/accuracy_log.txt
+    wait
+else
+    BATCH_SIZE=16
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
+        --data ${DATASET_DIR}/coco \
+        --device 0 \
+        --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
+        -j 0 \
+        --no-cuda \
+        --batch-size ${BATCH_SIZE} \
+        --jit \
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/accuracy_log.txt
+    wait
+fi
 # For the summary of results
-wait
 
 accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/accuracy_log* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
 echo ""SSD-RN34";"accuracy";$1; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log

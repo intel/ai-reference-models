@@ -56,28 +56,71 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=16
-
 rm -rf ${OUTPUT_DIR}/throughput_log*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    --throughput_mode \
-    ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
-    --data ${DATASET_DIR}/coco \
-    --device 0 \
-    --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
-    -w 20 \
-    -j 0 \
-    --no-cuda \
-    --iteration 200 \
-    --batch-size ${BATCH_SIZE} \
-    --jit \
-    $ARGS 2>&1 | tee ${OUTPUT_DIR}/throughput_log.txt
+weight_sharing=false
 
-# For the summary of results
-wait
+if [ "$weight_sharing" = true ]; then
+    CORES=`lscpu | grep Core | awk '{print $4}'`
+    SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+    TOTAL_CORES=`expr $CORES \* $SOCKETS`
+    CORES_PER_INSTANCE=$CORES
+    INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
+    LAST_INSTANCE=`expr $INSTANCES - 1`
+    INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
+    BATCH_PER_STREAM=1
+    CORES_PER_STREAM=4
+    STREAM_PER_INSTANCE=`expr $CORES / $CORES_PER_STREAM`
+    BATCH_SIZE=`expr $BATCH_PER_STREAM \* $STREAM_PER_INSTANCE`
+
+    export OMP_NUM_THREADS=$CORES_PER_STREAM
+
+    for i in $(seq 0 $LAST_INSTANCE); do
+        numa_node_i=`expr $i / $INSTANCES_PER_SOCKET`
+        start_core_i=`expr $i \* $CORES_PER_INSTANCE`
+        end_core_i=`expr $start_core_i + $CORES_PER_INSTANCE - 1`
+        LOG_i=throughput_log_weight_sharing_${i}.txt
+
+        echo "### running on instance $i, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
+        numactl --physcpubind=$start_core_i-$end_core_i --membind=$numa_node_i python -u \
+            ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_tb.py \
+            --data ${DATASET_DIR}/coco \
+            --device 0 \
+            --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
+            -w 20 \
+            -j 0 \
+            --no-cuda \
+            --iteration 200 \
+            --batch-size ${BATCH_SIZE} \
+            --jit \
+            --number-instance $STREAM_PER_INSTANCE \
+            --use-multi-stream-module \
+            --instance-number $i \
+            $ARGS 2>&1 | tee ${OUTPUT_DIR}/$LOG_i &
+    done
+    wait
+
+else
+    BATCH_SIZE=16
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator \
+        --throughput_mode \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
+        --data ${DATASET_DIR}/coco \
+        --device 0 \
+        --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
+        -w 20 \
+        -j 0 \
+        --no-cuda \
+        --iteration 200 \
+        --batch-size ${BATCH_SIZE} \
+        --jit \
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/throughput_log.txt
+
+    # For the summary of results
+    wait
+fi
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;

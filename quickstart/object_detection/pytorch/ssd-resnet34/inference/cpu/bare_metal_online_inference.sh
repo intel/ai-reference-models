@@ -60,28 +60,51 @@ BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/latency_log*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    --latency_mode \
-    ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
-    --data ${DATASET_DIR}/coco \
-    --device 0 \
-    --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
-    -w 20 \
-    -j 0 \
-    --no-cuda \
-    --iteration 200 \
-    --batch-size ${BATCH_SIZE} \
-    --jit \
-    $ARGS 2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
-
-# For the summary of results
-wait
-
 CORES=`lscpu | grep Core | awk '{print $4}'`
 CORES_PER_INSTANCE=4
 
 INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+
+weight_sharing=false
+
+if [ "$weight_sharing" = true ]; then
+    SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+    export OMP_NUM_THREADS=$CORES_PER_INSTANCE
+
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator \
+        --ninstance ${SOCKETS} \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_tb.py \
+        --data ${DATASET_DIR}/coco \
+        --device 0 \
+        --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
+        -w 20 \
+        -j 0 \
+        --no-cuda \
+        --iteration 200 \
+        --batch-size ${BATCH_SIZE} \
+        --jit \
+        --number-instance $INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET \
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
+    wait
+else
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator \
+        --latency_mode \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
+        --data ${DATASET_DIR}/coco \
+        --device 0 \
+        --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
+        -w 20 \
+        -j 0 \
+        --no-cuda \
+        --iteration 200 \
+        --batch-size ${BATCH_SIZE} \
+        --jit \
+        $ARGS 2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
+    wait
+fi
+# For the summary of results
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
 BEGIN {
