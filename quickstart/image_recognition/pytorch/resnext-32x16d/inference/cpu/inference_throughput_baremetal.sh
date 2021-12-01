@@ -69,7 +69,7 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=`expr $CORES_PER_INSTANCE \* 2`
+BATCH_SIZE=116
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
@@ -80,6 +80,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
     $ARGS \
     --ipex \
+    --seed 2020 \
     -j 0 \
     -b $BATCH_SIZE
 
