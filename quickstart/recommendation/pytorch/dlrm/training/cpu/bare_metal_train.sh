@@ -52,7 +52,6 @@ LOG=${OUTPUT_DIR}/dlrm_training_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
@@ -81,7 +80,7 @@ for i in $(seq 1 $((SOCKETS-1))); do
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
   --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-freq=5000 --test-mini-batch-size=16384 \
+  --test-mini-batch-size=16384 --ipex-merged-emb \
   $ARGS |tee $LOG_i &
 done
 
@@ -98,7 +97,7 @@ $numa_cmd python -u $MODEL_SCRIPT \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
   --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-freq=5000 --test-mini-batch-size=16384 \
+  --test-mini-batch-size=16384 --ipex-merged-emb \
   $ARGS |tee $LOG_0
 wait
 
