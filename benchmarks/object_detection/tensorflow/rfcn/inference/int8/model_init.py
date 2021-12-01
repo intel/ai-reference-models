@@ -115,7 +115,8 @@ class ModelInitializer(BaseModelInitializer):
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        if self.args.socket_id != -1:
+        num_numas = self.platform_util.num_numa_nodes
+        if self.args.socket_id != -1 and num_numas > 0:
             self.command.append("numactl")
             if self.args.socket_id:
                 socket_id = self.args.socket_id
