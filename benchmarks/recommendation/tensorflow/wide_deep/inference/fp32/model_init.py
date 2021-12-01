@@ -48,9 +48,11 @@ class ModelInitializer(BaseModelInitializer):
         executable = os.path.join(args.mode, args.precision,
                                   "wide_deep_inference.py")
 
-        self.run_cmd = " OMP_NUM_THREADS=1" + \
-                       " numactl --cpunodebind=0 --membind=0 " + \
-                       self.python_exe + " " + executable + \
+        command_prefix = " OMP_NUM_THREADS=1 "
+        num_numas = self.platform_util.num_numa_nodes
+        if num_numas > 0:
+            command_prefix = command_prefix + "numactl --cpunodebind=0 --membind=0 "
+        self.run_cmd = command_prefix + self.python_exe + " " + executable + \
                        " --data_dir=" + self.args.data_location + \
                        " --model_dir=" + self.args.checkpoint + \
                        " --batch_size=" + str(self.args.batch_size)
