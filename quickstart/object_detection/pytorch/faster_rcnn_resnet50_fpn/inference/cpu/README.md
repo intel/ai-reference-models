@@ -50,6 +50,7 @@ bash download_dataset.sh
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
 | FP32        | bash batch_inference_baremetal.sh fp32 | bash online_inference_baremetal.sh fp32 | bash accuracy_baremetal.sh fp32 |
+| BF16        | bash batch_inference_baremetal.sh bf16 | bash online_inference_baremetal.sh bf16 | bash accuracy_baremetal.sh bf16 |
 
 ## Run the model
 

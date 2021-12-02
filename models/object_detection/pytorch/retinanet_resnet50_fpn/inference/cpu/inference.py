@@ -26,6 +26,7 @@ from coco_eval import CocoEvaluator
 from presets import DetectionPresetEval
 from coco_utils import get_coco_api_from_dataset, get_coco
 from utils import collate_fn
+from retinanet import *
 
 model_names = sorted(name for name in torchvision.models.detection.__dict__
     if name.islower() and not name.startswith("__")
@@ -62,21 +63,18 @@ def inference(model, dataloader, datatype, args):
     model.eval()
     coco = get_coco_api_from_dataset(dataloader.dataset)
     iou_types = ["bbox"]
-    if isinstance(model, torchvision.models.detection.MaskRCNN):
-        iou_types.append("segm")
-    if isinstance(model, torchvision.models.detection.KeypointRCNN):
-        iou_types.append("keypoints")
     coco_evaluator = CocoEvaluator(coco, iou_types)
     if args.ipex:
         import intel_extension_for_pytorch as ipex
         model = model.to(memory_format=torch.channels_last)
         model = ipex.optimize(model, dtype=datatype, level="O1", conv_bn_folding=False, replace_dropout_with_identity=False)
         model.backbone = ipex.optimize(model.backbone, dtype=datatype, level="O1")
+        model = model.to(datatype)
     else:
         if args.jit:
             model = model.to(memory_format=torch.channels_last)
         else:
-            from torch.utils import mkldnn as mkldnn_utils  
+            from torch.utils import mkldnn as mkldnn_utils
             model = mkldnn_utils.to_mkldnn(model, dtype=datatype)
     if args.jit:
         x = torch.randn(batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)
@@ -135,19 +133,12 @@ def inference(model, dataloader, datatype, args):
     coco_evaluator.accumulate()
     coco_evaluator.summarize()
     print("Bbox AP: {:.5f} ".format(coco_evaluator.coco_eval['bbox'].stats[0]))
-    if isinstance(model, torchvision.models.detection.MaskRCNN):
-        print("Segm AP: {:.5f} ".format(coco_evaluator.coco_eval['segm'].stats[0]))
-    if isinstance(model, torchvision.models.detection.KeypointRCNN):
-        print("Keypoints AP: {:.5f} ".format(coco_evaluator.coco_eval['keypoints'].stats[0]))
     print('Latency: %.3f ms'%latency)
     print("Throughput: {:.3f} fps".format(perf))
 
-def get_coco_data_loader(coco_image_dir, batch_size, task):
+def get_coco_data_loader(coco_image_dir, batch_size):
     transforms = DetectionPresetEval()
-    if task == "detection":
-        coco_test_data = get_coco(root=coco_image_dir, image_set="val", transforms=transforms)
-    elif task == "person_keypoints":
-        coco_test_data = get_coco(root=coco_image_dir, image_set="val", transforms=transforms, mode=task)
+    coco_test_data = get_coco(root=coco_image_dir, image_set="val", transforms=transforms)
     coco_test_data_loader = DataLoader(coco_test_data, batch_size=batch_size, shuffle=False, collate_fn=collate_fn)
     return coco_test_data_loader
 
@@ -186,22 +177,19 @@ if __name__ == "__main__":
                         help="using  dummu data to test the performance of inference")
     parser.add_argument('-w', '--warmup_iterations', default=30, type=int, metavar='N',
                         help='number of warmup iterations to run')
-    parser.add_argument('-m', '--max_iterations', default=50, type=int, 
+    parser.add_argument('-m', '--max_iterations', default=50, type=int,
                         help='number of max iterations to run')
     parser.add_argument('--log-path', required = False, default = "", type=str,
                         help="Path for the log file")
     parser.add_argument("--cache-dataset", dest="cache_dataset", default=False, action="store_true",
-                        help='Cache the datasets for quicker initialization. ' 
+                        help='Cache the datasets for quicker initialization. '
                             'It also serializes the transforms')
     args = parser.parse_args()
-    model = torchvision.models.detection.__dict__[args.arch](pretrained=args.pretrained)
+    model = retinanet_resnet50_fpn(pretrained=args.pretrained)
     batch_size = args.batch_size
     datatype=torch.float32
     dataset_dir = args.data_path
     if args.precision == 'bf16':
         datatype=torch.bfloat16
-    task = "detection"
-    if isinstance(model, torchvision.models.detection.KeypointRCNN):
-        task = "person_keypoints"
-    dataloader = get_coco_data_loader(dataset_dir, batch_size, task)
+    dataloader = get_coco_data_loader(dataset_dir, batch_size)
     inference(model, dataloader, datatype, args)
