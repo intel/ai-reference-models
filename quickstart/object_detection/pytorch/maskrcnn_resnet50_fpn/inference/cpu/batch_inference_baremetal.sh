@@ -17,9 +17,9 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/common/inference.py" ]; then
+if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/inference.py" ]; then
   echo "Could not find the script of infer.py. Please set environment variable '\${MODEL_DIR}'."
-  echo "From which the infer.py exist at the: \${MODEL_DIR}/models/object_detection/pytorch/common/inference.py"
+  echo "From which the infer.py exist at the: \${MODEL_DIR}/models/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/inference.py"
   exit 1
 fi
 
@@ -38,12 +38,16 @@ mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
 PRECISION="fp32"
-if [ "$1" == "fp32" ]; then
+if [ "$1" == "bf16" ]; then
+  ARGS="$ARGS --precision bf16"
+  PRECISION="bf16"
+  echo "### running bf16 datatype"
+elif [ "$1" == "fp32" ]; then
   ARGS="$ARGS --precision fp32"
   echo "### running fp32 datatype"
 else
   echo "The specified precision '$1' is unsupported."
-  echo "Supported precisions: fp32"
+  echo "Supported precisions are: fp32 and bf16"
   exit 1
 fi
 
@@ -62,7 +66,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
   --throughput_mode \
   --log_path=${OUTPUT_DIR} \
   --log_file_prefix="maskrcnn_resnet50_fpn_throughput_log_${PRECISION}" \
-  ${MODEL_DIR}/models/object_detection/pytorch/common/inference.py \
+  ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/inference.py \
   --data_path ${DATASET_DIR}/coco \
   --arch maskrcnn_resnet50_fpn \
   --batch_size $BATCH_SIZE \
