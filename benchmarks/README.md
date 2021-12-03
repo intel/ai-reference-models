@@ -103,7 +103,7 @@ For information on running more advanced use cases using the workload containers
 | Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Inference  | | [FP32 Int8 BFloat16**](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md) |
 | Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Training   | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md) |
 | Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Inference | | [FP32 Int8 BFloat16**](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md) |
-| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Training  | Model Packages: [BFloat16**](https://software.intel.com/content/www/us/en/develop/articles/containers/dlrm-bfloat16-training-pytorch-model.html) | [FP32 BFloat16**](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) |
+| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Training  | | [FP32 BFloat16**](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) |
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
 
