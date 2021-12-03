@@ -359,6 +359,22 @@ class RNNT(torch.nn.Module):
         del f, g, inp
         return res
 
+    def joint_inference(self, f, g):
+        """
+        f should be shape (B, 1, H1)
+        g should be shape (B, 1, H2)
+
+        returns:
+            logits of shape (B, 1, H1+H2)
+        """
+        # In inference case, time step = 1
+        # f: (B, T = 1, H1 = 1024)
+        # g: (B, T = 1, H2 = 320)
+        inp = torch.cat([f, g], dim=2)   # (B, T, H1 + H2)
+        res = self.joint_net(inp)
+        del f, g, inp
+        return res
+
 
 def label_collate(labels):
     """Collates the label inputs for the rnn-t prediction network.
