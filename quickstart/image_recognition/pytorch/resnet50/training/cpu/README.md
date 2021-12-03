@@ -8,6 +8,7 @@ This document has instructions for running ResNet50 training using
 Intel-optimized PyTorch.
 
 ## Bare Metal
+
 ### General setup
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison and Jemalloc.
@@ -17,7 +18,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 * Set Jemalloc Preload for better performance
 
 The jemalloc should be built from the [General setup](#general-setup) section.
-```
+
+```bash
     export LD_PRELOAD="path/lib/libjemalloc.so":$LD_PRELOAD
     export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 ```
@@ -25,12 +27,14 @@ The jemalloc should be built from the [General setup](#general-setup) section.
 * Set IOMP preload for better performance
 
 IOMP should be installed in your conda env from the [General setup](#general-setup) section.
-```
+
+```bash
     export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
 ```
 
 * Set ENV to use AMX if you are using SPR
-```
+
+```bash
     export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ```
 
@@ -44,7 +48,8 @@ then move validation images to labeled subfolders, using
 [the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
 
 A after running the data prep script, your folder structure should look something like this:
-```
+
+```txt
 imagenet
 ├── train
 │   ├── n02085620
@@ -61,6 +66,7 @@ imagenet
     │   └── ...
     └── ...
 ```
+
 The folder that contains the `val` and `train` directories should be set as the
 `DATASET_DIR` (for example: `export DATASET_DIR=/home/<user>/imagenet`).
 
@@ -79,7 +85,7 @@ the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
 Ensure that you have enviornment variables set to point to the dataset directory,
 an output directory, precision, and the number of training epochs.
 
-```
+```bash
 # Clone the model zoo repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
@@ -100,6 +106,3 @@ bash training_baremetal.sh
 ## License
 
 [LICENSE](/LICENSE)
-
-
-
