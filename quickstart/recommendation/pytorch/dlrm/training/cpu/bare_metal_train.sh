@@ -114,4 +114,4 @@ END   {
 sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""dlrm";"throughput";${PRECISION};${BATCHSIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""dlrm";"training throughput";${PRECISION};${BATCHSIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
