@@ -101,6 +101,7 @@ else
         --iteration 200 \
         --batch-size ${BATCH_SIZE} \
         --jit \
+        --latency-mode \
         $ARGS 2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
     wait
 fi

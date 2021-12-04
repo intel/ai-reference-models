@@ -107,6 +107,7 @@ else
         --no-cuda \
         --batch-size ${BATCH_SIZE} \
         --jit \
+        --accuracy-mode \
         $ARGS 2>&1 | tee ${OUTPUT_DIR}/accuracy_log.txt
     wait
 fi

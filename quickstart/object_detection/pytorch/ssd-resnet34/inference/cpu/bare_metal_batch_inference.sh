@@ -116,6 +116,7 @@ else
         --iteration 200 \
         --batch-size ${BATCH_SIZE} \
         --jit \
+        --throughput-mode \
         $ARGS 2>&1 | tee ${OUTPUT_DIR}/throughput_log.txt
 
     # For the summary of results
