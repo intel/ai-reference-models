@@ -6,7 +6,21 @@ After fine tuning, the [Intel® Neural Compressor](https://github.com/intel/neur
 is used to do quantization.
 
 For more information on the large movie review dataset, please see the
-[ACL 2011 paper](https://aclanthology.org/P11-1015/).
+[ACL 2011 paper](https://aclanthology.org/P11-1015/). <br>
+Dataset citation:
+```
+@InProceedings{maas-EtAl:2011:ACL-HLT2011,
+  author    = {Maas, Andrew L.  and  Daly, Raymond E.  and  Pham, Peter T.  and  Huang, Dan  and  Ng, Andrew Y.  and  Potts, Christopher},
+  title     = {Learning Word Vectors for Sentiment Analysis},
+  booktitle = {Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies},
+  month     = {June},
+  year      = {2011},
+  address   = {Portland, Oregon, USA},
+  publisher = {Association for Computational Linguistics},
+  pages     = {142--150},
+  url       = {http://www.aclweb.org/anthology/P11-1015}
+}
+```
 
 Steps that the notebook follows:
 * Downloads the IMDB dataset
@@ -52,7 +66,7 @@ virtual environment or in a [docker container](#using-docker).
 4. Navigate to the notebook directory in your clone of the model zoo repo, and then
    start the [notebook server](https://jupyter.readthedocs.io/en/latest/running.html#starting-the-notebook-server):
    ```
-   cd ${MODEL_ZOO_DIR}/docs/notebooks/bert_classifier_fine_tuning
+   cd ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/bert_classifier_fine_tuning
    jupyter notebook --port 8888
    ```
 5. Copy and paste the URL from the terminal to your browser to view and run
@@ -97,7 +111,7 @@ virtual environment or in a [docker container](#using-docker).
      -v ${OUTPUT_DIR}:${OUTPUT_DIR} \
      -v ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
      -v ${MODEL_ZOO_DIR}:${MODEL_ZOO_DIR} \
-     -v ${MODEL_ZOO_DIR}/docs/notebooks/bert_classifier_fine_tuning:/tf \
+     -v ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/bert_classifier_fine_tuning:/tf \
      intel/intel-optimized-tensorflow:jupyter
    ```
 3. After the container starts, view the logs to get the URL and token for
