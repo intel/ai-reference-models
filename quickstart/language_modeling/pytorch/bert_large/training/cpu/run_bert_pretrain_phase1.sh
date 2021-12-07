@@ -52,6 +52,7 @@ python -m intel_extension_for_pytorch.cpu.launch --socket_id 0 --log_path=${OUTP
     --model_type 'bert' \
     --benchmark \
     --output_dir model_save \
+    --dense_seq_output \
     $ARGS \
     --config_name ${BERT_MODEL_CONFIG} \
     --per_device_train_batch_size ${batch_size} \

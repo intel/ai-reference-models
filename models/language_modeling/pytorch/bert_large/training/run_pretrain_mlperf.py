@@ -145,7 +145,7 @@ def parse_args():
 
     parser.add_argument("--benchmark", action="store_true", help="Whether to enable benchmark")
     parser.add_argument("--bf16", action="store_true", help="Whether to enable benchmark")
-
+    parser.add_argument("--dense_seq_output", action="store_true", help="Whether to enable benchmark")
     args = parser.parse_args()
 
     if args.output_dir is not None:
@@ -192,7 +192,11 @@ def main():
     else:
         config = CONFIG_MAPPING[args.model_type]()
         logger.warning("You are instantiating a new config instance from scratch.")
-
+    
+    if args.dense_seq_output:
+        config.dense_seq_output = True
+    else:
+        config.dense_seq_output = False
     if args.model_name_or_path:
         model = AutoModelForPreTraining.from_pretrained(
             args.model_name_or_path,
@@ -202,7 +206,8 @@ def main():
     else:
         logger.info("Training new model from scratch")
         model = AutoModelForPreTraining.from_config(config)
-
+    
+    
     print(model)
     if args.max_seq_length is not None and args.max_seq_length != 512:
         raise ValueError(f"Max_seq_length is fixed to 512 for MLPerf dataset but args.max_seq_length = {args.max_seq_length} specified")
@@ -289,7 +294,12 @@ def main():
         #for k in outputs: print(k)
         prediction_logits = outputs.prediction_logits
         seq_relationship_logits = outputs.seq_relationship_logits
-        lm_acc_t = torch.masked_select(torch.argmax(prediction_logits, dim=-1).eq(masked_lm_labels).to(torch.float), masked_lm_labels.ne(-100))
+        lm_acc_t = None
+        if args.dense_seq_output:
+            masked_lm_labels = torch.masked_select(masked_lm_labels, masked_lm_labels.ne(-100)).view(-1) 
+            lm_acc_t = torch.argmax(prediction_logits, dim=-1).eq(masked_lm_labels).to(torch.float)
+        else:
+            lm_acc_t = torch.masked_select(torch.argmax(prediction_logits, dim=-1).eq(masked_lm_labels).to(torch.float), masked_lm_labels.ne(-100))
         seq_acc_t = torch.argmax(seq_relationship_logits, dim=-1).eq(next_sentence_label.view([-1])).to(torch.float)
         metrics = [outputs.loss.item(), lm_acc_t.sum().item(), lm_acc_t.numel(), seq_acc_t.sum().item(), seq_acc_t.numel()]
         if sync_global == True:
@@ -344,18 +354,18 @@ def main():
     bench_total_time = 0
     model.train()
     model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float)
-    #with torch.profiler.profile(
-    #    activities=[
-    #        torch.profiler.ProfilerActivity.CPU],
+   # with torch.profiler.profile(
+   #     activities=[
+   #         torch.profiler.ProfilerActivity.CPU],
 
-    #    schedule=torch.profiler.schedule(
-    #        wait=1,
-    #        warmup=9,
-    #        active=10),
-    #    #on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/bert_bf16'),#trace_handler
-    #    on_trace_ready=trace_handler#torch.profiler.tensorboard_trace_handler('./log/bert_bf16')
-    #    # used when outputting for tensorboard
-    #    ) as prof1:
+   #     schedule=torch.profiler.schedule(
+   #         wait=1,
+   #         warmup=9,
+   #         active=10),
+   #     #on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/bert_bf16'),#trace_handler
+   #     on_trace_ready=trace_handler#torch.profiler.tensorboard_trace_handler('./log/bert_bf16')
+   #     # used when outputting for tensorboard
+   #     ) as prof1:
 
     for epoch in range(args.num_train_epochs):
         model.train()
@@ -368,6 +378,7 @@ def main():
             else:
                 train(batch, model, optimizer, lr_scheduler, step)
             t_end = time.time()
+            #prof1.step()
             completed_steps += 1
             if completed_steps >= args.max_train_steps:
                 break
