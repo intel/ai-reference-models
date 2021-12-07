@@ -107,6 +107,7 @@ cd pytorch-spr-resnet50-training
 export DATASET_DIR=<path to the dataset>
 export PRECISION=<specify the precision to run (fp32 or bf16)>
 export OUTPUT_DIR=<directory where log files will be written>
+export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 
 # Run the container with training.sh quickstart script
 ./run.sh

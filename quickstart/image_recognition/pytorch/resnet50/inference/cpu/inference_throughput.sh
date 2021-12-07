@@ -16,6 +16,11 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+if [ ! -e "${MODEL_DIR}/models/image_recognition/pytorch/common/main.py"  ]; then
+    echo "Could not find the script of main.py. Please set environment variable '\${MODEL_DIR}'."
+    echo "From which the main.py exist at the: \${MODEL_DIR}/models/image_recognition/pytorch/common/main.py.py"
+    exit 1
+fi
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -31,25 +36,69 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
-cd ${MODEL_DIR}/models/resnet50/examples/imagenet
-
-# download pretrained weight.
-python hub_help.py --url https://download.pytorch.org/models/resnet50-0676ba61.pth
-
-export work_space=${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/resnet50_throughput_log_*
 
 if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
+ARGS=""
+ARGS="$ARGS -e -a resnet50 ../ --dummy"
+
 if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    bash run_multi_instance_ipex_spr.sh resnet50 int8 no_jit resnet50_configure_sym.json 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-inference-throughput-int8.log
+    echo "running int8 path"
+    ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnet50_configure_sym.json"
 elif [[ $PRECISION == "bf16" ]]; then
-    bash run_multi_instance_ipex_spr.sh resnet50 bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-inference-throughput-bf16.log
+    ARGS="$ARGS --bf16 --jit"
+    echo "running bf16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
-    bash run_multi_instance_ipex_spr.sh resnet50 fp32 jit 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-inference-throughput-fp32.log
+    ARGS="$ARGS --jit"
+    echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
     exit 1
 fi
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+
+CORES_PER_INSTANCE=$CORES
+
+export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
+export KMP_BLOCKTIME=1
+export KMP_AFFINITY=granularity=fine,compact,1,0
+
+BATCH_SIZE=116
+
+python -m intel_extension_for_pytorch.cpu.launch \
+    --use_default_allocator \
+    --ninstance ${SOCKETS} \
+    --ncore_per_instance ${CORES_PER_INSTANCE} \
+    --log_path=${OUTPUT_DIR} \
+    --log_file_prefix="./resnet50_throughput_log_${PRECISION}" \
+    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+    $ARGS \
+    --ipex \
+    --seed 2020 \
+    -j 0 \
+    -b $BATCH_SIZE
+
+wait
+
+throughput=$(grep 'Throughput:'  ${OUTPUT_DIR}/resnet50_throughput_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+BEGIN {
+    sum = 0;
+    i = 0;
+    }
+    {
+        sum = sum + $1;
+        i++;
+    }
+END   {
+    sum = sum / i;
+    printf("%.3f", sum);
+}')
+
+echo "resnet50;"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

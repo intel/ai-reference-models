@@ -16,6 +16,11 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+if [ ! -e "${MODEL_DIR}/models/image_recognition/pytorch/common/main.py"  ]; then
+    echo "Could not find the script of main.py. Please set environment variable '\${MODEL_DIR}'."
+    echo "From which the main.py exist at the: \${MODEL_DIR}/models/image_recognition/pytorch/common/main.py"
+    exit 1
+fi
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -41,25 +46,50 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
-cd ${MODEL_DIR}/models/resnet50/examples/imagenet
+export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
+export KMP_BLOCKTIME=1
+export KMP_AFFINITY=granularity=fine,compact,1,0
 
-# download pretrained weight.
-python hub_help.py --url https://download.pytorch.org/models/resnet50-0676ba61.pth
+BATCH_SIZE=128
 
-export work_space=${OUTPUT_DIR}
+rm -rf ${OUTPUT_DIR}/resnet50_accuracy_log*
 
 if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
 fi
 
+# download pretrained weight.
+python ${MODEL_DIR}/models/image_recognition/pytorch/common/hub_help.py \
+    --url https://download.pytorch.org/models/resnet50-0676ba61.pth
+
+ARGS=""
+ARGS="$ARGS -e -a resnet50 ${DATASET_DIR}"
+
 if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    bash run_accuracy_ipex.sh resnet50 $DATASET_DIR int8 no_jit resnet50_configure_sym.json 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-inference-accuracy-int8.log
+    echo "running int8 path"
+    ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnet50_configure_sym.json"
 elif [[ $PRECISION == "bf16" ]]; then
-    bash run_accuracy_ipex.sh resnet50 $DATASET_DIR bf16 jit 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-inference-accuracy-bf16.log
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32"  ]]; then
-    bash run_accuracy_ipex.sh resnet50 $DATASET_DIR fp32 jit 2>&1 | tee -a ${OUTPUT_DIR}/resnet50-inference-accuracy-fp32.log
+    ARGS="$ARGS --bf16 --jit"
+    echo "running bf16 path"
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
+    ARGS="$ARGS --jit"
+    echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
     exit 1
 fi
+
+python -m intel_extension_for_pytorch.cpu.launch \
+    --use_default_allocator \
+    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+    $ARGS \
+    --ipex \
+    --pretrained \
+    -j 0 \
+    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log
+
+wait
+
+accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+echo "resnet50;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log

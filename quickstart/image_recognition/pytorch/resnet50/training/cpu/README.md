@@ -75,7 +75,7 @@ The folder that contains the `val` and `train` directories should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| `training_baremetal.sh` | Trains using one node for one epoch for the specified precision (fp32 or bf16). |
+| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, or bf16). |
 
 ## Run the model
 
@@ -94,12 +94,12 @@ export MODEL_DIR=$(pwd)
 # Env vars
 export DATASET_DIR=<path_to_Imagenet_Dataset>
 export OUTPUT_DIR=<Where_to_save_log>
-export PRECISION=<precision to run (fp32 or bf16)>
+export PRECISION=<precision to run (fp32, avx-fp32, or bf16)>
 export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 
 # Run the training quickstart script
 cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
-bash training_baremetal.sh
+bash training.sh
 ```
 
 <!--- 80. License -->
