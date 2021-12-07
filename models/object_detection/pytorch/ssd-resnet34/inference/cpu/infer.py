@@ -206,7 +206,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                 print("INT8 LLGA start trace")
                 # insert quant/dequant based on configure.json
                 conf = ipex.quantization.QuantConf(configure_file=args.configure)
-                model = ipex.quantization.convert(model, conf, torch.randn(args.batch_size, 3, 1200, 1200))
+                model = ipex.quantization.convert(model, conf, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
                 print("done ipex default recipe.......................")
                 # freeze the module
                 # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
@@ -216,13 +216,14 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                 with torch.no_grad():
                     for i in range(2):
                         #_, _ = model(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
-                        _, _ = model(torch.randn(args.batch_size, 3, 1200, 1200))
+                        _, _ = model(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
 
                 print('runing int8 real inputs inference path')
                 with torch.no_grad():
                     total_iteration = 0
                     for epoch in range(epoch_number):
                         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                            img = img.to(memory_format=torch.channels_last)
                             if total_iteration >= args.warmup_iterations:
                                 start_time=time.time()
 
@@ -373,11 +374,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                             for epoch in range(epoch_number):
                                 for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                                     with torch.no_grad():
-
                                         if total_iteration >= args.warmup_iterations:
                                             start_time=time.time()
                                         img = img.contiguous(memory_format=torch.channels_last)
-
                                         if args.profile and total_iteration == Profilling_iterator:
                                             print("Profilling")
                                             with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler("./bf16_imperative_log")) as prof:
@@ -435,7 +434,6 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                     if total_iteration >= args.warmup_iterations:
                                         start_time=time.time()
                                     img = img.contiguous(memory_format=torch.channels_last)
-
                                     if args.profile and total_iteration == Profilling_iterator:
                                         print("Profilling")
                                         with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler("./bf16_oob_log")) as prof:
@@ -503,7 +501,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                             if total_iteration >= args.warmup_iterations:
                                 start_time=time.time()
-                            
+
                             img = img.contiguous(memory_format=torch.channels_last)
                             if args.profile and total_iteration == Profilling_iterator:
                                 print("Profilling")
