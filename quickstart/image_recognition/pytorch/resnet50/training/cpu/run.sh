@@ -33,6 +33,7 @@ fi
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-resnet50-training}
 WORKDIR=/workspace/pytorch-spr-resnet50-training
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
+TRAINING_EPOCHS=${TRAINING_EPOCHS:-1}
 
 # training scripts:
 # training.sh
@@ -46,6 +47,7 @@ docker run --rm \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env TRAINING_EPOCHS=${TRAINING_EPOCHS} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
