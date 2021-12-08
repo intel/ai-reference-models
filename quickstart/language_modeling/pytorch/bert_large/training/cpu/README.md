@@ -70,8 +70,6 @@ git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.11.3
 git apply ../enable_optmization.diff
-wget https://github.com/huggingface/transformers/pull/13714.diff
-git apply 13714.diff
 pip install -e ./
 cd ..
 
