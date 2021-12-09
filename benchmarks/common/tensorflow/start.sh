@@ -65,9 +65,7 @@ fi
 # Determines if we are running in a container by checking for .dockerenv
 function _running-in-container()
 {
-  # .dockerenv is a legacy mount populated by Docker engine and at some point it may go away.
-  # Also if users shell into a container we should treat that senario like running on bare-metal
-  [ ! -z "${DOCKER}" ] && [ -f /.dockerenv ]
+  [ -f /.dockerenv ]
 }
 
 # Check the Linux platform distribution if CentOS or Ubuntu
@@ -163,21 +161,22 @@ fi
 
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
-  if [[ ${NOINSTALL} != "True" ]]; then
-    # For running inside a real CentOS container
-    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
-      if [[ $INSTALL_NUMACTL == "True" ]]; then
-        yum update -y
-        yum install -y numactl
-      fi
-    # Call the framework's container_init.sh, if it exists
-    elif [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-        INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+  if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+    if [[ $INSTALL_NUMACTL == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
+      yum update -y
+      yum install -y numactl
+    fi
+  else
+    # For ubuntu, run the container_init.sh scripts
+    if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+      # Call the framework's container_init.sh, if it exists and we are running on ubuntu
+      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+    fi
     # Call the model specific container_init.sh, if it exists
-    elif [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+    if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
       ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
     fi
-    fi
+  fi
 fi
 
 verbose_arg=""
@@ -348,7 +347,7 @@ function bert_options() {
   fi
 
   if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
-    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}" 
+    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}"
   fi
 
   if [[ -n "${task_name}" && ${task_name} != "" ]]; then
@@ -364,7 +363,7 @@ function bert_options() {
   fi
 
   if [[ -n "${vocab_file}" && ${vocab_file} != "" ]]; then
-    CMD=" ${CMD} --vocab-file=${vocab_file}" 
+    CMD=" ${CMD} --vocab-file=${vocab_file}"
   fi
 
   if [[ -n "${config_file}" && ${config_file} != "" ]]; then
@@ -773,7 +772,7 @@ function minigo() {
         if [ ! -f "bazel-0.22.0-installer-linux-x86_64.sh" ];then
           wget https://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
           chmod 755 bazel-0.22.0-installer-linux-x86_64.sh
-        fi 
+        fi
         ./bazel-0.22.0-installer-linux-x86_64.sh --prefix=/tmp/bazel
         rm /root/.bazelrc
         export PATH=/tmp/bazel/bin:$PATH
@@ -791,8 +790,8 @@ function minigo() {
         echo "You are supposed to provide model dir."
         exit 1
       fi
-    
-      # MODEL_DIR is the official mlperf minigo repo 
+
+      # MODEL_DIR is the official mlperf minigo repo
       cd ${MODEL_DIR}
       git checkout 60ecb12f29582227a473fdc7cd09c2605f42bcd6
 
@@ -817,7 +816,7 @@ function minigo() {
         git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/tune_for_many_core.patch
-      else 
+      else
         # single-node normal mode
         git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/mlperf_split.patch
@@ -860,11 +859,11 @@ function minigo() {
       # $HOSTLIST.txt contains all the ip address
 
       if [ ! $multi_node ];then
-        unset -v HOSTLIST 
+        unset -v HOSTLIST
       else
-        export HOSTLIST=${BENCHMARK_DIR}/node_list 
+        export HOSTLIST=${BENCHMARK_DIR}/node_list
       fi
-      
+
       cd ${original_dir}
       CMD="${CMD} \
       $(add_arg "--large-scale" ${large_scale}) \
@@ -1128,7 +1127,7 @@ function ssd-resnet34() {
           fi
           benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-          
+
 
           cd  ${model_source_dir}/../
           cd ssd-resnet-benchmarks
@@ -1348,7 +1347,7 @@ function transformer_mlperf() {
           exit 1
       fi
 
-      CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
+      CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints}
       --print_iter=${print_iter} --save_profile=${save_profile}"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -1527,7 +1526,7 @@ function wide_deep_large_ds() {
           echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
           exit 1
       fi
-    fi  
+    fi
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
