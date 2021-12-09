@@ -65,26 +65,35 @@ fi
 # Determines if we are running in a container by checking for .dockerenv
 function _running-in-container()
 {
+  # .dockerenv is a legacy mount populated by Docker engine and at some point it may go away.
   [ -f /.dockerenv ]
 }
 
 # Check the Linux platform distribution if CentOS or Ubuntu
-CENTOS_PLATFORM="False"
-if [[ $(awk -F= '/^NAME/{print $2}' /etc/os-release) == *"CentOS"* ]]; then
-  CENTOS_VERSION_ID=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
-  if [[ "${CENTOS_VERSION_ID}" == '"8"' ]]; then
-    CENTOS_PLATFORM="True"
-  else
-    echo "CentOS version ${CENTOS_VERSION_ID} is not currently supported."
+OS_PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+OS_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
+if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+  if [[ "${OS_VERSION}" != '"8"' ]]; then
+    echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
     exit 1
   fi
+elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+  if [[ "${OS_VERSION}" != '"18.04"' ]] && [[ "${OS_VERSION}" != '"20.04"' ]]; then
+    echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+    exit 1
+  fi
+else
+  echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+  exit 1
 fi
+
+echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
 
 if [[ ${NOINSTALL} != "True" ]]; then
   # set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
   # install common dependencies
-  if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
     yum update -y
     yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
 
@@ -114,7 +123,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
       # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
-  else
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
     apt-get update -y
     apt-get install gcc-8 g++-8 cmake python-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
@@ -129,12 +138,12 @@ if [[ ${NOINSTALL} != "True" ]]; then
     if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
       ## Installing OpenMPI
       apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
-      # Horovod Installation
-      export HOROVOD_VERSION=87094a4
 
+      ## Install Horovod
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
+      export HOROVOD_VERSION=87094a4
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
@@ -161,12 +170,13 @@ fi
 
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
-  if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+  # For running inside a real CentOS container
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
     if [[ $INSTALL_NUMACTL == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
       yum update -y
       yum install -y numactl
     fi
-  else
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
     # For ubuntu, run the container_init.sh scripts
     if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
       # Call the framework's container_init.sh, if it exists and we are running on ubuntu
@@ -451,7 +461,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
       yum update -y && yum install -y unzip wget
     else
       apt-get update && apt-get install -y unzip wget
