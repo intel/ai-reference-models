@@ -67,11 +67,8 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ARG DLRM_DIR="/workspace/pytorch-spr-dlrm-inference/models/dlrm"
-
 RUN source activate pytorch && \
-    cd ${DLRM_DIR} && \
-    pip install -r dlrm/requirements.txt
+    pip install -r ${MODEL_WORKSPACE}/${PACKAGE_NAME}/quickstart/requirements.txt
 
 FROM intel-optimized-pytorch AS release
 COPY --from=intel-optimized-pytorch /root/conda /root/conda

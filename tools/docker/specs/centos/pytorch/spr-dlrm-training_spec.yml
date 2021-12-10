@@ -10,7 +10,6 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-dlrm-training
-        - DLRM_DIR=/workspace/pytorch-spr-dlrm-training/models/dlrm
       partials:
         - pytorch/gcc-and-utils
         - pytorch/spr-model-installs
@@ -20,12 +19,12 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/models/dlrm-jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/dlrm
-          destination: models/dlrm
-        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training_convergence.sh
-          destination: quickstart/training_convergence.sh
-        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training_performance.sh
-          destination: quickstart/training_performance.sh
+        - source: models/recommendation/pytorch/dlrm
+          destination: models/recommendation/pytorch/dlrm
+        - source: quickstart/recommendation/pytorch/dlrm/training/cpu/training.sh
+          destination: quickstart/training.sh
+        - source: quickstart/recommendation/pytorch/dlrm/requirements.txt
+          destination: quickstart/requirements.txt
       wrapper_package_files:
         - source: output/pytorch-spr-dlrm-training.tar.gz
           destination: model_packages/pytorch-spr-dlrm-training.tar.gz

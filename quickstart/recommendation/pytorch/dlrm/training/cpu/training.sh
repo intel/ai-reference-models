@@ -40,35 +40,37 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [[ "$NUM_BATCH" != "" ]]
+then
+    ARGS="$ARGS --num-batches=${NUM_BATCH}"
+    echo "will early stop after ${NUM_BATCH} batches"
+fi
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
-LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
+LOG=${OUTPUT_DIR}/dlrm_training_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-ARGS=""
-if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    if [[ $PRECISION == "avx-int8" ]]; then
-        unset DNNL_MAX_CPU_ISA
-    fi
-    echo "running int8 path"
-    ARGS="$ARGS --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
-elif [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --bf16"
+if [[ "$PRECISION" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
+if [[ $PRECISION == "bf16" ]]; then
+    ARGS="$ARGS --bf16 --ipex-merged-emb"
     echo "running bf16 path"
-elif [[ $PRECISION == "fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, bf16, int8, and avx-int8"
+    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16"
     exit 1
 fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
-export OMP_NUM_THREADS=1
-
+BATCHSIZE=$((128*CORES))
+export OMP_NUM_THREADS=$CORES
 for i in $(seq 1 $((SOCKETS-1))); do
   LOG_i="${LOG}/socket_$i"
   start=$((i*CORES))
@@ -79,10 +81,11 @@ for i in $(seq 1 $((SOCKETS-1))); do
   --data-set=terabyte \
   --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
   --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
-  --arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
-  --numpy-rand-seed=727  --inference-only --num-batches=1000 \
-  --print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
-  $ARGS > $LOG_i
+  --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+  --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
+  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
+  --test-mini-batch-size=16384 \
+  $ARGS |tee $LOG_i &
 done
 
 i=0
@@ -91,14 +94,15 @@ start=$((i*CORES))
 end=$((start+CORES-1))
 numa_cmd="numactl -C $start-$end -m $i"
 $numa_cmd python -u $MODEL_SCRIPT \
---raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
---data-set=terabyte \
---memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
---arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
---arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
---numpy-rand-seed=727  --inference-only --num-batches=1000 \
---print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
-$ARGS > $LOG_0
+  --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+  --data-set=terabyte \
+  --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+  --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+  --arch-sparse-feature-size=128 --max-ind-range=40000000 \
+  --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
+  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
+  --test-mini-batch-size=16384 \
+  $ARGS |tee $LOG_0
 wait
 
 throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
@@ -114,4 +118,4 @@ END   {
 sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""dlrm";"throughput";${PRECISION};128;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""dlrm";"training throughput";${PRECISION};${BATCHSIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

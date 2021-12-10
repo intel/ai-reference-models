@@ -40,9 +40,8 @@ DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
 WORKDIR=/workspace/pytorch-spr-dlrm-training
 
 # training scripts:
-# training_convergence.sh
-# training_performance.sh
-export SCRIPT="${SCRIPT:-training_performance.sh}"
+# training.sh
+export SCRIPT="${SCRIPT:-training.sh}"
 
 if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
