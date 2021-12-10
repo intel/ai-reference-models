@@ -35,8 +35,8 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ ! -d "${DATASET_DIR}/LibriSpeech" ]; then
-  echo "The LibriSpeech directory was not found in the DATASET_DIR (${DATASET_DIR}/LibriSpeech)."
+if [ ! -d "${DATASET_DIR}/dataset/LibriSpeech" ]; then
+  echo "The LibriSpeech directory was not found in the DATASET_DIR (${DATASET_DIR}/dataset/LibriSpeech)."
   echo "Please check that the dataset directory is correct."
   exit 1
 fi
@@ -56,17 +56,16 @@ fi
 echo "Run $SCRIPT"
 
 docker run --rm \
-  --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env DATASET_DIR=${WORKDIR}/models/rnnt-training/training/rnn_speech_recognition/pytorch/dataset \
+  --env DATASET_DIR=${DATASET_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
-  --volume ${DATASET_DIR}:${WORKDIR}/models/rnnt-training/training/rnn_speech_recognition/pytorch/dataset \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash $SCRIPT $PRECISION
   

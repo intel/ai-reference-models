@@ -19,7 +19,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 * Download and preprocess RNN-T dataset:
   ```bash
   export DATASET_DIR=#Where_to_save_Dataset
-  bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu/download_dataset_baremetal.sh
+  bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu/download_dataset.sh
   ```
 
 * Set Jemalloc Preload for better performance
@@ -46,8 +46,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash training_baremetal.sh fp32 | --- | --- |
-| BF16        | bash training_baremetal.sh bf16 | --- | --- |
+| FP32        | bash training.sh fp32 | --- | --- |
+| BF16        | bash training.sh bf16 | --- | --- |
 
 ## Run the model
 
@@ -69,7 +69,7 @@ export DATASET_DIR=<path to the dataset>
 
 # Run a quickstart script (for example, FP32 training)
 cd ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu
-bash training_baremetal.sh fp32
+bash training.sh fp32
 ```
 
 <!--- 80. License -->

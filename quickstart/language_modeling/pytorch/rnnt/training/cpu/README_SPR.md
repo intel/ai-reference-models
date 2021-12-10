@@ -29,7 +29,7 @@ pytorch-spr-rnnt-training
 
 | Script name | Description |
 |-------------|-------------|
-| `download_training_dataset.sh` | Download and prepare the LibriSpeech training dataset |
+| `download_dataset.sh` | Download and prepare the LibriSpeech training dataset |
 | `training.sh` | Runs RNN-T training for the specified precision (fp32, avx-fp32, or bf16). |
 
 > Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
@@ -82,7 +82,7 @@ docker run --rm \
   -w /workspace/pytorch-spr-rnnt-training \
   -it \
   model-zoo:pytorch-spr-rnnt-training \
-  /bin/bash quickstart/download_training_dataset.sh
+  /bin/bash quickstart/download_dataset.sh
 ```
 
 This `DATASET_DIR` environment variable will be used again when
