@@ -62,19 +62,13 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ARG RNNT_DIR="/workspace/pytorch-spr-rnnt-inference/models/rnnt"
 
 RUN source activate pytorch && \
-    conda install intel-openmp && \
-    yum install -y libsndfile && \
-    cd ${RNNT_DIR} && \
-    cd training/rnn_speech_recognition/pytorch && \
+    cd ${MODEL_WORKSPACE}/${PACKAGE_NAME}/models/language_modeling/pytorch/rnnt/inference/cpu && \
     pip install -r requirements.txt && \
     pip install unidecode inflect && \
-    mkdir -p /root/.local
-
-RUN source activate pytorch && \
-    cd /workspace && \
+    yum install -y libsndfile && \
+    mkdir -p /root/.local && \
     git clone https://github.com/HawkAaron/warp-transducer && \
     cd warp-transducer && \
     mkdir build && \
@@ -83,7 +77,6 @@ RUN source activate pytorch && \
     make && \
     cd ../pytorch_binding && \
     python setup.py install
-
 
 FROM intel-optimized-pytorch AS release
 COPY --from=intel-optimized-pytorch /root/conda /root/conda

@@ -19,13 +19,13 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 * Download and preprocess RNN-T dataset:
   ```bash
   export DATASET_DIR=#Where_to_save_Dataset
-  bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_dataset_baremetal.sh
+  bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_dataset.sh
   ```
 
 * Download pretrained model
   ```bash
   export CHECKPOINT_DIR=#Where_to_save_pretrained_model
-  bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_model_baremetal.sh
+  bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/inference/cpu/download_model.sh
   ```
 
 * Set Jemalloc Preload for better performance
@@ -52,8 +52,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash batch_inference_baremetal.sh fp32 | bash online_inference_baremetal.sh fp32 | bash accuracy_baremetal.sh fp32 |
-| BF16        | bash batch_inference_baremetal.sh bf16 | bash online_inference_baremetal.sh bf16 | bash accuracy_baremetal.sh bf16 |
+| FP32        | bash inference_throughput.sh fp32 | bash inference_realtime.sh fp32 | bash accuracy.sh fp32 |
+| BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 | bash accuracy.sh bf16 |
 
 ## Run the model
 
@@ -76,7 +76,7 @@ export DATASET_DIR=<path to the dataset>
 
 # Run a quickstart script (for example, FP32 batch inference)
 cd ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/inference/cpu
-bash batch_inference_baremetal.sh fp32
+bash inference_throughput.sh fp32
 ```
 
 <!--- 80. License -->

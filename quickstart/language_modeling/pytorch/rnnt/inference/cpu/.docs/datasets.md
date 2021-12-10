@@ -16,7 +16,7 @@ docker run --rm \
   -w /workspace/<package dir> \
   -it \
   <docker image> \
-  /bin/bash quickstart/download_inference_dataset.sh
+  /bin/bash quickstart/download_dataset.sh
 ```
 
 This `DATASET_DIR` environment variable will be used again when

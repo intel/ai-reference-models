@@ -29,7 +29,7 @@ pytorch-spr-rnnt-inference
 
 | Script name | Description |
 |-------------|-------------|
-| `download_inference_dataset.sh` | Download and prepare the LibriSpeech inference dataset. See the [datasets section](#datasets) for instructions on it's usage. |
+| `download_dataset.sh` | Download and prepare the LibriSpeech inference dataset. See the [datasets section](#datasets) for instructions on it's usage. |
 | `inference_realtime.sh` | Runs multi-instance inference using 4 cores per instance for the specified precision (fp32, avx-fp32, or bf16). |
 | `inference_throughput.sh` | Runs multi-instance inference using 1 instance per socket for the specified precision (fp32, avx-fp32, or bf16). |
 | `accuracy.sh` | Runs an inference accuracy test for the specified precision (fp32, avx-fp32, or bf16). |
@@ -83,7 +83,7 @@ docker run --rm \
   -w /workspace/pytorch-spr-rnnt-inference \
   -it \
   model-zoo:pytorch-spr-rnnt-inference \
-  /bin/bash quickstart/download_inference_dataset.sh
+  /bin/bash quickstart/download_dataset.sh
 ```
 
 This `DATASET_DIR` environment variable will be used again when
@@ -91,11 +91,13 @@ This `DATASET_DIR` environment variable will be used again when
 
 ## Run the model
 
-Download the pretrained model and set the `PRETRAINED_MODEL` environment variable
-to point to the file:
+Set the `CHECKPOINT_DIR` environment variable and run the script to download the
+pretrained model:
 ```
-wget https://zenodo.org/record/3662521/files/DistributedDataParallel_1576581068.9962234-epoch-100.pt?download=1 -O rnnt.pt
-export PRETRAINED_MODEL=$(pwd)/rnnt.pt
+export CHECKPOINT_DIR=<directory to download the pretrained model>
+mkdir -p $CHECKPOINT_DIR
+cd pytorch-spr-rnnt-inference
+bash download_model.sh
 ```
 
 After you've downloaded the pretrained model and followed the instructions to
@@ -113,7 +115,7 @@ cd pytorch-spr-rnnt-inference
 
 # Set the required environment vars
 export DATASET_DIR=<path to the dataset>
-export PRETRAINED_MODEL=<path to the rnnt.pt file>
+export CHECKPOINT_DIR=<path to the downloaded model weights directory>
 export PRECISION=<specify the precision to run (fp32 or bf16)>
 export OUTPUT_DIR=<directory where log files will be written>
 
