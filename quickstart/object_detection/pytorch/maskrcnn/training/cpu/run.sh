@@ -30,40 +30,37 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ -z "${PRETRAINED_MODEL}" ]; then
-  echo "The required environment variable PRETRAINED_MODEL has not been set"
-  exit 1
-fi
-
-
 mkdir -p ${OUTPUT_DIR}
 
-IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-maskrcnn-inference}
+IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-maskrcnn-training}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
-WORKDIR=/workspace/pytorch-spr-maskrcnn-inference
+WORKDIR=/workspace/pytorch-spr-maskrcnn-training
 
-# inference scripts:
-# inference_realtime.sh
-# inference_throughput.sh
-# accuracy.sh
-export SCRIPT="${SCRIPT:-inference_realtime.sh}"
+# training scripts:
+# training.sh
+export SCRIPT="${SCRIPT:-training.sh}"
 
 if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
 fi
 
+batch_size_env=""
+if [ ! -z "${BATCH_SIZE}" ]; then
+  echo "BATCH_SIZE: ${BATCH_SIZE}"
+   batch_size_env="--env BATCH_SIZE=${BATCH_SIZE} "
+fi
+
 docker run --rm \
-  ${dataset_env} \
-  --env PRECISION=${PRECISION} \
+  ${batch_size_env} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env DATASET_DIR=${DATASET_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
-  --volume ${PRETRAINED_MODEL}:${WORKDIR}/models/maskrcnn/maskrcnn-benchmark/ImageNetPretrained/MSRA/e2e_mask_rcnn_R_50_FPN_1x.pth \
-  --volume ${DATASET_DIR}:${WORKDIR}/models/maskrcnn/maskrcnn-benchmark/datasets/coco \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash $SCRIPT $PRECISION

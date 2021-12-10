@@ -30,31 +30,44 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${CHECKPOINT_DIR}" ]; then
+  echo "The required environment variable CHECKPOINT_DIR has not been set"
+  exit 1
+fi
+
+if [ -z "${MODE}" ]; then
+  echo "The required environment variable MODE has not been set. Please set MODE to 'jit' or 'imperative'."
+  exit 1
+fi
+
 mkdir -p ${OUTPUT_DIR}
 
-IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-maskrcnn-training}
+IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-maskrcnn-inference}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
-WORKDIR=/workspace/pytorch-spr-maskrcnn-training
+WORKDIR=/workspace/pytorch-spr-maskrcnn-inference
 
-# training scripts:
-# training.sh
-export SCRIPT="${SCRIPT:-training.sh}"
+# inference scripts:
+# inference_realtime.sh
+# inference_throughput.sh
+# accuracy.sh
+export SCRIPT="${SCRIPT:-inference_realtime.sh}"
 
 if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
 fi
 
 docker run --rm \
-  ${dataset_env} \
-  --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
+  --env DATASET_DIR=${DATASET_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
-  --volume ${DATASET_DIR}:${WORKDIR}/models/maskrcnn/maskrcnn-benchmark/datasets/coco \
+  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
+  --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash $SCRIPT $PRECISION $MODE

@@ -15,6 +15,7 @@ run Mask R-CNN training in a container.
 pytorch-spr-maskrcnn-training
 ├── README.md
 ├── build.sh
+├── download_dataset.sh
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
@@ -37,34 +38,15 @@ pytorch-spr-maskrcnn-training
 
 ## Datasets
 
-The [COCO dataset](https://cocodataset.org) is used to run Mask R-CNN
-training. Download and unzip the 2017 training and validation images and
-annotations from the [COCO dataset website](https://cocodataset.org/#download)
-to a `coco` folder and unzip the files. After extracting the zip files,
-your dataset directory structure should look something like this:
+Download the 2017 [COCO dataset](https://cocodataset.org) using the `download_dataset.sh` script
+from the container package.
+Export the `DATASET_DIR` environment variable to specify the directory where the dataset
+will be downloaded. This environment variable will be used again when running quickstart scripts.
 ```
-coco
-├── annotations
-│   ├── captions_train2017.json
-│   ├── captions_val2017.json
-│   ├── instances_train2017.json
-│   ├── instances_val2017.json
-│   ├── person_keypoints_train2017.json
-│   └── person_keypoints_val2017.json
-├── train2017
-│   ├── 000000000009.jpg
-│   ├── 000000000025.jpg
-│   ├── 000000000030.jpg
-│   └── ...
-└── val2017
-    ├── 000000000139.jpg
-    ├── 000000000285.jpg
-    ├── 000000000632.jpg
-    └── ...
+cd pytorch-spr-maskrcnn-training
+export DATASET_DIR=<directory where the dataset will be saved>
+bash download_dataset.sh
 ```
-The parent of the `annotations`, `val2017`, and `train2017` directory (in this
-example `coco`) is the directory that should be used when setting the `DATASET_DIR`
-environment variable for Mask R-CNN (for example: `export DATASET_DIR=/home/<user>/coco`).
 
 ## Build the container
 
@@ -108,6 +90,9 @@ cd pytorch-spr-maskrcnn-training
 export PRECISION=<specify the precision to run>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
+
+# Optionally set the batch size (default is 112)
+export BATCH_SIZE=<batch size>
 
 # Run the container with training.sh quickstart script
 ./run.sh

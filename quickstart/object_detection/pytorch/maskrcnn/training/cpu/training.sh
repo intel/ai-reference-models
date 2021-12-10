@@ -33,16 +33,20 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+if [[ "$1" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 ARGS=""
 
-if [ "$1" == "bf16" ]; then
+if [[ "$1" == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "### running bf16 datatype"
-elif [ "$1" == "fp32" ]; then
+elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32 and bf16."
+    echo "Supported precisions are: fp32, avx-fp32, and bf16."
     exit 1
 fi
 
@@ -60,9 +64,10 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=1
 
-BATCH_SIZE=112
+PRECISION=$1
+BATCH_SIZE=${BATCH_SIZE-112}
 
-rm -rf ${OUTPUT_DIR}/train_throughput_log*
+rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --enable_jemalloc \
@@ -72,18 +77,18 @@ python -m intel_extension_for_pytorch.cpu.launch \
     $ARGS \
     --iter-warmup 10 \
     -i 20 \
-    --config-file '"${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml"' \
+    --config-file "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
     --skip-test \
     SOLVER.IMS_PER_BATCH ${BATCH_SIZE} \
     SOLVER.MAX_ITER 720000 \
     SOLVER.STEPS '"(480000, 640000)"' \
     SOLVER.BASE_LR 0.0025 \
     MODEL.DEVICE cpu \
-    2>&1 | tee ${OUTPUT_DIR}/train_throughput_log.txt
+    2>&1 | tee ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput.log
 
 # For the summary of results
 wait
 
-throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/train_throughput_log* |sed -e 's/.Trainng throughput//;s/[^0-9.]//g')
+throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput* |sed -e 's/.Trainng throughput//;s/[^0-9.]//g')
 echo ""maskrcnn";"training throughput";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 

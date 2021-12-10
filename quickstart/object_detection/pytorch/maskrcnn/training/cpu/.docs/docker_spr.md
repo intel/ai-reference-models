@@ -14,6 +14,9 @@ export PRECISION=<specify the precision to run>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 
+# Optionally set the batch size (default is 112)
+export BATCH_SIZE=<batch size>
+
 # Run the container with training.sh quickstart script
 ./run.sh
 ```

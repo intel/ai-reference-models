@@ -17,9 +17,9 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py" ]; then
-  echo "Could not find the script of infer.py. Please set environment variable '\${MODEL_DIR}'."
-  echo "From which the infer.py exist at the: \${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py"
+if [ ! -e "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/test_net.py" ]; then
+  echo "Could not find the script test_net.py. Please set environment variable '\${MODEL_DIR}'."
+  echo "From which the test_net.py exist at: \${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/test_net.py"
   exit 1
 fi
 
@@ -38,16 +38,20 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+if [[ "$1" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 ARGS=""
 
-if [ "$1" == "bf16" ]; then
+if [[ "$1" == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "### running bf16 datatype"
-elif [ "$1" == "fp32" ]; then
+elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32 and bf16."
+    echo "Supported precisions are: fp32, avx-fp32, and bf16."
     exit 1
 fi
 
@@ -68,9 +72,10 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 export TRAIN=0
 
+PRECISION=$1
 BATCH_SIZE=1
 
-rm -rf ${OUTPUT_DIR}/latency_log*
+rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --enable_jemalloc \
@@ -79,11 +84,11 @@ python -m intel_extension_for_pytorch.cpu.launch \
     $ARGS \
     --iter-warmup 20 \
     -i 200 \
-    --config-file '"${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_inf.yaml"' \
+    --config-file "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_inf.yaml" \
     TEST.IMS_PER_BATCH ${BATCH_SIZE} \
-    MODEL.WEIGHT '"${CHECKPOINT_DIR}/e2e_mask_rcnn_R_50_FPN_1x.pth"' \
+    MODEL.WEIGHT "${CHECKPOINT_DIR}/e2e_mask_rcnn_R_50_FPN_1x.pth" \
     MODEL.DEVICE cpu \
-    2>&1 | tee ${OUTPUT_DIR}/latency_log.txt
+    2>&1 | tee ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime.log
 
 # For the summary of results
 wait
@@ -93,7 +98,7 @@ CORES_PER_INSTANCE=4
 
 INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
 BEGIN {
         sum = 0;
         i = 0;
