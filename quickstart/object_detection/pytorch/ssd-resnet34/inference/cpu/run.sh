@@ -30,8 +30,8 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ -z "${PRETRAINED_MODEL}" ]; then
-  echo "The required environment variable PRETRAINED_MODEL has not been set"
+if [ -z "${CHECKPOINT_DIR}" ]; then
+  echo "The required environment variable CHECKPOINT_DIR has not been set"
   exit 1
 fi
 
@@ -52,17 +52,16 @@ fi
 docker run --rm \
   ${dataset_env} \
   --env DATASET_DIR=${DATASET_DIR} \
-  --env PRECISION=${PRECISION} \
-  --env PRETRAINED_MODEL=${PRETRAINED_MODEL} \
+  --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --volume ${PRETRAINED_MODEL}:${PRETRAINED_MODEL} \
+  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash $SCRIPT $PRECISION
