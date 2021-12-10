@@ -45,7 +45,7 @@ to download and preprocess the dataset.
    ```
    git clone https://github.com/tensorflow/models.git tf_models
    cd tf_models
-   git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
+   git checkout 7a9934df2afdf95be9405b4e9f1f2480d748dc40
    cd ..
    ```
 
@@ -162,7 +162,8 @@ Clone the repo at the commit specified below, and set the `TF_MODELS_DIR`
 environment variable to point to that directory. Apply the TF2 patch from
 the model zoo to the TensorFlow models directory.
 ```
-# Clone the tensorflow/models repo at the specified commit
+# Clone the tensorflow/models repo at the specified commit.
+# Please note that required commit for this section is different from the one used for dataset preparation.
 git clone https://github.com/tensorflow/models.git tf_models
 cd tf_models
 export TF_MODELS_DIR=$(pwd)
