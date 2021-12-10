@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,35 +17,39 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-echo "PRECISION: ${PRECISION}"
-echo "OUTPUT_DIR: ${OUTPUT_DIR}"
-
-if [ -z "${OUTPUT_DIR}" ]; then
-  echo "The required environment variable OUTPUT_DIR has not been set"
+if [ ! -e "${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py" ]; then
+  echo "Could not find the script of train.py. Please set environment variable '\${MODEL_DIR}'."
+  echo "From which the train.py exist at the: \${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py"
   exit 1
 fi
 
-# Create the output directory in case it doesn't already exist
-mkdir -p ${OUTPUT_DIR}
-
-if [ -z "${PRECISION}" ]; then
-  echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
+if [ ! -d "${DATASET_DIR}/dataset/LibriSpeech" ]; then
+  echo "The DATASET_DIR \${DATASET_DIR}/dataset/LibriSpeech does not exist"
   exit 1
 fi
 
-cd ${MODEL_DIR}/models/rnnt-training/training/rnn_speech_recognition/pytorch
-export work_space=${OUTPUT_DIR}
+if [ ! -d "${OUTPUT_DIR}" ]; then
+  echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
+  exit 1
+fi
 
-if [[ $PRECISION == "avx-fp32" ]]; then
+if [[ $1 == "avx-fp32" ]]; then
     unset DNNL_MAX_CPU_ISA
-    PRECISION=fp32
 fi
 
-if [[ $PRECISION == "bf16" || $PRECISION == "fp32" ]]; then
-    bash train.sh ${PRECISION} ipex 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-${PRECISION}.log
+ARGS=""
+if [ "$1" == "bf16" ]; then
+    ARGS="$ARGS bf16"
+    echo "### running bf16 datatype"
+elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
+    ARGS="$ARGS fp32"
+    echo "### running fp32 datatype"
 else
-    echo "The specified precision '${PRECISION}' is unsupported."
+    echo "The specified precision '${1}' is unsupported."
     echo "Supported precisions are: fp32, avx-fp32, and bf16"
     exit 1
 fi
+
+PRECISION=$1
+
+bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-${PRECISION}.log

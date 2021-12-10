@@ -3,7 +3,7 @@
 
 | Script name | Description |
 |-------------|-------------|
-| `download_training_dataset.sh` | Download and prepare the LibriSpeech training dataset |
+| `download_dataset.sh` | Download and prepare the LibriSpeech training dataset |
 | `training.sh` | Runs RNN-T training for the specified precision (fp32, avx-fp32, or bf16). |
 
 > Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
