@@ -6,6 +6,7 @@ run <model name> <mode> in a container.
 <package dir>
 ├── README.md
 ├── build.sh
+├── download_dataset.sh
 ├── licenses
 │   ├── LICENSE
 │   └── third_party

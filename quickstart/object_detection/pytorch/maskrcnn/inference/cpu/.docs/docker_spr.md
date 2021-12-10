@@ -10,7 +10,7 @@ export PRETRAINED_MODEL=$(pwd)/e2e_mask_rcnn_R_50_FPN_1x.pth
 After you've downloaded the pretrained model and followed the instructions to
 [build the container](#build-the-container) and [prepare the dataset](#datasets),
 use the `run.sh` script from the container package to run <model name> <mode>.
-Set environment variables to specify the dataset directory, precision to run, and
+Set environment variables to specify the dataset directory, precision and mode to run, and
 an output directory. By default, the `run.sh` script will run the
 `inference_realtime.sh` quickstart script. To run a different script, specify
 the name of the script using the `SCRIPT` environment variable.
@@ -20,6 +20,7 @@ cd <package dir>
 
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
+export MODE=<imperative or jit>
 export PRETRAINED_MODEL=<path to the downloaded .pth file>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>

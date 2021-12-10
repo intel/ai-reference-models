@@ -10,7 +10,6 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-maskrcnn-inference
-        - MASKRCNN_DIR=/workspace/pytorch-spr-maskrcnn-inference/models/maskrcnn
         - TORCHVISION_VERSION=81fe60cc258f49ccfb0f9f32d78b4825754cff7b
       partials:
         - pytorch/gcc-and-utils
@@ -22,47 +21,49 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/maskrcnn
-          destination: models/maskrcnn
-        - source: quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/inference_realtime.sh
+        - source: models/object_detection/pytorch/maskrcnn
+          destination: models/object_detection/pytorch/maskrcnn
+        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/inference_realtime.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/inference_throughput.sh
+        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/inference_throughput.sh
           destination: quickstart/inference_throughput.sh
-        - source: quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/accuracy.sh
+        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh
       wrapper_package_files:
         - source: output/pytorch-spr-maskrcnn-inference.tar.gz
           destination: model_packages/pytorch-spr-maskrcnn-inference.tar.gz
-        - source: quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/build.sh
+        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/build.sh
           destination: build.sh
-        - source: quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/run.sh
+        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/run.sh
           destination: run.sh
+        - source: quickstart/object_detection/pytorch/maskrcnn/training/cpu/download_dataset.sh
+          destination: download_dataset.sh
         - source: dockerfiles/pytorch/pytorch-spr-maskrcnn-inference.Dockerfile
           destination: pytorch-spr-maskrcnn-inference.Dockerfile
         - source: LICENSE
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/README_SPR.md
+        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README_SPR.md
           destination: README.md
       documentation:
         - docs:
           - name: Title
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/title.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/title.md
           - name: Description
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/description.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/description.md
           - name: Model Package
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/wrapper_package.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/wrapper_package.md
           - name: Quickstart
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/quickstart.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/quickstart.md
           - name: Datasets
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/datasets.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/datasets.md
           - name: Container build
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/container_build.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/container_build.md
           - name: Docker
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/docker_spr.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/docker_spr.md
           - name: License
-            uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu/.docs/license.md
+            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/license.md
           name: README_SPR.md
           text_replace:
             <model name>: Mask R-CNN
@@ -70,4 +71,4 @@ slice_sets:
             <package name>: pytorch-spr-maskrcnn-inference.tar.gz
             <package dir>: pytorch-spr-maskrcnn-inference
             <docker image>: model-zoo:pytorch-spr-maskrcnn-inference
-          uri: models/quickstart/image_segmentation/pytorch/maskrcnn/inference/cpu
+          uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu

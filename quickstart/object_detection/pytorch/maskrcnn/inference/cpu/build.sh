@@ -17,15 +17,15 @@
 
 set -e
 
-PACKAGE_NAME=pytorch-spr-maskrcnn-training
-DOCKERFILE=pytorch-spr-maskrcnn-training.Dockerfile
+PACKAGE_NAME=pytorch-spr-maskrcnn-inference
+DOCKERFILE=pytorch-spr-maskrcnn-inference.Dockerfile
 PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE:-model-zoo}
 PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-pytorch-ipex-spr}
-IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-maskrcnn-training}
+IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-maskrcnn-inference}
 
 if [ "$(docker images -q ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG})" == "" ]; then
   echo "The Intel(R) Extension for PyTorch container (${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}) was not found."
-  echo "This container is required, as it is used as the base for building the maskrcnn training container."
+  echo "This container is required, as it is used as the base for building the maskrcnn inference container."
   echo "Please download the IPEX container package and build the image and then retry this build."
   exit 1
 fi
@@ -34,7 +34,6 @@ docker build --build-arg PYTORCH_IMAGE=${PYTORCH_BASE_IMAGE} \
              --build-arg PYTORCH_TAG=${PYTORCH_BASE_TAG} \
              --build-arg PACKAGE_NAME=$PACKAGE_NAME \
              --build-arg MODEL_WORKSPACE=/workspace \
-             --build-arg MASKRCNN_DIR=/workspace/pytorch-spr-maskrcnn-training/models/maskrcnn \
              --build-arg http_proxy=$http_proxy \
              --build-arg https_proxy=$https_proxy  \
              --build-arg no_proxy=$no_proxy \

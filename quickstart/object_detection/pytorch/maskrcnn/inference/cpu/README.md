@@ -64,10 +64,10 @@ bash download_dataset.sh
 
 |  DataType   |  mode  | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ------ | ----------- | ----------- | ----------- |
-| FP32        | imperative | bash inference_throughput_baremetal.sh fp32 imperative | bash inference_realtime_baremetal.sh fp32 imperative | bash accuracy_baremetal.sh fp32 imperative |
-| BF16        | imperative | bash inference_throughput_baremetal.sh bf16 imperative | bash inference_realtime_baremetal.sh bf16 imperative | bash accuracy_baremetal.sh bf16 imperative |
-| FP32        | jit | bash inference_throughput_baremetal.sh fp32 jit | bash inference_realtime_baremetal.sh fp32 jit | bash accuracy_baremetal.sh fp32 jit |
-| BF16        | jit | bash inference_throughput_baremetal.sh bf16 jit | bash inference_realtime_baremetal.sh bf16 jit | bash accuracy_baremetal.sh bf16 jit |
+| FP32        | imperative | bash inference_throughput.sh fp32 imperative | bash inference_realtime.sh fp32 imperative | bash accuracy.sh fp32 imperative |
+| BF16        | imperative | bash inference_throughput.sh bf16 imperative | bash inference_realtime.sh bf16 imperative | bash accuracy.sh bf16 imperative |
+| FP32        | jit | bash inference_throughput.sh fp32 jit | bash inference_realtime.sh fp32 jit | bash accuracy.sh fp32 jit |
+| BF16        | jit | bash inference_throughput.sh bf16 jit | bash inference_realtime.sh bf16 jit | bash accuracy.sh bf16 jit |
 
 ## Run the model
 
@@ -90,7 +90,7 @@ export OUTPUT_DIR=<path to an output directory>
 
 # Run a quickstart script (for example, FP32 batch inference jit)
 cd ${MODEL_DIR}/quickstart/object_detection/pytorch/maskrcnn/inference/cpu
-bash inference_throughput_baremetal.sh fp32 jit
+bash inference_throughput.sh fp32 jit
 ```
 
 <!--- 80. License -->

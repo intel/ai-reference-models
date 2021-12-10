@@ -76,11 +76,8 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ARG MASKRCNN_DIR="/workspace/pytorch-spr-maskrcnn-inference/models/maskrcnn"
-
 RUN source activate pytorch && \
-    cd ${MASKRCNN_DIR} && \
-    cd maskrcnn-benchmark && \
+    cd ${MODEL_WORKSPACE}/${PACKAGE_NAME}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark && \
     python setup.py install && \
     pip install onnx
 

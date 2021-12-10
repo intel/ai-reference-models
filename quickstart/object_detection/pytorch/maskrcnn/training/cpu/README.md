@@ -57,8 +57,8 @@ bash download_dataset.sh
 
 |  DataType   | Throughput  |
 | ----------- | ----------- |
-| FP32        | bash train_throughput_baremetal.sh fp32 |
-| BF16        | bash train_throughput_baremetal.sh bf16 |
+| FP32        | bash training.sh fp32 |
+| BF16        | bash training.sh bf16 |
 
 ## Run the model
 
@@ -80,7 +80,7 @@ export OUTPUT_DIR=<path to an output directory>
 
 # Run a quickstart script (for example, FP32 training)
 cd ${MODEL_DIR}/quickstart/object_detection/pytorch/maskrcnn/training/cpu
-bash train_throughput_baremetal.sh fp32
+bash training.sh fp32
 ```
 
 <!--- 80. License -->
