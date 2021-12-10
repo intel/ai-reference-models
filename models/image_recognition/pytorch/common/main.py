@@ -494,23 +494,21 @@ def run_weights_sharing_model(m, tid, args):
     start_time = time.time()
     num_images = 0
     time_consume = 0
+    x = torch.randn(args.batch_size, 3, 224, 224)
+    if args.bf16:
+        x = x.to(torch.bfloat16)
+    if args.ipex:
+        x = x.contiguous(memory_format=torch.channels_last)
+
     with torch.no_grad():
         while num_images < steps:
-            if args.bf16:
-                for i in range(24):
-                    x = torch.randn(args.batch_size, 3, 224, 224).to(torch.bfloat16)
-            else:
-                for i in range(24):
-                    x = torch.randn(args.batch_size, 3, 224, 224)
-            if args.ipex:
-                x = x.contiguous(memory_format=torch.channels_last)
             start_time = time.time()
             if not args.jit and args.bf16:
                 with torch.cpu.amp.autocast():
                     y = m(x)
             else:
                 y = m(x)
-    
+
             end_time = time.time()
             if num_images > args.warmup_iterations:
                 time_consume += end_time - start_time
@@ -585,7 +583,7 @@ def validate(val_loader, model, criterion, args):
                                 output = model(images)
                         else:
                             output = model(images)
-    
+
                         if i >= args.warmup_iterations:
                             batch_time.update(time.time() - end)
 
@@ -613,7 +611,7 @@ def validate(val_loader, model, criterion, args):
                             output = model(images)
                     else:
                         output = model(images)
-    
+
                     # compute output
                     batch_time.update(time.time() - end)
                     #print(output)
