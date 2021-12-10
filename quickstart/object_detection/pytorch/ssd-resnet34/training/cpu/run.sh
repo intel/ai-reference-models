@@ -30,8 +30,8 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ -z "${BACKBONE_WEIGHTS}" ]; then
-  echo "The required environment variable BACKBONE_WEIGHTS has not been set"
+if [ -z "${CHECKPOINT_DIR}" ]; then
+  echo "The required environment variable CHECKPOINT_DIR has not been set"
   exit 1
 fi
 
@@ -40,9 +40,9 @@ DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
 WORKDIR=/workspace/pytorch-spr-ssd-resnet34-training
 
 # training scripts:
-# train_performance.sh
-# train_accuracy.sh
-export SCRIPT="${SCRIPT:-train_performance.sh}"
+# throughput.sh
+# accuracy.sh
+export SCRIPT="${SCRIPT:-throughput.sh}"
 
 if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
@@ -50,18 +50,17 @@ fi
 
 docker run --rm \
   ${dataset_env} \
-  --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
-  --env BACKBONE_WEIGHTS=${BACKBONE_WEIGHTS} \
+  --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume ${BACKBONE_WEIGHTS}:${BACKBONE_WEIGHTS} \
+  --volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --shm-size 8G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash $SCRIPT $PRECISION

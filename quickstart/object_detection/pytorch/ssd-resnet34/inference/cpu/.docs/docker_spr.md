@@ -1,11 +1,11 @@
 ## Run the model
 
-Download the pretrained model weights using the script from the MLPerf repo
-and set the `PRETRAINED_MODEL` environment variable to point to the downloaded file:
+Download the pretrained model weights using the script from the container package
+and set the `CHECKPOINT_DIR` environment variable to point to the downloaded file:
 ```
-wget https://raw.githubusercontent.com/mlcommons/inference/v0.7/others/cloud/single_stage_detector/download_model.sh
+cd <package dir>
+export CHECKPOINT_DIR=<directory where to save the pretrained model>
 sh download_model.sh
-export PRETRAINED_MODEL=$(pwd)/pretrained/resnet34-ssd1200.pth
 ```
 
 After downloading the pretrained model and following the instructions to
@@ -21,7 +21,7 @@ cd <package dir>
 
 # Set the required environment vars
 export DATASET_DIR=<path to the coco dataset>
-export PRETRAINED_MODEL=<path to the resnet34-ssd1200.pth file>
+export CHECKPOINT_DIR=<path to the downloaded weights directory>
 export PRECISION=<specify the precision to run>
 export OUTPUT_DIR=<directory where log files will be written>
 

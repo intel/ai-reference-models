@@ -20,8 +20,8 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/jemalloc-libiomp5-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/ssd/inference/others/cloud/single_stage_detector
-          destination: models/ssd/inference/others/cloud/single_stage_detector
+        - source: models/object_detection/pytorch/ssd-resnet34/inference/cpu
+          destination: models/object_detection/pytorch/ssd-resnet34/inference/cpu
         - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_realtime.sh
           destination: quickstart/inference_realtime.sh
         - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/inference_throughput.sh
@@ -35,6 +35,10 @@ slice_sets:
           destination: build.sh
         - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/run.sh
           destination: run.sh
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/download_dataset.sh
+          destination: download_dataset.sh
+        - source: quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/download_model.sh
+          destination: download_model.sh
         - source: dockerfiles/pytorch/pytorch-spr-ssd-resnet34-inference.Dockerfile
           destination: pytorch-spr-ssd-resnet34-inference.Dockerfile
         - source: LICENSE
