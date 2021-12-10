@@ -1,5 +1,2 @@
-ARG DLRM_DIR
-
 RUN source activate pytorch && \
-    cd ${DLRM_DIR} && \
-    pip install -r dlrm/requirements.txt
+    pip install -r ${MODEL_WORKSPACE}/${PACKAGE_NAME}/quickstart/requirements.txt

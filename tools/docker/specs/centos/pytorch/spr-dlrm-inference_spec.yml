@@ -10,7 +10,6 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-dlrm-inference
-        - DLRM_DIR=/workspace/pytorch-spr-dlrm-inference/models/dlrm
       partials:
         - pytorch/gcc-and-utils
         - pytorch/spr-model-installs
@@ -20,14 +19,14 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/models/dlrm-jemalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/dlrm
-          destination: models/dlrm
-        - source: tools/docker/models/cpu-models/dlrm-int8
-          destination: models/dlrm-int8
+        - source: models/recommendation/pytorch/dlrm
+          destination: models/recommendation/pytorch/dlrm
         - source: quickstart/recommendation/pytorch/dlrm/inference/cpu/inference_performance.sh
           destination: quickstart/inference_performance.sh
         - source: quickstart/recommendation/pytorch/dlrm/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh
+        - source: quickstart/recommendation/pytorch/dlrm/requirements.txt
+          destination: quickstart/requirements.txt
       wrapper_package_files:
         - source: output/pytorch-spr-dlrm-inference.tar.gz
           destination: model_packages/pytorch-spr-dlrm-inference.tar.gz

@@ -74,7 +74,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 | Script name | Description |
 |-------------|-------------|
-| `bare_metal_train.sh` | Run training for the specified precision (fp32 or bf16). |
+| `training.sh` | Run training for the specified precision (fp32, avx-fp32, or bf16). |
 
 ## Run the model
 
@@ -100,10 +100,10 @@ export OUTPUT_DIR=<directory where log files will be written>
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/training/cpu
 
 # Run the quickstart script to test performance
-NUM_BATCH=10000 bash bare_metal_train.sh
+NUM_BATCH=10000 bash training.sh
 
 # Or, run quickstart script for testing convergence trend
-NUM_BATCH=50000 bash bare_metal_train.sh
+NUM_BATCH=50000 bash training.sh
 ```
 
 <!--- 80. License -->

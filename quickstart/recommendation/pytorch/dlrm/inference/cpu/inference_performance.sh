@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,10 +14,15 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+if [ ! -e "${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/dlrm_s_pytorch.py"  ]; then
+    echo "Could not find the script of dlrm_s_pytorch.py. Please set environment variable '\${MODEL_DIR}'."
+    echo "From which the dlrm_s_pytorch.py exist at the: \${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/dlrm_s_pytorch.py"
+    exit 1
+fi
+MODEL_SCRIPT=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/dlrm_s_pytorch.py
 
 echo "PRECISION: ${PRECISION}"
 echo "DATASET_DIR: ${DATASET_DIR}"
-echo "WEIGHT_PATH: ${WEIGHT_PATH}"
 echo "OUTPUT_DIR: ${OUTPUT_DIR}"
 
 if [ -z "${OUTPUT_DIR}" ]; then
@@ -37,50 +40,79 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [ -z "${WEIGHT_PATH}" ]; then
-  echo "The required environment variable WEIGHT_PATH has not been set"
-  exit 1
-fi
-
-if [ ! -f "${WEIGHT_PATH}" ]; then
-  echo "The WEIGHT_PATH ${WEIGHT_PATH} file does not exist "
-  exit 1
-fi
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
-
-if [ -z "${PRECISION}" ]; then
-  echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, int8, avx-int8, or bf16."
-  exit 1
-fi
-
-# Set paths that the run_inference_performance.sh scripts expect
-export DATASET_PATH=${DATASET_DIR}
-export work_space=${OUTPUT_DIR}
-export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-export KMP_SETTINGS=1
-export KMP_AFFINITY="granularity=fine,compact,1,0"
-export KMP_BLOCKTIME=1
+LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
+rm -rf ${LOG}
+mkdir -p ${LOG}
 
 if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
-else
-    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 fi
 
-if [[ $PRECISION == "bf16" ]]; then
-    cd ${MODEL_DIR}/models/dlrm/dlrm
-    bash run_inference_performance.sh bf16 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-performance-bf16.log
+ARGS=""
+if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
+    echo "running int8 path"
+    ARGS="$ARGS --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
+elif [[ $PRECISION == "bf16" ]]; then
+    ARGS="$ARGS --bf16"
+    echo "running bf16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
-    cd ${MODEL_DIR}/models/dlrm/dlrm
-    bash run_inference_performance.sh 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-performance-fp32.log
-elif [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    cd ${MODEL_DIR}/models/dlrm-int8/dlrm
-    bash run_inference_performance.sh int8 2>&1 | tee -a ${OUTPUT_DIR}/dlrm-inference-performance-int8.log
+    echo "running fp32 path"
 else
-    echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, int8, avx-int8, and bf16"
+    echo "The specified PRECISION '${PRECISION}' is unsupported."
+    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16, int8, and avx-int8"
     exit 1
 fi
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+export OMP_NUM_THREADS=1
+
+for i in $(seq 1 $((SOCKETS-1))); do
+  LOG_i="${LOG}/socket_$i"
+  start=$((i*CORES))
+  end=$((start+CORES-1))
+  numa_cmd="numactl -C $start-$end -m $i"
+  $numa_cmd python -u $MODEL_SCRIPT \
+  --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+  --data-set=terabyte \
+  --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+  --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+  --arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
+  --numpy-rand-seed=727  --inference-only --num-batches=1000 \
+  --print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
+  $ARGS > $LOG_i
+done
+
+i=0
+LOG_0="${LOG}/socket_$i"
+start=$((i*CORES))
+end=$((start+CORES-1))
+numa_cmd="numactl -C $start-$end -m $i"
+$numa_cmd python -u $MODEL_SCRIPT \
+--raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
+--data-set=terabyte \
+--memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+--arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
+--arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
+--numpy-rand-seed=727  --inference-only --num-batches=1000 \
+--print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
+$ARGS > $LOG_0
+wait
+
+throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+BEGIN {
+        sum = 0;
+        i = 0;
+      }
+      {
+        sum = sum + $1;
+        i++;
+      }
+END   {
+sum = sum / i;
+        printf("%.3f", sum);
+}')
+echo ""dlrm";"throughput";${PRECISION};128;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
