@@ -166,6 +166,9 @@ if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != 
 elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES != "None" ]]; then
   # BERT large training with MPI uses numactl
   INSTALL_NUMACTL="True"
+elif [[ $MODEL_NAME == "wide_deep" ]]; then
+  # TODO: Why Wide & Deep uses numactl always
+  INSTALL_NUMACTL="True"
 fi
 
 # If we are running in a container, call the container_init.sh files
