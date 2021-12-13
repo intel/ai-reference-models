@@ -111,7 +111,7 @@ if [ "$weight_sharing" = true ]; then
     wait
 
 else
-    BATCH_SIZE=16
+    BATCH_SIZE=112
     python -m intel_extension_for_pytorch.cpu.launch \
         --use_default_allocator \
         --throughput_mode \
@@ -119,10 +119,10 @@ else
         --data ${DATASET_DIR}/coco \
         --device 0 \
         --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
-        -w 20 \
+        -w 10 \
         -j 0 \
         --no-cuda \
-        --iteration 200 \
+        --iteration 50 \
         --batch-size ${BATCH_SIZE} \
         --jit \
         --throughput-mode \
