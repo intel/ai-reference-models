@@ -10,9 +10,7 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-bert-large-training
-        - BERT_DIR=/workspace/pytorch-spr-bert-large-training/models/bert/bert
-        - BERT_PRE_TRAIN_DIR=/workspace/pytorch-spr-bert-large-training/models/bert_pre_train
-        - TRANSFORMERS_COMMIT=91758e399f8c4bf81820a8af6a257682ccea0223
+        - TRANSFORMERS_COMMIT=v4.11.3
       partials:
         - pytorch/gcc-and-utils
         - pytorch/tcmalloc
@@ -22,14 +20,14 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/tcmalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/bert_pre_train
-          destination: models/bert_pre_train
-        - source: tools/docker/models/cpu-models/bert
-          destination: models/bert
-        - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/pretrain_phase1.sh
-          destination: quickstart/pretrain_phase1.sh
-        - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/pretrain_phase2.sh
-          destination: quickstart/pretrain_phase2.sh
+        - source: models/language_modeling/pytorch/bert_large/training
+          destination: models/language_modeling/pytorch/bert_large/training
+        - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/enable_optmization.diff
+          destination: quickstart/enable_optmization.diff
+        - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/run_bert_pretrain_phase1.sh
+          destination: quickstart/run_bert_pretrain_phase1.sh
+        - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/run_bert_pretrain_phase2.sh
+          destination: quickstart/run_bert_pretrain_phase2.sh
       wrapper_package_files:
         - source: output/pytorch-spr-bert-large-training.tar.gz
           destination: model_packages/pytorch-spr-bert-large-training.tar.gz

@@ -35,7 +35,6 @@ docker build --build-arg PYTORCH_IMAGE=${PYTORCH_BASE_IMAGE} \
              --build-arg PYTORCH_TAG=${PYTORCH_BASE_TAG} \
              --build-arg PACKAGE_NAME=$PACKAGE_NAME \
              --build-arg MODEL_WORKSPACE=/workspace \
-             --build-arg BERT_DIR=/workspace/pytorch-spr-bert-large-inference/models/bert \
              --build-arg http_proxy=$http_proxy \
              --build-arg https_proxy=$https_proxy  \
              --build-arg no_proxy=$no_proxy \

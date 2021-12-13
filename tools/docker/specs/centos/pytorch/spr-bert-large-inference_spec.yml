@@ -10,7 +10,6 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-bert-large-inference
-        - BERT_DIR=/workspace/pytorch-spr-bert-large-inference/models/bert
       partials:
         - pytorch/gcc-and-utils
         - pytorch/tcmalloc
@@ -20,14 +19,18 @@ slice_sets:
         - pytorch/spr-dnnl-max-var
         - pytorch/tcmalloc-entrypoint
       files:
-        - source: tools/docker/models/cpu-models/bert
-          destination: models/bert
-        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/accuracy.sh
-          destination: quickstart/accuracy.sh
-        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/inference_realtime.sh
-          destination: quickstart/inference_realtime.sh
-        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/inference_throughput.sh
-          destination: quickstart/inference_throughput.sh
+        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/enable_ipex_for_squad.diff
+          destination: quickstart/enable_ipex_for_squad.diff
+        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/configure.json
+          destination: quickstart/configure.json
+        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_accuracy.sh
+          destination: quickstart/run_accuracy.sh
+        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_calibration.sh
+          destination: quickstart/run_calibration.sh
+        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_multi_instance_realtime.sh
+          destination: quickstart/run_multi_instance_realtime.sh
+        - source: quickstart/language_modeling/pytorch/bert_large/inference/cpu/run_multi_instance_throughput.sh
+          destination: quickstart/run_multi_instance_throughput.sh
       wrapper_package_files:
         - source: output/pytorch-spr-bert-large-inference.tar.gz
           destination: model_packages/pytorch-spr-bert-large-inference.tar.gz
@@ -53,6 +56,8 @@ slice_sets:
             uri: models/quickstart/language_modeling/pytorch/bert_large/inference/cpu/.docs/wrapper_package.md
           - name: Quickstart
             uri: models/quickstart/language_modeling/pytorch/bert_large/inference/cpu/.docs/quickstart.md
+          - name: Datasets
+            uri: models/quickstart/language_modeling/pytorch/bert_large/inference/cpu/.docs/dataset.md
           - name: Container build
             uri: models/quickstart/language_modeling/pytorch/bert_large/inference/cpu/.docs/container_build.md
           - name: Docker

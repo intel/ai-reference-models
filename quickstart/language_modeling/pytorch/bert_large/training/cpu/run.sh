@@ -34,11 +34,12 @@ echo "DATASET_DIR: ${DATASET_DIR}"
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-bert-large-training}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
 WORKDIR=/workspace/pytorch-spr-bert-large-training
+TRAIN_SCRIPT=${WORKDIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py
 
 # training scripts:
-# pretrain_phase1.sh
-# pretrain_phase2.sh
-export SCRIPT="${SCRIPT:-pretrain_phase1.sh}"
+# run_bert_pretrain_phase1.sh
+# run_bert_pretrain_phase2.sh
+export SCRIPT="${SCRIPT:-run_bert_pretrain_phase1.sh}"
 
 if [[ ${SCRIPT} != quickstart* ]]; then
   SCRIPT="quickstart/$SCRIPT"
@@ -51,7 +52,7 @@ checkpoint_mount=""
 
 if [ ! -z "${CONFIG_FILE}" ]; then
   echo "CONFIG_FILE: ${CONFIG_FILE}"
-  config_file_env="--env bert_config_name=${CONFIG_FILE}"
+  config_file_env="--env BERT_MODEL_CONFIG=${CONFIG_FILE}"
   config_file_mount="--volume ${CONFIG_FILE}:${CONFIG_FILE}"
 else
   echo "The required environment variable CONFIG_FILE has not been set to run pretraining."
@@ -61,7 +62,7 @@ fi
 if [[ ${SCRIPT} = *phase2* ]]; then
   if [ ! -z "${CHECKPOINT_DIR}" ]; then
     echo "CHECKPOINT_DIR: ${CHECKPOINT_DIR}"
-    checkpoint_env="--env bert_model_path=${CHECKPOINT_DIR}"
+    checkpoint_env="--env PRETRAINED_MODEL=${CHECKPOINT_DIR}"
     checkpoint_mount="--volume ${CHECKPOINT_DIR}:${CHECKPOINT_DIR}"
   else
     echo "The required environment variable CHECKPOINT_DIR has not been set to run phase2 pretraining."
@@ -73,7 +74,8 @@ fi
 docker run --rm \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env bert_dataset=${DATASET_DIR} \
+  --env TRAIN_SCRIPT=${TRAIN_SCRIPT} \
+  --env DATASET_DIR=${DATASET_DIR} \
   ${config_file_env} \
   ${checkpoint_env} \
   --env http_proxy=${http_proxy} \
@@ -87,4 +89,4 @@ docker run --rm \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \
-  /bin/bash $SCRIPT
+  /bin/bash $SCRIPT $PRECISION

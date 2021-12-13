@@ -24,18 +24,22 @@ precision=fp32
 
 batch_size=224
 
+if [[ "$1" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 if [[ "$1" == "bf16" ]]
 then
     ARGS="$ARGS --bf16"
     precision=bf16
     batch_size=448
     echo "### running bf16 mode"
-elif [[ $1 == "fp32" ]]; then
+elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running FP32 mode"
 
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf16"
     exit 1
 fi
 rm -rf ${OUTPUT_DIR}/throughput_log_phase1*
@@ -51,7 +55,7 @@ python -m intel_extension_for_pytorch.cpu.launch --socket_id 0 --log_path=${OUTP
     --validation_file ${DATASET_DIR}/seq_128/part-00000-of-00500_128 \
     --model_type 'bert' \
     --benchmark \
-    --output_dir model_save \
+    --output_dir $OUTPUT_DIR/model_save \
     --dense_seq_output \
     $ARGS \
     --config_name ${BERT_MODEL_CONFIG} \
