@@ -62,14 +62,15 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ARG BERT_DIR="/workspace/pytorch-spr-bert-large-inference/models/bert"
-
 RUN source activate pytorch && \
-    cd ${BERT_DIR} && \
-    cd bert && \
+    cd ${MODEL_WORKSPACE}/${PACKAGE_NAME}/quickstart && \
+    git clone https://github.com/huggingface/transformers.git && \
+    cd transformers && \
+    git checkout v3.0.2 && \
+    git apply ../enable_ipex_for_squad.diff && \
+    pip install -e ./ && \
     pip install -r examples/requirements.txt && \
-    pip install -e . && \
-    conda install intel-openmp && \
+    conda install intel-openmp &&  \
     mkdir -p /root/.local
 
 FROM intel-optimized-pytorch AS release

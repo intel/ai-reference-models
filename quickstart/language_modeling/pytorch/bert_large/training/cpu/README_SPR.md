@@ -29,14 +29,14 @@ pytorch-spr-bert-large-training
 
 | Script name | Description |
 |-------------|-------------|
-| `pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32, avx-fp32, or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
-| `pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32, avx-fp32, or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
+| `run_bert_pretrain_phase1.sh` | Runs BERT large pretraining phase 1 using max_seq_len=128 for the first 90% dataset for the specified precision (fp32, avx-fp32, or bf16). The script saves the model to the `OUTPUT_DIR` in a directory called `model_save`. |
+| `run_bert_pretrain_phase2.sh` | Runs BERT large pretraining phase 2 using max_seq_len=512 with the remaining 10% of the dataset for the specified precision (fp32, avx-fp32, or bf16). Use path to the `model_save` directory from phase one as the `CHECKPOINT_DIR` for phase 2. |
 
 > Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
 > `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
 > otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
-# Datasets
+## Datasets
 
 BERT Large training uses the config file and enwiki-20200101 dataset from the
 [MLCommons training GitHub repo](https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert).
@@ -94,8 +94,9 @@ After you've followed the instructions to [build the container](#build-the-conta
 download the [dataset and config file](#datasets), use the `run.sh` script from the
 container package to run BERT Large training in docker. Set environment variables to
 specify the precision to run, dataset directory, config file directory, and an
-output directory. By default, the `run.sh` script will run the `pretrain_phase1.sh`
-quickstart script.
+output directory. Use an empty `OUTPUT_DIR` to start with to prevent any previously
+generated checkpoints from getting picked up. By default, the `run.sh` script will
+run the `run_bert_pretrain_phase1.sh` quickstart script.
 ```
 # Navigate to the container package directory
 cd pytorch-spr-bert-large-training
@@ -106,7 +107,7 @@ export OUTPUT_DIR=<directory where log and model files will be written for phase
 export DATASET_DIR=<path to the preprocessed dataset>
 export CONFIG_FILE=<path to the bert_config.json>
 
-# Run the container with the default pretrain_phase1.sh quickstart script
+# Run the container with the default run_bert_pretrain_phase1.sh quickstart script
 ./run.sh
 ```
 To run phase 2, use the model_save from the phase 1 output as the `CHECKPOINT_DIR`.
@@ -119,7 +120,7 @@ export CHECKPOINT_DIR=${OUTPUT_DIR}/model_save
 
 # Define a new directory for phase 2 output, and set the SCRIPT var to run phase 2
 export OUTPUT_DIR=<directory where log and model files will be written for phase 2>
-SCRIPT=pretrain_phase2.sh ./run.sh
+SCRIPT=run_bert_pretrain_phase2.sh ./run.sh
 ```
 
 <!--- 80. License -->

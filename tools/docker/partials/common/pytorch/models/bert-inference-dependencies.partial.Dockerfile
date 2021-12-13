@@ -1,9 +1,10 @@
-ARG BERT_DIR
-
 RUN source activate pytorch && \
-    cd ${BERT_DIR} && \
-    cd bert && \
+    cd ${MODEL_WORKSPACE}/${PACKAGE_NAME}/quickstart && \
+    git clone https://github.com/huggingface/transformers.git && \
+    cd transformers && \
+    git checkout v3.0.2 && \
+    git apply ../enable_ipex_for_squad.diff && \
+    pip install -e ./ && \
     pip install -r examples/requirements.txt && \
-    pip install -e . && \
-    conda install intel-openmp && \
+    conda install intel-openmp &&  \
     mkdir -p /root/.local
