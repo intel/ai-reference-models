@@ -51,11 +51,11 @@ Third party programs and their corresponding required notices and/or license ter
 
    TorchCCL
    Intel(R) oneAPI Collective Communications Library is provided under
-   the terms of the Apache License, Version 2.0. Third party programs or 
+   the terms of the Apache License, Version 2.0. Third party programs or
    components provided with Intel(R) oneAPI Collective Communications Library are governed by separate license terms.
-   Such separate license terms (and not the Apache License) solely govern your 
-   use of these third party programs. Information on those components and 
-   licenses can be found in the "third-party-programs.txt" text file that is 
+   Such separate license terms (and not the Apache License) solely govern your
+   use of these third party programs. Information on those components and
+   licenses can be found in the "third-party-programs.txt" text file that is
    included with Intel(R) oneAPI Collective Communications Library.
 
    torch-ipex
@@ -63,7 +63,7 @@ Third party programs and their corresponding required notices and/or license ter
    tornado
 
 ##### Apache License 2.0 #####
-   
+
 	Apache License
 
 Version 2.0, January 2004
@@ -117,7 +117,7 @@ You may add Your own copyright statement to Your modifications and may provide a
 9. Accepting Warranty or Additional Liability. While redistributing the Work or Derivative Works thereof, You may choose to offer, and charge a fee for, acceptance of support, warranty, indemnity, or other liability obligations and/or rights consistent with this License. However, in accepting such obligations, You may act only on Your own behalf and on Your sole responsibility, not on behalf of any other Contributor, and only if You agree to indemnify, defend, and hold each Contributor harmless for any liability incurred by, or claims asserted against, such Contributor by reason of your accepting any such warranty or additional liability.
 
 END OF TERMS AND CONDITIONS
-   
+
 ----------------------------------------------------------------------------------
 2. python-dateutil
 
@@ -192,7 +192,7 @@ The above BSD License Applies to all code, even that also covered by Apache 2.0.
    This software is made available under the terms of *either* of the licenses
    found in LICENSE.APACHE or LICENSE.BSD. Contributions to this software is made
    under the terms of *both* these licenses.
-   
+
   The code used in the OS random engine is derived from CPython, and is licensed
   under the terms of the PSF License Agreement.
 
@@ -213,7 +213,7 @@ INDIRECT,  OR CONSEQUENTIAL DAMAGES  OR ANY DAMAGES WHATSOEVER RESULTING FROM
 LOSS OF USE,  DATA OR PROFITS,  WHETHER IN AN ACTION OF CONTRACT,  NEGLIGENCE
 OR OTHER TORTIOUS ACTION,  ARISING OUT OF  OR IN CONNECTION  WITH THE USE  OR
 PERFORMANCE OF THIS SOFTWARE.
-----------------------------------------------------------------------------------  
+----------------------------------------------------------------------------------
 6. Bottleneck
    Copyright (c) 2010-2019 Keith Goodman
    Copyright (c) 2019 Bottleneck Developers
@@ -430,7 +430,7 @@ http://docs.python.org/license.html
 
 ----------------------------------------------------------------------------------
 11. olefile
-   
+
 LICENSE for the olefile package:
 
 olefile (formerly OleFileIO_PL) is copyright (c) 2005-2020 Philippe Lagadec
@@ -493,10 +493,10 @@ PERFORMANCE OF THIS SOFTWARE.
    This repository uses 2 different licenses :
    - all files in the `lib` directory use a BSD 2-Clause license
    - all other files use a GPLv2 license, unless explicitly stated otherwise
-   
+
    Relevant license is reminded at the top of each source file,
    and with presence of COPYING or LICENSE file in associated directories.
-   
+
    This model is selected to emphasize that
    files in the `lib` directory are designed to be included into 3rd party applications,
    while all other files, in `programs`, `tests` or `examples`,
@@ -881,7 +881,7 @@ changes. For this, see comments in patsy/compat.py.
    All rights reserved.
 
    Pytorch Examples
-   Copyright (c) 2017, 
+   Copyright (c) 2017,
    All rights reserved.
 
    qtconsole
@@ -901,7 +901,7 @@ changes. For this, see comments in patsy/compat.py.
     All rights reserved.
 
     torchvision
-    Copyright (c) Soumith Chintala 2016, 
+    Copyright (c) Soumith Chintala 2016,
     All rights reserved.
 
     werkzeug
@@ -1028,13 +1028,13 @@ modification, are permitted provided that the following conditions are
 met:
 
 * Redistributions of source code must retain the above copyright notice,
-  this list of conditions and the following disclaimer.  
-* Redistributions in binary form must reproduce the above copyright notice, 
+  this list of conditions and the following disclaimer.
+* Redistributions in binary form must reproduce the above copyright notice,
   this list of conditions and the following disclaimer in the documentation
-  and/or other materials provided with the distribution.  
+  and/or other materials provided with the distribution.
 * Neither the name of the David Beazley or Dabeaz LLC may be used to
   endorse or promote products derived from this software without
-  specific prior written permission. 
+  specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -1308,7 +1308,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     anaconda-project
     Copyright (c) 2016, Anaconda, Inc.
     All rights reserved.
-   
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 
@@ -1479,7 +1479,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 DAMAGE.
- 
+
 --------------------------------------------------------------------------------
 30. networkx
 
@@ -2098,24 +2098,24 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice, this 
+* Redistributions of source code must retain the above copyright notice, this
   list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, 
-  this list of conditions and the following disclaimer in the documentation 
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
   and/or other materials provided with the distribution.
-* Neither the name of Eli Bendersky nor the names of its contributors may 
-  be used to endorse or promote products derived from this software without 
+* Neither the name of Eli Bendersky nor the names of its contributors may
+  be used to endorse or promote products derived from this software without
   specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE 
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ----------------------------------------------------------------------------------
 43. zstd
@@ -2199,7 +2199,7 @@ are permitted provided that the following conditions are met:
 3. Neither the name of Dan Haim nor the names of his contributors may be used
    to endorse or promote products derived from this software without specific
    prior written permission.
-   
+
 THIS SOFTWARE IS PROVIDED BY DAN HAIM "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO
@@ -2213,7 +2213,7 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMANGE.
 ----------------------------------------------------------------------------------
 46. lxml
     Copyright (c) 2004 Infrae. All rights reserved.
-    
+
     MKL_fft
     MKL_random
     MKL-service
@@ -2225,7 +2225,7 @@ met:
 
   1. Redistributions of source code must retain the above copyright
      notice, this list of conditions and the following disclaimer.
-   
+
   2. Redistributions in binary form must reproduce the above copyright
      notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the
@@ -2981,16 +2981,16 @@ are met:
 1. Redistributions of source code must retain the above copyright
    notice, this list of conditions and the following disclaimer.
 
-2. The origin of this software must not be misrepresented; you must 
-   not claim that you wrote the original software.  If you use this 
-   software in a product, an acknowledgment in the product 
+2. The origin of this software must not be misrepresented; you must
+   not claim that you wrote the original software.  If you use this
+   software in a product, an acknowledgment in the product
    documentation would be appreciated but is not required.
 
 3. Altered source versions must be plainly marked as such, and must
    not be misrepresented as being the original software.
 
-4. The name of the author may not be used to endorse or promote 
-   products derived from this software without specific prior written 
+4. The name of the author may not be used to endorse or promote
+   products derived from this software without specific prior written
    permission.
 
 THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS
@@ -4786,7 +4786,7 @@ library.  If this is what you want to do, use the GNU Library General
 Public License instead of this License.
 --------------------------------------------------------------------------------
 64. ca-certificates
- 
+
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Source: http://ftp.debian.org/debian/pool/main/c/ca-certificates/
 
@@ -6119,7 +6119,7 @@ WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 --------------------------------------------------------------------------------
-68. 
+68.
 
 --------------------------------------------------------------------------------
 69. cairo
@@ -6398,7 +6398,7 @@ Library.
 Copyright (c) 1988-1997 Sam Leffler
 Copyright (c) 1991-1997 Silicon Graphics, Inc.
 
-Permission to use, copy, modify, distribute, and sell this software and 
+Permission to use, copy, modify, distribute, and sell this software and
 its documentation for any purpose is hereby granted without fee, provided
 that (i) the above copyright notices and this permission notice appear in
 all copies of the software and related documentation, and (ii) the names of
@@ -6406,15 +6406,15 @@ Sam Leffler and Silicon Graphics may not be used in any advertising or
 publicity relating to the software without the specific, prior written
 permission of Sam Leffler and Silicon Graphics.
 
-THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
-WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
+THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 
 IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
 ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
 OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
-LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
 OF THIS SOFTWARE.
 -----------------------------------------------------------------------------------
 73. matplotlib
@@ -6475,9 +6475,9 @@ License agreement for matplotlib versions prior to 1.3.0
     Copyright (c) 2014 Christopher Rosell
 
     boto
-    
+
     cffi
-    
+
     DLRM
     Copyright (c) Facebook, Inc. and its affiliates.
 
@@ -6576,7 +6576,7 @@ License agreement for matplotlib versions prior to 1.3.0
     Copyright © 2006-2009 Johann C. Rocholl <johann@rocholl.net>
     Copyright © 2009-2014 Florent Xicluna <florent.xicluna@gmail.com>
     Copyright © 2014-2020 Ian Lee <IanLee1521@gmail.com>
-   
+
     pycosat
     Copyright (c) 2013, Ilan Schnell, Continuum Analytics, Inc.
 
@@ -6607,8 +6607,8 @@ License agreement for matplotlib versions prior to 1.3.0
 
     QtAwesome
     QtPy
-    Copyright (c) 2015 The Spyder development team 
-    
+    Copyright (c) 2015 The Spyder development team
+
     ruamel_yaml
     Copyright (c) 2014-2020 Anthon van der Neut, Ruamel bvba
 
@@ -6616,7 +6616,7 @@ License agreement for matplotlib versions prior to 1.3.0
     Copyright Jason R. Coombs
 
     singledispatch
-    
+
     six
     Copyright (c) 2010-2020 Benjamin Peterson
 
@@ -6837,7 +6837,7 @@ files names COPYING in subdirectories where applicable.
 
 Copyright © 2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020  Google, Inc.
 Copyright © 2018,2019,2020  Ebrahim Byagowi
-Copyright © 2019,2020  Facebook, Inc. 
+Copyright © 2019,2020  Facebook, Inc.
 Copyright © 2012  Mozilla Foundation
 Copyright © 2011  Codethink Limited
 Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
@@ -6935,7 +6935,7 @@ possible. They may also add themselves to the list below.
  * The above copyright notice and this permission notice (including the next
  * paragraph) shall be included in all copies or substantial portions of the
  * Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
@@ -7100,7 +7100,7 @@ Texts. A copy of the license is included in the file COPYING.
 %%name: ncurses
 
 %%short-description: Displays and updates text on text-only terminals.
- 
+
 %%full-description: The ncurses (new curses) lib is a free
 software emulation of curses in System V Release 4.0 and more. It uses
 terminfo format, supports pads and color and multiple highlights and
@@ -7124,7 +7124,7 @@ a termcap conversion tool captoinfo.
 
 %%keywords: development, command line, text mode, text
 
-%%programs: 
+%%programs:
 
 %%GNU: yes
 
@@ -7136,7 +7136,7 @@ a termcap conversion tool captoinfo.
 
 %%developers: Zeyd Ben-Halim <zmbenhal@netcom.com>, Eric Raymond, Thomas Dickey <dickey@clark.net>,Jurgen Pfeifer <juergen.pfeiffer@gmx.net>
 
-%%contributors: Alexander V. Lukyanov <lav@yars.free.net>  
+%%contributors: Alexander V. Lukyanov <lav@yars.free.net>
 
 %%sponsors:
 
@@ -7154,7 +7154,7 @@ a termcap conversion tool captoinfo.
 
 %%supported-languages: C, C++, Ada95
 
-%%use-requirements: 
+%%use-requirements:
 
 %%build-prerequisites: awk, sed, make
 
@@ -7162,7 +7162,7 @@ a termcap conversion tool captoinfo.
 
 %%source-prerequisites:
 
-%%version: 5.2 released 21 Oct 2000 
+%%version: 5.2 released 21 Oct 2000
 
 %%announce-list:
 
@@ -7170,7 +7170,7 @@ a termcap conversion tool captoinfo.
 
 %%help-list: bug-ncurses@gnu.org
 
-%%help-news: 
+%%help-news:
 
 %%dev-list: bug-ncurses@gnu.org
 
@@ -8537,23 +8537,41 @@ a legal notice, here is a blessing:
   *   May you find forgiveness for yourself and forgive others.
   *   May you share freely, never taking more than you give.
 
+--------------------------------------------------------------------------------
+
+Licenses for Operating systems
+Licensing for image operating systems can be found here:
+Ubuntu: https://ubuntu.com/licensing
+Centos: https://centos.org/legal/licensing-policy/#:~:text=The%20CentOS%20Linux%20and%20CentOS,copyright%20is%20licensed%20under%20GPLv2.
+
+--------------------------------------------------------------------------------
+
+License files for packages installed using the Ubuntu package manager can be found at the location: /usr/share/docs
+License files for packages installed using the Centos package manager can be found at the location: /usr/share/licenses
+License files for packages installed using the Python package manager can be found at the location: /usr/local/lib/python*/dist-packages/
+License files for packages installed using the Cona package manager can be found at the location: <PATH_TO_CONDA_ENV>/pkgs/**/info/licenses
 
 ----------------------------------------------------------------------------------
+
 The following third party programs have their own third party program files. These additional third party program files are as follows:
 
-1. Intel® Extension for PyTorch* 
-2. MKL (OneMKL Interfaces) : https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
-3. MKL_umath (OneMKL Interfaces) : https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
-4. MKL-include (OneMKL Interfaces) : https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
-5. tbb : https://github.com/oneapi-src/oneTBB/blob/master/third-party-programs.txt
-6. tbb4py : https://github.com/oneapi-src/oneTBB/blob/master/third-party-programs.txt
-7. TorchCCL : https://github.com/intel/torch-ccl/blob/master/third-party-programs.txt
+1.  Intel® Extension for PyTorch*: https://github.com/intel/intel-extension-for-pytorch/blob/master/third-party-programs/THIRD-PARTY-PROGRAMS
+2.  Intel® Neural Compressor: https://github.com/intel/neural-compressor/blob/master/third-party-programs.txt
+3.  Intel® Optimization for Tensorflow: https://github.com/Intel-tensorflow/tensorflow/blob/v2.7.0/LEGAL-NOTICE
+4.  Intel® oneAPI Base Kit: https://github.com/intel/oneapi-containers/blob/master/licensing/basekit-centos-8/third-party-programs.txt
+5.  Intel® oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
+6.  TorchCCL : https://github.com/intel/torch-ccl/blob/master/third-party-programs.txt
+7.  oneCCL : https://github.com/oneapi-src/oneCCL/blob/master/third-party-programs.txt
+8.  oneMKL Interfaces : https://github.com/oneapi-src/oneMKL/tree/develop/third-party-programs
+9.  oneTBB : https://github.com/oneapi-src/oneTBB/blob/master/third-party-programs.txt
 
 ----------------------------------------------------------------------------------
 
 The docker container layers depends on the use of the following additional layers.
 1.      ubuntu:20.04 https://hub.docker.com/_/ubuntu tag 20.04
-2.      centos:7 https://hub.docker.com/_/centos tag 7
+2.      S2I Base Image ; https://catalog.redhat.com/software/containers/ubi8/s2i-base/5c83976a5a13464733ec6790 using the latest tag
+3.      centos:8 https://hub.docker.com/_/centos tag 8
+4.      RedHat Universal Base Image 8 ; https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e using the latest tag
 
 ----------------------------------------------------------------------------------
 

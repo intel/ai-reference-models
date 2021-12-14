@@ -44,7 +44,7 @@ Third party programs and their corresponding required notices and/or license ter
 
    tensorflow/benchmarks
 
-   minigo
+   tensorflow/minigo
 
    tensorflow/models
    Copyright 2016 The TensorFlow Authors.  All rights reserved.
@@ -75,6 +75,14 @@ Third party programs and their corresponding required notices and/or license ter
    Copyright 2018 The TensorFlow Authors.  All rights reserved.
 
    tensorflow-serving-api
+
+   Alibaba's DIEN
+   Copyright 1999-present Alibaba Group Holding Ltd.
+
+   Huggingface Transformers
+   Copyright 2018- The Hugging Face team. All rights reserved.
+
+   TransFormer ML Perf
 
 Apache License 2.0
 
@@ -1053,13 +1061,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
    All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met: 
+modification, are permitted provided that the following conditions are met:
 
 1. Redistributions of source code must retain the above copyright notice, this
-   list of conditions and the following disclaimer. 
+   list of conditions and the following disclaimer.
 2. Redistributions in binary form must reproduce the above copyright notice,
    this list of conditions and the following disclaimer in the documentation
-   and/or other materials provided with the distribution. 
+   and/or other materials provided with the distribution.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
 ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -1073,7 +1081,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 The views and conclusions contained in the software and documentation are those
-of the authors and should not be interpreted as representing official policies, 
+of the authors and should not be interpreted as representing official policies,
 either expressed or implied, of the FreeBSD Project.
 -------------------------------------------------------------
 8. pandas
@@ -1117,31 +1125,31 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 BSD 3-Clause (async customized)
 
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
 are met:
 
-* Redistributions of source code must retain the above copyright 
+* Redistributions of source code must retain the above copyright
 notice, this list of conditions and the following disclaimer.
 
-* Redistributions in binary form must reproduce the above copyright 
-notice, this list of conditions and the following disclaimer in the 
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
 
-* Neither the name of the async project nor the names of 
-its contributors may be used to endorse or promote products derived 
+* Neither the name of the async project nor the names of
+its contributors may be used to endorse or promote products derived
 from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------
 10. pycparser
@@ -1155,24 +1163,24 @@ BSD 3-Clause (Bendersky customized)
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-* Redistributions of source code must retain the above copyright notice, this 
+* Redistributions of source code must retain the above copyright notice, this
   list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice, 
-  this list of conditions and the following disclaimer in the documentation 
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
   and/or other materials provided with the distribution.
-* Neither the name of Eli Bendersky nor the names of its contributors may 
-  be used to endorse or promote products derived from this software without 
+* Neither the name of Eli Bendersky nor the names of its contributors may
+  be used to endorse or promote products derived from this software without
   specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE 
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE 
-LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR 
-CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE 
-GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) 
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE
+GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
 OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------
 11. BSD 3-Clause (GitDB customized + dependencies)
@@ -1180,44 +1188,44 @@ OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     All rights reserved.
 
 BSD 3-Clause (GitPython customized)
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
 are met:
 
-* Redistributions of source code must retain the above copyright 
+* Redistributions of source code must retain the above copyright
 notice, this list of conditions and the following disclaimer.
 
-* Redistributions in binary form must reproduce the above copyright 
-notice, this list of conditions and the following disclaimer in the 
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
 
-* Neither the name of the GitDB project nor the names of 
-its contributors may be used to endorse or promote products derived 
+* Neither the name of the GitDB project nor the names of
+its contributors may be used to endorse or promote products derived
 from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
 Additional Licenses
 -------------------
-The files at 
+The files at
 gitdb/test/fixtures/packs/pack-11fdfa9e156ab73caae3b6da867192221f2089c2.idx
-and 
-gitdb/test/fixtures/packs/pack-11fdfa9e156ab73caae3b6da867192221f2089c2.pack 
-are licensed under GNU GPL as part of the git source repository, 
+and
+gitdb/test/fixtures/packs/pack-11fdfa9e156ab73caae3b6da867192221f2089c2.pack
+are licensed under GNU GPL as part of the git source repository,
 see http://en.wikipedia.org/wiki/Git_%28software%29 for more information.
 
-They are not required for the actual operation, which is why they are not found 
+They are not required for the actual operation, which is why they are not found
 in the distribution package.
 -------------------------------------------------------------
 12. GitPython
@@ -1226,31 +1234,31 @@ in the distribution package.
 
 BSD 3-Clause (GitPython customized)
 
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
 are met:
 
-* Redistributions of source code must retain the above copyright 
+* Redistributions of source code must retain the above copyright
 notice, this list of conditions and the following disclaimer.
 
-* Redistributions in binary form must reproduce the above copyright 
-notice, this list of conditions and the following disclaimer in the 
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the
 documentation and/or other materials provided with the distribution.
 
-* Neither the name of the GitPython project nor the names of 
-its contributors may be used to endorse or promote products derived 
+* Neither the name of the GitPython project nor the names of
+its contributors may be used to endorse or promote products derived
 from this software without specific prior written permission.
 
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR 
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT 
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, 
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED 
-TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR 
-PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS 
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 -------------------------------------------------------------
 13. libprotobuf17
@@ -1302,7 +1310,7 @@ support library is itself covered by the above license.
     libgoogle-perftools4
     Copyright (c) 2005, Google Inc.
     All rights reserved.
-   
+
     libwebp6
     Copyright (c) 2010, Google Inc. All rights reserved.
 
@@ -1349,7 +1357,7 @@ met:
 
   1. Redistributions of source code must retain the above copyright
      notice, this list of conditions and the following disclaimer.
-   
+
   2. Redistributions in binary form must reproduce the above copyright
      notice, this list of conditions and the following disclaimer in
      the documentation and/or other materials provided with the
@@ -1638,28 +1646,28 @@ Please link to http://www.gnome.org where available.
 
 Dual Licensed MIT + Public domain
 
-The JsonCpp library's source code, including accompanying documentation, 
+The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
 conditions...
 
-Baptiste Lepilleur and The JsonCpp Authors explicitly disclaim copyright in all 
-jurisdictions which recognize such a disclaimer. In such jurisdictions, 
+Baptiste Lepilleur and The JsonCpp Authors explicitly disclaim copyright in all
+jurisdictions which recognize such a disclaimer. In such jurisdictions,
 this software is released into the Public Domain.
 
 In jurisdictions which do not recognize Public Domain property (e.g. Germany as of
 2010), this software is Copyright (c) 2007-2010 by Baptiste Lepilleur and
 The JsonCpp Authors, and is released under the terms of the MIT License (see below).
 
-In jurisdictions which recognize Public Domain property, the user of this 
-software may choose to accept it either as 1) Public Domain, 2) under the 
-conditions of the MIT License (see below), or 3) under the terms of dual 
+In jurisdictions which recognize Public Domain property, the user of this
+software may choose to accept it either as 1) Public Domain, 2) under the
+conditions of the MIT License (see below), or 3) under the terms of dual
 Public Domain/MIT License conditions described here, as they choose.
 
 The MIT License is about as close to Public Domain as a license can get, and is
 described in clear, concise terms at:
 
    http://en.wikipedia.org/wiki/MIT_License
-   
+
 The full text of the MIT License follows:
 
 ========================================================================
@@ -3909,7 +3917,7 @@ such a program is covered only if its contents constitute a work based
 on the Library (independent of the use of the Library in a tool for
 writing it).  Whether that is true depends on what the Library does
 and what the program that uses the Library does.
-  
+
   1. You may copy and distribute verbatim copies of the Library's
 complete source code as you receive it, in any medium, provided that
 you conspicuously and appropriately publish on each copy an
@@ -4428,7 +4436,7 @@ such a program is covered only if its contents constitute a work based
 on the Library (independent of the use of the Library in a tool for
 writing it).  Whether that is true depends on what the Library does
 and what the program that uses the Library does.
-  
+
   1. You may copy and distribute verbatim copies of the Library's
 complete source code as you receive it, in any medium, provided that
 you conspicuously and appropriately publish on each copy an
@@ -5126,7 +5134,7 @@ such a program is covered only if its contents constitute a work based
 on the Library (independent of the use of the Library in a tool for
 writing it).  Whether that is true depends on what the Library does
 and what the program that uses the Library does.
-  
+
   1. You may copy and distribute verbatim copies of the Library's
 complete source code as you receive it, in any medium, provided that
 you conspicuously and appropriately publish on each copy an
@@ -5483,7 +5491,7 @@ files names COPYING in subdirectories where applicable.
 
 Copyright © 2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020  Google, Inc.
 Copyright © 2018,2019,2020  Ebrahim Byagowi
-Copyright © 2019,2020  Facebook, Inc. 
+Copyright © 2019,2020  Facebook, Inc.
 Copyright © 2012  Mozilla Foundation
 Copyright © 2011  Codethink Limited
 Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
@@ -5618,7 +5626,7 @@ libtiff License
 Copyright (c) 1988-1997 Sam Leffler
 Copyright (c) 1991-1997 Silicon Graphics, Inc.
 
-Permission to use, copy, modify, distribute, and sell this software and 
+Permission to use, copy, modify, distribute, and sell this software and
 its documentation for any purpose is hereby granted without fee, provided
 that (i) the above copyright notices and this permission notice appear in
 all copies of the software and related documentation, and (ii) the names of
@@ -5626,15 +5634,15 @@ Sam Leffler and Silicon Graphics may not be used in any advertising or
 publicity relating to the software without the specific, prior written
 permission of Sam Leffler and Silicon Graphics.
 
-THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND, 
-EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY 
-WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  
+THE SOFTWARE IS PROVIDED "AS-IS" AND WITHOUT WARRANTY OF ANY KIND,
+EXPRESS, IMPLIED OR OTHERWISE, INCLUDING WITHOUT LIMITATION, ANY
+WARRANTY OF MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
 
 IN NO EVENT SHALL SAM LEFFLER OR SILICON GRAPHICS BE LIABLE FOR
 ANY SPECIAL, INCIDENTAL, INDIRECT OR CONSEQUENTIAL DAMAGES OF ANY KIND,
 OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
-WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF 
-LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE 
+WHETHER OR NOT ADVISED OF THE POSSIBILITY OF DAMAGE, AND ON ANY THEORY OF
+LIABILITY, ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE
 OF THIS SOFTWARE.
 -------------------------------------------------------------
 38. libx11-xcb1
@@ -6834,7 +6842,7 @@ DEALINGS IN THE SOFTWARE.
     Copyright (c) 2020-202x The virtualenv developers
 
     python3-wheel
-    "wheel" copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and 
+    "wheel" copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and
     contributors.
 
     The MIT License
@@ -6843,7 +6851,7 @@ DEALINGS IN THE SOFTWARE.
     Copyright Jason R. Coombs
 
     python-pip-whl
-    "wheel" copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and 
+    "wheel" copyright (c) 2012-2014 Daniel Holth <dholth@fastmail.fm> and
     contributors.
 
     The MIT License
@@ -8220,7 +8228,7 @@ Mozilla Public License Version 2.0
     means any form of the work other than Source Code Form.
 
 1.7. "Larger Work"
-    means a work that combines Covered Software with other material, in 
+    means a work that combines Covered Software with other material, in
     a separate file or files, that is not Covered Software.
 
 1.8. "License"
@@ -8635,7 +8643,7 @@ License: MIT
  distribute, sub license, and/or sell copies of the Software, and to
  permit persons to whom the Software is furnished to do so, subject to
  the following conditions:
- . 
+ .
  The above copyright notice and this permission notice (including the
  next paragraph) shall be included in all copies or substantial portions
  of the Software.
@@ -10187,273 +10195,273 @@ License: CC-BY-SA-3.0
  http://creativecommons.org/licenses/by-sa/3.0/ or send a letter to
  Creative Commons, 171 Second Street, Suite 300, San Francisco,
  California, 94105, USA. See below for the full text of the license.
- . 
- Some Rights Reserved: 
- . 
+ .
+ Some Rights Reserved:
+ .
  The rights in the trademarks, logos, service marks of Canonical Ltd,
  as well as the look and feel of Ubuntu, are not licensed under the
  Creative Commons license and are subject to the Canonical Trademark
  Policy at http://www.ubuntu.com/ubuntu/TrademarkPolicy
- . 
- License: 
- . 
- CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE 
- LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN 
- ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS 
- INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES 
- REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR 
+ .
+ License:
+ .
+ CREATIVE COMMONS CORPORATION IS NOT A LAW FIRM AND DOES NOT PROVIDE
+ LEGAL SERVICES. DISTRIBUTION OF THIS LICENSE DOES NOT CREATE AN
+ ATTORNEY-CLIENT RELATIONSHIP. CREATIVE COMMONS PROVIDES THIS
+ INFORMATION ON AN "AS-IS" BASIS. CREATIVE COMMONS MAKES NO WARRANTIES
+ REGARDING THE INFORMATION PROVIDED, AND DISCLAIMS LIABILITY FOR
  DAMAGES RESULTING FROM ITS USE.
- . 
+ .
  License
- . 
- THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS 
- CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS 
- PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE 
- WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW 
+ .
+ THE WORK (AS DEFINED BELOW) IS PROVIDED UNDER THE TERMS OF THIS
+ CREATIVE COMMONS PUBLIC LICENSE ("CCPL" OR "LICENSE"). THE WORK IS
+ PROTECTED BY COPYRIGHT AND/OR OTHER APPLICABLE LAW. ANY USE OF THE
+ WORK OTHER THAN AS AUTHORIZED UNDER THIS LICENSE OR COPYRIGHT LAW
  IS PROHIBITED.
- . 
- BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND 
+ .
+ BY EXERCISING ANY RIGHTS TO THE WORK PROVIDED HERE, YOU ACCEPT AND
  AGREE TO BE BOUND BY THE TERMS OF THIS LICENSE. THE LICENSOR GRANTS YOU
- THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH 
+ THE RIGHTS CONTAINED HERE IN CONSIDERATION OF YOUR ACCEPTANCE OF SUCH
  TERMS AND CONDITIONS.
- . 
+ .
  1. Definitions
- . 
-    1. "Collective Work" means a work, such as a periodical issue, 
-    anthology or encyclopedia, in which the Work in its entirety in 
-    unmodified form, along with a number of other contributions, 
-    constituting separate and independent works in themselves, are 
-    assembled into a collective whole. A work that constitutes a 
-    Collective Work will not be considered a Derivative Work 
+ .
+    1. "Collective Work" means a work, such as a periodical issue,
+    anthology or encyclopedia, in which the Work in its entirety in
+    unmodified form, along with a number of other contributions,
+    constituting separate and independent works in themselves, are
+    assembled into a collective whole. A work that constitutes a
+    Collective Work will not be considered a Derivative Work
     (as defined below) for the purposes of this License.
-    2. "Derivative Work" means a work based upon the Work or upon the 
-    Work and other pre-existing works, such as a translation, musical 
-    arrangement, dramatization, fictionalization, motion picture 
-    version, sound recording, art reproduction, abridgment, 
-    condensation, or any other form in which the Work may be recast, 
-    transformed, or adapted, except that a work that constitutes a 
-    Collective Work will not be considered a Derivative Work for the 
-    purpose of this License. For the avoidance of doubt, where the Work 
-    is a musical composition or sound recording, the synchronization of 
-    the Work in timed-relation with a moving image ("synching") will be 
+    2. "Derivative Work" means a work based upon the Work or upon the
+    Work and other pre-existing works, such as a translation, musical
+    arrangement, dramatization, fictionalization, motion picture
+    version, sound recording, art reproduction, abridgment,
+    condensation, or any other form in which the Work may be recast,
+    transformed, or adapted, except that a work that constitutes a
+    Collective Work will not be considered a Derivative Work for the
+    purpose of this License. For the avoidance of doubt, where the Work
+    is a musical composition or sound recording, the synchronization of
+    the Work in timed-relation with a moving image ("synching") will be
     considered a Derivative Work for the purpose of this License.
-    3. "Licensor" means the individual or entity that offers the Work 
+    3. "Licensor" means the individual or entity that offers the Work
     under the terms of this License.
-    4. "Original Author" means the individual or entity who created the 
+    4. "Original Author" means the individual or entity who created the
     Work.
-    5. "Work" means the copyrightable work of authorship offered under 
+    5. "Work" means the copyrightable work of authorship offered under
     the terms of this License.
-    6. "You" means an individual or entity exercising rights under this 
-    License who has not previously violated the terms of this License 
-    with respect to the Work, or who has received express permission 
-    from the Licensor to exercise rights under this License despite a 
+    6. "You" means an individual or entity exercising rights under this
+    License who has not previously violated the terms of this License
+    with respect to the Work, or who has received express permission
+    from the Licensor to exercise rights under this License despite a
     previous violation.
-    7. "License Elements" means the following high-level license 
-    attributes as selected by Licensor and indicated in the title of 
+    7. "License Elements" means the following high-level license
+    attributes as selected by Licensor and indicated in the title of
     this License: Attribution, ShareAlike.
- . 
- 2. Fair Use Rights. Nothing in this license is intended to reduce, 
- limit, or restrict any rights arising from fair use, first sale or 
- other limitations on the exclusive rights of the copyright owner under 
+ .
+ 2. Fair Use Rights. Nothing in this license is intended to reduce,
+ limit, or restrict any rights arising from fair use, first sale or
+ other limitations on the exclusive rights of the copyright owner under
  copyright law or other applicable laws.
- . 
- 3. License Grant. Subject to the terms and conditions of this License, 
- Licensor hereby grants You a worldwide, royalty-free, non-exclusive, 
- perpetual (for the duration of the applicable copyright) license to 
+ .
+ 3. License Grant. Subject to the terms and conditions of this License,
+ Licensor hereby grants You a worldwide, royalty-free, non-exclusive,
+ perpetual (for the duration of the applicable copyright) license to
  exercise the rights in the Work as stated below:
- . 
-    1. to reproduce the Work, to incorporate the Work into one or more 
-    Collective Works, and to reproduce the Work as incorporated in the 
+ .
+    1. to reproduce the Work, to incorporate the Work into one or more
+    Collective Works, and to reproduce the Work as incorporated in the
     Collective Works;
     2. to create and reproduce Derivative Works;
-    3. to distribute copies or phonorecords of, display publicly, 
-    perform publicly, and perform publicly by means of a digital audio 
+    3. to distribute copies or phonorecords of, display publicly,
+    perform publicly, and perform publicly by means of a digital audio
     transmission the Work including as incorporated in Collective Works;
-    4. to distribute copies or phonorecords of, display publicly, 
-    perform publicly, and perform publicly by means of a digital audio 
+    4. to distribute copies or phonorecords of, display publicly,
+    perform publicly, and perform publicly by means of a digital audio
     transmission Derivative Works.
     5.
- . 
-       For the avoidance of doubt, where the work is a musical 
+ .
+       For the avoidance of doubt, where the work is a musical
        composition:
-          1. Performance Royalties Under Blanket Licenses. Licensor 
-          waives the exclusive right to collect, whether individually 
-          or via a performance rights society (e.g. ASCAP, BMI, SESAC), 
-          royalties for the public performance or public digital 
+          1. Performance Royalties Under Blanket Licenses. Licensor
+          waives the exclusive right to collect, whether individually
+          or via a performance rights society (e.g. ASCAP, BMI, SESAC),
+          royalties for the public performance or public digital
           performance (e.g. webcast) of the Work.
-          2. Mechanical Rights and Statutory Royalties. Licensor waives 
-          the exclusive right to collect, whether individually or via a 
-          music rights society or designated agent (e.g. Harry Fox 
-          Agency), royalties for any phonorecord You create from the 
-          Work ("cover version") and distribute, subject to the 
-          compulsory license created by 17 USC Section 115 of the US 
+          2. Mechanical Rights and Statutory Royalties. Licensor waives
+          the exclusive right to collect, whether individually or via a
+          music rights society or designated agent (e.g. Harry Fox
+          Agency), royalties for any phonorecord You create from the
+          Work ("cover version") and distribute, subject to the
+          compulsory license created by 17 USC Section 115 of the US
           Copyright Act (or the equivalent in other jurisdictions).
-    6. Webcasting Rights and Statutory Royalties. For the avoidance of 
-    doubt, where the Work is a sound recording, Licensor waives the 
-    exclusive right to collect, whether individually or via a 
-    performance-rights society (e.g. SoundExchange), royalties for the 
-    public digital performance (e.g. webcast) of the Work, subject to 
-    the compulsory license created by 17 USC Section 114 of the US 
+    6. Webcasting Rights and Statutory Royalties. For the avoidance of
+    doubt, where the Work is a sound recording, Licensor waives the
+    exclusive right to collect, whether individually or via a
+    performance-rights society (e.g. SoundExchange), royalties for the
+    public digital performance (e.g. webcast) of the Work, subject to
+    the compulsory license created by 17 USC Section 114 of the US
     Copyright Act (or the equivalent in other jurisdictions).
- . 
- The above rights may be exercised in all media and formats whether now 
- known or hereafter devised. The above rights include the right to make 
- such modifications as are technically necessary to exercise the rights 
- in other media and formats. All rights not expressly granted by 
+ .
+ The above rights may be exercised in all media and formats whether now
+ known or hereafter devised. The above rights include the right to make
+ such modifications as are technically necessary to exercise the rights
+ in other media and formats. All rights not expressly granted by
  Licensor are hereby reserved.
- . 
- 4. Restrictions.The license granted in Section 3 above is expressly 
+ .
+ 4. Restrictions.The license granted in Section 3 above is expressly
  made subject to and limited by the following restrictions:
- . 
-    1. You may distribute, publicly display, publicly perform, or 
-    publicly digitally perform the Work only under the terms of this 
-    License, and You must include a copy of, or the Uniform Resource 
-    Identifier for, this License with every copy or phonorecord of the 
+ .
+    1. You may distribute, publicly display, publicly perform, or
+    publicly digitally perform the Work only under the terms of this
+    License, and You must include a copy of, or the Uniform Resource
+    Identifier for, this License with every copy or phonorecord of the
     Work You distribute, publicly display, publicly perform, or publicly
     digitally perform. You may not offer or impose any terms on the Work
-    that alter or restrict the terms of this License or the recipients' 
+    that alter or restrict the terms of this License or the recipients'
     exercise of the rights granted hereunder. You may not sublicense the
-    Work. You must keep intact all notices that refer to this License 
-    and to the disclaimer of warranties. You may not distribute, 
-    publicly display, publicly perform, or publicly digitally perform 
+    Work. You must keep intact all notices that refer to this License
+    and to the disclaimer of warranties. You may not distribute,
+    publicly display, publicly perform, or publicly digitally perform
     the Work with any technological measures that control access or use
-    of the Work in a manner inconsistent with the terms of this License 
-    Agreement. The above applies to the Work as incorporated in a 
+    of the Work in a manner inconsistent with the terms of this License
+    Agreement. The above applies to the Work as incorporated in a
     Collective Work, but this does not require the Collective Work apart
-    from the Work itself to be made subject to the terms of this 
-    License. If You create a Collective Work, upon notice from any 
-    Licensor You must, to the extent practicable, remove from the 
+    from the Work itself to be made subject to the terms of this
+    License. If You create a Collective Work, upon notice from any
+    Licensor You must, to the extent practicable, remove from the
     Collective Work any credit as required by clause 4(c), as requested.
-    If You create a Derivative Work, upon notice from any Licensor You 
-    must, to the extent practicable, remove from the Derivative Work 
+    If You create a Derivative Work, upon notice from any Licensor You
+    must, to the extent practicable, remove from the Derivative Work
     any credit as required by clause 4(c), as requested.
-    2. You may distribute, publicly display, publicly perform, or 
-    publicly digitally perform a Derivative Work only under the terms 
-    of this License, a later version of this License with the same 
-    License Elements as this License, or a Creative Commons iCommons 
-    license that contains the same License Elements as this License 
+    2. You may distribute, publicly display, publicly perform, or
+    publicly digitally perform a Derivative Work only under the terms
+    of this License, a later version of this License with the same
+    License Elements as this License, or a Creative Commons iCommons
+    license that contains the same License Elements as this License
     (e.g. Attribution-ShareAlike 2.5 Japan). You must include a copy of,
-    or the Uniform Resource Identifier for, this License or other 
-    license specified in the previous sentence with every copy or 
-    phonorecord of each Derivative Work You distribute, publicly 
-    display, publicly perform, or publicly digitally perform. You may 
-    not offer or impose any terms on the Derivative Works that alter or 
-    restrict the terms of this License or the recipients' exercise of 
-    the rights granted hereunder, and You must keep intact all notices 
-    that refer to this License and to the disclaimer of warranties. 
-    You may not distribute, publicly display, publicly perform, or 
-    publicly digitally perform the Derivative Work with any 
-    technological measures that control access or use of the Work in a 
-    manner inconsistent with the terms of this License Agreement. 
-    The above applies to the Derivative Work as incorporated in a 
-    Collective Work, but this does not require the Collective Work 
-    apart from the Derivative Work itself to be made subject to the 
+    or the Uniform Resource Identifier for, this License or other
+    license specified in the previous sentence with every copy or
+    phonorecord of each Derivative Work You distribute, publicly
+    display, publicly perform, or publicly digitally perform. You may
+    not offer or impose any terms on the Derivative Works that alter or
+    restrict the terms of this License or the recipients' exercise of
+    the rights granted hereunder, and You must keep intact all notices
+    that refer to this License and to the disclaimer of warranties.
+    You may not distribute, publicly display, publicly perform, or
+    publicly digitally perform the Derivative Work with any
+    technological measures that control access or use of the Work in a
+    manner inconsistent with the terms of this License Agreement.
+    The above applies to the Derivative Work as incorporated in a
+    Collective Work, but this does not require the Collective Work
+    apart from the Derivative Work itself to be made subject to the
     terms of this License.
-    3. If you distribute, publicly display, publicly perform, or 
-    publicly digitally perform the Work or any Derivative Works or 
-    Collective Works, You must keep intact all copyright notices for 
-    the Work and provide, reasonable to the medium or means You are 
-    utilizing: (i) the name of the Original Author (or pseudonym, if 
-    applicable) if supplied, and/or (ii) if the Original Author and/or 
-    Licensor designate another party or parties (e.g. a sponsor 
+    3. If you distribute, publicly display, publicly perform, or
+    publicly digitally perform the Work or any Derivative Works or
+    Collective Works, You must keep intact all copyright notices for
+    the Work and provide, reasonable to the medium or means You are
+    utilizing: (i) the name of the Original Author (or pseudonym, if
+    applicable) if supplied, and/or (ii) if the Original Author and/or
+    Licensor designate another party or parties (e.g. a sponsor
     institute, publishing entity, journal) for attribution in Licensor's
     copyright notice, terms of service or by other reasonable means, the
     name of such party or parties; the title of the Work if supplied; to
-    the extent reasonably practicable, the Uniform Resource Identifier, 
-    if any, that Licensor specifies to be associated with the Work, 
-    unless such URI does not refer to the copyright notice or licensing 
-    information for the Work; and in the case of a Derivative Work, a 
+    the extent reasonably practicable, the Uniform Resource Identifier,
+    if any, that Licensor specifies to be associated with the Work,
+    unless such URI does not refer to the copyright notice or licensing
+    information for the Work; and in the case of a Derivative Work, a
     credit identifying the use of the Work in the Derivative Work (e.g.,
-    "French translation of the Work by Original Author," or "Screenplay 
-    based on original Work by Original Author"). Such credit may be 
+    "French translation of the Work by Original Author," or "Screenplay
+    based on original Work by Original Author"). Such credit may be
     implemented in any reasonable manner; provided, however, that in the
-    case of a Derivative Work or Collective Work, at a minimum such 
-    credit will appear where any other comparable authorship credit 
-    appears and in a manner at least as prominent as such other 
+    case of a Derivative Work or Collective Work, at a minimum such
+    credit will appear where any other comparable authorship credit
+    appears and in a manner at least as prominent as such other
     comparable authorship credit.
- . 
+ .
  5. Representations, Warranties and Disclaimer
- . 
- UNLESS OTHERWISE AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS 
- THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND 
- CONCERNING THE MATERIALS, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE, 
- INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY, 
- FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF 
- LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF 
- ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW 
- THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY 
+ .
+ UNLESS OTHERWISE AGREED TO BY THE PARTIES IN WRITING, LICENSOR OFFERS
+ THE WORK AS-IS AND MAKES NO REPRESENTATIONS OR WARRANTIES OF ANY KIND
+ CONCERNING THE MATERIALS, EXPRESS, IMPLIED, STATUTORY OR OTHERWISE,
+ INCLUDING, WITHOUT LIMITATION, WARRANTIES OF TITLE, MERCHANTIBILITY,
+ FITNESS FOR A PARTICULAR PURPOSE, NONINFRINGEMENT, OR THE ABSENCE OF
+ LATENT OR OTHER DEFECTS, ACCURACY, OR THE PRESENCE OF ABSENCE OF
+ ERRORS, WHETHER OR NOT DISCOVERABLE. SOME JURISDICTIONS DO NOT ALLOW
+ THE EXCLUSION OF IMPLIED WARRANTIES, SO SUCH EXCLUSION MAY NOT APPLY
  TO YOU.
- . 
- 6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE 
- LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR 
- ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES 
- ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR 
+ .
+ 6. Limitation on Liability. EXCEPT TO THE EXTENT REQUIRED BY APPLICABLE
+ LAW, IN NO EVENT WILL LICENSOR BE LIABLE TO YOU ON ANY LEGAL THEORY FOR
+ ANY SPECIAL, INCIDENTAL, CONSEQUENTIAL, PUNITIVE OR EXEMPLARY DAMAGES
+ ARISING OUT OF THIS LICENSE OR THE USE OF THE WORK, EVEN IF LICENSOR
  HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- . 
+ .
  7. Termination
- . 
-    1. This License and the rights granted hereunder will terminate 
-    automatically upon any breach by You of the terms of this License. 
-    Individuals or entities who have received Derivative Works or 
-    Collective Works from You under this License, however, will not have 
-    their licenses terminated provided such individuals or entities 
-    remain in full compliance with those licenses. Sections 1, 2, 5, 6, 
+ .
+    1. This License and the rights granted hereunder will terminate
+    automatically upon any breach by You of the terms of this License.
+    Individuals or entities who have received Derivative Works or
+    Collective Works from You under this License, however, will not have
+    their licenses terminated provided such individuals or entities
+    remain in full compliance with those licenses. Sections 1, 2, 5, 6,
     7, and 8 will survive any termination of this License.
-    2. Subject to the above terms and conditions, the license granted 
-    here is perpetual (for the duration of the applicable copyright in 
-    the Work). Notwithstanding the above, Licensor reserves the right to 
-    release the Work under different license terms or to stop 
-    distributing the Work at any time; provided, however that any such 
-    election will not serve to withdraw this License (or any other 
-    license that has been, or is required to be, granted under the terms 
-    of this License), and this License will continue in full force and 
+    2. Subject to the above terms and conditions, the license granted
+    here is perpetual (for the duration of the applicable copyright in
+    the Work). Notwithstanding the above, Licensor reserves the right to
+    release the Work under different license terms or to stop
+    distributing the Work at any time; provided, however that any such
+    election will not serve to withdraw this License (or any other
+    license that has been, or is required to be, granted under the terms
+    of this License), and this License will continue in full force and
     effect unless terminated as stated above.
- . 
+ .
  8. Miscellaneous
- . 
-    1. Each time You distribute or publicly digitally perform the Work 
-    or a Collective Work, the Licensor offers to the recipient a license 
-    to the Work on the same terms and conditions as the license granted 
+ .
+    1. Each time You distribute or publicly digitally perform the Work
+    or a Collective Work, the Licensor offers to the recipient a license
+    to the Work on the same terms and conditions as the license granted
     to You under this License.
-    2. Each time You distribute or publicly digitally perform a 
-    Derivative Work, Licensor offers to the recipient a license to the 
-    original Work on the same terms and conditions as the license 
+    2. Each time You distribute or publicly digitally perform a
+    Derivative Work, Licensor offers to the recipient a license to the
+    original Work on the same terms and conditions as the license
     granted to You under this License.
     3. If any provision of this License is invalid or unenforceable under
     applicable law, it shall not affect the validity or enforceability of
-    the remainder of the terms of this License, and without further 
-    action by the parties to this agreement, such provision shall be 
-    reformed to the minimum extent necessary to make such provision 
+    the remainder of the terms of this License, and without further
+    action by the parties to this agreement, such provision shall be
+    reformed to the minimum extent necessary to make such provision
     valid and enforceable.
-    4. No term or provision of this License shall be deemed waived and 
-    no breach consented to unless such waiver or consent shall be in 
-    writing and signed by the party to be charged with such waiver or 
+    4. No term or provision of this License shall be deemed waived and
+    no breach consented to unless such waiver or consent shall be in
+    writing and signed by the party to be charged with such waiver or
     consent.
-    5. This License constitutes the entire agreement between the parties 
-    with respect to the Work licensed here. There are no understandings, 
-    agreements or representations with respect to the Work not specified 
-    here. Licensor shall not be bound by any additional provisions that 
-    may appear in any communication from You. This License may not be 
-    modified without the mutual written agreement of the Licensor and 
+    5. This License constitutes the entire agreement between the parties
+    with respect to the Work licensed here. There are no understandings,
+    agreements or representations with respect to the Work not specified
+    here. Licensor shall not be bound by any additional provisions that
+    may appear in any communication from You. This License may not be
+    modified without the mutual written agreement of the Licensor and
     You.
- . 
- Creative Commons is not a party to this License, and makes no warranty 
- whatsoever in connection with the Work. Creative Commons will not be 
- liable to You or any party on any legal theory for any damages 
- whatsoever, including without limitation any general, special, 
- incidental or consequential damages arising in connection to this 
- license. Notwithstanding the foregoing two (2) sentences, if Creative 
- Commons has expressly identified itself as the Licensor hereunder, 
+ .
+ Creative Commons is not a party to this License, and makes no warranty
+ whatsoever in connection with the Work. Creative Commons will not be
+ liable to You or any party on any legal theory for any damages
+ whatsoever, including without limitation any general, special,
+ incidental or consequential damages arising in connection to this
+ license. Notwithstanding the foregoing two (2) sentences, if Creative
+ Commons has expressly identified itself as the Licensor hereunder,
  it shall have all rights and obligations of Licensor.
- . 
- Except for the limited purpose of indicating to the public that the 
- Work is licensed under the CCPL, neither party will use the trademark 
- "Creative Commons" or any related trademark or logo of Creative Commons 
- without the prior written consent of Creative Commons. Any permitted 
- use will be in compliance with Creative Commons' then-current trademark 
- usage guidelines, as may be published on its website or otherwise made 
+ .
+ Except for the limited purpose of indicating to the public that the
+ Work is licensed under the CCPL, neither party will use the trademark
+ "Creative Commons" or any related trademark or logo of Creative Commons
+ without the prior written consent of Creative Commons. Any permitted
+ use will be in compliance with Creative Commons' then-current trademark
+ usage guidelines, as may be published on its website or otherwise made
  available upon request from time to time.
- . 
+ .
  Creative Commons may be contacted at http://creativecommons.org/
 
 Files: scavenge.py Makefile debian/
@@ -11830,18 +11838,43 @@ permission to use and distribute the software in accordance with the
 terms specified in this license.
 -------------------------------------------------------------
 
+--------------------------------------------------------------------------------
+
+Licenses for Operating systems
+Licensing for image operating systems can be found here:
+Ubuntu: https://ubuntu.com/licensing
+Centos: https://centos.org/legal/licensing-policy/#:~:text=The%20CentOS%20Linux%20and%20CentOS,copyright%20is%20licensed%20under%20GPLv2.
+
+--------------------------------------------------------------------------------
+
+License files for packages installed using the Ubuntu package manager can be found at the location: /usr/share/docs
+License files for packages installed using the Centos package manager can be found at the location: /usr/share/licenses
+License files for packages installed using the Python package manager can be found at the location: /usr/local/lib/python*/dist-packages/
+License files for packages installed using the Cona package manager can be found at the location: <PATH_TO_CONDA_ENV>/pkgs/**/info/licenses
+
+----------------------------------------------------------------------------------
 
 The following third party programs have their own third party program files. These additional third party program files are as follows:
 
-1. intel/intel-optimized-tensorflow:latest https://github.com/Intel-tensorflow/tensorflow/blob/r2.5/third-party-programs.txt
-2. Intel® Quantization Tool (intel-quantization): https://github.com/IntelAI/tools/blob/master/api/third-party-programs.txt
-3. oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
+1.  Intel® Extension for PyTorch*: https://github.com/intel/intel-extension-for-pytorch/blob/master/third-party-programs/THIRD-PARTY-PROGRAMS
+2.  Intel® Neural Compressor: https://github.com/intel/neural-compressor/blob/master/third-party-programs.txt
+3.  Intel® Optimization for Tensorflow: https://github.com/Intel-tensorflow/tensorflow/blob/v2.7.0/LEGAL-NOTICE
+4.  Intel® oneAPI Base Kit: https://github.com/intel/oneapi-containers/blob/master/licensing/basekit-centos-8/third-party-programs.txt
+5.  Intel® oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
+6.  TorchCCL : https://github.com/intel/torch-ccl/blob/master/third-party-programs.txt
+7.  oneCCL : https://github.com/oneapi-src/oneCCL/blob/master/third-party-programs.txt
+8.  oneMKL Interfaces : https://github.com/oneapi-src/oneMKL/tree/develop/third-party-programs
+9.  oneTBB : https://github.com/oneapi-src/oneTBB/blob/master/third-party-programs.txt
 
----------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
 The docker container layers depends on the use of the following additional layers.
-1.      intel/intel-optimized-tensorflow:latest ubuntu:20.04
+1.      ubuntu:20.04 https://hub.docker.com/_/ubuntu tag 20.04
+2.      S2I Base Image ; https://catalog.redhat.com/software/containers/ubi8/s2i-base/5c83976a5a13464733ec6790 using the latest tag
+3.      centos:8 https://hub.docker.com/_/centos tag 8
+4.      RedHat Universal Base Image 8 ; https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e using the latest tag
 
----------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
 
 Other names and brands may be claimed as the property of others.

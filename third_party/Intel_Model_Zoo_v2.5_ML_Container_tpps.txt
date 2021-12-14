@@ -556,7 +556,7 @@ Apache License Version 2.0, January 2004
    All rights reserved.
 
    torchvision
-   Copyright (c) Soumith Chintala 2016, 
+   Copyright (c) Soumith Chintala 2016,
    All rights reserved.
 
 The 3-Clause BSD License
@@ -572,8 +572,8 @@ The 3-Clause BSD License
       notice, this list of conditions and the following disclaimer in the
       documentation and/or other materials provided with the distribution.
 
-   3. Neither the name of the copyright holder nor the names of its contributors 
-      may be used to endorse or promote products derived from this software without 
+   3. Neither the name of the copyright holder nor the names of its contributors
+      may be used to endorse or promote products derived from this software without
       specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
@@ -1043,23 +1043,23 @@ Copyright (c) 2016-present, Facebook Inc. All rights reserved.
 
 All contributions by Facebook:
 Copyright (c) 2016 Facebook Inc.
- 
+
 All contributions by Google:
 Copyright (c) 2015 Google Inc.
 All rights reserved.
- 
+
 All contributions by Yangqing Jia:
 Copyright (c) 2015 Yangqing Jia
 All rights reserved.
- 
+
 All contributions from Caffe:
 Copyright(c) 2013, 2014, 2015, the respective contributors
 All rights reserved.
- 
+
 All other contributions:
 Copyright(c) 2015, 2016 the respective contributors
 All rights reserved.
- 
+
 Caffe2 uses a copyright model similar to Caffe: each contributor holds
 copyright over their contributions to Caffe2. The project versioning records
 all such contribution and copyright details. If a contributor wants to further
@@ -1389,29 +1389,41 @@ License: LGPL-2.1
 
 --------------------------------------------------------------------------------
 
+Licenses for Operating systems
+Licensing for image operating systems can be found here:
+Ubuntu: https://ubuntu.com/licensing
+Centos: https://centos.org/legal/licensing-policy/#:~:text=The%20CentOS%20Linux%20and%20CentOS,copyright%20is%20licensed%20under%20GPLv2.
+
+--------------------------------------------------------------------------------
+
+License files for packages installed using the Ubuntu package manager can be found at the location: /usr/share/docs
+License files for packages installed using the Centos package manager can be found at the location: /usr/share/licenses
+License files for packages installed using the Python package manager can be found at the location: /usr/local/lib/python*/dist-packages/
+License files for packages installed using the Cona package manager can be found at the location: <PATH_TO_CONDA_ENV>/pkgs/**/info/licenses
+
+----------------------------------------------------------------------------------
 
 The following third party programs have their own third party program files. These additional third party program files are as follows:
 
-1. Intel® Quantization Tool (intel-quantization): https://github.com/IntelAI/tools/blob/master/api/third-party-programs.txt
-2. oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
+1.  Intel® Extension for PyTorch*: https://github.com/intel/intel-extension-for-pytorch/blob/master/third-party-programs/THIRD-PARTY-PROGRAMS
+2.  Intel® Neural Compressor: https://github.com/intel/neural-compressor/blob/master/third-party-programs.txt
+3.  Intel® Optimization for Tensorflow: https://github.com/Intel-tensorflow/tensorflow/blob/v2.7.0/LEGAL-NOTICE
+4.  Intel® oneAPI Base Kit: https://github.com/intel/oneapi-containers/blob/master/licensing/basekit-centos-8/third-party-programs.txt
+5.  Intel® oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
+6.  TorchCCL : https://github.com/intel/torch-ccl/blob/master/third-party-programs.txt
+7.  oneCCL : https://github.com/oneapi-src/oneCCL/blob/master/third-party-programs.txt
+8.  oneMKL Interfaces : https://github.com/oneapi-src/oneMKL/tree/develop/third-party-programs
+9.  oneTBB : https://github.com/oneapi-src/oneTBB/blob/master/third-party-programs.txt
 
---------------------------------------------------------------------------------
-
-License files for packages installed using the ubuntu package manager can be found at the location: /usr/share/docs
-License files for packages installed using the centos package manager can be found at: the location /usr/share/licenses
-License files for packages installed using the python package manager can be found at: the location /usr/local/lib/python*/dist-packages/
---------------------------------------------------------------------------------
-
-Licenses for Operating systems
-Licensing for image operating systems can be found here:
-Ubuntu:  ubuntu.com/licensing
-Centos: https://centos.org/legal/licensing-policy/#:~:text=The%20CentOS%20Linux%20and%20CentOS,copyright%20is%20licensed%20under%20GPLv2.
---------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
 
 The docker container layers depends on the use of the following additional layers.
-1.      intel/intel-optimized-pytorch ubuntu:18.04
-2.      intel/intel-optimized-ml ubuntu:18.04
+1.      ubuntu:20.04 https://hub.docker.com/_/ubuntu tag 20.04
+2.      S2I Base Image ; https://catalog.redhat.com/software/containers/ubi8/s2i-base/5c83976a5a13464733ec6790 using the latest tag
+3.      centos:8 https://hub.docker.com/_/centos tag 8
+4.      RedHat Universal Base Image 8 ; https://catalog.redhat.com/software/containers/ubi8/ubi/5c359854d70cc534b3a3784e using the latest tag
 
----------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------
+
 
 Other names and brands may be claimed as the property of others.
