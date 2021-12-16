@@ -124,9 +124,7 @@ class Transformer(object):
         length = tf.shape(input=embedded_inputs)[1]
         pos_encoding = model_utils.get_position_encoding(
             length, self.params.hidden_size)
-        with tf.compat.v1.tpu.bfloat16_scope():
-          pos_encoding = tf.cast(pos_encoding, tf.bfloat16)
-          encoder_inputs = embedded_inputs + pos_encoding
+        encoder_inputs = embedded_inputs + pos_encoding
 
       if self.train:
         mlperf_log.transformer_print(
@@ -160,8 +158,8 @@ class Transformer(object):
             tensor=decoder_inputs, paddings=[[0, 0], [1, 0], [0, 0]])[:, :-1, :]
       with tf.compat.v1.name_scope("add_pos_encoding"):
         length = tf.shape(input=decoder_inputs)[1]
-        poscod = tf.cast(model_utils.get_position_encoding(
-            length, self.params.hidden_size), tf.bfloat16)
+        poscod = model_utils.get_position_encoding(
+            length, self.params.hidden_size)
         decoder_inputs += poscod
       if self.train:
         mlperf_log.transformer_print(
@@ -206,8 +204,8 @@ class Transformer(object):
       decoder_input = ids[:, -1:]
 
       # Preprocess decoder input by getting embeddings and adding timing signal.
-      decoder_input = self.embedding_softmax_layer(decoder_input)
-      decoder_input += tf.cast(timing_signal[i:i + 1], tf.bfloat16)
+      decoder_input = self.embedding_softmax_layer(decoder_input) \
+          + timing_signal[i:i + 1]
 
       self_attention_bias = decoder_self_attention_bias[:, :, i:i + 1, :i + 1]
       decoder_outputs = self.decoder_stack(
@@ -285,17 +283,15 @@ class LayerNormalization(tf.compat.v1.layers.Layer):
                                    initializer=tf.compat.v1.ones_initializer())
     self.bias = tf.compat.v1.get_variable("layer_norm_bias", [self.hidden_size],
                                   initializer=tf.compat.v1.zeros_initializer())
+    self.scale = tf.cast(self.scale, tf.bfloat16)
+    self.bias = tf.cast(self.bias, tf.bfloat16)
     self.built = True
 
   def call(self, x, epsilon=1e-6):
     mean = tf.reduce_mean(input_tensor=x, axis=[-1], keepdims=True)
     variance = tf.reduce_mean(input_tensor=tf.square(x - mean), axis=[-1], keepdims=True)
     norm_x = (x - mean) * tf.math.rsqrt(variance + epsilon)
-    with tf.compat.v1.tpu.bfloat16_scope():
-      norm_x = tf.cast(norm_x, tf.float32)
-      temp = norm_x * self.scale + self.bias
-    temp = tf.cast(temp, tf.bfloat16)
-    return temp
+    return norm_x * self.scale + self.bias
 
 
 class PrePostProcessingWrapper(object):
@@ -312,7 +308,6 @@ class PrePostProcessingWrapper(object):
   def __call__(self, x, *args, **kwargs):
     # Preprocessing: apply layer normalization
     #casting back to float32
-    x = tf.cast(x, tf.bfloat16)
     y = self.layer_norm(x)
 
     # Get layer output
@@ -387,6 +382,7 @@ class DecoderStack(tf.compat.v1.layers.Layer):
     self.layers = []
     self.batch_size = params.batch_size
     self.beam_size = params.beam_size
+    self.hidden_size = params.hidden_size
     mlperf_log.transformer_print(
         key=mlperf_log.MODEL_HP_NUM_HIDDEN_LAYERS,
         value=params.num_hidden_layers)
@@ -440,11 +436,11 @@ class DecoderStack(tf.compat.v1.layers.Layer):
       self.enc_out_cache["encoder_decoder_attention_bias"] = encdec_attention_bias
     for n, layer in enumerate(self.layers):
       with tf.compat.v1.variable_scope("decoder_stack/" + "layer_%d" % n + "/encdec_attention", reuse=tf.compat.v1.AUTO_REUSE):
-        Wk = tf.compat.v1.get_variable("attention//k/kernel", shape=[1024, 1024])
-        Wv = tf.compat.v1.get_variable("attention//v/kernel", shape=[1024, 1024])
+        Wk = tf.compat.v1.get_variable("attention//k/kernel",
+          shape=[self.hidden_size, self.hidden_size])
+        Wv = tf.compat.v1.get_variable("attention//v/kernel",
+          shape=[self.hidden_size, self.hidden_size])
         with tf.compat.v1.tpu.bfloat16_scope("attention/"):
           k = tf.matmul(encoder_outputs, tf.cast(Wk, tf.bfloat16))
           v = tf.matmul(encoder_outputs, tf.cast(Wv, tf.bfloat16))
-          # k = layer[1].layer.k_dense_layer(encoder_outputs)
-          # v = layer[1].layer.v_dense_layer(encoder_outputs)
           self.encdec_cache["layer_%d" % n] = {"k": k, "v": v}
