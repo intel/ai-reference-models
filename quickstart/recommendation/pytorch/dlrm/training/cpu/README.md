@@ -102,8 +102,11 @@ cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/training/cpu
 # Run the quickstart script to test performance
 NUM_BATCH=10000 bash training.sh
 
-# Or, run quickstart script for testing convergence trend
-NUM_BATCH=50000 bash training.sh
+# Run quickstart script for testing convergence trend
+NUM_BATCH=50000 bash bare_metal_train.sh
+
+# Or, run quickstart script to test full convergence
+bash bare_metal_train.sh
 ```
 
 <!--- 80. License -->
