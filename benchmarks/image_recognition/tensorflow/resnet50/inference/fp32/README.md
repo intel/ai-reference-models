@@ -82,6 +82,29 @@ export OUTPUT_DIR=<directory where log files will be written>
 ./quickstart/image_recognition/tensorflow/resnet50/inference/cpu/fp32/<script name>.sh
 ```
 
+#### Run on Windows Systems
+Set the environment variables for the paths to your `PRETRAINED_MODEL`, `DATASET_DIR` for ImageNet
+and an `OUTPUT_DIR` where log files will be written. Navigate to your
+model zoo directory and then run a [quickstart script](#quick-start-scripts).
+```
+# cd to your model zoo directory
+cd models
+
+set PRETRAINED_MODEL=<path to the frozen graph downloaded above>
+set DATASET_DIR=<path to the ImageNet TF records>
+set OUTPUT_DIR=<directory where log files will be written>
+
+bash quickstart\image_recognition\tensorflow\resnet50\inference\cpu\fp32\<script name>.sh
+```
+> Please note that Intel Model Zoo source code includes some Bash scripts, please install [MSYS2](https://www.msys2.org) on your system. You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+As an example, if the dataset location on Windows is `D:\user\ImageNet`, convert the Windows path to Unix as shown:
+> ```
+> cygpath D:\user\ImageNet
+> /d/user/ImageNet
+>```
+>Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/ImageNet`.
+
+
 <!--- 90. Resource Links-->
 ## Additional Resources
 
@@ -90,4 +113,3 @@ export OUTPUT_DIR=<directory where log files will be written>
 * To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
   workload container:<br />
   [https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-fp32-inference-tensorflow-container.html).
-
