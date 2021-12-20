@@ -40,18 +40,11 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-
-export TEST_FULLY_CONVERGENCE=0
 if [[ "$NUM_BATCH" != "" ]]
 then
     ARGS="$ARGS --num-batches=${NUM_BATCH}"
     echo "will early stop after ${NUM_BATCH} batches"
-else
-    ARGS="$ARGS --lr-num-warmup-steps=8000 --lr-decay-start-step=70000 --lr-num-decay-steps=30000 --learning-rate=18.0 --should-test"
-    echo "not set early stop interaction, will fully test convergence"
-    TEST_FULLY_CONVERGENCE=1
 fi
-
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -64,7 +57,7 @@ if [[ "$PRECISION" == *"avx"* ]]; then
 fi
 
 if [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --bf16 "
+    ARGS="$ARGS --bf16 --ipex-merged-emb"
     echo "running bf16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
@@ -79,11 +72,6 @@ SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCHSIZE=$((128*CORES))
 export OMP_NUM_THREADS=$CORES
 for i in $(seq 1 $((SOCKETS-1))); do
-  if [ $TEST_FULLY_CONVERGENCE -eq 1 ]
-  # only need to use 1 instance to test fully convergence
-  then
-      break 1
-  fi
   LOG_i="${LOG}/socket_$i"
   start=$((i*CORES))
   end=$((start+CORES-1))
@@ -95,8 +83,8 @@ for i in $(seq 1 $((SOCKETS-1))); do
   --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
-  --mini-batch-size=${BATCHSIZE} --print-freq=1000 --print-time --ipex-interaction \
-  --test-mini-batch-size=16384 --ipex-merged-emb \
+  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
+  --test-mini-batch-size=16384 \
   $ARGS |tee $LOG_i &
 done
 
@@ -112,8 +100,8 @@ $numa_cmd python -u $MODEL_SCRIPT \
   --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
-  --mini-batch-size=${BATCHSIZE} --print-freq=1000 --print-time --ipex-interaction \
-  --test-mini-batch-size=16384 --ipex-merged-emb \
+  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
+  --test-mini-batch-size=16384 \
   $ARGS |tee $LOG_0
 wait
 
