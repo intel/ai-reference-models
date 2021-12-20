@@ -63,7 +63,7 @@ if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]];]]; then
     echo "running fp32 path"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
