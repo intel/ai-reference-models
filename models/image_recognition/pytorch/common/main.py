@@ -105,6 +105,8 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
+parser.add_argument('--steps', default=-1, type=int,
+                    help='steps for validation')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -490,7 +492,7 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     print("Training throughput: {:.3f} fps".format(perf))
 
 def run_weights_sharing_model(m, tid, args):
-    steps = 300
+    steps = args.steps if args.steps > 0 else 300
     start_time = time.time()
     num_images = 0
     time_consume = 0
@@ -523,11 +525,11 @@ def validate(val_loader, model, criterion, args):
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
     if args.dummy:
-        number_iter = 200
+        number_iter = args.steps if args.steps > 0 else 200
         if args.int8:
-            number_iter = 500
+            number_iter = args.steps if args.steps > 0 else 200
     else:
-        number_iter = len(val_loader)
+        number_iter = args.steps if args.steps > 0 else len(val_loader)
     if args.calibration:
         number_iter = 100
 
@@ -535,6 +537,10 @@ def validate(val_loader, model, criterion, args):
         number_iter,
         [batch_time, losses, top1, top5],
         prefix='Test: ')
+    steps_per_epoch = len(val_loader)
+    total_steps = number_iter
+    print('Evaluating RESNET: Steps per Epoch {} total Steps: {}'.format(steps_per_epoch, total_steps))
+             
 
     # switch to evaluate mode
     model.eval()
