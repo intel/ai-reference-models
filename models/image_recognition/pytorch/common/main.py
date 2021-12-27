@@ -537,9 +537,8 @@ def validate(val_loader, model, criterion, args):
         number_iter,
         [batch_time, losses, top1, top5],
         prefix='Test: ')
-    steps_per_epoch = len(val_loader)
-    total_steps = number_iter
-    print('Evaluating RESNET: Steps per Epoch {} total Steps: {}'.format(steps_per_epoch, total_steps))
+    print('Evaluating RESNET: total Steps: {}'.format(number_iter))
+
              
 
     # switch to evaluate mode
