@@ -81,7 +81,7 @@ model_names = sorted(name for name in models.__dict__
     and callable(models.__dict__[name]))
 
 torch.hub._validate_not_a_forked_repo=lambda a,b,c: True
-hub_model_names = torch.hub.list('facebookresearch/semi-supervised-ImageNet1K-models')
+hub_model_names = torch.hub.list('facebookresearch/WSL-Images')
 model_names += hub_model_names
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -219,7 +219,7 @@ def main_worker(gpu, ngpus_per_node, args):
                                 world_size=args.world_size, rank=args.rank)
     if args.hub:
         torch.set_flush_denormal(True)
-        model = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', args.arch)
+        model = torch.hub.load('facebookresearch/WSL-Images', args.arch)
     else:
         # create model
         if args.pretrained:

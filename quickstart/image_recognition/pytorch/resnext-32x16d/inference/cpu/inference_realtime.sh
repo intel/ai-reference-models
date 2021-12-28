@@ -41,7 +41,7 @@ BATCH_SIZE=1
 rm -rf ${OUTPUT_DIR}/resnext101_latency_log*
 
 ARGS=""
-ARGS="$ARGS -e -a resnext101_32x16d_swsl --hub ../ --dummy"
+ARGS="$ARGS -e -a resnext101_32x16d_wsl --hub ../ --dummy"
 
 if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA

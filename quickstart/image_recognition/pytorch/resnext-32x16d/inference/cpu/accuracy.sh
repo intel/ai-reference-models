@@ -56,10 +56,10 @@ rm -rf ${OUTPUT_DIR}/resnext101_accuracy_log*
 
 # download pretrained weight.
 python ${MODEL_DIR}/models/image_recognition/pytorch/common/hub_help.py \
-    --url https://dl.fbaipublicfiles.com/semiweaksupervision/model_files/semi_weakly_supervised_resnext101_32x16-f3559a9c.pth
+    --url https://download.pytorch.org/models/ig_resnext101_32x16-c6f796b0.pth
 
 ARGS=""
-ARGS="$ARGS -e -a resnext101_32x16d_swsl --hub ${DATASET_DIR}"
+ARGS="$ARGS -e -a resnext101_32x16d_wsl --hub ${DATASET_DIR}"
 
 if [[ "$PRECISION" == *"avx"* ]]; then
     unset DNNL_MAX_CPU_ISA
