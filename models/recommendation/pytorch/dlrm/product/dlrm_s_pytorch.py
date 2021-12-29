@@ -702,7 +702,7 @@ def run():
             args.lr_decay_start_step,
             args.lr_num_decay_steps,
         )
-r
+
     ### main loop ###
 
     # training or inference
