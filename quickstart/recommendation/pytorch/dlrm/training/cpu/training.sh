@@ -40,11 +40,17 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+export TEST_FULLY_CONVERGENCE=0
 if [[ "$NUM_BATCH" != "" ]]
 then
     ARGS="$ARGS --num-batches=${NUM_BATCH}"
     echo "will early stop after ${NUM_BATCH} batches"
+else
+    ARGS="$ARGS --lr-num-warmup-steps=8000 --lr-decay-start-step=70000 --lr-num-decay-steps=30000 --learning-rate=18.0 --should-test"
+    echo "not set early stop interaction, will fully test convergence"
+    TEST_FULLY_CONVERGENCE=1
 fi
+ 
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}

@@ -421,7 +421,7 @@ def inference(
                 total_time = 0
                 total_iter = 0
             # early exit if nbatches was set by the user and was exceeded
-            if nbatches > 0 and i >= nbatches:
+            if args.inference_only and nbatches > 0 and i >= nbatches:
                 break
 
             X_test, lS_o_test, lS_i_test, T_test, W_test, CBPP_test = unpack_batch(
@@ -429,9 +429,20 @@ def inference(
             )
 
             # forward pass
-            start = time_wrap()
 
-            Z_test = dlrm(X_test, lS_o_test, lS_i_test)
+            if not args.inference_only and isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                n_tables = lS_i_test.shape[0]
+                idx = [lS_i_test[i] for i in range(n_tables)]
+                offset = [lS_o_test[i] for i in range(n_tables)]
+                include_last = [False for i in range(n_tables)]
+                indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+
+            start = time_wrap()
+            if not args.inference_only and isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                Z_test = dlrm(X_test, indices, offsets, indices_with_row_offsets)
+            else:
+                Z_test = dlrm(X_test, lS_o_test, lS_i_test)
+
     
             total_time += (time_wrap() - start)
             total_iter += 1
@@ -491,7 +502,6 @@ def inference(
         "nepochs": args.nepochs,
         "nbatches": nbatches,
         "nbatches_test": nbatches_test,
-        "state_dict": dlrm.state_dict(),
     }
     if not args.inference_only:
         model_metrics_dict["test_acc"] = acc_test
@@ -517,7 +527,7 @@ def inference(
             ),
             flush=True,
         )
-        print("Accuracy: {:.3f} ".format(validation_results["roc_auc"]))
+        print("Accuracy: {:.34} ".format(validation_results["roc_auc"]))
     elif not args.inference_only:
         is_best = acc_test > best_acc_test
         if is_best:
@@ -599,6 +609,7 @@ def run():
     parser.add_argument("--lr-num-decay-steps", type=int, default=0)
     # intel
     parser.add_argument("--print-auc", action="store_true", default=False)
+    parser.add_argument("--should-test", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=False)
     parser.add_argument("--share-weight-instance", type=int, default=0)
     parser.add_argument("--ipex-interaction", action="store_true", default=False)
@@ -691,7 +702,7 @@ def run():
             args.lr_decay_start_step,
             args.lr_num_decay_steps,
         )
-
+r
     ### main loop ###
 
     # training or inference
@@ -774,6 +785,7 @@ def run():
         throughput = total_samples / training_record[0] * 1000
         print("Throughput: {:.3f} fps".format(throughput))
 
+    test_freq = args.test_freq if args.test_freq != -1  else nbatches // 20
     with torch.autograd.profiler.profile(
         enabled=args.enable_profiling, use_cuda=False, record_shapes=False
     ) as prof:
@@ -838,6 +850,8 @@ def run():
                         # optimizer
                         optimizer.step()
                     lr_scheduler.step()
+                    if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                        dlrm.emb_l.sgd_args = dlrm.emb_l.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0])
 
                     t2 = time_wrap()
                     total_time += t2 - t1
@@ -850,8 +864,8 @@ def run():
                         j + 1 == nbatches
                     )
                     should_test = (
-                        (args.test_freq > 0)
-                        and (((j + 1) % args.test_freq == 0) or (j + 1 == nbatches))
+                        (args.should_test)
+                        and (((j + 1) % test_freq == 0) or (j + 1 == nbatches))
                     )
 
                     # print time, loss and accuracy
