@@ -65,26 +65,35 @@ fi
 # Determines if we are running in a container by checking for .dockerenv
 function _running-in-container()
 {
+  # .dockerenv is a legacy mount populated by Docker engine and at some point it may go away.
   [ -f /.dockerenv ]
 }
 
 # Check the Linux platform distribution if CentOS or Ubuntu
-CENTOS_PLATFORM="False"
-if [[ $(awk -F= '/^NAME/{print $2}' /etc/os-release) == *"CentOS"* ]]; then
-  CENTOS_VERSION_ID=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
-  if [[ "${CENTOS_VERSION_ID}" == '"8"' ]]; then
-    CENTOS_PLATFORM="True"
-  else
-    echo "CentOS version ${CENTOS_VERSION_ID} is not currently supported."
+OS_PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+OS_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
+if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+  if [[ "${OS_VERSION}" != '"8"' ]]; then
+    echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
     exit 1
   fi
+elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+  if [[ "${OS_VERSION}" != '"18.04"' ]] && [[ "${OS_VERSION}" != '"20.04"' ]]; then
+    echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+    exit 1
+  fi
+else
+  echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+  exit 1
 fi
+
+echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
 
 if [[ ${NOINSTALL} != "True" ]]; then
   # set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
   # install common dependencies
-  if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
     yum update -y
     yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
 
@@ -114,7 +123,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
       # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
-  else
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
     apt-get update -y
     apt-get install gcc-8 g++-8 cmake python-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
@@ -129,12 +138,12 @@ if [[ ${NOINSTALL} != "True" ]]; then
     if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
       ## Installing OpenMPI
       apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
-      # Horovod Installation
-      export HOROVOD_VERSION=87094a4
 
+      ## Install Horovod
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
+      export HOROVOD_VERSION=87094a4
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
@@ -149,20 +158,37 @@ if [[ ${NOINSTALL} != "True" ]]; then
   python3 -m pip install requests
 fi
 
+# Determine if numactl needs to be installed
+INSTALL_NUMACTL="False"
+if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != "-1" ]]; then
+  # The --numa-cores-per-instance, --socket-id, and --num-cores args use numactl
+  INSTALL_NUMACTL="True"
+elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES != "None" ]]; then
+  # BERT large training with MPI uses numactl
+  INSTALL_NUMACTL="True"
+elif [[ $MODEL_NAME == "wide_deep" ]]; then
+  # TODO: Why Wide & Deep uses numactl always
+  INSTALL_NUMACTL="True"
+fi
+
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
-  # Call the framework's container_init.sh, if it exists
-  if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
-    if [[ ${CENTOS_PLATFORM} == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
+  # For running inside a real CentOS container
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+    if [[ $INSTALL_NUMACTL == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
       yum update -y
       yum install -y numactl
-  else
-    ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
     fi
-  fi
-  # Call the model specific container_init.sh, if it exists
-  if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
-    ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+    # For ubuntu, run the container_init.sh scripts
+    if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
+      # Call the framework's container_init.sh, if it exists and we are running on ubuntu
+      INSTALL_NUMACTL=$INSTALL_NUMACTL ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh
+    fi
+    # Call the model specific container_init.sh, if it exists
+    if [ -f ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh ]; then
+      ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/${PRECISION}/container_init.sh
+    fi
   fi
 fi
 
@@ -334,7 +360,7 @@ function bert_options() {
   fi
 
   if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
-    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}" 
+    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}"
   fi
 
   if [[ -n "${task_name}" && ${task_name} != "" ]]; then
@@ -350,7 +376,7 @@ function bert_options() {
   fi
 
   if [[ -n "${vocab_file}" && ${vocab_file} != "" ]]; then
-    CMD=" ${CMD} --vocab-file=${vocab_file}" 
+    CMD=" ${CMD} --vocab-file=${vocab_file}"
   fi
 
   if [[ -n "${config_file}" && ${config_file} != "" ]]; then
@@ -438,7 +464,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    if [[ ${CENTOS_PLATFORM} == "True" ]]; then
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
       yum update -y && yum install -y unzip wget
     else
       apt-get update && apt-get install -y unzip wget
@@ -759,7 +785,7 @@ function minigo() {
         if [ ! -f "bazel-0.22.0-installer-linux-x86_64.sh" ];then
           wget https://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
           chmod 755 bazel-0.22.0-installer-linux-x86_64.sh
-        fi 
+        fi
         ./bazel-0.22.0-installer-linux-x86_64.sh --prefix=/tmp/bazel
         rm /root/.bazelrc
         export PATH=/tmp/bazel/bin:$PATH
@@ -777,8 +803,8 @@ function minigo() {
         echo "You are supposed to provide model dir."
         exit 1
       fi
-    
-      # MODEL_DIR is the official mlperf minigo repo 
+
+      # MODEL_DIR is the official mlperf minigo repo
       cd ${MODEL_DIR}
       git checkout 60ecb12f29582227a473fdc7cd09c2605f42bcd6
 
@@ -803,7 +829,7 @@ function minigo() {
         git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/tune_for_many_core.patch
-      else 
+      else
         # single-node normal mode
         git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/mlperf_split.patch
@@ -846,11 +872,11 @@ function minigo() {
       # $HOSTLIST.txt contains all the ip address
 
       if [ ! $multi_node ];then
-        unset -v HOSTLIST 
+        unset -v HOSTLIST
       else
-        export HOSTLIST=${BENCHMARK_DIR}/node_list 
+        export HOSTLIST=${BENCHMARK_DIR}/node_list
       fi
-      
+
       cd ${original_dir}
       CMD="${CMD} \
       $(add_arg "--large-scale" ${large_scale}) \
@@ -1114,7 +1140,7 @@ function ssd-resnet34() {
           fi
           benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-          
+
 
           cd  ${model_source_dir}/../
           cd ssd-resnet-benchmarks
@@ -1334,7 +1360,7 @@ function transformer_mlperf() {
           exit 1
       fi
 
-      CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints} 
+      CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints}
       --print_iter=${print_iter} --save_profile=${save_profile}"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -1513,7 +1539,7 @@ function wide_deep_large_ds() {
           echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
           exit 1
       fi
-    fi  
+    fi
 }
 
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}

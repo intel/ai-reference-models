@@ -156,7 +156,8 @@ Running SSD-ResNet34 training uses code from the
 Clone the  repo at the commit specified below, and set the `TF_MODELS_DIR` environment
 variable to point to that directory.
 ```
-# Clone the tensorflow/models repo at the specified commit
+# Clone the tensorflow/models repo at the specified commit.
+# Please note that required commit for this section is different from the one used for dataset preparation.
 git clone https://github.com/tensorflow/models.git tf_models
 cd tf_models
 export TF_MODELS_DIR=$(pwd)

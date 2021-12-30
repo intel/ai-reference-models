@@ -343,3 +343,31 @@ def test_disable_tcmalloc(launch_benchmark, mock_popen,
     # convert the run command args to a string and then check for the custom volume mounts
     docker_run_cmd = " ".join(args[0])
     assert "--env DISABLE_TCMALLOC=".format(expected_disable_tcmalloc) in docker_run_cmd
+
+
+@pytest.mark.parametrize("numa_cores_per_instance_arg,socket_id_args,num_cores_arg,mpi_num_proc_arg,run_privileged",
+                         [["4", -1, -1, None, True],
+                          [None, -1, -1, None, False],
+                          ["socket", -1, -1, None, True],
+                          [None, 0, -1, None, True],
+                          [None, 1, -1, None, True],
+                          [None, -1, 8, None, True],
+                          [None, -1, -1, 2, True]])
+def test_launch_benchmark_docker_privileged(launch_benchmark, mock_popen, platform_mock,
+                                            numa_cores_per_instance_arg, socket_id_args,
+                                            num_cores_arg, mpi_num_proc_arg, run_privileged):
+    """
+    Verifies that docker only runs with --privileged when it needs to (if args that
+    run multi-instance or numactl are used).
+    """
+    launch_benchmark.args.numa_cores_per_instance = numa_cores_per_instance_arg
+    launch_benchmark.args.socket_id = socket_id_args
+    launch_benchmark.args.num_cores = num_cores_arg
+    launch_benchmark.args.mpi = mpi_num_proc_arg
+    platform_mock.return_value = platform_config.OS_TYPE
+    launch_benchmark.main()
+    assert mock_popen.called
+    args, _ = mock_popen.call_args
+    # convert the run command args to a string and then check for the docker args
+    docker_run_cmd = " ".join(args[0])
+    assert ("--privileged" in docker_run_cmd) == run_privileged
