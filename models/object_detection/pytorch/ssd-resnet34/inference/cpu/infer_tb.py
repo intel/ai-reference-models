@@ -205,9 +205,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                 if args.use_multi_stream_module:
                     batch_per_stream = args.batch_size // args.number_instance
                     print("batch_per_stream for multi_stream_module is:", batch_per_stream)
-                    model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(batch_per_stream, 3, 1200, 1200))
+                    model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
                 else:
-                    model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(args.batch_size, 3, 1200, 1200))
+                    model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
                 print("done ipex default recipe.......................")
                 # freeze the module
                 # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
@@ -219,9 +219,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     for i in range(2):
                         # _ = model_decode(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
                         if args.use_multi_stream_module:
-                            _ = model_decode(torch.randn(batch_per_stream, 3, 1200, 1200))
+                            _ = model_decode(torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
                         else:
-                            _ = model_decode(torch.randn(args.batch_size, 3, 1200, 1200))
+                            _ = model_decode(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
 
                 if args.use_throughput_benchmark:
 
@@ -229,7 +229,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     bench = ThroughputBenchmark(model_decode)
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         #bench.add_input(img.to(memory_format=torch.channels_last))
-                        bench.add_input(img)
+                        bench.add_input(img.to(memory_format=torch.channels_last))
                         if nbatch == args.iteration:
                             break
 
@@ -253,6 +253,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                     time_consume = 0
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                        img = img.to(memory_format=torch.channels_last)
                         if nbatch > args.warmup_iterations:
                             start_time=time.time()
                         result_raw = model_decode(img)
@@ -292,6 +293,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         time_consume = 0
                         with torch.no_grad():
                             for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                                img = img.to(memory_format=torch.channels_last)
                                 if nbatch > args.warmup_iterations:
                                     start_time=time.time()
                                 #m(img.to(memory_format=torch.channels_last))
