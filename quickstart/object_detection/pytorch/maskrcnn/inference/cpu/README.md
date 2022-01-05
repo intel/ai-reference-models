@@ -87,6 +87,7 @@ export MODEL_DIR=$(pwd)
 export DATASET_DIR=<path to the COCO dataset>
 export CHECKPOINT_DIR=<path to the downloaded pretrained model>
 export OUTPUT_DIR=<path to an output directory>
+export MODE=<set to 'jit' or 'imperative'>
 
 # Run a quickstart script (for example, FP32 batch inference jit)
 cd ${MODEL_DIR}/quickstart/object_detection/pytorch/maskrcnn/inference/cpu
