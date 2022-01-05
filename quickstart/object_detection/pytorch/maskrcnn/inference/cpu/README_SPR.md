@@ -30,9 +30,9 @@ pytorch-spr-maskrcnn-inference
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_realtime.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, avx-fp32, or bf16). |
-| `inference_throughput.sh` | Runs multi instance batch inference using 24 cores per instance for the specified precision (fp32, avx-fp32, or bf16). |
-| `accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, avx-fp32, or bf16). |
+| `inference_realtime.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, avx-fp32, or bf16) and mode (imperative or jit). |
+| `inference_throughput.sh` | Runs multi instance batch inference using 24 cores per instance for the specified precision (fp32, avx-fp32, or bf16) and mode (imperative or jit). |
+| `accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, avx-fp32, or bf16) and mode (imperative or jit). |
 
 > Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
 > `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
@@ -89,7 +89,7 @@ export PRETRAINED_MODEL=$(pwd)/e2e_mask_rcnn_R_50_FPN_1x.pth
 After you've downloaded the pretrained model and followed the instructions to
 [build the container](#build-the-container) and [prepare the dataset](#datasets),
 use the `run.sh` script from the container package to run Mask R-CNN inference.
-Set environment variables to specify the dataset directory, precision to run, and
+Set environment variables to specify the dataset directory, precision and mode to run, and
 an output directory. By default, the `run.sh` script will run the
 `inference_realtime.sh` quickstart script. To run a different script, specify
 the name of the script using the `SCRIPT` environment variable.
@@ -99,6 +99,7 @@ cd pytorch-spr-maskrcnn-inference
 
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
+export MODE=<imperative or jit>
 export PRETRAINED_MODEL=<path to the downloaded .pth file>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
