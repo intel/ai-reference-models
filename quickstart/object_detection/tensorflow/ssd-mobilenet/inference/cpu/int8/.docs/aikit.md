@@ -73,3 +73,26 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 ./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8/<script name>.sh
 ```
+
+#### Run on Windows Systems
+After installing the prerequisites and downloading the pretrained model, set the environment variables for the paths to your `PRETRAINED_MODEL`, an `OUTPUT_DIR` where log files will be written,
+and `DATASET_DIR` for COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.
+Navigate to your model zoo directory and then run a [quickstart script](#quick-start-scripts).
+```
+# cd to your model zoo directory
+cd models
+
+set PRETRAINED_MODEL=<path to the pretrained model pb file>
+set DATASET_DIR=<path to the coco tf record file>
+set OUTPUT_DIR=<directory where log files will be written>
+
+bash quickstart\object_detection\tensorflow\ssd-mobilenet\inference\cpu\int8\<script name>.sh
+```
+> Please note that Intel Model Zoo source code includes some Bash scripts, please install [MSYS2](https://www.msys2.org) on your system.
+You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+As an example, if the dataset location on Windows is `D:\user\coco_dataset\coco_val.record`, convert the Windows path to Unix as shown:
+> ```
+> cygpath D:\user\coco_dataset\coco_val.record
+> /d/user/coco_dataset/coco_val.record
+>```
+>Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/coco_dataset/coco_val.record`.

@@ -24,7 +24,7 @@ from common.base_model_init import BaseModelInitializer, set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
-    # SSD-MobileNet Int8 inference model initialization
+    # SSD-MobileNet inference model initialization
     args = None
     custom_args = []
 
@@ -62,5 +62,4 @@ class ModelInitializer(BaseModelInitializer):
             self.command_prefix += " -b {0}".format(self.args.batch_size)
 
     def run(self):
-        # Run script from the tensorflow models research directory
         self.run_command(self.command_prefix)

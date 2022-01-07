@@ -159,28 +159,34 @@ class ModelInitializer(BaseModelInitializer):
     def run_accuracy_command(self):
         # already validated by parent
         self.command = self.get_command_prefix(self.args.socket_id, numactl=False)
-        self.command += "FROZEN_GRAPH=" + self.args.input_graph
+        os.environ["FROZEN_GRAPH"] = "{}".format(self.args.input_graph)
 
         if self.args.data_location and os.path.exists(
                 self.args.data_location):
-            self.command += " TF_RECORD_FILE=" + self.args.data_location
+            os.environ["TF_RECORD_FILE"] = "{}".format(self.args.data_location)
         else:
             raise ValueError(
                 "Unable to locate the coco data record file at {}".format(
                     self.args.tf_record_file))
 
         if self.args.split:
-            self.command += " SPLIT=" + self.args.split
+            os.environ["SPLIT"] = "{}".format(self.args.split)
         else:
             raise ValueError("Must specify SPLIT parameter")
 
-        self.command += " TF_MODELS_ROOT={}".format(
-            self.args.model_source_dir)
+        os.environ["TF_MODELS_ROOT"] = "{}".format(self.args.model_source_dir)
 
-        self.command += " " + self.accuracy_script_path
+        self.command += "bash " + self.accuracy_script_path
         self.run_command(self.command)
 
     def run(self):
+        # TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
+        # We already do the OS check there to see if it's one that we support.
+        if os.environ.get('OS', '') == 'Windows_NT':
+            os.environ["PYTHONPATH"] = "{};{};{}".format(
+                os.path.join(self.args.model_source_dir, "research"),
+                os.path.join(self.args.model_source_dir, "research", "slim"),
+                os.environ["PYTHONPATH"])
         # Run script from the tensorflow models research directory
         original_dir = os.getcwd()
         os.chdir(os.path.join(self.args.model_source_dir, "research"))

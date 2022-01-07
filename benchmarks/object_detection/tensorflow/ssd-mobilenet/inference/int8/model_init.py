@@ -60,5 +60,4 @@ class ModelInitializer(BaseModelInitializer):
             self.command_prefix += " -b {0}".format(self.args.batch_size)
 
     def run(self):
-        # Run script from the tensorflow models research directory
         self.run_command(self.command_prefix)

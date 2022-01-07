@@ -140,6 +140,40 @@ export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 ./quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_accuracy.sh
 ```
 
+#### Run on Windows Systems
+* Download and install [Google Protobuf version 3.4.0]((https://github.com/protocolbuffers/protobuf/releases/tag/v3.4.0)) for Windows in addition to the above listed dependencies.
+Download and extract [protoc-3.4.0-win32.zip](https://github.com/protocolbuffers/protobuf/releases/download/v3.4.0/protoc-3.4.0-win32.zip)
+Navigate to the `research` directory in `TF_MODELS_DIR` and install Google Protobuf:
+```
+set TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
+cd %TF_MODELS_DIR%\research
+“C:\<user>\protoc-3.4.0-win32\bin\protoc.exe” object_detection/protos/*.proto --python_out=.
+```
+
+After installing the prerequisites and cloning the TensorFlow models repo, and downloading the pretrained model,
+set the environment variables for the paths to your `PRETRAINED_MODEL`, an `OUTPUT_DIR` where log files will be written,
+TF_MODELS_DIR, and `DATASET_DIR` for COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.
+Navigate to your model zoo directory and then run a [quickstart script](#quick-start-scripts).
+```
+# cd to your model zoo directory
+cd models
+
+set PRETRAINED_MODEL=<path to the frozen graph downloaded above>
+set DATASET_DIR=<path to COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts>
+set OUTPUT_DIR=<directory where log files will be written>
+set TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
+
+bash quickstart\object_detection\tensorflow\rfcn\inference\cpu\int8\<script name>.sh
+```
+> Please note that Intel Model Zoo source code includes some Bash scripts, please install [MSYS2](https://www.msys2.org) on your system.
+You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+As an example, if the dataset location on Windows is `D:\user\coco_dataset\val2017`, convert the Windows path to Unix as shown:
+> ```
+> cygpath D:\user\coco_dataset\val2017
+> /d/user/coco_dataset/val2017
+>```
+>Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/coco_dataset/val2017`.
+
 <!--- 90. Resource Links-->
 ## Additional Resources
 

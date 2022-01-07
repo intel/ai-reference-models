@@ -265,3 +265,4 @@ Log file location: {--output-dir value}/benchmark_dien_inference_fp32_20201118_0
 
 ### 4. Run inference  with bfloat16 for accuracy  or latency 
  Use same options as fp32 in section 4 & 5, and use precision as bfloat16.
+ 
