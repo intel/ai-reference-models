@@ -95,8 +95,14 @@ def parse_args():
                         help='use throughput benchmark')
     parser.add_argument('--use-multi-stream-module', action='store_true', default=False,
                         help='use multi stream module')
-    parser.add_argument('--instance-number', default=0, type=int,
+    parser.add_argument('--instance-number', default=-1, type=int,
                     help='the instance number to run under runtime api')
+    parser.add_argument('--async-execution', action='store_true', default=False,
+                        help='use multi stream module')
+    parser.add_argument('--start-core', default=-1, type=int,
+                    help='the start core to creat cpu pool')
+    parser.add_argument('--end-core', default=-1, type=int,
+                    help='the end core to creat cpu pool')
     return parser.parse_args()
 
 
@@ -248,9 +254,16 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                             print(args.number_instance)
                             stats = bench.benchmark(num_calling_threads=args.number_instance, num_warmup_iters=args.warmup_iterations, num_iters=args.iteration) #num_instance, warm up iters, total iters
                 elif args.use_multi_stream_module:
-                    print('runing int8 real inputs inference use_multi_stream_module path')
-                    cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
-                    model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
+                    print('runing int8 real inputs inference use_multi_stream_module path. async_execution is:{}'.format(args.async_execution))
+                    if args.async_execution:
+                        if args.start_core != -1 and args.end_core != -1:
+                            cpu_pool = ipex.cpu.runtime.CPUPool(core_ids=range(args.start_core, args.end_core + 1))
+                        elif args.instance_number != -1:
+                            cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
+                        else:
+                            print("args.instance_number or (args.start_core, args.end_core) must be indicated to create cpu_pool")
+                            exit(-1)
+                        model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                     time_consume = 0
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         img = img.to(memory_format=torch.channels_last)
@@ -264,11 +277,18 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
 
                         results = []
                         idx = 0
-                        for i in range(img.size(0)):
-                            results.append((result_raw[i][0],
-                                            result_raw[i][1],
-                                            result_raw[i][2]))
-                            idx += result_raw[i][3]
+                        if args.async_execution:
+                            for i in range(img.size(0)//batch_per_stream):
+                                results.append((result_raw[i][0],
+                                                result_raw[i][1],
+                                                result_raw[i][2]))
+                                idx += result_raw[i][3]
+                        else:
+                            for i in range(result_raw[3].size(0)):
+                                results.append((result_raw[0][idx:idx+result_raw[3][i]],
+                                                result_raw[1][idx:idx+result_raw[3][i]],
+                                                result_raw[2][idx:idx+result_raw[3][i]]))
+                                idx += result_raw[3][i]
                         (htot, wtot) = [d.cpu().numpy() for d in img_size]
                         img_id = img_id.cpu().numpy()
                         # Iterate over batch elements
@@ -334,8 +354,8 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     print('enable jit')
                     with torch.cpu.amp.autocast(), torch.no_grad():
                         # model = torch.jit.trace(model, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
-                        trace_batch = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
-                        model_decode = torch.jit.trace(model_decode, torch.randn(trace_batch, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
+                        batch_per_stream = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
+                        model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     # model = torch.jit.freeze(model)
                     model_decode = torch.jit.freeze(model_decode)
 
@@ -353,8 +373,15 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                             stats = bench.benchmark(num_calling_threads=args.number_instance, num_warmup_iters=args.warmup_iterations, num_iters=args.iteration) #num_instance, warm up iters, total iters
                     elif args.use_multi_stream_module:
                         print('bf16 use_multi_stream_module path')
-                        cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
-                        model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
+                        if args.async_execution:
+                            if args.start_core != -1 and args.end_core != -1:
+                                cpu_pool = ipex.cpu.runtime.CPUPool(core_ids=range(args.start_core, args.end_core + 1))
+                            elif args.instance_number != -1:
+                                cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
+                            else:
+                                print("args.instance_number or (args.start_core, args.end_core) must be indicated to create cpu_pool")
+                                exit(-1)
+                            model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                         time_consume = 0
                         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                             img = img.to(memory_format=torch.channels_last)
@@ -368,11 +395,18 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
 
                             results = []
                             idx = 0
-                            for i in range(img.size(0)):
-                                results.append((result_raw[i][0],
-                                                result_raw[i][1],
-                                                result_raw[i][2]))
-                                idx += result_raw[i][3]
+                            if args.async_execution:
+                                for i in range(img.size(0)//batch_per_stream):
+                                    results.append((result_raw[i][0],
+                                                    result_raw[i][1],
+                                                    result_raw[i][2]))
+                                    idx += result_raw[i][3]
+                            else:
+                                for i in range(result_raw[3].size(0)):
+                                    results.append((result_raw[0][idx:idx+result_raw[3][i]],
+                                                    result_raw[1][idx:idx+result_raw[3][i]],
+                                                    result_raw[2][idx:idx+result_raw[3][i]]))
+                                    idx += result_raw[3][i]
                             (htot, wtot) = [d.cpu().numpy() for d in img_size]
                             img_id = img_id.cpu().numpy()
                             # Iterate over batch elements
@@ -433,8 +467,8 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                 if args.jit:
                     print("enable jit")
                     with torch.no_grad():
-                        trace_batch = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
-                        model_decode = torch.jit.trace(model_decode, torch.randn(trace_batch, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
+                        batch_per_stream = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
+                        model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     model_decode = torch.jit.freeze(model_decode)
                     if args.use_throughput_benchmark:
                         print('fp32 throughput benchmark')
@@ -450,8 +484,15 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                             stats = bench.benchmark(num_calling_threads=args.number_instance, num_warmup_iters=args.warmup_iterations, num_iters=args.iteration) #num_instance, warm up iters, total iters
                     elif args.use_multi_stream_module:
                         print('fp32 use_multi_stream_module path')
-                        cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
-                        model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
+                        if args.async_execution:
+                            if args.start_core != -1 and args.end_core != -1:
+                                cpu_pool = ipex.cpu.runtime.CPUPool(core_ids=range(args.start_core, args.end_core + 1))
+                            elif args.instance_number != -1:
+                                cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
+                            else:
+                                print("args.instance_number or (args.start_core, args.end_core) must be indicated to create cpu_pool")
+                                exit(-1)
+                            model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                         time_consume = 0
                         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                             img = img.to(memory_format=torch.channels_last)
@@ -465,11 +506,18 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
 
                             results = []
                             idx = 0
-                            for i in range(img.size(0)):
-                                results.append((result_raw[i][0],
-                                                result_raw[i][1],
-                                                result_raw[i][2]))
-                                idx += result_raw[i][3]
+                            if args.async_execution:
+                                for i in range(img.size(0)//batch_per_stream):
+                                    results.append((result_raw[i][0],
+                                                    result_raw[i][1],
+                                                    result_raw[i][2]))
+                                    idx += result_raw[i][3]
+                            else:
+                                for i in range(result_raw[3].size(0)):
+                                    results.append((result_raw[0][idx:idx+result_raw[3][i]],
+                                                    result_raw[1][idx:idx+result_raw[3][i]],
+                                                    result_raw[2][idx:idx+result_raw[3][i]]))
+                                    idx += result_raw[3][i]
                             (htot, wtot) = [d.cpu().numpy() for d in img_size]
                             img_id = img_id.cpu().numpy()
                             # Iterate over batch elements

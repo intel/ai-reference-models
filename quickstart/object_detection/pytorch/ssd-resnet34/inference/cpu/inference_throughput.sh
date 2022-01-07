@@ -70,6 +70,10 @@ PRECISION=$1
 weight_sharing=false
 
 if [ "$weight_sharing" = true ]; then
+    async=true
+    if [ "$async" = true ]; then
+       ARGS="$ARGS --async-execution"
+    fi
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     TOTAL_CORES=`expr $CORES \* $SOCKETS`
