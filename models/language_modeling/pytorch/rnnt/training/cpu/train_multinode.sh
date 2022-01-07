@@ -64,6 +64,10 @@ LEARNING_RATE=${16:-"0.001"}
 LEARNING_RATE_WARMUP=${17:-"8000"}
 GRADIENT_ACCUMULATION_STEPS=${18:-1}
 LAUNCH_OPT=${LAUNCH_OPT:-"none"}
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NNODES=${NNODES:-1}
+HOSTFILE=${HOSTFILE:-"${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu/hostfile"}
+NUM_RANKS=$(( NNODES * SOCKETS ))
 
 PREC=""
 if [ "$1" = "bf16" ]; then
@@ -117,28 +121,25 @@ CMD+=" $PREC"
 CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
-if [ "$1" = "fp32" ] ; then
-    CMD+=" --num_steps=100"
-fi
+CMD+=" --world_size=$NUM_RANKS"
+CMD+=" --backend=ccl"
+CMD+=" --num_steps=100"
 
-export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-export KMP_BLOCKTIME=1
-export KMP_AFFINITY=granularity=fine,compact,1,0
-
-rm -rf ${OUTPUT_DIR}/throughput_log*
+rm -rf ${OUTPUT_DIR}/distributed_throughput_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    --throughput_mode \
+    --distributed \
+    --nnodes ${NNODES} \
+    --hostfile ${HOSTFILE} \
+    --nproc_per_node $SOCKETS \
     --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./throughput_log_${precision}" \
+    --log_file_prefix="./distributed_throughput_log_${precision}" \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py \
-    $CMD
+    $CMD 2>&1 | tee ${OUTPUT_DIR}/distributed_throughput_log_${precision}.txt
 
 # For the summary of results
 wait
-
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/distributed_throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;
@@ -151,4 +152,4 @@ END   {
         sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""RNN-T";"training throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""RNN-T";"training distributed throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
