@@ -121,3 +121,29 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 ./quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/int8/<script name>.sh
 ```
+
+#### Run on Windows Systems
+After installing the prerequisites and cloning the models and benchmarks
+repos, and downloading the pretrained model, set the environment variables for the paths to your `PRETRAINED_MODEL`, `TF_MODELS_DIR`,
+an `OUTPUT_DIR` where log files will be written,
+and `DATASET_DIR` to point to the folder where the COCO dataset `validation-00000-of-00001` file is located.
+Navigate to your model zoo directory and then run a [quickstart script](#quick-start-scripts).
+```
+# cd to your model zoo directory
+cd models
+
+set PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
+set DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
+set OUTPUT_DIR=<directory where log files will be written>
+set TF_MODELS_DIR=<path to the TensorFlow Models repo>
+
+bash quickstart\object_detection\tensorflow\ssd-resnet34\inference\cpu\int8\<script name>.sh
+```
+> Please note that Intel Model Zoo source code includes some Bash scripts, please install [MSYS2](https://www.msys2.org) on your system.
+You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+As an example, if the dataset location on Windows is `D:\user\coco_dataset`, convert the Windows path to Unix as shown:
+> ```
+> cygpath D:\user\coco_dataset
+> /d/user/coco_dataset
+>```
+>Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/coco_dataset`.
