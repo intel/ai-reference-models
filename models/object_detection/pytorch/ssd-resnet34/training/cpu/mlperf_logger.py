@@ -24,7 +24,8 @@ mllog.config(
     root_dir=os.path.normpath(os.path.dirname(os.path.realpath(__file__))))
 
 def ssd_print(*args, sync=True, **kwargs):
-    if sync:
+    use_cuda = os.getenv('USE_CUDA')
+    if sync and use_cuda=='True':
         barrier()
     if get_rank() == 0:
         kwargs['stack_offset'] = 2

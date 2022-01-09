@@ -99,7 +99,7 @@ def parse_args():
                         help='number of examples for each training iteration')
     parser.add_argument('--val-batch-size', type=int, default=None,
                         help='number of examples for each validation iteration (defaults to --batch-size)')
-    parser.add_argument('--no-cuda', action='store_true',
+    parser.add_argument('--no_cuda', action='store_true', default=True,
                         help='use available GPUs')
     parser.add_argument('--seed', '-s', type=int, default=random.SystemRandom().randint(0, 2**32 - 1),
                         help='manually set random seed for torch')
@@ -138,9 +138,16 @@ def parse_args():
     parser.add_argument('--log-interval', type=int, default=100,
                         help='Logging mini-batch interval.')
     # Distributed stuff
+    parser.add_argument('--distributed', action='store_true', default=False, help='enable distributed')
     parser.add_argument('--local_rank', default=os.getenv('LOCAL_RANK', 0), type=int,
                         help='Used for multi-process training. Can either be manually set '
                              'or automatically set by using \'python -m multiproc\'.')
+    parser.add_argument('--rank', default=0, type=int, help='rank')
+    parser.add_argument('--local_world_size', default=1, type=int, help='local world size')
+    parser.add_argument('--world_size', default=1, type=int, help='world size')
+    parser.add_argument('--backend', default='gloo', type=str, help='DDP backend, default to gloo')
+    parser.add_argument('--master_addr', default='127.0.0.1', type=str, help='Master Addr')
+    parser.add_argument('--port', default='29500', type=str, help='Port')
     # Added for performance measurement
     parser.add_argument('--performance_only', action='store_true', default=False,
                         help='only for performance test')
@@ -300,12 +307,28 @@ def train300_mlperf_coco(args):
             raise ImportError("Please install APEX from https://github.com/nvidia/apex")
 
     local_seed = args.seed
+    os.environ['USE_CUDA'] = str(use_cuda)
+    if args.world_size > 1:
+        args.distributed = True
+
     if args.distributed:
         # necessary pytorch imports
         import torch.utils.data.distributed
         import torch.distributed as dist
+        print('Distributed training with DDP')
         if args.no_cuda:
             device = torch.device('cpu')
+            os.environ['RANK'] = str(os.environ.get('PMI_RANK', args.rank))
+            os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', args.world_size))
+            os.environ['MASTER_ADDR'] = args.master_addr
+            os.environ['MASTER_PORT'] = args.port
+
+            # Initialize the process group with ccl backend
+            if args.backend == 'ccl':
+                import torch_ccl
+            dist.init_process_group(
+                backend=args.backend
+            )
         else:
             torch.cuda.set_device(args.local_rank)
             device = torch.device('cuda')
@@ -374,10 +397,6 @@ def train300_mlperf_coco(args):
     else:
         N_gpu = 1
 
-	# parallelize
-    if args.distributed:
-        ssd300 = DDP(ssd300)
-
     global_batch_size = N_gpu * args.batch_size
     mllogger.event(key=mllog_const.GLOBAL_BATCH_SIZE, value=global_batch_size)
     # Reference doesn't support group batch norm, so bn_span==local_batch_size
@@ -442,6 +461,12 @@ def train300_mlperf_coco(args):
             ssd300, optim = ipex.optimize(ssd300, dtype=torch.bfloat16, optimizer=optim)
         else:
             ssd300, optim = ipex.optimize(ssd300, dtype=torch.float32, optimizer=optim)
+
+    # parallelize
+    if args.distributed:
+        device_ids = None
+        ssd300 = torch.nn.parallel.DistributedDataParallel(ssd300, device_ids=device_ids)
+
     optim.zero_grad(set_to_none=True)
     for epoch in range(args.epochs):
         mllogger.start(
@@ -533,7 +558,7 @@ def train300_mlperf_coco(args):
             if args.performance_only and iter_num % args.print_freq == 0:
                 progress.display(iter_num)
             if not np.isinf(loss.item()): avg_loss = 0.999*avg_loss + 0.001*loss.item()
-            if args.rank == 0 and args.log_interval and not iter_num % args.log_interval:
+            if args.log_interval and not iter_num % args.log_interval:
                 print("Iteration: {:6d}, Loss function: {:5.8f}, Average Loss: {:.8f}"\
                     .format(iter_num, loss.item(), avg_loss))
             iter_num += 1
@@ -551,7 +576,7 @@ def train300_mlperf_coco(args):
                         dist.all_reduce(bn_buf, op=dist.ReduceOp.SUM)
                         bn_buf /= world_size
                         ssd_print(key=mllog_const.MODEL_BN_SPAN,
-                            value=bn_buf)
+                            value=bn_buf.cpu().detach().numpy())
             if args.rank == 0:
                 if not args.no_save:
                     print("")
@@ -566,9 +591,9 @@ def train300_mlperf_coco(args):
                     success = torch.ones(1)
                     if use_cuda:
                         success = success.cuda()
-            if args.distributed:
-                dist.broadcast(success, 0)
-            if success[0]:
+                if args.distributed:
+                    dist.broadcast(success, 0)
+                if success[0]:
                     return True
             mllogger.end(
                 key=mllog_const.EPOCH_STOP,
