@@ -122,10 +122,12 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
-parser.add_argument('--world-size', default=-1, type=int,
+parser.add_argument('--world-size', default=1, type=int,
                     help='number of nodes for distributed training')
-parser.add_argument('--rank', default=-1, type=int,
+parser.add_argument('--rank', default=0, type=int,
                     help='node rank for distributed training')
+parser.add_argument('--master_addr', default='127.0.0.1', type=str, help='Master Addr')
+parser.add_argument('--port', default='29500', type=str, help='Port')
 parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='nccl', type=str,
@@ -209,14 +211,23 @@ def main_worker(gpu, ngpus_per_node, args):
         print("Use GPU: {} for training".format(args.gpu))
 
     if args.distributed:
+        os.environ['RANK'] = str(os.environ.get('PMI_RANK', args.rank))
+        os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', args.world_size))
+        os.environ['MASTER_ADDR'] = args.master_addr
+        os.environ['MASTER_PORT'] = args.port
         if args.dist_url == "env://" and args.rank == -1:
             args.rank = int(os.environ["RANK"])
         if args.multiprocessing_distributed:
             # For multiprocessing distributed training, rank needs to be the
             # global rank among all the processes
             args.rank = args.rank * ngpus_per_node + gpu
-        dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-                                world_size=args.world_size, rank=args.rank)
+
+        # Initialize the process group with ccl backend
+        if args.dist_backend == 'ccl':
+            import torch_ccl
+        dist.init_process_group(backend=args.dist_backend)
+        #dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
+        #                        world_size=args.world_size, rank=args.rank)
     if args.hub:
         torch.set_flush_denormal(True)
         model = torch.hub.load('facebookresearch/WSL-Images', args.arch)
@@ -256,11 +267,11 @@ def main_worker(gpu, ngpus_per_node, args):
             if args.cuda:
                 model.cuda()
                 print("create DistributedDataParallel in GPU")
+                # DistributedDataParallel will divide and allocate batch_size to all
+                # available GPUs if device_ids are not set
+                model = torch.nn.parallel.DistributedDataParallel(model)
             else:
                 print("create DistributedDataParallel in CPU")
-            # DistributedDataParallel will divide and allocate batch_size to all
-            # available GPUs if device_ids are not set
-            model = torch.nn.parallel.DistributedDataParallel(model)
     elif args.gpu is not None and args.cuda:
         torch.cuda.set_device(args.gpu)
         model = model.cuda(args.gpu)
@@ -408,6 +419,12 @@ def main_worker(gpu, ngpus_per_node, args):
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
         else:
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
+
+    # parallelize
+    if args.distributed and not args.cuda and args.gpu is None:
+        print("create DistributedDataParallel in CPU")
+        device_ids = None
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:

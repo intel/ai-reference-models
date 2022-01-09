@@ -11,7 +11,7 @@ Intel-optimized PyTorch.
 
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison and Jemalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison, Torch-CCL and Jemalloc.
 
 ### Model Specific Setup
 
@@ -36,6 +36,14 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 
 ```bash
     export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+```
+
+* Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
+
+  In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
+```bash
+    export NNODES=#your_node_number
+    export HOSTFILE=your_ip_list_file #one ip per line
 ```
 
 ## Datasets
@@ -76,6 +84,7 @@ The folder that contains the `val` and `train` directories should be set as the
 | Script name | Description |
 |-------------|-------------|
 | `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, or bf16). |
+| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, or bf16). |
 
 ## Run the model
 
@@ -100,6 +109,10 @@ export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 # Run the training quickstart script
 cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
 bash training.sh
+
+# Run the distributed training quickstart script
+cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
+bash training_dist.sh
 ```
 
 <!--- 80. License -->

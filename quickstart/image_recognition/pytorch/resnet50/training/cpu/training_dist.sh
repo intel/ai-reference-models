@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,8 +51,6 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
-rm -rf ${OUTPUT_DIR}/resnet50_training_log_*
-
 ARGS=""
 ARGS="$ARGS -a resnet50 ${DATASET_DIR}"
 
@@ -76,6 +74,9 @@ fi
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
+NNODES=${NNODES:-1}
+HOSTFILE=${HOSTFILE:-./hostfile}
+NUM_RANKS=$(( NNODES * SOCKETS ))
 
 CORES_PER_INSTANCE=$CORES
 
@@ -86,11 +87,17 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=128
 
-rm -rf ./resnet50_training_log_*
+rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_*
+
+torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
+source $torch_ccl_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
-    --ninstances 1 \
+    --distributed \
+    --nnodes ${NNODES} \
+    --hostfile ${HOSTFILE} \
+    --nproc_per_node ${SOCKETS} \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
     $ARGS \
@@ -98,10 +105,24 @@ python -m intel_extension_for_pytorch.cpu.launch \
     -j 0 \
     --seed 2020 \
     --epochs $TRAINING_EPOCHS \
-    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}.log
+    --world-size ${NUM_RANKS} \
+    --dist-backend ccl \
+    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
 # For the summary of results
 wait
 
-throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}.log |sed -e 's/.Training throughput//;s/[^0-9.]//g')
+throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
+BEGIN {
+       sum = 0;
+i = 0;
+      }
+      {
+       sum = sum + $1;
+i++;
+      }
+END   {
+       sum = sum / i;
+       printf("%.3f", sum);
+}')
 
-echo "resnet50;"training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo "resnet50;"distributed training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
