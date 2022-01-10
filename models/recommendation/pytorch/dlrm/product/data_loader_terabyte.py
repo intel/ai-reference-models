@@ -14,6 +14,7 @@ import time
 import math
 from tqdm import tqdm
 import argparse
+import extend_distributed as ext_dist
 
 
 class DataLoader:
@@ -212,6 +213,23 @@ class CriteoBinDataset(Dataset):
 
         self.num_entries = math.ceil(os.path.getsize(data_file) / self.bytes_per_entry)
 
+        data_file_size = os.path.getsize(data_file)
+        bytes_per_sample = bytes_per_feature * self.tot_fea
+        if ext_dist.my_size > 1:
+            self.bytes_per_rank = self.bytes_per_entry // ext_dist.my_size
+        else:
+            self.bytes_per_rank = self.bytes_per_entry
+
+        if ext_dist.my_size > 1 and self.num_entries * self.bytes_per_entry > data_file_size:
+            last_batch = (data_file_size % self.bytes_per_entry) // bytes_per_sample
+            self.bytes_last_batch = last_batch // ext_dist.my_size * bytes_per_sample
+        else:
+            self.bytes_last_batch = self.bytes_per_rank
+
+        if self.bytes_last_batch == 0:
+            self.num_entries = self.num_entries - 1
+            self.bytes_last_batch = self.bytes_per_rank
+
         print('data file:', data_file, 'number of batches:', self.num_entries)
         self.file = open(data_file, 'rb')
 
@@ -225,8 +243,10 @@ class CriteoBinDataset(Dataset):
         return self.num_entries
 
     def __getitem__(self, idx):
-        self.file.seek(idx * self.bytes_per_entry, 0)
-        raw_data = self.file.read(self.bytes_per_entry)
+        my_rank = ext_dist.dist.get_rank() if ext_dist.my_size > 1 else 0
+        rank_size = self.bytes_last_batch if idx == (self.num_entries - 1) else self.bytes_per_rank 
+        self.file.seek(idx * self.bytes_per_entry + rank_size * my_rank, 0)
+        raw_data = self.file.read(rank_size)
         array = np.frombuffer(raw_data, dtype=np.int32)
         tensor = torch.from_numpy(array).view((-1, self.tot_fea))
 
