@@ -121,7 +121,6 @@ CMD+=" $PREC"
 CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
-CMD+=" --world_size=$NUM_RANKS"
 CMD+=" --backend=ccl"
 CMD+=" --num_steps=100"
 
