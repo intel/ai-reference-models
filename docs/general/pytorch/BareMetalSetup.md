@@ -53,3 +53,11 @@
     cd vision
     git checkout v0.8.0
     python setup.py install
+
+### build torch-ccl 
+    cd ..
+    git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
+    git submodule sync 
+    git submodule update --init --recursive
+    python setup.py install 
+
