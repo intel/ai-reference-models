@@ -42,7 +42,7 @@ fi
 
 rm -f ${OUTPUT_DIR}/accuracy_log*
 INT8_CONFIG=${INT8_CONFIG:-"configure.json"}
-BATCH_SIZE=${BATCH_SIZE:-128}
+BATCH_SIZE=${BATCH_SIZE:-8}
 EVAL_DATA_FILE=${EVAL_DATA_FILE:-"${PWD}/squad1.1/dev-v1.1.json"}
 FINETUNED_MODEL=${FINETUNED_MODEL:-bert_squad_model}
 OUTPUT_DIR=${OUTPUT_DIR:-"${PWD}"}
