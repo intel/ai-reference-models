@@ -71,7 +71,8 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCHSIZE=$((256*CORES))
 export OMP_NUM_THREADS=$CORES
-source /home/haozhe/frameworks.ai.pytorch.torch-ccl/torch_ccl/env/setvars.sh
+torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
+source $torch_ccl_path/env/setvars.sh
 
 i=0
 LOG_0="${LOG}/socket_$i"

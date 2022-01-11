@@ -75,7 +75,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 | Script name | Description |
 |-------------|-------------|
 | `training.sh` | Run training for the specified precision (fp32, avx-fp32, or bf16). |
-| `distribute_training.sh` | Run distribute training for the specified precision (fp32, avx-fp32, or bf16). |
+| `distribute_training.sh` | Run distribute training on 1 node with 2 sockets for the specified precision (fp32, avx-fp32, or bf16). |
 
 ## Run the model
 
