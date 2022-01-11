@@ -177,12 +177,14 @@ def main():
     args = parser.parse_args()
 
     args.distributed = False
-    if args.world_size > 1:
+    if torch.distributed.is_available() and int(os.environ.get('PMI_SIZE', '0')) > 1:
         print('Distributed training with DDP')
-        os.environ['RANK'] = str(os.environ.get('PMI_RANK', args.rank))
-        os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', args.world_size))
-        os.environ['MASTER_ADDR'] = args.master_addr  # your master address
-        os.environ['MASTER_PORT'] = args.port  # your master port
+        os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
+        os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
+        if not 'MASTER_ADDR' in os.environ:
+            os.environ['MASTER_ADDR'] = args.master_addr
+        if not 'MASTER_PORT' in os.environ:
+            os.environ['MASTER_PORT'] = args.port
 
         # Initialize the process group with ccl backend
         if args.backend == 'ccl':
@@ -191,6 +193,14 @@ def main():
                 backend=args.backend                
         )
         args.distributed = True
+        if torch.distributed.is_initialized():
+            print("Torch distributed is initialized.")
+            args.rank = torch.distributed.get_rank()
+            args.world_size = torch.distributed.get_world_size()
+        else:
+            print("Torch distributed is not initialized.")
+            args.rank = 0
+            args.world_size = 1
 
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
