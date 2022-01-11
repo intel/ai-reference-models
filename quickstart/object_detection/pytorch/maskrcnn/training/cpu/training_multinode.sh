@@ -89,7 +89,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     -i 20 \
     --config-file "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
     --skip-test \
-    --world-size $NUM_RANKS \
     --backend ccl \
     SOLVER.IMS_PER_BATCH ${BATCH_SIZE} \
     SOLVER.MAX_ITER 720000 \
