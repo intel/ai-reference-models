@@ -73,7 +73,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 export TRAIN=0
 
 PRECISION=$1
-BATCH_SIZE=112
+BATCH_SIZE=168
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput*
 
