@@ -93,7 +93,7 @@ class ModelInitializer(BaseModelInitializer):
         benchmarks_path = os.path.join(self.args.model_source_dir, "../ssd-resnet-benchmarks")
         os.environ["PYTHONPATH"] = os.path.join(self.args.model_source_dir, "research")
 
-        #TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
+        # TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
         # We already do the OS check there to see if it's one that we support.
         if os.environ.get('OS', '') == 'Windows_NT':
             os.environ["PYTHONPATH"] += ";" + os.path.join(benchmarks_path, "scripts/tf_cnn_benchmarks")

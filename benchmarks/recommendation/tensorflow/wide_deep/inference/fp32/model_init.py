@@ -23,6 +23,7 @@ import os
 from common.base_model_init import BaseModelInitializer
 from common.base_model_init import set_env_var
 
+
 class ModelInitializer(BaseModelInitializer):
     '''Add code here to detect the environment and set necessary variables
     before launching the model'''
@@ -47,21 +48,21 @@ class ModelInitializer(BaseModelInitializer):
         executable = os.path.join(args.mode, args.precision,
                                   "wide_deep_inference.py")
 
-        if os.environ.get('OS','') == 'Windows_NT':
+        if os.environ.get('OS', '') == 'Windows_NT':
             os.environ["OMP_NUM_THREADS"] = "1"
             self.run_cmd = self.python_exe + " " + executable + \
-                          " --data_dir=" + self.args.data_location + \
-                          " --model_dir=" + self.args.checkpoint + \
-                          " --batch_size=" + str(self.args.batch_size)
+                " --data_dir=" + self.args.data_location + \
+                " --model_dir=" + self.args.checkpoint + \
+                " --batch_size=" + str(self.args.batch_size)
         else:
             command_prefix = " OMP_NUM_THREADS=1 "
             num_numas = self.platform_util.num_numa_nodes
             if num_numas > 0:
                 command_prefix = command_prefix + "numactl --cpunodebind=0 --membind=0 "
             self.run_cmd = command_prefix + self.python_exe + " " + executable + \
-                           " --data_dir=" + self.args.data_location + \
-                           " --model_dir=" + self.args.checkpoint + \
-                           " --batch_size=" + str(self.args.batch_size)
+                " --data_dir=" + self.args.data_location + \
+                " --model_dir=" + self.args.checkpoint + \
+                " --batch_size=" + str(self.args.batch_size)
 
     def run(self):
         original_dir = os.getcwd()
