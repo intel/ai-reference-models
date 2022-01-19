@@ -299,7 +299,35 @@ class BaseModelInitializer(object):
 
         num_numas = self.platform_util.num_numa_nodes
         if num_numas and socket_id != -1 and numactl and not self.args.numa_cores_per_instance:
-            command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
+            if self.args.num_cores == -1:
+                # Running on the whole socket
+                command += "numactl --cpunodebind={0} --membind={0} ".format(
+                    str(socket_id))
+            else:
+                # Running on specific number of cores
+                first_physical_core = self.platform_util.cpuset_cpus[0][0]
+                num_sockets = len(self.platform_util.cpuset_cpus.keys())
+                num_cores_in_socket0 = len(self.platform_util.cpuset_cpus[0])
+                for i in range(num_sockets):
+                    if num_cores_in_socket0 != len(
+                            self.platform_util.cpuset_cpus[i]):
+                        raise ValueError(
+                            "Error: Identifying logical core id assumes all sockets have same number of cores"
+                        )
+                first_logical_core = num_cores_in_socket0 * num_sockets
+                if self.platform_util.num_threads_per_core == 1:
+                    # HT is off
+                    cpus_range = "{0}-{1}".format(
+                        first_physical_core,
+                        first_physical_core + self.args.num_cores - 1)
+                else:
+                    # HT is on.
+                    cpus_range = "{0}-{1},{2}-{3}".format(
+                        first_physical_core,
+                        first_physical_core + self.args.num_cores - 1,
+                        first_logical_core,
+                        first_logical_core + self.args.num_cores - 1)
+                command += "numactl -C{0} --membind=0 ".format(cpus_range)
 
         return command
 
