@@ -56,7 +56,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         env_var_dict = self.get_env_vars(benchmark_scripts, use_case, intelai_models,
                                          intelai_models_common, os_type)
         if "Windows" == os_type:
-            if os.getenv("PYTHONPATH") == None:
+            if os.getenv("PYTHONPATH") is None:
                 os.environ["PYTHONPATH"] = os.path.dirname(sys.executable)
             os.environ["PYTHONPATH"] = "{};{};{}".format(
                 benchmark_scripts, intelai_models, os.environ["PYTHONPATH"])

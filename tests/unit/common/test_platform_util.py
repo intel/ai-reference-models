@@ -256,3 +256,14 @@ def test_platform_utils_num_sockets_with_cpuset(get_cpuset_mock, platform_mock, 
     platform_util = PlatformUtil(MagicMock(verbose=True))
     platform_util.linux_init()
     assert platform_util.num_cpu_sockets == expected_num_sockets
+
+
+def test_platform_util_with_no_args(platform_mock, subprocess_mock):
+    """
+    Verifies that PlatformUtil object can be created with an empty string, as needed
+    by the performance Jupyter notebooks.
+    """
+    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    platform_util = PlatformUtil("")
+    assert platform_util.num_logical_cpus == 112
