@@ -387,7 +387,7 @@ bare metal.
 * On Windows:
 ```
  python launch_benchmark.py ^
-    --in-graph <path_to_pretrained_model>\resnet50_fp32_pretrained_model.pb ^
+    --in-graph <path_to_pretrained_model>\\resnet50_fp32_pretrained_model.pb ^
     --model-name resnet50 ^
     --framework tensorflow ^
     --precision fp32 ^
@@ -411,8 +411,6 @@ bare metal.
 | Language Modeling       | TensorFlow   | [BERT](https://arxiv.org/pdf/1810.04805.pdf) | Inference | [FP32](language_modeling/tensorflow/bert_large/inference/fp32/README.md) |
 | Language Translation    | TensorFlow   | [BERT](https://arxiv.org/pdf/1810.04805.pdf) | Inference | [FP32](language_translation/tensorflow/bert/README.md#fp32-inference-instructions) |
 | Language Translation    | TensorFlow   | [GNMT*](https://arxiv.org/pdf/1609.08144.pdf) | Inference | [FP32](language_translation/tensorflow/mlperf_gnmt/inference/fp32/README.md) |
-| Language Translation    | TensorFlow   | [Transformer_LT_mlperf](https://arxiv.org/pdf/1706.03762.pdf) | Inference | [FP32](language_translation/tensorflow/transformer_mlperf/inference/fp32/README.md) [Int8](language_translation/tensorflow/transformer_mlperf/inference/int8/README.md) |
-| Language Translation    | TensorFlow   | [Transformer_LT_Official](https://arxiv.org/pdf/1706.03762.pdf) | Inference | [FP32](language_translation/tensorflow/transformer_lt_official/inference/fp32/README.md) |
 | Object Detection        | TensorFlow   | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf) | Inference | [Int8](object_detection/tensorflow/rfcn/inference/int8/README.md) [FP32](object_detection/tensorflow/rfcn/inference/fp32/README.md) |
 | Object Detection        | TensorFlow   | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](object_detection/tensorflow/ssd-mobilenet/inference/int8/README.md) [FP32](object_detection/tensorflow/ssd-mobilenet/inference/fp32/README.md) |
 | Object Detection        | TensorFlow   | [SSD-ResNet34*](https://arxiv.org/pdf/1512.02325.pdf) | Inference | [Int8](object_detection/tensorflow/ssd-resnet34/inference/int8/README.md) [FP32](object_detection/tensorflow/ssd-resnet34/inference/fp32/README.md) |
