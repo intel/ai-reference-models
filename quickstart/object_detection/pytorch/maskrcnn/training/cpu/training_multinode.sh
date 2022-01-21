@@ -74,7 +74,7 @@ source $torch_ccl_path/env/setvars.sh
 
 BATCH_SIZE=${BATCH_SIZE-112}
 
-rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
+rm -rf ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --distributed \
@@ -82,7 +82,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --hostfile ${HOSTFILE} \
     --nproc_per_node $SOCKETS \
     --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./distributed_throughput_log_${precision}" \
+    --log_file_prefix="./distributed_throughput_log_${PRECISION}" \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/train_net.py \
     $ARGS \
     --iter-warmup 10 \
@@ -95,11 +95,11 @@ python -m intel_extension_for_pytorch.cpu.launch \
     SOLVER.STEPS '(60000, 80000)' \
     SOLVER.BASE_LR 0.0025 \
     MODEL.DEVICE cpu \
-    2>&1 | tee ${OUTPUT_DIR}/distributed_throughput_log_${precision}.txt
+    2>&1 | tee ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}.txt
 
 # For the summary of results
 wait
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/distributed_throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}* |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;
@@ -111,5 +111,5 @@ BEGIN {
 END   {
         printf("%.3f", sum);
 }')
-echo ""maskrcnn";"training distributed throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""maskrcnn";"training distributed throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 
