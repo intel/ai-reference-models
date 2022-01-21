@@ -58,7 +58,7 @@ NUM_GPUS=${10:-0}
 PRECISION=${11:-"fp32"}
 EPOCHS=${12:-1}
 SEED=${13:-2021}
-BATCH_SIZE=${14:-64}
+BATCH_SIZE=${14:-32}
 EVAL_BATCH_SIZE=${15:-2}
 LEARNING_RATE=${16:-"0.001"}
 LEARNING_RATE_WARMUP=${17:-"8000"}
@@ -109,7 +109,7 @@ CMD+=" --seed=$SEED"
 CMD+=" --optimizer=adam"
 CMD+=" --dataset_dir=$DATASET_DIR/dataset/LibriSpeech"
 CMD+=" --val_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-dev-clean-wav.json"
-CMD+=" --train_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json"
+CMD+=" --train_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json,$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-360-wav.json,$DATASET_DIR/dataset/LibriSpeech/librispeech-train-other-500-wav.json"
 CMD+=" --weight_decay=1e-3"
 CMD+=" --save_freq=100"
 CMD+=" --eval_freq=1"
@@ -122,7 +122,13 @@ CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
 CMD+=" --backend=ccl"
-CMD+=" --num_steps=100"
+# TODO: FP32 is still under development. For current validation,
+# in FP32, it only runs 100 iterations. NUM_STEPS is disabled in FP32.
+if [ "$1" = "fp32" ] ; then
+    CMD+=" --num_steps=100"
+elif [[ ! -z "${NUM_STEPS}" ]]; then
+    CMD+=" --num_steps=$NUM_STEPS"
+fi
 
 rm -rf ${OUTPUT_DIR}/distributed_throughput_log*
 

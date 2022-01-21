@@ -48,4 +48,7 @@ python utils/download_librispeech.py utils/librispeech.csv $DATASET_DIR/dataset/
 export PATH=$WORKDIR/local/bin:$PATH
 python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/dev-clean --dest_dir $DATASET_DIR/dataset/LibriSpeech/dev-clean-wav --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-dev-clean-wav.json
 python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/train-clean-100 --dest_dir $DATASET_DIR/dataset/LibriSpeech/train-clean-100-wav  --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json --speed 0.9 1.1
+python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/train-clean-360 --dest_dir $DATASET_DIR/dataset/LibriSpeech/train-clean-360-wav  --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-360-wav.json --speed 0.9 1.1
+python utils/convert_librispeech.py --input_dir $DATASET_DIR/dataset/LibriSpeech/train-other-500 --dest_dir $DATASET_DIR/dataset/LibriSpeech/train-other-500-wav  --output_json $DATASET_DIR/dataset/LibriSpeech/librispeech-train-other-500-wav.json --speed 0.9 1.1
+
 cd $dir

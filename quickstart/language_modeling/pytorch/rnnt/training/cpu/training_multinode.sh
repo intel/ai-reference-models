@@ -54,4 +54,8 @@ PRECISION=$1
 
 torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
 source $torch_ccl_path/env/setvars.sh
-bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train_multinode.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-distributed-${PRECISION}.log
+if [[ ! -z "${NUM_STEPS}" ]]; then
+    NUM_STEPS=$NUM_STEPS bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train_multinode.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-distributed-${PRECISION}.log
+else
+    bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train_multinode.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-distributed-${PRECISION}.log
+fi

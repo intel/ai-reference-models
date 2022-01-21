@@ -52,4 +52,8 @@ fi
 
 PRECISION=$1
 
-bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-${PRECISION}.log
+if [[ ! -z "${NUM_STEPS}" ]]; then
+    NUM_STEPS=$NUM_STEPS bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-${PRECISION}.log
+else
+    bash ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.sh $ARGS 2>&1 | tee -a ${OUTPUT_DIR}/rnnt-training-${PRECISION}.log
+fi
