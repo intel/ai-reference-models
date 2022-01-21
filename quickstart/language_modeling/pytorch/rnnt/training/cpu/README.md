@@ -17,6 +17,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   ```
 
 * Download and preprocess RNN-T dataset:
+  Dataset takes up 60+ GB disk space. After they are decompressed, they will need 60GB more disk space. Next step is preprocessing dataset, it will generate 110+ GB WAV file. Please make sure the disk space is enough.
   ```bash
   export DATASET_DIR=#Where_to_save_Dataset
   bash ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu/download_dataset.sh
@@ -53,14 +54,16 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash training.sh fp32 | --- | --- |
+| FP32 (run 100 steps)        | bash training.sh fp32 | --- | --- |
 | BF16        | bash training.sh bf16 | --- | --- |
+| BF16 (run 500 steps)       | NUM_STEPS=500 bash training.sh bf16 | --- | --- |
 
 |               Distributed Training                    |
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash training_multinode.sh fp32 | --- | --- |
+| FP32 (run 100 steps)       | bash training_multinode.sh fp32 | --- | --- |
 | BF16        | bash training_multinode.sh bf16 | --- | --- |
+| BF16 (run 500 steps)        | NUM_STEPS=500 bash training_multinode.sh bf16 | --- | --- |
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
@@ -86,7 +89,15 @@ bash training.sh fp32
 # Run distributed training script (for example, FP32 distributed training)
 cd ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu
 bash training_multinode.sh fp32
+
+# Run a quickstart script and terminate in advance (for example, BF16 training)
+cd ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu
+NUM_STEPS=500 bash training.sh bf16
 ```
+## Attention please:
+1. According to MLPerf RNN-T training README, three RNN-T datasets may need 500GB disk space to preprocess the dataset. After preprocessing done, datasets take up 110+ GB disk.
+
+2. It will take ~4 hours to run the entire 3 datasets for one epoch in BF16. You can stop the training in advance, by adding NUM_STEPS=500 before bash script. It means, after running 500 iterations, the training process will be terminated. For now, NUM_STEPS only works for BF16 training.
 
 <!--- 80. License -->
 ## License

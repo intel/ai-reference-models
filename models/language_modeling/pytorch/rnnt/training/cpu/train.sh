@@ -105,7 +105,7 @@ CMD+=" --seed=$SEED"
 CMD+=" --optimizer=adam"
 CMD+=" --dataset_dir=$DATASET_DIR/dataset/LibriSpeech"
 CMD+=" --val_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-dev-clean-wav.json"
-CMD+=" --train_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json"
+CMD+=" --train_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json,$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-360-wav.json,$DATASET_DIR/dataset/LibriSpeech/librispeech-train-other-500-wav.json"
 CMD+=" --weight_decay=1e-3"
 CMD+=" --save_freq=100"
 CMD+=" --eval_freq=1"
@@ -117,8 +117,12 @@ CMD+=" $PREC"
 CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
+# TODO: FP32 is still under development. For current validation,
+# in FP32, it only runs 100 iterations. NUM_STEPS is disabled in FP32.
 if [ "$1" = "fp32" ] ; then
     CMD+=" --num_steps=100"
+elif [[ ! -z "${NUM_STEPS}" ]]; then
+    CMD+=" --num_steps=$NUM_STEPS"
 fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
