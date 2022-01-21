@@ -375,14 +375,12 @@ def train300_mlperf_coco(args):
                                   sampler=train_sampler,
                                   num_workers=0)
     # set shuffle=True in DataLoader
-    if args.rank==0:
-        val_dataloader = DataLoader(val_coco,
-                                    batch_size=args.val_batch_size or args.batch_size,
-                                    shuffle=False,
-                                    sampler=None,
-                                    num_workers=0)
-    else:
-        val_dataloader = None
+    # Leslie: here is the workaround: dist.broadcast will fail on other rank. we will run evalution on all the ranks
+    val_dataloader = DataLoader(val_coco,
+                                batch_size=args.val_batch_size or args.batch_size,
+                                shuffle=False,
+                                sampler=None,
+                                num_workers=0)
 
     ssd300 = SSD300(train_coco.labelnum, model_path=args.pretrained_backbone)
 
@@ -577,7 +575,7 @@ def train300_mlperf_coco(args):
                         bn_buf /= world_size
                         ssd_print(key=mllog_const.MODEL_BN_SPAN,
                             value=bn_buf.cpu().detach().numpy())
-            if args.rank == 0:
+            if args.rank == 0 or True: # Leslie: here is the workaround: dist.broadcast will fail on other rank. we will run evalution on all the ranks
                 if not args.no_save:
                     print("")
                     print("saving model...")
@@ -591,10 +589,11 @@ def train300_mlperf_coco(args):
                     success = torch.ones(1)
                     if use_cuda:
                         success = success.cuda()
-                if args.distributed:
-                    dist.broadcast(success, 0)
-                if success[0]:
-                    return True
+            # Leslie: same Workaround: since we run evalution on all ranks, we don't need to broadcast the evalutation result
+            # if args.distributed:
+            #     dist.broadcast(success, 0)
+            if success[0]:
+                return True
             mllogger.end(
                 key=mllog_const.EPOCH_STOP,
                 metadata={mllog_const.EPOCH_NUM: epoch})
