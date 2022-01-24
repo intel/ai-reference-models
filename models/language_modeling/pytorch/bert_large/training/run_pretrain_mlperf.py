@@ -641,6 +641,7 @@ def main():
     global skipped_steps
     if torch.distributed.is_initialized():
         model = torch.nn.parallel.DistributedDataParallel(model,
+                                                          find_unused_parameters=True,
                                                           bucket_cap_mb=8192,
                                                           gradient_as_bucket_view=args.use_gradient_as_bucket_view)
 
