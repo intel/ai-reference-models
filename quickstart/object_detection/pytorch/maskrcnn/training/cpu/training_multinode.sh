@@ -109,6 +109,7 @@ BEGIN {
         i++;
       }
 END   {
+        sum = sum / i;
         printf("%.3f", sum);
 }')
 echo ""maskrcnn";"training distributed throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
