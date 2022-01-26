@@ -61,9 +61,10 @@ python -m intel_extension_for_pytorch.cpu.launch --distributed --nnodes ${NNODES
     --dense_seq_output \
     $ARGS \
     $params \
-    
+    2>&1 | tee ${OUTPUT_DIR}/throughput_log_phase2_${precision}.log
 
-
+# For the summary of results
+wait
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase2_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
