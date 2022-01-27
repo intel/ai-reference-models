@@ -74,32 +74,11 @@ else
 fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
-SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCHSIZE=$((128*CORES))
 export OMP_NUM_THREADS=$CORES
-for i in $(seq 1 $((SOCKETS-1))); do
-  LOG_i="${LOG}/socket_$i"
-  start=$((i*CORES))
-  end=$((start+CORES-1))
-  numa_cmd="numactl -C $start-$end -m $i"
-  $numa_cmd python -u $MODEL_SCRIPT \
-  --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
-  --data-set=terabyte \
-  --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
-  --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
-  --arch-sparse-feature-size=128 --max-ind-range=40000000 \
-  --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
-  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-mini-batch-size=16384 --ipex-merged-emb \
-  $ARGS |tee $LOG_i &
-done
 
-i=0
-LOG_0="${LOG}/socket_$i"
-start=$((i*CORES))
-end=$((start+CORES-1))
-numa_cmd="numactl -C $start-$end -m $i"
-$numa_cmd python -u $MODEL_SCRIPT \
+LOG_0="${LOG}/socket_0"
+python -m intel_extension_for_pytorch.cpu.launch --socket_id 0 --enable_jemalloc $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
   --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \

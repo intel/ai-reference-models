@@ -864,6 +864,9 @@ def run():
                         rank_id = dlrm.rank
                         X = X[rank_id * local_bs: (rank_id + 1) * local_bs]
                         T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
+                        global_bs = local_bs * ext_dist.my_size
+                        lS_o = lS_o[:, :global_bs]
+                        lS_i = lS_i[:, :global_bs]
 
                     if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
                         if ext_dist.my_size > 1:
