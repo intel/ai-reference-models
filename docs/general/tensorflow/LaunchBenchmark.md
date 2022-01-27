@@ -327,12 +327,7 @@ Basic requirements for running all models include:
  * libsm6
  * libxext6
  * requests
-
-Ubuntu 18.04:
  * numactl
-
-Windows:
- * [MSYS2](https://www.msys2.org)
  
 Individual models may have additional dependencies that need to be
 installed. The easiest way is to find this out find the model's function in
@@ -351,8 +346,8 @@ model, you can follow the [tutorials](/docs/README.md) or model
 required code repositories, dataset, and pretrained model. Once you get
 to the step for running the `launch_benchmark.py` script, omit the
 `--docker-image` arg to run without a Docker container.
-If you run on Windows, please omit the `--socket-id` arg too to run using all of the cores on the system. If you have
-installed the model dependencies in a virtual environment be sure that
+If you run on Windows, please check the [instructions for the environment setup and running the available models](Windows.md).
+If you have installed the model dependencies in a virtual environment be sure that
 you are calling the proper python executable, which includes the
 dependencies that you installed in the previous step.
 
@@ -364,7 +359,6 @@ commands writing to the log file to work properly.
 For example, in order to run ResNet50 FP32 on bare metal,
 the following command can be used:
 
-* On Ubuntu 18.04:
 ```
  /home/<user>/venv/bin/python launch_benchmark.py \
     --in-graph /home/<user>/resnet50_fp32_pretrained_model.pb \
@@ -383,36 +377,3 @@ overwrite environment variables that have already been set, such as
 but since a new docker container instance is started with each run, you
 won't have previously set environment variables, like you may have on
 bare metal.
-
-* On Windows:
-```
- python launch_benchmark.py ^
-    --in-graph <path_to_pretrained_model>\\resnet50_fp32_pretrained_model.pb ^
-    --model-name resnet50 ^
-    --framework tensorflow ^
-    --precision fp32 ^
-    --mode inference ^
-    --batch-size=1
-```
-
->Note that only the following list of use cases are tested on Windows,
- and that all of the system cores will be used: 
-
-| Use Case                | Framework    | Model              | Mode      | Run from the Model Zoo repository |
-| ----------------------- | ------------ | ------------------ | --------- | --------------------------------- |
-| Image Recognition       | TensorFlow   | [DenseNet169](https://arxiv.org/pdf/1608.06993.pdf) | Inference | [FP32](/benchmarks/image_recognition/tensorflow/densenet169/inference/fp32/README.md) |
-| Image Recognition       | TensorFlow   | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/inceptionv3/inference/fp32/README.md) |
-| Image Recognition       | TensorFlow   | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/inceptionv4/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/inceptionv4/inference/fp32/README.md) |
-| Image Recognition       | TensorFlow   | [MobileNet V1*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/mobilenet_v1/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/mobilenet_v1/inference/fp32/README.md) |
-| Image Recognition       | TensorFlow   | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/resnet101/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/resnet101/inference/fp32/README.md) |
-| Image Recognition       | TensorFlow   | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf) | Inference  | [Int8](/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/resnet50/inference/fp32/README.md) |
-| Image Recognition       | TensorFlow   | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | Inference | [Int8](/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/fp32/README.md) |
-| Image Segmentation      | TensorFlow   | [3D U-Net MLPerf](https://arxiv.org/pdf/1606.06650.pdf) | Inference | [FP32](/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/README.md) |
-| Language Modeling       | TensorFlow   | [BERT](https://arxiv.org/pdf/1810.04805.pdf) | Inference | [FP32](/benchmarks/language_modeling/tensorflow/bert_large/inference/fp32/README.md) |
-| Language Translation    | TensorFlow   | [BERT](https://arxiv.org/pdf/1810.04805.pdf) | Inference | [FP32](/benchmarks/language_translation/tensorflow/bert/README.md#fp32-inference-instructions) |
-| Language Translation    | TensorFlow   | [GNMT*](https://arxiv.org/pdf/1609.08144.pdf) | Inference | [FP32](/benchmarks/language_translation/tensorflow/mlperf_gnmt/inference/fp32/README.md) |
-| Object Detection        | TensorFlow   | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf) | Inference | [Int8](/benchmarks/object_detection/tensorflow/rfcn/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/rfcn/inference/fp32/README.md) |
-| Object Detection        | TensorFlow   | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/fp32/README.md) |
-| Object Detection        | TensorFlow   | [SSD-ResNet34*](https://arxiv.org/pdf/1512.02325.pdf) | Inference | [Int8](/benchmarks/object_detection/tensorflow/ssd-resnet34/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/ssd-resnet34/inference/fp32/README.md) |
-| Recommendation          | TensorFlow   | [DIEN](https://arxiv.org/abs/1809.03672) | Inference | [FP32](/benchmarks/recommendation/tensorflow/dien#fp32-inference) |
-| Recommendation          | TensorFlow   | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | Inference | [FP32](/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/README.md) |

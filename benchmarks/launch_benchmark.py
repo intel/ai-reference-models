@@ -64,13 +64,13 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if self.args.docker_image:
             if self.args.framework == 'tensorflow_serving':
                 self.run_bare_metal(benchmark_scripts, intelai_models,
-                                    intelai_models_common, env_var_dict)
+                                    intelai_models_common, env_var_dict, os_type)
             elif self.args.framework == 'tensorflow':
                 self.run_docker_container(benchmark_scripts, intelai_models,
                                           intelai_models_common, env_var_dict)
         else:
             self.run_bare_metal(benchmark_scripts, intelai_models,
-                                intelai_models_common, env_var_dict)
+                                intelai_models_common, env_var_dict, os_type)
 
     def parse_args(self):
         # Additional args that are only used with the launch script
@@ -257,7 +257,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         return env_var_dict
 
     def run_bare_metal(self, benchmark_scripts, intelai_models,
-                       intelai_models_common, env_var_dict):
+                       intelai_models_common, env_var_dict, os_type):
         """
         Runs the model without a container
         """
@@ -343,7 +343,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # Run the start script
         start_script = os.path.join(workspace, "start.sh")
-        self._launch_command(["bash", start_script])
+        if "Windows" == os_type:
+            self._launch_command([os.environ["MSYS64_BASH"], start_script])
+        else:
+            self._launch_command(["bash", start_script])
 
     def run_docker_container(self, benchmark_scripts, intelai_models,
                              intelai_models_common, env_var_dict):

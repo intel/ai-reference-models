@@ -86,18 +86,15 @@ modes/precisions:
    to get additional debug output or change the default output location.
 
 #### Run FP32 Inference on Windows
-Install the following dependencies:
-* Python3
-* [MSYS2](https://www.msys2.org)
-* [Intel-TensorFlow](https://pypi.org/project/intel-tensorflow/)
-* Model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt`
-* matplotlib
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
+Then, install the model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt` and `matplotlib`.
 
 Evaluate the model performance:
 Currently, for performance evaluation dummy data is used. The required parameters include: the pre-trained `3dunet_dynamic_ndhwc.pb` input graph file (from step 2) and the `--benchmark-only` flag.
 Optionally, you can also specify the number of `warmup_steps` and `steps` as shown in the example below.
 If these optional arguments are not specified, the script will use the default values `warmup_steps=10` and `steps=50`.
 
+Using `cmd.exe`, run:
 ```
 python launch_benchmark.py ^
 --in-graph <path to pretrained model>\\3dunet_dynamic_ndhwc.pb ^
