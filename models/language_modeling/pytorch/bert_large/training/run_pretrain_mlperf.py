@@ -75,7 +75,9 @@ from transformers import (
 )
 
 from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
-from lamb import Lamb
+#from lamb import Lamb
+from intel_extension_for_pytorch.optim._lamb import Lamb
+
 try:
     import torch_ccl
 except ImportError as e:
@@ -479,7 +481,7 @@ def prepare_model_and_optimizer(args, device):
     optimizer_grouped_parameters = [
         {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': args.weight_decay_rate},
         {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
-    optimizer = Lamb(optimizer_grouped_parameters, lr=args.learning_rate,  betas=(args.opt_lamb_beta_1, args.opt_lamb_beta_2))
+    optimizer = Lamb(optimizer_grouped_parameters, lr=args.learning_rate,  betas=(args.opt_lamb_beta_1, args.opt_lamb_beta_2), fused=True)
 
     if args.warmup_steps == 0:
         warmup_steps = int(args.max_steps * args.warmup_proportion)
@@ -731,8 +733,8 @@ def main():
                 completed_steps += 1
                 if args.benchmark and completed_steps > 10:
                     bench_total_time = bench_total_time + (t_end -t_beg)
-                if args.benchmark and completed_steps > 110:
-                    throughput = 100 * args.train_batch_size / bench_total_time
+                if args.benchmark and completed_steps > 60:
+                    throughput = 50 * args.train_batch_size / bench_total_time
                     print("Throughput: {:.3f} sentence/s".format(throughput), flush=True)
                     exit()
 

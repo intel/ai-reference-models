@@ -30,7 +30,7 @@ if [[ "$1" == "bf16" ]]
 then
     ARGS="$ARGS --bf16"
     precision=bf16
-    batch_size=56
+    batch_size=128
     echo "### running bf16 mode"
 elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running FP32 mode"
