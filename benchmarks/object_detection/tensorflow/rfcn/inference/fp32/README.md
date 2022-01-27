@@ -34,12 +34,13 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Kit on Linux</th>
+    <th>Setup without AI Kit on Linux</th>
+    <th>Setup without AI Kit on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Kit on Linux you will need:</p>
       <ul>
         <li>git
         <li>numactl
@@ -58,13 +59,30 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Kit on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li>git
         <li>numactl
         <li>wget
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
+        <li>build-essential
+        <li>Cython
+        <li>contextlib2
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>pillow>=8.1.2
+        <li>protobuf-compiler
+        <li>pycocotools
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+    <td>
+      <p>To run without AI Kit on Windows you will need:</p>
+      <ul>
+        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>build-essential
         <li>Cython
         <li>contextlib2
@@ -85,7 +103,9 @@ For more information on the required dependencies, see the documentation on [pre
 in the TensorFlow models repo.
 
 Download and extract the pretrained model and set the `PRETRAINED_MODEL`
-environment variable to point to the frozen graph file:
+environment variable to point to the frozen graph file.
+If you run on Windows, please use a browser to download the pretrained model using the link below.
+For Linux, run:
 ```
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
 tar -xzvf rfcn_resnet101_fp32_coco_pretrained_model.tar.gz
@@ -94,8 +114,7 @@ export PRETRAINED_MODEL=$(pwd)/rfcn_resnet101_coco_2018_01_28/frozen_inference_g
 
 RFCN uses the object detection code from the [TensorFlow Model Garden](https://github.com/tensorflow/models).
 Clone this repo with the SHA specified below and apply the patch from the model zoo directory.
-Set the `TF_MODELS_DIR` environment variable to the path of your clone of the TF Model Garden and
-run [protobuf compilation](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#protobuf-compilation).
+Set the `TF_MODELS_DIR` environment variable to the path of your clone of the TF Model Garden.
 ```
 # Clone the TensorFlow Model Garden
 git clone https://github.com/tensorflow/models.git tensorflow-models
@@ -103,13 +122,17 @@ cd tensorflow-models
 git checkout 6c21084503b27a9ab118e1db25f79957d5ef540b
 
 # Apply the TF2 patch from the model zoo repo directory
-git apply <model zoo directory>/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
+git apply --ignore-space-change --ignore-whitespace <model zoo directory>/models/object_detection/tensorflow/rfcn/inference/tf-2.0.patch
 
 # Set the TF_MODELS_DIR env var
 export TF_MODELS_DIR=$(pwd)
+```
 
-# Protobuf compilation from the TF models research directory
-cd research
+### Run on Linux
+Download and install [Google Protobuf version 3.3.0](https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip), and
+run [protobuf compilation](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#protobuf-compilation).
+```
+cd TF_MODELS_DIR/research
 protoc object_detection/protos/*.proto --python_out=.
 cd ../..
 ```
@@ -142,7 +165,7 @@ export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 ./quickstart/object_detection/tensorflow/rfcn/inference/cpu/fp32/fp32_accuracy.sh
 ```
 
-#### Run on Windows Systems
+### Run on Windows
 * Download and install [Google Protobuf version 3.4.0]((https://github.com/protocolbuffers/protobuf/releases/tag/v3.4.0)) for Windows in addition to the above listed dependencies.
 Download and extract [protoc-3.4.0-win32.zip](https://github.com/protocolbuffers/protobuf/releases/download/v3.4.0/protoc-3.4.0-win32.zip)
 Navigate to the `research` directory in `TF_MODELS_DIR` and install Google Protobuf:
@@ -167,8 +190,7 @@ set TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 
 bash quickstart\object_detection\tensorflow\rfcn\inference\cpu\fp32\<script name>.sh
 ```
-> Please note that Intel Model Zoo source code includes some Bash scripts, please install [MSYS2](https://www.msys2.org) on your system.
-You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+> Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
 As an example, if the dataset location on Windows is `D:\user\coco_dataset\val2017`, convert the Windows path to Unix as shown:
 > ```
 > cygpath D:\user\coco_dataset\val2017
