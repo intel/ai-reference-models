@@ -74,12 +74,8 @@ export OMP_NUM_THREADS=$CORES
 torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
 source $torch_ccl_path/env/setvars.sh
 
-i=0
-LOG_0="${LOG}/socket_$i"
-start=$((i*CORES))
-end=$((start+CORES-1))
-numa_cmd="numactl -C $start-$end -m $i"
-python -m intel_extension_for_pytorch.cpu.launch --distributed \
+LOG_0="${LOG}/distributed.log"
+python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --distributed \
 $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
