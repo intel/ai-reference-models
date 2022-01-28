@@ -48,7 +48,7 @@ fi
  
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
-LOG=${OUTPUT_DIR}/dlrm_training_log/${PRECISION}
+LOG=${OUTPUT_DIR}/dlrm_distribute_training_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
@@ -74,8 +74,8 @@ export OMP_NUM_THREADS=$CORES
 torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
 source $torch_ccl_path/env/setvars.sh
 
-LOG_0="${LOG}/distributed.log"
-python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --distributed \
+LOG_0="${LOG}/socket.log"
+python -m intel_extension_for_pytorch.cpu.launch --enable_jemalloc --distributed \
 $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
