@@ -1,4 +1,4 @@
-pandas==0.24.2
+pandas
 tqdm==4.31.1
 ascii-graph==1.5.1
 wrapt==1.10.11
