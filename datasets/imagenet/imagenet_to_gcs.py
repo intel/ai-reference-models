@@ -14,7 +14,6 @@
 # limitations under the License.
 #
 
-
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,13 +29,9 @@
 # limitations under the License.
 # ==============================================================================
 
-r"""Script to process the Imagenet dataset and upload to gcs.
+r"""Script to process the Imagenet dataset
 
 To run the script setup a virtualenv with the following libraries installed.
-- `gcloud`: Follow the instructions on
-  [cloud SDK docs](https://cloud.google.com/sdk/downloads) followed by
-  installing the python api using `pip install gcloud`.
-- `google-cloud-storage`: Install with `pip install google-cloud-storage`
 - `tensorflow`: Install with `pip install tensorflow`
 
 Once you have all the above libraries setup, you should register on the
@@ -45,16 +40,6 @@ ImageNet .tar files. It should be extracted and provided in the format:
 - Training images: train/n03062245/n03062245_4620.JPEG
 - Validation Images: validation/ILSVRC2012_val_00000001.JPEG
 - Validation Labels: synset_labels.txt
-
-To run the script to preprocess the raw dataset as TFRecords and upload to gcs,
-run the following command:
-
-```
-python imagenet_to_gcs.py \
-  --project="TEST_PROJECT" \
-  --gcs_output_path="gs://TEST_BUCKET/IMAGENET_DIR" \
-  --raw_data_dir="path/to/imagenet"
-```
 
 """
 
@@ -72,19 +57,11 @@ import tensorflow.compat.v1 as tf
 tf.disable_eager_execution()
 
 
-from google.cloud import storage
-
-flags.DEFINE_string(
-    'project', None, 'Google cloud project id for uploading the dataset.')
-flags.DEFINE_string(
-    'gcs_output_path', None, 'GCS path for uploading the dataset.')
 flags.DEFINE_string(
     'local_scratch_dir', None, 'Scratch directory path for temporary files.')
 flags.DEFINE_string(
     'raw_data_dir', None, 'Directory path for raw Imagenet dataset. '
     'Should have train and validation subdirectories inside it.')
-flags.DEFINE_boolean(
-    'gcs_upload', True, 'Set to false to not upload to gcs.')
 
 FLAGS = flags.FLAGS
 
@@ -425,49 +402,8 @@ def convert_to_tf_records(raw_data_dir):
   return training_records, validation_records
 
 
-def upload_to_gcs(training_records, validation_records):
-  """Upload TF-Record files to GCS, at provided path."""
-
-  # Find the GCS bucket_name and key_prefix for dataset files
-  path_parts = FLAGS.gcs_output_path[5:].split('/', 1)
-  bucket_name = path_parts[0]
-  if len(path_parts) == 1:
-    key_prefix = ''
-  elif path_parts[1].endswith('/'):
-    key_prefix = path_parts[1]
-  else:
-    key_prefix = path_parts[1] + '/'
-
-  client = storage.Client(project=FLAGS.project)
-  bucket = client.get_bucket(bucket_name)
-
-  def _upload_files(filenames):
-    """Upload a list of files into a specifc subdirectory."""
-    for i, filename in enumerate(sorted(filenames)):
-      blob = bucket.blob(key_prefix + os.path.basename(filename))
-      blob.upload_from_filename(filename)
-      if not i % 20:
-        logging.info('Finished uploading file: %s', filename)
-
-  # Upload training dataset
-  logging.info('Uploading the training data.')
-  _upload_files(training_records)
-
-  # Upload validation dataset
-  logging.info('Uploading the validation data.')
-  _upload_files(validation_records)
-
-
 def main(argv):  # pylint: disable=unused-argument
   logging.set_verbosity(logging.INFO)
-
-  if FLAGS.gcs_upload and FLAGS.project is None:
-    raise ValueError('GCS Project must be provided.')
-
-  if FLAGS.gcs_upload and FLAGS.gcs_output_path is None:
-    raise ValueError('GCS output path must be provided.')
-  elif FLAGS.gcs_upload and not FLAGS.gcs_output_path.startswith('gs://'):
-    raise ValueError('GCS output path must start with gs://')
 
   if FLAGS.local_scratch_dir is None:
     raise ValueError('Scratch directory path must be provided.')
@@ -481,10 +417,6 @@ def main(argv):  # pylint: disable=unused-argument
 
   # Convert the raw data into tf-records
   training_records, validation_records = convert_to_tf_records(raw_data_dir)
-
-  # Upload to GCS
-  if FLAGS.gcs_upload:
-    upload_to_gcs(training_records, validation_records)
 
 
 if __name__ == '__main__':
