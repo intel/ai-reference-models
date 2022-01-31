@@ -71,8 +71,7 @@ if [[ ! -f "${WORKDIR}/imagenet_to_gcs.py" ]]; then
 fi
 python3 ${WORKDIR}/imagenet_to_gcs.py \
   --raw_data_dir=$IMAGENET_HOME \
-  --local_scratch_dir=$IMAGENET_HOME/tf_records \
-  --nogcs_upload
+  --local_scratch_dir=$IMAGENET_HOME/tf_records
 
 # Clean up the user work directory, remove the previously downloaded script `imagenet_to_gcs.py`
 rm ${WORKDIR}/imagenet_to_gcs.py
