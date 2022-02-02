@@ -34,6 +34,9 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
+
 ARG TF_MODELS_BRANCH="wide-deep-tf2"
 
 ARG FETCH_PR="pull/7461/head:wide-deep-tf2"
