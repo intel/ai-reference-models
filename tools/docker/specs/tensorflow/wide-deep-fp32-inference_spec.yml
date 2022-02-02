@@ -39,6 +39,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/recommendation/tensorflow/wide_deep/inference/cpu/fp32
     partials:
+    - numactl
     - tensorflow/model-source
     - model_package
     - tar
