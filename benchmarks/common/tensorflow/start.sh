@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-
 echo 'Running with parameters:'
 echo "    USE_CASE: ${USE_CASE}"
 echo "    FRAMEWORK: ${FRAMEWORK}"
@@ -85,16 +84,21 @@ echo
 
 OS_PLATFORM=""
 if [[ ${PLATFORM} == "linux" ]]; then
-    # Check the Linux PLATFORM distribution if CentOS or Ubuntu
+    # Check the Linux PLATFORM distribution if CentOS, Debian or Ubuntu
     OS_PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
     OS_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
     if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
-      if [[ "${OS_VERSION}" != '"8"' ]]; then
+      if [[ "${OS_VERSION}" != '"7"' ]] && [[ "${OS_VERSION}" != '"8"' ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
     elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
       if [[ "${OS_VERSION}" != '"18.04"' ]] && [[ "${OS_VERSION}" != '"20.04"' ]]; then
+        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+        exit 1
+      fi
+    elif [[ ${OS_PLATFORM} == *"Debian"* ]]; then
+      if [[ "${OS_VERSION}" != '"10"' ]] && [[ "${OS_VERSION}" != '"11"' ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
@@ -116,8 +120,8 @@ if [[ ${NOINSTALL} != "True" ]]; then
 
     # install google-perftools for tcmalloc
     if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-      dnf -y install https://extras.getpagespeed.com/release-el8-latest.rpm && \
-      dnf -y install gperftools && \
+      yum -y install https://extras.getpagespeed.com/release-el8-latest.rpm && \
+      yum -y install gperftools && \
       yum clean all
     fi
 
@@ -138,9 +142,8 @@ if [[ ${NOINSTALL} != "True" ]]; then
       yum install -y git make
       yum clean all
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
-  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     apt-get update -y
     apt-get install gcc-8 g++-8 cmake python-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
@@ -189,11 +192,19 @@ fi
 if _running-in-container ; then
   # For running inside a real CentOS container
   if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
-    if [[ $INSTALL_NUMACTL == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
+    # Next if block only applies to CentOS 8. Please see here:
+    # https://forums.centos.org/viewtopic.php?f=54&t=78708
+    if [[ ${OS_VERSION} == *"8"* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]]; then
+      sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
+      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+      yum clean all
+      yum distro-sync -y
+    fi
+    if [[ $INSTALL_NUMACTL == "True" ]]; then
       yum update -y
       yum install -y numactl
     fi
-  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     # For ubuntu, run the container_init.sh scripts
     if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
       # Call the framework's container_init.sh, if it exists and we are running on ubuntu
