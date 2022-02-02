@@ -87,7 +87,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
     # Check the Linux PLATFORM distribution if CentOS, Debian or Ubuntu
     OS_PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
     OS_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
-    if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
       if [[ "${OS_VERSION}" != '"7"' ]] && [[ "${OS_VERSION}" != '"8"' ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
@@ -114,7 +114,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
   # set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
   # install common dependencies
-  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
     yum update -y
     yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
 
@@ -191,10 +191,10 @@ fi
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
   # For running inside a real CentOS container
-  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
     # Next if block only applies to CentOS 8. Please see here:
     # https://forums.centos.org/viewtopic.php?f=54&t=78708
-    if [[ ${OS_VERSION} == *"8"* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]]; then
+    if [[ ${OS_VERSION} == *"8"* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
       sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
       sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
       yum clean all
