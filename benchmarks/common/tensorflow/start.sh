@@ -71,8 +71,10 @@ function _running-in-container()
 OS_PLATFORM=""
 if [[ ${PLATFORM} == "linux" ]]; then
     # Check the Linux PLATFORM distribution if CentOS, Debian or Ubuntu
-    OS_PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-    OS_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
+    OS_PLATFORM=$(egrep '^(NAME)=' /etc/os-release)
+    OS_PLATFORM=$(echo "${OS_PLATFORM#*=}")
+    OS_VERSION=$(egrep '^(VERSION_ID)=' /etc/os-release)
+    OS_VERSION=$(echo "${OS_VERSION#*=}")
     if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
       if [[ "${OS_VERSION}" != '"7"' ]] && [[ "${OS_VERSION}" != '"8"' ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
