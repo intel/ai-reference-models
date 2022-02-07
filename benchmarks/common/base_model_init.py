@@ -21,6 +21,7 @@
 import glob
 import json
 import os
+import re
 import sys
 import time
 
@@ -153,6 +154,16 @@ class BaseModelInitializer(object):
         so that each instance uses a unique output folder.
         """
 
+        # Find LD_PRELOAD vars, remove them from the cmd, and save them to add on to the prefix
+        ld_preload_strs = re.findall(r'\bLD_PRELOAD=\S*', cmd)
+        ld_preload_prefix = ""
+        for ld_preload_str in ld_preload_strs:
+            cmd = cmd.replace(ld_preload_str, "")
+            ld_preload_prefix += ld_preload_str + " "
+
+        # Remove leading/trailing whitespace
+        cmd = cmd.strip()
+
         if self.args.numa_cores_per_instance != "socket":
             # Get the cores list and group them according to the number of cores per instance
             cores_per_instance = int(self.args.numa_cores_per_instance)
@@ -208,9 +219,9 @@ class BaseModelInitializer(object):
             if len(core_list) == 0:
                 continue
 
-            prefix = ("OMP_NUM_THREADS={0} "
-                      "numactl --localalloc --physcpubind={1}").format(
-                len(core_list), ",".join(core_list))
+            prefix = ("{0}OMP_NUM_THREADS={1} "
+                      "numactl --localalloc --physcpubind={2}").format(
+                ld_preload_prefix, len(core_list), ",".join(core_list))
             instance_logfile = log_filename_format.format("instance" + str(instance_num))
 
             unique_command = cmd
@@ -282,6 +293,7 @@ class BaseModelInitializer(object):
         Should be used only for single instance.
         """
         command = ""
+        ld_preload = ""
 
         if not self.args.disable_tcmalloc:
             # Try to find the TCMalloc library file
@@ -290,12 +302,18 @@ class BaseModelInitializer(object):
             if len(matches) == 0:
                 matches = glob.glob("/usr/lib64/libtcmalloc.so*")
 
+            if len(matches) == 0:
+                matches = glob.glob("/usr/lib/*/libtcmalloc.so*")
+
+            if len(matches) == 0:
+                matches = glob.glob("/usr/lib64/*/libtcmalloc.so*")
+
             if len(matches) > 0:
-                command += "LD_PRELOAD={} ".format(matches[0])
+                ld_preload += "LD_PRELOAD={} ".format(matches[0])
             else:
                 # Unable to find the TCMalloc library file
-                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
-                      "so the LD_PRELOAD environment variable will not be set.")
+                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib, /usr/lib64, "
+                      "/usr/lib/*, or /usr/lib64/* so the LD_PRELOAD environment variable will not be set.")
 
         num_numas = self.platform_util.num_numa_nodes
         if num_numas and socket_id != -1 and numactl and not self.args.numa_cores_per_instance:
@@ -328,6 +346,9 @@ class BaseModelInitializer(object):
                         first_logical_core,
                         first_logical_core + self.args.num_cores - 1)
                 command += "numactl -C{0} --membind=0 ".format(cpus_range)
+
+        # Add LD_PRELOAD to the front of the command
+        command = ld_preload + command
 
         return command
 

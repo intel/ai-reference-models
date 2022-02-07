@@ -106,5 +106,6 @@ slice_sets:
     - destination: quickstart
       source: quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/int8
     partials:
+    - tcmalloc
     - model_package
     - entrypoint

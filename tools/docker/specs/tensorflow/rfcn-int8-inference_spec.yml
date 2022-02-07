@@ -109,6 +109,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8
     partials:
+    - tcmalloc
     - model_package
     - object_detection/rfcn_patch
     - tar

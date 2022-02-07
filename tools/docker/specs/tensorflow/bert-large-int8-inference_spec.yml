@@ -107,5 +107,6 @@ slice_sets:
       source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8
     partials:
     - unzip
+    - tcmalloc
     - model_package
     - entrypoint
