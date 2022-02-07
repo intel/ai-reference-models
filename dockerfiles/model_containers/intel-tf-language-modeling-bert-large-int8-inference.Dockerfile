@@ -36,6 +36,8 @@ RUN apt-get update && \
 
 RUN apt-get install --no-install-recommends --fix-missing -y unzip
 
+RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="bert-large-int8-inference"

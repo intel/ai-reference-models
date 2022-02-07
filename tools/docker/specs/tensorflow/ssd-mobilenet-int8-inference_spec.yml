@@ -118,5 +118,6 @@ slice_sets:
       source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8
     partials:
     - numactl
+    - tcmalloc
     - model_package
     - entrypoint

@@ -37,6 +37,8 @@ RUN apt-get update && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
+RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="mobilenet-v1-int8-inference"
