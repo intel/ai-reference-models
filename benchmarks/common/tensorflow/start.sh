@@ -68,7 +68,20 @@ function _running-in-container()
   [ -f /.dockerenv ]
 }
 
-OS_PLATFORM=""
+# check if running on Windows OS
+PLATFORM='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+   PLATFORM='linux'
+elif [[ "$unamestr" == "MSYS"* ]]; then
+   PLATFORM='windows'
+else
+   echo "$unamestr is not supported!"
+fi
+echo
+echo "Running on ${PLATFORM}"
+echo
+
 if [[ ${PLATFORM} == "linux" ]]; then
     # Check the Linux PLATFORM distribution if CentOS, Debian or Ubuntu
     OS_PLATFORM=$(egrep '^(NAME)=' /etc/os-release)
@@ -94,8 +107,8 @@ if [[ ${PLATFORM} == "linux" ]]; then
       echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
       exit 1
     fi
-
-echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
+    echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
+fi
 
 if [[ ${NOINSTALL} != "True" ]]; then
   # set env var before installs so that user interaction is not required
