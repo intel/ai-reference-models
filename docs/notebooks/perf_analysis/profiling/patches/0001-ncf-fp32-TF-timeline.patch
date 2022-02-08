@@ -1,0 +1,44 @@
+From 392c6a9aa7bcff5337d56246b839c5d41be7e016 Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Tue, 22 Dec 2020 23:30:12 +0800
+Subject: [PATCH] ncf fp32 TF timeline
+
+---
+ .../tensorflow/ncf/inference/fp32/ncf_main.py          | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py b/models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py
+index 338a2b00..e0cb5683 100644
+--- a/models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py
++++ b/models/recommendation/tensorflow/ncf/inference/fp32/ncf_main.py
+@@ -52,6 +52,10 @@ import typing
+ import time
+ from datetime import datetime
+ 
++import sys
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import ConfigFile, tfProfileHook
++
+ # pylint: disable=g-bad-import-order
+ import numpy as np
+ from absl import app as absl_app
+@@ -241,11 +245,15 @@ def evaluate_model(estimator, ncf_dataset, pred_input_fn):
+     if not os.environ.get("KMP_AFFINITY"):
+         os.environ["KMP_AFFINITY"] = "granularity=fine,noverbose,compact,1,0"
+ 
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config("ncf infer fp32")
++    profile_hook = [tfProfileHook(save_steps=1, json_fname=config.json_fname)]
++
+     # Get predictions
+     prediction_hooks = None if FLAGS.accuracy_only else [LoggerHook()]
+     predictions = estimator.predict(input_fn=pred_input_fn,
+                                     yield_single_examples=False,
+-                                    hooks=prediction_hooks)
++                                    hooks=prediction_hooks+profile_hook)
+     predictions = list(predictions)
+ 
+     prediction_batches = [p[movielens.RATING_COLUMN] for p in predictions]
+-- 
+2.25.1
+

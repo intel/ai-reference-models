@@ -1,0 +1,46 @@
+From d4aa910dfc23a1818e38ef586659b5ca1770ad8e Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Mon, 11 Jan 2021 17:45:28 -0800
+Subject: [PATCH] mobilenet_v1 fp32 TF timeline
+
+---
+ .../tensorflow/mobilenet_v1/inference/benchmark.py   | 12 +++++++++++-
+ 1 file changed, 11 insertions(+), 1 deletion(-)
+
+diff --git a/models/image_recognition/tensorflow/mobilenet_v1/inference/benchmark.py b/models/image_recognition/tensorflow/mobilenet_v1/inference/benchmark.py
+index 67bf90f5..43691068 100644
+--- a/models/image_recognition/tensorflow/mobilenet_v1/inference/benchmark.py
++++ b/models/image_recognition/tensorflow/mobilenet_v1/inference/benchmark.py
+@@ -46,6 +46,9 @@ from google.protobuf import text_format
+ import tensorflow as tf
+ from tensorflow.core.protobuf import rewriter_config_pb2
+ 
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ def load_graph(model_file):
+   graph = tf.Graph()
+   graph_def = tf.compat.v1.GraphDef()
+@@ -118,7 +121,12 @@ if __name__ == "__main__":
+   if args.precision == 'bfloat16':
+     config.graph_options.rewrite_options.auto_mixed_precision_mkl = rewriter_config_pb2.RewriterConfig.ON
+ 
+-  with tf.compat.v1.Session(graph=graph, config=config) as sess:
++  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  configf.read_config('mobilenet_v1 infer fp32')
++  infer_many_runs_timeline = TimeLiner()
++  infer_run_metadata = tf.compat.v1.RunMetadata()
++
++  with tfSession(graph=graph, config=config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+     input_shape = [batch_size, input_height, input_width, 3]
+     images = tf.random.truncated_normal(
+           input_shape,
+@@ -151,3 +159,5 @@ if __name__ == "__main__":
+               "".format(t+1, batch_size/elapsed_time));
+ 
+     print('Average Throughput: %0.2f images/s on %d iterations'%(batch_size * steps / total_time, steps))
++    print("json_fname : ",configf.json_fname)
++    infer_many_runs_timeline.save(configf.json_fname)
+-- 
+2.17.1
+

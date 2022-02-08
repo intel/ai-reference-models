@@ -1,0 +1,58 @@
+From b0d01e7a01c83d0989ca7ab0c04c576833144972 Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Fri, 25 Dec 2020 01:13:37 +0800
+Subject: [PATCH] wide_deep_large fp32 TF timeline
+
+---
+ .../wide_deep_large_ds/inference/inference.py      | 14 ++++++++++++--
+ 1 file changed, 12 insertions(+), 2 deletions(-)
+
+diff --git a/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py b/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py
+index d71cc7f6..8fc852e3 100755
+--- a/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py
++++ b/models/recommendation/tensorflow/wide_deep_large_ds/inference/inference.py
+@@ -35,6 +35,8 @@ from tensorflow.python.framework import ops
+ from tensorflow.core.framework import graph_pb2
+ from google.protobuf import text_format
+ 
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
+ 
+ def str2bool(v):
+     if v.lower() in ('true'):
+@@ -150,7 +152,13 @@ correctly_predicted = 0
+ total_infer_consume = 0.0
+ warm_iter = 100
+ features_list = []
+-with tf.compat.v1.Session(config=config, graph=graph) as sess:
++
++configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++configf.read_config("wide_deep_large infer fp32")
++infer_many_runs_timeline = TimeLiner()
++infer_run_metadata = tf.compat.v1.RunMetadata()
++
++with tfSession(config=config, graph=graph, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+   res_dataset = input_fn(data_file, 1, False, batch_size)
+   iterator = tf.compat.v1.data.make_one_shot_iterator(res_dataset)
+   next_element = iterator.get_next()
+@@ -159,7 +167,7 @@ with tf.compat.v1.Session(config=config, graph=graph) as sess:
+     features=batch[0:3]
+     features_list.append(features)
+ 
+-with tf.compat.v1.Session(config=config, graph=graph) as sess1:    
++with tfSession(config=config, graph=graph, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess1:    
+   i=0
+   while True:
+     if i >= no_of_batches:
+@@ -183,6 +191,8 @@ evaluate_duration = total_infer_consume
+ latency = (1000 * batch_size* float(evaluate_duration)/float(no_of_test_samples - warm_iter*batch_size))
+ throughput = (no_of_test_samples - warm_iter * batch_size)/evaluate_duration
+ 
++infer_many_runs_timeline.save(configf.json_fname)
++
+ print('--------------------------------------------------')
+ print('Total test records           : ', no_of_test_samples)
+ print('Batch size is                : ', batch_size)
+-- 
+2.25.1
+
