@@ -104,6 +104,11 @@ if [[ ${PLATFORM} == "linux" ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
+    elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "15".* ]]; then
+        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+        exit 1
+      fi
     else
       echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
       exit 1
@@ -138,10 +143,10 @@ if [[ ${NOINSTALL} != "True" ]]; then
         LD_LIBRARY_PATH=“/usr/local/lib:${LD_LIBRARY_PATH}”
         popd
       else
-        if [[ ${OS_VERSION} == *"7"* ]]; then
+        if [[ ${OS_VERSION} =~ "7".* ]]; then
           yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
           yum install -y https://extras.getpagespeed.com/release-el7-latest.rpm
-        elif [[ ${OS_VERSION} == *"8"* ]]; then
+        elif [[ ${OS_VERSION} =~ "8".* ]]; then
           # For Red Hat user needs to register the system first to be able to use the following repositories
           # subscription-manager register --auto-attach
           yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
@@ -165,7 +170,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_VERSION=87094a4
 
       # Install GCC 7 from devtoolset-7
-      if [[ ${OS_VERSION} == *"7"* ]]; then
+      if [[ ${OS_VERSION} =~ "7".* ]]; then
         if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
           yum install -y centos-release-scl
         else
@@ -181,6 +186,34 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # a working commit replace next set of commands with something like:
       yum install -y git make
       yum clean all
+      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+    fi
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+    zypper update -y
+    zypper install -y gcc gcc-c++ cmake python3-tk libXext6 libSM6
+
+    # install google-perftools for tcmalloc
+    if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
+      zypper install -y gperftools && \
+      zypper clean all
+    fi
+
+    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+      ## Installing OpenMPI
+      zypper install -y openmpi3 openmpi3-devel openssh openssh-server
+      zypper clean all
+      export PATH="/usr/lib64/mpi/gcc/openmpi3/bin:${PATH}"
+
+      ## Install Horovod
+      export HOROVOD_WITHOUT_PYTORCH=1
+      export HOROVOD_WITHOUT_MXNET=1
+      export HOROVOD_WITH_TENSORFLOW=1
+      export HOROVOD_VERSION=87094a4
+
+      # In case installing released versions of Horovod fail,and there is
+      # a working commit replace next set of commands with something like:
+      zypper install -y git make
+      zypper clean all
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
   elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
@@ -243,6 +276,11 @@ if _running-in-container ; then
     if [[ $INSTALL_NUMACTL == "True" ]]; then
       yum update -y
       yum install -y numactl
+    fi
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+    if [[ $INSTALL_NUMACTL == "True" ]]; then
+      zypper update -y
+      zypper install -y numactl
     fi
   elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     # For ubuntu, run the container_init.sh scripts
