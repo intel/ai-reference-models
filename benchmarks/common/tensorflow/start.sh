@@ -122,22 +122,60 @@ if [[ ${NOINSTALL} != "True" ]]; then
 
     # install google-perftools for tcmalloc
     if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-      yum -y install https://extras.getpagespeed.com/release-el8-latest.rpm && \
-      yum -y install gperftools && \
-      yum clean all
+      if [[ ${OS_PLATFORM} == *"Red Hat"* ]] && [[ ${OS_VERSION} =~ "7".* ]]; then
+        # For Red Hat 7 we need to build from source
+        pushd .
+        yum install -y wget
+
+        GPERFTOOLS_VER="2.9.1"
+        wget https://github.com/gperftools/gperftools/releases/download/gperftools-${GPERFTOOLS_VER}/gperftools-${GPERFTOOLS_VER}.tar.gz  -O gperftools-${GPERFTOOLS_VER}.tar.gz
+        tar -xvzf gperftools-${GPERFTOOLS_VER}.tar.gz
+        cd gperftools-${GPERFTOOLS_VER}
+
+        ./configure --disable-cpu-profiler --disable-heap-profiler --disable-heap-checker --disable-debugalloc --enable-minimal
+        make
+        make install
+        LD_LIBRARY_PATH=“/usr/local/lib:${LD_LIBRARY_PATH}”
+        popd
+      else
+        if [[ ${OS_VERSION} == *"7"* ]]; then
+          yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+          yum install -y https://extras.getpagespeed.com/release-el7-latest.rpm
+        elif [[ ${OS_VERSION} == *"8"* ]]; then
+          # For Red Hat user needs to register the system first to be able to use the following repositories
+          # subscription-manager register --auto-attach
+          yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+          yum install -y https://extras.getpagespeed.com/release-el8-latest.rpm
+        fi
+        yum install -y gperftools && \
+        yum clean all
+      fi
     fi
 
     if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-      ## Installing OpenMPI
+      # Installing OpenMPI
       yum install -y openmpi openmpi-devel openssh openssh-server
       yum clean all
       export PATH="/usr/lib64/openmpi/bin:${PATH}"
 
-      ## Install Horovod
+      # Install Horovod
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
       export HOROVOD_VERSION=87094a4
+
+      # Install GCC 7 from devtoolset-7
+      if [[ ${OS_VERSION} == *"7"* ]]; then
+        if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+          yum install -y centos-release-scl
+        else
+          # For Red Hat user needs to register then enable the repo:
+          # subscription-manager repos --enable rhel-7-server-devtools-rpms
+          yum install -y scl-utils
+        fi
+        yum install -y devtoolset-7
+        export PATH="/opt/rh/devtoolset-7/root/usr/bin:${PATH}"
+      fi
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
@@ -158,10 +196,10 @@ if [[ ${NOINSTALL} != "True" ]]; then
     fi
 
     if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-      ## Installing OpenMPI
+      # Installing OpenMPI
       apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
 
-      ## Install Horovod
+      # Install Horovod
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
