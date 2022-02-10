@@ -4,12 +4,13 @@ This document has instructions for how to run BERT Base Classifier model on MRPC
 
 ## Prepare dataset
 
-Currently, it supports MRPC(Microsoft Research Paraphrase Corpus) dataset on Classifier task. We need download it first. The [script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e " ") supports to download [GLUE](https://gluebenchmark.com/tasks) data set. You should download the script first and run command as below,
+Currently, it supports MRPC(Microsoft Research Paraphrase Corpus) dataset on Classifier task. We need download it first. The [script](https://gist.github.com/vlasenkoalexey/fef1601580f269eca73bf26a198595f3) supports to download [GLUE](https://gluebenchmark.com/tasks) data set. You should download the script first and run command as below,
 
 ``` shell
 WORKSPACE=${HOME}/bert_bf16
 GLUE_DIR=${WORKSPACE}/data/glue
-python download_glue_data.py --data_dir $GLUE_DIR
+wget https://gist.githubusercontent.com/vlasenkoalexey/fef1601580f269eca73bf26a198595f3/raw/db67cdf22eb5bd7efe376205e8a95028942e263d/download_glue_data.py
+python3 download_glue_data.py --data_dir $GLUE_DIR
 ```
 
 ## Prepare pre-trained model
