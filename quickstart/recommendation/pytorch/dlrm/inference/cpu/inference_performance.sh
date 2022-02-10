@@ -81,7 +81,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
 $ARGS |tee $LOG_0
 wait
 
-throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${LOG}/throughput.log |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
         i = 0;
