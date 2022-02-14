@@ -56,7 +56,10 @@ RUN conda env create --file /tmp/env.yml && \
 
 RUN conda install -n intel -c intel scipy=1.5.2 --force-reinstall
 
-ENV USE_DAAL4PY_SKLEARN=YES
+RUN conda activate intel \
+    python sklearnex.glob patch_sklearn \
+    conda deactivate
+
 
 # Set an environment variable used by Databricks to decide which conda environment to activate by default.
 ENV DEFAULT_DATABRICKS_ROOT_CONDA_ENV=intel
