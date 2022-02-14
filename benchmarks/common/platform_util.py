@@ -301,10 +301,16 @@ class PlatformUtil:
 
         # Try to get the cpuset.cpus info, since lscpu does not know if the cpuset is limited
         cpuset = self._get_cpuset()
+
         if cpuset:
+            num_cores_arg = -1
+            if hasattr(self.args, "num_cores"):
+                num_cores_arg = self.args.num_cores
             # If the cpuset is the same as the online_cpus_list, then we are using the whole
-            # machine, so let's avoid unnecessary complexity and don't bother with the cpuset_cpu list
-            if (online_cpus_list != "" and online_cpus_list != cpuset) or online_cpus_list == "":
+            # machine, so let's avoid unnecessary complexity and don't bother with the cpuset_cpu list.
+            # The cpuset_cpus list will also get populated if the num_cores arg is being specified,
+            # since this list will be used to create the numactl args in base_model_init.py
+            if (online_cpus_list != "" and online_cpus_list != cpuset) or online_cpus_list == "" or num_cores_arg != -1:
                 self.cpuset_cpus = self._get_list_from_string_ranges(cpuset)
 
         # Uses numactl get the core number for each numa node and adds the cores for each
