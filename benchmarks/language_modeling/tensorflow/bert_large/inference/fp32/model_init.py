@@ -113,10 +113,10 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads()
 
         if not os.getenv("OMP_NUM_THREADS"):
-          if self.args.num_intra_threads:
-            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-          else:
-            set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket)
+            if self.args.num_intra_threads:
+                set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+            else:
+                set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket)
 
         model_script = os.path.join(
             self.args.intelai_models, self.args.mode, "run_squad.py")
