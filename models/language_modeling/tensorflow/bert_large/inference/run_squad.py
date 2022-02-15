@@ -197,6 +197,10 @@ flags.DEFINE_integer("warmup_steps", 10,
 flags.DEFINE_integer("steps", 30,
     "[Optional] Number of benchmark steps.")
 
+flags.DEFINE_bool("weight_sharing", False,
+                  "Simulate weight sharing across multiple instances.")
+flags.DEFINE_integer("num_cores_per_socket", None,
+                     "Number of cores per socket.")
 
 class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
   def __init__(self):
@@ -1231,9 +1235,115 @@ def validate_flags_or_throw(bert_config):
         "The max_seq_length (%d) must be greater than max_query_length "
         "(%d) + 3" % (FLAGS.max_seq_length, FLAGS.max_query_length))
 
+def do_benchmark():
+  import numpy as np
+  import threading
+  if FLAGS.weight_sharing:
+    if not FLAGS.num_cores_per_socket:
+      raise ValueError(
+          "Weight sharing requires number of cores per socket info.")
+    if not os.getenv("OMP_NUM_THREADS"):
+      raise ValueError(
+          "Weight sharing requires OMP_NUM_THREADS environment variable setting.")
+    num_instances = int(
+        FLAGS.num_cores_per_socket //
+        int(os.getenv("OMP_NUM_THREADS")))
+  else:
+    num_instances = 1
+  if num_instances < 1:
+    num_instances = 1
+  throughput_list = [None] * num_instances
+  # TODO(intel-tf): Generalize the values of seq, query, and paragraph lengths.
+  # Hard setting for running benchmark without data layer now.
+  MAX_SEQ_LENGTH = 384
+  MIN_QUERY_LENGTH = 10
+  MAX_QUERY_LENGTH = 20
+  MIN_PARAGRAPH_LENGTH = 120
+  MAX_PARAGRAPH_LENGTH = 300
+  VOCAB_SIZE = 30522
+
+  def create_feed_dict():
+    question_length = np.random.randint(MIN_QUERY_LENGTH, MAX_QUERY_LENGTH)
+    paragraph_length = np.random.randint(
+        MIN_PARAGRAPH_LENGTH, MAX_PARAGRAPH_LENGTH)
+    input_ids = np.random.randint(
+        1, VOCAB_SIZE, [
+            question_length + paragraph_length])
+    input_ids = np.pad(input_ids, (0, MAX_SEQ_LENGTH - len(input_ids)))
+    input_mask = np.ones(question_length + paragraph_length)
+    input_mask = np.pad(input_mask, (0, MAX_SEQ_LENGTH - len(input_mask)))
+    segment_ids = np.ones(paragraph_length)
+    segment_ids = np.pad(segment_ids, (question_length,
+                                       MAX_SEQ_LENGTH - (question_length + paragraph_length)))
+    input_ids = input_ids[None, :]
+    input_mask = input_mask[None, :]
+    segment_ids = segment_ids[None, :]
+    for _ in range(FLAGS.predict_batch_size - 1):
+      question_length = np.random.randint(MIN_QUERY_LENGTH, MAX_QUERY_LENGTH)
+      paragraph_length = np.random.randint(
+          MIN_PARAGRAPH_LENGTH, MAX_PARAGRAPH_LENGTH)
+      _input_ids = np.random.randint(
+          1, VOCAB_SIZE, [
+              question_length + paragraph_length])
+      _input_ids = np.pad(_input_ids, (0, MAX_SEQ_LENGTH - len(_input_ids)))
+      _input_mask = np.ones(question_length + paragraph_length)
+      _input_mask = np.pad(_input_mask, (0, MAX_SEQ_LENGTH - len(_input_mask)))
+      _segment_ids = np.ones(paragraph_length)
+      _segment_ids = np.pad(_segment_ids, (question_length,
+                                           MAX_SEQ_LENGTH - (question_length + paragraph_length)))
+      input_ids = np.vstack([input_ids, _input_ids])
+      input_mask = np.vstack([input_mask, _input_mask])
+      segment_ids = np.vstack([segment_ids, _segment_ids])
+    return {
+        'input_ids:0': input_ids,
+        'input_mask:0': input_mask,
+        'segment_ids:0': segment_ids}
+
+  def run_model(sess, tid):
+    outputs = ['start_logits:0', 'end_logits:0']
+    feed_dict = create_feed_dict()
+    for step in range(FLAGS.warmup_steps):
+      _ = sess.run(outputs, feed_dict=feed_dict)
+    t1 = time.time()
+    for step in range(FLAGS.steps):
+      _ = sess.run(outputs, feed_dict=feed_dict)
+    t2 = time.time()
+    throughput_list[tid] = FLAGS.predict_batch_size * FLAGS.steps / (t2 - t1)
+    print('Thread {0} has throughput {1}'.format(tid + 1, throughput_list[tid]))
+
+  # Override inter_op_parallelism_threads when weight sharing on
+  if FLAGS.weight_sharing:
+    FLAGS.inter_op_parallelism_threads = -1
+  config = tf.compat.v1.ConfigProto(
+      intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
+      inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads)
+  graph_def = tf.compat.v1.GraphDef()
+  with open(FLAGS.input_graph, "rb") as f:
+    graph_def.ParseFromString(f.read())
+  graph = tf.Graph()
+  with graph.as_default():
+    tf.import_graph_def(graph_def, name="")
+  sess = tf.compat.v1.Session(graph=graph, config=config)
+  if num_instances == 1:
+    run_model(sess, 0)
+  else:
+    threads = [None] * num_instances
+    for tid in range(num_instances):
+      thread = threading.Thread(target=run_model, args=(sess, tid))
+      threads[tid] = thread
+      thread.start()
+    for thread in threads:
+      thread.join()
+
+  print('Total throughput (examples/sec): {0}'.format(sum(throughput_list)))
 
 def main(_):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
+
+  if FLAGS.mode == 'benchmark' and FLAGS.input_graph:
+    tf.compat.v1.disable_eager_execution()
+    do_benchmark()
+    return
 
   if (FLAGS.accum_steps >1 ):
     tf.compat.v1.logging.info(" Accum steps not yet supported in SQuAD")
