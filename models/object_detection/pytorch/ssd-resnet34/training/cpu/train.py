@@ -338,8 +338,10 @@ def train300_mlperf_coco(args):
             args.seed = broadcast_seeds(args.seed, device)
             local_seed = (args.seed + dist.get_rank()) % 2**32
     mllogger.event(key=mllog_const.SEED, value=local_seed)
-    torch.manual_seed(local_seed)
-    np.random.seed(seed=local_seed)
+    # Refer to https://pytorch.org/docs/stable/notes/randomness.html#dataloader
+    torch.manual_seed(local_seed) # Set PyTorch seed
+    np.random.seed(seed=local_seed) # Set Numpy seed
+    random.seed(local_seed) # Set the Python seed
 
     args.rank = dist.get_rank() if args.distributed else args.local_rank
     print("args.rank = {}".format(args.rank))
