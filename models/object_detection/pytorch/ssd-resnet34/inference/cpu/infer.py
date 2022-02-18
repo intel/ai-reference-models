@@ -463,7 +463,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                                             results_raw[1][idx:idx+results_raw[3][i]],
                                                             results_raw[2][idx:idx+results_raw[3][i]]))
                                             idx += results_raw[3][i]
-                            
+
                                         (htot, wtot) = [d.cpu().numpy() for d in img_size]
                                         img_id = img_id.cpu().numpy()
 
@@ -640,8 +640,6 @@ def eval_ssd_r34_mlperf_coco(args):
 
     if use_cuda:
         ssd_r34.cuda(args.device)
-    elif args.ipex:
-        ssd_r34 = ssd_r34.to(ipex.DEVICE)
     coco_eval(ssd_r34, val_dataloader, cocoGt, encoder, inv_map, args)
 
 def main():
@@ -658,6 +656,9 @@ def main():
     if not args.no_cuda:
         torch.cuda.set_device(args.device)
         torch.backends.cudnn.benchmark = True
+    else:
+        if not "USE_IPEX" in os.environ:
+            print('Set environment variable "USE_IPEX" to 1 (export USE_IPEX=1) to utilize Intel® Extension for PyTorch, if needed.')
     eval_ssd_r34_mlperf_coco(args)
 
 if __name__ == "__main__":

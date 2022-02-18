@@ -136,7 +136,7 @@ class SSD_R34_NMS(nn.Module):
         assert encoder is not None
         self.model = model
         self.encoder = encoder
-    
+
     def forward(self, img):
         ploc, plabel = self.model(img)
         results = self.encoder.decode_batch(ploc, plabel, 0.5, 200, 0)
@@ -632,8 +632,6 @@ def eval_ssd_r34_mlperf_coco(args):
 
     if use_cuda:
         ssd_r34.cuda(args.device)
-    elif args.ipex:
-        ssd_r34 = ssd_r34.to(ipex.DEVICE)
     coco_eval(ssd_r34, val_dataloader, cocoGt, encoder, inv_map, args)
 
 def main():
@@ -650,6 +648,9 @@ def main():
     if not args.no_cuda:
         torch.cuda.set_device(args.device)
         torch.backends.cudnn.benchmark = True
+    else:
+        if not "USE_IPEX" in os.environ:
+            print('Set environment variable "USE_IPEX" to 1 (export USE_IPEX=1) to utilize Intel® Extension for PyTorch, if needed.')
     eval_ssd_r34_mlperf_coco(args)
 
 if __name__ == "__main__":
