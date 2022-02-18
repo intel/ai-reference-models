@@ -749,9 +749,6 @@ function dien_options() {
 function dien() {
   if [ ${MODE} == "inference" ]; then
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/dien/requirements.txt
-      fi
       dien_options
       CMD=${CMD} run_model
 
@@ -761,9 +758,6 @@ function dien() {
     fi
   elif [ ${MODE} == "training" ]; then
     if [ ${PRECISION} == "fp32" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/dien/requirements.txt
-      fi
       dien_options
       CMD=${CMD} run_model
 
