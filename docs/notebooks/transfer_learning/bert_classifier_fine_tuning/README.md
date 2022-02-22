@@ -6,21 +6,7 @@ After fine tuning, the [Intel® Neural Compressor](https://github.com/intel/neur
 is used to do quantization.
 
 For more information on the large movie review dataset, please see the
-[ACL 2011 paper](https://aclanthology.org/P11-1015/). <br>
-Dataset citation:
-```
-@InProceedings{maas-EtAl:2011:ACL-HLT2011,
-  author    = {Maas, Andrew L.  and  Daly, Raymond E.  and  Pham, Peter T.  and  Huang, Dan  and  Ng, Andrew Y.  and  Potts, Christopher},
-  title     = {Learning Word Vectors for Sentiment Analysis},
-  booktitle = {Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies},
-  month     = {June},
-  year      = {2011},
-  address   = {Portland, Oregon, USA},
-  publisher = {Association for Computational Linguistics},
-  pages     = {142--150},
-  url       = {http://www.aclweb.org/anthology/P11-1015}
-}
-```
+[ACL 2011 paper](https://aclanthology.org/P11-1015/).
 
 Steps that the notebook follows:
 * Downloads the IMDB dataset
@@ -125,3 +111,20 @@ virtual environment or in a [docker container](#using-docker).
    ```
    docker stop intel-tensorflow-jupyter
    ```
+
+### References
+
+Dataset citation:
+```
+@InProceedings{maas-EtAl:2011:ACL-HLT2011,
+  author    = {Maas, Andrew L.  and  Daly, Raymond E.  and  Pham, Peter T.  and  Huang, Dan  and  Ng, Andrew Y.  and  Potts, Christopher},
+  title     = {Learning Word Vectors for Sentiment Analysis},
+  booktitle = {Proceedings of the 49th Annual Meeting of the Association for Computational Linguistics: Human Language Technologies},
+  month     = {June},
+  year      = {2011},
+  address   = {Portland, Oregon, USA},
+  publisher = {Association for Computational Linguistics},
+  pages     = {142--150},
+  url       = {http://www.aclweb.org/anthology/P11-1015}
+}
+```
