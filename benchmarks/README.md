@@ -94,7 +94,7 @@ For information on running more advanced use cases using the workload containers
 | Language Modeling       | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/README.md) |
 | Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/rnnt/inference/cpu/README.md) |
 | Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Training  | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) |
-| Language Modeling       | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
+| Language Modeling       | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | Inference | | [FP32 BFloat16**](/quickstart/language_modeling/pytorch/roberta_base/inference/cpu/README.md) |
 | Object Detection        | [Faster R-CNN ResNet50 FPN](https://arxiv.org/abs/1506.01497) | Inference  | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/README.md) |
 | Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README.md) |
 | Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Training   | | [FP32 BFloat16**](/quickstart/object_detection/pytorch/maskrcnn/training/cpu/README.md) |
