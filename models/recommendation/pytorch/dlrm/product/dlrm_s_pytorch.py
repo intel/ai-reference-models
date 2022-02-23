@@ -302,10 +302,10 @@ class DLRM_Net(nn.Module):
             # approach 2: unique
             _, ni, nj = Z.shape
             # approach 1: tril_indices
-            # offset = 0 if self.arch_interaction_itself else -1
+            # offset = -1
             # li, lj = torch.tril_indices(ni, nj, offset=offset)
             # approach 2: custom
-            offset = 1 if self.arch_interaction_itself else 0
+            offset = 0
             li = torch.tensor([i for i in range(ni) for j in range(i + offset)])
             lj = torch.tensor([j for i in range(nj) for j in range(i + offset)])
             Zflat = Z[:, li, lj]
