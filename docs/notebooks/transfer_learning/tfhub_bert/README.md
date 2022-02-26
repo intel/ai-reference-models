@@ -7,7 +7,7 @@ following tasks:
 | Notebook | Description |
 |----------|-------------|
 | [BERT_Question_Answering.ipynb](BERT_Question_Answering.ipynb) | Demonstrates BERT fine tuning using scripts from the [TensorFlow Model Garden](https://github.com/tensorflow/models) and the [SQuAD dataset](https://rajpurkar.github.io/SQuAD-explorer/). The notebook allows for selecting a BERT large or BERT base model from [TF Hub](https://tfhub.dev). The fine tuned model is evaluated and exported as a saved model. |
-| [BERT_Binary_Text_Classification.ipynb](BERT_Binary_Text_Classification.ipynb) | Demonstrates BERT binary text classification fine tuning using the [IMDb movie review dataset](https://www.tensorflow.org/datasets/catalog/imdb_reviews) from [TensorFlow Datasets](https://www.tensorflow.org/datasets). The notebook allows for selecting a BERT encoder (BERT large, BERT base, or small BERT) to use along with a preprocessor from [TF Hub](https://tfhub.dev). The fine tuned model is evaluated and exported as a saved model. |
+| [BERT_Binary_Text_Classification.ipynb](BERT_Binary_Text_Classification.ipynb) | Demonstrates BERT binary text classification fine tuning using the [IMDb movie review dataset](https://www.tensorflow.org/datasets/catalog/imdb_reviews) from [TensorFlow Datasets](https://www.tensorflow.org/datasets) or a custom dataset. The notebook allows for selecting a BERT encoder (BERT large, BERT base, or small BERT) to use along with a preprocessor from [TF Hub](https://tfhub.dev). The fine tuned model is evaluated and exported as a saved model. |
 
 ## Running the notebooks
 
@@ -124,6 +124,13 @@ archivePrefix = {arXiv},
   publisher = {Association for Computational Linguistics},
   pages     = {142--150},
   url       = {http://www.aclweb.org/anthology/P11-1015}
+}
+
+@misc{misc_sms_spam_collection_228,
+  author       = {Almeida, Tiago},
+  title        = {{SMS Spam Collection}},
+  year         = {2012},
+  howpublished = {UCI Machine Learning Repository}
 }
 ```
 
