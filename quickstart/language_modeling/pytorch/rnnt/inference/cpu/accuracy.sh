@@ -75,4 +75,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
 wait
 
 accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_accuracy* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+WER=$(grep 'Evaluation WER:' ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_accuracy* |sed -e 's/.*Evaluation WER//;s/[^0-9.]//g')
 echo ""RNN-T";"accuracy";$1; ${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""RNN-T";"WER";$1; ${BATCH_SIZE};${WER}" | tee -a ${work_space}/summary.log
