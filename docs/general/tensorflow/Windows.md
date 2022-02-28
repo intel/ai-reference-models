@@ -44,4 +44,4 @@ The following list of models are tested on Windows, please check each model inst
 | Recommendation          | [DIEN](https://arxiv.org/abs/1809.03672) | Inference | [FP32](/benchmarks/recommendation/tensorflow/dien#fp32-inference) |
 | Recommendation          | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | Inference | [FP32](/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/README.md) |
 
-> Note, the use cases `Language Translation` and `Recommendation` are tested on Windows but models documentations are not yet updated with instructions.
+> Note, the use case `Language Translation` has been tested on Windows but models documentations are not yet updated with instructions.
