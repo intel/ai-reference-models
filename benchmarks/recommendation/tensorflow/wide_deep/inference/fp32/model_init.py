@@ -67,5 +67,11 @@ class ModelInitializer(BaseModelInitializer):
     def run(self):
         original_dir = os.getcwd()
         os.chdir(self.args.intelai_models)
+        # TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
+        # We already do the OS check there to see if it's one that we support.
+        if os.environ.get('OS', '') == 'Windows_NT':
+            os.environ["PYTHONPATH"] = "{};{}".format(
+                os.path.join(self.args.model_source_dir),
+                os.environ["PYTHONPATH"])
         self.run_command(self.run_cmd)
         os.chdir(original_dir)
