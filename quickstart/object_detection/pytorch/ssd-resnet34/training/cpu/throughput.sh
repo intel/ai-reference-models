@@ -72,8 +72,7 @@ rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
-    --ninstances 1 \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
+    --throughput_mode \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/training/cpu/train.py \
     --epochs 70 \
     --warmup-factor 0 \
