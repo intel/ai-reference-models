@@ -90,18 +90,33 @@ rm -rf ./resnet50_training_log_*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
-    --ninstances 1 \
+    --ninstances ${SOCKETS} \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
+    --log_path=${OUTPUT_DIR} \
+    --log_file_prefix="./resnet50_training_log_${PRECISION}" \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
     $ARGS \
     --ipex \
     -j 0 \
     --seed 2020 \
     --epochs $TRAINING_EPOCHS \
-    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}.log
+    -b $BATCH_SIZE
+
 # For the summary of results
 wait
 
-throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}.log |sed -e 's/.Training throughput//;s/[^0-9.]//g')
+throughput=$(grep 'Training throughput:'  ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}_* |sed -e 's/.*throughput//;s/[^0-9.]//g' |awk '
+BEGIN {
+    sum = 0;
+    i = 0;
+    }
+    {
+        sum = sum + $1;
+        i++;
+    }
+END   {
+    sum = sum / i;
+    printf("%.3f", sum);
+}')
 
 echo "resnet50;"training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
