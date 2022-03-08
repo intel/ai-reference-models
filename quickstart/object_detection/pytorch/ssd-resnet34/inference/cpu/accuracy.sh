@@ -67,9 +67,19 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 rm -rf ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_accuracy*
 
 PRECISION=$1
-weight_sharing=false
+weight_sharing=true
+if [ -z "${WEIGHT_SHAREING}" ]; then
+  weight_sharing=false
+else
+  echo "### Running the test with runtime extension."
+  weight_sharing=true
+fi
 
 if [ "$weight_sharing" = true ]; then
+    async=true
+    if [ "$async" = true ]; then
+       ARGS="$ARGS --async-execution"
+    fi
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     TOTAL_CORES=`expr $CORES \* $SOCKETS`
@@ -102,6 +112,7 @@ if [ "$weight_sharing" = true ]; then
         --number-instance $STREAM_PER_INSTANCE \
         --use-multi-stream-module \
         --instance-number 0 \
+        --accuracy-mode \
         $ARGS 2>&1 | tee ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_accuracy.log
     wait
 else
