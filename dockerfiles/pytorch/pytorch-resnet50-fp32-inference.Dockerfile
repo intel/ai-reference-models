@@ -22,7 +22,7 @@
 ARG PYTORCH_IMAGE="intel/intel-optimized-pytorch"
 ARG PYTORCH_TAG="1.5.0-rc3-ipex-latest"
 
-FROM ${PYTORCH_IMAGE}:${PYTORCH_TAG} AS intel-optimized-pytorch
+FROM ${PYTORCH_IMAGE}:${PYTORCH_TAG}
 
 ARG PACKAGE_DIR=model_packages
 
