@@ -81,7 +81,7 @@ model_names = sorted(name for name in models.__dict__
     and callable(models.__dict__[name]))
 
 torch.hub._validate_not_a_forked_repo=lambda a,b,c: True
-hub_model_names = torch.hub.list('facebookresearch/semi-supervised-ImageNet1K-models')
+hub_model_names = torch.hub.list('facebookresearch/WSL-Images')
 model_names += hub_model_names
 
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
@@ -105,6 +105,8 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                     help='mini-batch size (default: 256), this is the total '
                          'batch size of all GPUs on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
+parser.add_argument('--steps', default=-1, type=int,
+                    help='steps for validation')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -120,10 +122,12 @@ parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
                     help='use pre-trained model')
-parser.add_argument('--world-size', default=-1, type=int,
+parser.add_argument('--world-size', default=1, type=int,
                     help='number of nodes for distributed training')
-parser.add_argument('--rank', default=-1, type=int,
+parser.add_argument('--rank', default=0, type=int,
                     help='node rank for distributed training')
+parser.add_argument('--master_addr', default='127.0.0.1', type=str, help='Master Addr')
+parser.add_argument('--port', default='29500', type=str, help='Port')
 parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
 parser.add_argument('--dist-backend', default='nccl', type=str,
@@ -207,17 +211,26 @@ def main_worker(gpu, ngpus_per_node, args):
         print("Use GPU: {} for training".format(args.gpu))
 
     if args.distributed:
+        os.environ['RANK'] = str(os.environ.get('PMI_RANK', args.rank))
+        os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', args.world_size))
+        os.environ['MASTER_ADDR'] = args.master_addr
+        os.environ['MASTER_PORT'] = args.port
         if args.dist_url == "env://" and args.rank == -1:
             args.rank = int(os.environ["RANK"])
         if args.multiprocessing_distributed:
             # For multiprocessing distributed training, rank needs to be the
             # global rank among all the processes
             args.rank = args.rank * ngpus_per_node + gpu
-        dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-                                world_size=args.world_size, rank=args.rank)
+
+        # Initialize the process group with ccl backend
+        if args.dist_backend == 'ccl':
+            import torch_ccl
+        dist.init_process_group(backend=args.dist_backend)
+        #dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
+        #                        world_size=args.world_size, rank=args.rank)
     if args.hub:
         torch.set_flush_denormal(True)
-        model = torch.hub.load('facebookresearch/semi-supervised-ImageNet1K-models', args.arch)
+        model = torch.hub.load('facebookresearch/WSL-Images', args.arch)
     else:
         # create model
         if args.pretrained:
@@ -254,11 +267,11 @@ def main_worker(gpu, ngpus_per_node, args):
             if args.cuda:
                 model.cuda()
                 print("create DistributedDataParallel in GPU")
+                # DistributedDataParallel will divide and allocate batch_size to all
+                # available GPUs if device_ids are not set
+                model = torch.nn.parallel.DistributedDataParallel(model)
             else:
                 print("create DistributedDataParallel in CPU")
-            # DistributedDataParallel will divide and allocate batch_size to all
-            # available GPUs if device_ids are not set
-            model = torch.nn.parallel.DistributedDataParallel(model)
     elif args.gpu is not None and args.cuda:
         torch.cuda.set_device(args.gpu)
         model = model.cuda(args.gpu)
@@ -313,8 +326,15 @@ def main_worker(gpu, ngpus_per_node, args):
                 "please using dummy data and set batch_size to 1 if you want run weight sharing case for latency case"
     if args.jit and args.int8:
         assert False, "jit path is not available for int8 path using ipex"
+    if args.calibration:
+        assert args.int8, "please enable int8 path if you want to do int8 calibration path"
     if args.dummy:
         assert args.evaluate, "please using real dataset if you want run training path"
+    if not args.ipex:
+        # for offical pytorch, int8 and jit path is not enabled.
+        assert not args.int8, "int8 path is not enabled for offical pytorch"
+        assert not args.jit, "jit path is not enabled for offical pytorch"
+
     if not args.dummy:
         # Data loading code
         assert args.data != None, "please set dataset path if you want to using real data"
@@ -358,6 +378,8 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.evaluate:
         if args.ipex:
             print("using ipex model to do inference\n")
+        else:
+            print("using offical pytorch model to do inference\n")
 
         if args.ipex:
             model.eval()
@@ -397,6 +419,12 @@ def main_worker(gpu, ngpus_per_node, args):
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
         else:
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
+
+    # parallelize
+    if args.distributed and not args.cuda and args.gpu is None:
+        print("create DistributedDataParallel in CPU")
+        device_ids = None
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
 
     for epoch in range(args.start_epoch, args.epochs):
         if args.distributed:
@@ -438,95 +466,68 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
     # switch to train mode
     model.train()
 
-    if args.ipex:
-        if args.bf16:
-            print("running bfloat16 training step\n")
-        else:
-            print("running fp32 training step\n")
-        end = time.time()
-        for i, (images, target) in enumerate(train_loader):
-            # measure data loading time
-            data_time.update(time.time() - end)
-            images = images.contiguous(memory_format=torch.channels_last)
-            # compute output
-
-            if args.bf16:
-                with torch.cpu.amp.autocast():
-                    output = model(images)
-                output = output.to(torch.float32)
-            else:
-                output = model(images)
-            loss = criterion(output, target)
-
-            # measure accuracy and record loss
-            acc1, acc5 = accuracy(output, target, topk=(1, 5))
-            losses.update(loss.item(), images.size(0))
-            top1.update(acc1[0], images.size(0))
-            top5.update(acc5[0], images.size(0))
-
-            # compute gradient and do SGD step
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
-
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
-
-            if i % args.print_freq == 0:
-                progress.display(i)
+    if args.bf16:
+        print("running bfloat16 training step\n")
     else:
-        end = time.time()
-        for i, (images, target) in enumerate(train_loader):
-            # measure data loading time
-            data_time.update(time.time() - end)
+        print("running fp32 training step\n")
+    end = time.time()
+    for i, (images, target) in enumerate(train_loader):
+        # measure data loading time
+        data_time.update(time.time() - end)
+        if args.ipex:
+            images = images.contiguous(memory_format=torch.channels_last)
+        # compute output
 
-            if args.gpu is not None:
-                images = images.cuda(args.gpu, non_blocking=True)
-            if torch.cuda.is_available():
-                target = target.cuda(args.gpu, non_blocking=True)
-
-            # compute output
+        if args.bf16:
+            with torch.cpu.amp.autocast():
+                output = model(images)
+            output = output.to(torch.float32)
+        else:
             output = model(images)
-            loss = criterion(output, target)
+        loss = criterion(output, target)
 
-            # measure accuracy and record loss
-            acc1, acc5 = accuracy(output, target, topk=(1, 5))
-            losses.update(loss.item(), images.size(0))
-            top1.update(acc1[0], images.size(0))
-            top5.update(acc5[0], images.size(0))
+        # measure accuracy and record loss
+        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        losses.update(loss.item(), images.size(0))
+        top1.update(acc1[0], images.size(0))
+        top5.update(acc5[0], images.size(0))
 
-            # compute gradient and do SGD step
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+        # compute gradient and do SGD step
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
 
-            # measure elapsed time
-            batch_time.update(time.time() - end)
-            end = time.time()
+        # measure elapsed time
+        batch_time.update(time.time() - end)
+        end = time.time()
 
-            if i % args.print_freq == 0:
-                progress.display(i)
+        if i % args.print_freq == 0:
+            progress.display(i)
 
     batch_size = args.batch_size
     perf = batch_size / (batch_time.avg - data_time.avg)
     print("Training throughput: {:.3f} fps".format(perf))
 
 def run_weights_sharing_model(m, tid, args):
-    steps = 300
+    steps = args.steps if args.steps > 0 else 300
     start_time = time.time()
     num_images = 0
     time_consume = 0
+    x = torch.randn(args.batch_size, 3, 224, 224)
+    if args.bf16:
+        x = x.to(torch.bfloat16)
+    if args.ipex:
+        x = x.contiguous(memory_format=torch.channels_last)
+
     with torch.no_grad():
         while num_images < steps:
-            if args.bf16:
-                for i in range(24):
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last).to(torch.bfloat16)
-            else:
-                for i in range(24):
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
             start_time = time.time()
-            y = m(x)
+            if not args.jit and args.bf16:
+                with torch.cpu.amp.autocast():
+                    y = m(x)
+            else:
+                y = m(x)
+
             end_time = time.time()
             if num_images > args.warmup_iterations:
                 time_consume += end_time - start_time
@@ -541,11 +542,11 @@ def validate(val_loader, model, criterion, args):
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
     if args.dummy:
-        number_iter = 200
+        number_iter = args.steps if args.steps > 0 else 200
         if args.int8:
-            number_iter = 500
+            number_iter = args.steps if args.steps > 0 else 200
     else:
-        number_iter = len(val_loader)
+        number_iter = args.steps if args.steps > 0 else len(val_loader)
     if args.calibration:
         number_iter = 100
 
@@ -553,6 +554,9 @@ def validate(val_loader, model, criterion, args):
         number_iter,
         [batch_time, losses, top1, top5],
         prefix='Test: ')
+    print('Evaluating RESNET: total Steps: {}'.format(number_iter))
+
+             
 
     # switch to evaluate mode
     model.eval()
@@ -574,87 +578,37 @@ def validate(val_loader, model, criterion, args):
             print(".........calibration step done..........")
     else:
         if args.dummy:
-            if args.ipex:
-                # always running channle last for fp32, bf16, int8
-                with torch.no_grad():
-                    if args.weight_sharing:
-                        threads = []
-                        for i in range(1, args.number_instance+1):
-                            thread = threading.Thread(target=run_weights_sharing_model, args=(model, i, args))
-                            threads.append(thread)
-                            thread.start()
-                        for thread in threads:
-                            thread.join()
-                        exit()
-                    else:
-                        images = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
-                        target = torch.arange(1, args.batch_size + 1).long()
-                        if args.bf16:
-                            images = images.to(torch.bfloat16)
+            # always running channle last for fp32, bf16, int8
+            with torch.no_grad():
+                if args.weight_sharing:
+                    threads = []
+                    for i in range(1, args.number_instance+1):
+                        thread = threading.Thread(target=run_weights_sharing_model, args=(model, i, args))
+                        threads.append(thread)
+                        thread.start()
+                    for thread in threads:
+                        thread.join()
+                    exit()
+                else:
+                    images = torch.randn(args.batch_size, 3, 224, 224)
+                    if args.ipex:
+                        images = images.contiguous(memory_format=torch.channels_last)
+                    target = torch.arange(1, args.batch_size + 1).long()
+                    if args.bf16:
+                        images = images.to(torch.bfloat16)
 
-                        for i in range(number_iter):
-                            if i >= args.warmup_iterations:
-                                end = time.time()
-                            if not args.bf16:
-                                output = model(images)
-                            else:
-                                with torch.cpu.amp.autocast():
-                                    output = model(images)
-                            if i >= args.warmup_iterations:
-                                batch_time.update(time.time() - end)
-
-                            if args.bf16:
-                                output = output.to(torch.float32)
-                            loss = criterion(output, target)
-                            # measure accuracy and record loss
-                            acc1, acc5 = accuracy(output, target, topk=(1, 5))
-                            losses.update(loss.item(), images.size(0))
-                            top1.update(acc1[0], images.size(0))
-                            top5.update(acc5[0], images.size(0))
-
-                            if i % args.print_freq == 0:
-                                progress.display(i)
-            else:
-                with torch.no_grad():
                     for i in range(number_iter):
-                        if args.gpu is not None and args.cuda:
-                            images = images.cuda(args.gpu, non_blocking=True)
-                        if args.cuda:
-                            target = target.cuda(args.gpu, non_blocking=True)
-
                         if i >= args.warmup_iterations:
                             end = time.time()
-                        # compute output
-                        output = model(images)
+                        if not args.jit and args.bf16:
+                            with torch.cpu.amp.autocast():
+                                output = model(images)
+                        else:
+                            output = model(images)
+
                         if i >= args.warmup_iterations:
                             batch_time.update(time.time() - end)
 
-                        #print(output)
-                        loss = criterion(output, target)
-
-                        # measure accuracy and record loss
-                        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-                        losses.update(loss.item(), images.size(0))
-                        top1.update(acc1[0], images.size(0))
-                        top5.update(acc5[0], images.size(0))
-
-                        if i % args.print_freq == 0:
-                            progress.display(i)
-        else:
-            if args.ipex:
-                with torch.no_grad():
-                    for i, (images, target) in enumerate(val_loader):
-                        end = time.time()
-                        images = images.contiguous(memory_format=torch.channels_last)
-                        if not args.bf16:
-                            output = model(images)
-                        else:
-                            images = images.to(torch.bfloat16)
-                            with torch.cpu.amp.autocast():
-                                output = model(images)
-                        # compute output
-                        batch_time.update(time.time() - end)
-                        #print(output)
                         if args.bf16:
                             output = output.to(torch.float32)
                         loss = criterion(output, target)
@@ -666,31 +620,34 @@ def validate(val_loader, model, criterion, args):
 
                         if i % args.print_freq == 0:
                             progress.display(i)
-            else:
-                with torch.no_grad():
-                    for i, (images, target) in enumerate(val_loader):
-                        images = torch.randn(args.batch_size, 3, 224, 224)
-                        target = torch.arange(1, args.batch_size + 1).long()
-                        if args.gpu is not None and args.cuda:
-                            images = images.cuda(args.gpu, non_blocking=True)
-                        if args.cuda:
-                            target = target.cuda(args.gpu, non_blocking=True)
-                        end = time.time()
-                        # compute output
+        else:
+            with torch.no_grad():
+                for i, (images, target) in enumerate(val_loader):
+                    end = time.time()
+                    if args.ipex:
+                        images = images.contiguous(memory_format=torch.channels_last)
+                    if args.bf16:
+                        images = images.to(torch.bfloat16)
+                    if not args.jit and args.bf16:
+                        with torch.cpu.amp.autocast():
+                            output = model(images)
+                    else:
                         output = model(images)
-                        batch_time.update(time.time() - end)
 
-                        #print(output)
-                        loss = criterion(output, target)
+                    # compute output
+                    batch_time.update(time.time() - end)
+                    #print(output)
+                    if args.bf16:
+                        output = output.to(torch.float32)
+                    loss = criterion(output, target)
+                    # measure accuracy and record loss
+                    acc1, acc5 = accuracy(output, target, topk=(1, 5))
+                    losses.update(loss.item(), images.size(0))
+                    top1.update(acc1[0], images.size(0))
+                    top5.update(acc5[0], images.size(0))
 
-                        # measure accuracy and record loss
-                        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-                        losses.update(loss.item(), images.size(0))
-                        top1.update(acc1[0], images.size(0))
-                        top5.update(acc5[0], images.size(0))
-
-                        if i % args.print_freq == 0:
-                            progress.display(i)
+                    if i % args.print_freq == 0:
+                        progress.display(i)
 
         if args.weight_sharing:
             latency = stats.latency_avg_ms

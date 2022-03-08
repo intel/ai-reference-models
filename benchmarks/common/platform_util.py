@@ -249,7 +249,7 @@ class PlatformUtil:
             with open(cpuset_cpus_file, "r") as f:
                 cpuset = f.read()
 
-            if self.args.verbose:
+            if hasattr(self.args, "verbose") and self.args.verbose:
                 print("cpuset.cpus: {}".format(cpuset))
         return cpuset
 
@@ -301,10 +301,16 @@ class PlatformUtil:
 
         # Try to get the cpuset.cpus info, since lscpu does not know if the cpuset is limited
         cpuset = self._get_cpuset()
+
         if cpuset:
+            num_cores_arg = -1
+            if hasattr(self.args, "num_cores"):
+                num_cores_arg = self.args.num_cores
             # If the cpuset is the same as the online_cpus_list, then we are using the whole
-            # machine, so let's avoid unnecessary complexity and don't bother with the cpuset_cpu list
-            if (online_cpus_list != "" and online_cpus_list != cpuset) or online_cpus_list == "":
+            # machine, so let's avoid unnecessary complexity and don't bother with the cpuset_cpu list.
+            # The cpuset_cpus list will also get populated if the num_cores arg is being specified,
+            # since this list will be used to create the numactl args in base_model_init.py
+            if (online_cpus_list != "" and online_cpus_list != cpuset) or online_cpus_list == "" or num_cores_arg != -1:
                 self.cpuset_cpus = self._get_list_from_string_ranges(cpuset)
 
         # Uses numactl get the core number for each numa node and adds the cores for each
@@ -316,33 +322,34 @@ class PlatformUtil:
             cores_per_node = int(num_physical_cores / self.num_numa_nodes)
         else:
             cores_per_node = self.num_cores_per_socket
+        if hasattr(self.args, "numa_cores_per_instance"):
+            if self.num_numa_nodes > 0 and self.args.numa_cores_per_instance is not None:
+                try:
+                    # Get the list of cores
+                    cpu_array_command = \
+                        "numactl -H | grep 'node [0-9]* cpus:' |" \
+                        "sed 's/.*node [0-9]* cpus: *//' | head -{0} |cut -f1-{1} -d' '".format(
+                            self.num_numa_nodes, int(cores_per_node))
+                    cpu_array = subprocess.Popen(
+                        cpu_array_command, shell=True, stdout=subprocess.PIPE,
+                        stderr=subprocess.PIPE).stdout.readlines()
 
-        if self.num_numa_nodes > 0 and self.args.numa_cores_per_instance is not None:
-            try:
-                # Get the list of cores
-                cpu_array_command = \
-                    "numactl -H | grep 'node [0-9]* cpus:' |" \
-                    "sed 's/.*node [0-9]* cpus: *//' | head -{0} |cut -f1-{1} -d' '".format(
-                        self.num_numa_nodes, int(cores_per_node))
-                cpu_array = subprocess.Popen(
-                    cpu_array_command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).stdout.readlines()
+                    for node_cpus in cpu_array:
+                        node_cpus = str(node_cpus).lstrip("b'").replace("\\n'", " ")
+                        self.cpu_core_list.append([x for x in node_cpus.split(" ") if x != ''])
 
-                for node_cpus in cpu_array:
-                    node_cpus = str(node_cpus).lstrip("b'").replace("\\n'", " ")
-                    self.cpu_core_list.append([x for x in node_cpus.split(" ") if x != ''])
+                    # If we have the cpuset list, cross check that list with our core list and
+                    # remove cores that are not part of the cpuset list
+                    if self.cpuset_cpus is not None:
+                        for socket, core_list in enumerate(self.cpu_core_list):
+                            self.cpu_core_list[socket] = [x for x in core_list if int(x) in self.cpuset_cpus]
 
-                # If we have the cpuset list, cross check that list with our core list and
-                # remove cores that are not part of the cpuset list
-                if self.cpuset_cpus is not None:
-                    for socket, core_list in enumerate(self.cpu_core_list):
-                        self.cpu_core_list[socket] = [x for x in core_list if int(x) in self.cpuset_cpus]
+                    if hasattr(self.args, "verbose") and self.args.verbose:
+                        print("Core list: {}".format(self.cpu_core_list), flush=True)
 
-                if (self.args.verbose):
-                    print("Core list: {}".format(self.cpu_core_list), flush=True)
-
-            except Exception as e:
-                print("Warning: An error occured when getting the list of cores using '{}':\n {}".
-                      format(cpu_array_command, e))
+                except Exception as e:
+                    print("Warning: An error occured when getting the list of cores using '{}':\n {}".
+                          format(cpu_array_command, e))
 
         if self.cpuset_cpus is not None:
             # Reformat the cpuset_cpus list so that it's split up by node

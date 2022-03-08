@@ -6,12 +6,13 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Kit on Linux</th>
+    <th>Setup without AI Kit on Linux</th>
+    <th>Setup without AI Kit on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Kit on Linux you will need:</p>
       <ul>
         <li>build-essential
         <li>git
@@ -36,7 +37,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Kit on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li>build-essential
@@ -62,12 +63,35 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
+    <td>
+      <p>To run without AI Kit on Windows you will need:</p>
+      <ul>
+        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li>build-essential
+        <li>libgl1-mesa-glx
+        <li>libglib2.0-0
+        <li>python3-dev
+        <li>Cython
+        <li>contextlib2
+        <li>horovod==0.19.1
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>numpy>=1.17.4
+        <li>opencv-python
+        <li>pillow>=8.1.2
+        <li>pycocotools
+        <li>tensorflow-addons==0.11.0
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
   </tr>
 </table>
 
 The [TensorFlow models](https://github.com/tensorflow/models) and
 [benchmarks](https://github.com/tensorflow/benchmarks) repos are used by
-<model name> <precision> <mode>. Clone those at the git SHAs specified
+SSD-ResNet34 FP32 inference. Clone those at the git SHAs specified
 below and set the `TF_MODELS_DIR` environment variable to point to the
 directory where the models repo was cloned.
 
@@ -82,10 +106,12 @@ git checkout 509b9d288937216ca7069f31cfb22aaa7db6a4a7
 cd ..
 ```
 
-Download the <model name> pretrained model for either the 300x300 or 1200x1200
+Download the SSD-ResNet34 pretrained model for either the 300x300 or 1200x1200
 input size, depending on which [quickstart script](#quick-start-scripts) you are
 going to run. Set the `PRETRAINED_MODEL` environment variable for the path to the
 pretrained model that you'll be using.
+If you run on Windows, please use a browser to download the pretrained model using the link below.
+For Linux, run:
 ```
 # ssd-resnet34 300x300
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_fp32_bs1_pretrained_model.pb
@@ -97,12 +123,15 @@ export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
 ```
 
 After installing the prerequisites and cloning the models and benchmarks
-repos, and downloading the pretrained model, set environment variables
-for the path to your `DATASET_DIR` (for accuracy testing only --
-inference benchmarking uses synthetic data) and an `OUTPUT_DIR` where
-log files will be written. Once the required environment variables are set,
-you can then run a [quickstart script](#quick-start-scripts) from the
-Model Zoo.
+repos, and downloading the pretrained model, set the required environment
+variables. Set an environment variable for the path to an `OUTPUT_DIR`
+where log files will be written. If the accuracy test is being run, then
+also set the `DATASET_DIR` to point to the folder where the COCO dataset
+`validation-00000-of-00001` file is located.  Once the environment variables
+are set, you can then run a [quickstart script](#quick-start-scripts) from the
+Model Zoo on either Linux or Windows.
+
+### Run on Linux
 ```
 # cd to your model zoo directory
 cd models
@@ -115,3 +144,24 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 ./quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/<script name>.sh
 ```
+
+### Run on Windows
+Using `cmd.exe`,  run:
+```
+# cd to your model zoo directory
+cd models
+
+set PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
+set DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
+set OUTPUT_DIR=<directory where log files will be written>
+set TF_MODELS_DIR=<path to the TensorFlow Models repo>
+
+bash quickstart\object_detection\tensorflow\ssd-resnet34\inference\cpu\fp32\<script name>.sh
+```
+> Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+As an example, if the dataset location on Windows is `D:\user\coco_dataset`, convert the Windows path to Unix as shown:
+> ```
+> cygpath D:\user\coco_dataset
+> /d/user/coco_dataset
+>```
+>Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/coco_dataset`.

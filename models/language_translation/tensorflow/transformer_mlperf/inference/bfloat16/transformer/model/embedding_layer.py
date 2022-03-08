@@ -32,6 +32,7 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
     super(EmbeddingSharedWeights, self).__init__()
     self.vocab_size = vocab_size
     self.hidden_size = hidden_size
+    self.sqrt_hidden_size = self.hidden_size ** 0.5
 
   def build(self, _):
     with tf.compat.v1.variable_scope("embedding_and_softmax", reuse=tf.compat.v1.AUTO_REUSE):
@@ -48,6 +49,8 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
           initializer=tf.compat.v1.random_normal_initializer(
               0., self.hidden_size ** -0.5))
 
+      self.shared_weights = tf.cast(self.shared_weights, tf.bfloat16)
+
     self.built = True
 
   def call(self, x):
@@ -63,17 +66,15 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
     with tf.compat.v1.name_scope("embedding"):
       embeddings = tf.gather(self.shared_weights, x)
 
-      # Scale embedding by the sqrt of the hidden size
-      embeddings *= self.hidden_size ** 0.5
-
-      # Create binary array of size [batch_size, length]
-      # where 1 = padding, 0 = not padding
-      padding = model_utils.get_padding(x)
-
       # Set all padding embedding values to 0
       with tf.compat.v1.tpu.bfloat16_scope():
+         # Scale embedding by the sqrt of the hidden size
+         embeddings *= self.sqrt_hidden_size
+
+         # Create binary array of size [batch_size, length]
+         # where 1 = padding, 0 = not padding
+         padding = model_utils.get_padding(x)
          temp = tf.expand_dims(1 - padding, -1)
-         embeddings = tf.cast(embeddings, tf.bfloat16)
          embeddings *= temp
       return embeddings
 
@@ -90,8 +91,6 @@ class EmbeddingSharedWeights(tf.compat.v1.layers.Layer):
       length = tf.shape(input=x)[1]
 
       x = tf.reshape(x, [-1, self.hidden_size])
-      x = tf.cast(x, tf.bfloat16)
-      self.shared_weights = tf.cast(self.shared_weights, tf.bfloat16)
       logits = tf.matmul(x, self.shared_weights, transpose_b=True)
       logits = tf.cast(logits, tf.float32)
       

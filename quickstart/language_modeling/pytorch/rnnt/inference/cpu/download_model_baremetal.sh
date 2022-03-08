@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # Copyright (c) 2020 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,11 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+# ============================================================================
 #
+# THIS IS A GENERATED DOCKERFILE.
+#
+# This file was assembled from multiple pieces, whose use is documented
+# throughout. Please refer to the TensorFlow dockerfiles documentation
+# for more information.
 
-CHECKPOINT_DIR=${CHECKPOINT_DIR-$PWD}
-
-dir=$(pwd)
-mkdir -p ${CHECKPOINT_DIR}/results; cd ${CHECKPOINT_DIR}/results
-wget https://zenodo.org/record/3662521/files/DistributedDataParallel_1576581068.9962234-epoch-100.pt?download=1 -O "rnnt.pt"
-cd $dir
+from sklearn.datasets import fetch_rcv1
+rcv1 = fetch_rcv1()

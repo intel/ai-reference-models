@@ -50,6 +50,7 @@ from tb_logger import DummyLogger, TensorBoardLogger
 import preprocessing
 import intel_extension_for_pytorch as ipex
 from tqdm import tqdm
+import torch.distributed as dist
 
 def lr_decay(N, step, learning_rate):
     """
@@ -424,16 +425,37 @@ def main(args):
 
     args.local_rank = os.environ.get('LOCAL_RANK', args.local_rank)
     # set up distributed training
+    cpu_distributed_training = False
+    if torch.distributed.is_available() and int(os.environ.get('PMI_SIZE', '0')) > 1:
+        print('Distributed training with DDP')
+        os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
+        os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
+        if not 'MASTER_ADDR' in os.environ:
+            os.environ['MASTER_ADDR'] = args.master_addr
+        if not 'MASTER_PORT' in os.environ:
+            os.environ['MASTER_PORT'] = args.port
+
+        # Initialize the process group with ccl backend
+        if args.backend == 'ccl':
+            import torch_ccl
+        dist.init_process_group(
+                backend=args.backend                
+        )
+        cpu_distributed_training = True
+        if torch.distributed.is_initialized():
+            print("Torch distributed is initialized.")
+            args.rank = torch.distributed.get_rank()
+            args.world_size = torch.distributed.get_world_size()
+        else:
+            print("Torch distributed is not initialized.")
+            args.rank = 0
+            args.world_size = 1
 
     multi_gpu = False
     if multi_gpu:
         print_once("DISTRIBUTED TRAINING with {} gpus".format(torch.distributed.get_world_size()))
 
-    # define amp optimiation level
-    if args.fp16:
-        optim_level = Optimization.mxprO1
-    else:
-        optim_level = Optimization.mxprO0
+    optim_level = Optimization.mxprO0
 
     model_definition = toml.load(args.model_toml)
     dataset_vocab = model_definition['labels']['labels']
@@ -498,7 +520,8 @@ def main(args):
                                     batch_size=args.batch_size // args.gradient_accumulation_steps,
                                     multi_gpu=multi_gpu,
                                     pad_to_max=args.pad_to_max,
-                                    sampler=sampler_type)
+                                    sampler=sampler_type,
+                                    cpu_distributed_training=cpu_distributed_training)
 
     eval_datasets = [(
         AudioToTextDataLayer(
@@ -590,6 +613,10 @@ def main(args):
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
             ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
 
+    if args.world_size > 1:
+        device_ids = None
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
+
     print_once(model)
     print_once("# parameters: {}".format(sum(p.numel() for p in model.parameters())))
     greedy_decoder = RNNTGreedyDecoder(len(ctc_vocab) - 1, model.module if multi_gpu else model)
@@ -639,7 +666,6 @@ def parse_args():
     parser.add_argument("--lr_decay", action="store_true", default=False, help='use learning rate decay')
     parser.add_argument("--lr_warmup", type=int, default=None, help='if provided, the learning rate will linearly scale for given number of iterations from zero')
     parser.add_argument("--cudnn", action="store_true", default=False, help="enable cudnn benchmark")
-    parser.add_argument("--fp16", action="store_true", default=False, help="use mixed precision training")
     parser.add_argument("--output_dir", type=str, required=True, help='saves results in this directory')
     parser.add_argument("--ckpt", default=None, type=str, help="if specified continues training from given checkpoint. Otherwise starts from beginning")
     parser.add_argument("--seed", default=42, type=int, help='seed')
@@ -651,9 +677,13 @@ def parse_args():
     parser.add_argument('--fp32', action='store_true', default=False, help='enable ipex fp32 path')
     parser.add_argument("--warmup", type=int, default=0, help='if provided, will warm up steps. Only measure the performance from step=warmup')
     parser.add_argument("--profiling", action='store_true', help='do profiling', default=False)
+    parser.add_argument("--world_size", default=1, type=int, help='world size')
+    parser.add_argument("--master_addr", default='127.0.0.1', type=str, help='Master Addr')
+    parser.add_argument("--port", default='29500', type=str, help='Port')
+    parser.add_argument("--rank", default=0, type=int, help='rank')
+    parser.add_argument('--backend', default='gloo', type=str, help='DDP backend, default to gloo')
     args=parser.parse_args()
     return args
-
 
 if __name__=="__main__":
     args = parse_args()

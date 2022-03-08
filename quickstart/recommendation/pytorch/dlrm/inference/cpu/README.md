@@ -65,8 +65,8 @@ scripts will automatically use the preprocessed data.
 
 | Script name | Description |
 |-------------|-------------|
-| `bare_metal_performance.sh` | Run inference to verify performance for the specified precision (fp32, int8, avx-int8, or bf16). |
-| `bare_metal_accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, int8, avx-int8, or bf16). |
+| `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, avx-fp32, int8, avx-int8, or bf16). |
+| `accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, avx-fp32, int8, avx-int8, or bf16). |
 
 ## Run the model
 
@@ -97,7 +97,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 # Run a quickstart script (for example, bare metal performance)
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
-bash bare_metal_performance.sh
+bash inference_performance.sh
 ```
 
 <!--- 80. License -->

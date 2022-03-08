@@ -38,12 +38,20 @@ if [ ! -d "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
+if [[ "$1" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 ARGS=""
 if [ "$1" == "bf16" ]; then
     ARGS="$ARGS --autocast"
     echo "### running bf16 datatype"
-else
+elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
+else
+    echo "The specified precision '$1' is unsupported."
+    echo "Supported precisions are: fp32, avx-fp32, and bf16"
+    exit 1
 fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
@@ -52,20 +60,19 @@ TOTAL_CORES=`expr $CORES \* $SOCKETS`
 
 CORES_PER_INSTANCE=$CORES
 
-
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
+PRECISION=$1
 BATCH_SIZE=100
 
-rm -rf ${OUTPUT_DIR}/train_throughput_log*
+rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
-    --ninstances 1 \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
+    --throughput_mode \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/training/cpu/train.py \
     --epochs 70 \
     --warmup-factor 0 \
@@ -79,12 +86,12 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --performance_only \
     -w 20 \
     -iter 1000 \
-    $ARGS 2>&1 | tee ${OUTPUT_DIR}/train_throughput_log.txt
+    $ARGS 2>&1 | tee ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput.log
 
 # For the summary of results
 wait
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/train_throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
 i = 0;

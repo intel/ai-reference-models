@@ -34,6 +34,9 @@ class ModelInitializer(BaseModelInitializer):
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
 
+        # Parse custom arguments and append to self.args
+        self.parse_args()
+
         # Set the num_inter_threads and num_intra_threads
         self.set_num_inter_intra_threads()
 
@@ -44,6 +47,7 @@ class ModelInitializer(BaseModelInitializer):
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
+        self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
     def parse_args(self):
         parser = argparse.ArgumentParser()
@@ -69,6 +73,10 @@ class ModelInitializer(BaseModelInitializer):
             "--calibration-only",
             help="Calibrate the accuracy.",
             dest="calibration_only", action="store_true")
+        parser.add_argument(
+            '--kmp-blocktime', dest='kmp_blocktime',
+            help='number of kmp block time',
+            type=int, default=1)
 
         self.args = parser.parse_args(self.custom_args,
                                       namespace=self.args)
@@ -113,8 +121,7 @@ class ModelInitializer(BaseModelInitializer):
         self.run_command(cmd)
 
     def run(self):
-        # Parse custom arguments and append to self.args
-        self.parse_args()
+
         if self.args.accuracy_only and self.args.calibration_only:
             self.run_calibration()
         else:

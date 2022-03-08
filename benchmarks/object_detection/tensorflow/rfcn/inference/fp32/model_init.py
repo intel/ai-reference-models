@@ -80,7 +80,8 @@ class ModelInitializer(BaseModelInitializer):
         command = []
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
-        if self.args.socket_id != -1:
+        num_numas = self.platform_util.num_numa_nodes
+        if self.args.socket_id != -1 and num_numas > 0:
             command.append("numactl")
             if self.args.socket_id:
                 socket_id = self.args.socket_id
@@ -118,7 +119,7 @@ class ModelInitializer(BaseModelInitializer):
         if not os.path.exists(self.accuracy_script_path):
             raise ValueError("Unable to locate the R-FCN accuracy script: "
                              "{}".format(self.accuracy_script_path))
-        command = "FROZEN_GRAPH=" + self.args.input_graph
+        os.environ["FROZEN_GRAPH"] = "{}".format(self.args.input_graph)
 
         if self.args.data_location and os.path.exists(
                 self.args.data_location):
@@ -132,27 +133,32 @@ class ModelInitializer(BaseModelInitializer):
                     print("ERROR: No TF records files were found in "
                           "the data location: {}".format(self.args.data_location))
                     sys.exit(1)
-                command += " TF_RECORD_FILES=" + ",".join(tf_records_files)
+                os.environ["TF_RECORD_FILES"] = ",".join(tf_records_files)
             else:
                 # Single TF record file
-                command += " TF_RECORD_FILES=" + self.args.data_location
+                os.environ["TF_RECORD_FILES"] = "{}".format(self.args.data_location)
         else:
             raise ValueError(
                 "Unable to locate the coco data record file at {}".format(
                     self.args.tf_record_file))
 
         if self.args.split:
-            command += " SPLIT=" + self.args.split
+            os.environ["SPLIT"] = "{}".format(self.args.split)
         else:
             raise ValueError("Must specify SPLIT parameter")
 
-        command += " TF_MODELS_ROOT={}".format(
-            self.args.model_source_dir)
+        os.environ["TF_MODELS_ROOT"] = "{}".format(self.args.model_source_dir)
 
-        command += " " + self.accuracy_script_path
+        command = "bash {}".format(self.accuracy_script_path)
         self.run_command(command)
 
     def run(self):
+        # TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
+        # We already do the OS check there to see if it's one that we support.
+        if os.environ.get('OS', '') == 'Windows_NT':
+            os.environ["PYTHONPATH"] = "{};{};{}".format(
+                self.research_dir, os.path.join(self.research_dir, "slim"),
+                os.environ["PYTHONPATH"])
         original_dir = os.getcwd()
         os.chdir(self.research_dir)
         if self.args.accuracy_only:

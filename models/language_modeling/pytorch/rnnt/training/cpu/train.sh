@@ -74,10 +74,9 @@ elif [ "$1" = "fp32" ] ; then
     PREC="--fp32"
     precision="fp32"
     echo "### running fp32 datatype"
-fi
-
-if [ "$PRECISION" = "fp16" ] ; then
-  PREC="--fp16"
+else
+    echo "The specified precision '${1}' is unsupported."
+    echo "Supported precisions now are: fp32 and bf16"
 fi
 
 IPEX="--ipex"
@@ -98,7 +97,6 @@ fi
 CMD=" --batch_size=$BATCH_SIZE"
 CMD+=" --eval_batch_size=$EVAL_BATCH_SIZE"
 CMD+=" --num_epochs=$EPOCHS"
-# CMD+=" --num_steps=250"
 CMD+=" --output_dir=$RESULT_DIR"
 CMD+=" --model_toml=$MODEL_CONFIG"
 CMD+=" --lr=$LEARNING_RATE"
@@ -107,7 +105,7 @@ CMD+=" --seed=$SEED"
 CMD+=" --optimizer=adam"
 CMD+=" --dataset_dir=$DATASET_DIR/dataset/LibriSpeech"
 CMD+=" --val_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-dev-clean-wav.json"
-CMD+=" --train_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json"
+CMD+=" --train_manifest=$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-100-wav.json,$DATASET_DIR/dataset/LibriSpeech/librispeech-train-clean-360-wav.json,$DATASET_DIR/dataset/LibriSpeech/librispeech-train-other-500-wav.json"
 CMD+=" --weight_decay=1e-3"
 CMD+=" --save_freq=100"
 CMD+=" --eval_freq=1"
@@ -119,6 +117,13 @@ CMD+=" $PREC"
 CMD+=" $IPEX"
 CMD+=" --warmup=$WARMUP"
 CMD+=" $PROFILE"
+# TODO: FP32 is still under development. For current validation,
+# in FP32, it only runs 100 iterations. NUM_STEPS is disabled in FP32.
+if [ "$1" = "fp32" ] ; then
+    CMD+=" --num_steps=100"
+elif [[ ! -z "${NUM_STEPS}" ]]; then
+    CMD+=" --num_steps=$NUM_STEPS"
+fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
@@ -129,8 +134,10 @@ rm -rf ${OUTPUT_DIR}/throughput_log*
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --throughput_mode \
+    --log_path=${OUTPUT_DIR} \
+    --log_file_prefix="./throughput_log_${precision}" \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py \
-    $CMD 2>&1 | tee ${OUTPUT_DIR}/throughput_log.txt
+    $CMD
 
 # For the summary of results
 wait

@@ -1,0 +1,63 @@
+From 6a279995b89f8b15fe6c6b345886fb11f2f52642 Mon Sep 17 00:00:00 2001
+From: ltsai1 <louie.tsai@intel.com>
+Date: Wed, 2 Dec 2020 20:41:39 -0800
+Subject: [PATCH] inceptionv3 fp32 TF timeline
+
+---
+ .../fp32/eval_image_classifier_inference.py   | 19 +++++++++++++++++--
+ 1 file changed, 17 insertions(+), 2 deletions(-)
+
+diff --git a/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py b/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py
+index 65e0423f..6a48e9d2 100644
+--- a/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py
++++ b/models/image_recognition/tensorflow/inceptionv3/fp32/eval_image_classifier_inference.py
+@@ -32,6 +32,11 @@ OUTPUTS = 'predict'
+ 
+ INCEPTION_V3_IMAGE_SIZE = 299
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ 
+ class eval_classifier_optimized_graph:
+   """Evaluate image classifier with optimized TensorFlow graph"""
+@@ -107,6 +112,11 @@ class eval_classifier_optimized_graph:
+     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
+     infer_config.use_per_session_threads = 1
+ 
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config('inceptionv3 infer fp32')
++    infer_many_runs_timeline = TimeLiner()
++    infer_run_metadata = tf.compat.v1.RunMetadata()
++
+     data_graph = tf.Graph()
+     with data_graph.as_default():
+       if (self.args.data_location):
+@@ -137,8 +147,11 @@ class eval_classifier_optimized_graph:
+     input_tensor = infer_graph.get_tensor_by_name('input:0')
+     output_tensor = infer_graph.get_tensor_by_name('predict:0')
+ 
+-    data_sess  = tf.compat.v1.Session(graph=data_graph,  config=data_config)
+-    infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)
++    data_sess = tfSession(graph=data_graph,  config=data_config,
++        run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
++    infer_sess = tfSession(graph=infer_graph, config=infer_config,
++        run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
++
+ 
+     num_processed_images = 0
+     num_remaining_images = datasets.IMAGENET_NUM_VAL_IMAGES
+@@ -179,6 +192,8 @@ class eval_classifier_optimized_graph:
+         print('Latency: %.3f ms' % (time_average * 1000))
+ 
+       print('Throughput: %.3f images/sec' % (self.args.batch_size / time_average))
++      print("json_fname : ",config.json_fname)
++      infer_many_runs_timeline.save(config.json_fname)
+ 
+     else:  # accuracy check
+       total_accuracy1, total_accuracy5 = (0.0, 0.0)
+-- 
+2.22.1
+

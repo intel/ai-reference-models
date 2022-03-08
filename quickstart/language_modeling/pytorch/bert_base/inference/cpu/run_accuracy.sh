@@ -64,3 +64,4 @@ f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.
 echo ""BERT-base";"exact_match";${precision};${BATCH_SIZE};${match}" | tee -a ${WORK_SPACE}/summary.log
 echo ""BERT-base";"f1";${precision};${BATCH_SIZE};${f1}" | tee -a ${WORK_SPACE}/summary.log
 
+

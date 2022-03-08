@@ -40,6 +40,11 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
     model.eval()
     results_dict = {}
     cpu_device = torch.device("cpu")
+    steps_per_epoch = len(data_loader)
+    iter_warmup = max(0, iter_warmup)
+    total_steps = (iterations if iterations > 0 else steps_per_epoch) + iter_warmup
+    test_epoches = int(total_steps / steps_per_epoch)
+    print('Evaluating MaskRCNN: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
 
     model = model.to(memory_format=torch.channels_last)
     model.backbone = ipex.optimize(model.backbone, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
@@ -60,36 +65,29 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
         # Inference
         print("runing inference step")
         with torch.autograd.profiler.profile(enable_profiling) as prof:
-            for i, batch in enumerate(tqdm(data_loader)):
-                # warm-up step
-                if iter_warmup > 0 and i < iter_warmup:
-                    images, targets, image_ids = batch
-                    if bbox_aug:
-                        output = im_detect_bbox_aug(model, images, device)
-                    else:
-                        output = model(images.to(memory_format=torch.channels_last))
-                    output = [o.to(cpu_device) for o in output]
-                    results_dict.update(
-                        {img_id: result for img_id, result in zip(image_ids, output)}
-                    )
-                    continue
-                images, targets, image_ids = batch
-                if timer:
-                    timer.tic()
-                if bbox_aug:
-                    output = im_detect_bbox_aug(model, images, device)
-                else:
-                    output = model(images.to(memory_format=torch.channels_last))
-                if timer:
-                    if not device.type == 'cpu':
-                        torch.cuda.synchronize()
-                    timer.toc()
-                output = [o.to(cpu_device) for o in output]
-                results_dict.update(
-                    {img_id: result for img_id, result in zip(image_ids, output)}
-                )
-                if i == iterations + iter_warmup - 1:
-                    break
+            with tqdm(total=total_steps, desc="Evaluating") as pbar:
+                for epoch in range(test_epoches + 1):
+                    for i, batch in enumerate(data_loader):
+                        if epoch * steps_per_epoch + i >= total_steps:
+                            break
+                        images, targets, image_ids = batch
+                        images = images.to(memory_format=torch.channels_last)
+                        
+                        if bf16:
+                            images = images.to(torch.bfloat16)
+                        if timer and epoch * steps_per_epoch + i >= iter_warmup:
+                            timer.tic()
+                        if bbox_aug:
+                            output = im_detect_bbox_aug(model, images, device)
+                        else:
+                            output = model(images)
+                        if timer and epoch * steps_per_epoch + i >= iter_warmup:
+                            timer.toc()
+                        output = [o.to(cpu_device) for o in output]
+                        results_dict.update(
+                            {img_id: result for img_id, result in zip(image_ids, output)}
+                        )
+                        pbar.update(1)
         if enable_profiling:
             print(prof.key_averages().table(sort_by="self_cpu_time_total"))
     return results_dict
@@ -151,7 +149,7 @@ def inference(
     total_time_str = get_time_str(total_time)
 
     if iterations == -1:
-        iterations = len(dataset)
+        iterations = len(data_loader)
 
     logger.info(
         "Total run time: {} ({} s / iter per device, on {} devices)".format(

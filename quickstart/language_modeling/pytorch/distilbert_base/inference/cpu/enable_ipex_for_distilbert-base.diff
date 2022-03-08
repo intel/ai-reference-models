@@ -32,7 +32,7 @@ index cad46c5c2..7c3b1744f 100755
          max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
          metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
 diff --git a/examples/pytorch/question-answering/trainer_qa.py b/examples/pytorch/question-answering/trainer_qa.py
-index 7f98eba23..96887b25e 100644
+index 7f98eba23..934520e96 100644
 --- a/examples/pytorch/question-answering/trainer_qa.py
 +++ b/examples/pytorch/question-answering/trainer_qa.py
 @@ -15,6 +15,12 @@
@@ -229,6 +229,20 @@ index 7f98eba23..96887b25e 100644
  
          if self.post_process_function is not None and self.compute_metrics is not None:
              eval_preds = self.post_process_function(eval_examples, eval_dataset, output.predictions)
+diff --git a/examples/pytorch/question-answering/utils_qa.py b/examples/pytorch/question-answering/utils_qa.py
+index 1157849c9..0bdd947a9 100644
+--- a/examples/pytorch/question-answering/utils_qa.py
++++ b/examples/pytorch/question-answering/utils_qa.py
+@@ -135,7 +135,9 @@ def postprocess_qa_predictions(
+                         start_index >= len(offset_mapping)
+                         or end_index >= len(offset_mapping)
+                         or offset_mapping[start_index] is None
++                        or len(offset_mapping[start_index]) < 2
+                         or offset_mapping[end_index] is None
++                        or len(offset_mapping[end_index]) < 2
+                     ):
+                         continue
+                     # Don't consider answers with a length that is either < 0 or > max_answer_length.
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
 index f59cec776..b2dc9bfc4 100755
 --- a/src/transformers/trainer.py

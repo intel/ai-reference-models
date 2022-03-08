@@ -154,6 +154,7 @@ class AudioToTextDataLayer:
         trim_silence = kwargs.get('trim_silence', False)
         multi_gpu = kwargs.get('multi_gpu', False)
         sampler_type = kwargs.get('sampler', 'default')
+        cpu_distributed_training = kwargs.get('cpu_distributed_training', False)
         speed_perturbation = featurizer_config.get('speed_perturbation', False)
         sort_by_duration=sampler_type == 'bucket'
         self._featurizer = WaveformFeaturizer.from_config(featurizer_config, perturbation_configs=perturb_config)
@@ -171,6 +172,9 @@ class AudioToTextDataLayer:
 
         if not multi_gpu:
             self.sampler = None
+            if cpu_distributed_training:
+                self.sampler = torch.utils.data.distributed.DistributedSampler(self._dataset)
+            print("DDSampler in CPU")
             self._dataloader = torch.utils.data.DataLoader(
                 dataset=self._dataset,
                 batch_size=batch_size,

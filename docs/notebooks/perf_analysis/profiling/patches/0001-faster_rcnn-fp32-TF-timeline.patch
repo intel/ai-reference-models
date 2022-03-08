@@ -1,0 +1,54 @@
+From dc6f34a3a788be69bc24bd5a90a5e14e261a8420 Mon Sep 17 00:00:00 2001
+From: yhu5 <ying.hu@intel.com>
+Date: Thu, 17 Dec 2020 01:10:51 +0800
+Subject: [PATCH] faster_rcnn fp32 TF timeline
+
+---
+ .../faster_rcnn/inference/fp32/eval_util.py     | 17 ++++++++++++++---
+ 1 file changed, 14 insertions(+), 3 deletions(-)
+
+diff --git a/models/object_detection/tensorflow/faster_rcnn/inference/fp32/eval_util.py b/models/object_detection/tensorflow/faster_rcnn/inference/fp32/eval_util.py
+index 7c15e520..4f70c5e0 100644
+--- a/models/object_detection/tensorflow/faster_rcnn/inference/fp32/eval_util.py
++++ b/models/object_detection/tensorflow/faster_rcnn/inference/fp32/eval_util.py
+@@ -51,7 +51,10 @@ from object_detection.utils import ops
+ from object_detection.utils import visualization_utils as vis_utils
+ 
+ slim = tf.contrib.slim
+-
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
+ 
+ def write_metrics(metrics, global_step, summary_dir):
+   """Write metrics to a summary directory.
+@@ -279,8 +282,14 @@ def _run_checkpoint_once(tensor_dict,
+   if save_graph and not save_graph_dir:
+     raise ValueError('`save_graph_dir` must be defined.')
+   config = tf.ConfigProto(inter_op_parallelism_threads=inter_op,
+-                          intra_op_parallelism_threads=intra_op)  
+-  sess = tf.Session(master, graph=tf.get_default_graph(), config=config)
++                          intra_op_parallelism_threads=intra_op)
++                          
++  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  configf.read_config("faster_rcnn infer fp32")
++  infer_many_runs_timeline = TimeLiner()
++  infer_run_metadata = tf.compat.v1.RunMetadata() 
++  num_batches = 100
++  sess = tfSession(master, graph=tf.get_default_graph(), config=config,run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
+   sess.run(tf.global_variables_initializer())
+   sess.run(tf.local_variables_initializer())
+   sess.run(tf.tables_initializer())
+@@ -353,6 +362,8 @@ def _run_checkpoint_once(tensor_dict,
+ 
+       for key, value in iter(aggregate_result_losses_dict.items()):
+         all_evaluator_metrics['Losses/' + key] = np.mean(value)
++  print("json_fname : ",configf.json_fname)
++  infer_many_runs_timeline.save(configf.json_fname)
+   sess.close()
+   return (global_step, all_evaluator_metrics)
+ 
+-- 
+2.22.1
+

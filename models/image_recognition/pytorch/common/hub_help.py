@@ -30,7 +30,7 @@ def main():
     args = parser.parse_args()
 
     torch.hub._validate_not_a_forked_repo=lambda a,b,c: True
-    hub_model_names = torch.hub.list('facebookresearch/semi-supervised-ImageNet1K-models')
+    hub_model_names = torch.hub.list('facebookresearch/WSL-Images')
 
     state_dict = load_state_dict_from_url(args.url, progress=True)
 

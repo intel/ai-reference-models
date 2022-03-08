@@ -92,7 +92,12 @@
   { "_comment": "resnet50v1_5_bfloat16_online_inference_cpuset",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision bfloat16 --mode inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --model-name resnet50v1_5 --batch-size=1 --data-location=/dataset --in-graph=resnet50v1_5.pb",
     "output": "python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=resnet50v1_5.pb --num-inter-threads=1 --num-intra-threads=16 --num-cores=28 --batch-size=1 --warmup-steps=10 --steps=50 --data-location=/dataset",
-    "cpuset": "2-17"}
+    "cpuset": "2-17"},
+
+  { "_comment": "resnet50v1_5_int8_multi_instance_online_inference",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=int8 --mode=inference --intelai-models=/workspace/intelai_models --batch-size 1 --numa-cores-per-instance 4 --in-graph=/in_graph/resnet50v1_5_int8_pretrained_model.pb --benchmark-only -- warmup_steps=50 steps=1500",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50v1_5_int8_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=4 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4",
+    "cpuset": "0-111"}
 ]
 
 

@@ -229,6 +229,20 @@ index 7f98eba23..96887b25e 100644
  
          if self.post_process_function is not None and self.compute_metrics is not None:
              eval_preds = self.post_process_function(eval_examples, eval_dataset, output.predictions)
+diff --git a/examples/pytorch/question-answering/utils_qa.py b/examples/pytorch/question-answering/utils_qa.py
+index 1157849c9..0bdd947a9 100644
+--- a/examples/pytorch/question-answering/utils_qa.py
++++ b/examples/pytorch/question-answering/utils_qa.py
+@@ -135,7 +135,9 @@ def postprocess_qa_predictions(
+                         start_index >= len(offset_mapping)
+                         or end_index >= len(offset_mapping)
+                         or offset_mapping[start_index] is None
++                        or len(offset_mapping[start_index]) < 2
+                         or offset_mapping[end_index] is None
++                        or len(offset_mapping[end_index]) < 2
+                     ):
+                         continue
+                     # Don't consider answers with a length that is either < 0 or > max_answer_length.
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
 index f59cec776..b2dc9bfc4 100755
 --- a/src/transformers/trainer.py

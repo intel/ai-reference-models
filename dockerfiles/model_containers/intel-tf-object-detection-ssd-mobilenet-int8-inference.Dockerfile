@@ -86,6 +86,8 @@ RUN cd ${TF_MODELS_DIR}/research && \
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
+RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="ssd-mobilenet-int8-inference"
