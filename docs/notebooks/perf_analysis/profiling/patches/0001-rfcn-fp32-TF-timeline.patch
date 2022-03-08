@@ -1,0 +1,81 @@
+From 8fa2ce98337f26ac4b752beb180b2781fc9d3afb Mon Sep 17 00:00:00 2001
+From: yhu5 <ying.hu@intel.com>
+Date: Fri, 18 Dec 2020 01:20:11 +0800
+Subject: [PATCH] rfcn fp32 TF timeline
+
+---
+ .../rfcn/inference/fp32/run_rfcn_inference.py | 22 ++++++++++++++++---
+ 1 file changed, 19 insertions(+), 3 deletions(-)
+
+diff --git a/models/object_detection/tensorflow/rfcn/inference/fp32/run_rfcn_inference.py b/models/object_detection/tensorflow/rfcn/inference/fp32/run_rfcn_inference.py
+index 36e73d5c..e04641b5 100644
+--- a/models/object_detection/tensorflow/rfcn/inference/fp32/run_rfcn_inference.py
++++ b/models/object_detection/tensorflow/rfcn/inference/fp32/run_rfcn_inference.py
+@@ -22,6 +22,8 @@ import os
+ import six.moves.urllib as urllib
+ import sys
+ import tarfile
++os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"  
++os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+ import tensorflow as tf
+ import zipfile
+ import subprocess
+@@ -37,6 +39,12 @@ import argparse
+ from tensorflow.python.client import timeline
+ import importlib
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++print(sys.path)
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ class RFCNRunner:
+   '''Add code here to detect the environment and set necessary variables before launching the model'''
+   args=None
+@@ -126,11 +134,15 @@ class RFCNRunner:
+ 
+   def run(self):
+       self.log("Running performance test")
++      configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++      configf.read_config("rfcn infer fp32")
++      infer_many_runs_timeline = TimeLiner()
++      infer_run_metadata = tf.compat.v1.RunMetadata()
+       self.read_graph()
+       self.get_image_paths()
+       #self.load_label_map()
+       # Actual detection.
+-      output_dict, image_np = self.run_inference(self.detection_graph)
++      output_dict, image_np = self.run_inference(self.detection_graph, infer_run_metadata,infer_many_runs_timeline,configf)
+       self.visualize(output_dict, image_np)
+ 
+   def visualize(self, output_dict, image_np):
+@@ -188,12 +200,14 @@ class RFCNRunner:
+       return np.array(image.getdata()).reshape(
+           (im_height, im_width, 3)).astype(np.uint8)
+ 
+-  def run_inference(self,graph):
++  def run_inference(self,graph,infer_run_metadata,infer_many_runs_timeline,configf):
+     sess_config = tf.compat.v1.ConfigProto()
+     sess_config.intra_op_parallelism_threads = self.args.num_intra_threads
+     sess_config.inter_op_parallelism_threads = self.args.num_inter_threads
++    
+     with self.detection_graph.as_default():
+-      with tf.compat.v1.Session(config=sess_config) as sess:
++#      with tf.compat.v1.Session(config=sess_config) as sess:
++       with tfSession(config=sess_config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+         # Get handles to input and output tensors
+         tensor_dict = {}
+         if not self.args.evaluate_tensor:
+@@ -277,6 +291,8 @@ class RFCNRunner:
+ 
+           if 'detection_masks' in output_dict:
+             output_dict['detection_masks'] = output_dict['detection_masks'][0]
++        print("json_fname : ",configf.json_fname)
++        infer_many_runs_timeline.save(configf.json_fname)
+     return output_dict, image_np
+ 
+ if __name__ == "__main__":
+-- 
+2.25.1
+

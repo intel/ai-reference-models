@@ -9,35 +9,14 @@ Benchmark suits using Intel-optimized TensorFlow.
 
 Detailed information on mlperf Benchmark can be found in [mlperf/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
 
-The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modify the code of the model, so that it can achieve better performance on Intel CPUs. 
+The inference code is based on the transformer mlperf evaluation code, but Intel has optimized the inference model by modify the code of the model, so that it can achieve better performance on Intel CPUs. 
 The bfloat16 model is manually modfied by cast fp32 data type tensor to bfloat16 in the model, and we trained the modified model to reach the same or higher accuracy. The inference is based on the bfloat16 model we trained.
 
 <!--- 30. Datasets -->
 ## Datasets
 
-Decide the problem you want to run to get the appropriate dataset.
-We will need to download and generate necessary files from the training data as an example:
-
-Download dataset for computing BLEU score
-```
-export DATASET_DIR=/home/<user>/transformer_data
-mkdir $DATASET_DIR && cd $DATASET_DIR
-wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.en
-wget https://nlp.stanford.edu/projects/nmt/data/wmt14.en-de/newstest2014.de
-```
-
-For the training dataset, run the `data_download.py` script from the Model Zoo directory.
-The Model Zoo directory comes with [AI Kit](/docs/general/tensorflow/AIKit.md). If
-you are not using AI kit, you will need a clone of the Model Zoo repo.
-```
-export PYTHONPATH=$PYTHONPATH:<model zoo dir>/models/common/tensorflow
-export DATASET_DIR=/home/<user>/transformer_data
-
-cd <model zoo dir>/models/language_translation/tensorflow/transformer_mlperf/training/fp32/transformer
-python data_download.py --data_dir=$DATASET_DIR
-```
-
-Running `python data_download.py --data_dir=$DATASET_DIR` assumes you have a python environment similar to what the `intel/intel-optimized-tensorflow:ubuntu-18.04` container provides. One option would be to run the above within the `intel/intel-optimized-tensorflow:ubuntu-18.04` container eg: `docker run -u $(id -u):$(id -g) --privileged  --entrypoint /bin/bash -v /home/<user>:/home/<user> -it intel/intel-optimized-tensorflow:ubuntu-18.04`
+Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/transformer_data/README.md) to download and preprocess the WMT English-German dataset.
+Set `DATA_DIR` to point out to the location of the dataset directory.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts

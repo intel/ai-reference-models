@@ -26,6 +26,11 @@ from mlperf_compliance import mlperf_log
 class Attention(tf.compat.v1.layers.Layer):
   """Multi-headed attention layer."""
 
+  # set some variables to be static so that it can be computed only once, use 1.0 as initial
+  # value
+  rsqrtQ = 1.0
+  depth = 1
+
   def __init__(self, hidden_size, num_heads, attention_dropout, train):
     if hidden_size % num_heads != 0:
       raise ValueError("Hidden size must be evenly divisible by the number of "
@@ -53,6 +58,10 @@ class Attention(tf.compat.v1.layers.Layer):
           "num_heads": num_heads
         })
 
+    # Scale q to prevent the dot product between q and k from growing too large.
+    Attention.depth = (self.hidden_size // self.num_heads)
+    Attention.rsqrtQ = Attention.depth ** -0.5
+
   def split_heads(self, x):
     """Split x into different heads, and transpose the resulting value.
 
@@ -69,11 +78,8 @@ class Attention(tf.compat.v1.layers.Layer):
       batch_size = tf.shape(input=x)[0]
       length = tf.shape(input=x)[1]
 
-      # Calculate depth of last dimension after it has been split.
-      depth = (self.hidden_size // self.num_heads)
-
       # Split the last dimension
-      x = tf.reshape(x, [batch_size, length, self.num_heads, depth])
+      x = tf.reshape(x, [batch_size, length, self.num_heads, Attention.depth])
 
       # Transpose the result
       return tf.transpose(a=x, perm=[0, 2, 1, 3])
@@ -141,12 +147,11 @@ class Attention(tf.compat.v1.layers.Layer):
     v = self.split_heads(v)
 
     # Scale q to prevent the dot product between q and k from growing too large.
-    depth = (self.hidden_size // self.num_heads)
-    q *= depth ** -0.5
     # Calculate dot product attention
     with tf.compat.v1.tpu.bfloat16_scope():
-        logits = tf.matmul(q, k, transpose_b=True)
         bias = tf.cast(bias, tf.bfloat16)
+        logits = tf.matmul(q, k, transpose_b=True)
+        logits *= Attention.rsqrtQ
         logits += bias
         weights = tf.nn.softmax(logits, name="attention_weights")
         if self.train:
@@ -161,7 +166,6 @@ class Attention(tf.compat.v1.layers.Layer):
 
         # Run the combined outputs through another linear projection layer.
         attention_output = self.output_dense_layer(attention_output)
-#        attention_output = tf.cast(attention_output, tf.float32)
         return attention_output
 
 

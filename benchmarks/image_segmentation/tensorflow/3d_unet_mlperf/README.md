@@ -54,7 +54,7 @@ modes/precisions:
    Accuracy: mean = 0.85300, whole tumor = 0.9141, tumor core = 0.8679, enhancing tumor = 0.7770
    Done!
    ```
-   * Evaluate the model performance: Currently, for performance evaluation dummy data is used. The required parameters include: the pre-trained `3dunet_dynamic_ndhwc.pb` input graph file (from step 2) and the `--benchmark-only` flag. Optionally, you can also specify the number of `warmup-steps` and `steps` as shown in the example below. If these optional arguments are not specified, the script will use the default values `warup-steps=10` and `steps=50`.
+   * Evaluate the model performance: Currently, for performance evaluation dummy data is used. The required parameters include: the pre-trained `3dunet_dynamic_ndhwc.pb` input graph file (from step 2) and the `--benchmark-only` flag. Optionally, you can also specify the number of `warmup_steps` and `steps` as shown in the example below. If these optional arguments are not specified, the script will use the default values `warmup_steps=10` and `steps=50`.
    ```
    cd /home/<user>/models/benchmarks
 
@@ -68,8 +68,7 @@ modes/precisions:
       --benchmark-only \
       --docker-image intel/intel-optimized-tensorflow:latest \
       -- warmup_steps=20 steps=100
-   ```
-
+   ```  
    The tail of the log output when the performance run completes should look
    something like this:
    ```
@@ -85,6 +84,28 @@ modes/precisions:
 
    Note that the `--verbose` or `--output-dir` flag can be added to any of the above commands
    to get additional debug output or change the default output location.
+
+#### Run FP32 Inference on Windows
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
+Then, install the model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt` and `matplotlib`.
+
+Evaluate the model performance:
+Currently, for performance evaluation dummy data is used. The required parameters include: the pre-trained `3dunet_dynamic_ndhwc.pb` input graph file (from step 2) and the `--benchmark-only` flag.
+Optionally, you can also specify the number of `warmup_steps` and `steps` as shown in the example below.
+If these optional arguments are not specified, the script will use the default values `warmup_steps=10` and `steps=50`.
+
+Using `cmd.exe`, run:
+```
+python launch_benchmark.py ^
+--in-graph <path to pretrained model>\\3dunet_dynamic_ndhwc.pb ^
+--model-name 3d_unet_mlperf ^
+--framework tensorflow ^
+--precision fp32 ^
+--mode inference ^
+--batch-size 1 ^
+--benchmark-only ^
+-- warmup_steps=20 steps=100
+```
 
 ## BFloat16 Inference Instructions
 (Experimental)

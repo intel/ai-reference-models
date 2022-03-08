@@ -250,12 +250,13 @@ def test_launch_benchmark_validate_model(launch_benchmark, mock_popen, platform_
     assert "docker" == args[0][0]
     assert "run" == args[0][1]
 
-
-def test_bare_metal(launch_benchmark, mock_popen, platform_mock):
+@pytest.mark.parametrize("os_type", [["Linux"],
+                                     ["Windows"]])
+def test_bare_metal(launch_benchmark, mock_popen, platform_mock, os_type):
     """ Tests the bare metal launch script function """
     platform_mock.return_value = platform_config.OS_TYPE
     test_env_vars = {"TEST_ENV_VAR_1": "a", "TEST_ENV_VAR_2": "b"}
-    launch_benchmark.run_bare_metal("/foo", "/bar", "/baz", test_env_vars)
+    launch_benchmark.run_bare_metal("/foo", "/bar", "/baz", test_env_vars, os_type=os_type)
     assert mock_popen.called
     args, kwargs = mock_popen.call_args
 
