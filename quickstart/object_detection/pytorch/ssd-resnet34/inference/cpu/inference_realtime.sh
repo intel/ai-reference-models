@@ -74,7 +74,13 @@ CORES_PER_INSTANCE=4
 
 INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
-weight_sharing=false
+weight_sharing=true
+if [ -z "${WEIGHT_SHAREING}" ]; then
+  weight_sharing=false
+else
+  echo "### Running the test with runtime extension."
+  weight_sharing=true
+fi
 
 if [ "$weight_sharing" = true ]; then
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
@@ -83,7 +89,7 @@ if [ "$weight_sharing" = true ]; then
     python -m intel_extension_for_pytorch.cpu.launch \
         --use_default_allocator \
         --ninstance ${SOCKETS} \
-        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_tb.py \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_weight_sharing.py \
         --data ${DATASET_DIR}/coco \
         --device 0 \
         --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
