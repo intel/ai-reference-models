@@ -1,9 +1,12 @@
 # Text Classifier fine tuning using IMDb with PyTorch
 
 This notebook demonstrates fine tuning [pretrained models from Hugging Face](https://huggingface.co/models)
-using the [IMDb Larget Movie Review dataset](https://ai.stanford.edu/~amaas/data/sentiment/) for sentiment
-analysis. The full dataset has 25,0000 training and 25,000 test examples, but this notebook uses a subset of
-the dataset for quicker training. The notebook uses
+using text classification datasets from the [Hugging Face Datasets catalog](https://huggingface.co/datasets) or
+a custom dataset. The [IMDb Larget Movie Review dataset](https://ai.stanford.edu/~amaas/data/sentiment/) is used
+from the Hugging Face Datasets catalog, and the [SMS Spam Collection dataset](https://archive-beta.ics.uci.edu/ml/datasets/sms+spam+collection)
+is used as an example of a custom dataset being loaded from a csv file.
+
+The notebook uses
 [Intel® Extension for PyTorch*](https://github.com/intel/intel-extension-for-pytorch) which extends PyTorch
 with optimizations for extra performance boost on Intel hardware.
 
@@ -73,6 +76,13 @@ Dataset Citation:
   publisher = {Association for Computational Linguistics},
   pages     = {142--150},
   url       = {http://www.aclweb.org/anthology/P11-1015}
+}
+
+@misc{misc_sms_spam_collection_228,
+  author       = {Almeida, Tiago},
+  title        = {{SMS Spam Collection}},
+  year         = {2012},
+  howpublished = {UCI Machine Learning Repository}
 }
 ```
 
