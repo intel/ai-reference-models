@@ -112,6 +112,13 @@ class ModelInitializer(BaseModelInitializer):
             self.bleucmd = ''
 
     def run(self):
+        # TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
+        # We already do the OS check there to see if it's one that we support.
+        if os.environ.get('OS', '') == 'Windows_NT':
+            os.environ["PYTHONPATH"] = "{};{}".format(
+                os.path.join(self.args.intelai_models, os.pardir,
+                             os.pardir, os.pardir, "common", "tensorflow"),
+                os.environ["PYTHONPATH"])
         original_dir = os.getcwd()
         print(self.cmd)
         self.run_command(self.cmd)

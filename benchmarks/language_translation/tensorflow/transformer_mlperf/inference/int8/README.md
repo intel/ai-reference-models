@@ -18,27 +18,26 @@ The qunatized model is generated with Intel [LPOT tool](https://github.com/intel
 Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/transformer_data/README.md) to download and preprocess the WMT English-German dataset.
 Set `DATA_DIR` to point out to the location of the dataset directory.
 
-<!--- 40. Quick Start Scripts -->
-## Quick Start Scripts
+## Run the model on Linux
 
-Transformer Language in mlperf benchmark can run with full training or
-fewer training steps. During training we can control if it will do the evaluation
-or not.
-
-## Run the model
-
-Before running inference, users should have the model fully trained and have saved checkpoints ready at the path $CHECKPOINT_DIR.
+Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `$CHECKPOINT_DIR`.
 In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
-To generate the frozen model, users need to run the following command in the tranformer model directory where export_transformer.py in:
-
+To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/int8/transformer/export_transformer.py) in:
 ```
 export PYTHONPATH=$PYTHONPATH:<PATH_TO_MODEL_ZOO_ROOT>/models/common/tensorflow
-
 python export_transformer.py --model_dir=<$CHECKPOINT_DIR> --pb_path=<frozen_graph_full_path>
 ```
 The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
 
-#### Benchmark mode run:
+
+Set the environment variables to point to the dataset directory `DATA_DIR`, the pretrained model path `PB_FILE`, batch size `BATCH_SIZE`, the number of sockets `NUM_SOCKETS`, and the number of cores on your system `NUM_CORES`.
+```
+export PB_FILE=<path to the frozen pre trained model file>
+export DATA_DIR=<the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768>
+export BATCH_SIZE=1
+export NUM_SOCKETS=2
+```
+#### Benchmark mode:
 ```
   python3 ./benchmarks/launch_benchmark.py    \
      --benchmark-only --framework tensorflow  \
@@ -58,7 +57,7 @@ The translate can be run with accuracy mode or benchmark mode. The benchmark mod
         warmup_steps=3 \
         steps=100 
 ```
-#### accuracy mode run:
+#### Accuracy mode:
 ```
   python3 ./benchmarks/launch_benchmark.py    \
      --accuracy-only --framework tensorflow  \
@@ -78,8 +77,6 @@ The translate can be run with accuracy mode or benchmark mode. The benchmark mod
         steps=100 
 ```
 where:
-   * $DATA_DIR -- the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768
-   * $PB_FILE  -- the path of the frozen model generated with the script
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than avaialable batches in the input data, it will only run number of batches available in the data.
 
 The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
@@ -93,5 +90,72 @@ something like this, the real throughput and inferencing time varies:
   Case-insensitive results: 26.664000749588013
   Case-sensitive results: 26.154428720474243
 
+```
 
+## Run the model on Windows
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
+
+Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `%CHECKPOINT_DIR%`.
+In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
+To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/int8/transformer/export_transformer.py) in.
+
+Using `cmd.exe`, run:
+```
+set PYTHONPATH=%PYTHONPATH%;<PATH_TO_MODEL_ZOO_ROOT>\models\common\tensorflow
+python export_transformer.py --model_dir=<%CHECKPOINT_DIR%> --pb_path=<frozen_graph_full_path>
+```
+The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run.
+The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
+
+Set the environment variables to point to the dataset directory `DATA_DIR`, the path to the pretrained model file `PB_FILE`, batch size `BATCH_SIZE`, and  the number of sockets `NUM_SOCKETS`.
+You can use `wmic cpu get SocketDesignation` to list the available socket on your system, then set `NUM_SOCKETS` accordingly.
+```
+set PB_FILE=<path to the directory where the frozen pre trained model file saved>\\transformer_mlperf_int8.pb
+set DATA_DIR=<the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768>
+set BATCH_SIZE=1
+set NUM_SOCKETS=2
+```
+#### Benchmark mode:
+Using `cmd.exe`, run:
+```
+  cd benchmarks
+  python launch_benchmark.py    ^
+     --benchmark-only --framework tensorflow  ^
+     --in-graph=%PB_FILE% ^
+     --model-name transformer_mlperf ^
+     --mode inference --precision int8 ^
+     --batch-size %BATCH_SIZE% ^
+     --num-intra-threads %NUMBER_OF_PROCESSORS% --num-inter-threads %NUM_SOCKETS% ^
+     --verbose ^
+     --data-location %DATA_DIR% ^
+     -- params=big ^
+        file=newstest2014.en ^
+        vocab_file=vocab.ende.32768 ^
+        file_out=translation.en ^
+        reference=newstest2014.de ^
+        warmup_steps=3 ^
+        steps=100 
+```
+#### Accuracy mode:
+Using `cmd.exe`, run:
+```
+  cd benchmarks
+  python launch_benchmark.py    ^
+     --accuracy-only --framework tensorflow  ^
+     --in-graph=%PB_FILE% ^
+     --model-name transformer_mlperf ^
+     --mode inference --precision int8 ^
+     --batch-size %BATCH_SIZE% ^
+     --num-intra-threads %NUMBER_OF_PROCESSORS% --num-inter-threads %NUM_SOCKETS% ^
+     --verbose ^
+     --data-location %DATA_DIR% ^
+     -- params=big ^
+        file=newstest2014.en ^
+        vocab_file=vocab.ende.32768 ^
+        file_out=translation.en ^
+        reference=newstest2014.de ^
+        steps=100 
+```
+where:
+   * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
