@@ -184,7 +184,7 @@ def translate_file(
     else:
       hooks = []
 
-    if FLAGS.steps is 0:
+    if FLAGS.steps == 0:
         hooks =[]
 
     num_warmup_sentences = FLAGS.warmup_steps * FLAGS.batch_size
