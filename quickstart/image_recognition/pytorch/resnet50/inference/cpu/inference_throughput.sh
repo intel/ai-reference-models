@@ -76,19 +76,61 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    --ninstance ${SOCKETS} \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
-    --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./resnet50_throughput_log_${PRECISION}" \
-    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
-    $ARGS \
-    --ipex \
-    --seed 2020 \
-    -j 0 \
-    -b $BATCH_SIZE
+weight_sharing=false
+if [ ${WEIGHT_SHAREING} ]; then
+  echo "Running RN50 inference throughput with runtime extension enabled."
+  weight_sharing=true
+fi
 
+if [ "$weight_sharing" = true ]; then
+    CORES=`lscpu | grep Core | awk '{print $4}'`
+    SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+    TOTAL_CORES=`expr $CORES \* $SOCKETS`
+    CORES_PER_INSTANCE=$CORES
+    INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
+    LAST_INSTANCE=`expr $INSTANCES - 1`
+    INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
+
+    BATCH_PER_STREAM=2
+    CORES_PER_STREAM=1
+    STREAM_PER_INSTANCE=`expr $CORES / $CORES_PER_STREAM`
+    BATCH_SIZE=`expr $BATCH_PER_STREAM \* $STREAM_PER_INSTANCE`
+
+    export OMP_NUM_THREADS=$CORES_PER_STREAM
+
+    for i in $(seq 0 $LAST_INSTANCE); do
+        numa_node_i=`expr $i / $INSTANCES_PER_SOCKET`
+        start_core_i=`expr $i \* $CORES_PER_INSTANCE`
+        end_core_i=`expr $start_core_i + $CORES_PER_INSTANCE - 1`
+        LOG_i=resnet50_throughput_log_${PRECISION}_${i}.log
+        echo "### running on instance $i, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
+        numactl --membind=$numa_node_i python -u \
+            ${MODEL_DIR}/models/image_recognition/pytorch/common/main_runtime_extension.py \
+            $ARGS \
+            --ipex \
+            --seed 2020 \
+            -j 0 \
+            -b $BATCH_SIZE \
+            --number-instance $STREAM_PER_INSTANCE \
+            --use-multi-stream-module \
+            --instance-number $i 2>&1 | tee $LOG_i &
+    done
+    wait
+
+else
+    python -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator \
+        --ninstance ${SOCKETS} \
+        --ncore_per_instance ${CORES_PER_INSTANCE} \
+        --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnet50_throughput_log_${PRECISION}" \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+        $ARGS \
+        --ipex \
+        --seed 2020 \
+        -j 0 \
+        -b $BATCH_SIZE
+fi
 wait
 
 throughput=$(grep 'Throughput:'  ${OUTPUT_DIR}/resnet50_throughput_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '

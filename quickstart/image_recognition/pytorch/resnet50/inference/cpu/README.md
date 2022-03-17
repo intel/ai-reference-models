@@ -98,6 +98,8 @@ imagenet
 The folder that contains the `val` directory should be set as the
 `DATASET_DIR` (for example: `export DATASET_DIR=/home/<user>/imagenet`).
 
+**Note:** If you don't run `accuracy.sh`, you don't need to set the environment variable `DATASET_DIR`. Performance is measured with dummy data.
+
 ## Docker
 
 Make sure, you have all the requirements pre-setup in your Container as the [Bare Metal](#bare-metal) Setup section.

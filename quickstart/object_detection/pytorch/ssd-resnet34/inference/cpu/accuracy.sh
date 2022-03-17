@@ -67,9 +67,19 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 rm -rf ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_accuracy*
 
 PRECISION=$1
-weight_sharing=false
+weight_sharing=true
+if [ -z "${WEIGHT_SHAREING}" ]; then
+  weight_sharing=false
+else
+  echo "### Running the test with runtime extension."
+  weight_sharing=true
+fi
 
 if [ "$weight_sharing" = true ]; then
+    async=true
+    if [ "$async" = true ]; then
+       ARGS="$ARGS --async-execution"
+    fi
     CORES=`lscpu | grep Core | awk '{print $4}'`
     SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
     TOTAL_CORES=`expr $CORES \* $SOCKETS`
@@ -91,7 +101,7 @@ if [ "$weight_sharing" = true ]; then
 
     echo "### running on instance 0, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
     numactl --physcpubind=$start_core_i-$end_core_i --membind=$numa_node_i python -u \
-        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_tb.py \
+        ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_weight_sharing.py \
         --data ${DATASET_DIR}/coco \
         --device 0 \
         --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
@@ -102,6 +112,7 @@ if [ "$weight_sharing" = true ]; then
         --number-instance $STREAM_PER_INSTANCE \
         --use-multi-stream-module \
         --instance-number 0 \
+        --accuracy-mode \
         $ARGS 2>&1 | tee ${OUTPUT_DIR}/ssdresnet34_${PRECISION}_inference_accuracy.log
     wait
 else
