@@ -1,5 +1,5 @@
 From dc7ecb0ad119afcec616ee5b25f7f450507aaa52 Mon Sep 17 00:00:00 2001
-From: "louie.tsai" <ltsai1@mlp-ra-skx-05.ra.intel.com>
+From: "louie.tsai" <ltsai1@my-skx-server.intel.com>
 Date: Fri, 26 Mar 2021 11:55:08 -0700
 Subject: [PATCH] resnet50v1_5 fp32 TF timeline
 

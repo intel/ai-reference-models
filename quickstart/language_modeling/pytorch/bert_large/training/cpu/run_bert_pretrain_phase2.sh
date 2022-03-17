@@ -40,7 +40,6 @@ else
     echo "Supported precisions are: fp32, avx-fp32, bf16"
     exit 1
 fi
-#this is the path of model and enwiki-20200101 on mlp-sdp-spr-4150 machine 
 #you can also refer to https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert
 PRETRAINED_MODEL=${PRETRAINED_MODEL:-~/dataset/checkpoint/}
 DATASET_DIR=${DATASET_DIR:-~/dataset/}
