@@ -42,6 +42,36 @@ if os.environ.get('USE_IPEX') == "1":
     import intel_extension_for_pytorch as ipex
     use_ipex = True
 
+def get_bs_per_stream(batch_size, stream_number):
+    # Follow the logic of multi stream module
+    result = []
+    batch_per_instance = batch_size // stream_number
+
+    if batch_per_instance >= 1:
+        # The input batchsize larger or equal to num_streams.
+        used_num_streams = stream_number
+        # If input batchsize larger than num_streams and not divisible,
+        # the first remainder streams will have (mini_batch + 1) input size.
+        instance_need_extra_input = batch_size % stream_number
+    else:
+        # The input batchsize less than num_streams,
+        # only the first batchsize stream will have mini_batch(1) input.
+        batch_per_instance = 1
+        used_num_streams = batch_size
+        instance_need_extra_input = 0
+    start_idx = 0
+    end_idx = 0
+    for j in range(used_num_streams):
+        if j < instance_need_extra_input:
+            # Tail case, when the input image size larger than num_streams and not divisible,
+            # the first remainder streams will have (mini_batch + 1) input size.
+            end_idx = end_idx + (batch_per_instance + 1)
+        else:
+            # Input image size divisible of num_streams or input image size less than num_streams.
+            end_idx = end_idx + batch_per_instance
+        result.append(end_idx-start_idx)
+        start_idx = end_idx
+    return result
 
 def parse_args():
     parser = ArgumentParser(description="Train Single Shot MultiBox Detector"
@@ -103,6 +133,8 @@ def parse_args():
                     help='the start core to creat cpu pool')
     parser.add_argument('--end-core', default=-1, type=int,
                     help='the end core to creat cpu pool')
+    parser.add_argument('--accuracy-mode', action='store_true', default=False,
+                        help='enable accuracy mode')
     return parser.parse_args()
 
 
@@ -182,15 +214,20 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
     use_cuda = not args.no_cuda and torch.cuda.is_available()
     model.eval()
 
+    if args.accuracy_mode:
+        if args.iteration is not None:
+            print("accuracy mode should not input iteration")
+        epoch_number = 1
+    else:
+        if args.iteration is None:
+            print("None accuracy mode must input --iteration")
+            exit(-1)
+        epoch_number = (args.iteration // len(val_dataloader) + 1) if (args.iteration > len(val_dataloader)) else 1
+
     ret = []
 
     inference_time = AverageMeter('InferenceTime', ':6.3f')
     decoding_time = AverageMeter('DecodingTime', ':6.3f')
-
-    progress = ProgressMeter(
-        args.iteration if args.dummy else len(val_dataloader),
-        [inference_time, decoding_time],
-        prefix='Test: ')
 
     Profilling_iterator = 99
     start = time.time()
@@ -233,6 +270,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
 
                     print('runing int8 real inputs inference use_throughput_benchmark path')
                     bench = ThroughputBenchmark(model_decode)
+                    if args.iteration > len(val_dataloader):
+                        print("Using ThroughputBenchmark, but args.iteration:{0} larger than len(val_dataloader):{1}".format(args.iteration, len(val_dataloader)))
+                        exit(-1)
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         #bench.add_input(img.to(memory_format=torch.channels_last))
                         bench.add_input(img.to(memory_format=torch.channels_last))
@@ -265,66 +305,78 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                             exit(-1)
                         model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                     time_consume = 0
-                    for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
-                        img = img.to(memory_format=torch.channels_last)
-                        if nbatch > args.warmup_iterations:
-                            start_time=time.time()
-                        result_raw = model_decode(img)
-                        if nbatch > args.warmup_iterations:
-                            step_time = time.time() - start_time
-                            print("time of step {0} is: {1}".format(nbatch, step_time))
-                            time_consume += step_time
+                    total_iteration = 0
+                    for _ in range(epoch_number):
+                        for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                            img = img.to(memory_format=torch.channels_last)
+                            if total_iteration >= args.warmup_iterations:
+                                start_time=time.time()
+                            result_raw = model_decode(img)
+                            if total_iteration >= args.warmup_iterations:
+                                step_time = time.time() - start_time
+                                print("time of step {0} is: {1}".format(total_iteration, step_time))
+                                time_consume += step_time
 
-                        results = []
-                        idx = 0
-                        if args.async_execution:
-                            for i in range(img.size(0)//batch_per_stream):
-                                results.append((result_raw[i][0],
-                                                result_raw[i][1],
-                                                result_raw[i][2]))
-                                idx += result_raw[i][3]
-                        else:
-                            for i in range(result_raw[3].size(0)):
-                                results.append((result_raw[0][idx:idx+result_raw[3][i]],
-                                                result_raw[1][idx:idx+result_raw[3][i]],
-                                                result_raw[2][idx:idx+result_raw[3][i]]))
-                                idx += result_raw[3][i]
-                        (htot, wtot) = [d.cpu().numpy() for d in img_size]
-                        img_id = img_id.cpu().numpy()
-                        # Iterate over batch elements
-                        for img_id_, wtot_, htot_, result in zip(img_id, wtot, htot, results):
-                            loc, label, prob = [r.cpu().numpy() for r in result]
-                            # Iterate over image detections
-                            for loc_, label_, prob_ in zip(loc, label, prob):
-                                ret.append([img_id_, loc_[0]*wtot_, \
-                                            loc_[1]*htot_,
-                                            (loc_[2] - loc_[0])*wtot_,
-                                            (loc_[3] - loc_[1])*htot_,
-                                            prob_,
-                                            inv_map[label_]])
-                        if nbatch == args.iteration:
-                            fps = args.batch_size * (args.iteration - args.warmup_iterations) / time_consume
-                            avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations)
-                            print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(args.instance_number, avg_time, fps))
-                            break
+                            if args.accuracy_mode:
+                                results = []
+                                idx = 0
+                                if args.async_execution:
+                                    mini_batch_of_each_stream = get_bs_per_stream(img.size(0), args.number_instance)
+                                    used_num_streams = mini_batch_of_each_stream.__len__()
+                                    for i in range(used_num_streams):
+                                        idx2 = 0
+                                        mini_bs_of_this_stream = mini_batch_of_each_stream[i]
+                                        for j in range(mini_bs_of_this_stream):
+                                            results.append((result_raw[i][0][idx2:idx2+result_raw[i][3][j]],
+                                                            result_raw[i][1][idx2:idx2+result_raw[i][3][j]],
+                                                            result_raw[i][2][idx2:idx2+result_raw[i][3][j]]))
+                                            idx2 += result_raw[i][3][j]
+                                else:
+                                    for i in range(result_raw[3].size(0)):
+                                        results.append((result_raw[0][idx:idx+result_raw[3][i]],
+                                                        result_raw[1][idx:idx+result_raw[3][i]],
+                                                        result_raw[2][idx:idx+result_raw[3][i]]))
+                                        idx += result_raw[3][i]
+                                (htot, wtot) = [d.cpu().numpy() for d in img_size]
+                                img_id = img_id.cpu().numpy()
+                                # Iterate over batch elements
+                                for img_id_, wtot_, htot_, result in zip(img_id, wtot, htot, results):
+                                    loc, label, prob = [r.cpu().numpy() for r in result]
+                                    # Iterate over image detections
+                                    for loc_, label_, prob_ in zip(loc, label, prob):
+                                        ret.append([img_id_, loc_[0]*wtot_, \
+                                                    loc_[1]*htot_,
+                                                    (loc_[2] - loc_[0])*wtot_,
+                                                    (loc_[3] - loc_[1])*htot_,
+                                                    prob_,
+                                                    inv_map[label_]])
+                            if total_iteration == args.iteration:
+                                fps = args.batch_size * (args.iteration - args.warmup_iterations + 1) / time_consume
+                                avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations + 1)
+                                print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(args.instance_number, avg_time, fps))
+                                break
+                            total_iteration += 1
                 else:
                     print('runing int8 real inputs inference pthread weight sharing path')
                     def run_model(m, tid):
                         time_consume = 0
                         with torch.no_grad():
-                            for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
-                                img = img.to(memory_format=torch.channels_last)
-                                if nbatch > args.warmup_iterations:
-                                    start_time=time.time()
-                                #m(img.to(memory_format=torch.channels_last))
-                                m(img)
-                                if nbatch > args.warmup_iterations:
-                                    time_consume += time.time() - start_time
-                                if nbatch == args.iteration:
-                                    fps = (args.iteration - args.warmup_iterations) / time_consume
-                                    avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations)
-                                    print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
-                                    break
+                            total_iteration = 0
+                            for _ in range(epoch_number):
+                                for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                                    img = img.to(memory_format=torch.channels_last)
+                                    if total_iteration >= args.warmup_iterations:
+                                        start_time=time.time()
+                                    #m(img.to(memory_format=torch.channels_last))
+                                    m(img)
+                                    if total_iteration >= args.warmup_iterations:
+                                        time_consume += time.time() - start_time
+                                    if total_iteration == args.iteration:
+                                        fps = (args.iteration - args.warmup_iterations + 1) / time_consume
+                                        avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations + 1)
+                                        print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
+                                        break
+                                    total_iteration += 1
                     threads = []
                     for i in range(1, args.number_instance+1):
                         thread = threading.Thread(target=run_model, args=(model_decode, i))
@@ -362,6 +414,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     if args.use_throughput_benchmark:
                         print('bf16 throughput benchmark')
                         bench = ThroughputBenchmark(model_decode)
+                        if args.iteration > len(val_dataloader):
+                            print("Using ThroughputBenchmark, but args.iteration:{0} larger than len(val_dataloader):{1}".format(args.iteration, len(val_dataloader)))
+                            exit(-1)
                         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                             bench.add_input(img.to(memory_format=torch.channels_last))
                             if nbatch == args.iteration:
@@ -383,65 +438,77 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                 exit(-1)
                             model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                         time_consume = 0
-                        for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
-                            img = img.to(memory_format=torch.channels_last)
-                            if nbatch > args.warmup_iterations:
-                                start_time=time.time()
-                            result_raw = model_decode(img)
-                            if nbatch > args.warmup_iterations:
-                                step_time = time.time() - start_time
-                                print("time of step {0} is: {1}".format(nbatch, step_time))
-                                time_consume += step_time
+                        total_iteration = 0
+                        for _ in range(epoch_number):
+                            for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                                img = img.to(memory_format=torch.channels_last)
+                                if total_iteration >= args.warmup_iterations:
+                                    start_time=time.time()
+                                result_raw = model_decode(img)
+                                if total_iteration >= args.warmup_iterations:
+                                    step_time = time.time() - start_time
+                                    print("time of step {0} is: {1}".format(total_iteration, step_time))
+                                    time_consume += step_time
 
-                            results = []
-                            idx = 0
-                            if args.async_execution:
-                                for i in range(img.size(0)//batch_per_stream):
-                                    results.append((result_raw[i][0],
-                                                    result_raw[i][1],
-                                                    result_raw[i][2]))
-                                    idx += result_raw[i][3]
-                            else:
-                                for i in range(result_raw[3].size(0)):
-                                    results.append((result_raw[0][idx:idx+result_raw[3][i]],
-                                                    result_raw[1][idx:idx+result_raw[3][i]],
-                                                    result_raw[2][idx:idx+result_raw[3][i]]))
-                                    idx += result_raw[3][i]
-                            (htot, wtot) = [d.cpu().numpy() for d in img_size]
-                            img_id = img_id.cpu().numpy()
-                            # Iterate over batch elements
-                            for img_id_, wtot_, htot_, result in zip(img_id, wtot, htot, results):
-                                loc, label, prob = [r.cpu().numpy() for r in result]
-                                # Iterate over image detections
-                                for loc_, label_, prob_ in zip(loc, label, prob):
-                                    ret.append([img_id_, loc_[0]*wtot_, \
-                                                loc_[1]*htot_,
-                                                (loc_[2] - loc_[0])*wtot_,
-                                                (loc_[3] - loc_[1])*htot_,
-                                                prob_,
-                                                inv_map[label_]])
-                            if nbatch == args.iteration:
-                                fps = args.batch_size * (args.iteration - args.warmup_iterations) / time_consume
-                                avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations)
-                                print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(args.instance_number, avg_time, fps))
-                                break
+                                if args.accuracy_mode:
+                                    results = []
+                                    idx = 0
+                                    if args.async_execution:
+                                        mini_batch_of_each_stream = get_bs_per_stream(img.size(0), args.number_instance)
+                                        used_num_streams = mini_batch_of_each_stream.__len__()
+                                        for i in range(used_num_streams):
+                                            idx2 = 0
+                                            mini_bs_of_this_stream = mini_batch_of_each_stream[i]
+                                            for j in range(mini_bs_of_this_stream):
+                                                results.append((result_raw[i][0][idx2:idx2+result_raw[i][3][j]],
+                                                                result_raw[i][1][idx2:idx2+result_raw[i][3][j]],
+                                                                result_raw[i][2][idx2:idx2+result_raw[i][3][j]]))
+                                                idx2 += result_raw[i][3][j]
+                                    else:
+                                        for i in range(result_raw[3].size(0)):
+                                            results.append((result_raw[0][idx:idx+result_raw[3][i]],
+                                                            result_raw[1][idx:idx+result_raw[3][i]],
+                                                            result_raw[2][idx:idx+result_raw[3][i]]))
+                                            idx += result_raw[3][i]
+                                    (htot, wtot) = [d.cpu().numpy() for d in img_size]
+                                    img_id = img_id.cpu().numpy()
+                                    # Iterate over batch elements
+                                    for img_id_, wtot_, htot_, result in zip(img_id, wtot, htot, results):
+                                        loc, label, prob = [r.cpu().numpy() for r in result]
+                                        # Iterate over image detections
+                                        for loc_, label_, prob_ in zip(loc, label, prob):
+                                            ret.append([img_id_, loc_[0]*wtot_, \
+                                                        loc_[1]*htot_,
+                                                        (loc_[2] - loc_[0])*wtot_,
+                                                        (loc_[3] - loc_[1])*htot_,
+                                                        prob_,
+                                                        inv_map[label_]])
+                                if total_iteration == args.iteration:
+                                    fps = args.batch_size * (args.iteration - args.warmup_iterations + 1) / time_consume
+                                    avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations + 1)
+                                    print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(args.instance_number, avg_time, fps))
+                                    break
+                                total_iteration += 1
                     else:
                         print('bf16 pthread weight sharing path')
                         def run_model(m, tid):
                             time_consume = 0
                             with torch.no_grad():
-                                for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
-                                    if nbatch > args.warmup_iterations:
-                                        start_time=time.time()
-                                    img = img.to(memory_format=torch.channels_last)
-                                    m(img)
-                                    if nbatch > args.warmup_iterations:
-                                        time_consume += time.time() - start_time
-                                    if nbatch == args.iteration:
-                                        fps = (args.iteration - args.warmup_iterations) / time_consume
-                                        avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations)
-                                        print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
-                                        break
+                                total_iteration = 0
+                                for _ in range(epoch_number):
+                                    for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                                        if total_iteration >= args.warmup_iterations:
+                                            start_time=time.time()
+                                        img = img.to(memory_format=torch.channels_last)
+                                        m(img)
+                                        if total_iteration >= args.warmup_iterations:
+                                            time_consume += time.time() - start_time
+                                        if total_iteration == args.iteration:
+                                            fps = (args.iteration - args.warmup_iterations + 1) / time_consume
+                                            avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations + 1)
+                                            print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
+                                            break
+                                        total_iteration += 1
                         threads = []
                         for i in range(1, args.number_instance+1):
                             thread = threading.Thread(target=run_model, args=(model_decode, i))
@@ -473,6 +540,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                     if args.use_throughput_benchmark:
                         print('fp32 throughput benchmark')
                         bench = ThroughputBenchmark(model_decode)
+                        if args.iteration > len(val_dataloader):
+                            print("Using ThroughputBenchmark, but args.iteration:{0} larger than len(val_dataloader):{1}".format(args.iteration, len(val_dataloader)))
+                            exit(-1)
                         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                             bench.add_input(img.to(memory_format=torch.channels_last))
                             if nbatch == args.iteration:
@@ -494,64 +564,76 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                 exit(-1)
                             model_decode = ipex.cpu.runtime.MultiStreamModule(model_decode, num_streams=args.number_instance, cpu_pool=cpu_pool, concat_output=False)
                         time_consume = 0
-                        for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
-                            img = img.to(memory_format=torch.channels_last)
-                            if nbatch > args.warmup_iterations:
-                                start_time=time.time()
-                            result_raw = model_decode(img)
-                            if nbatch > args.warmup_iterations:
-                                step_time = time.time() - start_time
-                                print("time of step {0} is: {1}".format(nbatch, step_time))
-                                time_consume += step_time
+                        total_iteration = 0
+                        for _ in range(epoch_number):
+                            for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                                img = img.to(memory_format=torch.channels_last)
+                                if total_iteration >= args.warmup_iterations:
+                                    start_time=time.time()
+                                result_raw = model_decode(img)
+                                if total_iteration >= args.warmup_iterations:
+                                    step_time = time.time() - start_time
+                                    print("time of step {0} is: {1}".format(total_iteration, step_time))
+                                    time_consume += step_time
 
-                            results = []
-                            idx = 0
-                            if args.async_execution:
-                                for i in range(img.size(0)//batch_per_stream):
-                                    results.append((result_raw[i][0],
-                                                    result_raw[i][1],
-                                                    result_raw[i][2]))
-                                    idx += result_raw[i][3]
-                            else:
-                                for i in range(result_raw[3].size(0)):
-                                    results.append((result_raw[0][idx:idx+result_raw[3][i]],
-                                                    result_raw[1][idx:idx+result_raw[3][i]],
-                                                    result_raw[2][idx:idx+result_raw[3][i]]))
-                                    idx += result_raw[3][i]
-                            (htot, wtot) = [d.cpu().numpy() for d in img_size]
-                            img_id = img_id.cpu().numpy()
-                            # Iterate over batch elements
-                            for img_id_, wtot_, htot_, result in zip(img_id, wtot, htot, results):
-                                loc, label, prob = [r.cpu().numpy() for r in result]
-                                # Iterate over image detections
-                                for loc_, label_, prob_ in zip(loc, label, prob):
-                                    ret.append([img_id_, loc_[0]*wtot_, \
-                                                loc_[1]*htot_,
-                                                (loc_[2] - loc_[0])*wtot_,
-                                                (loc_[3] - loc_[1])*htot_,
-                                                prob_,
-                                                inv_map[label_]])
-                            if nbatch == args.iteration:
-                                fps = args.batch_size * (args.iteration - args.warmup_iterations) / time_consume
-                                avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations)
-                                print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(args.instance_number, avg_time, fps))
-                                break
+                                if args.accuracy_mode:
+                                    results = []
+                                    idx = 0
+                                    if args.async_execution:
+                                        mini_batch_of_each_stream = get_bs_per_stream(img.size(0), args.number_instance)
+                                        used_num_streams = mini_batch_of_each_stream.__len__()
+                                        for i in range(used_num_streams):
+                                            idx2 = 0
+                                            mini_bs_of_this_stream = mini_batch_of_each_stream[i]
+                                            for j in range(mini_bs_of_this_stream):
+                                                results.append((result_raw[i][0][idx2:idx2+result_raw[i][3][j]],
+                                                                result_raw[i][1][idx2:idx2+result_raw[i][3][j]],
+                                                                result_raw[i][2][idx2:idx2+result_raw[i][3][j]]))
+                                                idx2 += result_raw[i][3][j]
+                                    else:
+                                        for i in range(result_raw[3].size(0)):
+                                            results.append((result_raw[0][idx:idx+result_raw[3][i]],
+                                                            result_raw[1][idx:idx+result_raw[3][i]],
+                                                            result_raw[2][idx:idx+result_raw[3][i]]))
+                                            idx += result_raw[3][i]
+                                    (htot, wtot) = [d.cpu().numpy() for d in img_size]
+                                    img_id = img_id.cpu().numpy()
+                                    # Iterate over batch elements
+                                    for img_id_, wtot_, htot_, result in zip(img_id, wtot, htot, results):
+                                        loc, label, prob = [r.cpu().numpy() for r in result]
+                                        # Iterate over image detections
+                                        for loc_, label_, prob_ in zip(loc, label, prob):
+                                            ret.append([img_id_, loc_[0]*wtot_, \
+                                                        loc_[1]*htot_,
+                                                        (loc_[2] - loc_[0])*wtot_,
+                                                        (loc_[3] - loc_[1])*htot_,
+                                                        prob_,
+                                                        inv_map[label_]])
+                                if total_iteration == args.iteration:
+                                    fps = args.batch_size * (args.iteration - args.warmup_iterations + 1) / time_consume
+                                    avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations + 1)
+                                    print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(args.instance_number, avg_time, fps))
+                                    break
+                                total_iteration += 1
                     else:
                         print('fp32 pthread weight sharing path')
                         def run_model(m, tid):
                             time_consume = 0
-                            for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
-                                if nbatch > args.warmup_iterations:
-                                    start_time=time.time()
-                                img = img.to(memory_format=torch.channels_last)
-                                m(img)
-                                if nbatch > args.warmup_iterations:
-                                    time_consume += time.time() - start_time
-                                if nbatch == args.iteration:
-                                    fps = (args.iteration - args.warmup_iterations) / time_consume
-                                    avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations)
-                                    print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
-                                    break
+                            total_iteration = 0
+                            for _ in range(epoch_number):
+                                for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
+                                    if total_iteration >= args.warmup_iterations:
+                                        start_time=time.time()
+                                    img = img.to(memory_format=torch.channels_last)
+                                    m(img)
+                                    if total_iteration >= args.warmup_iterations:
+                                        time_consume += time.time() - start_time
+                                    if total_iteration == args.iteration:
+                                        fps = (args.iteration - args.warmup_iterations + 1) / time_consume
+                                        avg_time = time_consume * 1000 / (args.iteration - args.warmup_iterations + 1)
+                                        print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
+                                        break
+                                    total_iteration += 1
                         threads = []
                         for i in range(1, args.number_instance+1):
                             thread = threading.Thread(target=run_model, args=(model_decode, i))
@@ -578,7 +660,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
             throughput = batch_size / total_time_avg
             print("Throughput: {:.3f} fps".format(throughput))
             return False
-    elif args.use_multi_stream_module and not args.dummy:
+    elif args.use_multi_stream_module and not args.dummy and args.accuracy_mode:
         cocoDt = cocoGt.loadRes(np.array(ret))
 
         E = COCOeval(cocoGt, cocoDt, iouType='bbox')
@@ -610,11 +692,19 @@ def eval_ssd_r34_mlperf_coco(args):
         val_coco = COCODetection(val_coco_root, val_annotate, val_trans)
         inv_map = {v:k for k,v in val_coco.label_map.items()}
 
-        val_dataloader = DataLoader(val_coco,
-                                    batch_size=args.batch_size,
-                                    shuffle=False,
-                                    sampler=None,
-                                    num_workers=args.workers)
+        if args.accuracy_mode:
+            val_dataloader = DataLoader(val_coco,
+                                        batch_size=args.batch_size,
+                                        shuffle=False,
+                                        sampler=None,
+                                        num_workers=args.workers)
+        else:
+            val_dataloader = DataLoader(val_coco,
+                                        batch_size=args.batch_size,
+                                        shuffle=False,
+                                        sampler=None,
+                                        num_workers=args.workers,
+                                        drop_last=True)
         labelnum = val_coco.labelnum
     else:
         cocoGt = None

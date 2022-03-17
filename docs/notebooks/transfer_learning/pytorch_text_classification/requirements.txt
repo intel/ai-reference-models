@@ -7,3 +7,4 @@ psutil==5.9.0
 scikit-learn==1.0.2
 torch==1.10.2
 transformers==4.16.2
+wget==3.2

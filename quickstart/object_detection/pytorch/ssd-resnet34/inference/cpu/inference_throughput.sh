@@ -67,7 +67,13 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 rm -rf ${OUTPUT_DIR}/throughput_log*
 
 PRECISION=$1
-weight_sharing=false
+weight_sharing=true
+if [ -z "${WEIGHT_SHAREING}" ]; then
+  weight_sharing=false
+else
+  echo "### Running the test with runtime extension."
+  weight_sharing=true
+fi
 
 if [ "$weight_sharing" = true ]; then
     async=true
@@ -82,7 +88,7 @@ if [ "$weight_sharing" = true ]; then
     LAST_INSTANCE=`expr $INSTANCES - 1`
     INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
-    BATCH_PER_STREAM=1
+    BATCH_PER_STREAM=8
     CORES_PER_STREAM=4
     STREAM_PER_INSTANCE=`expr $CORES / $CORES_PER_STREAM`
     BATCH_SIZE=`expr $BATCH_PER_STREAM \* $STREAM_PER_INSTANCE`
@@ -97,14 +103,14 @@ if [ "$weight_sharing" = true ]; then
 
         echo "### running on instance $i, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
         numactl --physcpubind=$start_core_i-$end_core_i --membind=$numa_node_i python -u \
-            ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_tb.py \
+            ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer_weight_sharing.py \
             --data ${DATASET_DIR}/coco \
             --device 0 \
             --checkpoint ${CHECKPOINT_DIR}/pretrained/resnet34-ssd1200.pth \
-            -w 20 \
+            -w 10 \
             -j 0 \
             --no-cuda \
-            --iteration 200 \
+            --iteration 50 \
             --batch-size ${BATCH_SIZE} \
             --jit \
             --number-instance $STREAM_PER_INSTANCE \

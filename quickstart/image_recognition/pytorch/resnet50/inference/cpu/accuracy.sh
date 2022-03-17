@@ -80,15 +80,55 @@ else
     exit 1
 fi
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
-    $ARGS \
-    --ipex \
-    --pretrained \
-    -j 0 \
-    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log
+weight_sharing=false
+if [ ${WEIGHT_SHAREING} ]; then
+  echo "Running RN50 inference throughput with runtime extension enabled."
+  weight_sharing=true
+fi
 
+if [ "$weight_sharing" = true ]; then
+    CORES=`lscpu | grep Core | awk '{print $4}'`
+    SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+    TOTAL_CORES=`expr $CORES \* $SOCKETS`
+    CORES_PER_INSTANCE=$CORES
+    INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
+    LAST_INSTANCE=`expr $INSTANCES - 1`
+    INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
+
+    BATCH_PER_STREAM=2
+    CORES_PER_STREAM=1
+    STREAM_PER_INSTANCE=`expr $CORES / $CORES_PER_STREAM`
+    BATCH_SIZE=`expr $BATCH_PER_STREAM \* $STREAM_PER_INSTANCE`
+
+    export OMP_NUM_THREADS=$CORES_PER_STREAM
+
+    numa_node_i=0
+    start_core_i=0
+    end_core_i=`expr $start_core_i + $CORES_PER_INSTANCE - 1`
+    LOG_i=resnet50_accuracy_log_${PRECISION}_0.log
+    echo "### running on instance $i, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
+    numactl --physcpubind=$start_core_i-$end_core_i --membind=$numa_node_i python -u \
+        ${MODEL_DIR}/models/image_recognition/pytorch/common/main_runtime_extension.py \
+        $ARGS \
+        --ipex \
+        --pretrained \
+        -j 0 \
+        -b $BATCH_SIZE \
+        --number-instance $STREAM_PER_INSTANCE \
+        --use-multi-stream-module \
+        --instance-number 0
+
+else
+
+  python -m intel_extension_for_pytorch.cpu.launch \
+      --use_default_allocator \
+      ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+      $ARGS \
+      --ipex \
+      --pretrained \
+      -j 0 \
+      -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log
+fi
 wait
 
 accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnet50_accuracy_log_${PRECISION}.log |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
