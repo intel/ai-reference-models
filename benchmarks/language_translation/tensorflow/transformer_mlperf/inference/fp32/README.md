@@ -7,9 +7,9 @@
 This document has instructions for running Transformer Language FP32 Inference in mlperf
 Benchmark suits using Intel-optimized TensorFlow.
 
-Detailed information on mlperf Benchmark can be found in [mlperf/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
+Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
 
-The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modify the code of the model, so that it can achieve better performance on Intel CPUs.
+The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modifying the code of the model, so that it can achieve better performance on Intel CPUs.
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -22,6 +22,7 @@ Set `DATA_DIR` to point out to the location of the dataset directory.
 
 Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `$CHECKPOINT_DIR`.
 In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
+
 To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/fp32/transformer/export_transformer.py) in:
 
 ```
@@ -77,6 +78,9 @@ export NUM_SOCKETS=2
         steps=100 
 ```
 where:
+
+   * $DATA_DIR -- the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768
+   * $PB_FILE  -- the path of the frozen model generated with the script, or downloaded from Intel published trained models websites
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
 The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.

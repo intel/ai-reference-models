@@ -4,10 +4,10 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running Transformer Language FP32 Inference in mlperf
+This document has instructions for running Transformer Language int8 Inference in mlperf
 Benchmark suits using Intel-optimized TensorFlow.
 
-Detailed information on mlperf Benchmark can be found in [mlperf/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
+Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
 
 The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modify the code of the model, so that it can achieve better performance on Intel CPUs.
 The qunatized model is generated with Intel [LPOT tool](https://github.com/intel/neural-compressor) from fp32 model, and Intel also has optimized the model in the process of quantization. 
@@ -20,15 +20,9 @@ Set `DATA_DIR` to point out to the location of the dataset directory.
 
 ## Run the model on Linux
 
-Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `$CHECKPOINT_DIR`.
-In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
-To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/int8/transformer/export_transformer.py) in:
-```
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_MODEL_ZOO_ROOT>/models/common/tensorflow
-python export_transformer.py --model_dir=<$CHECKPOINT_DIR> --pb_path=<frozen_graph_full_path>
-```
-The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
+Before running inference, users should have the quantized model pb files downloaded from the trained models website the Intel published.
 
+The inference can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
 
 Set the environment variables to point to the dataset directory `DATA_DIR`, the pretrained model path `PB_FILE`, batch size `BATCH_SIZE`, the number of sockets `NUM_SOCKETS`, and the number of cores on your system `NUM_CORES`.
 ```
@@ -77,7 +71,9 @@ export NUM_SOCKETS=2
         steps=100 
 ```
 where:
-   * steps -- the number of batches of data to feed into the model for inference, if the number is greater than avaialable batches in the input data, it will only run number of batches available in the data.
+   * $DATA_DIR -- the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768
+   * $PB_FILE  -- the path of the quantized model downloaded from the trained models website the Intel published. 
+   * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
 The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
 With accuracy mode, the official BLEU score will be printed
