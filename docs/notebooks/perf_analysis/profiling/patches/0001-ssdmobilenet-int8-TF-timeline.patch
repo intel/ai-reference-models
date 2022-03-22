@@ -1,5 +1,5 @@
 From 91159f0f5e7b2fbb256ae673b2203cd741f6614a Mon Sep 17 00:00:00 2001
-From: "louie.tsai" <ltsai1@mlp-ra-cpx-05.ra.intel.com>
+From: "louie.tsai" <ltsai1@my-cpx-server.intel.com>
 Date: Sun, 24 Jan 2021 21:46:10 -0800
 Subject: [PATCH] ssdmobilenet int8 TF timeline
 
