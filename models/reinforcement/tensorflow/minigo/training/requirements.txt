@@ -15,4 +15,4 @@ setuptools>=34.0.0
 
 oauth2client==4.1
 
-horovod==0.15.1
+horovod==0.24.0
