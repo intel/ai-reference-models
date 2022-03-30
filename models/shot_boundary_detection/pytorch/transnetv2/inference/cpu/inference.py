@@ -90,7 +90,6 @@ def inference(model, dataloader, args):
         import intel_extension_for_pytorch as ipex
         model = model.to(memory_format=torch.channels_last_3d)
         model = ipex.optimize(model, dtype=datatype, inplace=True)
-        model = model.to(datatype)
     else:
         if args.jit:
             model = model.to(memory_format=torch.channels_last_3d)
