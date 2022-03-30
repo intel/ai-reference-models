@@ -125,4 +125,4 @@ END   {
        printf("%.3f", sum);
 }')
 
-echo "resnet50;"distributed training throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo "resnet50;"training distributed throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

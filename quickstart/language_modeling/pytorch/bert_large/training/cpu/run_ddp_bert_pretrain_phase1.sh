@@ -78,4 +78,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo ""BERT";"training phase1 throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""BERT";"training phase1 distributed throughput";${precision}; ${batch_size};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
