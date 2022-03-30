@@ -69,7 +69,6 @@ def inference(model, dataloader, datatype, args):
         model = model.to(memory_format=torch.channels_last)
         model = ipex.optimize(model, dtype=datatype, level="O1", conv_bn_folding=False, replace_dropout_with_identity=False)
         model.backbone = ipex.optimize(model.backbone, dtype=datatype, level="O1")
-        model = model.to(datatype)
     else:
         if args.jit:
             model = model.to(memory_format=torch.channels_last)
