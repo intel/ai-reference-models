@@ -807,9 +807,42 @@ def run():
     print("time/loss/accuracy (if enabled):")
 
     if args.bf16 and not args.inference_only:
+        for j, inputBatch in enumerate(train_ld):
+            X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
+            if ext_dist.my_size > 1:
+                local_bs = X.size()[0] // ext_dist.my_size
+                rank_id = dlrm.rank
+                X = X[rank_id * local_bs: (rank_id + 1) * local_bs]
+                T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
+                global_bs = local_bs * ext_dist.my_size
+                lS_o = lS_o[:, :global_bs]
+                lS_i = lS_i[:, :global_bs]
+
+            if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                if ext_dist.my_size > 1:
+                    batch_size = X.size()[0]
+                    g_i = lS_i[dlrm.local_ln_emb]
+                    g_o = lS_o[dlrm.local_ln_emb]
+                    n_tables = g_i.shape[0]
+                    idx = [g_i[i] for i in range(n_tables)]
+                    offset = [g_o[i] for i in range(n_tables)]
+                    include_last = [False for i in range(n_tables)]
+                    indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+                else:
+                    n_tables = lS_i.shape[0]
+                    idx = [lS_i[i] for i in range(n_tables)]
+                    offset = [lS_o[i] for i in range(n_tables)]
+                    include_last = [False for i in range(n_tables)]
+                    indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+            if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                sample_input = (X, indices, offsets, indices_with_row_offsets)
+            else:
+                sample_input = (X, lS_o, lS_i)
+            break
+        dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True, sample_input=sample_input)
+
         if args.ipex_merged_emb:
             dlrm.emb_l.to_bfloat16_train()
-        dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)
         for i in range(len(dlrm.top_l)):
             if isinstance(dlrm.top_l[i], ipex.nn.utils._weight_prepack._IPEXLinear):
                 if isinstance(dlrm.top_l[i+1], torch.nn.ReLU):
