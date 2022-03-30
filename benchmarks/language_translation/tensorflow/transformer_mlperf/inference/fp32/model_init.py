@@ -67,8 +67,8 @@ class ModelInitializer(BaseModelInitializer):
                                 type=int, default=100,
                                 help="number of steps")
         arg_parser.add_argument('--kmp-blocktime', dest='kmp_blocktime',
-                            help='number of kmp block time',
-                            type=int, default=1)
+                                help='number of kmp block time',
+                                type=int, default=1)
 
         self.args = arg_parser.parse_args(self.custom_args,
                                           namespace=self.args)
