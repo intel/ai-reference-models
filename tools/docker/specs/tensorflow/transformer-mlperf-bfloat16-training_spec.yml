@@ -33,7 +33,7 @@ slice_sets:
           <model name>: Transformer Language
           <package dir>: transformer-mlperf-bfloat16-training
           <package name>: transformer-mlperf-bfloat16-training.tar.gz
-          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/transformer-mlperf-bfloat16-training.tar.gz'
+          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-mlperf-bfloat16-training.tar.gz'
           <precision>: BFloat16
           <use case>: language_translation
         uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/bfloat16

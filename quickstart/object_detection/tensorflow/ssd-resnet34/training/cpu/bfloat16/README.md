@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-resnet34-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-bfloat16-training.tar.gz)
+[ssd-resnet34-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-bfloat16-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -134,7 +134,7 @@ cd ..
 Download and untar the model training package and apply a patch to the TensorFlow models code for TF 2.0:
 ```
 # Download and extract the model package, then run a quickstart script
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-bfloat16-training.tar.gz
 tar -xzf ssd-resnet34-bfloat16-training.tar.gz
 
 # Apply the patch the the TF_MODELS_DIR

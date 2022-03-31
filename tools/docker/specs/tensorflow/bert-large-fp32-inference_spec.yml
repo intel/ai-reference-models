@@ -33,7 +33,7 @@ slice_sets:
     downloads:
       - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
         destination: pretrained_model/bert_large_checkpoints.zip
-      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/fp32_bert_squad.pb
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/fp32_bert_squad.pb
         destination: pretrained_model/fp32_bert_squad.pb
     partials:
     - model_package
@@ -47,7 +47,7 @@ slice_sets:
           <model name>: BERT Large
           <precision>: FP32
           <use case>: language_modeling
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-fp32-inference.tar.gz
           <package name>: bert-large-fp32-inference.tar.gz
           <package dir>: bert-large-fp32-inference
           <docker image>: intel/language-modeling:tf-latest-bert-large-fp32-inference

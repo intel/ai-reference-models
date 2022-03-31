@@ -10,7 +10,7 @@ using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-fp32-inference.tar.gz)
+[bert-large-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -20,6 +20,8 @@ Download and unzip the BERT Large uncased (whole word masking) model from the
 [google bert repo](https://github.com/google-research/bert#pre-trained-models).
 Then, download the Stanford Question Answering Dataset (SQuAD) dataset file `dev-v1.1.json` into the `wwm_uncased_L-24_H-1024_A-16` directory that was just unzipped.
 
+If you run on Windows, please use a browser to download and extract the dataset files.
+For Linux, run:
 ```
 wget https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip
 unzip wwm_uncased_L-24_H-1024_A-16.zip
@@ -55,7 +57,7 @@ for more details on the different options.
 
 The snippet below shows how to run a quickstart script:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-fp32-inference.tar.gz
 tar -xvf bert-large-fp32-inference.tar.gz
 cd bert-large-fp32-inference
 

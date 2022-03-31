@@ -18,7 +18,7 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50v1-5-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50v1-5-fp32-inference.tar.gz)
+[resnet50v1-5-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-inference.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -50,7 +50,7 @@ written, then run a [quickstart script](#quick-start-scripts).
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50v1-5-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-inference.tar.gz
 tar -xzf resnet50v1-5-fp32-inference.tar.gz
 cd resnet50v1-5-fp32-inference
 

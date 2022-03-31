@@ -34,7 +34,7 @@ slice_sets:
           <model name>: SSD-MobileNet
           <package dir>: ssd-mobilenet-int8-inference
           <package name>: ssd-mobilenet-int8-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-mobilenet-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-mobilenet-int8-inference.tar.gz
           <precision>: Int8
           <use case>: object_detection
         uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8
@@ -118,5 +118,6 @@ slice_sets:
       source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8
     partials:
     - numactl
+    - tcmalloc
     - model_package
     - entrypoint

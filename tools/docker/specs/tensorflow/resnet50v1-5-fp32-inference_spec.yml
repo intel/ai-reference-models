@@ -49,7 +49,7 @@ slice_sets:
             <precision>: FP32
             <mode>: inference
             <use case>: image_recognition
-            <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50v1-5-fp32-inference.tar.gz
+            <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-inference.tar.gz
             <package name>: resnet50v1-5-fp32-inference.tar.gz
             <package dir>: resnet50v1-5-fp32-inference
             <docker image>: intel/image-recognition:tf-latest-resnet50v1-5-fp32-inference

@@ -12,7 +12,7 @@ Detailed information on mlperf Benchmark can be found in [mlperf/training](https
 <!--- 20. Download link -->
 ## Download link
 
-[transformer-mlperf-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/transformer-mlperf-bfloat16-training.tar.gz)
+[transformer-mlperf-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-mlperf-bfloat16-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -49,7 +49,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/transformer-mlperf-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-mlperf-bfloat16-training.tar.gz
 tar -xzf transformer-mlperf-bfloat16-training.tar.gz
 cd transformer-mlperf-bfloat16-training
 

@@ -10,7 +10,7 @@ Intel Optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[faster_rcnn-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/faster-rcnn-int8-inference.tar.gz)
+[faster_rcnn-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/faster-rcnn-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -74,7 +74,7 @@ located) and an `OUTPUT_DIR` where log files will be written, then run a
 [quickstart script](#quick-start-scripts).
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/faster-rcnn-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/faster-rcnn-int8-inference.tar.gz
 tar -xzf faster_rcnn-int8-inference.tar.gz
 cd faster_rcnn-int8-inference
 

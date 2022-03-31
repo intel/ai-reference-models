@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-resnet34-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-fp32-training.tar.gz)
+[ssd-resnet34-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -136,7 +136,7 @@ git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
 cd ..
 
 # Download and extract the model package, then run a quickstart script
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-fp32-training.tar.gz
 tar -xzf ssd-resnet34-fp32-training.tar.gz
 cd ssd-resnet34-fp32-training
 

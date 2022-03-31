@@ -33,7 +33,7 @@ slice_sets:
           <model name>: Transformer Language
           <package dir>: transformer-mlperf-fp32-training
           <package name>: transformer-mlperf-fp32-training.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/transformer-mlperf-fp32-training.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-mlperf-fp32-training.tar.gz
           <precision>: FP32
           <use case>: language_translation
         uri: models/quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/fp32

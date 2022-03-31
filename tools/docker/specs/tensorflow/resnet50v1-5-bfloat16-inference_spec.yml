@@ -33,7 +33,7 @@ slice_sets:
           <model name>: ResNet50 v1.5
           <package dir>: resnet50v1_5-bfloat16-inference
           <package name>: resnet50v1_5-bfloat16-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50v1-5-bfloat16-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-bfloat16-inference.tar.gz
           <precision>: BFloat16
           <use case>: image_recognition
         uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/bfloat16

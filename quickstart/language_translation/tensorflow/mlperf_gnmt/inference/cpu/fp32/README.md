@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[mlperf-gnmt-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/mlperf-gnmt-fp32-inference.tar.gz)
+[mlperf-gnmt-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/mlperf-gnmt-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -53,7 +53,7 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/mlperf-gnmt-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/mlperf-gnmt-fp32-inference.tar.gz
 tar -xzf mlperf-gnmt-fp32-inference.tar.gz
 cd mlperf-gnmt-fp32-inference
 

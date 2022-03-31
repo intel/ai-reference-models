@@ -59,7 +59,7 @@ slice_sets:
           <precision>: FP32
           <mode>: inference
           <use case>: object_detection
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-mobilenet-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-mobilenet-fp32-inference.tar.gz
           <package name>: ssd-mobilenet-fp32-inference.tar.gz
           <package dir>: ssd-mobilenet-fp32-inference
           <docker image>: intel/object-detection:tf-latest-ssd-mobilenet-fp32-inference

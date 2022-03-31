@@ -11,7 +11,7 @@ Intel® Optimizations for TensorFlow* on Kubernetes*.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-fp32-training-k8s.tar.gz)
+[wide-deep-large-ds-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training-k8s.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -48,7 +48,7 @@ These quickstart scripts are run in the following environment:
 Download and untar the model training package to get the yaml and config
 files for running training on a single node using Kubernetes.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training-k8s.tar.gz
 ```
 

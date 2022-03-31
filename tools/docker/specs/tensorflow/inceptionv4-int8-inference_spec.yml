@@ -33,7 +33,7 @@ slice_sets:
           <model name>: Inception V4
           <package dir>: inceptionv4-int8-inference
           <package name>: inceptionv4-int8-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/inceptionv4-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/inceptionv4-int8-inference.tar.gz
           <precision>: Int8
           <use case>: image_recognition
         uri: models/quickstart/image_recognition/tensorflow/inceptionv4/inference/cpu/int8

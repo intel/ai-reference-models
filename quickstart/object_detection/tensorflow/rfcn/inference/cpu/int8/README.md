@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/rfcn-int8-inference.tar.gz)
+[rfcn-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/rfcn-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -27,8 +27,8 @@ downloading and preprocessing the COCO validation dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| [`int8_inference.sh`](int8_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
-| [`int8_accuracy.sh`](int8_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
+| [`int8_inference.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`int8_accuracy.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -55,7 +55,7 @@ from the [TensorFlow Model Garden](https://github.com/tensorflow/models) reposit
 
 After installing the prerequisites, download and untar the model package.
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/rfcn-int8-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/rfcn-int8-inference.tar.gz
 tar -xzf rfcn-int8-inference.tar.gz
 ```
 

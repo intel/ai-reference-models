@@ -20,7 +20,7 @@ slice_sets:
             <model name>: Wide and Deep Large Dataset
             <precision>: FP32
             <use case>: recommendation
-            <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
+            <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training-k8s.tar.gz
             <package name>: wide-deep-large-ds-fp32-training-k8s.tar.gz
             <package dir>: wide-deep-large-ds-fp32-training-k8s
             <docker image>: intel/recommendation:tf-latest-wide-deep-large-ds-fp32-training

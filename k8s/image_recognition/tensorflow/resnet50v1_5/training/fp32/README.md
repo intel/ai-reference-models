@@ -11,7 +11,7 @@ Intel® Optimizations for TensorFlow* on Kubernetes*.
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50v1-5-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/resnet50v1-5-fp32-training-k8s.tar.gz)
+[resnet50v1-5-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-training-k8s.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -37,7 +37,7 @@ These quickstart scripts can be run in the following environment:
 
 Download and untar the ResNet50 v1.5 FP32 training package:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/resnet50v1-5-fp32-training-k8s.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-training-k8s.tar.gz
 tar -xvf resnet50v1-5-fp32-training-k8s.tar.gz
 ```
 

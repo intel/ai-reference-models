@@ -13,7 +13,7 @@ the Transformer LT Official model came from the
 <!--- 20. Download link -->
 ## Download link
 
-[transformer-lt-official-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/transformer-lt-official-fp32-inference.tar.gz)
+[transformer-lt-official-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-lt-official-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -58,7 +58,7 @@ that point to your dataset and an output directory.
 DATASET_DIR=<path to the test dataset directory>
 OUTPUT_DIR=<directory where the log and translation file will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/transformer-lt-official-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-lt-official-fp32-inference.tar.gz
 tar -xzf transformer-lt-official-fp32-inference.tar.gz
 cd transformer-lt-official-fp32-inference
 

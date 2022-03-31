@@ -33,7 +33,7 @@ slice_sets:
           <model name>: ResNet101
           <package dir>: resnet101-fp32-inference
           <package name>: resnet101-fp32-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet101-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet101-fp32-inference.tar.gz
           <precision>: FP32
           <use case>: image_recognition
         uri: models/quickstart/image_recognition/tensorflow/resnet101/inference/cpu/fp32

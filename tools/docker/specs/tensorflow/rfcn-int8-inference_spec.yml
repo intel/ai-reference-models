@@ -34,7 +34,7 @@ slice_sets:
           <model name>: RFCN
           <package dir>: rfcn-int8-inference
           <package name>: rfcn-int8-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/rfcn-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/rfcn-int8-inference.tar.gz
           <precision>: Int8
           <use case>: object_detection
         uri: models/quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8
@@ -109,6 +109,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8
     partials:
+    - tcmalloc
     - model_package
     - object_detection/rfcn_patch
     - tar

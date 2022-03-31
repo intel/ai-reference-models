@@ -47,7 +47,7 @@ slice_sets:
           <model name>: Transformer LT Official
           <precision>: FP32
           <use case>: language_translation
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/transformer-lt-official-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/transformer-lt-official-fp32-inference.tar.gz
           <package name>: transformer-lt-official-fp32-inference.tar.gz
           <package dir>: transformer-lt-official-fp32-inference
           <docker image>: intel/language-translation:tf-latest-transformer-lt-official-fp32-inference
