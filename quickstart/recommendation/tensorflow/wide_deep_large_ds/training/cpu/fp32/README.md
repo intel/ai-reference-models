@@ -10,7 +10,7 @@ using a large dataset using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-fp32-training.tar.gz)
+[wide-deep-large-ds-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -56,7 +56,7 @@ DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
 cd wide-deep-large-ds-fp32-training
 

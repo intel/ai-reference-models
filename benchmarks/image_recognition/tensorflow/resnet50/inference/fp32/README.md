@@ -115,7 +115,6 @@ As an example, if the dataset location on Windows is `D:\user\ImageNet`, convert
 >```
 >Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/ImageNet`.
 
-
 <!--- 90. Resource Links-->
 ## Additional Resources
 
@@ -124,3 +123,4 @@ As an example, if the dataset location on Windows is `D:\user\ImageNet`, convert
 * To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
   workload container:<br />
   [https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50-fp32-inference-tensorflow-container.html).
+

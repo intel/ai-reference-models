@@ -32,7 +32,7 @@ To run on bare metal first, follow the [instruction described here](/models/reco
 
 After installing the prerequisites, download and untar the DLRM bf16 training model package, and run the quick start script:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dlrm-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/dlrm-bfloat16-training.tar.gz
 tar -xvf dlrm-bfloat16-training.tar.gz
 ```
 Set environment variables

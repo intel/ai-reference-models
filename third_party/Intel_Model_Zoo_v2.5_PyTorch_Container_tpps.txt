@@ -8557,7 +8557,7 @@ The following third party programs have their own third party program files. The
 
 1.  Intel® Extension for PyTorch*: https://github.com/intel/intel-extension-for-pytorch/blob/master/third-party-programs/THIRD-PARTY-PROGRAMS
 2.  Intel® Neural Compressor: https://github.com/intel/neural-compressor/blob/master/third-party-programs.txt
-3.  Intel® Optimization for Tensorflow: https://github.com/Intel-tensorflow/tensorflow/blob/v2.7.0/LEGAL-NOTICE
+3.  Intel® Optimization for Tensorflow: https://github.com/Intel-tensorflow/tensorflow/blob/v2.8.0/LEGAL-NOTICE
 4.  Intel® oneAPI Base Kit: https://github.com/intel/oneapi-containers/blob/master/licensing/basekit-centos-8/third-party-programs.txt
 5.  Intel® oneAPI Deep Neural Network Library (oneDNN): https://github.com/oneapi-src/oneDNN/blob/master/THIRD-PARTY-PROGRAMS
 6.  TorchCCL : https://github.com/intel/torch-ccl/blob/master/third-party-programs.txt

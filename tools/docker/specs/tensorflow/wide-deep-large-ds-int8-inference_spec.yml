@@ -34,7 +34,7 @@ slice_sets:
           <model name>: Wide and Deep using a large dataset
           <package dir>: wide-deep-large-ds-int8-inference
           <package name>: wide-deep-large-ds-int8-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wide-deep-large-ds-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-int8-inference.tar.gz
           <precision>: Int8
           <use case>: recommendation
         uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/cpu/int8

@@ -35,7 +35,7 @@ slice_sets:
           <model name>: NCF
           <package dir>: ncf-fp32-inference
           <package name>: ncf-fp32-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/ncf-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ncf-fp32-inference.tar.gz
           <precision>: FP32
           <use case>: recommendation
         uri: models/quickstart/recommendation/tensorflow/ncf/inference/cpu/fp32

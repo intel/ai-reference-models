@@ -79,8 +79,8 @@ mv data2/* .
 ```
 export PB_DIR=/path/to/dien-pretrained-folder
 # download frozen pb(s)
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dien_fp32_static_rnn_graph.pb
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dien_fp32_pretrained_opt_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/dien_fp32_static_rnn_graph.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/dien_fp32_pretrained_opt_model.pb
 ```
 
 ### Run FP32 inference on Linux:
@@ -331,7 +331,7 @@ For Linux systems, please use the following code snippets.
 
 ### 2. Download pretrained bfloat16 model file
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/dien_bf16_pretrained_opt_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/dien_bf16_pretrained_opt_model.pb
 
 ### 3. Run inference with precision set to bfloat16 for throughput, accuracy and latency 
        
