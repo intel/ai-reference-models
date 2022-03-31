@@ -14,7 +14,7 @@
     export work_space=/home/sdp  (you can get the summary.log in this path where the models performance and accuracy write)   
 
 ### build pytorch and intel-pytorch-extension
-    git clone https://gitlab.devtools.intel.com/intel-pytorch-extension/pytorch-spr.git pytorch
+    git clone https://github.com/intel-innersource/frameworks.ai.pytorch.private-cpu.git pytorch
     git checkout dev
     git submodule sync
     git submodule update --init --recursive
