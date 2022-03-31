@@ -17,7 +17,7 @@ slice_sets:
           <model name>: 3D U-Net
           <package dir>: 3d-unet-fp32-inference
           <package name>: 3d-unet-fp32-inference.tar.gz
-          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/3d-unet-fp32-inference.tar.gz'
+          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/3d-unet-fp32-inference.tar.gz'
           <precision>: FP32
           <use case>: image_segmentation
         uri: models/quickstart/image_segmentation/tensorflow/3d_unet/inference/cpu/fp32

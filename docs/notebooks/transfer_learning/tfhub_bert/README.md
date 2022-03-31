@@ -28,7 +28,7 @@ been installed.
    python3 -m venv intel-tf-venv
    source intel-tf-venv/bin/activate
    pip install --upgrade pip
-   pip install intel-tensorflow==2.7.0 notebook
+   pip install intel-tensorflow==2.8.0 notebook
    ```
 3. Set environment variables for the path to the working folder and an output directory. Both folders
    need to be writable. The working directory is used for downloading dependencies needed to run
@@ -84,7 +84,7 @@ been installed.
      -v ${WORKING_DIR}:${WORKING_DIR} \
      -v ${OUTPUT_DIR}:${OUTPUT_DIR} \
      -v ${NOTEBOOK_DIR}:/tf \
-    intel/intel-optimized-tensorflow:2.7.0-jupyter
+    intel/intel-optimized-tensorflow:jupyter
    ```
 3. After the container starts, view the logs to get the URL and token for
    the notebook. Copy the URL with the token to view the notebook into your
