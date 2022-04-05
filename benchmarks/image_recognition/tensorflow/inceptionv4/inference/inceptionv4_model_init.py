@@ -68,8 +68,16 @@ class InceptionV4ModelInitializer(BaseModelInitializer):
                 "--output-layer", dest="output_layer",
                 help="name of output layer", type=str, default=None)
 
-            self.args = parser.parse_args(self.custom_args,
-                                          namespace=self.args)
+            parser.add_argument(
+                '--kmp-blocktime', dest='kmp_blocktime',
+                help='number of kmp block time',
+                type=int, default=1)
+
+            self.args = parser.parse_args(self.custom_args, namespace=self.args)
+
+            # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
+            config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+            self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
     def add_command_prefix(self, script_path):
         """ Uses the specified script path and adds on the command prefix """
