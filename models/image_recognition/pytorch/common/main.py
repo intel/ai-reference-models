@@ -415,10 +415,13 @@ def main_worker(gpu, ngpus_per_node, args):
 
 
     if args.ipex:
+        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
         if args.bf16:
-            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16,
+                                             optimizer=optimizer, sample_input=sample_input)
         else:
-            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
+            model, optimizer = ipex.optimize(model, dtype=torch.float32,
+                                             optimizer=optimizer, sample_input=sample_input)
 
     # parallelize
     if args.distributed and not args.cuda and args.gpu is None:
@@ -556,7 +559,7 @@ def validate(val_loader, model, criterion, args):
         prefix='Test: ')
     print('Evaluating RESNET: total Steps: {}'.format(number_iter))
 
-             
+
 
     # switch to evaluate mode
     model.eval()
