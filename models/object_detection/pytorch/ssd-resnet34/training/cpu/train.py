@@ -404,6 +404,7 @@ def train300_mlperf_coco(args):
     fragment_size = args.batch_size // args.batch_splits
     if args.batch_splits != 1:
         print("using gradient accumulation with fragments of size {}".format(fragment_size))
+    assert args.batch_splits == 1, "Not support the case when args.batch_splits not equal 1 (use gradient accumulation with fragments)"
 
     # Model to NHWC
     ssd300 = ssd300.to(memory_format=torch.channels_last)
@@ -480,26 +481,14 @@ def train300_mlperf_coco(args):
             for param_group in optim.param_groups:
                 param_group['lr'] = current_lr
         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(train_dataloader):
-            naive_train_case = True # img.shape[0] == fragment_size
-            if naive_train_case:
-                # Naive train case
-                fimg, gloc, glabel, mask, pos_num, neg_num, num_mask = data_preprocess(img, bbox, label, loss_func)
+            # Here is the case when img.shape[0] == fragment_size (except the last batch in dataloader)
+            fimg, gloc, glabel, mask, pos_num, neg_num, num_mask = data_preprocess(img, bbox, label, loss_func)
 
-                if args.performance_only and iter_num >= args.warmup_iterations:
-                    start_time = time.time()
-                if args.profile and args.performance_only and iter_num == 30:
-                    # Profile Mode
-                    with torch.profiler.profile(on_trace_ready=trace_handler) as prof:
-                        with torch.cpu.amp.autocast(enabled=args.autocast):
-                            ploc, plabel = ssd300(fimg)
-                            loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
-                        loss.backward()
-
-                        warmup_step(iter_num, current_lr)
-                        optim.step()
-                        optim.zero_grad(set_to_none=True)
-                else:
-                    # Non Profile Mode
+            if args.performance_only and iter_num >= args.warmup_iterations:
+                start_time = time.time()
+            if args.profile and args.performance_only and iter_num == 30:
+                # Profile Mode
+                with torch.profiler.profile(on_trace_ready=trace_handler) as prof:
                     with torch.cpu.amp.autocast(enabled=args.autocast):
                         ploc, plabel = ssd300(fimg)
                         loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
@@ -509,47 +498,16 @@ def train300_mlperf_coco(args):
                     optim.step()
                     optim.zero_grad(set_to_none=True)
             else:
-                # Train case: when split input to several fragment size
-                print("Not support input with several fragment size yet.")
-                exit(-1)
-                # current_batch_size = img.shape[0]
-                # # Split batch for gradient accumulation
-                # img = torch.split(img, fragment_size)
-                # bbox = torch.split(bbox, fragment_size)
-                # label = torch.split(label, fragment_size)
+                # Non Profile Mode
+                with torch.cpu.amp.autocast(enabled=args.autocast):
+                    ploc, plabel = ssd300(fimg)
+                    loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
+                loss.backward()
 
-                # if args.performance_only and iter_num >= args.warmup_iterations:
-                #     start_time=time.time()
-                # for (fimg, fbbox, flabel) in zip(img, bbox, label):
-                #     current_fragment_size = fimg.shape[0]
-                #     trans_bbox = fbbox.transpose(1,2).contiguous()
-                #     if use_cuda:
-                #         fimg = fimg.cuda()
-                #         trans_bbox = trans_bbox.cuda()
-                #         flabel = flabel.cuda()
-                #     fimg = Variable(fimg, requires_grad=True)
-                #     gloc, glabel = Variable(trans_bbox, requires_grad=False), \
-                #                 Variable(flabel, requires_grad=False)
-                #     gloc = loss_func._loc_vec(gloc)
-                #     mask = glabel > 0
-                #     pos_num = mask.sum(dim=1)
-                #     neg_num = torch.clamp(3*pos_num, max=mask.size(1)).unsqueeze(-1)
-                #     num_mask = (pos_num > 0).float()
-                #     # image to NHWC
-                #     fimg = fimg.contiguous(memory_format=torch.channels_last)
-                #     if use_ipex:
-                #         with ipex.amp.autocast(enabled=args.autocast, configure=ipex.conf.AmpConf(torch.bfloat16)):
-                #             ploc, plabel = ssd300(fimg)
-                #             loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
-                #     else:
-                #         ploc, plabel = ssd300(fimg)
-                #         loss = loss_func(ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask)
-                #     loss = loss * (current_fragment_size / current_batch_size) # weighted mean
-                #     loss.backward()
+                warmup_step(iter_num, current_lr)
+                optim.step()
+                optim.zero_grad(set_to_none=True)
 
-                # warmup_step(iter_num, current_lr)
-                # optim.step()
-                # optim.zero_grad(set_to_none=True)
             if args.performance_only and iter_num >= args.warmup_iterations:
                 train_time.update(time.time() - start_time)
             if args.performance_only and iter_num % args.print_freq == 0:
