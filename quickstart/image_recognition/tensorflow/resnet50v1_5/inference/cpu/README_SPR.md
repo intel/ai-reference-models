@@ -20,8 +20,8 @@ tf-spr-resnet50v1-5-inference
 │   └── third_party
 ├── model_packages
 │   └── tf-spr-resnet50v1-5-inference.tar.gz
-├── run.sh
-└── tf-spr-resnet50v1-5-inference.Dockerfile
+├──tf-spr-resnet50v1-5-inference.Dockerfile
+└── run.sh
 ```
 
 <!--- 40. Quick Start Scripts -->
@@ -76,7 +76,7 @@ After you've followed the instructions to [build the container](#build-the-conta
 and [prepare the dataset](#datasets), use the `run.sh` script from the container
 package to run ResNet50 v1.5 inference in docker. Set environment variables to
 specify the dataset directory, precision to run, and
-an output directory.
+an output directory. 
 The dataset is required for accuracy and optional for other inference scripts.
 By default, the `run.sh` script will run the
 `inference_realtime.sh` quickstart script. To run a different script, specify

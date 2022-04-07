@@ -20,7 +20,7 @@ tensorflow-spr-3dunet
 │   └── third_party
 ├── tensorflow-spr-3dunet.Dockerfile
 └── whls
-    └── tf_nightly-2.7.0.202140-cp36-cp36m-linux_x86_64.whl
+    └── tf_nightly-2.9.0.202212-cp38-cp38-linux_x86_64.whl
 ```
 
 ## Docker
@@ -64,3 +64,4 @@ script in the container.
 ## License
 
 Licenses can be found in the container package, in the `licenses` directory.
+

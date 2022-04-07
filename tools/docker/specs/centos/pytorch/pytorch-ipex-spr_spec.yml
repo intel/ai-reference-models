@@ -7,11 +7,11 @@ slice_sets:
     - add_to_name: pytorch-ipex-spr
       dockerfile_subdirectory: pytorch
       args:
-        - PYTORCH_WHEEL=torch-1.11.0a0+gita8a0090-cp37-cp37m-linux_x86_64.whl
-        - IPEX_WHEEL=intel_extension_for_pytorch-1.10.0+cpu-cp37-cp37m-linux_x86_64.whl
+        - PYTORCH_WHEEL=torch-1.12.0a0+git42f4993-cp37-cp37m-linux_x86_64.whl
+        - IPEX_WHEEL=intel_extension_for_pytorch-1.12.0+cpu-cp37-cp37m-linux_x86_64.whl
         - PACKAGE_NAME=pytorch-ipex-spr
       partials:
-        - centos8.3.2011-base
+        - centos-stream8-base
         - unzip
         - pytorch/centos-intel-base-installs
         - pytorch/prep-conda-env

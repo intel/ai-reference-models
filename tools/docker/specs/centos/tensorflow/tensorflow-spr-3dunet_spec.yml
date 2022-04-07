@@ -7,10 +7,10 @@ slice_sets:
     - add_to_name: tensorflow-spr-3dunet
       dockerfile_subdirectory: tensorflow-spr
       args:
-        - TENSORFLOW_WHEEL=tf_nightly-2.7.0.202140-cp36-cp36m-linux_x86_64.whl
+        - TENSORFLOW_WHEEL=tf_nightly-2.9.0.202212-cp38-cp38-linux_x86_64.whl
         - PACKAGE_NAME=tensorflow-spr-3dunet
       partials:
-        - centos8-base
+        - centos-stream8-base
         - tensorflow/spr-dnnl-max-var
         - tensorflow/spr-mkl-native-format-var
         - tensorflow/tf-spr-3dunet-whl
@@ -44,5 +44,5 @@ slice_sets:
             <package name>: tensorflow-spr-3dunet.tar.gz
             <package dir>: tensorflow-spr-3dunet
             <docker image>: model-zoo:tensorflow-spr-3dunet
-            <wheel name>: "tf_nightly-2.7.0.202140-cp36-cp36m-linux_x86_64.whl"
+            <wheel name>: "tf_nightly-2.9.0.202212-cp38-cp38-linux_x86_64.whl"
           uri: models/quickstart/spr_base/tensorflow

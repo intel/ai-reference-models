@@ -40,7 +40,7 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww32/ww32-pbfiles/tf_dataset/pre-trained-models/3DUNet/3dunet_dynamic_ndhwc.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/3DUNet/fp32/3dunet_dynamic_ndhwc.pb
         destination: pretrained_model/3dunet_dynamic_ndhwc.pb
       - source: https://ubit-artifactory-or.intel.com/artifactory/list/cicd-or-local/spr-ww42/tensorflow/models/3DUNet/3dunet_fused_pad_int8.pb
         destination: pretrained_model/3dunet_fused_pad_int8.pb

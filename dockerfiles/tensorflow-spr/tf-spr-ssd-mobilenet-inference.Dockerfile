@@ -76,7 +76,7 @@ RUN pip install \
         jupyter \
         lxml \
         matplotlib \
-        numpy==1.17.4 \
+        numpy>=1.17.4 \
         'pillow>=8.1.2' && \
     pip install pycocotools
 

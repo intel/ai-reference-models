@@ -19,7 +19,7 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE=centos:8
+ARG BASE_IMAGE=quay.io/centos/centos:stream8
 
 FROM ${BASE_IMAGE} AS centos-intel-base
 SHELL ["/bin/bash", "-c"]
@@ -50,7 +50,7 @@ RUN ln -sf $(which ${PYTHON}) /usr/local/bin/python && \
     ln -sf $(which ${PYTHON}) /usr/bin/python
 
 # Installs the latest version by default.
-ARG TF_WHEEL=tf_nightly-2.7.0.202140-cp36-cp36m-linux_x86_64.whl
+ARG TF_WHEEL=tf_nightly-2.9.0.202212-cp38-cp38-linux_x86_64.whl
 
 COPY ./whls/${TF_WHEEL} /tmp/pip3/
 

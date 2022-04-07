@@ -19,7 +19,7 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG BASE_IMAGE=centos:centos8.3.2011
+ARG BASE_IMAGE=quay.io/centos/centos:stream8
 
 FROM ${BASE_IMAGE} AS centos-intel-base
 SHELL ["/bin/bash", "-c"]
@@ -67,8 +67,8 @@ ENV PATH ~/conda/bin/:${PATH}
 ENV LD_LIBRARY_PATH /lib64/:/usr/lib64/:/usr/local/lib64:/root/conda/envs/pytorch/lib:${LD_LIBRARY_PATH}
 
 # Install PyTorch and IPEX wheels
-ARG PYTORCH_WHEEL="torch-1.11.0a0+gita8a0090-cp37-cp37m-linux_x86_64.whl"
-ARG IPEX_WHEEL="intel_extension_for_pytorch-1.10.0+cpu-cp37-cp37m-linux_x86_64.whl"
+ARG PYTORCH_WHEEL="torch-1.12.0a0+git42f4993-cp37-cp37m-linux_x86_64.whl"
+ARG IPEX_WHEEL="intel_extension_for_pytorch-1.12.0+cpu-cp37-cp37m-linux_x86_64.whl"
 
 COPY ./whls/* /tmp/pip3/
 RUN source activate pytorch && \
