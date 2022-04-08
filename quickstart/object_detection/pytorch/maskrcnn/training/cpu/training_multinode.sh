@@ -92,7 +92,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --backend ccl \
     SOLVER.IMS_PER_BATCH ${BATCH_SIZE} \
     SOLVER.MAX_ITER 720000 \
-    SOLVER.STEPS '(60000, 80000)' \
+    SOLVER.STEPS '"(60000, 80000)"' \
     SOLVER.BASE_LR 0.0025 \
     MODEL.DEVICE cpu \
     2>&1 | tee ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}.txt
