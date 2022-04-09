@@ -98,8 +98,8 @@ class ModelInitializer(BaseModelInitializer):
                    " --file=" + self.args.decode_from_file + \
                    " --file_out=" + translate_file + \
                    " --data_dir=" + self.args.data_location + \
-                   " --num_inter=" + str(self.args.num_inter_threads) + \
-                   " --num_intra=" + str(self.args.num_intra_threads)
+                   " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads) + \
+                   " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)
 
         self.bleu_params += " --translation=" + translate_file + \
                             " --reference=" + self.args.reference

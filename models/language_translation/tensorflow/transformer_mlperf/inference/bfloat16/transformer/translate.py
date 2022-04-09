@@ -245,6 +245,7 @@ def main(unused_argv):
   params.extra_decode_length = _EXTRA_DECODE_LENGTH
   params.batch_size = FLAGS.batch_size
   params.frozen_graph = FLAGS.input_graph
+
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
