@@ -315,11 +315,11 @@ if __name__ == "__main__":
            "translation to this file.",
       metavar="<FO>")
   parser.add_argument(
-      "--intra_op_parallelism_threads", "-intra", type=int, default=None,
+      "--intra_op_parallelism_threads", "-intra", type=int, default=28,
       help="the intra op parallelism thread to use", metavar="<INTRA>")
   parser.add_argument(
-      "--inter_op_parallelism_threads", "-inter", type=int, default=None,
-      help="the intra op parallelism thread to use", metavar="<INTER>")
+      "--inter_op_parallelism_threads", "-inter", type=int, default=1,
+      help="the inter op parallelism thread to use", metavar="<INTER>")
   parser.add_argument(
       "--batch_size", "-batch", type=int, default=_DECODE_BATCH_SIZE,
       help="the batch size for inference", metavar="<INTER>")

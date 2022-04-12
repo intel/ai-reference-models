@@ -21,6 +21,7 @@ import os
 from argparse import ArgumentParser
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -28,6 +29,11 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args, platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
+        # set num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads()
+
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
