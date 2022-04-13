@@ -18,4 +18,5 @@ and [Intel Extension for PyTorch](https://github.com/intel/intel-extension-for-p
 | Notebook | Framework | Description |
 | ---------| ----------|-------------|
 | [Transfer Learning for Image Classification with TF Hub](/docs/notebooks/transfer_learning/tf_image_classification) | TensorFlow | Demonstrates transfer learning with multiple [TF Hub](https://tfhub.dev) image classifiers, TF datasets, and custom image datasets |
+| [Transfer Learning for Image Classification with PyTorch & torchvision](/docs/notebooks/transfer_learning/pytorch_image_classification) | PyTorch | Demonstrates transfer learning with multiple [torchvision](https://pytorch.org/vision/stable/index.html) image classification models, torchvision datasets, and custom datasets |
 | [Transfer Learning for Object Detection with PyTorch & torchvision](/docs/notebooks/transfer_learning/pytorch_object_detection) | PyTorch | Demonstrates transfer learning with multiple [torchvision](https://pytorch.org/vision/stable/index.html) object detection models and a public image dataset |
