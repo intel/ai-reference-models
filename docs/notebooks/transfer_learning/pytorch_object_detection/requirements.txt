@@ -1,3 +1,4 @@
+intel_extension_for_pytorch==1.10.100
 ipywidgets==7.6.5
 matplotlib==3.5.1
 matplotlib-inline==0.1.3
@@ -12,3 +13,4 @@ tensorflow-addons==0.15.0
 torchvision==0.11.2
 tqdm==4.62.3
 urllib3==1.26.8
+
