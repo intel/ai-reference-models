@@ -9,7 +9,7 @@ slice_sets:
     - PACKAGE_NAME=ssd-resnet34-bfloat16-training
     - TF_MODELS_BRANCH=8110bb64ca63c48d0caee9d565e5b4274db2220a
     - TF_BENCHMARKS_BRANCH=509b9d288937216ca7069f31cfb22aaa7db6a4a7
-    - HOROVOD_VERSION=87094a4
+    - HOROVOD_VERSION=11c1389
     dockerfile_subdirectory: model_containers
     documentation:
       - docs:

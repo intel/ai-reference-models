@@ -68,7 +68,7 @@ RUN yum update -y && yum install -y  \
     cmake && \
     yum clean all
 
-ARG HOROVOD_VERSION=87094a4
+ARG HOROVOD_VERSION=11c1389
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \
     HOROVOD_WITH_TENSORFLOW=1 \

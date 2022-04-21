@@ -167,7 +167,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=87094a4
+      export HOROVOD_VERSION=11c1389
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -208,7 +208,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=87094a4
+      export HOROVOD_VERSION=11c1389
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
@@ -236,15 +236,13 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=87094a4
+      export HOROVOD_VERSION=11c1389
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      # apt-get install -y --no-install-recommends --fix-missing cmake
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
   fi
   python3 -m pip install --upgrade 'pip>=20.3.4'
