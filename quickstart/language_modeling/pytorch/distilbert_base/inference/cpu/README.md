@@ -23,9 +23,22 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   pip install datasets
   ```
 
-* Set ENV to use AMX if you are using SPR
+* Set ENV to use AMX if you are using SPR an linux kernel < 5.16
   ```
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
+* Set the following batch size if you are using SPR-56core and running bf16 or int8-bf16 for throughput mode in "run_multi_instance_throughput.sh"
+  ```
+  bf16:
+  BATCH_SIZE=${BATCH_SIZE:-198}
+  int8-bf16:
+  BATCH_SIZE=${BATCH_SIZE:-168}
+  (Other conditions can use [4 x core number] by default)
+  ```
+
+* [optional] Do calibration to get quantization config if you want do calibration by yourself.
+  ```
+  bash do_calibration.sh
   ```
 
 # Quick Start Scripts
@@ -34,6 +47,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 | ----------- | ----------- | ----------- | ----------- |
 | FP32        | bash run_multi_instance_throughput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
 | BF16        | bash run_multi_instance_throughput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
+| INT8-FP32        | bash run_multi_instance_throughput.sh int8-fp32 | bash run_multi_instance_realtime.sh int8-fp32 | bash run_accuracy.sh int8-fp32 |
+| INT8-BF16       | bash run_multi_instance_throughput.sh int8-bf16 | bash run_multi_instance_realtime.sh int8-bf16 | bash run_accuracy.sh int8-bf16 |
 
 ## Run the model
 
@@ -52,7 +67,7 @@ export MODEL_DIR=$(pwd)
 cd quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.10.0
+git checkout v4.18.0
 git apply ../enable_ipex_for_distilbert-base.diff
 pip install -e ./
 cd ..

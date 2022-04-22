@@ -20,23 +20,34 @@
 ARGS=""
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
+export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 path="ipex"
-ARGS="$ARGS --use_ipex"
+ARGS="$ARGS --use_ipex --benchmark --perf_begin_iter 500 --perf_run_iters 2000 "
 echo "### running with intel extension for pytorch"
 
 precision="fp32"
 if [[ "$1" == "bf16" ]]
 then
     precision="bf16"
-    ARGS="$ARGS --bf16"
+    ARGS="$ARGS --mix_bf16"
     echo "### running bf16 mode"
 elif [[ "$1" == "fp32" ]]
 then
     echo "### running fp32 mode"
+elif [[ "$1" == "int8-fp32" ]]
+then
+    precision="int8-fp32"
+    ARGS="$ARGS --int8 --int8_config configure.json"
+    echo "### running int8-fp32 mode"
+elif [[ "$1" == "int8-bf16" ]]
+then
+    precision="int8-bf16"
+    ARGS="$ARGS --mix_bf16 --int8 --int8_config configure.json"
+    echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf16"
+    echo "Supported precisions are: fp32, bf16, int8-fp32, int8-bf16"
     exit 1
 fi
 
@@ -47,6 +58,7 @@ echo "### running with jit mode"
 
 export OMP_NUM_THREADS=4
 CORES=`lscpu | grep Core | awk '{print $4}'`
+ARGS="$ARGS --use_share_weight --total_cores ${CORES} --cores_per_instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"distilbert-base-uncased-distilled-squad"}
@@ -57,13 +69,13 @@ fi
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/question-answering/run_qa.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --latency_mode --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --dataset_name squad \
   --do_eval \
-  --max_seq_length 384 \
-  --doc_stride 128 \
+  --max_seq_length 128 \
+  --doc_stride 64 \
   --output_dir ./tmp \
   --per_device_eval_batch_size $BATCH_SIZE \
 
