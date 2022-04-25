@@ -62,6 +62,8 @@ rm -rf ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_realtime*
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --latency_mode \
+    --log_path ${OUTPUT_DIR} \
+    --log_file_prefix rnnt_${PRECISION}_inference_realtime \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py \
     --dataset_dir ${DATASET_DIR}/dataset/LibriSpeech/ \
     --val_manifest ${DATASET_DIR}/dataset/LibriSpeech/librispeech-dev-clean-wav.json \
@@ -71,7 +73,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --ipex \
     --jit \
     --warm_up 10 \
-    $ARGS 2>&1 | tee ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_realtime.log
+    $ARGS
 
 # For the summary of results
 wait
