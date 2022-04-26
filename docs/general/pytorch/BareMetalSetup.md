@@ -51,7 +51,6 @@
     cd ..
     git clone https://github.com/pytorch/vision
     cd vision
-    git checkout v0.8.0
     python setup.py install
 
 ### build torch-ccl 
