@@ -791,6 +791,7 @@ def run():
             args.print_freq = ld_nbatches
             args.test_freq = 0
 
+        del(ld_model)
         print(
             "Saved at: epoch = {:d}/{:d}, batch = {:d}/{:d}, ntbatch = {:d}".format(
                 ld_k, ld_nepochs, ld_j, ld_nbatches, ld_nbatches_test
