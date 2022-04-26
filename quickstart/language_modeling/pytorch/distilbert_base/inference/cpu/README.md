@@ -4,7 +4,7 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [DistilBERT Base SQuAD1.1](https://huggingface.co/distilbert-base-uncased-distilled-squad) inference using Intel-optimized PyTorch.
+This document has instructions for running [DistilBERT base uncased finetuned SST-2](https://huggingface.co/distilbert-base-uncased-finetuned-sst-2-english) inference using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -23,17 +23,25 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   pip install datasets
   ```
 
-* Set ENV to use AMX if you are using SPR an linux kernel < 5.16
+* Set SEQUENCE_LENGTH before running the model
   ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  export SEQUENCE_LENGTH=128 
+  (128 is preferred, while you could set any other length)
   ```
-* Set the following batch size if you are using SPR-56core and running bf16 or int8-bf16 for throughput mode in "run_multi_instance_throughput.sh"
+
+* Set CORE_PER_INSTANCE before running realtime mode ("run_multi_instance_realtime.sh")
+  ```
+  export CORE_PER_INSTANCE=4
+  (4cores per instance setting is preferred, while you could set any other config like 1core per instance)
+  ```
+
+* Set the following preferred batch size if you are using SPR-56core and running bf16 or int8-bf16 for throughput mode in "run_multi_instance_throughput.sh"
   ```
   bf16:
   BATCH_SIZE=${BATCH_SIZE:-198}
   int8-bf16:
   BATCH_SIZE=${BATCH_SIZE:-168}
-  (Other conditions can use [4 x core number] by default)
+  (Other conditions can use [4 x core number] by default in script)
   ```
 
 * [optional] Do calibration to get quantization config if you want do calibration by yourself.
