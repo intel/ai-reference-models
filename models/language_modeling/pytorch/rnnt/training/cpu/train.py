@@ -608,10 +608,8 @@ def main(args):
     if args.ipex:
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
-            ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
         else:
-            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
-            ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
+            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
 
     if args.world_size > 1:
         device_ids = None
