@@ -40,7 +40,7 @@ index 14bc7b9e9..03b1f864a 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2fb10b9e..001c15fe2 100755
+index a2fb10b9e..29d9159cf 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -1027,7 +1027,62 @@ class Trainer:
@@ -67,7 +67,7 @@ index a2fb10b9e..001c15fe2 100755
 +                    break
 +
 +                if self.args.use_ipex:
-+                    if self.args.mix_bf16:
++                    if self.args.mix_bf16 and not self.args.int8:
 +                        model = ipex.optimize(model, dtype=torch.bfloat16, level="O1")
 +                        with torch.cpu.amp.autocast(), torch.no_grad():
 +                            model = torch.jit.trace(model, jit_inputs, strict=False)
