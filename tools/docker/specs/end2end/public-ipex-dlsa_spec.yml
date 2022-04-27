@@ -10,5 +10,5 @@ slice_sets:
     args: []
     partials:
         - end2end/profiling-transformers
-        - end2end/dlsa-patch-installed-ipex
+        - end2end/dlsa-conda-patch-installed-ipex
         - end2end/dlsa-pip-installs
