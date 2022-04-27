@@ -79,8 +79,6 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --en
   --output_dir ./tmp \
   --per_device_eval_batch_size $BATCH_SIZE \
 
-match=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_exact_match" |sed -e 's/.*= //;s/[^0-9.]//g')
+accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
 f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')
-echo ""distilbert-base";"exact_match";${precision};${BATCH_SIZE};${match}" | tee -a ${WORK_SPACE}/summary.log
-echo ""distilbert-base";"f1";${precision};${BATCH_SIZE};${f1}" | tee -a ${WORK_SPACE}/summary.log
-
+echo ""distilbert-base";"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log

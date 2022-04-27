@@ -11,6 +11,16 @@ This document has instructions for running [DistilBERT base uncased finetuned SS
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
+### Prepare model
+```
+  cd <clone of the model zoo>/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
+  git clone https://github.com/huggingface/transformers.git
+  cd transformers
+  git checkout v4.18.0
+  git apply ../enable_ipex_for_distilbert-base.diff
+  pip install -e ./
+  cd ..
+ ```
 ### Model Specific Setup
 
 * Install Intel OpenMP
@@ -29,23 +39,21 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   (128 is preferred, while you could set any other length)
   ```
 
-* Set CORE_PER_INSTANCE before running realtime mode ("run_multi_instance_realtime.sh")
+* Set CORE_PER_INSTANCE before running realtime mode
   ```
   export CORE_PER_INSTANCE=4
   (4cores per instance setting is preferred, while you could set any other config like 1core per instance)
   ```
 
-* Set the following preferred batch size if you are using SPR-56core and running bf16 or int8-bf16 for throughput mode in "run_multi_instance_throughput.sh"
+* About the BATCH_SIZE in scripts
   ```
-  bf16:
-  BATCH_SIZE=${BATCH_SIZE:-198}
-  int8-bf16:
-  BATCH_SIZE=${BATCH_SIZE:-168}
-  (Other conditions can use [4 x core number] by default in script)
+  Throughput mode is using BATCH_SIZE=[4 x core number] by default in script; 
+  Realtime mode is using BATCH_SIZE=[1] by default in script; 
   ```
 
-* [optional] Do calibration to get quantization config if you want do calibration by yourself.
+* Do calibration to get quantization config before running INT8 (Default attached is produced with sequence length 128).
   ```
+  #Set the SEQUENCE_LENGTH to which is going to run when doing the calibration.
   bash do_calibration.sh
   ```
 
