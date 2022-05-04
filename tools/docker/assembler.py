@@ -784,7 +784,11 @@ def get_download(source, destination):
     # Ensure that the directories exist first, otherwise the file copy will fail
     if not os.path.isdir(os.path.dirname(destination)):
         os.makedirs(os.path.dirname(destination))
-    urllib.request.urlretrieve(source, destination)
+    if source.lower().startswith('http'):
+        urllib.request.Request(source)
+    else:
+        raise ValueError from None
+    urllib.request.urlretrieve(source, destination)  # nosec
     eprint("Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
 
 def run(cmd):
