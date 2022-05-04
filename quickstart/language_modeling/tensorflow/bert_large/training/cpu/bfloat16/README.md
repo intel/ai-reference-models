@@ -10,34 +10,13 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-bfloat16-training.tar.gz)
+[bert-large-bfloat16-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-bfloat16-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
 
-### Pretrained models
-
-Download and extract checkpoints the bert pretrained model from the
-[google bert repo](https://github.com/google-research/bert#pre-trained-models).
-The extracted directory should be set to the `CHECKPOINT_DIR` environment
-variable when running the quickstart scripts.
-
-For training from scratch, Wikipedia and BookCorpus need to be downloaded
-and pre-processed.
-
-### GLUE data
-
-[GLUE data](https://gluebenchmark.com/tasks) is used when running BERT
-classification training. Download and unpack the GLUE data by running
-[this script](https://gist.github.com/W4ngatang/60c2bdb54d156a41194446737ce03e2e).
-
-### SQuAD data
-
-The Stanford Question Answering Dataset (SQuAD) dataset files can be downloaded
-from the [Google bert repo](https://github.com/google-research/bert#squad-11).
-The three files (`train-v1.1.json`, `dev-v1.1.json`, and `evaluate-v1.1.py`)
-should be downloaded to the same directory. Set the `DATASET_DIR` to point to
-that directory when running bert fine tuning using the SQuAD data.
+Follow instructions in [BERT Large datasets](/datasets/bert_data/README.md#training) to download and preprocess the dataset.
+You can do either classification training or fine-tuning using SQuAD.
 
 
 <!--- 40. Quick Start Scripts -->
@@ -67,7 +46,7 @@ training or running classifier training multiple times, use a new empty
 
 The snippet below shows a quickstart script running with a single instance:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-bfloat16-training.tar.gz
 tar -xvf bert-large-bfloat16-training.tar.gz
 cd bert-large-bfloat16-training
 
@@ -105,7 +84,7 @@ installed in your environment:
 * horovod==0.19.1
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-bfloat16-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-bfloat16-training.tar.gz
 tar -xvf bert-large-bfloat16-training.tar.gz
 cd bert-large-bfloat16-training
 

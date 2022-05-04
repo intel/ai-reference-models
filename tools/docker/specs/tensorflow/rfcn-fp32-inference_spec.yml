@@ -20,7 +20,7 @@ slice_sets:
                 <precision>: FP32
                 <mode>: inference
                 <use case>: object_detection
-                <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/rfcn-fp32-inference.tar.gz
+                <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/rfcn-fp32-inference.tar.gz
                 <package name>: rfcn-fp32-inference.tar.gz
                 <package dir>: rfcn-fp32-inference
                 <docker image>: intel/object-detection:tf-latest-rfcn-fp32-inference

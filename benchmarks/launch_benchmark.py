@@ -56,21 +56,21 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         env_var_dict = self.get_env_vars(benchmark_scripts, use_case, intelai_models,
                                          intelai_models_common, os_type)
         if "Windows" == os_type:
+            if os.getenv("PYTHONPATH") is None:
+                os.environ["PYTHONPATH"] = os.path.dirname(sys.executable)
             os.environ["PYTHONPATH"] = "{};{};{}".format(
-                os.environ["PYTHONPATH"], benchmark_scripts,
-                os.path.join(benchmark_scripts, "common"),
-                os.path.join(benchmark_scripts, "common", "tensorflow"))
+                benchmark_scripts, intelai_models, os.environ["PYTHONPATH"])
 
         if self.args.docker_image:
             if self.args.framework == 'tensorflow_serving':
                 self.run_bare_metal(benchmark_scripts, intelai_models,
-                                    intelai_models_common, env_var_dict)
+                                    intelai_models_common, env_var_dict, os_type)
             elif self.args.framework == 'tensorflow':
                 self.run_docker_container(benchmark_scripts, intelai_models,
                                           intelai_models_common, env_var_dict)
         else:
             self.run_bare_metal(benchmark_scripts, intelai_models,
-                                intelai_models_common, env_var_dict)
+                                intelai_models_common, env_var_dict, os_type)
 
     def parse_args(self):
         # Additional args that are only used with the launch script
@@ -214,7 +214,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "DATA_NUM_INTER_THREADS": args.data_num_inter_threads,
             "DATA_NUM_INTRA_THREADS": args.data_num_intra_threads,
             "DISABLE_TCMALLOC": args.disable_tcmalloc,
-            "DOCKER": args.docker_image or str(args.docker_image is not None),
+            "DOCKER": str(args.docker_image) if args.docker_image is not None else "",
             "DRY_RUN": str(args.dry_run) if args.dry_run is not None else "",
             "EXTERNAL_MODELS_SOURCE_DIRECTORY": args.model_source_dir,
             "FRAMEWORK": args.framework,
@@ -250,19 +250,14 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
                                  format(custom_arg))
             split_arg = custom_arg.split("=")
             split_arg[0] = split_arg[0].replace("-", "_").lstrip('_')
+            # Convert the arg names to upper case to work on both Windows and Linux systems
+            split_arg[0] = split_arg[0].upper()
             env_var_dict[split_arg[0]] = split_arg[1]
-
-        # For TF 2.5, int8 models must be run with TF_ENABLE_MKL_NATIVE_FORMAT=0
-        if self.args.precision == "int8":
-            env_var_dict["TF_ENABLE_MKL_NATIVE_FORMAT"] = "0"
-            print("Warning: Running int8 inference with blocked format. Native format will be supported in future "
-                  "TensorFlow releases. Please don't define TF_ENABLE_MKL_NATIVE_FORMAT in CLI unless native format "
-                  "is enabled for your installed TensorFlow version.")
 
         return env_var_dict
 
     def run_bare_metal(self, benchmark_scripts, intelai_models,
-                       intelai_models_common, env_var_dict):
+                       intelai_models_common, env_var_dict, os_type):
         """
         Runs the model without a container
         """
@@ -348,7 +343,10 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         # Run the start script
         start_script = os.path.join(workspace, "start.sh")
-        self._launch_command(["bash", start_script])
+        if "Windows" == os_type:
+            self._launch_command([os.environ["MSYS64_BASH"], start_script])
+        else:
+            self._launch_command(["bash", start_script])
 
     def run_docker_container(self, benchmark_scripts, intelai_models,
                              intelai_models_common, env_var_dict):

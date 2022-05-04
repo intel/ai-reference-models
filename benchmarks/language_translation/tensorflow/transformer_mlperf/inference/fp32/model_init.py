@@ -32,10 +32,6 @@ class ModelInitializer(BaseModelInitializer):
         self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
 
-        # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
-        self.set_kmp_vars(config_file_path)
-
         MODEL_EXEC_DIR = os.path.join(self.args.intelai_models, self.args.mode, self.args.precision)
 
         self.cmd += self.python_exe
@@ -70,9 +66,16 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument("--steps", dest='steps',
                                 type=int, default=100,
                                 help="number of steps")
+        arg_parser.add_argument('--kmp-blocktime', dest='kmp_blocktime',
+                                help='number of kmp block time',
+                                type=int, default=1)
 
         self.args = arg_parser.parse_args(self.custom_args,
                                           namespace=self.args)
+
+        # Set KMP env vars, if they haven't already been set
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
         # Model parameter control
         translate_file = os.path.join(self.args.output_dir,
@@ -109,6 +112,13 @@ class ModelInitializer(BaseModelInitializer):
             self.bleucmd = ''
 
     def run(self):
+        # TODO: make it a property in PlatformUtils (platform_util.os_type) to get the host OS.
+        # We already do the OS check there to see if it's one that we support.
+        if os.environ.get('OS', '') == 'Windows_NT':
+            os.environ["PYTHONPATH"] = "{};{}".format(
+                os.path.join(self.args.intelai_models, os.pardir,
+                             os.pardir, os.pardir, "common", "tensorflow"),
+                os.environ["PYTHONPATH"])
         original_dir = os.getcwd()
         print(self.cmd)
         self.run_command(self.cmd)
