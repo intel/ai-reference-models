@@ -181,6 +181,10 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
         [inference_time, decoding_time],
         prefix='Test: ')
 
+    # Disable TE, there 2 cat at the end of the forward.
+    # When the inputs of these 2 cat are fp32, there is a fused-cat-cat kernel by TE.
+    # This fused-cat-cat kernel is not efficient as the native cat operation.
+    torch._C._jit_set_texpr_fuser_enabled(False)
     Profilling_iterator = 99
     start = time.time()
     if args.int8:
