@@ -25,8 +25,6 @@ ARG TENSORFLOW_TAG="tensorflow-spr"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN yum update -y && \
     yum install -y \
         numactl \

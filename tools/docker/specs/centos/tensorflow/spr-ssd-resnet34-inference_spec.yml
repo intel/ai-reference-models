@@ -60,9 +60,9 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/ssd-resnet34/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/ssd-resnet34/fp32/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
           destination: pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
-        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/ssd-resnet34/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/ssd-resnet34/int8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
           destination: pretrained_model/ssd_resnet34_int8_1200x1200_pretrained_model.pb
       wrapper_package_files:
         - source: output/tf-spr-ssd-resnet34-inference.tar.gz

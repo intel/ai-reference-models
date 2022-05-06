@@ -25,8 +25,6 @@ ARG TENSORFLOW_TAG="tensorflow-spr"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN yum update -y && \
     yum install -y \
         numactl \
@@ -35,8 +33,9 @@ RUN yum update -y && \
         python3-tkinter && \
     pip install requests
 
+ARG PY_VER=38
 RUN yum install -y gcc gcc-c++ && \
-    yum install -y python3-devel && \
+    yum install -y python${PY_VER}-devel && \
     yum clean all
 
 ARG TF_MODELS_BRANCH="f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc"

@@ -19,17 +19,13 @@ RUN ln -sf $(which ${PYTHON}) /usr/local/bin/python && \
     ln -sf $(which ${PYTHON}) /usr/bin/python
 
 # Installs the latest version by default.
-ARG TF_WHEEL=tf_nightly-2.7.0.202142-cp36-cp36m-linux_x86_64.whl
+ARG TF_WHEEL=tf_nightly-2.10.0.202218-cp38-cp38-linux_x86_64.whl
+ARG TF_ESTIMATOR_VER=2.10.0.dev2022042008
+ARG KERAS_NIGHTLY_VER=2.10.0.dev2022042007
 
 COPY ./whls/${TF_WHEEL} /tmp/pip3/
 
-RUN python -m pip install --no-cache-dir /tmp/pip3/${TF_WHEEL}
-
-
-# fix keras-nightly and tf-estimator-nightly versions
-RUN python -m pip uninstall -y \
-      keras-nightly \
-      tf-estimator-nightly && \
-    python -m pip install \
-      'keras-nightly==2.9.0.dev2022021708' \
-      tf-estimator-nightly~=2.9.0.dev
+RUN python -m pip install --no-cache-dir \
+    "tf-estimator-nightly==${TF_ESTIMATOR_VER}" \
+    "keras-nightly==${KERAS_NIGHTLY_VER}" \
+    /tmp/pip3/${TF_WHEEL}

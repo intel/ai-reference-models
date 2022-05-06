@@ -7,14 +7,18 @@ slice_sets:
     - add_to_name: tensorflow-spr
       dockerfile_subdirectory: tensorflow-spr
       args:
-        - TF_WHEEL=tf_nightly-2.9.0.202212-cp38-cp38-linux_x86_64.whl
+        - TF_WHEEL=tf_nightly-2.10.0.202218-cp38-cp38-linux_x86_64.whl
+        - TF_ESTIMATOR_VER=2.10.0.dev2022042008
+        - KERAS_NIGHTLY_VER=2.10.0.dev2022042007
         - PACKAGE_NAME=tensorflow-spr
         - PY_VER=38
       partials:
-        - centos-stream8-base
+        - centos8-base
         - tensorflow/spr-dnnl-max-var
         - tensorflow/spr-mkl-native-format-var
         - tensorflow/tf-installs
+        - tcmalloc
+        - erase-openssl
       files:
         - source: quickstart/spr_base/tensorflow/build.sh
           destination: build.sh
@@ -45,5 +49,5 @@ slice_sets:
             <package name>: tensorflow-spr.tar.gz
             <package dir>: tensorflow-spr
             <docker image>: model-zoo:tensorflow-spr
-            <wheel name>: "tf_nightly-2.7.0.202142-cp36-cp36m-linux_x86_64.whl"
+            <wheel name>: "tf_nightly-2.10.0.202218-cp38-cp38-linux_x86_64.whl"
           uri: models/quickstart/spr_base/tensorflow

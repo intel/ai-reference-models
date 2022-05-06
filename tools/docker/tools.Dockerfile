@@ -1,4 +1,4 @@
-# Copyright 2018 The TensorFlow Authors. All Rights Reserved.
+# Copyright 2021 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 #
 # You can use this image to quickly develop changes to the Dockerfile assembler
 # or set of TF Docker partials. See README.md for usage instructions.
-FROM ubuntu:20.04
+FROM ubuntu:18.04
 LABEL maintainer="Austin Anderson <angerson@google.com>"
 
 ARG HTTP_PROXY
@@ -46,7 +46,7 @@ RUN apt-get update && \
     libssl-dev \
     python3 \
     python3-pip \
-    python-dev
+    python3-dev
 
 RUN curl -sSL https://get.docker.com/ | sh
 RUN pip3 install --upgrade pip==20.3.4 && \
@@ -54,7 +54,7 @@ RUN pip3 install --upgrade pip==20.3.4 && \
          absl-py \
          cerberus \
          'cryptography<=3.2.1' \
-         'docker==4.2.2' \
+         'docker<=4.3.0' \
          GitPython \
          ndg-httpsclient \
          pyasn1 \

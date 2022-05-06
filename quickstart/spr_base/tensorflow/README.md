@@ -20,7 +20,7 @@ tensorflow-spr
 │   └── third_party
 ├── tensorflow-spr.Dockerfile
 └── whls
-    └── tf_nightly-2.7.0.202142-cp36-cp36m-linux_x86_64.whl
+    └── tf_nightly-2.10.0.202218-cp38-cp38-linux_x86_64.whl
 ```
 
 ## Docker

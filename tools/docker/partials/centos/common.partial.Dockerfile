@@ -1,5 +1,3 @@
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN yum update -y && \
     yum install -y \
         numactl \

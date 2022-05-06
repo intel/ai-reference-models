@@ -25,8 +25,6 @@ ARG TENSORFLOW_TAG="tensorflow-spr"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN yum update -y && \
     yum install -y \
         numactl \
@@ -35,21 +33,19 @@ RUN yum update -y && \
         python3-tkinter && \
     pip install requests
 
+ARG PY_VER=38
 RUN yum install -y gcc gcc-c++ && \
-    yum install -y python3-devel && \
+    yum install -y python${PY_VER}-devel && \
     yum clean all
 
 RUN yum update -y && \
     yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM && \
     yum clean all
 
+# Install OpenMPI
 ARG OPENMPI_VERSION="openmpi-4.1.0"
 ARG OPENMPI_DOWNLOAD_URL="https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-4.1.0.tar.gz"
 
-RUN yum install -y perl && \
-    yum clean all
-
-# Install OpenMPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
     curl -fSsL -O ${OPENMPI_DOWNLOAD_URL} && \
@@ -74,8 +70,7 @@ RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.
 # Install OpenSSH for MPI to communicate between containers
 RUN yum update -y && yum install -y  \
     openssh-server \
-    openssh-clients \
-    cmake && \
+    openssh-clients && \
     yum clean all
 
 ARG HOROVOD_VERSION=11c1389
@@ -87,8 +82,9 @@ ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_GLOO=1
 
 # Install Horovod
-RUN yum update -y && yum install -y git make && \
+RUN yum update -y && yum install -y git cmake gcc-c++ && \
     yum clean all
+
 RUN python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
 
 RUN pip install opencv-python

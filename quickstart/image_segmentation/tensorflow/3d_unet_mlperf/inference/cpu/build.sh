@@ -20,7 +20,7 @@ set -e
 PACKAGE_NAME=tf-spr-3d-unet-mlperf-inference
 DOCKERFILE=tf-spr-3d-unet-mlperf-inference.Dockerfile
 TF_SPR_BASE_IMAGE=${TF_SPR_BASE_IMAGE:-model-zoo}
-TF_SPR_BASE_TAG=${TF_SPR_BASE_TAG:-tensorflow-spr-3dunet}
+TF_SPR_BASE_TAG=${TF_SPR_BASE_TAG:-tensorflow-spr}
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:tf-spr-3d-unet-mlperf-inference}
 
 if [ "$(docker images -q ${TF_SPR_BASE_IMAGE}:${TF_SPR_BASE_TAG})" == "" ]; then

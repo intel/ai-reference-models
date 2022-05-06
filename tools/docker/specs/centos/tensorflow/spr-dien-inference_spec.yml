@@ -43,7 +43,7 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/dien/fp32/dien_fp32_static_rnn_graph.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/dien/fp32/dien_fp32_static_rnn_graph.pb
         destination: pretrained_model/dien_fp32_static_rnn_graph.pb
       wrapper_package_files:
         - source: output/tf-spr-dien-inference.tar.gz

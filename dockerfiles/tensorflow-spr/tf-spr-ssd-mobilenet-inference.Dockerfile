@@ -41,8 +41,6 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ENV DEBIAN_FRONTEND=noninteractive
-
 RUN yum update -y && \
     yum install -y \
         numactl \
@@ -51,8 +49,9 @@ RUN yum update -y && \
         python3-tkinter && \
     pip install requests
 
+ARG PY_VER=38
 RUN yum install -y gcc gcc-c++ && \
-    yum install -y python3-devel && \
+    yum install -y python${PY_VER}-devel && \
     yum clean all
 
 ARG TF_MODELS_BRANCH

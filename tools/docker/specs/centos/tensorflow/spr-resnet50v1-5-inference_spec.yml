@@ -47,11 +47,11 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/resnet50v1_5/int8/bias_resnet50.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/resnet50v1_5/int8/bias_resnet50.pb
         destination: pretrained_model/resnet50v1_5_int8_pretrained_model.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/resnet50v1_5/bfloat16/bf16_resnet50_v1.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/resnet50v1_5/bfloat16/bf16_resnet50_v1.pb
         destination: pretrained_model/resnet50v1_5_bfloat16_pretrained_model.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/resnet50v1_5/fp32/resnet50_v1.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/resnet50v1_5/fp32/resnet50_v1.pb
         destination: pretrained_model/resnet50v1_5_fp32_pretrained_model.pb
       wrapper_package_files:
         - source: output/tf-spr-resnet50v1-5-inference.tar.gz

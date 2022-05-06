@@ -46,11 +46,11 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/bert_squad/int8/int8_bf16_optimized_bert.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/bert_squad/int8/int8_bf16_optimized_bert.pb
         destination: pretrained_model/bert_large_int8_pretrained_model.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/bert_squad/bfloat16/bf16_optimized_bert.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/bert_squad/bfloat16/bf16_optimized_bert.pb
         destination: pretrained_model/bert_large_bfloat16_pretrained_model.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/spr-ww12-2022/bert_squad/fp32/new_fp32_bert_squad.pb
+      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/bert_squad/fp32/new_fp32_bert_squad.pb
         destination: pretrained_model/bert_large_fp32_pretrained_model.pb
       - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_6_1/bert_large_checkpoints.zip
         destination: pretrained_model/bert_large_checkpoints.zip

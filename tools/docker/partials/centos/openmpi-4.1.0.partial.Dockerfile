@@ -1,10 +1,7 @@
+# Install OpenMPI
 ARG OPENMPI_VERSION="openmpi-4.1.0"
 ARG OPENMPI_DOWNLOAD_URL="https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-4.1.0.tar.gz"
 
-RUN yum install -y perl && \
-    yum clean all
-
-# Install OpenMPI
 RUN mkdir /tmp/openmpi && \
     cd /tmp/openmpi && \
     curl -fSsL -O ${OPENMPI_DOWNLOAD_URL} && \
