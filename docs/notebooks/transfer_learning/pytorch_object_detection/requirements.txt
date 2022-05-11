@@ -1,0 +1,14 @@
+ipywidgets==7.6.5
+matplotlib==3.5.1
+matplotlib-inline==0.1.3
+notebook==6.4.7
+numpy==1.22.1
+opencv-python==4.5.5.62
+pandas==1.4.0
+Pillow==9.0.0
+psutil==5.9.0
+pycocotools==2.0.4
+tensorflow-addons==0.15.0
+torchvision==0.11.2
+tqdm==4.62.3
+urllib3==1.26.8

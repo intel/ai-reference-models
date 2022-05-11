@@ -10,25 +10,25 @@ using a large dataset using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wide-deep-large-ds-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/wide-deep-large-ds-fp32-training.tar.gz)
+[wide-deep-large-ds-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
 
-The large [Kaggle Display Advertising Challenge Dataset](https://www.kaggle.com/c/criteo-display-ad-challenge/data)
-will be used for training Wide and Deep. The
-[data](https://www.kaggle.com/c/criteo-display-ad-challenge/data) is from
+The Large [Kaggle Display Advertising Challenge Dataset](https://www.kaggle.com/c/criteo-display-ad-challenge/data)
+will be used for training Wide and Deep. The [data](https://www.kaggle.com/c/criteo-display-ad-challenge/data) is from
 [Criteo](https://www.criteo.com) and has a field indicating if an ad was
 clicked (1) or not (0), along with integer and categorical features.
 
-Download large Kaggle Display Advertising Challenge Dataset from
-[Criteo Labs](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/).
-* Download the large version of train dataset from: https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/train.csv
-* Download the large version of evaluation dataset from: https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/eval.csv
-
-The directory where you've downloaded the `train.csv` and `eval.csv`
-files should be used as the `DATASET_DIR` when running [quickstart scripts](#quick-start-scripts).
-
+Download the Large Kaggle Display Advertising Challenge Dataset from [Criteo Labs](http://labs.criteo.com/2014/02/kaggle-display-advertising-challenge-dataset/) in `$DATASET_DIR`.
+If the evaluation/train dataset were not available in the above link, it can be downloaded as follow:
+   ```
+    export DATASET_DIR=<location where dataset files will be saved>
+    mkdir $DATASET_DIR && cd $DATASET_DIR
+    wget https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/eval.csv
+    wget https://storage.googleapis.com/dataset-uploader/criteo-kaggle/large_version/train.csv
+   ```
+The `DATASET_DIR` environment variable will be used as the dataset directory when running [quickstart scripts](#quick-start-scripts).
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -56,7 +56,7 @@ DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/wide-deep-large-ds-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
 cd wide-deep-large-ds-fp32-training
 
