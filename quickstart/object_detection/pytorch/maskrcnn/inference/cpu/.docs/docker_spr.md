@@ -1,10 +1,10 @@
 ## Run the model
 
-Download the pretrained model and set the `PRETRAINED_MODEL` environment variable
-to point to the file.
+Download the pretrained model and set the `CHECKPOINT_DIR` environment variable
+to point to the directory where the weights file is downloaded.
 ```
 curl -O https://download.pytorch.org/models/maskrcnn/e2e_mask_rcnn_R_50_FPN_1x.pth
-export PRETRAINED_MODEL=$(pwd)/e2e_mask_rcnn_R_50_FPN_1x.pth
+export CHECKPOINT_DIR=$(pwd)
 ```
 
 After you've downloaded the pretrained model and followed the instructions to
@@ -21,7 +21,7 @@ cd <package dir>
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
 export MODE=<imperative or jit>
-export PRETRAINED_MODEL=<path to the downloaded .pth file>
+export CHECKPOINT_DIR=<path to the directory where the downloaded .pth file is located>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 
