@@ -15,6 +15,23 @@
 # limitations under the License.
 #
 
+MODEL_DIR=${MODEL_DIR-$PWD}
+
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+TCMALLOC_ARGS=""
+ARGS=""
+
+if [[ ${PLATFORM} == "linux" ]]; then
+  pip list | grep intel-extension-for-pytorch
+  if [[ "$?" == 0 ]]; then
+    TCMALLOC_ARGS=" -m intel_pytorch_extension.cpu.launch --enable_tcmalloc"
+    # in case IPEX is used we set ipex and jit path args
+    ARGS="--ipex --jit"
+    echo "Running using ${ARGS} args ..."
+  fi
+fi
+
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"
   exit 1
@@ -25,15 +42,12 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-python -m intel_pytorch_extension.launch \
-    --enable_tcmalloc \
+python ${TCMALLOC_ARGS} \
     models/image_recognition/pytorch/common/main.py \
-    --arch resnet50 \
+    --arch resnet50 ${DATASET_DIR} \
     --evaluate \
-    --data ${DATASET_DIR} \
     --pretrained \
-    --ipex \
-    --jit \
-    --precision bf16 \
+    ${ARGS} \
+    --bf16 \
     --workers 0 \
     --batch-size 128

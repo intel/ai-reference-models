@@ -74,7 +74,6 @@ export DATASET_DIR=<path to the preprocessed imagenet dataset>
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/pytorch-resnet50-bfloat16-inference.tar.gz
 tar -xzf pytorch-resnet50-bfloat16-inference.tar.gz
 cd pytorch-resnet50-bfloat16-inference
-
 ./quickstart/<script name>.sh
 ```
 
