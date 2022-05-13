@@ -107,6 +107,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --epochs $TRAINING_EPOCHS \
     --world-size ${NUM_RANKS} \
     --dist-backend ccl \
+    --train-no-eval \
     -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
 # For the summary of results
 wait
