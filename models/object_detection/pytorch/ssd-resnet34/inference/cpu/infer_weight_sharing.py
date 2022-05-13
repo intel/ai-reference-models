@@ -229,6 +229,11 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
     inference_time = AverageMeter('InferenceTime', ':6.3f')
     decoding_time = AverageMeter('DecodingTime', ':6.3f')
 
+    # Disable TE, there 2 cat at the end of the forward.
+    # When the inputs of these 2 cat are fp32, there is a fused-cat-cat kernel by TE.
+    # This fused-cat-cat kernel is not efficient as the native cat operation.
+    torch._C._jit_set_texpr_fuser_enabled(False)
+
     Profilling_iterator = 99
     start = time.time()
     if args.int8:
@@ -410,6 +415,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     # model = torch.jit.freeze(model)
                     model_decode = torch.jit.freeze(model_decode)
+                    # Suggest to run the Jit optimization in the main thread
+                    for _ in range(3):
+                        model_decode(torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
 
                     if args.use_throughput_benchmark:
                         print('bf16 throughput benchmark')
@@ -537,6 +545,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         batch_per_stream = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
                         model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     model_decode = torch.jit.freeze(model_decode)
+                    # Suggest to run the Jit optimization in the main thread
+                    for _ in range(3):
+                        model_decode(torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
                     if args.use_throughput_benchmark:
                         print('fp32 throughput benchmark')
                         bench = ThroughputBenchmark(model_decode)

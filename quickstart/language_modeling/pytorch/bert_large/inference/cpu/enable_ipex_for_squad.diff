@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..cf28e434a 100644
+index 2bd4e90ff..41f9ad6c8 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -37,14 +37,16 @@ index 2bd4e90ff..cf28e434a 100644
  
  def set_seed(args):
      random.seed(args.seed)
-@@ -264,19 +270,101 @@ def train(args, train_dataset, model, tokenizer):
+@@ -264,19 +270,127 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
 +def wrap_model(model, args):
 +    model.eval()
 +    ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
-+    dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
++    dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long) \
++                    if not args.use_multi_stream_module \
++                    else torch.ones((args.eval_batch_size//args.num_streams, 384), dtype=torch.long)
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
 +    if args.int8:
@@ -81,6 +83,20 @@ index 2bd4e90ff..cf28e434a 100644
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
 +            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True)) 
 +            model = torch.jit.freeze(model)
++    if args.use_multi_stream_module:
++        # Suggest to run the Jit optimization in the main thread
++        for _ in range(3):
++            model(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++        print("Use multi stream module on numa node:{0}, num of streams:{1}, batch per stream:{2}".format(args.instance_number, args.num_streams, args.eval_batch_size//args.num_streams))
++        input_hint_object = {"input_ids": 0, "attention_mask": 0, "token_type_ids": 0}
++        multi_stream_input_hint = ipex.cpu.runtime.MultiStreamModuleHint(**input_hint_object)
++        multi_stream_output_hint = ipex.cpu.runtime.MultiStreamModuleHint((0, 0))
++        cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
++        model = ipex.cpu.runtime.MultiStreamModule(model,
++                                                num_streams=args.num_streams,
++                                                cpu_pool=cpu_pool,
++                                                input_split_hint = multi_stream_input_hint,
++                                                output_concat_hint = multi_stream_output_hint)
 +    return model 
 +
 +def benchmark_evaluate(args, model, eval_dataloader):
@@ -116,8 +132,18 @@ index 2bd4e90ff..cf28e434a 100644
 +                        "attention_mask": batch[1],
 +                        "token_type_ids": batch[2],
 +                    }
++                    #print("---------------**inputs is:{}".format(**inputs))
 +                    time_start = time.time()
++                    #print("inputs type is: {}".format(type(inputs)))
++                    #print("inputs is: {}".format(inputs))
++
 +                    outputs = model(**inputs)          
++
++                    # print("outputs type is: {}".format(type(outputs)))
++                    # print("outputs len is: {}".format(len(outputs)))
++                    # print("output[0] size is: {}".format(outputs[0].size()))
++                    # print("output[1] size is: {}".format(outputs[1].size()))
++                    # print("outputs is: {}".format(outputs))
 +                    #prof.step()
 +                    time_end = time.time()
 +                    if epoch * steps_per_epoch + it > args.perf_begin_iter:
@@ -142,7 +168,7 @@ index 2bd4e90ff..cf28e434a 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -285,10 +373,38 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -285,10 +399,38 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -183,7 +209,7 @@ index 2bd4e90ff..cf28e434a 100644
      for batch in tqdm(eval_dataloader, desc="Evaluating"):
          model.eval()
          batch = tuple(t.to(args.device) for t in batch)
-@@ -658,6 +774,36 @@ def main():
+@@ -658,6 +800,41 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -216,7 +242,12 @@ index 2bd4e90ff..cf28e434a 100644
 +                        help="Number iterations to collect time")
 +    parser.add_argument("--total_cores", type=int, default=28,
 +                        help="Total cores used for this process, used for share_weight mode")
-+
++    parser.add_argument('--use_multi_stream_module', dest='use_multi_stream_module', action='store_true',
++                        help='Whether use multi stream module for throughput mode')
++    parser.add_argument("--num_streams", type=int, default=1,
++                        help="The number of stream to use, used for multi stream module")
++    parser.add_argument("--instance_number", type=int, default=0,
++                        help="The socket to run multi stream module, used for multi stream module with multi sockets")
      args = parser.parse_args()
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
