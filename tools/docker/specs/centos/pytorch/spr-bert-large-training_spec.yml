@@ -43,6 +43,8 @@ slice_sets:
           destination: licenses/third_party
         - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/README_SPR.md
           destination: README.md
+        - source: models/language_modeling/pytorch/bert_large/training/input_preprocessing
+          destination: input_preprocessing
       documentation:
         - docs:
           - name: Title

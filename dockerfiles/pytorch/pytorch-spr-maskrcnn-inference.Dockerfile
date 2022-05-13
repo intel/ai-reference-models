@@ -95,4 +95,5 @@ ENV BASH_ENV=/root/.bash_profile
 WORKDIR /workspace/
 RUN yum install -y numactl mesa-libGL && \
     yum clean all && \
+    echo "export LD_PRELOAD=${LD_PRELOAD%%:}" >> /root/.bash_profile && \
     echo "source activate pytorch" >> /root/.bash_profile

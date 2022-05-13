@@ -20,13 +20,11 @@ export CONFIG_FILE=<path to the bert_config.json>
 # Run the container with the default run_bert_pretrain_phase1.sh quickstart script
 ./run.sh
 ```
-To run phase 2, use the model_save from the phase 1 output as the `CHECKPOINT_DIR`.
-Alternatively, checkpoints can be downloaded from online (for example, from the
-[MLCommons repo](https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert),
-but these are TF checkpoints that would need to be converted to a PyTorch model file).
+To run phase 2, to the directory where checkpoints were generated during phase 1
+pretraining. This `CHECKPOINT_DIR` should also have the `bert_config.json` file.
 ```
-# To run phase 2, set the CHECKPOINT_DIR to the model_save directory from phase 1's output
-export CHECKPOINT_DIR=${OUTPUT_DIR}/model_save
+# To run phase 2, set the CHECKPOINT_DIR to the folder with checkpoints generated during phase 1
+export CHECKPOINT_DIR=<directory with checkpoints and the bert_config.json file>
 
 # Define a new directory for phase 2 output, and set the SCRIPT var to run phase 2
 export OUTPUT_DIR=<directory where log and model files will be written for phase 2>

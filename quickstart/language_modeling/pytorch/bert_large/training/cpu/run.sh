@@ -54,8 +54,8 @@ if [ ! -z "${CONFIG_FILE}" ]; then
   echo "CONFIG_FILE: ${CONFIG_FILE}"
   config_file_env="--env BERT_MODEL_CONFIG=${CONFIG_FILE}"
   config_file_mount="--volume ${CONFIG_FILE}:${CONFIG_FILE}"
-else
-  echo "The required environment variable CONFIG_FILE has not been set to run pretraining."
+elif [[ ${SCRIPT} = *phase1* ]]; then
+  echo "The required environment variable CONFIG_FILE has not been set to run phase1 pretraining."
   exit 1
 fi
 

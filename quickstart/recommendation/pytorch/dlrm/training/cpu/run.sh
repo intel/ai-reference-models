@@ -58,7 +58,7 @@ docker run --rm \
   --env no_proxy=${no_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --shm-size 8G \
+  --shm-size 10G \
   -w ${WORKDIR} \
   ${DOCKER_ARGS} \
   $IMAGE_NAME \

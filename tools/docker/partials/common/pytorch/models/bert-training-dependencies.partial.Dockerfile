@@ -13,4 +13,5 @@ RUN source activate pytorch && \
     python -m pip install --upgrade pip && \
     pip uninstall transformers -y && \
     pip install -e . && \
+    pip install h5py && \
     mkdir -p /root/.local

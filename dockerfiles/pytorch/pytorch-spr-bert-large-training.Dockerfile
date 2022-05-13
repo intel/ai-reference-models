@@ -77,6 +77,7 @@ RUN source activate pytorch && \
     python -m pip install --upgrade pip && \
     pip uninstall transformers -y && \
     pip install -e . && \
+    pip install h5py && \
     mkdir -p /root/.local
 
 FROM intel-optimized-pytorch AS release
@@ -93,4 +94,5 @@ ENV BASH_ENV=/root/.bash_profile
 WORKDIR /workspace/
 RUN yum install -y numactl mesa-libGL && \
     yum clean all && \
+    echo "export LD_PRELOAD=${LD_PRELOAD%%:}" >> /root/.bash_profile && \
     echo "source activate pytorch" >> /root/.bash_profile
