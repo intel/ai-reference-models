@@ -17,10 +17,10 @@
 
 # Input args
 IMAGENET_HOME=${1}
-TPU_REPO=${2}
 
 VALIDATION_TAR=${IMAGENET_HOME}/ILSVRC2012_img_val.tar
 TRAIN_TAR=${IMAGENET_HOME}/ILSVRC2012_img_train.tar
+WORKDIR=$(pwd)
 
 # Arg validation: Verify that the IMAGENET_HOME dir exists
 if [[ -z ${IMAGENET_HOME} ]]; then
@@ -34,18 +34,6 @@ elif [[ ! -f ${VALIDATION_TAR} ]]; then
   exit 1
 elif [[ ! -f ${TRAIN_TAR} ]]; then
   echo "The ImageNet training tar file does not exist at ${TRAIN_TAR}"
-  exit 1
-fi
-
-# Arg validation: Verify that the TPU_REPO dir exists
-if [[ -z ${TPU_REPO} ]]; then
-  echo "The TPU repo is required for arg 2"
-  exit 1
-elif [[ ! -d ${TPU_REPO} ]]; then
-  echo "The TPU repo directory (${TPU_REPO}) specified in arg 2 does not exist"
-  exit 1
-elif [[ ! -f ${TPU_REPO}/tools/datasets/imagenet_to_gcs.py ]]; then
-  echo "The TPU repo ImageNet script was not found at ${TPU_REPO}/tools/datasets/imagenet_to_gcs.py"
   exit 1
 fi
 
@@ -75,16 +63,18 @@ for f in *.tar; do
   # Delete the intermediate tar, since it's no longer needed
   rm $f
 done
-cd $IMAGENET_HOME # Move back to the base folder
 
-# Navigate to the TPU repo dataset directory and run the conversion script
-# The TF Records will end up inthe --local_scratch_dir
-cd ${TPU_REPO}/tools/datasets
-
-python3 imagenet_to_gcs.py \
+cd ${WORKDIR}
+# Download `imagenet_to_gcs.py` script from the Intel model zoo repo to convert the dataset files to TF records
+if [[ ! -f "${WORKDIR}/imagenet_to_gcs.py" ]]; then
+    wget https://raw.githubusercontent.com/IntelAI/models/master/datasets/imagenet/imagenet_to_gcs.py
+fi
+python3 ${WORKDIR}/imagenet_to_gcs.py \
   --raw_data_dir=$IMAGENET_HOME \
-  --local_scratch_dir=$IMAGENET_HOME/tf_records \
-  --nogcs_upload
+  --local_scratch_dir=$IMAGENET_HOME/tf_records
+
+# Clean up the user work directory, remove the previously downloaded script `imagenet_to_gcs.py`
+rm ${WORKDIR}/imagenet_to_gcs.py
 
 # Combine the two folders in tf-records together
 cd $IMAGENET_HOME/tf_records
@@ -92,3 +82,5 @@ mv train/* $IMAGENET_HOME/tf_records
 mv validation/* $IMAGENET_HOME/tf_records
 rm -rf train
 rm -rf validation
+
+cd ${WORKDIR}

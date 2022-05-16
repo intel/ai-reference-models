@@ -113,7 +113,11 @@ def eval(
             print("INFERENCE TIME\t\t: {} ms".format((t1-t0)*1000.0))
             print("TRANSCRIPT\t\t:", hypotheses[0])
             return
-        
+        steps_per_epoch = len(data_layer)
+        total_steps = args.steps if args.steps is not None else steps_per_epoch
+        test_epoches = int(total_steps / steps_per_epoch)
+        print('Evaluating RNNT: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
+
         # Int8 Calibration
         if args.ipex and args.int8 and args.calibration:
             print("runing int8 calibration step\n")
@@ -138,53 +142,13 @@ def eval(
                             
                             if it + 1 >= args.warm_up:
                                 break
-                print("\nstart measure performance, measure steps = ", args.steps)
+                print("\nstart measure performance, measure steps = ", total_steps)
                 total_time = 0
-                for it, data in enumerate(tqdm(data_layer.data_iterator)):
-                    t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
-                    if args.profiling:
-                        # with torch.autograd.profiler.profile(args.profiling) as prof:
-                        with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
-                            conf = None
-                            t0 = time.perf_counter()
-                            t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                            t1 = time.perf_counter()
-                    else:
-                        conf = None
-                        t0 = time.perf_counter()
-                        t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                        t1 = time.perf_counter()
-
-                    total_time += (t1 - t0)
-
-                    values_dict = dict(
-                        predictions=[t_predictions_e],
-                        transcript=[t_transcript_e],
-                        transcript_length=[t_transcript_len_e],
-                    )
-                    process_evaluation_batch(values_dict, _global_var_dict, labels=labels)
-
-                    if args.steps is not None and it + 1 >= args.steps:
-                        break
-            else:
-                if args.mix_precision:
-                    with torch.cpu.amp.autocast():
-                        # warm up
-                        if args.warm_up > 0:
-                            print("\nstart warm up, warmp_up steps = ", args.warm_up)
-                            for it, data in enumerate(tqdm(data_layer.data_iterator)):
-                                t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
-                                conf = None
-                                t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                                
-                                if it + 1 >= args.warm_up:
-                                    break
-
-                        # measure performance
-                        print("\nstart measure performance, measure steps = ", args.steps)
-                        total_time = 0
-                        # with torch.autograd.profiler.profile(args.profiling) as prof:
-                        for it, data in enumerate(tqdm(data_layer.data_iterator)):
+                with tqdm(total=total_steps) as pbar:
+                    for epoch in range(test_epoches + 1):
+                        for it, data in enumerate(data_layer.data_iterator):
+                            if  epoch * steps_per_epoch + it >= total_steps:
+                                break
                             t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
                             if args.profiling:
                                 # with torch.autograd.profiler.profile(args.profiling) as prof:
@@ -208,8 +172,54 @@ def eval(
                             )
                             process_evaluation_batch(values_dict, _global_var_dict, labels=labels)
 
-                            if args.steps is not None and it + 1 >= args.steps:
-                                break
+                            pbar.update(1)
+            else:
+                if args.mix_precision:
+                    with torch.cpu.amp.autocast():
+                        # warm up
+                        if args.warm_up > 0:
+                            print("\nstart warm up, warmp_up steps = ", args.warm_up)
+                            for it, data in enumerate(tqdm(data_layer.data_iterator)):
+                                t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
+                                conf = None
+                                t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                
+                                if it + 1 >= args.warm_up:
+                                    break
+
+                        # measure performance
+                        print("\nstart measure performance, measure steps = ", total_steps)
+                        total_time = 0
+                        # with torch.autograd.profiler.profile(args.profiling) as prof:
+                        with tqdm(total=total_steps) as pbar:
+                            for epoch in range(test_epoches + 1):
+                                for it, data in enumerate(data_layer.data_iterator):
+                                    if epoch * steps_per_epoch + it >= total_steps:
+                                        break
+                                    t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
+                                    if args.profiling:
+                                        # with torch.autograd.profiler.profile(args.profiling) as prof:
+                                        with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
+                                            conf = None
+                                            t0 = time.perf_counter()
+                                            t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                            t1 = time.perf_counter()
+                                    else:
+                                        conf = None
+                                        t0 = time.perf_counter()
+                                        t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                        t1 = time.perf_counter()
+
+                                    total_time += (t1 - t0)
+
+                                    values_dict = dict(
+                                        predictions=[t_predictions_e],
+                                        transcript=[t_transcript_e],
+                                        transcript_length=[t_transcript_len_e],
+                                    )
+                                    process_evaluation_batch(values_dict, _global_var_dict, labels=labels)
+
+                                    pbar.update(1)
                 else:
                     # warm up
                     if args.warm_up > 0:
@@ -223,35 +233,38 @@ def eval(
                                 break
 
                     # measure performance
-                    print("\nstart measure performance, measure steps = ", args.steps)
+                    print("\nstart measure performance, measure steps = ", total_steps)
                     total_time = 0
                     # with torch.autograd.profiler.profile(args.profiling) as prof:
-                    for it, data in enumerate(tqdm(data_layer.data_iterator)):
-                        t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
-                        if args.profiling:
-                            # with torch.autograd.profiler.profile(args.profiling) as prof:
-                            with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
-                                conf = None
-                                t0 = time.perf_counter()
-                                t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                                t1 = time.perf_counter()
-                        else:
-                            conf = None
-                            t0 = time.perf_counter()
-                            t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                            t1 = time.perf_counter()
+                    with tqdm(total=total_steps) as pbar:
+                        for epoch in range(test_epoches + 1):
+                            for it, data in enumerate(data_layer.data_iterator):
+                                if epoch * steps_per_epoch + it >= total_steps:
+                                    break
+                                t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
+                                if args.profiling:
+                                    # with torch.autograd.profiler.profile(args.profiling) as prof:
+                                    with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
+                                        conf = None
+                                        t0 = time.perf_counter()
+                                        t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                        t1 = time.perf_counter()
+                                else:
+                                    conf = None
+                                    t0 = time.perf_counter()
+                                    t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                    t1 = time.perf_counter()
 
-                        total_time += (t1 - t0)
+                                total_time += (t1 - t0)
 
-                        values_dict = dict(
-                            predictions=[t_predictions_e],
-                            transcript=[t_transcript_e],
-                            transcript_length=[t_transcript_len_e],
-                        )
-                        process_evaluation_batch(values_dict, _global_var_dict, labels=labels)
+                                values_dict = dict(
+                                    predictions=[t_predictions_e],
+                                    transcript=[t_transcript_e],
+                                    transcript_length=[t_transcript_len_e],
+                                )
+                                process_evaluation_batch(values_dict, _global_var_dict, labels=labels)
 
-                        if args.steps is not None and it + 1 >= args.steps:
-                            break
+                                pbar.update(1)
 
             if args.print_result:
                 hypotheses = _global_var_dict['predictions']
@@ -287,10 +300,7 @@ def eval(
                         pickle.dump(logits, f, protocol=pickle.HIGHEST_PROTOCOL)
 
             if args.steps:
-                if args.steps * args.batch_size > len(data_layer):
-                    total_samples = len(data_layer)
-                else:
-                    total_samples = args.steps * args.batch_size
+                total_samples = args.steps * args.batch_size
             else:
                 total_samples = len(data_layer)
 
@@ -364,8 +374,11 @@ def main(args):
 
     if args.ipex:
         import intel_extension_for_pytorch as ipex
+        from rnn import IPEXStackTime
         model.joint_net.eval()
         data_type = torch.bfloat16 if args.mix_precision else torch.float32
+        if model.encoder["stack_time"].factor == 2:
+            model.encoder["stack_time"] = IPEXStackTime(model.encoder["stack_time"].factor)
         model.joint_net = ipex.optimize(model.joint_net, dtype=data_type, auto_kernel_selection=True)
         model.prediction["embed"] = model.prediction["embed"].to(data_type)
         if args.jit:

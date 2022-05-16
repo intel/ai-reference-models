@@ -16,7 +16,7 @@ Refer to google reference page for [checkpoints](https://github.com/google-resea
 <!--- 20. Download link -->
 ## Download link
 
-[bert-large-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/bert-large-fp32-training-k8s.tar.gz)
+[bert-large-fp32-training-k8s.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-fp32-training-k8s.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -61,7 +61,7 @@ These quickstart scripts can be run in the following environment:
 
 Download and untar the BERT Large FP32 training package:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/bert-large-fp32-training-k8s.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-fp32-training-k8s.tar.gz
 tar -xvf bert-large-fp32-training-k8s.tar.gz
 ```
 

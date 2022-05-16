@@ -35,7 +35,7 @@ slice_sets:
           <model name>: Faster_RCNN
           <package dir>: faster_rcnn-int8-inference
           <package name>: faster_rcnn-int8-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/faster-rcnn-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/faster-rcnn-int8-inference.tar.gz
           <precision>: Int8
           <use case>: object_detection
         uri: models/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8
@@ -108,5 +108,6 @@ slice_sets:
     - destination: quickstart
       source: quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8
     partials:
+    - tcmalloc
     - model_package
     - entrypoint

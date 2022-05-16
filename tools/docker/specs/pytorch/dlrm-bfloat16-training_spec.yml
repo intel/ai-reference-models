@@ -51,7 +51,7 @@ slice_sets:
           <model name>: Dlrm
           <package dir>: dlrm-bfloat16-training
           <package name>: dlrm-bfloat16-training.tar.gz
-          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/dlrm-bfloat16-training.tar.gz'
+          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/dlrm-bfloat16-training.tar.gz'
           <precision>: bfloat16
           <use case>: recommendation
         uri: models/quickstart/recommendation/pytorch/dlrm/training/cpu/bfloat16

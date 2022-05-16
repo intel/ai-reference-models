@@ -30,28 +30,19 @@ logging in.
    source tf_env/bin/activate
    pip install --upgrade pip==19.3.1
    pip install intel-tensorflow
-   pip install google-cloud-storage
-   pip uninstall urllib3 && pip install urllib3
+   pip install -I urllib3
+   pip install wget
    ```
 
-3. Clone the TensorFlow TPU repo, then download and apply the
-   [imagenet-patch.diff patch](imagenet-patch.diff).
-   ```
-   git clone https://github.com/tensorflow/tpu.git
-   cd tpu
-   git checkout e896a3d2d1e6687c4c84ddc6b5b7563459167568
-   git apply imagenet-patch.diff
-   ```
-
-4. Run the [imagenet_to_tfrecords.sh](imagenet_to_tfrecords.sh) script and pass
+3. Download and run the [imagenet_to_tfrecords.sh](imagenet_to_tfrecords.sh) script and pass
    arguments for the directory with the ImageNet tar files that were downloaded
-   in step 1 (e.g. `/home/<user>/imagenet_raw_data`) and the TPU repo directory from
-   step 3.
+   in step 1 (e.g. `/home/<user>/imagenet_raw_data`).
    ```
-   ./imagenet_to_tfrecords.sh <IMAGENET DIR> <TPU REPO DIR>
+   wget https://raw.githubusercontent.com/IntelAI/models/master/datasets/imagenet/imagenet_to_tfrecords.sh
+   ./imagenet_to_tfrecords.sh <IMAGENET DIR>
    ```
-   The `imagenet_to_tfrecords.sh` script extracts the ImageNet tar files, and
-   then runs the `imagenet_to_gcs.py` script from the TPU repo to convert the
+   The `imagenet_to_tfrecords.sh` script extracts the ImageNet tar files, downloads and
+   then runs the [`imagenet_to_gcs.py`](imagenet_to_gcs.py) script to convert the
    files to TF records. As the script is running you should see output like:
    ```
    I0911 16:23:59.174904 140581751400256 imagenet_to_gcs.py:354] Finished writing file: <IMAGENET DIR>/tf_records/train/train-00000-of-01024
@@ -67,7 +58,7 @@ logging in.
    I0911 16:24:27.028785 140581751400256 imagenet_to_gcs.py:354] Finished writing file: <IMAGENET DIR>/tf_records/validation/validation-00004-of-00128
    ...
    ```
-   After the `imagenet_to_gcs.py` script completes, the .sh script combines
+   After the `imagenet_to_gcs.py` script completes, the `imagenet_to_tfrecords.sh` script combines
    the train and validation files into the `<IMAGENET DIR>/tf_records`
    directory. The folder should contains 1024 training files and 128 validation
    files.

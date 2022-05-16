@@ -1,0 +1,64 @@
+From dc7ecb0ad119afcec616ee5b25f7f450507aaa52 Mon Sep 17 00:00:00 2001
+From: "louie.tsai" <ltsai1@my-skx-server.intel.com>
+Date: Fri, 26 Mar 2021 11:55:08 -0700
+Subject: [PATCH] resnet50v1_5 fp32 TF timeline
+
+---
+ .../eval_image_classifier_inference.py        | 20 +++++++++++++++++--
+ 1 file changed, 18 insertions(+), 2 deletions(-)
+
+diff --git a/models/image_recognition/tensorflow/resnet50v1_5/inference/eval_image_classifier_inference.py b/models/image_recognition/tensorflow/resnet50v1_5/inference/eval_image_classifier_inference.py
+index 6ac641b6..b370adaa 100644
+--- a/models/image_recognition/tensorflow/resnet50v1_5/inference/eval_image_classifier_inference.py
++++ b/models/image_recognition/tensorflow/resnet50v1_5/inference/eval_image_classifier_inference.py
+@@ -34,6 +34,10 @@ OUTPUTS = 'softmax_tensor'
+ 
+ RESNET_IMAGE_SIZE = 224
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
+ 
+ class eval_classifier_optimized_graph:
+   """Evaluate image classifier with optimized TensorFlow graph"""
+@@ -128,6 +132,15 @@ class eval_classifier_optimized_graph:
+     infer_config.graph_options.rewrite_options.remapping = (
+                   rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+ 
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    if self.args.input_graph.find('bfloat16') != -1:
++        config.read_config('resnet50v1_5 infer bf16')
++    elif self.args.input_graph.find('int8') != -1:
++        config.read_config('resnet50v1_5 infer int8')
++    else:
++        config.read_config('resnet50v1_5 infer fp32')
++    infer_many_runs_timeline = TimeLiner()
++    infer_run_metadata = tf.compat.v1.RunMetadata()
+ 
+     data_graph = tf.Graph()
+     with data_graph.as_default():
+@@ -169,8 +182,10 @@ class eval_classifier_optimized_graph:
+     input_tensor = infer_graph.get_tensor_by_name('input_tensor:0')
+     output_tensor = infer_graph.get_tensor_by_name('softmax_tensor:0')
+ 
+-    data_sess  = tf.compat.v1.Session(graph=data_graph,  config=data_config)
+-    infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)
++    data_sess = tfSession(graph=data_graph,  config=data_config,
++        run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
++    infer_sess = tfSession(graph=infer_graph, config=infer_config,
++        run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
+ 
+     num_processed_images = 0
+     num_remaining_images = dataset.num_examples_per_epoch(subset=subset) - num_processed_images \
+@@ -261,6 +276,7 @@ class eval_classifier_optimized_graph:
+         print("Processed %d images. (Top1 accuracy, Top5 accuracy) = (%0.4f, %0.4f)" \
+                   % (num_processed_images, total_accuracy1 / num_processed_images,
+                      total_accuracy5 / num_processed_images))
++    infer_many_runs_timeline.save(config.json_fname)
+ 
+   def validate_args(self):
+     """validate the arguments"""
+-- 
+2.17.1
+

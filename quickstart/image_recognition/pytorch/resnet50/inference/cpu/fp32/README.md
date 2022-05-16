@@ -10,7 +10,7 @@ This document has instructions for running ResNet50 FP32 inference using
 <!--- 20. Download link -->
 ## Download link
 
-[pytorch-resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/pytorch-resnet50-fp32-inference.tar.gz)
+[pytorch-resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/pytorch-resnet50-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -71,7 +71,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 
 # Download and extract the model package
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/pytorch-resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/pytorch-resnet50-fp32-inference.tar.gz
 tar -xzf pytorch-resnet50-fp32-inference.tar.gz
 cd pytorch-resnet50-fp32-inference
 

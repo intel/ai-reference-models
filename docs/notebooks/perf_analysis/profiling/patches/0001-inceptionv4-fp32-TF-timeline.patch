@@ -1,0 +1,53 @@
+From deea6cccd87409f92dda7c0e99ceecf69c68008d Mon Sep 17 00:00:00 2001
+From: yhu5 <ying.hu@intel.com>
+Date: Thu, 17 Dec 2020 19:37:41 +0800
+Subject: [PATCH] inceptionv4 fp32 TF timeline
+diff --git a/models/image_recognition/tensorflow/inceptionv4/inference/benchmark.py b/models/image_recognition/tensorflow/inceptionv4/inference/benchmark.py
+index 3c51662a..e7d199f2 100644
+--- a/models/image_recognition/tensorflow/inceptionv4/inference/benchmark.py
++++ b/models/image_recognition/tensorflow/inceptionv4/inference/benchmark.py
+@@ -45,6 +45,9 @@ import numpy as np
+ from google.protobuf import text_format
+ import tensorflow as tf
+ 
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ def load_graph(model_file):
+   graph = tf.Graph()
+   graph_def = tf.compat.v1.GraphDef()
+@@ -109,6 +112,12 @@ if __name__ == "__main__":
+   assert steps > 10, "Benchmark steps should be at least 10."
+   num_inter_threads = args.num_inter_threads
+   num_intra_threads = args.num_intra_threads
++  
++  
++  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  configf.read_config('inceptionv4 infer fp32')
++  infer_many_runs_timeline = TimeLiner()
++  infer_run_metadata = tf.compat.v1.RunMetadata()
+ 
+   data_graph = tf.Graph() ##
+   with data_graph.as_default():##
+@@ -137,9 +146,10 @@ if __name__ == "__main__":
+   data_config.inter_op_parallelism_threads = num_inter_threads ###
+   data_config.intra_op_parallelism_threads = num_intra_threads ###
+   
+-  data_sess = tf.compat.v1.Session(graph=data_graph, config=data_config) ###
+-
+-  with tf.compat.v1.Session(graph=graph, config=config) as sess:
++  #data_sess = tf.compat.v1.Session(graph=data_graph, config=data_config) ###
++  data_sess = tfSession(graph=data_graph, config=data_config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
++ 
++  with tfSession(graph=graph, config=config, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+     sys.stdout.flush()
+     print("[Running warmup steps...]")
+     image_data = data_sess.run(images) ###
+@@ -166,3 +176,7 @@ if __name__ == "__main__":
+     average_time = total_time / total_images
+     if batch_size == 1:
+       print('Latency: %.3f ms' % (average_time * 1000))
++      
++    print("json_fname : ",configf.json_fname)
++    infer_many_runs_timeline.save(configf.json_fname)
++

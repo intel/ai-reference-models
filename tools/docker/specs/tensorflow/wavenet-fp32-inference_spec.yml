@@ -34,7 +34,7 @@ slice_sets:
           <model name>: WaveNet
           <package dir>: wavenet-fp32-inference
           <package name>: wavenet-fp32-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wavenet-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wavenet-fp32-inference.tar.gz
           <precision>: FP32
           <use case>: text_to_speech
         uri: models/quickstart/text_to_speech/tensorflow/wavenet/inference/cpu/fp32

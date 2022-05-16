@@ -39,6 +39,7 @@ slice_sets:
     - destination: quickstart
       source: quickstart/recommendation/tensorflow/wide_deep/inference/cpu/fp32
     partials:
+    - numactl
     - tensorflow/model-source
     - model_package
     - tar
@@ -51,7 +52,7 @@ slice_sets:
           <model name>: Wide & Deep
           <precision>: FP32
           <use case>: recommendation
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/wide-deep-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-fp32-inference.tar.gz
           <package name>: wide-deep-fp32-inference.tar.gz
           <package dir>: wide-deep-fp32-inference
           <docker image>: intel/recommendation:tf-latest-wide-deep-fp32-inference
