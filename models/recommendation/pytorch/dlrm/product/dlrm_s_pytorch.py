@@ -97,6 +97,8 @@ from torch.optim.lr_scheduler import _LRScheduler
 # intel
 import intel_extension_for_pytorch as ipex
 from torch.utils import ThroughputBenchmark
+# For distributed run
+import extend_distributed as ext_dist
 
 exc = getattr(builtins, "IOError", "FileNotFoundError")
 
@@ -108,9 +110,9 @@ def time_wrap():
     return time.time()
 
 
-def dlrm_wrap(X, lS_o, lS_i):
+def dlrm_wrap(X, *emb_args):
     with record_function("DLRM forward"):
-        return dlrm(X, lS_o, lS_i)
+        return dlrm(X, *emb_args)
 
 
 def loss_fn_wrap(Z, T):
@@ -203,10 +205,14 @@ class DLRM_Net(nn.Module):
         # approach 2: use Sequential container to wrap all layers
         return torch.nn.Sequential(*layers)
 
-    def create_emb(self, m, ln):
+    def create_emb(self, m, ln, local_ln_emb=None):
         emb_l = nn.ModuleList()
-        for i in range(0, ln.size):
-            n = ln[i]
+        n_embs = ln.size if local_ln_emb is None else len(local_ln_emb)
+        for i in range(n_embs):
+            if local_ln_emb is None:
+                n = ln[i]
+            else:
+                n = ln[local_ln_emb[i]]
             EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True)
             # initialize embeddings
             if not args.inference_only:
@@ -227,7 +233,18 @@ class DLRM_Net(nn.Module):
     ):
         super(DLRM_Net, self).__init__()
         self.loss_threshold = loss_threshold
-        self.emb_l = self.create_emb(m_spa, ln_emb)
+        #If running distributed, get local slice of embedding tables
+        if ext_dist.my_size > 1:
+            n_emb = len(ln_emb)
+            self.n_global_emb = n_emb
+            self.rank = ext_dist.dist.get_rank()
+            self.ln_emb = [i for i in range(n_emb)]
+            self.n_local_emb, self.n_emb_per_rank = ext_dist.get_split_lengths(n_emb)
+            self.local_ln_emb_slice = ext_dist.get_my_slice(n_emb)
+            self.local_ln_emb = self.ln_emb[self.local_ln_emb_slice]
+        else:
+            self.local_ln_emb = None
+        self.emb_l = self.create_emb(m_spa, ln_emb, self.local_ln_emb)
         self.bot_l = self.create_mlp(ln_bot, sigmoid_bot)
         self.top_l = self.create_mlp(ln_top, sigmoid_top)
         self.loss_fn = torch.nn.BCELoss(reduction="mean")
@@ -241,14 +258,16 @@ class DLRM_Net(nn.Module):
         # approach 2: use Sequential container to wrap all layers
         return layers(x)
 
-    def apply_emb(self, lS_o, lS_i, emb_l):
+    def apply_emb(self, emb_l, *emb_args):
         # WARNING: notice that we are processing the batch at once. We implicitly
         # assume that the data is laid out such that:
         # 1. each embedding is indexed with a group of sparse indices,
         #   corresponding to a single lookup
         # 2. for each embedding the lookups are further organized into a batch
         # 3. for a list of embedding tables there is a list of batched lookups
-
+        if isinstance(emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+            return emb_l(emb_args, self.need_linearize_indices_and_offsets)
+        lS_o, lS_i = emb_args
         ly = []
         for k, sparse_index_group_batch in enumerate(lS_i):
             sparse_offset_group_batch = lS_o[k]
@@ -269,7 +288,7 @@ class DLRM_Net(nn.Module):
 
     def interact_features(self, x, ly):
         if args.ipex_interaction:
-            T = [x] + ly
+            T = [x] + list(ly)
             R = ipex.nn.functional.interaction(*T)
         else:
             # concatenate dense and sparse features
@@ -283,10 +302,10 @@ class DLRM_Net(nn.Module):
             # approach 2: unique
             _, ni, nj = Z.shape
             # approach 1: tril_indices
-            # offset = 0 if self.arch_interaction_itself else -1
+            # offset = -1
             # li, lj = torch.tril_indices(ni, nj, offset=offset)
             # approach 2: custom
-            offset = 1 if self.arch_interaction_itself else 0
+            offset = 0
             li = torch.tensor([i for i in range(ni) for j in range(i + offset)])
             lj = torch.tensor([j for i in range(nj) for j in range(i + offset)])
             Zflat = Z[:, li, lj]
@@ -294,10 +313,43 @@ class DLRM_Net(nn.Module):
             R = torch.cat([x] + [Zflat], dim=1)
         return R
 
-    def forward(self, dense_x, lS_o, lS_i):
-        return self.sequential_forward(dense_x, lS_o, lS_i)
+    def forward(self, dense_x, *emb_args):
+        if ext_dist.my_size > 1:
+            return self.distributed_forward(dense_x, *emb_args)
+        else:
+            return self.sequential_forward(dense_x, *emb_args)
 
-    def sequential_forward(self, dense_x, lS_o, lS_i):
+    def distributed_forward(self, dense_x, *emb_args):
+        batch_size = dense_x.size()[0]
+        vector_lenght = self.emb_l.weights[0].size()[1]
+        # WARNING: # of ranks must be <= batch size in distributed_forward call
+        if batch_size < ext_dist.my_size:
+            sys.exit("ERROR: batch_size (%d) must be larger than number of ranks (%d)" % (batch_size, ext_dist.my_size))
+
+        # embeddings
+        ly = self.apply_emb(self.emb_l, *emb_args)
+        a2a_req = ext_dist.alltoall(ly, self.n_emb_per_rank)
+        # bottom mlp
+        x = self.apply_mlp(dense_x, self.bot_l)
+        ly = a2a_req.wait()
+        _ly = []
+        for item in ly:
+            _ly += [item[:, emb_id * vector_lenght: (emb_id + 1) * vector_lenght] for emb_id in range(self.emb_l.n_tables)]
+        # interactions
+        z = self.interact_features(x, _ly)
+        # top mlp
+        p = self.apply_mlp(z, self.top_l)
+        # clamp output if needed
+        if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
+            z = torch.clamp(
+                p, min=self.loss_threshold, max=(1.0 - self.loss_threshold)
+            )
+        else:
+            z = p
+        return z
+ 
+
+    def sequential_forward(self, dense_x, *emb_args):
         # process dense features (using bottom mlp), resulting in a row vector
         x = self.apply_mlp(dense_x, self.bot_l)
         # debug prints
@@ -305,7 +357,7 @@ class DLRM_Net(nn.Module):
         # print(x.detach().cpu().numpy())
 
         # process sparse features(using embeddings), resulting in a list of row vectors
-        ly = self.apply_emb(lS_o, lS_i, self.emb_l)
+        ly = self.apply_emb(self.emb_l, *emb_args)
         # for y in ly:
         #     print(y.detach().cpu().numpy())
 
@@ -376,7 +428,7 @@ def run_throughput_benchmark(args, dlrm, test_ld):
     stats = bench.benchmark(
         num_calling_threads=args.share_weight_instance,
         num_warmup_iters=100,
-        num_iters=1000 * args.share_weight_instance,
+        num_iters=args.num_batches * args.share_weight_instance,
     )
     print(stats)
     latency = stats.latency_avg_ms
@@ -419,7 +471,7 @@ def inference(
                 total_time = 0
                 total_iter = 0
             # early exit if nbatches was set by the user and was exceeded
-            if nbatches > 0 and i >= nbatches:
+            if args.inference_only and nbatches > 0 and i >= nbatches:
                 break
 
             X_test, lS_o_test, lS_i_test, T_test, W_test, CBPP_test = unpack_batch(
@@ -427,9 +479,20 @@ def inference(
             )
 
             # forward pass
-            start = time_wrap()
 
-            Z_test = dlrm(X_test, lS_o_test, lS_i_test)
+            if not args.inference_only and isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                n_tables = lS_i_test.shape[0]
+                idx = [lS_i_test[i] for i in range(n_tables)]
+                offset = [lS_o_test[i] for i in range(n_tables)]
+                include_last = [False for i in range(n_tables)]
+                indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+
+            start = time_wrap()
+            if not args.inference_only and isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                Z_test = dlrm(X_test, indices, offsets, indices_with_row_offsets)
+            else:
+                Z_test = dlrm(X_test, lS_o_test, lS_i_test)
+
     
             total_time += (time_wrap() - start)
             total_iter += 1
@@ -489,7 +552,6 @@ def inference(
         "nepochs": args.nepochs,
         "nbatches": nbatches,
         "nbatches_test": nbatches_test,
-        "state_dict": dlrm.state_dict(),
     }
     if not args.inference_only:
         model_metrics_dict["test_acc"] = acc_test
@@ -515,7 +577,7 @@ def inference(
             ),
             flush=True,
         )
-        print("Accuracy: {:.3f} ".format(validation_results["roc_auc"]))
+        print("Accuracy: {:.34} ".format(validation_results["roc_auc"]))
     elif not args.inference_only:
         is_best = acc_test > best_acc_test
         if is_best:
@@ -597,17 +659,22 @@ def run():
     parser.add_argument("--lr-num-decay-steps", type=int, default=0)
     # intel
     parser.add_argument("--print-auc", action="store_true", default=False)
+    parser.add_argument("--should-test", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=False)
     parser.add_argument("--share-weight-instance", type=int, default=0)
     parser.add_argument("--ipex-interaction", action="store_true", default=False)
-    parser.add_argument("--num-warmup-iters", type=int, default=100)
+    parser.add_argument("--ipex-merged-emb", action="store_true", default=False)
+    parser.add_argument("--num-warmup-iters", type=int, default=1000)
     parser.add_argument("--int8", action="store_true", default=False)
     parser.add_argument("--int8-configure", type=str, default="./int8_configure.json")
+    parser.add_argument("--dist-backend", type=str, default="ccl")
 
     global args
     global nbatches
     global nbatches_test
     args = parser.parse_args()
+    ext_dist.init_distributed(backend=args.dist_backend)
+
 
     ### some basic setup ###
     np.random.seed(args.numpy_rand_seed)
@@ -676,6 +743,9 @@ def run():
         sigmoid_top=ln_top.size - 2,
         loss_threshold=args.loss_threshold,
     )
+    if args.ipex_merged_emb:
+        dlrm.emb_l = ipex.nn.modules.MergedEmbeddingBagWithSGD.from_embeddingbag_list(dlrm.emb_l, lr=args.learning_rate)
+        dlrm.need_linearize_indices_and_offsets = torch.BoolTensor([False])
 
     if not args.inference_only:
         optimizer = torch.optim.SGD(dlrm.parameters(), lr=args.learning_rate)
@@ -733,11 +803,64 @@ def run():
         )
         print("Testing state: accuracy = {:3.3f} %".format(ld_acc_test * 100))
 
+    ext_dist.barrier()
     print("time/loss/accuracy (if enabled):")
 
     if args.bf16 and not args.inference_only:
-        dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)
+        for j, inputBatch in enumerate(train_ld):
+            X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
+            if ext_dist.my_size > 1:
+                local_bs = X.size()[0] // ext_dist.my_size
+                rank_id = dlrm.rank
+                X = X[rank_id * local_bs: (rank_id + 1) * local_bs]
+                T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
+                global_bs = local_bs * ext_dist.my_size
+                lS_o = lS_o[:, :global_bs]
+                lS_i = lS_i[:, :global_bs]
 
+            if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                if ext_dist.my_size > 1:
+                    batch_size = X.size()[0]
+                    g_i = lS_i[dlrm.local_ln_emb]
+                    g_o = lS_o[dlrm.local_ln_emb]
+                    n_tables = g_i.shape[0]
+                    idx = [g_i[i] for i in range(n_tables)]
+                    offset = [g_o[i] for i in range(n_tables)]
+                    include_last = [False for i in range(n_tables)]
+                    indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+                else:
+                    n_tables = lS_i.shape[0]
+                    idx = [lS_i[i] for i in range(n_tables)]
+                    offset = [lS_o[i] for i in range(n_tables)]
+                    include_last = [False for i in range(n_tables)]
+                    indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+            if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                sample_input = (X, indices, offsets, indices_with_row_offsets)
+            else:
+                sample_input = (X, lS_o, lS_i)
+            break
+        dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True, sample_input=sample_input)
+
+        if args.ipex_merged_emb:
+            dlrm.emb_l.to_bfloat16_train()
+        for i in range(len(dlrm.top_l)):
+            if isinstance(dlrm.top_l[i], ipex.nn.utils._weight_prepack._IPEXLinear):
+                if isinstance(dlrm.top_l[i+1], torch.nn.ReLU):
+                    dlrm.top_l[i] = ipex.nn.modules.IPEXLinearEltwise(dlrm.top_l[i], 'relu')
+                else:
+                    dlrm.top_l[i] = ipex.nn.modules.IPEXLinearEltwise(dlrm.top_l[i], 'sigmoid')
+                dlrm.top_l[i + 1] = torch.nn.Identity()
+        for i in range(len(dlrm.bot_l)):
+            if isinstance(dlrm.bot_l[i], ipex.nn.utils._weight_prepack._IPEXLinear):
+                if isinstance(dlrm.bot_l[i+1], torch.nn.ReLU):
+                    dlrm.bot_l[i] = ipex.nn.modules.IPEXLinearEltwise(dlrm.bot_l[i], 'relu')
+                else:
+                    dlrm.bot_l[i] = ipex.nn.modules.IPEXLinearEltwise(dlrm.bot_l[i], 'sigmoid')
+                dlrm.bot_l[i + 1] = torch.nn.Identity()
+
+        if ext_dist.my_size > 1:
+            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l)
+            dlrm.top_l = ext_dist.DDP(dlrm.top_l)
     training_record = [0, 0]
     def update_training_performance(time, iters, training_record=training_record):
         if iters > args.num_warmup_iters:
@@ -752,6 +875,7 @@ def run():
         throughput = total_samples / training_record[0] * 1000
         print("Throughput: {:.3f} fps".format(throughput))
 
+    test_freq = args.test_freq if args.test_freq != -1  else nbatches // 20
     with torch.autograd.profiler.profile(
         enabled=args.enable_profiling, use_cuda=False, record_shapes=False
     ) as prof:
@@ -768,6 +892,31 @@ def run():
                         continue
 
                     X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
+                    if ext_dist.my_size > 1:
+                        local_bs = X.size()[0] // ext_dist.my_size
+                        rank_id = dlrm.rank
+                        X = X[rank_id * local_bs: (rank_id + 1) * local_bs]
+                        T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
+                        global_bs = local_bs * ext_dist.my_size
+                        lS_o = lS_o[:, :global_bs]
+                        lS_i = lS_i[:, :global_bs]
+
+                    if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                        if ext_dist.my_size > 1:
+                            batch_size = X.size()[0]
+                            g_i = lS_i[dlrm.local_ln_emb]
+                            g_o = lS_o[dlrm.local_ln_emb]
+                            n_tables = g_i.shape[0]
+                            idx = [g_i[i] for i in range(n_tables)]
+                            offset = [g_o[i] for i in range(n_tables)]
+                            include_last = [False for i in range(n_tables)]
+                            indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+                        else:
+                            n_tables = lS_i.shape[0]
+                            idx = [lS_i[i] for i in range(n_tables)]
+                            offset = [lS_o[i] for i in range(n_tables)]
+                            include_last = [False for i in range(n_tables)]
+                            indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
 
                     t1 = time_wrap()
 
@@ -779,11 +928,19 @@ def run():
 
                     # forward pass
                     with torch.cpu.amp.autocast(enabled=args.bf16):
-                        Z = dlrm_wrap(
-                            X,
-                            lS_o,
-                            lS_i,
-                        ).float()
+                        if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                            Z = dlrm_wrap(
+                                X,
+                                indices,
+                                offsets,
+                                indices_with_row_offsets
+                            ).float()
+                        else:
+                            Z = dlrm_wrap(
+                                X,
+                                lS_o,
+                                lS_i,
+                            ).float()
 
                     # loss
                     E = loss_fn_wrap(Z, T)
@@ -794,13 +951,16 @@ def run():
                     with record_function("DLRM backward"):
                         # scaled error gradient propagation
                         # (where we do not accumulate gradients across mini-batches)
-                        optimizer.zero_grad()
+                        optimizer.zero_grad(set_to_none=True)
                         # backward pass
                         E.backward()
 
+                    with record_function("DLRM update"):
                         # optimizer
                         optimizer.step()
-                        lr_scheduler.step()
+                    lr_scheduler.step()
+                    if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                        dlrm.emb_l.sgd_args = dlrm.emb_l.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0])
 
                     t2 = time_wrap()
                     total_time += t2 - t1
@@ -813,8 +973,8 @@ def run():
                         j + 1 == nbatches
                     )
                     should_test = (
-                        (args.test_freq > 0)
-                        and (((j + 1) % args.test_freq == 0) or (j + 1 == nbatches))
+                        (args.should_test)
+                        and (((j + 1) % test_freq == 0) or (j + 1 == nbatches))
                     )
 
                     # print time, loss and accuracy

@@ -14,7 +14,7 @@ Use the link below to download the model package for SSD-ResNet34
 FP32 <inference>. The model package includes scripts and
 documentation need to run the model.
 
-[ssd-resnet34-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-fp32-inference.tar.gz)
+[ssd-resnet34-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -96,7 +96,7 @@ testing only -- inference benchmarking uses synthetic data) and an
 DATASET_DIR=<path to the dataset (for accuracy testing only)>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-fp32-inference.tar.gz
 tar -xzf ssd-resnet34-fp32-inference.tar.gz
 cd ssd-resnet34-fp32-inference
 

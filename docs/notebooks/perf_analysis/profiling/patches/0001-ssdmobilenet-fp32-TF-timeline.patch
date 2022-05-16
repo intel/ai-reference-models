@@ -1,0 +1,78 @@
+From 8e0ab6f902377b24891d088c628a3dbac52aa9d6 Mon Sep 17 00:00:00 2001
+From: "louie.tsai" <ltsai1@my-cpx-server.intel.com>
+Date: Sun, 24 Jan 2021 21:26:43 -0800
+Subject: [PATCH] ssdmobilenet fp32 TF timeline
+
+---
+ .../inference/infer_detections.py             | 26 +++++++++++++++----
+ 1 file changed, 21 insertions(+), 5 deletions(-)
+
+diff --git a/models/object_detection/tensorflow/ssd-mobilenet/inference/infer_detections.py b/models/object_detection/tensorflow/ssd-mobilenet/inference/infer_detections.py
+index af69f25b..5884aecd 100644
+--- a/models/object_detection/tensorflow/ssd-mobilenet/inference/infer_detections.py
++++ b/models/object_detection/tensorflow/ssd-mobilenet/inference/infer_detections.py
+@@ -35,8 +35,10 @@ IMAGE_SIZE = 300
+ COCO_NUM_VAL_IMAGES = 4952
+ 
+ import os
+-
+ import numpy as np
++import sys
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
+ 
+ def parse_and_preprocess(serialized_example):
+   # Dense features in Example proto.
+@@ -173,9 +175,13 @@ class model_infer:
+       print("Inference with real data.")
+     else:
+       print("Inference with dummy data.")
+-          
+-    with tf.compat.v1.Session(graph=self.infer_graph, config=self.config) as sess:
+-      
++
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config('ssd-mobilenet infer fp32')
++    infer_many_runs_timeline = TimeLiner()
++    infer_run_metadata = tf.compat.v1.RunMetadata()
++
++    with tfSession(graph=self.infer_graph, config=self.config,run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+       if self.args.data_location:
+         self.build_data_sess()
+       else:
+@@ -211,6 +217,9 @@ class model_infer:
+       print ('Batchsize: {0}'.format(str(self.args.batch_size)))
+       print ('Time spent per BATCH: {0:10.4f} ms'.format(ttime / total_batches * 1000))
+       print ('Total samples/sec: {0:10.4f} samples/s'.format(total_batches * self.args.batch_size / ttime))
++    print("json_fname : ",config.json_fname)
++    infer_many_runs_timeline.save(config.json_fname)
++
+   
+ 
+   def get_input(self):
+@@ -239,7 +248,12 @@ class model_infer:
+     print("Inference for accuracy check.")
+     self.build_data_sess()
+     evaluator = CocoDetectionEvaluator()
+-    with tf.compat.v1.Session(graph=self.infer_graph, config=self.config) as sess:
++    config = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    config.read_config('ssd-mobilenet infer fp32')
++    infer_many_runs_timeline = TimeLiner()
++    infer_run_metadata = tf.compat.v1.RunMetadata()
++
++    with tfSession(graph=self.infer_graph, config=self.config,run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+       iter = 0
+       while True:
+         print('Run {0} iter'.format(iter))
+@@ -261,6 +275,8 @@ class model_infer:
+         if iter * self.args.batch_size >= COCO_NUM_VAL_IMAGES:
+           evaluator.evaluate()
+           break
++    print("json_fname : ",config.json_fname)
++    infer_many_runs_timeline.save(config.json_fname)
+ 
+   def run(self):
+     if self.args.accuracy_only:
+-- 
+2.17.1
+

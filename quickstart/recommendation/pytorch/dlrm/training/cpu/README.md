@@ -17,22 +17,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   cd <clone of the model zoo>/quickstart/recommendation/pytorch/dlrm
   pip install requirements.txt
   ```
-* Set Jemalloc Preload for better performance
-
-  The jemalloc should be built from the [General setup](#general-setup) section.
-  ```bash
-  export LD_PRELOAD="path/lib/libjemalloc.so":$LD_PRELOAD
-  export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
-  ```
-
-* Set IOMP preload for better performance
-
-  IOMP should be installed in your conda env from the [General setup](#general-setup) section.
-  ```bash
-  export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
-  export KMP_AFFINITY="granularity=fine,compact,1,0"
-  export KMP_BLOCKTIME=1
-  ```
 
 * Set ENV to use AMX if you are using SPR
   ```bash
@@ -74,7 +58,8 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 | Script name | Description |
 |-------------|-------------|
-| `bare_metal_train.sh` | Run training for the specified precision (fp32 or bf16). |
+| `training.sh` | Run training for the specified precision (fp32, avx-fp32, or bf16). |
+| `distribute_training.sh` | Run distribute training on 1 node with 2 sockets for the specified precision (fp32, avx-fp32, or bf16). |
 
 ## Run the model
 
@@ -100,10 +85,17 @@ export OUTPUT_DIR=<directory where log files will be written>
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/training/cpu
 
 # Run the quickstart script to test performance
-NUM_BATCH=10000 bash bare_metal_train.sh
+NUM_BATCH=10000 bash training.sh
 
-# Or, run quickstart script for testing convergence trend
-NUM_BATCH=50000 bash bare_metal_train.sh
+# Run quickstart script for testing convergence trend
+NUM_BATCH=50000 bash training.sh
+
+# Or, run quickstart script for testing fully convergency
+bash training.sh
+
+# Run quickstart to distribute training dlrm on 2 sockets
+# Note, you need to follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Torch-CCL and run this command on the machine which sockets larger than 2
+NUM_BATCH=10000 bash distribute_training.sh
 ```
 
 <!--- 80. License -->

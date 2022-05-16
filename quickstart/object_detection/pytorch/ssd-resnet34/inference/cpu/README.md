@@ -56,9 +56,11 @@ bash download_dataset.sh
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash bare_metal_batch_inference.sh fp32 | bash bare_metal_online_inference.sh fp32 | bash bare_metal_accuracy.sh fp32 |
-| BF16        | bash bare_metal_batch_inference.sh bf16 | bash bare_metal_online_inference.sh bf16 | bash bare_metal_accuracy.sh bf16 |
-| INT8        | bash bare_metal_batch_inference.sh int8 | bash bare_metal_online_inference.sh int8 | bash bare_metal_accuracy.sh int8 |
+| FP32        | bash inference_throughput.sh fp32 | bash inference_realtime.sh fp32 | bash accuracy.sh fp32 |
+| BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 | bash accuracy.sh bf16 |
+| INT8        | bash inference_throughput.sh int8 | bash inference_realtime.sh int8 | bash accuracy.sh int8 |
+
+To do the int8 calibration `bash bare_metal_int8_calibration.sh int8 <file where to save the calibrated model> <steps to run calibration>`, for example `bash bare_metal_int8_calibration.sh int8 test.json 100`.
 
 ## Run the model
 
@@ -81,7 +83,7 @@ export OUTPUT_DIR=<path to an output directory>
 
 # Run a quickstart script (for example, FP32 batch inference)
 cd ${MODEL_DIR}/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu
-bash bare_metal_batch_inference.sh fp32
+bash inference_throughput.sh fp32
 ```
 
 <!--- 80. License -->

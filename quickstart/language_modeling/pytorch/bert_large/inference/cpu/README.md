@@ -61,9 +61,9 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
 | ----------- | ----------- | ----------- | ----------- |
-| FP32        | bash run_multi_instance_throuput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
-| BF16        | bash run_multi_instance_throuput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
-| INT8        | bash run_multi_instance_throuput.sh int8 | bash run_multi_instance_realtime.sh int8 | bash run_accuracy.sh int8 |
+| FP32        | bash run_multi_instance_throughput.sh fp32 | bash run_multi_instance_realtime.sh fp32 | bash run_accuracy.sh fp32 |
+| BF16        | bash run_multi_instance_throughput.sh bf16 | bash run_multi_instance_realtime.sh bf16 | bash run_accuracy.sh bf16 |
+| INT8        | bash run_multi_instance_throughput.sh int8 | bash run_multi_instance_realtime.sh int8 | bash run_accuracy.sh int8 |
 
 ## Run the model
 
