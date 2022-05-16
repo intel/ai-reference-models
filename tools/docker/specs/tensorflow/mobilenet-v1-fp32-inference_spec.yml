@@ -49,7 +49,7 @@ slice_sets:
           <precision>: FP32
           <mode>: inference
           <use case>: image_recognition
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/mobilenet-v1-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/mobilenet-v1-fp32-inference.tar.gz
           <package name>: mobilenet-v1-fp32-inference.tar.gz
           <package dir>: mobilenet-v1-fp32-inference
           <docker image>: intel/image-recognition:tf-latest-mobilenet-v1-fp32-inference

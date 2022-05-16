@@ -33,7 +33,7 @@ slice_sets:
           <model name>: Inception V3
           <package dir>: inceptionv3-fp32-inference
           <package name>: inceptionv3-fp32-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/inceptionv3-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/inceptionv3-fp32-inference.tar.gz
           <precision>: FP32
           <use case>: image_recognition
         uri: models/quickstart/image_recognition/tensorflow/inceptionv3/inference/cpu/fp32

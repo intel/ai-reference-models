@@ -11,7 +11,7 @@ using Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-resnet34-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-int8-inference.tar.gz)
+[ssd-resnet34-int8-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-int8-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
