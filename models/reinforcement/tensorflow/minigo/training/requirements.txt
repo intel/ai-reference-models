@@ -5,7 +5,9 @@ google.cloud.logging
 google.cloud.bigtable
 grpcio-tools
 keras
-numpy
+
+numpy==1.22.2
+
 protobuf
 sgf==0.5
 six
