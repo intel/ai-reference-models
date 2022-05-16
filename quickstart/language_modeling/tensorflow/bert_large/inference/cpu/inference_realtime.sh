@@ -59,19 +59,14 @@ for i in "${!input_dirs[@]}"; do
     exit 1
   fi
 done
-
+num_inter_threads=" --num-inter-threads 3 "
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
-        num_warmup_steps=50
-        num_steps=350
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
+        num_inter_threads=" --num-inter-threads 1 "
     elif [[ $PRECISION == "bfloat16" ]]; then
-        num_warmup_steps=400
-        num_steps=300
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_bfloat16_pretrained_model.pb"
     elif [[ $PRECISION == "fp32" ]]; then
-        num_warmup_steps=50
-        num_steps=350
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_fp32_pretrained_model.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
@@ -105,8 +100,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
   --checkpoint ${CHECKPOINT_DIR} \
   --num-intra-threads 8 \
-  --num-inter-threads 3 \
-  --warmup-steps=${num_warmup_steps} --steps=${num_steps} \
+  ${num_inter_threads} \
   --benchmark-only \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive \

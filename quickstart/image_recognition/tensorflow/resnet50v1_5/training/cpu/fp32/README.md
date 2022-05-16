@@ -20,7 +20,7 @@ Set the `DATASET_DIR` to point to this directory when running ResNet50 v1.5.
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50v1-5-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50v1-5-fp32-training.tar.gz)
+[resnet50v1-5-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-training.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -47,7 +47,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50v1-5-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50v1-5-fp32-training.tar.gz
 tar -xvf resnet50v1-5-fp32-training.tar.gz
 cd resnet50v1-5-fp32-training
 

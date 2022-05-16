@@ -36,3 +36,13 @@ slice_sets:
                  destination: licenses/LICENSE
                - source: third_party
                  destination: licenses/third_party
+
+    pytorch-multistage:
+        - add_to_name: "pytorch"
+          partials:
+              - pytorch/pytorch-multistage-base
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party

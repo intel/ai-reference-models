@@ -1,3 +1,4 @@
+# Copyright (c) 2018 Intel Corporation
 # Copyright (c) 2019, Myrtle Software Limited. All rights reserved.
 # Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
 #
@@ -261,6 +262,34 @@ class StackTime(torch.nn.Module):
             seq.append(tmp)
         x_lens = torch.ceil(x_lens.float() / self.factor).int()
         return torch.cat(seq, dim=2)[::self.factor, :, :], x_lens
+
+
+class IPEXStackTime(torch.nn.Module):
+    def __init__(self, factor):
+        super().__init__()
+        # TODO: support factor to be any value
+        assert factor == 2, "only support factor to be 2"
+        self.factor = int(factor)
+
+    def forward(self, x):
+        # T, B, U
+        x, x_lens = x
+        T = x.size()[0]
+        B = x.size()[1]
+        U = x.size()[2]
+
+        x_lens = torch.ceil(x_lens.float() / self.factor).int()
+
+        output = torch.empty((math.ceil(T / self.factor), B, U * self.factor), dtype=x.dtype)
+
+        output[:, :, :U] = x[::self.factor, :, :]
+
+        if T % 2 != 0:
+            output[:-1, :, U:] = x[1::self.factor, :, :]
+            output[-1, :, U:] = 0
+        else:
+            output[:, :, U:] = x[1::self.factor, :, :]
+        return output, x_lens
 
 
 def lnlstm(input_size, hidden_size, num_layers, dropout, forget_gate_bias,

@@ -1,0 +1,57 @@
+From b219e241e8b1f0621837565a58abc85ea6f700c6 Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Wed, 23 Dec 2020 23:55:04 +0800
+Subject: [PATCH] transformer_lt_official fp32 TF timeline
+
+---
+ .../inference/fp32/infer_ab.py                    | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py b/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py
+index fa680046..bf8daf4a 100644
+--- a/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py
++++ b/models/language_translation/tensorflow/transformer_lt_official/inference/fp32/infer_ab.py
+@@ -32,6 +32,11 @@ import time
+ import pandas as pd
+ from timeit import default_timer as timer
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ flags = flags_lib
+ FLAGS = flags.FLAGS
+ 
+@@ -172,7 +177,12 @@ def main(unused_args):
+       inter_op_parallelism_threads=FLAGS.num_inter,
+       intra_op_parallelism_threads=FLAGS.num_intra)
+ 
+-  with tf.compat.v1.Session(config=session_config, graph=graph) as sess:
++  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  configf.read_config("transformer_lt_official infer fp32")
++  infer_many_runs_timeline = TimeLiner()
++  infer_run_metadata = tf.compat.v1.RunMetadata()
++
++  with tfSession(config=session_config, graph=graph, run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline) as sess:
+ 
+     run_options = tf.compat.v1.RunOptions(trace_level=tf.compat.v1.RunOptions.FULL_TRACE)
+     run_metadata = tf.compat.v1.RunMetadata()
+@@ -207,12 +217,13 @@ def main(unused_args):
+         #print('Batch inferencing time:%s for batch size:%d and batch:%d' % (duration, FLAGS.batch_size, batch_num))
+         batch = []
+       inference_time += duration
++      infer_many_runs_timeline.save(configf.json_fname)
+ 
+     inference_time += graph_parse_time
+     inference_time += sort_time
+     print('Total inferencing time:%s' %(inference_time))
+     print('Throughput:{} sentences/second'.format((DATASET_SIZE)/inference_time))
+-
++    
+     translation_count = 0
+ 
+     decoded_translations=[]
+-- 
+2.25.1
+

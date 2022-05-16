@@ -33,7 +33,7 @@ slice_sets:
           <model name>: ResNet101
           <package dir>: resnet101-int8-inference
           <package name>: resnet101-int8-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet101-int8-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet101-int8-inference.tar.gz
           <precision>: Int8
           <use case>: image_recognition
         uri: models/quickstart/image_recognition/tensorflow/resnet101/inference/cpu/int8
@@ -108,5 +108,6 @@ slice_sets:
     - destination: quickstart
       source: quickstart/image_recognition/tensorflow/resnet101/inference/cpu/int8
     partials:
+    - tcmalloc
     - model_package
     - entrypoint
