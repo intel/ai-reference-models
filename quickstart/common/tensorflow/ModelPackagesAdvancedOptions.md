@@ -33,7 +33,7 @@ can be used with other model packages.
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50_fp32_inference.tar.gz
 
 cd resnet50_fp32_inference/benchmarks
@@ -180,7 +180,7 @@ model.
 DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
 OUTPUT_DIR=&lt;directory where log files will be written&gt;
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50_fp32_inference.tar.gz
 
 docker run \
@@ -207,7 +207,7 @@ following env variables shown below, the user can run the model with their uid:g
 DATASET_DIR=&lt;path to the preprocessed imagenet dataset&gt;
 OUTPUT_DIR=&lt;directory where log files will be written&gt;
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50_fp32_inference.tar.gz
 
 docker run \

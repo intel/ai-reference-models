@@ -24,10 +24,20 @@ import os
 import fnmatch
 import psutil
 
-import tensorflow.estimator
-import tensorflow as tf
-from tensorflow.python.client import timeline
-from tensorflow.python.training import training_util
+from importlib import util
+tensorflow_found = util.find_spec("tensorflow") is not None
+pytorch_found = util.find_spec("torch") is not None
+pytorch_ext_found = util.find_spec("intel_pytorch_extension") is not None
+
+try:
+    import tensorflow.estimator
+    import tensorflow as tf
+    from tensorflow.python.client import timeline
+    from tensorflow.python.training import training_util
+except ImportError as e:
+    print(e)
+    print("can't import tensorflow module")
+    pass
 
 try:
     from git import Repo
@@ -132,12 +142,19 @@ class tfProfileHook(tf.estimator.ProfilerHook):
 class TensorflowUtils:
 
     def is_mkl_enabled(self):
+        mkl_enabled = False
         major_version = int(tf.__version__.split(".")[0])
+        minor_version = int(tf.__version__.split(".")[1])
         if major_version >= 2:
-            from tensorflow.python.util import _pywrap_util_port
-            return _pywrap_util_port.IsMklEnabled()
+            if minor_version < 5:
+                from tensorflow.python import _pywrap_util_port
+            else:
+                from tensorflow.python.util import _pywrap_util_port
+                onednn_enabled = int(os.environ.get('TF_ENABLE_ONEDNN_OPTS', '0'))
+            mkl_enabled = _pywrap_util_port.IsMklEnabled() or (onednn_enabled == 1)
         else:
-            return tf.pywrap_tensorflow.IsMklEnabled()
+            mkl_enabled = tf.pywrap_tensorflow.IsMklEnabled()
+        return mkl_enabled
 
 
 class GitOps:
@@ -313,12 +330,12 @@ class ConfigFile:
         self.preprocessing = ''
         self.in_graph = ''
         self.checkpoint = ''
-        self.tf_util = TensorflowUtils()
         self.json_fname = ''
-        if self.tf_util.is_mkl_enabled() is True:
-            self.json_fname = 'mkl_'
-        else:
-            self.json_fname = 'stock_'
+        self.json_fname = 'stock_'
+        if tensorflow_found == True:
+            self.tf_util = TensorflowUtils()
+            if self.tf_util.is_mkl_enabled() is True:
+                self.json_fname = 'mkl_'
         self.patches = ''
         self.patched = False
         self.patches_keyword = ''
@@ -587,7 +604,8 @@ class ConfigFile:
             os.system(cmd)
             if os.path.exists(pretrainfd + os.sep + filename) is False:
                 shutil.move(filename, pretrainfd)
-            uncompress_path = filepath.split('.')[0]
+
+            uncompress_path = os.path.splitext(filepath)[0]
 
         return uncompress_path
 
@@ -631,6 +649,8 @@ class ConfigFile:
             print(cmd)
             os.system(cmd)
             self.patched = True
+        else:
+            print("couldn't find the patch file : ", patch_path)
         ret = self.git.check_git_status()
         return ret
 
@@ -1092,22 +1112,26 @@ class TFTimelinePresenter:
         total_time = 0.0
         total_mkl_time = 0.0
         with f:
-            fnames = ['op', time_col_name, 'speedup', 'mkl_op']
+            fnames = ['op', time_col_name, 'speedup', 'mkl_op', 'native_op']
             writer = csv.DictWriter(f, fieldnames=fnames)
             writer.writeheader()
             x = 0
             for sitem in sitems:
                 mkl_op = False
+                native_op = False
                 if tfile_prefix == 'mkl':
                     op_name = sitems.index[x].strip('_')
                     if op_name.find('Mkl') != -1:
                         mkl_op = True
                         op_name = op_name[3:]
                         total_mkl_time += float(sitems[x])
+                        if op_name.find('Native') != -1:
+                            op_name = op_name[6:]
+                            native_op = True
                     total_time += float(sitems[x])
                 else:
                     op_name = sitems.index[x].strip('_')
-                writer.writerow({'op': op_name, time_col_name: sitems[x], 'speedup': 0, 'mkl_op': mkl_op})
+                writer.writerow({'op': op_name, time_col_name: sitems[x], 'speedup': 0, 'mkl_op': mkl_op, 'native_op': native_op})
                 x = x + 1
 
         percentage_filename = ''
@@ -1147,8 +1171,12 @@ class TFTimelinePresenter:
         if merged['mkl_op_x'] is True:
             merged['mkl_op'] = True
         merged['mkl_op'] = merged['mkl_op_x'] + merged['mkl_op_y']
+        if merged['native_op_x'] is True:
+            merged['native_op'] = True
+        merged['native_op'] = merged['native_op_x'] + merged['native_op_y']
         merged = merged.drop(columns=['speedup_x', 'speedup_y'])
         merged = merged.drop(columns=['mkl_op_x', 'mkl_op_y'])
+        merged = merged.drop(columns=['native_op_x', 'native_op_y'])
         if self.showAbsNumber is False:
             ret = merged.drop(columns=['elapsed_time_stock', 'elapsed_time_mkl'])
         else:
@@ -1162,7 +1190,7 @@ class TFTimelinePresenter:
         extra = extra.drop(columns=['speedup'])
         common_time = common[common.columns.values[1]].sum(axis=0)
         append_op = 'Common ops with ' + tag2
-        to_append = [append_op, common_time, True]
+        to_append = [append_op, common_time, True, False]
         series = pd.Series(to_append, index=extra.columns)
         extra = extra.append(series, ignore_index=True)
         extra.to_csv(fpath, index=False)
@@ -1174,14 +1202,17 @@ class TFTimelinePresenter:
         common_a = a[a.op.isin(merged.op)]
         extra_b = b[~b.op.isin(merged.op)]
         common_b = b[b.op.isin(merged.op)]
-        merged['speedup'] = merged.iloc[:, 1] / merged.iloc[:, 4]
-        merged = merged.rename(columns={merged.columns.values[1]: tags[0], merged.columns.values[4]: tags[1]})
+        merged['speedup'] = merged.iloc[:, 1] / merged.iloc[:, 5]
+        merged = merged.rename(columns={merged.columns.values[1]: tags[0], merged.columns.values[5]: tags[1]})
         if merged.iloc[:, 3] is True:
             merged['mkl_op'] = True
-        merged['mkl_op'] = merged.iloc[:, 3] + merged.iloc[:, 6]
-        merged = merged.drop(columns=[merged.columns.values[2], merged.columns.values[3], merged.columns.values[5], merged.columns.values[6]])
+        merged['mkl_op'] = merged.iloc[:, 3] + merged.iloc[:, 7]
+        if merged.iloc[:, 4] is True:
+            merged['native_op'] = True
+        merged['native_op'] = merged.iloc[:, 4] + merged.iloc[:, 8]
+        merged = merged.drop(columns=[merged.columns.values[2], merged.columns.values[3], merged.columns.values[4], merged.columns.values[6], merged.columns.values[7], merged.columns.values[8]])
         if self.showAbsNumber is False:
-            ret = merged.drop(columns=[merged.columns.values[1], merged.columns.values[4]])
+            ret = merged.drop(columns=[merged.columns.values[1], merged.columns.values[5]])
         else:
             ret = merged
         merged.to_csv(merged_filepaths[0], index=False)

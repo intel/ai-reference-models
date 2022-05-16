@@ -9,7 +9,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50-fp32-inference.tar.gz)
+[resnet50-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -44,7 +44,7 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/resnet50-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50-fp32-inference.tar.gz
 cd resnet50-fp32-inference
 

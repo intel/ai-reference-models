@@ -33,7 +33,7 @@ slice_sets:
           <model name>: DenseNet 169
           <package dir>: densenet169-fp32-inference
           <package name>: densenet169-fp32-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/densenet169-fp32-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/densenet169-fp32-inference.tar.gz
           <precision>: FP32
           <use case>: image_recognition
         uri: models/quickstart/image_recognition/tensorflow/densenet169/inference/cpu/fp32

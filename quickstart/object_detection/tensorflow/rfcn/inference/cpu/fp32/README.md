@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/rfcn-fp32-inference.tar.gz)
+[rfcn-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/rfcn-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -28,8 +28,8 @@ downloading and preprocessing the COCO validation dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_inference.sh`](fp32_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
-| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
+| [`fp32_inference.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/fp32/fp32_inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`fp32_accuracy.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/fp32/fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -54,7 +54,7 @@ in the TensorFlow models repo.
 Download and untar the RFCN FP32 inference model package:
 
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/rfcn-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/rfcn-fp32-inference.tar.gz
 tar -xvf rfcn-fp32-inference.tar.gz
 ```
 

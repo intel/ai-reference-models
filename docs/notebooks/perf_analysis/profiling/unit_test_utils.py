@@ -18,6 +18,7 @@
 
 #
 import unittest
+import configparser
 
 
 class RunCmd:
@@ -62,14 +63,16 @@ class RunCmd:
             print("Exception!")
             return -1
 
-    def runPerfComparisonCmd(self, conda_env, enable_accuracy, topo_index, enable_timeline, postfix, model_source_dir='', data_download_path=''):
+    def runPerfComparisonCmd(self, conda_env, enable_accuracy, topo_index, enable_timeline, postfix, model_source_dir='', data_download_path='', ENABLE_ONEDNN_OPTS='0', enable_online='False'):
         import os
         os.environ['ACCURACY_ENABLE']=enable_accuracy
+        os.environ['ONLINE_ENABLE']=enable_online
         os.environ['TOPO_INDEX']=topo_index
         os.environ['TF_ENABLE_MKL_NATIVE_FORMAT']='1'
         os.environ['ENABLE_TIMELINE']=enable_timeline
         os.environ['MODEL_SOURCE_DIR']=model_source_dir
         os.environ['DATA_DOWNLOAD_PATH']=data_download_path
+        os.environ['TF_ENABLE_ONEDNN_OPTS'] = ENABLE_ONEDNN_OPTS
         cmd = self.runJupyterNotebook('benchmark_perf_comparison.ipynb', 'profiling/unit_test_results/benchmark_perf_comparison_' + postfix + '.ipynb', conda_env)
         return cmd
 
@@ -81,11 +84,13 @@ class RunCmd:
         cmd = self.runJupyterNotebook('benchmark_perf_timeline_analysis.ipynb', 'profiling/unit_test_results/benchmark_perf_timeline_analysis_' + postfix + '.ipynb', conda_env)
         return cmd
 
-    def runDataTypeCmd(self, conda_env, enable_accuracy, topo_index, data_type_index, enable_timeline, postfix, model_source_dir='', data_download_path=''):
+    def runDataTypeCmd(self, conda_env, enable_accuracy, topo_index, data_type_index, enable_timeline, postfix, model_source_dir='', data_download_path='', ENABLE_ONEDNN_OPTS='1', enable_online='False'):
         import os
         os.environ['ACCURACY_ENABLE']=enable_accuracy
+        os.environ['ONLINE_ENABLE']=enable_online
         os.environ['TOPO_INDEX']=topo_index
         os.environ['TF_ENABLE_MKL_NATIVE_FORMAT']='0'
+        os.environ['TF_ENABLE_ONEDNN_OPTS'] = ENABLE_ONEDNN_OPTS
         os.environ['ENABLE_TIMELINE']=enable_timeline
         os.environ['DATA_TYPE_INDEX']=str(data_type_index)
         os.environ['MODEL_SOURCE_DIR']=model_source_dir
@@ -125,6 +130,29 @@ class Utils:
             os.mkdir(unit_test_dir)
         return unit_test_dir
 
+    def rmIntermediateResults(self):
+        import shutil
+        import os
+        rm_files = []
+
+        pattern = "Timeline_*"
+        path = os.getcwd()
+        files1, rm_paths = self.found_files_in_folder(pattern, path)
+        pattern = "logs"
+        path = os.getcwd()
+        files2, rm_paths = self.found_files_in_folder(pattern, path)
+        pattern = "merged"
+        path = os.getcwd()
+        files3, rm_paths = self.found_files_in_folder(pattern, path)
+        rm_files = files1 + files2 + files3
+        print(rm_files)
+        for f in rm_files:
+            if os.path.isdir(f) is True:
+                print(f)
+                shutil.rmtree(f)
+            else:
+                os.remove(f)
+
     def mvTimeline2Results(self):
         import shutil
         import os
@@ -137,20 +165,24 @@ class Utils:
                 print(f)
                 shutil.move(f, unit_test_dir)
 
-    def mvCSV2Results(self):
+    def mvCSV2Results(self, folder=None):
         import shutil
         import os
         pattern = "*.csv"
-        path = os.getcwd()
+        if folder == None:
+            folder = os.getcwd()
+        print("mvCSV2Results : ", folder)
         unit_test_dir = self.createFolderForResults()
-        csv_files, csv_paths = self.found_files_in_folder(pattern, path)
-        for f in csv_files:
+        csv_files, csv_paths = self.found_files_in_folder(pattern, folder)
+        for f in csv_paths:
             if os.path.isfile(f) is True:
                 print(f)
-                perf_ratio = self.get_perf_ratio_from_csv(f, 'throughput')
-                model = f.split('.')[0].split('_')[1]
+                if f.split(os.sep)[-1] == "unit_test_summary.csv":
+                    continue
+                perf_ratio, mean1, mean2 = self.get_perf_ratio_from_csv(f, 'throughput')
+                model = f.split(os.sep)[-1].split('.')[0].split('_')[1]
                 print(model)
-                self.log_model_speedupcsv(model, perf_ratio, 'profiling/unit_test_results/unit_test_summary.csv')
+                self.log_model_speedupcsv(model, perf_ratio, mean1, mean2, 'profiling/unit_test_results/unit_test_summary.csv')
                 shutil.move(f, unit_test_dir)
 
     def get_perf_ratio_from_csv(self, filepath, framename):
@@ -161,12 +193,12 @@ class Utils:
             print("ERROR. Users must run the benchmark with both Stock TF and Intel TF\n")
             return
         intel_ratio_means = float(mean1 / mean2)
-        return intel_ratio_means
+        return intel_ratio_means, mean1, mean2
 
     def create_csv_logfile(self, filename):
         import csv
         import os.path
-        fnames = ['model', 'speedup']
+        fnames = ['model', 'speedup', 'stock', 'intel']
         if os.path.isfile(filename):
             print('file exists')
         else:
@@ -175,18 +207,21 @@ class Utils:
                 writer = csv.DictWriter(f, fieldnames=fnames)
                 writer.writeheader()
 
-    def log_model_speedupcsv(self, model, speedup, filename):
+    def log_model_speedupcsv(self, model, speedup, mean1, mean2, filename):
         import csv
         import os
         if os.path.isfile(filename) is False:
             self.create_csv_logfile(filename)
         f = open(filename, 'a')
         with f:
-            fnames = ['model', 'speedup']
+            fnames = ['model', 'speedup', 'stock', 'intel']
             writer = csv.DictWriter(f, fieldnames=fnames)
             writer.writerow(
                 {'model': model,
-                 'speedup': speedup})
+                 'speedup': speedup,
+                 'stock': mean2,
+                 'intel': mean1
+                })
 
     def test_patches(self, topology_name, ModelZooRoot=""):
         import os
@@ -205,6 +240,32 @@ class Utils:
             return -1
         else: 
             return 0
+
+class ConfFile:
+
+    def __init__(self, confpath='profiling/unittest.ini'):
+        self.configpath = confpath
+
+    def read_section(self):
+        config = configparser.ConfigParser()
+        config.read(self.configpath)
+        return config.sections()
+
+    def read_value_from_section(self, test_name, key):
+        config = configparser.ConfigParser()
+        config.read(self.configpath)
+        string_val = config.get(test_name, key)
+        return string_val
+
+    def write_value_from_section(self, test_name, key, val):
+        config = configparser.ConfigParser()
+        config.read(self.configpath)
+        config.set(test_name, key, val)
+
+        # save to a file
+        with open(self.configpath, 'w') as configfile:
+            config.write(configfile)
+        return
 
 
 class TestPatches(unittest.TestCase):
@@ -248,24 +309,29 @@ class TestPatches(unittest.TestCase):
 class TestPerfComparison(unittest.TestCase):
 
     def setUp(self):
-        self.TimelineEnabled = True
-        self.baseline_conda = 'stock-tensorflow'
-        self.compare_conda = 'intel-tensorflow'
+        config = ConfFile()
+        test_name = 'TestPerfComparison'
+        self.TimelineEnabled = config.read_value_from_section(test_name, 'TimelineEnabled')
+        self.OnlineEnabled = config.read_value_from_section(test_name, 'OnlineEnabled')
+        self.baseline_conda = config.read_value_from_section(test_name, 'baseline_conda')
+        self.compare_conda = config.read_value_from_section(test_name, 'compare_conda')
 
-        self.rfcn_infer_fp32_model_path = '/tmp/TF-Models/tensorflow-models-rfcn '
-        self.rfcn_infer_fp32_data_path = '/tf_dataset/dataset/coco_dataset/raw-data/val2017 '
-        self.mobilenet_v1_infer_fp32_model_path = '/tmp/TF-Models/models '
-        self.wide_deep_large_infer_fp32_data_path = '/tf_dataset/dataset/wide_deep_kaggle/eval_preprocessed_eval.tfrecords'
-        self.bert_infer_fp32_data_path = '/tf_dataset/dataset/bert_official/MRPC '
-        self.bert_infer_fp32_model_path = '/tmp/TF-Models/bert '
-        self.transformer_mlperf_train_fp32_data_path = '/tf_dataset/dataset/transformer_data '
-        self.ssd_mobilenet_infer_fp32_data_path = '/tf_dataset/dataset/SSDMobilenet/coco_val.record '
+        self.rfcn_infer_fp32_model_path = config.read_value_from_section(test_name, 'rfcn_infer_fp32_model_path')
+        self.rfcn_infer_fp32_data_path = config.read_value_from_section(test_name, 'rfcn_infer_fp32_data_path')
+        self.mobilenet_v1_infer_fp32_model_path = config.read_value_from_section(test_name, 'mobilenet_v1_infer_fp32_model_path')
+        self.wide_deep_large_infer_fp32_data_path = config.read_value_from_section(test_name, 'wide_deep_large_infer_fp32_data_path')
+        self.bert_infer_fp32_data_path = config.read_value_from_section(test_name, 'bert_infer_fp32_data_path')
+        self.bert_infer_fp32_model_path = config.read_value_from_section(test_name, 'bert_infer_fp32_model_path')
+        self.transformer_mlperf_train_fp32_data_path = config.read_value_from_section(test_name, 'transformer_mlperf_train_fp32_data_path')
+        self.ssd_mobilenet_infer_fp32_data_path = config.read_value_from_section(test_name, 'ssd_mobilenet_infer_fp32_data_path')
 
         Utils().createFolderForResults()
 
     def tearDown(self):
-        self.TimelineEnabled = False
+        self.TimelineEnabled = 'False'
+        self.OnlineEnabled = 'False'
         Utils().mvTimeline2Results()
+        Utils().rmIntermediateResults()
 
     def test_0_env_setup(self):
         import os
@@ -279,15 +345,15 @@ class TestPerfComparison(unittest.TestCase):
         if setup is True:
             cmd1 = 'conda create -n ' + self.baseline_conda + ' python matplotlib ipykernel psutil pandas gitpython'
             ret1 = RunCmd().run(cmd1)
-            cmd2 = 'conda run -n ' + self.baseline_conda + ' pip install tensorflow==2.4.0 cxxfilt'
+            cmd2 = 'conda run -n ' + self.baseline_conda + ' pip install tensorflow cxxfilt'
             ret2 = RunCmd().run(cmd2)
             cmd3 = '~/anaconda3/envs/' + self.baseline_conda + '/bin/python  -m ipykernel install --user --name=' + self.baseline_conda
             ret3 = RunCmd().run(cmd3)
-            cmd4 = 'conda create -n intel-tensorflow python matplotlib ipykernel psutil pandas gitpython'
+            cmd4 = 'conda create -n ' + self.compare_conda + ' python matplotlib ipykernel psutil pandas gitpython'
             ret4 = RunCmd().run(cmd4)
-            cmd5 = 'conda run -n intel-tensorflow pip install intel-tensorflow==2.4.0 cxxfilt'
+            cmd5 = 'conda run -n ' + self.compare_conda + ' pip install intel-tensorflow cxxfilt'
             ret5 = RunCmd().run(cmd5)
-            cmd6 = '~/anaconda3/envs/intel-tensorflow/bin/python  -m ipykernel install --user --name=intel-tensorflow'
+            cmd6 = '~/anaconda3/envs/' + self.compare_conda + '/bin/python  -m ipykernel install --user --name=' + self.baseline_conda
             ret6 = RunCmd().run(cmd6)
             ret = ret1 or ret2 or ret3 or ret4 or ret5 or ret6
 
@@ -296,8 +362,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_a_resnet50_infer_fp32(self):
         postfix = 'resnet50_infer_fp32'
         topo_index = '0'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -305,8 +371,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_b_resnet50v1_5_infer_fp32(self):
         postfix = 'resnet50v1_5_infer_fp32'
         topo_index = '1'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -329,8 +395,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_d_densenet169_infer_fp32(self):
         postfix = 'densenet169_infer_fp32'
         topo_index = '2'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -368,8 +434,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_g_rfcn_infer_fp32(self):
         postfix = 'rfcn_infer_fp32'
         topo_index = '3'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.rfcn_infer_fp32_model_path, data_download_path=self.rfcn_infer_fp32_data_path)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.rfcn_infer_fp32_model_path, data_download_path=self.rfcn_infer_fp32_data_path)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.rfcn_infer_fp32_model_path, data_download_path=self.rfcn_infer_fp32_data_path, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.rfcn_infer_fp32_model_path, data_download_path=self.rfcn_infer_fp32_data_path, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -377,8 +443,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_h_inceptionv3_infer_fp32(self):
         postfix = 'inceptionv3_infer_fp32'
         topo_index = '4'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -386,8 +452,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_i_inceptionv4_infer_fp32(self):
         postfix = 'inceptionv4_infer_fp32'
         topo_index = '5'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -395,8 +461,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_j_mobilenet_v1_infer_fp32(self):
         postfix = 'mobilenet_v1_infer_fp32'
         topo_index = '6'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.mobilenet_v1_infer_fp32_model_path)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.mobilenet_v1_infer_fp32_model_path)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.mobilenet_v1_infer_fp32_model_path, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.mobilenet_v1_infer_fp32_model_path, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -404,8 +470,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_k_resnet101_infer_fp32(self):
         postfix = 'resnet101_infer_fp32'
         topo_index = '7'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -413,8 +479,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_l_wide_deep_large_infer_fp32(self):
         postfix = 'wide_deep_large_infer_fp32'
         topo_index = '8'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, data_download_path=self.wide_deep_large_infer_fp32_data_path)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, data_download_path=self.wide_deep_large_infer_fp32_data_path)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, data_download_path=self.wide_deep_large_infer_fp32_data_path, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, data_download_path=self.wide_deep_large_infer_fp32_data_path, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -422,8 +488,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_m_bert_infer_fp32(self):
         postfix = 'bert_infer_fp32'
         topo_index = '9'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.bert_infer_fp32_model_path, data_download_path=self.bert_infer_fp32_data_path)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.bert_infer_fp32_model_path, data_download_path=self.bert_infer_fp32_data_path)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.bert_infer_fp32_model_path, data_download_path=self.bert_infer_fp32_data_path, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, model_source_dir=self.bert_infer_fp32_model_path, data_download_path=self.bert_infer_fp32_data_path, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -431,8 +497,8 @@ class TestPerfComparison(unittest.TestCase):
     def test_n_transformer_mlperf_train_fp32(self):
         postfix = 'transformer_mlperf_train_fp32'
         topo_index = '10'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, data_download_path=self.transformer_mlperf_train_fp32_data_path)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, data_download_path=self.transformer_mlperf_train_fp32_data_path)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, data_download_path=self.transformer_mlperf_train_fp32_data_path, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, data_download_path=self.transformer_mlperf_train_fp32_data_path, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
@@ -440,16 +506,16 @@ class TestPerfComparison(unittest.TestCase):
     def test_o_ssd_mobilenet_infer_fp32(self):
         postfix = 'ssd_mobilenet_infer_fp32'
         topo_index = '11'
-        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, data_download_path=self.ssd_mobilenet_infer_fp32_data_path)
-        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, data_download_path=self.ssd_mobilenet_infer_fp32_data_path)
+        ret1 = RunCmd().runPerfComparisonCmd(self.baseline_conda, 'False', topo_index, 'True', postfix, data_download_path=self.ssd_mobilenet_infer_fp32_data_path, enable_online=self.OnlineEnabled)
+        ret2 = RunCmd().runPerfComparisonCmd(self.compare_conda, 'False', topo_index, 'True', postfix, data_download_path=self.ssd_mobilenet_infer_fp32_data_path, ENABLE_ONEDNN_OPTS='1', enable_online=self.OnlineEnabled)
         ret3 = RunCmd().runPerfTimelneCmd(self.compare_conda, postfix)
         ret = ret1 or ret2 or ret3
         self.assertEqual(ret, 0)
 
     def test_z_summarize(self):
-        cmd1 = 'conda run -n intel-tensorflow python summarize_unit_test.py -v'
+        cmd1 = 'conda run -n ' + self.baseline_conda + ' python summarize_unit_test.py'
         ret1 = RunCmd().run(cmd1)
-        cmd2 = 'ipython nbconvert profiling/unit_test_results/*.ipynb'
+        cmd2 = 'ipython nbconvert profiling/unit_test_results/*.ipynb --to html'
         ret2 = RunCmd().run(cmd2)
         ret = ret1 or ret2
         self.assertEqual(ret, 0)
@@ -458,20 +524,26 @@ class TestPerfComparison(unittest.TestCase):
 class TestPerfDataType(unittest.TestCase):
 
     def setUp(self):
-        self.TimelineEnabled = 'True'
-        self.baseline_conda = 'stock-tensorflow'
-        self.compare_conda = 'intel-tensorflow'
-        self.mobilenet_v1_infer_model_path = '/tmp/TF-Models/models'
-        self.rfcn_infer_model_path = '/tmp/TF-Models/tensorflow-models-rfcn'
-        self.rfcn_infer_data_path = '/tf_dataset/dataset/coco_dataset/raw-data/val2017 '
-        self.ssdmobilenet_data_path = '/tf_dataset/dataset/SSDMobilenet/coco_val.record'
-        self.wide_deep_large_ds_infer_data_path = '/tf_dataset/dataset/wide_deep_kaggle/eval_preprocessed_eval.tfrecords'
-        self.transformer_mlperf_training_data_path = '/tf_dataset/dataset/transformer_data'
+        config = ConfFile()
+        test_name = 'TestPerfDataType'
+        self.TimelineEnabled = config.read_value_from_section(test_name, 'TimelineEnabled')
+        self.OnlineEnabled = config.read_value_from_section(test_name, 'OnlineEnabled')
+        self.baseline_conda = config.read_value_from_section(test_name, 'baseline_conda')
+        self.compare_conda = config.read_value_from_section(test_name, 'compare_conda')
+
+        self.mobilenet_v1_infer_model_path = config.read_value_from_section(test_name, 'mobilenet_v1_infer_model_path')
+        self.rfcn_infer_model_path = config.read_value_from_section(test_name, 'rfcn_infer_model_path')
+        self.rfcn_infer_data_path = config.read_value_from_section(test_name, 'rfcn_infer_data_path')
+        self.ssdmobilenet_data_path = config.read_value_from_section(test_name, 'ssdmobilenet_data_path')
+        self.wide_deep_large_ds_infer_data_path = config.read_value_from_section(test_name, 'wide_deep_large_ds_infer_data_path')
+        self.transformer_mlperf_training_data_path = config.read_value_from_section(test_name, 'transformer_mlperf_training_data_path')
         Utils().createFolderForResults()
 
     def tearDown(self):
         self.TimelineEnabled = 'False'
+        self.OnlineEnabled = 'False'
         Utils().mvTimeline2Results()
+        Utils().rmIntermediateResults()
 
     def test_0_env_setup(self):
         import os
@@ -504,18 +576,18 @@ class TestPerfDataType(unittest.TestCase):
         topo_index = '3'
         ret = 0
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
-        cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
+        cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix, baseline_index='1', comparison_index='2')
         ret = ret or cmd_ret
 
         self.assertEqual(ret, 0)
@@ -525,11 +597,11 @@ class TestPerfDataType(unittest.TestCase):
         topo_index = '2'
         ret = 0
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
@@ -542,11 +614,11 @@ class TestPerfDataType(unittest.TestCase):
         topo_index = '0'
         ret = 0
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
@@ -576,11 +648,11 @@ class TestPerfDataType(unittest.TestCase):
         ret = 0
 
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
@@ -593,11 +665,11 @@ class TestPerfDataType(unittest.TestCase):
         ret = 0
 
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, model_source_dir=self.rfcn_infer_model_path, data_download_path=self.rfcn_infer_data_path)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, model_source_dir=self.rfcn_infer_model_path, data_download_path=self.rfcn_infer_data_path, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, model_source_dir=self.rfcn_infer_model_path, data_download_path=self.rfcn_infer_data_path)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, model_source_dir=self.rfcn_infer_model_path, data_download_path=self.rfcn_infer_data_path, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
@@ -611,11 +683,11 @@ class TestPerfDataType(unittest.TestCase):
         extra = ' DATA_DOWNLOAD_PATH=' + self.ssdmobilenet_data_path + ' '
 
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.ssdmobilenet_data_path)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.ssdmobilenet_data_path, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.ssdmobilenet_data_path)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.ssdmobilenet_data_path, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
@@ -645,19 +717,19 @@ class TestPerfDataType(unittest.TestCase):
         ret = 0
 
         data_type_index = 0
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.transformer_mlperf_training_data_path)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.transformer_mlperf_training_data_path, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
         data_type_index += 1
-        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.transformer_mlperf_training_data_path)
+        cmd_ret = RunCmd().runDataTypeCmd(self.compare_conda, 'False', topo_index, data_type_index, self.TimelineEnabled, postfix, data_download_path=self.transformer_mlperf_training_data_path, enable_online=self.OnlineEnabled)
         ret = ret or cmd_ret
 
-        cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix)
+        cmd_ret = RunCmd().runDataTypeTimelneCmd(self.compare_conda, postfix, baseline_index='1', comparison_index='0')
         ret = ret or cmd_ret
         self.assertEqual(ret, 0)
 
     def test_z_summarize(self):
-        cmd = 'ipython nbconvert profiling/unit_test_results/*.ipynb'
+        cmd = 'ipython nbconvert profiling/unit_test_results/*.ipynb --to html'
         ret = RunCmd().run(cmd)
         self.assertEqual(ret, 0)
 

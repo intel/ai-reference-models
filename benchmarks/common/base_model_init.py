@@ -21,6 +21,7 @@
 import glob
 import json
 import os
+import re
 import sys
 import time
 
@@ -153,6 +154,16 @@ class BaseModelInitializer(object):
         so that each instance uses a unique output folder.
         """
 
+        # Find LD_PRELOAD vars, remove them from the cmd, and save them to add on to the prefix
+        ld_preload_strs = re.findall(r'\bLD_PRELOAD=\S*', cmd)
+        ld_preload_prefix = ""
+        for ld_preload_str in ld_preload_strs:
+            cmd = cmd.replace(ld_preload_str, "")
+            ld_preload_prefix += ld_preload_str + " "
+
+        # Remove leading/trailing whitespace
+        cmd = cmd.strip()
+
         if self.args.numa_cores_per_instance != "socket":
             # Get the cores list and group them according to the number of cores per instance
             cores_per_instance = int(self.args.numa_cores_per_instance)
@@ -208,9 +219,9 @@ class BaseModelInitializer(object):
             if len(core_list) == 0:
                 continue
 
-            prefix = ("OMP_NUM_THREADS={0} "
-                      "numactl --localalloc --physcpubind={1}").format(
-                len(core_list), ",".join(core_list))
+            prefix = ("{0}OMP_NUM_THREADS={1} "
+                      "numactl --localalloc --physcpubind={2}").format(
+                ld_preload_prefix, len(core_list), ",".join(core_list))
             instance_logfile = log_filename_format.format("instance" + str(instance_num))
 
             unique_command = cmd
@@ -282,6 +293,7 @@ class BaseModelInitializer(object):
         Should be used only for single instance.
         """
         command = ""
+        ld_preload = ""
 
         if not self.args.disable_tcmalloc:
             # Try to find the TCMalloc library file
@@ -290,16 +302,53 @@ class BaseModelInitializer(object):
             if len(matches) == 0:
                 matches = glob.glob("/usr/lib64/libtcmalloc.so*")
 
+            if len(matches) == 0:
+                matches = glob.glob("/usr/lib/*/libtcmalloc.so*")
+
+            if len(matches) == 0:
+                matches = glob.glob("/usr/lib64/*/libtcmalloc.so*")
+
             if len(matches) > 0:
-                command += "LD_PRELOAD={} ".format(matches[0])
+                ld_preload += "LD_PRELOAD={} ".format(matches[0])
             else:
                 # Unable to find the TCMalloc library file
-                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib or /usr/lib64, "
-                      "so the LD_PRELOAD environment variable will not be set.")
+                print("Warning: Unable to find the TCMalloc library file (libtcmalloc.so) in /usr/lib, /usr/lib64, "
+                      "/usr/lib/*, or /usr/lib64/* so the LD_PRELOAD environment variable will not be set.")
 
         num_numas = self.platform_util.num_numa_nodes
         if num_numas and socket_id != -1 and numactl and not self.args.numa_cores_per_instance:
-            command += "numactl --cpunodebind={0} --membind={0} ".format(str(socket_id))
+            if self.args.num_cores == -1:
+                # Running on the whole socket
+                command += "numactl --cpunodebind={0} --membind={0} ".format(
+                    str(socket_id))
+            else:
+                # Running on specific number of cores
+                first_physical_core = self.platform_util.cpuset_cpus[0][0]
+                num_sockets = len(self.platform_util.cpuset_cpus.keys())
+                num_cores_in_socket0 = len(self.platform_util.cpuset_cpus[0])
+                for i in range(num_sockets):
+                    if num_cores_in_socket0 != len(
+                            self.platform_util.cpuset_cpus[i]):
+                        raise ValueError(
+                            "Error: Identifying logical core id assumes all sockets have same number of cores"
+                        )
+                first_logical_core = num_cores_in_socket0 * num_sockets
+                if self.platform_util.num_threads_per_core == 1:
+                    # HT is off
+                    cpus_range = "{0}-{1}".format(
+                        first_physical_core,
+                        first_physical_core + self.args.num_cores - 1)
+                else:
+                    # HT is on.
+                    cpus_range = "{0}-{1},{2}-{3}".format(
+                        first_physical_core,
+                        first_physical_core + self.args.num_cores - 1,
+                        first_logical_core,
+                        first_logical_core + self.args.num_cores - 1)
+                command += "numactl -C{0} --membind=0 ".format(cpus_range)
+
+        # Add LD_PRELOAD to the front of the command
+        command = ld_preload + command
 
         return command
 

@@ -19,22 +19,30 @@
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ARGS=""
 precision=fp32
-if [[ "$1" == "bf16" ]]
-then
-    ARGS="$ARGS --bf16"
-    precision=bf16
-    echo "### running bf16 mode"
+
+if [[ "$1" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
 fi
 
-if [[ "$1" == "int8" ]]
+if [[ "$1" == "bf16" ]]
 then
-    ARGS="$ARGS --int8 --int8_fp32"
+    precision=bf16
+    ARGS="$ARGS --bf16"
+    echo "### running bf16 mode"
+elif [[ "$1" == "int8" || "$1" == "avx-int8" ]]
+then
     precision=int8
+    ARGS="$ARGS --int8"
     echo "### running int8 mode"
+elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]
+then
+    precision=fp32
+    echo "### running fp32 mode"
 fi
+
 rm -f ${OUTPUT_DIR}/accuracy_log*
 INT8_CONFIG=${INT8_CONFIG:-"configure.json"}
-BATCH_SIZE=${BATCH_SIZE:-128}
+BATCH_SIZE=${BATCH_SIZE:-8}
 EVAL_DATA_FILE=${EVAL_DATA_FILE:-"${PWD}/squad1.1/dev-v1.1.json"}
 FINETUNED_MODEL=${FINETUNED_MODEL:-bert_squad_model}
 OUTPUT_DIR=${OUTPUT_DIR:-"${PWD}"}
