@@ -1,7 +1,7 @@
 [
   { "_comment": "rfcn_fp32_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --verbose --in-graph=/in_graph/frozen_inference_graph.pb --data-location=/dataset --accuracy-only --split=accuracy_message",
-    "output": "FROZEN_GRAPH=/in_graph/frozen_inference_graph.pb TF_RECORD_FILES=/dataset/data.record SPLIT=accuracy_message TF_MODELS_ROOT=/workspace/models /workspace/intelai_models/inference/fp32/coco_mAP.sh",
+    "output": "bash /workspace/intelai_models/inference/fp32/coco_mAP.sh",
     "cpuset": "0-111"},
 
   { "_comment": "rfcn_fp32",
@@ -16,7 +16,7 @@
 
   { "_comment": "rfcn_int8_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset --accuracy-only --split=accuracy_message",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 FROZEN_GRAPH=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb TF_RECORD_FILE=/dataset SPLIT=accuracy_message TF_MODELS_ROOT=/workspace/models /workspace/intelai_models/inference/int8/coco_mAP.sh",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 bash /workspace/intelai_models/inference/int8/coco_mAP.sh",
     "cpuset": "0-111"},
 
   { "_comment": "rfcn_int8",

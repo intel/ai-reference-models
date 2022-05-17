@@ -361,8 +361,9 @@ class RNNTGreedyDecoder(TransducerDecoder):
         return result
 
     def _joint_step_batch(self, enc, pred, log_normalize=False):
-        logits = self._model.joint(enc, pred)
-        logits = logits[:, 0, 0, :]
+        logits = self._model.joint_inference(enc, pred)
+        # In inference, logits is 3d: (B, T=1, H)
+        logits = logits[:, 0, :]
         if not log_normalize:
             return logits
 

@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-mobilenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-mobilenet-fp32-inference.tar.gz)
+[ssd-mobilenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-mobilenet-fp32-inference.tar.gz)
 
 <!--- 30. Datasets -->
 ## Dataset
@@ -26,10 +26,10 @@ downloading and preprocessing the COCO validation dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_inference.sh`](fp32_inference.sh) | Runs inference on TF records and outputs performance metrics. |
-| [`fp32_accuracy.sh`](fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
-| [`multi_instance_batch_inference.sh`](multi_instance_batch_inference.sh) | A multi-instance run that uses all the cores for each socket for each instance with a batch size of 448 and synthetic data. |
-| [`multi_instance_online_inference.sh`](multi_instance_online_inference.sh) | A multi-instance run that uses 4 cores per instance with a batch size of 1. Uses synthetic data if no `DATASET_DIR` is set. |
+| [`fp32_inference.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/fp32/fp32_inference.sh) | Runs inference on TF records and outputs performance metrics. |
+| [`fp32_accuracy.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/fp32/fp32_accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
+| [`multi_instance_batch_inference.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/fp32/multi_instance_batch_inference.sh) | A multi-instance run that uses all the cores for each socket for each instance with a batch size of 448 and synthetic data. |
+| [`multi_instance_online_inference.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/fp32/multi_instance_online_inference.sh) | A multi-instance run that uses 4 cores per instance with a batch size of 1. Uses synthetic data if no `DATASET_DIR` is set. |
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
@@ -58,7 +58,7 @@ inference model package, and then run a [quickstart script](#quick-start-scripts
 DATASET_DIR=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-mobilenet-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-mobilenet-fp32-inference.tar.gz
 tar -xzf ssd-mobilenet-fp32-inference.tar.gz
 cd ssd-mobilenet-fp32-inference
 

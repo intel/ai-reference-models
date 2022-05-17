@@ -33,7 +33,7 @@ slice_sets:
           <model name>: BERT Large
           <package dir>: bert-large-bfloat16-training
           <package name>: bert-large-bfloat16-training.tar.gz
-          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/bert-large-bfloat16-training.tar.gz'
+          <package url>: 'https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/bert-large-bfloat16-training.tar.gz'
           <precision>: BFloat16
           <use case>: language_modeling
         uri: models/quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16

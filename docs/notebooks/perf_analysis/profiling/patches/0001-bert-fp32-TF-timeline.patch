@@ -1,0 +1,47 @@
+From 95d574a1b698e7f186dde9617ac197e61baf6516 Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Fri, 11 Dec 2020 00:39:38 +0800
+Subject: [PATCH] bert fp32 TF timeline
+
+---
+ .../tensorflow/bert/inference/fp32/run_classifier.py   | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/models/language_translation/tensorflow/bert/inference/fp32/run_classifier.py b/models/language_translation/tensorflow/bert/inference/fp32/run_classifier.py
+index 7683b7c6..bce333e6 100644
+--- a/models/language_translation/tensorflow/bert/inference/fp32/run_classifier.py
++++ b/models/language_translation/tensorflow/bert/inference/fp32/run_classifier.py
+@@ -30,6 +30,10 @@ import time
+ import inference.fp32.tokenization as tokenization
+ import tensorflow as tf
+ 
++import sys
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import ConfigFile, tfProfileHook
++
+ tf.compat.v1.disable_v2_behavior()
+ flags = tf.compat.v1.flags
+ 
+@@ -875,6 +879,10 @@ def main(_):
+           per_host_input_for_training=is_per_host),
+       session_config=session_config)
+ 
++  configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++  configf.read_config('bert_base infer fp32')
++  profile_hook = [tfProfileHook(save_steps=1, json_fname=configf.json_fname)]
++ 
+   train_examples = None
+   num_train_steps = None
+   num_warmup_steps = None
+@@ -957,7 +965,7 @@ def main(_):
+         drop_remainder=eval_drop_remainder)
+ 
+     start = time.time()
+-    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps, hooks=[LoggerHook()])
++    result = estimator.evaluate(input_fn=eval_input_fn, steps=eval_steps, hooks=[LoggerHook()] + profile_hook)
+     end = time.time() - start
+     result['global_step'] = str(eval_steps)
+     result['latency_total'] = str(end)
+-- 
+2.25.1
+

@@ -34,6 +34,8 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
+RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="resnet101-int8-inference"

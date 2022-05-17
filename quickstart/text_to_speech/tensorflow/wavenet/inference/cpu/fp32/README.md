@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[wavenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wavenet-fp32-inference.tar.gz)
+[wavenet-fp32-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wavenet-fp32-inference.tar.gz)
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -49,7 +49,7 @@ Set environment variables for the path to your `TF_WAVENET_DIR` and an
 export TF_WAVENET_DIR=<tensorflow-wavenet directory>
 export OUTPUT_DIR=<directory where log files will be written>
 
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/wavenet-fp32-inference.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wavenet-fp32-inference.tar.gz
 tar -xzf wavenet-fp32-inference.tar.gz
 cd wavenet-fp32-inference
 

@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 
-
 echo 'Running with parameters:'
 echo "    USE_CASE: ${USE_CASE}"
 echo "    FRAMEWORK: ${FRAMEWORK}"
@@ -69,46 +68,141 @@ function _running-in-container()
   [ -f /.dockerenv ]
 }
 
-# Check the Linux platform distribution if CentOS or Ubuntu
-OS_PLATFORM=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-OS_VERSION=$(awk -F= '/^VERSION_ID/{print $2}' /etc/os-release)
-if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
-  if [[ "${OS_VERSION}" != '"8"' ]]; then
-    echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-    exit 1
-  fi
-elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
-  if [[ "${OS_VERSION}" != '"18.04"' ]] && [[ "${OS_VERSION}" != '"20.04"' ]]; then
-    echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-    exit 1
-  fi
+# check if running on Windows OS
+PLATFORM='unknown'
+unamestr=`uname`
+if [[ "$unamestr" == 'Linux' ]]; then
+   PLATFORM='linux'
+elif [[ "$unamestr" == "MSYS"* ]]; then
+   PLATFORM='windows'
 else
-  echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-  exit 1
+   echo "$unamestr is not supported!"
 fi
+echo
+echo "Running on ${PLATFORM}"
+echo
 
-echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
+OS_PLATFORM=""
+if [[ ${PLATFORM} == "linux" ]]; then
+    # Check the Linux PLATFORM distribution if CentOS, Debian or Ubuntu
+    OS_PLATFORM=$(egrep '^(NAME)=' /etc/os-release)
+    OS_PLATFORM=$(echo "${OS_PLATFORM#*=}")
+    OS_VERSION=$(egrep '^(VERSION_ID)=' /etc/os-release)
+    OS_VERSION=$(echo "${OS_VERSION#*=}")
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "7".* ]] && [[ ! "${OS_VERSION}" =~ "8".* ]]; then
+        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+        exit 1
+      fi
+    elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "18.04".* ]] && [[ ! "${OS_VERSION}" =~ "20.04".* ]]; then
+        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+        exit 1
+      fi
+    elif [[ ${OS_PLATFORM} == *"Debian"* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "10".* ]] && [[ ! "${OS_VERSION}" =~ "11".* ]]; then
+        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+        exit 1
+      fi
+    elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "15".* ]]; then
+        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+        exit 1
+      fi
+    else
+      echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
+      exit 1
+    fi
+
+    echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
+fi
 
 if [[ ${NOINSTALL} != "True" ]]; then
   # set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
   # install common dependencies
-  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
     yum update -y
     yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
 
     # install google-perftools for tcmalloc
     if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
-      dnf -y install https://extras.getpagespeed.com/release-el8-latest.rpm && \
-      dnf -y install gperftools && \
+      if [[ ${OS_PLATFORM} == *"Red Hat"* ]] && [[ ${OS_VERSION} =~ "7".* ]]; then
+        # For Red Hat 7 we need to build from source
+        pushd .
+        yum install -y wget
+
+        GPERFTOOLS_VER="2.9.1"
+        wget https://github.com/gperftools/gperftools/releases/download/gperftools-${GPERFTOOLS_VER}/gperftools-${GPERFTOOLS_VER}.tar.gz  -O gperftools-${GPERFTOOLS_VER}.tar.gz
+        tar -xvzf gperftools-${GPERFTOOLS_VER}.tar.gz
+        cd gperftools-${GPERFTOOLS_VER}
+
+        ./configure --disable-cpu-profiler --disable-heap-profiler --disable-heap-checker --disable-debugalloc --enable-minimal
+        make
+        make install
+        LD_LIBRARY_PATH=“/usr/local/lib:${LD_LIBRARY_PATH}”
+        popd
+      else
+        if [[ ${OS_VERSION} =~ "7".* ]]; then
+          yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm && \
+          yum install -y https://extras.getpagespeed.com/release-el7-latest.rpm
+        elif [[ ${OS_VERSION} =~ "8".* ]]; then
+          # For Red Hat user needs to register the system first to be able to use the following repositories
+          # subscription-manager register --auto-attach
+          yum install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-8.noarch.rpm && \
+          yum install -y https://extras.getpagespeed.com/release-el8-latest.rpm
+        fi
+        yum install -y gperftools && \
+        yum clean all
+      fi
+    fi
+
+    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+      # Installing OpenMPI
+      yum install -y openmpi openmpi-devel openssh openssh-server
       yum clean all
+      export PATH="/usr/lib64/openmpi/bin:${PATH}"
+
+      # Install Horovod
+      export HOROVOD_WITHOUT_PYTORCH=1
+      export HOROVOD_WITHOUT_MXNET=1
+      export HOROVOD_WITH_TENSORFLOW=1
+      export HOROVOD_VERSION=87094a4
+
+      # Install GCC 7 from devtoolset-7
+      if [[ ${OS_VERSION} =~ "7".* ]]; then
+        if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+          yum install -y centos-release-scl
+        else
+          # For Red Hat user needs to register then enable the repo:
+          # subscription-manager repos --enable rhel-7-server-devtools-rpms
+          yum install -y scl-utils
+        fi
+        yum install -y devtoolset-7
+        export PATH="/opt/rh/devtoolset-7/root/usr/bin:${PATH}"
+      fi
+
+      # In case installing released versions of Horovod fail,and there is
+      # a working commit replace next set of commands with something like:
+      yum install -y git make
+      yum clean all
+      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+    fi
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+    zypper update -y
+    zypper install -y gcc gcc-c++ cmake python3-tk libXext6 libSM6
+
+    # install google-perftools for tcmalloc
+    if [[ ${DISABLE_TCMALLOC} != "True" ]]; then
+      zypper install -y gperftools && \
+      zypper clean all
     fi
 
     if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
       ## Installing OpenMPI
-      yum install -y openmpi openmpi-devel openssh openssh-server
-      yum clean all
-      export PATH="/usr/lib64/openmpi/bin:${PATH}"
+      zypper install -y openmpi3 openmpi3-devel openssh openssh-server
+      zypper clean all
+      export PATH="/usr/lib64/mpi/gcc/openmpi3/bin:${PATH}"
 
       ## Install Horovod
       export HOROVOD_WITHOUT_PYTORCH=1
@@ -118,12 +212,11 @@ if [[ ${NOINSTALL} != "True" ]]; then
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
-      yum install -y git make
-      yum clean all
+      zypper install -y git make
+      zypper clean all
       python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
     fi
-  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     apt-get update -y
     apt-get install gcc-8 g++-8 cmake python-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
@@ -136,10 +229,10 @@ if [[ ${NOINSTALL} != "True" ]]; then
     fi
 
     if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
-      ## Installing OpenMPI
+      # Installing OpenMPI
       apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
 
-      ## Install Horovod
+      # Install Horovod
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
@@ -166,20 +259,30 @@ if [[ $NUMA_CORES_PER_INSTANCE != "None" || $SOCKET_ID != "-1" || $NUM_CORES != 
 elif [[ $MODEL_NAME == "bert_large" && $MODE == "training" && $MPI_NUM_PROCESSES != "None" ]]; then
   # BERT large training with MPI uses numactl
   INSTALL_NUMACTL="True"
-elif [[ $MODEL_NAME == "wide_deep" ]]; then
-  # TODO: Why Wide & Deep uses numactl always
-  INSTALL_NUMACTL="True"
 fi
 
 # If we are running in a container, call the container_init.sh files
 if _running-in-container ; then
   # For running inside a real CentOS container
-  if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
-    if [[ $INSTALL_NUMACTL == "True" ]] && [[ ${NOINSTALL} != "True" ]]; then
+  if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
+    # Next if block only applies to CentOS 8. Please see here:
+    # https://forums.centos.org/viewtopic.php?f=54&t=78708
+    if [[ ! ${OS_VERSION} =~ "8".* ]] && [[ ${OS_PLATFORM} != *"Stream"* ]] && [[ ${OS_PLATFORM} != *"Red Hat"* ]]; then
+      sed -i '/^mirrorlist=/s/mirrorlist=/#mirrorlist=/g' /etc/yum.repos.d/CentOS-Linux-*
+      sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-Linux-*
+      yum clean all
+      yum distro-sync -y
+    fi
+    if [[ $INSTALL_NUMACTL == "True" ]]; then
       yum update -y
       yum install -y numactl
     fi
-  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+    if [[ $INSTALL_NUMACTL == "True" ]]; then
+      zypper update -y
+      zypper install -y numactl
+    fi
+  elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     # For ubuntu, run the container_init.sh scripts
     if [ -f ${MOUNT_BENCHMARK}/common/${FRAMEWORK}/container_init.sh ]; then
       # Call the framework's container_init.sh, if it exists and we are running on ubuntu
@@ -342,117 +445,117 @@ fi
 function bert_options() {
 
   if [[ ${MODE} == "training" ]]; then
-    if [[ -z "${train_option}" ]]; then
+    if [[ -z "${TRAIN_OPTION}" ]]; then
       echo "Error: Please specify a train option (SQuAD, Classifier, Pretraining)"
       exit 1
     fi
 
-    CMD=" ${CMD} --train-option=${train_option}"
+    CMD=" ${CMD} --train-option=${TRAIN_OPTION}"
   fi
 
   if [[ ${MODE} == "inference" ]]; then
-    if [[ -z "${infer_option}" ]]; then
+    if [[ -z "${INFER_OPTION}" ]]; then
       echo "Error: Please specify a inference option (SQuAD, Classifier, Pretraining)"
       exit 1
     fi
 
-    CMD=" ${CMD} --infer-option=${infer_option}"
+    CMD=" ${CMD} --infer-option=${INFER_OPTION}"
   fi
 
-  if [[ -n "${init_checkpoint}" && ${init_checkpoint} != "" ]]; then
-    CMD=" ${CMD} --init-checkpoint=${init_checkpoint}"
+  if [[ -n "${INIT_CHECKPOINT}" && ${INIT_CHECKPOINT} != "" ]]; then
+    CMD=" ${CMD} --init-checkpoint=${INIT_CHECKPOINT}"
   fi
 
-  if [[ -n "${task_name}" && ${task_name} != "" ]]; then
-    CMD=" ${CMD} --task-name=${task_name}"
+  if [[ -n "${TASK_NAME}" && ${TASK_NAME} != "" ]]; then
+    CMD=" ${CMD} --task-name=${TASK_NAME}"
   fi
 
-  if [[ -n "${warmup_steps}" && ${warmup_steps} != "" ]]; then
-    CMD=" ${CMD} --warmup-steps=${warmup_steps}"
+  if [[ -n "${WARMUP_STEPS}" && ${WARMUP_STEPS} != "" ]]; then
+    CMD=" ${CMD} --warmup-steps=${WARMUP_STEPS}"
   fi
 
-  if [[ -n "${steps}" && ${steps} != "" ]]; then
-    CMD=" ${CMD} --steps=${steps}"
+  if [[ -n "${STEPS}" && ${STEPS} != "" ]]; then
+    CMD=" ${CMD} --steps=${STEPS}"
   fi
 
-  if [[ -n "${vocab_file}" && ${vocab_file} != "" ]]; then
-    CMD=" ${CMD} --vocab-file=${vocab_file}"
+  if [[ -n "${VOCAB_FILE}" && ${VOCAB_FILE} != "" ]]; then
+    CMD=" ${CMD} --vocab-file=${VOCAB_FILE}"
   fi
 
-  if [[ -n "${config_file}" && ${config_file} != "" ]]; then
-    CMD=" ${CMD} --config-file=${config_file}"
+  if [[ -n "${CONFIG_FILE}" && ${CONFIG_FILE} != "" ]]; then
+    CMD=" ${CMD} --config-file=${CONFIG_FILE}"
   fi
 
-  if [[ -n "${do_predict}" && ${do_predict} != "" ]]; then
-    CMD=" ${CMD} --do-predict=${do_predict}"
+  if [[ -n "${DO_PREDICT}" && ${DO_PREDICT} != "" ]]; then
+    CMD=" ${CMD} --do-predict=${DO_PREDICT}"
   fi
 
-  if [[ -n "${predict_file}" && ${predict_file} != "" ]]; then
-    CMD=" ${CMD} --predict-file=${predict_file}"
+  if [[ -n "${PREDICT_FILE}" && ${PREDICT_FILE} != "" ]]; then
+    CMD=" ${CMD} --predict-file=${PREDICT_FILE}"
   fi
 
-  if [[ -n "${do_train}" && ${do_train} != "" ]]; then
-    CMD=" ${CMD} --do-train=${do_train}"
+  if [[ -n "${DO_TRAIN}" && ${DO_TRAIN} != "" ]]; then
+    CMD=" ${CMD} --do-train=${DO_TRAIN}"
   fi
 
-  if [[ -n "${train_file}" && ${train_file} != "" ]]; then
-    CMD=" ${CMD} --train-file=${train_file}"
+  if [[ -n "${TRAIN_FILE}" && ${TRAIN_FILE} != "" ]]; then
+    CMD=" ${CMD} --train-file=${TRAIN_FILE}"
   fi
 
-  if [[ -n "${num_train_epochs}" && ${num_train_epochs} != "" ]]; then
-    CMD=" ${CMD} --num-train-epochs=${num_train_epochs}"
+  if [[ -n "${NUM_TRAIN_EPOCHS}" && ${NUM_TRAIN_EPOCHS} != "" ]]; then
+    CMD=" ${CMD} --num-train-epochs=${NUM_TRAIN_EPOCHS}"
   fi
 
-  if [[ -n "${num_train_steps}" && ${num_train_steps} != "" ]]; then
-    CMD=" ${CMD} --num-train-steps=${num_train_steps}"
+  if [[ -n "${NUM_TRAIN_STEPS}" && ${NUM_TRAIN_STEPS} != "" ]]; then
+    CMD=" ${CMD} --num-train-steps=${NUM_TRAIN_STEPS}"
   fi
 
-  if [[ -n "${max_predictions}" && ${max_predictions} != "" ]]; then
-    CMD=" ${CMD} --max-predictions=${max_predictions}"
+  if [[ -n "${MAX_PREDICTIONS}" && ${MAX_PREDICTIONS} != "" ]]; then
+    CMD=" ${CMD} --max-predictions=${MAX_PREDICTIONS}"
   fi
 
-  if [[ -n "${learning_rate}" && ${learning_rate} != "" ]]; then
-    CMD=" ${CMD} --learning-rate=${learning_rate}"
+  if [[ -n "${LEARNING_RATE}" && ${LEARNING_RATE} != "" ]]; then
+    CMD=" ${CMD} --learning-rate=${LEARNING_RATE}"
   fi
 
-  if [[ -n "${max_seq_length}" && ${max_seq_length} != "" ]]; then
-    CMD=" ${CMD} --max-seq-length=${max_seq_length}"
+  if [[ -n "${MAX_SEQ_LENGTH}" && ${MAX_SEQ_LENGTH} != "" ]]; then
+    CMD=" ${CMD} --max-seq-length=${MAX_SEQ_LENGTH}"
   fi
 
-  if [[ -n "${doc_stride}" && ${doc_stride} != "" ]]; then
-    CMD=" ${CMD} --doc-stride=${doc_stride}"
+  if [[ -n "${DOC_STRIDE}" && ${DOC_STRIDE} != "" ]]; then
+    CMD=" ${CMD} --doc-stride=${DOC_STRIDE}"
   fi
 
-  if [[ -n "${input_file}" && ${input_file} != "" ]]; then
-    CMD=" ${CMD} --input-file=${input_file}"
+  if [[ -n "${INPUT_FILE}" && ${INPUT_FILE} != "" ]]; then
+    CMD=" ${CMD} --input-file=${INPUT_FILE}"
   fi
 
-  if [[ -n "${do_eval}" && ${do_eval} != "" ]]; then
-    CMD=" ${CMD} --do-eval=${do_eval}"
+  if [[ -n "${DO_EVAL}" && ${DO_EVAL} != "" ]]; then
+    CMD=" ${CMD} --do-eval=${DO_EVAL}"
   fi
 
-  if [[ -n "${data_dir}" && ${data_dir} != "" ]]; then
-    CMD=" ${CMD} --data-dir=${data_dir}"
+  if [[ -n "${DATA_DIR}" && ${DATA_DIR} != "" ]]; then
+    CMD=" ${CMD} --data-dir=${DATA_DIR}"
   fi
 
-  if [[ -n "${do_lower_case}" && ${do_lower_case} != "" ]]; then
-    CMD=" ${CMD} --do-lower-case=${do_lower_case}"
+  if [[ -n "${DO_LOWER_CASE}" && ${DO_LOWER_CASE} != "" ]]; then
+    CMD=" ${CMD} --do-lower-case=${DO_LOWER_CASE}"
   fi
-  if [[ -n "${accum_steps}" && ${accum_steps} != "" ]]; then
-    CMD=" ${CMD} --accum_steps=${accum_steps}"
+  if [[ -n "${ACCUM_STEPS}" && ${ACCUM_STEPS} != "" ]]; then
+    CMD=" ${CMD} --accum_steps=${ACCUM_STEPS}"
   fi
-  if [[ -n "${profile}" && ${profile} != "" ]]; then
-    CMD=" ${CMD} --profile=${profile}"
+  if [[ -n "${PROFILE}" && ${PROFILE} != "" ]]; then
+    CMD=" ${CMD} --profile=${PROFILE}"
   fi
-  if [[ -n "${experimental_gelu}" && ${experimental_gelu} != "" ]]; then
-    CMD=" ${CMD} --experimental-gelu=${experimental_gelu}"
+  if [[ -n "${EXPERIMENTAL_GELU}" && ${EXPERIMENTAL_GELU} != "" ]]; then
+    CMD=" ${CMD} --experimental-gelu=${EXPERIMENTAL_GELU}"
   fi
-  if [[ -n "${optimized_softmax}" && ${optimized_softmax} != "" ]]; then
-    CMD=" ${CMD} --optimized-softmax=${optimized_softmax}"
+  if [[ -n "${OPTIMIZED_SOFTMAX}" && ${OPTIMIZED_SOFTMAX} != "" ]]; then
+    CMD=" ${CMD} --optimized-softmax=${OPTIMIZED_SOFTMAX}"
   fi
 
-  if [[ -n "${mpi_workers_sync_gradients}" && ${mpi_workers_sync_gradients} != "" ]]; then
-    CMD=" ${CMD} --mpi_workers_sync_gradients=${mpi_workers_sync_gradients}"
+  if [[ -n "${MPI_WORKERS_SYNC_GRADIENTS}" && ${MPI_WORKERS_SYNC_GRADIENTS} != "" ]]; then
+    CMD=" ${CMD} --mpi_workers_sync_gradients=${MPI_WORKERS_SYNC_GRADIENTS}"
   fi
 
 }
@@ -464,7 +567,7 @@ function install_protoc() {
   if [ ! -f "bin/protoc" ]; then
     install_location=$1
     echo "protoc not found, installing protoc from ${install_location}"
-    if [[ ${OS_PLATFORM} == *"CentOS"* ]]; then
+    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
       yum update -y && yum install -y unzip wget
     else
       apt-get update && apt-get install -y unzip wget
@@ -525,24 +628,24 @@ function add_steps_args() {
   local warmup_steps_arg=""
   local kmp_blocktime_arg=""
 
-  if [ -n "${steps}" ]; then
-    steps_arg="--steps=${steps}"
+  if [ -n "${STEPS}" ]; then
+    steps_arg="--steps=${STEPS}"
   fi
 
-  if [ -n "${train_epochs}" ]; then
-    trainepochs_arg="--train_epochs=${train_epochs}"
+  if [ -n "${TRAIN_EPOCHS}" ]; then
+    trainepochs_arg="--train_epochs=${TRAIN_EPOCHS}"
   fi
 
-  if [ -n "${epochs_between_evals}" ]; then
-    epochsbtweval_arg="--epochs_between_evals=${epochs_between_evals}"
+  if [ -n "${EPOCHS_BETWEEN_EVALS}" ]; then
+    epochsbtweval_arg="--epochs_between_evals=${EPOCHS_BETWEEN_EVALS}"
   fi
 
-  if [ -n "${warmup_steps}" ]; then
-    warmup_steps_arg="--warmup-steps=${warmup_steps}"
+  if [ -n "${WARMUP_STEPS}" ]; then
+    warmup_steps_arg="--warmup-steps=${WARMUP_STEPS}"
   fi
 
-  if [ -n "${kmp_blocktime}" ]; then
-    kmp_blocktime_arg="--kmp-blocktime=${kmp_blocktime}"
+  if [ -n "${KMP_BLOCKTIME}" ]; then
+    kmp_blocktime_arg="--kmp-blocktime=${KMP_BLOCKTIME}"
   fi
 
   echo "${steps_arg} ${trainepochs_arg} ${epochsbtweval_arg} ${warmup_steps_arg} ${kmp_blocktime_arg}"
@@ -610,20 +713,18 @@ function 3d_unet_mlperf() {
 function bert() {
    if [ ${PRECISION} == "fp32" ]; then
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-
     if [ ${NOINSTALL} != "True" ]; then
       apt-get update && apt-get install -y git
       python3 -m pip install -r ${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt
     fi
-
     CMD="${CMD} \
-    $(add_arg "--task_name" ${task_name}) \
-    $(add_arg "--max_seq_length" ${max_seq_length}) \
+    $(add_arg "--task_name" ${TASK_NAME}) \
+    $(add_arg "--max_seq_length" ${MAX_SEQ_LENGTH}) \
     $(add_arg "--eval_batch_size" ${eval_batch_size}) \
-    $(add_arg "--learning_rate" ${learning_rate}) \
-    $(add_arg "--vocab_file" ${vocab_file}) \
-    $(add_arg "--bert_config_file" ${bert_config_file}) \
-    $(add_arg "--init_checkpoint" ${init_checkpoint})"
+    $(add_arg "--learning_rate" ${LEARNING_RATE}) \
+    $(add_arg "--vocab_file" ${VOCAB_FILE}) \
+    $(add_arg "--bert_config_file" ${BERT_CONFIG_FILE}) \
+    $(add_arg "--init_checkpoint" ${INIT_CHECKPOINT})"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -633,14 +734,14 @@ function bert() {
 }
 
 function dien_options() {
-  if [[ -n "${exact_max_length}" && ${exact_max_length} != "" ]]; then
-    CMD=" ${CMD} --exact-max-length=${exact_max_length}"
+  if [[ -n "${EXACT_MAX_LENGTH}" && ${EXACT_MAX_LENGTH} != "" ]]; then
+    CMD=" ${CMD} --exact-max-length=${EXACT_MAX_LENGTH}"
   fi
-  if [[ -n "${graph_type}" && ${graph_type} != "" ]]; then
-    CMD=" ${CMD} --graph_type=${graph_type}"
+  if [[ -n "${GRAPH_TYPE}" && ${GRAPH_TYPE} != "" ]]; then
+    CMD=" ${CMD} --graph_type=${GRAPH_TYPE}"
   fi
-  if [[ -n "${num_iterations}" && ${num_iterations} != "" ]]; then
-    CMD=" ${CMD} --num-iterations=${num_iterations}"
+  if [[ -n "${NUM_ITERATIONS}" && ${NUM_ITERATIONS} != "" ]]; then
+    CMD=" ${CMD} --num-iterations=${NUM_ITERATIONS}"
   fi
 }
 
@@ -648,9 +749,6 @@ function dien_options() {
 function dien() {
   if [ ${MODE} == "inference" ]; then
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/dien/requirements.txt
-      fi
       dien_options
       CMD=${CMD} run_model
 
@@ -660,9 +758,6 @@ function dien() {
     fi
   elif [ ${MODE} == "training" ]; then
     if [ ${PRECISION} == "fp32" ]; then
-      if [ ${NOINSTALL} != "True" ]; then
-        python3 -m pip install -r ${MOUNT_BENCHMARK}/recommendation/tensorflow/dien/requirements.txt
-      fi
       dien_options
       CMD=${CMD} run_model
 
@@ -689,9 +784,9 @@ function dcgan() {
 # DenseNet 169 model
 function densenet169() {
   if [ ${PRECISION} == "fp32" ]; then
-      CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
-      $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) $(add_arg "--input_layer" ${input_layer}) \
-      $(add_arg "--output_layer" ${output_layer})"
+      CMD="${CMD} $(add_arg "--input_height" ${INPUT_HEIGHT}) $(add_arg "--input_width" ${INPUT_WIDTH}) \
+      $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) $(add_arg "--input_layer" ${INPUT_LAYER}) \
+      $(add_arg "--output_layer" ${OUTPUT_LAYER})"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
     echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -721,19 +816,19 @@ function faster_rcnn() {
     git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/faster_rcnn.patch
 
     if [ ${PRECISION} == "fp32" ]; then
-      if [ -n "${config_file}" ]; then
-        CMD="${CMD} --config_file=${config_file}"
+      if [ -n "${CONFIG_FILE}" ]; then
+        CMD="${CMD} --config_file=${CONFIG_FILE}"
       fi
 
-      if [[ -z "${config_file}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
+      if [[ -z "${CONFIG_FILE}" ]] && [ ${BENCHMARK_ONLY} == "True" ]; then
         echo "Fast R-CNN requires -- config_file arg to be defined"
         exit 1
       fi
 
     elif [ ${PRECISION} == "int8" ]; then
       number_of_steps_arg=""
-      if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-        CMD="${CMD} --number-of-steps=${number_of_steps}"
+      if [ -n "${NUMBER_OF_STEPS}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+        CMD="${CMD} --number-of-steps=${NUMBER_OF_STEPS}"
       fi
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -752,9 +847,9 @@ function inceptionv4() {
     exit 1
   fi
   # add extra model specific args and then run the model
-  CMD="${CMD} $(add_steps_args) $(add_arg "--input-height" ${input_height}) \
-  $(add_arg "--input-width" ${input_width}) $(add_arg "--input-layer" ${input_layer}) \
-  $(add_arg "--output-layer" ${output_layer})"
+  CMD="${CMD} $(add_steps_args) $(add_arg "--input-height" ${INPUT_HEIGHT}) \
+  $(add_arg "--input-width" ${INPUT_WIDTH}) $(add_arg "--input-layer" ${INPUT_LAYER}) \
+  $(add_arg "--output-layer" ${OUTPUT_LAYER})"
 
   if [ ${PRECISION} == "int8" ]; then
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -817,13 +912,13 @@ function minigo() {
       rm -rf ${MODEL_DIR}/ml_perf/tools/
       rm -rf ${MODEL_DIR}/cc/ml_perf/tools/
 
-      if [ "${large_scale}" == "True" ]; then
+      if [ "${LARGE_SCALE}" == "True" ]; then
         # multi-node mode
         git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf_large_scale.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-multinode.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-large-scale.patch
         # git apply ${INTELAI_MODEL_DIR}/training/fp32/large-scale-no-bg.patch
-      elif [ "${large_num_cores}" == "True" ]; then
+      elif [ "${LARGE_NUM_CORES}" == "True" ]; then
         # single-node large num mode
         git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
         git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
@@ -838,11 +933,11 @@ function minigo() {
       fi
 
       # generate the flags with specified iterations
-      if [ -z "$steps" ];then
+      if [ -z "${STEPS}" ];then
         steps=30
       fi
       mv ml_perf/flags/9/rl_loop.flags ml_perf/flags/9/rl_loop.flags-org
-      sed "s/iterations=30/iterations=${steps}/g" ml_perf/flags/9/rl_loop.flags-org &> ml_perf/flags/9/rl_loop.flags
+      sed "s/iterations=30/iterations=${STEPS}/g" ml_perf/flags/9/rl_loop.flags-org &> ml_perf/flags/9/rl_loop.flags
       mv ml_perf/flags/9/train.flags ml_perf/flags/9/train.flags-org
       sed "s/train_batch_size=8192/train_batch_size=4096/g" ml_perf/flags/9/train.flags-org &> ml_perf/flags/9/train.flags
 
@@ -879,11 +974,11 @@ function minigo() {
 
       cd ${original_dir}
       CMD="${CMD} \
-      $(add_arg "--large-scale" ${large_scale}) \
-      $(add_arg "--num-train-nodes" ${num_train_nodes}) \
-      $(add_arg "--num-eval-nodes" ${num_eval_nodes}) \
-      $(add_arg "--quantization" ${quantization}) \
-      $(add_arg "--multi-node" ${multi_node})"
+      $(add_arg "--large-scale" ${LARGE_SCALE}) \
+      $(add_arg "--num-train-nodes" ${NUM_TRAIN_NODES}) \
+      $(add_arg "--num-eval-nodes" ${NUM_EVAL_NODES}) \
+      $(add_arg "--quantization" ${QUANTIZATION}) \
+      $(add_arg "--multi-node" ${MULTI_NODE})"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     fi
   else
@@ -912,15 +1007,15 @@ function maskrcnn() {
 # mobilenet_v1 model
 function mobilenet_v1() {
   if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
-    CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
-    $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) \
-    $(add_arg "--input_layer" ${input_layer}) $(add_arg "--output_layer" ${output_layer})"
+    CMD="${CMD} $(add_arg "--input_height" ${INPUT_HEIGHT}) $(add_arg "--input_width" ${INPUT_WIDTH}) \
+    $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) \
+    $(add_arg "--input_layer" ${INPUT_LAYER}) $(add_arg "--output_layer" ${OUTPUT_LAYER})"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   elif [ ${PRECISION} == "int8" ]; then
-    CMD="${CMD} $(add_arg "--input_height" ${input_height}) $(add_arg "--input_width" ${input_width}) \
-    $(add_arg "--warmup_steps" ${warmup_steps}) $(add_arg "--steps" ${steps}) \
-    $(add_arg "--input_layer" ${input_layer}) $(add_arg "--output_layer" ${output_layer}) \
+    CMD="${CMD} $(add_arg "--input_height" ${INPUT_HEIGHT}) $(add_arg "--input_width" ${INPUT_WIDTH}) \
+    $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) \
+    $(add_arg "--input_layer" ${INPUT_LAYER}) $(add_arg "--output_layer" ${OUTPUT_LAYER}) \
     $(add_calibration_arg)"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
@@ -958,12 +1053,12 @@ function ncf() {
   fi
 
   # NCF supports different datasets including ml-1m and ml-20m.
-  if [[ -n "${dataset}" && ${dataset} != "" ]]; then
-    CMD="${CMD} --dataset=${dataset}"
+  if [[ -n "${DATASET}" && ${DATASET} != "" ]]; then
+    CMD="${CMD} --dataset=${DATASET}"
   fi
 
-  if [[ -n "${te}" && ${te} != "" ]]; then
-    CMD="${CMD} -te=${te}"
+  if [[ -n "${TE}" && ${TE} != "" ]]; then
+    CMD="${CMD} -te=${TE}"
   fi
 
   if [ ${PRECISION} == "fp32" -o ${PRECISION} == "bfloat16" ]; then
@@ -1079,13 +1174,13 @@ function rfcn() {
   fi
 
   split_arg=""
-  if [ -n "${split}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
-      split_arg="--split=${split}"
+  if [ -n "${SPLIT}" ] && [ ${ACCURACY_ONLY} == "True" ]; then
+      split_arg="--split=${SPLIT}"
   fi
 
   number_of_steps_arg=""
-  if [ -n "${number_of_steps}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
-      number_of_steps_arg="--number_of_steps=${number_of_steps}"
+  if [ -n "${NUMBER_OF_STEPS}" ] && [ ${BENCHMARK_ONLY} == "True" ]; then
+      number_of_steps_arg="--number_of_steps=${NUMBER_OF_STEPS}"
   fi
   CMD="${CMD} ${number_of_steps_arg} ${split_arg}"
 
@@ -1157,9 +1252,9 @@ function ssd-resnet34() {
           cd ${old_dir}
 
           CMD="${CMD} \
-          $(add_arg "--warmup-steps" ${warmup_steps}) \
-          $(add_arg "--steps" ${steps}) \
-          $(add_arg "--input-size" ${input_size})"
+          $(add_arg "--warmup-steps" ${WARMUP_STEPS}) \
+          $(add_arg "--steps" ${STEPS}) \
+          $(add_arg "--input-size" ${INPUT_SIZE})"
           CMD=${CMD} run_model
 
         else
@@ -1196,11 +1291,11 @@ function ssd-resnet34() {
           cd ${old_dir}
 
           CMD="${CMD} \
-          $(add_arg "--weight_decay" ${weight_decay}) \
-          $(add_arg "--epochs" ${epochs}) \
-          $(add_arg "--save_model_steps" ${save_model_steps}) \
-          $(add_arg "--timeline" ${timeline}) \
-          $(add_arg "--num_warmup_batches" ${num_warmup_batches})"
+          $(add_arg "--weight_decay" ${WEIGHT_DECAY}) \
+          $(add_arg "--epochs" ${EPOCHS}) \
+          $(add_arg "--save_model_steps" ${SAVE_MODEL_STEPS}) \
+          $(add_arg "--timeline" ${TIMELINE}) \
+          $(add_arg "--num_warmup_batches" ${NUM_WARMUP_BATCHES})"
           local old_pythonpath=${PYTHONPATH}
           export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
           CMD=${CMD} run_model
@@ -1268,7 +1363,7 @@ function unet() {
       python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/requirements.txt"
     fi
 
-    if [[ -z "${checkpoint_name}" ]]; then
+    if [[ -z "${CHECKPOINT_NAME}" ]]; then
       echo "UNet requires -- checkpoint_name arg to be defined"
       exit 1
     fi
@@ -1276,7 +1371,7 @@ function unet() {
       echo "Accuracy testing is not supported for ${MODEL_NAME}"
       exit 1
     fi
-    CMD="${CMD} --checkpoint_name=${checkpoint_name}"
+    CMD="${CMD} --checkpoint_name=${CHECKPOINT_NAME}"
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -1289,19 +1384,19 @@ function unet() {
 function transformer_lt_official() {
   if [ ${PRECISION} == "fp32" ]; then
 
-    if [[ -z "${file}" ]]; then
+    if [[ -z "${FILE}" ]]; then
         echo "transformer-language requires -- file arg to be defined"
         exit 1
     fi
-    if [[ -z "${file_out}" ]]; then
+    if [[ -z "${FILE_OUT}" ]]; then
         echo "transformer-language requires -- file_out arg to be defined"
         exit 1
     fi
-    if [[ -z "${reference}" ]]; then
+    if [[ -z "${REFERENCE}" ]]; then
         echo "transformer-language requires -- reference arg to be defined"
         exit 1
     fi
-    if [[ -z "${vocab_file}" ]]; then
+    if [[ -z "${VOCAB_FILE}" ]]; then
         echo "transformer-language requires -- vocab_file arg to be defined"
         exit 1
     fi
@@ -1311,10 +1406,10 @@ function transformer_lt_official() {
     fi
 
     CMD="${CMD}
-    --vocab_file=${DATASET_LOCATION}/${vocab_file} \
-    --file=${DATASET_LOCATION}/${file} \
-    --file_out=${OUTPUT_DIR}/${file_out} \
-    --reference=${DATASET_LOCATION}/${reference}"
+    --vocab_file=${DATASET_LOCATION}/${VOCAB_FILE} \
+    --file=${DATASET_LOCATION}/${FILE} \
+    --file_out=${OUTPUT_DIR}/${FILE_OUT} \
+    --reference=${DATASET_LOCATION}/${REFERENCE}"
     PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -1331,37 +1426,37 @@ function transformer_mlperf() {
     if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
     then
 
-      if [[ -z "${random_seed}" ]]; then
+      if [[ -z "${RANDOM_SEED}" ]]; then
           echo "transformer-language requires --random_seed arg to be defined"
           exit 1
       fi
-      if [[ -z "${params}" ]]; then
+      if [[ -z "${PARAMS}" ]]; then
           echo "transformer-language requires --params arg to be defined"
           exit 1
       fi
-      if [[ -z "${train_steps}" ]]; then
+      if [[ -z "${TRAIN_STEPS}" ]]; then
           echo "transformer-language requires --train_steps arg to be defined"
           exit 1
       fi
-      if [[ -z "${steps_between_eval}" ]]; then
+      if [[ -z "${STEPS_BETWEEN_EVAL}" ]]; then
           echo "transformer-language requires --steps_between_eval arg to be defined"
           exit 1
       fi
-      if [[ -z "${do_eval}" ]]; then
+      if [[ -z "${DO_EVAL}" ]]; then
           echo "transformer-language requires --do_eval arg to be defined"
           exit 1
       fi
-      if [[ -z "${save_checkpoints}" ]]; then
+      if [[ -z "${SAVE_CHECKPOINTS}" ]]; then
           echo "transformer-language requires --save_checkpoints arg to be defined"
           exit 1
       fi
-      if [[ -z "${print_iter}" ]]; then
+      if [[ -z "${PRINT_ITER}" ]]; then
           echo "transformer-language requires --print_iter arg to be defined"
           exit 1
       fi
 
-      CMD="${CMD} --random_seed=${random_seed} --params=${params} --train_steps=${train_steps} --steps_between_eval=${steps_between_eval} --do_eval=${do_eval} --save_checkpoints=${save_checkpoints}
-      --print_iter=${print_iter} --save_profile=${save_profile}"
+      CMD="${CMD} --random_seed=${RANDOM_SEED} --params=${PARAMS} --train_steps=${TRAIN_STEPS} --steps_between_eval=${STEPS_BETWEEN_EVAL} --do_eval=${DO_EVAL} --save_checkpoints=${SAVE_CHECKPOINTS} 
+      --print_iter=${PRINT_ITER} --save_profile=${SAVE_PROFILE}"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
@@ -1372,29 +1467,29 @@ function transformer_mlperf() {
   if [[ ${MODE} == "inference" ]]; then
     if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") || ( ${PRECISION} == "int8") ]]; then
 
-      if [[ -z "${params}" ]]; then
+      if [[ -z "${PARAMS}" ]]; then
           echo "transformer-language requires --params arg to be defined"
           exit 1
       fi
 
-      if [[ -z "${file}" ]]; then
+      if [[ -z "${FILE}" ]]; then
           echo "transformer-language requires -- file arg to be defined"
           exit 1
       fi
-      if [[ -z "${file_out}" ]]; then
+      if [[ -z "${FILE_OUT}" ]]; then
           echo "transformer-language requires -- file_out arg to be defined"
           exit 1
       fi
-      if [[ -z "${reference}" ]]; then
+      if [[ -z "${REFERENCE}" ]]; then
           echo "transformer-language requires -- reference arg to be defined"
           exit 1
       fi
 
-      CMD="${CMD} $(add_steps_args) $(add_arg "--params" ${params}) \
-           $(add_arg "--file" ${DATASET_LOCATION}/${file}) \
-           $(add_arg "--vocab_file" ${DATASET_LOCATION}/${vocab_file}) \
-           $(add_arg "--file_out" ${OUTPUT_DIR}/${file_out}) \
-           $(add_arg "--reference" ${DATASET_LOCATION}/${reference})"
+      CMD="${CMD} $(add_steps_args) $(add_arg "--params" ${PARAMS}) \
+           $(add_arg "--file" ${DATASET_LOCATION}/${FILE}) \
+           $(add_arg "--vocab_file" ${DATASET_LOCATION}/${VOCAB_FILE}) \
+           $(add_arg "--file_out" ${OUTPUT_DIR}/${FILE_OUT}) \
+           $(add_arg "--reference" ${DATASET_LOCATION}/${REFERENCE})"
       echo $CMD
 
       PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}
@@ -1410,12 +1505,12 @@ function transformer_mlperf() {
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
-    if [[ -z "${checkpoint_name}" ]]; then
+    if [[ -z "${CHECKPOINT_NAME}" ]]; then
       echo "wavenet requires -- checkpoint_name arg to be defined"
       exit 1
     fi
 
-    if [[ -z "${sample}" ]]; then
+    if [[ -z "${SAMPLE}" ]]; then
       echo "wavenet requires -- sample arg to be defined"
       exit 1
     fi
@@ -1426,8 +1521,8 @@ function wavenet() {
       python3 -m pip install librosa==0.5
     fi
 
-    CMD="${CMD} --checkpoint_name=${checkpoint_name} \
-        --sample=${sample}"
+    CMD="${CMD} --checkpoint_name=${CHECKPOINT_NAME} \
+        --sample=${SAMPLE}"
 
     PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
   else
@@ -1503,8 +1598,8 @@ function wide_deep_large_ds() {
       exit 1
     fi
     if [ ${MODE} == "training" ]; then
-      if [[ ! -z $steps ]]; then
-        CMD="${CMD} --steps=${steps}"
+      if [[ ! -z ${STEPS} ]]; then
+        CMD="${CMD} --steps=${STEPS}"
       fi
       if [ ${PRECISION} == "fp32" ]; then
         CMD="${CMD}"
@@ -1515,22 +1610,22 @@ function wide_deep_large_ds() {
       fi
     fi
     if [ ${MODE} == "inference" ]; then
-      if [ "${num_omp_threads}" != None ]; then
-        CMD="${CMD} --num_omp_threads=${num_omp_threads}"
+      if [ "${NUM_OMP_THREADS}" != None ]; then
+        CMD="${CMD} --num_omp_threads=${NUM_OMP_THREADS}"
       fi
-      if [ "${use_parallel_batches}" == "True" ]; then
-        CMD="${CMD} --use_parallel_batches=${use_parallel_batches}"
+      if [ "${USE_PARALLEL_BATCHES}" == "True" ]; then
+        CMD="${CMD} --use_parallel_batches=${USE_PARALLEL_BATCHES}"
       else
         CMD="${CMD} --use_parallel_batches=False"
       fi
-      if [ "${num_parallel_batches}" != None  ] && [ "${use_parallel_batches}" == "True" ]; then
-        CMD="${CMD} --num_parallel_batches=${num_parallel_batches}"
+      if [ "${NUM_PARALLEL_BATCHES}" != None  ] && [ "${USE_PARALLEL_BATCHES}" == "True" ]; then
+        CMD="${CMD} --num_parallel_batches=${NUM_PARALLEL_BATCHES}"
       fi
-      if [ "${kmp_block_time}" != None ] ; then
-        CMD="${CMD} --kmp_block_time=${kmp_block_time}"
+      if [ "${KMP_BLOCK_TIME}" != None ] ; then
+        CMD="${CMD} --kmp_block_time=${KMP_BLOCK_TIME}"
       fi
-      if [ "${kmp_settings}" != None ]; then
-        CMD="${CMD} --kmp_settings=${kmp_settings}"
+      if [ "${KMP_SETTINGS}" != None ]; then
+        CMD="${CMD} --kmp_settings=${KMP_SETTINGS}"
       fi
       if [ ${PRECISION} == "int8" ] ||  [ ${PRECISION} == "fp32" ]; then
           CMD="${CMD}"

@@ -180,11 +180,11 @@ def translate_file(
     elif FLAGS.test_mode == 'profile':
       hooks = [UpdateGlobalStepHook(),
                StopAtStepHook(total_steps),
-               ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
+               ProfilerHook(save_steps=1, output_dir=FLAGS.output_dir)]
     else:
       hooks = []
 
-    if FLAGS.steps is 0:
+    if FLAGS.steps == 0:
         hooks =[]
 
     num_warmup_sentences = FLAGS.warmup_steps * FLAGS.batch_size
