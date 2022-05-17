@@ -1,0 +1,276 @@
+diff --git a/examples/pytorch/question-answering/run_qa.py b/examples/pytorch/question-answering/run_qa.py
+index cad46c5c2..7c3b1744f 100755
+--- a/examples/pytorch/question-answering/run_qa.py
++++ b/examples/pytorch/question-answering/run_qa.py
+@@ -85,7 +85,18 @@ class ModelArguments:
+             "with private models)."
+         },
+     )
+-
++    use_ipex: bool = field(
++        default=False, metadata={"help": "Choose if use intel extension for pytorch, dafault is just use pytorch"}
++    )
++    jit_mode: bool = field(
++        default=False, metadata={"help": "Choose if run with jit mode, default is imperative mode"}
++    )
++    bf16: bool = field(
++        default=False, metadata={"help": "Enable bf16 mix-precision"}
++    )
++    profile: bool = field(
++        default=False, metadata={"help": "Choose if run with torch profile tools"}
++    )
+ 
+ @dataclass
+ class DataTrainingArguments:
+@@ -601,7 +612,7 @@ def main():
+     # Evaluation
+     if training_args.do_eval:
+         logger.info("*** Evaluate ***")
+-        metrics = trainer.evaluate()
++        metrics = trainer.evaluate(profile=model_args.profile, use_ipex =model_args.use_ipex, bf16=model_args.bf16, jit_mode=model_args.jit_mode, max_seq_length=data_args.max_seq_length)
+ 
+         max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
+         metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
+diff --git a/examples/pytorch/question-answering/trainer_qa.py b/examples/pytorch/question-answering/trainer_qa.py
+index 7f98eba23..96887b25e 100644
+--- a/examples/pytorch/question-answering/trainer_qa.py
++++ b/examples/pytorch/question-answering/trainer_qa.py
+@@ -15,6 +15,12 @@
+ """
+ A subclass of `Trainer` specific to Question-Answering tasks
+ """
++import torch
++import sys
++if "--use_ipex" in sys.argv:
++    import intel_extension_for_pytorch as ipex
++else:
++    from torch.utils import mkldnn as mkldnn_utils
+ 
+ from transformers import Trainer, is_torch_tpu_available
+ from transformers.trainer_utils import PredictionOutput
+@@ -31,7 +37,7 @@ class QuestionAnsweringTrainer(Trainer):
+         self.eval_examples = eval_examples
+         self.post_process_function = post_process_function
+ 
+-    def evaluate(self, eval_dataset=None, eval_examples=None, ignore_keys=None, metric_key_prefix: str = "eval"):
++    def evaluate(self, profile= False, use_ipex=None, bf16=None, jit_mode=None, max_seq_length=None, eval_dataset=None, eval_examples=None, ignore_keys=None, metric_key_prefix: str = "eval"):
+         eval_dataset = self.eval_dataset if eval_dataset is None else eval_dataset
+         eval_dataloader = self.get_eval_dataloader(eval_dataset)
+         eval_examples = self.eval_examples if eval_examples is None else eval_examples
+@@ -40,17 +46,160 @@ class QuestionAnsweringTrainer(Trainer):
+         compute_metrics = self.compute_metrics
+         self.compute_metrics = None
+         eval_loop = self.prediction_loop if self.args.use_legacy_prediction_loop else self.evaluation_loop
+-        try:
+-            output = eval_loop(
+-                eval_dataloader,
+-                description="Evaluation",
+-                # No point gathering the predictions if there are no metrics, otherwise we defer to
+-                # self.args.prediction_loss_only
+-                prediction_loss_only=True if compute_metrics is None else None,
+-                ignore_keys=ignore_keys,
+-            )
+-        finally:
+-            self.compute_metrics = compute_metrics
++        self.model.eval()
++        if jit_mode:
++            jit_inputs=()
++            for _,batch in enumerate(eval_dataloader):
++                for _,label in enumerate(batch):
++                    if (batch[label].dim()) >=4:
++                        dumpy_tensor = torch.ones((batch[label].shape), dtype=torch.long).to(memory_format=torch.channels_last)
++                    else:
++                        dumpy_tensor = torch.ones((batch[label].shape), dtype=torch.long)
++                    L1=list(jit_inputs)
++                    L1.append(dumpy_tensor)
++                    jit_inputs=tuple(L1)
++                break
++            if use_ipex:
++                if bf16:
++                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.bfloat16, level="O1")
++                    with torch.cpu.amp.autocast(), torch.no_grad():
++                        self.model = torch.jit.trace(self.model, jit_inputs, strict=False)
++                    self.model = torch.jit.freeze(self.model)
++                else:
++                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.float32, level="O1")
++                    with torch.no_grad():
++                        self.model = torch.jit.trace(self.model, jit_inputs, strict=False)
++                    self.model = torch.jit.freeze(self.model)
++            else:
++                if bf16:
++                    with torch.cpu.amp.autocast(), torch.no_grad():
++                        self.model = torch.jit.trace(self.model.to(memory_format=torch.channels_last), jit_inputs, strict=False)
++                    self.model = torch.jit.freeze(self.model)
++                    with torch.no_grad():
++                        for _,batch in enumerate(eval_dataloader):
++                            for _,label in enumerate(batch):
++                                if batch[label].dim() >=4:
++                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
++                else:
++                    with torch.no_grad():
++                        self.model = torch.jit.trace(self.model.to(memory_format=torch.channels_last), jit_inputs, strict=False)
++                    self.model = torch.jit.freeze(self.model)
++                    with torch.no_grad():
++                        for _,batch in enumerate(eval_dataloader):
++                            for _,label in enumerate(batch):
++                                if batch[label].dim() >=4:
++                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
++        else:
++            if use_ipex:
++                if bf16:
++                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.bfloat16, level="O1")
++                else:
++                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.float32, level="O1")
++            else:
++                if bf16:
++                    for _,batch in enumerate(eval_dataloader):
++                        for _,label in enumerate(batch):
++                            batch[label]=batch[label].to(torch.bfloat16)
++                    self.model = mkldnn_utils.to_mkldnn(self.model, dtype=torch.bfloat16)
++                else:
++                    self.model = mkldnn_utils.to_mkldnn(self.model)
++
++        with torch.autograd.profiler.profile(
++            enabled=profile,
++            use_cuda=False,
++            record_shapes=False,
++            with_flops=False,
++        ) as prof:
++            if bf16:
++                if use_ipex:
++                    with torch.cpu.amp.autocast(), torch.no_grad():
++                        for _,batch in enumerate(eval_dataloader):
++                            for _,label in enumerate(batch):
++                                if batch[label].dim() >=4:
++                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
++                    if jit_mode:
++                        try:
++                            output = eval_loop(
++                                eval_dataloader,
++                                description="Evaluation",
++                                # No point gathering the predictions if there are no metrics, otherwise we defer to
++                                # self.args.prediction_loss_only
++                                prediction_loss_only=True if compute_metrics is None else None,
++                                ignore_keys=ignore_keys,
++                            )
++                        finally:
++                            self.compute_metrics = compute_metrics
++                    else:
++                        with torch.cpu.amp.autocast():
++                            try:
++                                output = eval_loop(
++                                    eval_dataloader,
++                                    description="Evaluation",
++                                    # No point gathering the predictions if there are no metrics, otherwise we defer to
++                                    # self.args.prediction_loss_only
++                                    prediction_loss_only=True if compute_metrics is None else None,
++                                    ignore_keys=ignore_keys,
++                                )
++                            finally:
++                                self.compute_metrics = compute_metrics
++                else:
++                    if jit_mode:
++                        try:
++                            output = eval_loop(
++                                eval_dataloader,
++                                description="Evaluation",
++                                # No point gathering the predictions if there are no metrics, otherwise we defer to
++                                # self.args.prediction_loss_only
++                                prediction_loss_only=True if compute_metrics is None else None,
++                                ignore_keys=ignore_keys,
++                            )
++                        finally:
++                            self.compute_metrics = compute_metrics
++                    else:
++                        with torch.cpu.amp.autocast():
++                            try:
++                                output = eval_loop(
++                                    eval_dataloader,
++                                    description="Evaluation",
++                                    # No point gathering the predictions if there are no metrics, otherwise we defer to
++                                    # self.args.prediction_loss_only
++                                    prediction_loss_only=True if compute_metrics is None else None,
++                                    ignore_keys=ignore_keys,
++                                )
++                            finally:
++                                self.compute_metrics = compute_metrics
++            else:
++                if use_ipex:
++                    with torch.no_grad():
++                        for _,batch in enumerate(eval_dataloader):
++                            for _,label in enumerate(batch):
++                                if batch[label].dim() >=4:
++                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
++                    try:
++                        output = eval_loop(
++                            eval_dataloader,
++                            description="Evaluation",
++                            # No point gathering the predictions if there are no metrics, otherwise we defer to
++                            # self.args.prediction_loss_only
++                            prediction_loss_only=True if compute_metrics is None else None,
++                            ignore_keys=ignore_keys,
++                        )
++                    finally:
++                        self.compute_metrics = compute_metrics
++                else:
++                    try:
++                        output = eval_loop(
++                            eval_dataloader,
++                            description="Evaluation",
++                            # No point gathering the predictions if there are no metrics, otherwise we defer to
++                            # self.args.prediction_loss_only
++                            prediction_loss_only=True if compute_metrics is None else None,
++                            ignore_keys=ignore_keys,
++                        )
++                    finally:
++                        self.compute_metrics = compute_metrics
++        if profile:
++            print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+ 
+         if self.post_process_function is not None and self.compute_metrics is not None:
+             eval_preds = self.post_process_function(eval_examples, eval_dataset, output.predictions)
+diff --git a/examples/pytorch/question-answering/utils_qa.py b/examples/pytorch/question-answering/utils_qa.py
+index 1157849c9..0bdd947a9 100644
+--- a/examples/pytorch/question-answering/utils_qa.py
++++ b/examples/pytorch/question-answering/utils_qa.py
+@@ -135,7 +135,9 @@ def postprocess_qa_predictions(
+                         start_index >= len(offset_mapping)
+                         or end_index >= len(offset_mapping)
+                         or offset_mapping[start_index] is None
++                        or len(offset_mapping[start_index]) < 2
+                         or offset_mapping[end_index] is None
++                        or len(offset_mapping[end_index]) < 2
+                     ):
+                         continue
+                     # Don't consider answers with a length that is either < 0 or > max_answer_length.
+diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
+index f59cec776..b2dc9bfc4 100755
+--- a/src/transformers/trainer.py
++++ b/src/transformers/trainer.py
+@@ -2208,9 +2208,15 @@ class Trainer:
+         all_labels = None
+         # Will be useful when we have an iterable dataset so don't know its length.
+ 
++        start_time = time.time()
++        # record iteration start time
++        iter_num = 0
++        # record iteration number
+         observed_num_examples = 0
+         # Main evaluation loop
+         for step, inputs in enumerate(dataloader):
++            iter_num = iter_num + 1
++
+             # Update the observed num examples
+             observed_batch_size = find_batch_size(inputs)
+             if observed_batch_size is not None:
+@@ -2253,6 +2259,10 @@ class Trainer:
+                 # Set back to None to begin a new accumulation
+                 losses_host, preds_host, labels_host = None, None, None
+ 
++        total_iter_time = time.time() - start_time
++        throughput = self.args.eval_batch_size * iter_num / total_iter_time
++        print("Throughput: {:.3f} sentence/s".format(throughput))
++
+         if self.args.past_index and hasattr(self, "_past"):
+             # Clean the state at the end of the evaluation loop
+             delattr(self, "_past")

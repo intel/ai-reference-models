@@ -324,7 +324,7 @@ def train_schedule(
   #profile file will be saved in in profile_dir
   #Creating hooks for printing Examples per Second, used with estimator.train
   training_batch_size = estimator.params.batch_size
-  if FLAGS.batch_size is not -1:
+  if FLAGS.batch_size != -1:
     training_batch_size = FLAGS.batch_size
   train_hooks = hooks_helper.get_train_hooks(
       ["ExamplesPerSecondHook"],
@@ -401,10 +401,10 @@ def main(_):
                      "Expected 'base' or 'big.'" % FLAGS.params)
 
   # Determine training schedule based on flags.
-  if FLAGS.train_steps is not 0 and FLAGS.train_epochs is not None:
+  if FLAGS.train_steps != 0 and FLAGS.train_epochs is not None:
     raise ValueError("Both --train_steps and --train_epochs were set. Only one "
                      "may be defined.")
-  if FLAGS.train_steps is not 0:
+  if FLAGS.train_steps != 0:
     train_eval_iterations = FLAGS.train_steps // FLAGS.steps_between_eval
     single_iteration_train_steps = FLAGS.steps_between_eval
     single_iteration_train_epochs = None
