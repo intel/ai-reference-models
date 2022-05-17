@@ -1,0 +1,26 @@
+{
+    "bert_en_wwm_uncased_L-24_H-1024_A-16": {
+        "preprocess": "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3",
+        "bert_encoder": "https://tfhub.dev/tensorflow/bert_en_wwm_uncased_L-24_H-1024_A-16/2",
+        "hidden_size": 1024,
+        "num_hidden_layers": 24,
+        "num_attention_heads": 16,
+        "checkpoint_zip": "https://storage.googleapis.com/bert_models/2019_05_30/wwm_uncased_L-24_H-1024_A-16.zip"
+    },
+    "bert_en_uncased_L-12_H-768_A-12": {
+        "preprocess": "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3",
+        "bert_encoder": "https://tfhub.dev/tensorflow/bert_en_uncased_L-12_H-768_A-12/2",
+        "hidden_size": 768,
+        "num_hidden_layers": 12,
+        "num_attention_heads": 12,
+        "checkpoint_zip": "https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip"
+    },
+    "bert_en_uncased_L-24_H-1024_A-16": {
+        "preprocess": "https://tfhub.dev/tensorflow/bert_en_uncased_preprocess/3",
+        "bert_encoder": "https://tfhub.dev/tensorflow/bert_en_uncased_L-24_H-1024_A-16/2",
+        "hidden_size": 1024,
+        "num_hidden_layers": 24,
+        "num_attention_heads": 16,
+        "checkpoint_zip": "https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-24_H-1024_A-16.zip"
+    }
+}

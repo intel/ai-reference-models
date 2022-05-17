@@ -10,7 +10,7 @@ Intel-optimized TensorFlow.
 <!--- 20. Download link -->
 ## Download link
 
-[ssd-resnet34-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/ssd-resnet34-fp32-training.tar.gz)
+[ssd-resnet34-fp32-training.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-fp32-training.tar.gz)
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -127,7 +127,8 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log and checkpoint files will be written>
 export MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
 
-# Clone the tensorflow/models repo at the specified commit
+# Clone the tensorflow/models repo at the specified commit.
+# Please note that required commit for this section is different from the one used for dataset preparation.
 git clone https://github.com/tensorflow/models.git tf_models
 cd tf_models
 export TF_MODELS_DIR=$(pwd)
@@ -135,7 +136,7 @@ git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
 cd ..
 
 # Download and extract the model package, then run a quickstart script
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_5_0/ssd-resnet34-fp32-training.tar.gz
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-fp32-training.tar.gz
 tar -xzf ssd-resnet34-fp32-training.tar.gz
 cd ssd-resnet34-fp32-training
 
