@@ -6,7 +6,7 @@ lxml
 jupyter
 matplotlib
 pycocotools
-tensorflow-addons==0.11.0
+tensorflow-addons
 opencv-python
 notebook>=6.1.5
 

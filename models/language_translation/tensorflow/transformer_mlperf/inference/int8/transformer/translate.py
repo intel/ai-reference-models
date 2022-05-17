@@ -154,8 +154,7 @@ def translate_file(
 
     duration = time.time() - start_time
     num_sentences = len(sorted_inputs)
-    print('Total inferencing time:%s' %(duration))
-    print('Throughput:{} sentences/second'.format(num_sentences/duration))
+    print('Total number of sentences is %s ' %(num_sentences))
 
     # Write translations in the order they appeared in the original file.
     if output_file is not None:
@@ -177,33 +176,34 @@ def translate_file(
         available_steps = len(sorted_inputs) // FLAGS.batch_size + 1
         if FLAGS.warmup_steps > available_steps:
           FLAGS.warmup_steps = available_steps
-        num_lines_added = FLAGS.warmup_steps * FLAGS.batch_size
-        sorted_inputs = sorted_inputs[0:num_lines_added] + sorted_inputs
 
     elif FLAGS.test_mode == 'profile':
       hooks = [UpdateGlobalStepHook(),
                StopAtStepHook(total_steps),
-               ProfilerHook(save_steps=10, output_dir=FLAGS.output_dir)]
+               ProfilerHook(save_steps=1, output_dir=FLAGS.output_dir)]
     else:
       hooks = []
 
-    if FLAGS.steps is 0:
+    if FLAGS.steps == 0:
         hooks =[]
+
+    num_warmup_sentences = FLAGS.warmup_steps * FLAGS.batch_size
     translations = []
     start_time = time.time()
     for i, prediction in enumerate(estimator.predict(input_fn, hooks=hooks)):
-      if i == FLAGS.warmup_steps * FLAGS.batch_size:
-        start_time = time.time()
       translation = _trim_and_decode(prediction["outputs"], subtokenizer)
-      if i >= FLAGS.warmup_steps * FLAGS.batch_size:
+      if i >= num_warmup_sentences:
         translations.append(translation)
-      if FLAGS.test_mode != 'benchmark' and i%10 == 9:
-        tf.compat.v1.logging.info('Number of examples processed: {}'.format(len(translations)))
+      #skip the time spended for the warmup steps
+      if FLAGS.warmup_steps > 0 and i == num_warmup_sentences-FLAGS.batch_size:
+        start_time = time.time()
 
     duration = time.time() - start_time
-    num_sentences = len(translations)
-    print('Total inferencing time:%s seconds' %(duration))
-    print('Throughput:{} sentences/second'.format(num_sentences/duration))
+    if FLAGS.test_mode == 'benchmark':
+      num_sentences = len(translations)
+      print('The number of sentences translated is %s ' %(num_sentences))
+      print('Total inferencing time:%s seconds' %(duration))
+      print('Throughput:{} sentences/second'.format(num_sentences/duration))
 
 def translate_text(estimator, subtokenizer, txt):
   """Translate a single string."""

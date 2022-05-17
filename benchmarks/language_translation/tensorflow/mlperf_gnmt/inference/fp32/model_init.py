@@ -36,10 +36,6 @@ class ModelInitializer(BaseModelInitializer):
                         (str(self.args.num_cores - 1)) + " "
         self.cmd += "{} ".format(self.python_exe)
 
-        # Set KMP env vars, if they haven't already been set
-        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
-        self.set_kmp_vars(config_file_path)
-
         # use default batch size if -1
         if self.args.batch_size == -1:
             self.args.batch_size = 32
@@ -48,7 +44,14 @@ class ModelInitializer(BaseModelInitializer):
         self.set_num_inter_intra_threads()
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
         arg_parser = ArgumentParser(description="process custom_args")
+        arg_parser.add_argument('--kmp-blocktime', dest='kmp_blocktime',
+                                help='number of kmp block time',
+                                type=int, default=1)
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
+        # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
+        config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
+        self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
+
         src_vocab_file = os.path.join(self.args.data_location, "vocab.bpe.32000.en")
         tgt_vocab_file = os.path.join(self.args.data_location, "vocab.bpe.32000.de")
         inference_input_file = os.path.join(self.args.data_location, "newstest2014.tok.bpe.32000.en")

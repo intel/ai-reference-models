@@ -5,7 +5,8 @@ google.cloud.logging
 google.cloud.bigtable
 grpcio-tools
 keras
-numpy==1.16.3
+numpy==1.22.2
+
 protobuf
 sgf==0.5
 six
@@ -15,4 +16,4 @@ setuptools>=34.0.0
 
 oauth2client==4.1
 
-horovod==0.15.1
+horovod==0.24.0
