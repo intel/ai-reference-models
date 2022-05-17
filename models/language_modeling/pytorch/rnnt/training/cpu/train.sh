@@ -133,7 +133,7 @@ rm -rf ${OUTPUT_DIR}/throughput_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
-    --throughput_mode \
+    --node_id=0 \
     --log_path=${OUTPUT_DIR} \
     --log_file_prefix="./throughput_log_${precision}" \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py \
