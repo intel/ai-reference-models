@@ -1,14 +1,14 @@
 pycocotools
-numpy>=1.16.3
-scipy==1.2.0
+numpy
+scipy
 Pillow>=8.1.2
 cython
 matplotlib
 scikit-image
-intel-tensorflow==1.15.2
-keras==2.0.8
+intel-tensorflow
+keras==2.6.0rc3
 opencv-python
-h5py==2.10.0
+h5py
 imgaug
 IPython[all]
 

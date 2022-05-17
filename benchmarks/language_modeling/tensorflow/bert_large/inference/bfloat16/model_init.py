@@ -81,6 +81,7 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument("--steps", dest='steps',
                                 type=int, default=30,
                                 help="number of benchmark steps")
+        arg_parser.add_argument("--weight-sharing", dest="weight_sharing", action="store_false")
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
         # Set KMP env vars, if they haven't already been set, but override the default KMP_BLOCKTIME value
@@ -104,15 +105,11 @@ class ModelInitializer(BaseModelInitializer):
         # set default inter/intra threads
         self.set_num_inter_intra_threads()
 
-        if self.args.num_intra_threads:
-            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-        else:
-            set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket - 2)
-
-        if self.args.num_inter_threads:
-            set_env_var("TF_NUM_INTEROP_THREADS", self.args.num_inter_threads)
-        else:
-            set_env_var("TF_NUM_INTEROP_THREADS", 1)
+        if not os.getenv("OMP_NUM_THREADS"):
+            if self.args.num_intra_threads:
+                set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+            else:
+                set_env_var("OMP_NUM_THREADS", platform_util.num_cores_per_socket)
 
         model_script = os.path.join(
             self.args.intelai_models, self.args.mode,
@@ -158,6 +155,11 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.steps:
             model_args += " --steps=" + str(self.args.steps)
+
+        if self.args.weight_sharing:
+            model_args += " --weight_sharing"
+
+        model_args += " --num_cores_per_socket=" + str(platform_util.num_cores_per_socket)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + model_script + model_args

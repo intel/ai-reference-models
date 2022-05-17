@@ -1,0 +1,74 @@
+From 8757786eae4b6666a9bc89a0f94b6311d855297b Mon Sep 17 00:00:00 2001
+From: zhuoweis <zhuowei.si@intel.com>
+Date: Thu, 10 Dec 2020 22:15:11 +0800
+Subject: [PATCH] resnet101 fp32 TF timeline
+
+---
+ .../eval_image_classifier_inference.py        | 23 +++++++++++++++++--
+ 1 file changed, 21 insertions(+), 2 deletions(-)
+
+diff --git a/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py b/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py
+index 225c94e6..0d0da925 100644
+--- a/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py
++++ b/models/image_recognition/tensorflow/resnet101/inference/eval_image_classifier_inference.py
+@@ -27,6 +27,11 @@ from tensorflow.python.framework import dtypes
+ 
+ import datasets
+ 
++import sys
++import os
++sys.path.append(os.environ['ProfileUtilsRoot'])
++from profile_utils import TimeLiner, ConfigFile, tfSession
++
+ INPUTS = 'input'
+ OUTPUTS = 'resnet_v1_101/predictions/Reshape_1'
+ 
+@@ -106,6 +111,11 @@ class eval_classifier_optimized_graph:
+     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
+     infer_config.use_per_session_threads = 1
+ 
++    configf = ConfigFile(confpath=os.environ['ProfileUtilsRoot']+"/topo.ini")
++    configf.read_config('resnet101 infer fp32')
++    infer_many_runs_timeline = TimeLiner()
++    infer_run_metadata = tf.compat.v1.RunMetadata()
++
+     data_graph = tf.Graph()
+     with data_graph.as_default():
+       if (self.args.data_location):
+@@ -139,8 +149,10 @@ class eval_classifier_optimized_graph:
+     output_tensor = infer_graph.get_tensor_by_name('resnet_v1_101/predictions/Reshape_1:0')
+       
+     #tf.global_variables_initializer()
+-    data_sess  = tf.compat.v1.Session(graph=data_graph,  config=data_config)
+-    infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)
++    data_sess = tfSession(graph=data_graph,  config=data_config,
++        run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
++    infer_sess = tfSession(graph=infer_graph, config=infer_config,
++        run_metadata=infer_run_metadata, many_runs_timeline=infer_many_runs_timeline)
+ 
+     num_processed_images = 0
+     num_remaining_images = IMAGENET_VALIDATION_IMAGES
+@@ -189,6 +201,9 @@ class eval_classifier_optimized_graph:
+       # print throughput for both batch size 1 and 128
+       print('Throughput: %.3f images/sec' % (self.args.batch_size / time_average))
+ 
++      print("json_fname : ",configf.json_fname)
++      infer_many_runs_timeline.save(configf.json_fname)
++
+     else:  # accuracy check
+       total_accuracy1, total_accuracy5 = (0.0, 0.0)
+ 
+@@ -223,6 +238,10 @@ class eval_classifier_optimized_graph:
+               % (num_processed_images, total_accuracy1 / num_processed_images,
+                  total_accuracy5 / num_processed_images))
+ 
++      print("json_fname : ",configf.json_fname)
++      infer_many_runs_timeline.save(configf.json_fname)
++
++
+   def validate_args(self):
+     """validate the arguments"""
+ 
+-- 
+2.25.1
+
