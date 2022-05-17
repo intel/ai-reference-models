@@ -71,7 +71,7 @@ rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --enable_jemalloc \
-    --throughput_mode \
+    --node_id=0 \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/train_net.py \
     $ARGS \
     --iter-warmup 10 \
