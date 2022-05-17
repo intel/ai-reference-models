@@ -1,7 +1,9 @@
 Keras==2.6.0rc3
-numpy==1.16.3
+
+numpy==1.22.2
+
 nilearn==0.6.2
-tables==3.4.4
+tables
 nibabel==2.3.3
-SimpleITK===1.2.0
-h5py==2.10.0
+SimpleITK
+h5py

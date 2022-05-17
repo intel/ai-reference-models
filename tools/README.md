@@ -162,5 +162,4 @@ using these steps.
      images on your machine. This image can be used to locally test
      running the model in a container).
 
-3. When the model spec yaml is complete, create an MR that adds
-   the new files to the repo.
+3. When the model spec yaml is complete, create an MR that adds the new files to the repo.

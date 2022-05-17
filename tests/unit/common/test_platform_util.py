@@ -21,7 +21,7 @@
 import json
 import pytest
 import os
-from mock import MagicMock
+from mock import MagicMock, mock_open, patch
 
 from benchmarks.common.platform_util import PlatformUtil, CPUInfo
 from test_utils import platform_config
@@ -53,13 +53,20 @@ def platform_mock(patch):
     return patch("system_platform.system")
 
 
-def test_platform_util_lscpu_parsing(platform_mock, subprocess_mock, os_mock):
+@pytest.fixture
+def read_mock(patch):
+    return patch("read")
+
+
+@patch("benchmarks.common.platform_util.PlatformUtil._get_cpuset")
+def test_platform_util_lscpu_parsing(get_cpuset_mock, platform_mock, subprocess_mock, os_mock):
     """
     Verifies that platform_utils gives us the proper values that we expect
     based on the lscpu_output string provided.
     """
     platform_mock.return_value = platform_config.SYSTEM_TYPE
     os_mock.return_value = True
+    get_cpuset_mock.return_value = "0-111"
     subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
     platform_util = PlatformUtil(MagicMock(verbose=True))
     platform_util.linux_init()
@@ -137,11 +144,13 @@ def test_cpu_info_binding_information_no_numa(subprocess_mock):
     assert generated_value == expected_value
 
 
-def test_numa_cpu_core_list(subprocess_mock, subprocess_popen_mock, platform_mock, os_mock):
+@patch("benchmarks.common.platform_util.PlatformUtil._get_cpuset")
+def test_numa_cpu_core_list(get_cpuset_mock, subprocess_mock, subprocess_popen_mock, platform_mock, os_mock):
     """ Test the platform utils to ensure that we are getting the proper core lists """
     subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
     subprocess_popen_mock.return_value.stdout.readlines.return_value = platform_config.NUMA_CORES_OUTPUT
     platform_mock.return_value = platform_config.SYSTEM_TYPE
+    get_cpuset_mock.return_value = "0-111"
     os_mock.return_value = True
     subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
     platform_util = PlatformUtil(MagicMock(verbose=True))
@@ -169,3 +178,92 @@ def test_platform_util_wmic_parsing(platform_mock, subprocess_mock, os_mock):
     assert platform_util.num_threads_per_core == 28
     assert platform_util.num_logical_cpus == 56
     assert platform_util.num_numa_nodes == 0
+
+
+@patch("benchmarks.common.platform_util.PlatformUtil._get_cpuset")
+@pytest.mark.parametrize('cpuset_range,expected_list',
+                         [['0-5', [0, 1, 2, 3, 4, 5]],
+                          ['0-3,7,6', [0, 1, 2, 3, 6, 7]],
+                          ['2-3,7,9-11,20', [2, 3, 7, 9, 10, 11, 20]],
+                          ['0-3,7-6,11,11', [0, 1, 2, 3, 11]],
+                          ['7-9,5-10,6,4', [4, 5, 6, 7, 8, 9, 10]],
+                          ['0', [0]],
+                          ['', []]])
+def test_get_list_from_string_ranges(get_cpuset_mock, platform_mock, subprocess_mock, os_mock,
+                                     cpuset_range, expected_list,):
+    """
+    Tests the PlatformUtils _get_list_from_string_ranges function that converts string
+    number ranges to an integer list.
+    """
+    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    get_cpuset_mock.return_value = cpuset_range
+    os_mock.return_value = True
+    platform_util = PlatformUtil(MagicMock())
+    result = platform_util._get_list_from_string_ranges(cpuset_range)
+    assert result == expected_list
+
+
+@pytest.mark.parametrize('cpuset_range,expected_core_list',
+                         [["0-7,28-35",
+                           [["0", "1", "2", "3", "4", "5", "6", "7"],
+                            ["28", "29", "30", "31", "32", "33", "34", "35"]]],
+                          ["0,2-5,20,29-32,1",
+                           [["0", "1", "2", "3", "4", "5", "20"],
+                            ["29", "30", "31", "32"]]]])
+@patch("os.path.exists")
+def test_numa_cpu_core_list_cpuset(path_exists_mock, subprocess_mock, subprocess_popen_mock,
+                                   platform_mock, os_mock, cpuset_range, expected_core_list):
+    """ Test the platform utils to ensure that we are getting the proper core lists """
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    subprocess_popen_mock.return_value.stdout.readlines.return_value = platform_config.NUMA_CORES_OUTPUT
+    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    os_mock.return_value = True
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    path_exists_mock.return_value = True
+    cpuset_mock = mock_open(read_data=cpuset_range)
+    with patch("builtins.open", cpuset_mock):
+        platform_util = PlatformUtil(MagicMock(verbose=True, numa_cores_per_instance=4))
+
+    # ensure there are 2 items in the list since there are 2 sockets
+    assert len(platform_util.cpu_core_list) == 2
+
+    # Check that the core list matches the ranges defined for the cpuset file read
+    assert platform_util.cpu_core_list == expected_core_list
+
+
+@patch("benchmarks.common.platform_util.PlatformUtil._get_cpuset")
+@pytest.mark.parametrize('cpuset_range,expected_num_sockets',
+                         [['0-5', 1],
+                          ['0-3,7,6', 1],
+                          ['2-3,7,9-11,20', 1],
+                          ['0-3,7-6,11,11', 1],
+                          ['7-9,5-10,6,4', 1],
+                          ['0-111', 2],
+                          ['28-32,84-90', 1]])
+def test_platform_utils_num_sockets_with_cpuset(get_cpuset_mock, platform_mock, subprocess_mock,
+                                                os_mock, cpuset_range, expected_num_sockets):
+    """
+    Checks that the number of sockets in platform_utils reflects the proper value based on
+    the cpuset. If the cores being used by the container in the cpuset are all on one socket,
+    then the num_cpu_sockets should be 1, even if the system itself has 2 sockets (since the
+    container only has access to 1).
+    """
+    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    os_mock.return_value = True
+    get_cpuset_mock.return_value = cpuset_range
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    platform_util = PlatformUtil(MagicMock(verbose=True))
+    platform_util.linux_init()
+    assert platform_util.num_cpu_sockets == expected_num_sockets
+
+
+def test_platform_util_with_no_args(platform_mock, subprocess_mock):
+    """
+    Verifies that PlatformUtil object can be created with an empty string, as needed
+    by the performance Jupyter notebooks.
+    """
+    platform_mock.return_value = platform_config.SYSTEM_TYPE
+    subprocess_mock.return_value = platform_config.LSCPU_OUTPUT
+    platform_util = PlatformUtil("")
+    assert platform_util.num_logical_cpus == 112
