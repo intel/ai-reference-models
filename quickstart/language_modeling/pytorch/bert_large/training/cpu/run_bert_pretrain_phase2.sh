@@ -15,44 +15,56 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-$PWD}
+MODEL_DIR=${MODEL_DIR-../../../../../..}
 
 #export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ARGS="--benchmark"
 precision=fp32
 batch_size=28
+
+if [[ "$1" == *"avx"* ]]; then
+    unset DNNL_MAX_CPU_ISA
+fi
+
 if [[ "$1" == "bf16" ]]
 then
     ARGS="$ARGS --bf16"
     precision=bf16
-    batch_size=56
+    batch_size=128
     echo "### running bf16 mode"
-elif [[ $1 == "fp32" ]]; then
+elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running FP32 mode"
 
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf16"
     exit 1
 fi
-#this is the path of model and enwiki-20200101 on mlp-sdp-spr-4150 machine 
 #you can also refer to https://github.com/mlcommons/training/tree/master/language_model/tensorflow/bert
-PRETRAINED_MODEL=${PRETRAINED_MODEL-/pyt_dataset/enwiki-20200101/bert_large_mlperf_checkpoint/checkpoint/}
-DATASET_DIR=${DATASET_DIR-/pyt_dataset/enwiki-20200101/dataset/tfrecord_dir}
+PRETRAINED_MODEL=${PRETRAINED_MODEL:-~/dataset/checkpoint/}
+DATASET_DIR=${DATASET_DIR:-~/dataset/}
 TRAIN_SCRIPT=${TRAIN_SCRIPT:-${MODEL_DIR}/models/language_modeling/pytorch/bert_large/training/run_pretrain_mlperf.py}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
 work_space=${work_space:-${OUTPUT_DIR}}
+export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000";
 rm -rf ${OUTPUT_DIR}/throughput_log_phase2_*
 
-python -m intel_extension_for_pytorch.cpu.launch --socket_id 0  --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
-    --train_file ${DATASET_DIR}/seq_512/part-00000-of-00500 \
-    --validation_file ${DATASET_DIR}/seq_512/part-00000-of-00500 \
+NUM_RANKS=1
+LBS=$(( batch_size / NUM_RANKS ))
+params="--train_batch_size=$LBS     --learning_rate=3.5e-4     --opt_lamb_beta_1=0.9     --opt_lamb_beta_2=0.999     --warmup_proportion=0.0     --warmup_steps=0.0     --start_warmup_step=0     --max_steps=13700     --phase2    --max_predictions_per_seq=76      --do_train     --skip_checkpoint     --train_mlm_accuracy_window_size=0     --target_mlm_accuracy=0.720     --weight_decay_rate=0.01     --max_samples_termination=4500000     --eval_iter_start_samples=150000 --eval_iter_samples=150000     --eval_batch_size=16  --gradient_accumulation_steps=1     --log_freq=0 "
+
+python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_phase2_${precision}" ${TRAIN_SCRIPT} \
+    --input_dir ${DATASET_DIR}/2048_shards_uncompressed_512/ \
+    --eval_dir ${DATASET_DIR}/eval_set_uncompressed/ \
     --model_type 'bert' \
     --model_name_or_path ${PRETRAINED_MODEL} \
     --benchmark \
-    --output_dir model_save \
+    --dense_seq_output \
+    --output_dir $OUTPUT_DIR/model_save \
     $ARGS \
-    --per_device_train_batch_size ${batch_size} \
+    $params \
+    
+
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log_phase2_${precision}* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {

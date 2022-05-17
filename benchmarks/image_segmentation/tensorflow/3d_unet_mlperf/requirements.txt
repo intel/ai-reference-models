@@ -1,4 +1,5 @@
-numpy==1.19.5
+numpy==1.22.0
+
 nilearn==0.7.1
 tables==3.6.1
 nibabel==3.2.1

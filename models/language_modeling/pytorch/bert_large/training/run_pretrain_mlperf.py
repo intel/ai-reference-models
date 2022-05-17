@@ -22,21 +22,45 @@ https://huggingface.co/models?filter=masked-lm
 """
 # You can also adapt this script on your own mlm task. Pointers for this are left as comments.
 
+"""BERT Pretraining"""
+
+import argparse
+import csv
+import h5py
+import os
+import glob
+import numpy as np
+import torch
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, Dataset
+from torch.utils.data.distributed import DistributedSampler
+import logging
+import math
+import multiprocessing
+import numpy as np
+import os
+import random
+import re
+import time
+
+from collections import OrderedDict
+from concurrent.futures import ProcessPoolExecutor
+#from modeling import BertForPretraining, BertConfig
+from schedulers import LinearWarmupPolyDecayScheduler
+
+import utils
+
+import torch
+import torch.nn.functional as F
+from torch.utils.data import DataLoader, RandomSampler, SequentialSampler, Dataset
+from torch.utils.data.distributed import DistributedSampler
 import argparse
 import logging
 import math
 import os
 import random
 
-import datasets
-import torch
-from datasets import load_dataset
-from torch.utils.data.dataloader import DataLoader
-from tqdm.auto import tqdm
-import time
 
 import transformers
-from accelerate import Accelerator, DistributedType
 from transformers import (
     CONFIG_MAPPING,
     MODEL_MAPPING,
@@ -50,16 +74,136 @@ from transformers import (
     set_seed,
 )
 
-from tfrecord.torch.dataset import TFRecordDataset, MultiTFRecordDataset
-import intel_extension_for_pytorch as ipex 
+from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
+#from lamb import Lamb
+from intel_extension_for_pytorch.optim._lamb import Lamb
+
+try:
+    import torch_ccl
+except ImportError as e:
+    torch_ccl = False
+import intel_extension_for_pytorch as ipex
+
 
 logger = logging.getLogger(__name__)
 MODEL_CONFIG_CLASSES = list(MODEL_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
+class WorkerInitObj(object):
+    def __init__(self, seed):
+        self.seed = seed
+    def __call__(self, id):
+        np.random.seed(seed=self.seed + id)
+        random.seed(self.seed + id)
+
+def get_eval_batchsize_per_worker(args):
+    if torch.distributed.is_initialized():
+        chunk_size = args.num_eval_examples // args.world_size
+        rank = args.local_rank
+        remainder = args.num_eval_examples % args.world_size
+        if rank<remainder:
+            return (chunk_size+1)
+        else:
+            return chunk_size
+
+def create_pretraining_dataset(input_file, max_pred_length, shared_list, args, worker_init_fn):
+    train_data = pretraining_dataset(input_file=input_file, max_pred_length=max_pred_length)
+    train_sampler = RandomSampler(train_data)
+    train_dataloader = DataLoader(train_data, sampler=train_sampler,
+        batch_size=args.train_batch_size)
+
+    return train_dataloader, input_file
+
+def create_eval_dataset(args, worker_init_fn):
+    eval_data = []
+    for eval_file in sorted(os.listdir(args.eval_dir)):
+        eval_file_path = os.path.join(args.eval_dir, eval_file)
+      
+        if os.path.isfile(eval_file_path) and 'part' in eval_file_path:
+            eval_data.extend(pretraining_dataset(eval_file_path, max_pred_length=args.max_predictions_per_seq))
+            if len(eval_data) > args.num_eval_examples:
+                eval_data = eval_data[:args.num_eval_examples]
+                break
+    if torch.distributed.is_initialized():
+        chunk_size = args.num_eval_examples // args.world_size
+        rank = args.local_rank
+        remainder = args.num_eval_examples % args.world_size
+        if rank<remainder:
+            eval_data = eval_data[(chunk_size+1)*rank : (chunk_size+1)*(rank+1)]
+        else:
+            eval_data = eval_data[chunk_size*rank+remainder : chunk_size*(rank+1)+remainder]
+
+
+    eval_sampler = SequentialSampler(eval_data)
+    eval_dataloader = DataLoader(eval_data, sampler=eval_sampler, batch_size=args.eval_batch_size, num_workers=0)
+    return eval_dataloader
+
+class pretraining_dataset(Dataset):
+    def __init__(self, input_file, max_pred_length):
+        self.input_file = input_file
+        self.max_pred_length = max_pred_length
+        f = h5py.File(input_file, "r")
+        keys = ['input_ids', 'input_mask', 'segment_ids', 'masked_lm_positions', 'masked_lm_ids',
+                'next_sentence_labels']
+        self.inputs = [np.asarray(f[key][:]) for key in keys]
+        f.close()
+
+    def __len__(self):
+        'Denotes the total number of samples'
+        return len(self.inputs[0])
+
+    def __getitem__(self, index):
+        [input_ids, input_mask, segment_ids, masked_lm_positions, masked_lm_ids, next_sentence_labels] = [
+            torch.from_numpy(input[index].astype(np.int64)) if indice < 5 else torch.from_numpy(
+                np.asarray(input[index].astype(np.int64))) for indice, input in enumerate(self.inputs)]
+        masked_lm_labels = torch.zeros(input_ids.shape, dtype=torch.long) - 100
+        index = self.max_pred_length
+        masked_token_count = torch.count_nonzero(masked_lm_positions)
+        if masked_token_count != 0:
+            index = masked_token_count
+        masked_lm_labels[masked_lm_positions[:index]] = masked_lm_ids[:index]
+
+        return [input_ids, segment_ids, input_mask, masked_lm_labels, next_sentence_labels]
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Finetune a transformers model on a Masked Language Modeling task")
+
+    ## Required parameters
+    parser.add_argument("--input_dir",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The input data dir. Should contain .hdf5 files  for the task.")
+    parser.add_argument("--output_dir",
+                        default=None,
+                        type=str,
+                        required=True,
+                        help="The output directory where the model checkpoints will be written.")
+    parser.add_argument("--eval_dir",
+                        default=None,
+                        type=str,
+                        help="The eval data dir. Should contain .hdf5 files  for the task.")
+    parser.add_argument("--eval_iter_start_samples",
+                        default=3000000,
+                        type=int,
+                        help="Sample to begin performing eval.")
+    parser.add_argument("--eval_iter_samples",
+                        default=-1,
+                        type=int,
+                        help="If set to -1, disable eval, \
+                        else evaluate every eval_iter_samples during training")
+    parser.add_argument("--num_eval_examples",
+                        default=10000,
+                        type=int,
+                        help="number of eval examples to run eval on")
+    parser.add_argument("--init_checkpoint",
+                        default=None,
+                        type=str,
+                        help="The initial checkpoint to start training from.")
+    parser.add_argument("--init_tf_checkpoint",
+                        default=None,
+                        type=str,
+                        help="The initial TF checkpoint to start training from.")
     parser.add_argument(
         "--train_file", type=str, default=None, help="A csv or a json file containing the training data."
     )
@@ -78,12 +222,6 @@ def parse_args():
         help="Pretrained config name or path if not the same as model_name",
     )
     parser.add_argument(
-        "--per_device_train_batch_size",
-        type=int,
-        default=8,
-        help="Batch size (per device) for the training dataloader.",
-    )
-    parser.add_argument(
         "--per_device_eval_batch_size",
         type=int,
         default=8,
@@ -95,14 +233,119 @@ def parse_args():
         default=5e-5,
         help="Initial learning rate (after the potential warmup period) to use.",
     )
+    parser.add_argument("--max_predictions_per_seq",
+                        default=76,
+                        type=int,
+                        help="The maximum total of masked tokens in input sequence")
+    parser.add_argument("--train_batch_size",
+                        default=18,
+                        type=int,
+                        help="Total batch size for training.")
+    parser.add_argument("--eval_batch_size",
+                        default=128,
+                        type=int,
+                        help="Total batch size for training.")
+    parser.add_argument("--weight_decay_rate",
+
+                        default=0.01,
+                        type=float,
+                        help="weight decay rate for LAMB.")
+    parser.add_argument("--opt_lamb_beta_1",
+                        default=0.9,
+                        type=float,
+                        help="LAMB beta1.")
+    parser.add_argument("--opt_lamb_beta_2",
+                        default=0.999,
+                        type=float,
+                        help="LAMB beta2.")
+    parser.add_argument("--max_steps",
+                        default=1536,
+                        type=float,
+                        help="Total number of training steps to perform.")
+    parser.add_argument("--max_samples_termination",
+                        default=14000000,
+                        type=float,
+                        help="Total number of training samples to run.")
+    parser.add_argument("--warmup_proportion",
+                        default=0.01,
+                        type=float,
+                        help="Proportion of optimizer update steps to perform linear learning rate warmup for. "
+                             "Typically 1/8th of steps for Phase2")
+    parser.add_argument("--warmup_steps",
+                        default=0,
+                        type=float,
+                        help="Number of optimizer update steps to perform linear learning rate warmup for. "
+                             "Typically 1/8th of steps for Phase2")
+    parser.add_argument("--start_warmup_step",
+                        default=0,
+                        type=float,
+                        help="Starting step for warmup. ")
+    parser.add_argument('--log_freq',
+                        type=float, default=10000.0,
+                        help='frequency of logging loss. If not positive, no logging is provided for training loss')
+    parser.add_argument('--checkpoint_activations',
+                        default=False,
+                        action='store_true',
+                        help="Whether to use gradient checkpointing")
+    parser.add_argument("--resume_from_checkpoint",
+                        default=False,
+                        action='store_true',
+                        help="Whether to resume training from checkpoint. If set, precedes init_checkpoint/init_tf_checkpoint")
+    parser.add_argument('--keep_n_most_recent_checkpoints',
+                        type=int,
+                        default=20,
+                        help="Number of checkpoints to keep (rolling basis).")
+    parser.add_argument('--num_samples_per_checkpoint',
+                        type=int,
+                        default=500000,
+                        help="Number of update steps until a model checkpoint is saved to disk.")
+    parser.add_argument('--min_samples_to_start_checkpoints',
+                        type=int,
+                        default=3000000,
+                        help="Number of update steps until model checkpoints start saving to disk.")
+    parser.add_argument('--skip_checkpoint',
+                        default=False,
+                        action='store_true',
+                        help="Whether to save checkpoints")
+    parser.add_argument('--phase2',
+                        default=False,
+                        action='store_true',
+                        help="Only required for checkpoint saving format")
+    parser.add_argument("--do_train",
+                        default=False,
+                        action='store_true',
+                        help="Whether to run training.")
+    parser.add_argument('--bert_config_path',
+                        type=str,
+                        default="/workspace/phase1",
+                        help="Path bert_config.json is located in")
+    parser.add_argument('--target_mlm_accuracy',
+                        type=float,
+                        default=0.72,
+                        help="Stop training after reaching this Masked-LM accuracy")
+    parser.add_argument('--train_mlm_accuracy_window_size',
+                        type=int,
+                        default=0,
+                        help="Average accuracy over this amount of batches before performing a stopping criterion test")
+    parser.add_argument('--num_epochs_to_generate_seeds_for',
+                        type=int,
+                        default=2,
+                        help="Number of epochs to plan seeds for. Same set across all workers.")
+    parser.add_argument("--use_gradient_as_bucket_view",
+                        default=False,
+                        action='store_true',
+                        help="Turn ON gradient_as_bucket_view optimization in native DDP.")
+    parser.add_argument("--dense_seq_output",
+                        default=False,
+                        action='store_true',
+                        help="Whether to run with optimizations.")    
+    parser.add_argument("--bf16",
+                        default=False,
+                        action='store_true',
+                        help="Enale BFloat16 training")
+    parser.add_argument("--benchmark", action="store_true", help="Whether to enable benchmark")
     parser.add_argument("--weight_decay", type=float, default=0.0, help="Weight decay to use.")
     parser.add_argument("--num_train_epochs", type=int, default=3, help="Total number of training epochs to perform.")
-    parser.add_argument(
-        "--max_train_steps",
-        type=int,
-        default=None,
-        help="Total number of training steps to perform. If provided, overrides num_train_epochs.",
-    )
     parser.add_argument(
         "--gradient_accumulation_steps",
         type=int,
@@ -116,11 +359,7 @@ def parse_args():
         help="The scheduler type to use.",
         choices=["linear", "cosine", "cosine_with_restarts", "polynomial", "constant", "constant_with_warmup"],
     )
-    parser.add_argument(
-        "--num_warmup_steps", type=int, default=0, help="Number of steps for the warmup in the lr scheduler."
-    )
-    parser.add_argument("--output_dir", type=str, default=None, help="Where to store the final model.")
-    parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
+    parser.add_argument("--seed", type=int, default=42, help="A seed for reproducible training.")
     parser.add_argument(
         "--model_type",
         type=str,
@@ -128,62 +367,72 @@ def parse_args():
         help="Model type to use if training from scratch.",
         choices=MODEL_TYPES,
     )
-    parser.add_argument(
-        "--max_seq_length",
-        type=int,
-        default=None,
-        help="The maximum total input sequence length after tokenization. Sequences longer than this will be truncated.",
-    )
+    
     parser.add_argument(
         "--preprocessing_num_workers",
         type=int,
         default=None,
         help="The number of processes to use for the preprocessing.",
     )
+    parser.add_argument("--local_rank",
+                        default=0,
+                        type=int,
+                        help="Total batch size for training.")
+    parser.add_argument("--world_size",
+                        default=1,
+                        type=int,
+                        help="Total batch size for training.")
 
     parser.add_argument("--profile", action="store_true", help="Whether to enable profiling")
-
-    parser.add_argument("--benchmark", action="store_true", help="Whether to enable benchmark")
-    parser.add_argument("--bf16", action="store_true", help="Whether to enable benchmark")
 
     args = parser.parse_args()
 
     if args.output_dir is not None:
         os.makedirs(args.output_dir, exist_ok=True)
+    #assert args.init_checkpoint is not None or args.init_tf_checkpoint is not None or found_resume_checkpoint(args), \
+    #    "Must specify --init_checkpoint, --init_tf_checkpoint or have ckpt to resume from in --output_dir of the form *.pt"
 
+    #assert not (args.init_checkpoint is not None and args.init_tf_checkpoint is not None), \
+    #        "Can only specify one of --init_checkpoint and --init_tf_checkpoint"
     return args
 
-
-def main():
-    args = parse_args()
-    print(args)
-    # Initialize the accelerator. We will let the accelerator handle device placement for us in this example.
-    accelerator = Accelerator(split_batches=False)
-    # Make one log on every process with the configuration for debugging.
-    logging.basicConfig(
-        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
-        datefmt="%m/%d/%Y %H:%M:%S",
-        level=logging.INFO,
-    )
-    logger.info(accelerator.state)
-
-    # Setup logging, we only want one process per machine to log things on the screen.
-    # accelerator.is_local_main_process is only True for one process per machine.
-    logger.setLevel(logging.INFO if accelerator.is_local_main_process else logging.ERROR)
-    if accelerator.is_local_main_process:
-        datasets.utils.logging.set_verbosity_warning()
-        #transformers.utils.logging.set_verbosity_info()
+def found_resume_checkpoint(args):
+    if args.phase2:
+        checkpoint_str = "phase2_ckpt*.pt"
     else:
-        datasets.utils.logging.set_verbosity_error()
-        #transformers.utils.logging.set_verbosity_error()
+        checkpoint_str = "phase1_ckpt*.pt"
+    return args.resume_from_checkpoint and len(glob.glob(os.path.join(args.output_dir, checkpoint_str))) > 0
 
-    # If passed along, set the training seed now.
-    if args.seed is not None:
-        set_seed(args.seed)
+def setup_training(args):
+    device = torch.device("cpu")
+    if torch_ccl and int(os.environ.get('PMI_SIZE', '0')) > 1:
+        os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
+        os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
+        torch.distributed.init_process_group(backend="ccl")
+        device = torch.device("cpu")
+        args.local_rank = torch.distributed.get_rank()
+        args.world_size = torch.distributed.get_world_size()
+        print("##################Using CCL dist run", flush=True)
+    if args.gradient_accumulation_steps < 1:
+        raise ValueError("Invalid gradient_accumulation_steps parameter: {}, should be >= 1".format(
+            args.gradient_accumulation_steps))
+    if args.train_batch_size % args.gradient_accumulation_steps != 0:
+        raise ValueError("Invalid gradient_accumulation_steps parameter: {}, batch size {} should be divisible".format(
+            args.gradient_accumulation_steps, args.train_batch_size))
 
-    # Load pretrained model
-    #
-    # In distributed training, the .from_pretrained methods guarantee that only one local process can concurrently
+    args.train_batch_size = args.train_batch_size // args.gradient_accumulation_steps
+
+    if not (args.do_train or (args.eval_dir and args.eval_iter_samples <= 0)):
+        raise ValueError(" `do_train`  or should be in offline eval mode")
+
+    if not args.resume_from_checkpoint or not os.path.exists(args.output_dir):
+        os.makedirs(args.output_dir, exist_ok=True)
+    return device, args
+
+def prepare_model_and_optimizer(args, device):
+    global_step = 0
+    args.resume_step = 0
+    checkpoint = None
     # download model & vocab.
     if args.config_name:
         config = AutoConfig.from_pretrained(args.config_name)
@@ -193,233 +442,437 @@ def main():
         config = CONFIG_MAPPING[args.model_type]()
         logger.warning("You are instantiating a new config instance from scratch.")
 
+    config.dense_seq_output = args.dense_seq_output 
     if args.model_name_or_path:
         model = AutoModelForPreTraining.from_pretrained(
             args.model_name_or_path,
             from_tf=bool(".ckpt" in args.model_name_or_path),
             config=config,
-        )
+            )
     else:
         logger.info("Training new model from scratch")
         model = AutoModelForPreTraining.from_config(config)
+    ## Load from Pyt checkpoint - either given as init_checkpoint, or picked up from output_dir if found
+    #if args.init_checkpoint is not None or found_resume_checkpoint(args):
+    #    # Prepare model
+    #    #model = BertForPreTraining(config)
+    #    model = BertForPreTrainingSegmented(config)
 
-    print(model)
-    if args.max_seq_length is not None and args.max_seq_length != 512:
-        raise ValueError(f"Max_seq_length is fixed to 512 for MLPerf dataset but args.max_seq_length = {args.max_seq_length} specified")
+    #    # for k,v in model.state_dict().items():
+    #    #     print(f'model-k,len(v)={k}, {v.numel()}')
 
-    def transform_features(features):
-        features['attention_mask'] = features['input_mask']
-        del features['input_mask']
-        features['token_type_ids'] = features['segment_ids'].to(torch.int64)
-        del features['segment_ids']
-        features['next_sentence_label'] = features['next_sentence_labels'].to(torch.int64)
-        del features['next_sentence_labels']
-        labels = torch.ones_like(features['input_ids']) * -100
-        # FIXME: use features['masked_lm_weights']
-        nlabels = labels.scatter(-1, features['masked_lm_positions'].to(torch.int64), features['masked_lm_ids'])
-        # Fix for padded lm_positions
-        nlabels[:,0] = labels[:,0]
-        labels = nlabels
-        features['labels'] = labels.to(torch.int64)
-        features['input_ids'] = features['input_ids'].to(torch.int64)
-        del features['masked_lm_positions']
-        del features['masked_lm_ids']
-        #print(f"masked_lm_weights count = {features['masked_lm_weights'].sum()}")
-        del features['masked_lm_weights']
-        return features
+    #    #model = BertForPretraining(config)
+    #    if args.init_checkpoint is None: # finding checkpoint in output_dir
+    #        assert False, "code path not tested with cuda graphs"
+    #        checkpoint_str = "phase2_ckpt_*.pt" if args.phase2 else "phase1_ckpt_*.pt"
+    #        model_names = [f for f in glob.glob(os.path.join(args.output_dir, checkpoint_str))]
+    #        global_step = max([int(x.split('.pt')[0].split('_')[-1].strip()) for x in model_names])
+    #        args.resume_step = global_step #used for throughput computation
 
-    train_dataset = TFRecordDataset(args.train_file, index_path=None, description=None) #, transform=transform_features)
-    eval_dataset = TFRecordDataset(args.validation_file, index_path=None, description=None) #, transform=transform_features)
-    eval_dataloader = torch.utils.data.DataLoader(eval_dataset, batch_size=args.per_device_eval_batch_size)
-    train_dataloader = torch.utils.data.DataLoader(train_dataset, batch_size=args.per_device_train_batch_size)
-    # Optimizer
-    # Split weights in two groups, one with weight decay and the other not.
-    no_decay = ["bias", "LayerNorm.weight"]
+    #        resume_init_checkpoint = os.path.join(args.output_dir, checkpoint_str.replace("*", str(global_step)))
+    #        print("Setting init checkpoint to %s - which is the latest in %s" %(resume_init_checkpoint, args.output_dir))
+    #        checkpoint=torch.load(resume_init_checkpoint, map_location="cpu")
+    #    else:
+    #        checkpoint=torch.load(args.init_checkpoint, map_location="cpu")["model"]
+    param_optimizer = list(model.named_parameters())
+    
+    no_decay = ['bias', 'gamma', 'beta', 'LayerNorm']
+
     optimizer_grouped_parameters = [
-        {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
-            "weight_decay": args.weight_decay,
-        },
-        {
-            "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
-            "weight_decay": 0.0,
-        },
-    ]
+        {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': args.weight_decay_rate},
+        {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}]
+    optimizer = Lamb(optimizer_grouped_parameters, lr=args.learning_rate,  betas=(args.opt_lamb_beta_1, args.opt_lamb_beta_2), fused=True)
 
-    optimizer = AdamW(optimizer_grouped_parameters, lr=args.learning_rate)
-
-    # Prepare everything with our `accelerator`.
-    #model, optimizer, train_dataloader, eval_dataloader = accelerator.prepare(
-    #    model, optimizer, train_dataloader, eval_dataloader
-    #)
-
-    # Note -> the training dataloader needs to be prepared before we grab his length below (cause its length will be
-    # shorter in multiprocess)
-
-    # Scheduler and math around the number of training steps.
-    epoch_len = 0
-    try:
-        epoch_len = len(train_dataloader)
-    except:
-        # for _ in train_dataloader: epoch_len += 1
-        pass
-
-    num_update_steps_per_epoch = math.ceil(epoch_len / args.gradient_accumulation_steps)
-    if args.max_train_steps is None:
-        if num_update_steps_per_epoch > 0:
-            args.max_train_steps = args.num_train_epochs * num_update_steps_per_epoch
-        else:
-            args.max_train_steps = 100000000 #some large number
+    if args.warmup_steps == 0:
+        warmup_steps = int(args.max_steps * args.warmup_proportion)
+        warmup_start = 0
     else:
-        if num_update_steps_per_epoch > 0:
-            args.num_train_epochs = math.ceil(args.max_train_steps / num_update_steps_per_epoch)
+        warmup_steps = args.warmup_steps
+        warmup_start = args.start_warmup_step
+    
+    lr_scheduler = LinearWarmupPolyDecayScheduler(optimizer, start_warmup_steps=warmup_start, warmup_steps=warmup_steps,
+                                                  total_steps=args.max_steps, end_learning_rate=0.0, degree=1.0)
+    #if found_resume_checkpoint(args):
+    #    assert False, "code path not tested with cuda graphs"
+    #    optimizer.load_state_dict(checkpoint['optimizer']) #restores m,v states (only if resuming checkpoint, not for init_checkpoint and init_tf_checkpoint for now)
+    return model, optimizer, lr_scheduler, checkpoint, global_step
 
-    lr_scheduler = get_scheduler(
-        name=args.lr_scheduler_type,
-        optimizer=optimizer,
-        num_warmup_steps=args.num_warmup_steps,
-        num_training_steps=args.max_train_steps,
-    )
-    def trace_handler(prof):
-        print(prof.key_averages().table(
-            sort_by="self_cpu_time_total", row_limit=-1))
-        prof.export_chrome_trace("./log/test_trace_" + str(prof.step_num) + ".json")
+def take_optimizer_step(args, optimizer, model, overflow_buf, global_step):
+    global skipped_steps
+    optimizer.step()
+    global_step += 1
+    return global_step
 
-    def calc_accuracy(outputs, masked_lm_labels, next_sentence_label, sync_global = True):
-        #for k in outputs: print(k)
-        prediction_logits = outputs.prediction_logits
-        seq_relationship_logits = outputs.seq_relationship_logits
-        lm_acc_t = torch.masked_select(torch.argmax(prediction_logits, dim=-1).eq(masked_lm_labels).to(torch.float), masked_lm_labels.ne(-100))
-        seq_acc_t = torch.argmax(seq_relationship_logits, dim=-1).eq(next_sentence_label.view([-1])).to(torch.float)
-        metrics = [outputs.loss.item(), lm_acc_t.sum().item(), lm_acc_t.numel(), seq_acc_t.sum().item(), seq_acc_t.numel()]
-        if sync_global == True:
-            tmp = [metrics]
-            tmp = torch.tensor(tmp, dtype=torch.float)
-            tmp = accelerator.gather(tmp).sum(0)
-            metrics = [i.item() for i in tmp]
-            metrics[0] = metrics[0] / accelerator.num_processes
-        (loss, lm_true, lm_tot, seq_true, seq_tot) = metrics
-        lm_acc = lm_true / lm_tot
-        seq_acc = seq_true / seq_tot
-        #if accelerator.is_main_process:
-        #    print(f"loss = {loss:.3f}  lm_acc = {lm_acc:.3f} ({lm_true:.0f}/{lm_tot:.0f}),  seq_acc = {seq_acc:.3f} ({seq_true:.0f}/{seq_tot:.0f})")
-        return loss, lm_acc, seq_acc, lm_true, lm_tot, seq_true, seq_tot
-     
-    def train(batch, model, optmizer, lr_scheduler, step):       
-        t1 = time.time()
-        batch = transform_features(batch)
-        #print(f"Input shape: {batch['input_ids'].shape}")
-        t2 = time.time()
-        outputs = model(**batch)
-        t3 = time.time()
-        loss = outputs.loss
-        loss = loss / args.gradient_accumulation_steps
-        loss.backward()
-        t4 = time.time()
-        if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-            optimizer.step()
-            lr_scheduler.step()
-            optimizer.zero_grad()
-            #progress_bar.update(1)
-        t5 = time.time()
-        #prof1.step()
-        gloss, lm_acc, seq_acc, lm_true, lm_tot, seq_true, seq_tot = calc_accuracy(outputs, batch['labels'], batch['next_sentence_label'])
-        if accelerator.is_main_process:
-            print(f"Step {completed_steps:5d}: loss: {gloss:6.3f} lm_acc: {lm_acc:.3f} seq_acc: {seq_acc:.3f} lbs: {args.per_device_train_batch_size} gbs: {total_batch_size} XT: {(t2-t1)*1000.0:.1f} FT: {(t3-t2)*1000.0:.1f} BT: {(t4-t3)*1000.0:.1f} OT: {(t5-t4)*1000.0:.1f} TT: {(t5-t1)*1000.0:.1f}", flush=True)
-        
-    # Train!
-    total_batch_size = args.per_device_train_batch_size * accelerator.num_processes * args.gradient_accumulation_steps
-
-    logger.info("***** Running training *****")
-    #logger.info(f"  Num examples = {len(train_dataset)}")
-    logger.info(f"  Num Epochs = {args.num_train_epochs}")
-    logger.info(f"  Instantaneous batch size per device = {args.per_device_train_batch_size}")
-    logger.info(f"  Total train batch size (w. parallel, distributed & accumulation) = {total_batch_size}")
-    logger.info(f"  Gradient Accumulation steps = {args.gradient_accumulation_steps}")
-    logger.info(f"  Total optimization steps = {args.max_train_steps}")
-    # Only show the progress bar once on each machine.
-    #progress_bar = tqdm(range(args.max_train_steps), disable=not accelerator.is_local_main_process)
-    completed_steps = 0
-    t0 = time.time()
-    bench_total_time = 0
-    model.train()
-    model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float)
-    #with torch.profiler.profile(
-    #    activities=[
-    #        torch.profiler.ProfilerActivity.CPU],
-
-    #    schedule=torch.profiler.schedule(
-    #        wait=1,
-    #        warmup=9,
-    #        active=10),
-    #    #on_trace_ready=torch.profiler.tensorboard_trace_handler('./log/bert_bf16'),#trace_handler
-    #    on_trace_ready=trace_handler#torch.profiler.tensorboard_trace_handler('./log/bert_bf16')
-    #    # used when outputting for tensorboard
-    #    ) as prof1:
-
-    for epoch in range(args.num_train_epochs):
-        model.train()
-        for step, batch in enumerate(train_dataloader):
-            record_shapes = True
-            t_beg = time.time()
+def run_eval(model, eval_dataloader, device, num_eval_examples, args, first_eval=False, use_cache=False):
+    model.eval()
+    total_eval_loss, total_eval_mlm_acc = 0.0, 0.0
+    total_masked = 0
+    with torch.no_grad():
+        for batch in eval_dataloader:
+            input_ids, segment_ids, input_mask, masked_lm_labels, next_sentence_labels = batch
+            outputs = None
             if args.bf16:
                 with torch.cpu.amp.autocast():
-                    train(batch, model, optimizer, lr_scheduler, step)
+                    outputs = model(
+                        input_ids=input_ids, 
+                        token_type_ids=segment_ids, 
+                        attention_mask=input_mask,
+                        labels=masked_lm_labels, 
+                        next_sentence_label=next_sentence_labels)
             else:
-                train(batch, model, optimizer, lr_scheduler, step)
-            t_end = time.time()
-            completed_steps += 1
-            if completed_steps >= args.max_train_steps:
+                outputs = model(
+                        input_ids=input_ids,
+                        token_type_ids=segment_ids,
+                        attention_mask=input_mask,
+                        labels=masked_lm_labels,
+                        next_sentence_label=next_sentence_labels)
+            mlm_acc, num_masked = calc_mlm_acc(outputs, masked_lm_labels, args.dense_seq_output)
+            total_eval_loss += outputs.loss.item() * num_masked
+            total_eval_mlm_acc += mlm_acc * num_masked
+            total_masked += num_masked            
+    model.train()
+    total_masked = torch.tensor(total_masked, device=device, dtype=torch.int64)
+    total_eval_loss = torch.tensor(total_eval_loss, device=device, dtype=torch.float64)
+    if torch.distributed.is_initialized():
+        #Collect total scores from all ranks
+        torch.distributed.all_reduce(total_eval_mlm_acc, op=torch.distributed.ReduceOp.SUM)
+        torch.distributed.all_reduce(total_eval_loss, op=torch.distributed.ReduceOp.SUM)
+        torch.distributed.all_reduce(total_masked, op=torch.distributed.ReduceOp.SUM)
+
+    # Average by number of examples
+    total_eval_mlm_acc /= total_masked
+    total_eval_loss /= total_masked
+
+    return total_eval_loss, total_eval_mlm_acc
+
+def global_batch_size(args):
+    return args.train_batch_size * args.gradient_accumulation_steps * args.world_size
+
+def calc_mlm_acc(outputs, masked_lm_labels, dense_seq_output=False):
+    prediction_scores = outputs.prediction_logits
+    masked_lm_labels_flat = masked_lm_labels.view(-1)
+    mlm_labels = masked_lm_labels_flat[masked_lm_labels_flat != -100]
+    if not dense_seq_output:
+        prediction_scores_flat = prediction_scores.view(-1, prediction_scores.shape[-1])
+        mlm_predictions_scores = prediction_scores_flat[masked_lm_labels_flat != -100]
+        mlm_predictions = mlm_predictions_scores.argmax(dim=-1)
+    else:
+        mlm_predictions = prediction_scores.argmax(dim=-1)
+
+    num_masked = mlm_labels.numel()
+    mlm_acc = (mlm_predictions == mlm_labels).sum(dtype=torch.float) / num_masked
+
+    return mlm_acc, num_masked
+
+def calc_accuracy(outputs, masked_lm_labels, next_sentence_label, args):
+    loss = outputs.loss.item()
+    prediction_logits = outputs.prediction_logits
+    seq_relationship_logits = outputs.seq_relationship_logits
+    mlm_acc, num_masked = calc_mlm_acc(outputs, masked_lm_labels, args.dense_seq_output)
+    seq_acc_t = torch.argmax(seq_relationship_logits, dim=-1).eq(next_sentence_label.view([-1])).to(torch.float)
+    seq_acc_true, seq_tot = seq_acc_t.sum().item(), seq_acc_t.numel()
+    seq_acc = seq_acc_true / seq_tot
+    return loss, mlm_acc, num_masked, seq_acc, seq_tot
+
+
+def main():
+    args = parse_args()
+    status = 'aborted'  # later set to 'success' if termination criteria met
+    device, args = setup_training(args)
+    total_batch_size = global_batch_size(args) 
+    # Initialize the accelerator. We will let the accelerator handle device placement for us in this example.
+    # Make one log on every process with the configuration for debugging.
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(name)s -   %(message)s",
+        datefmt="%m/%d/%Y %H:%M:%S",
+        level=logging.INFO,
+    )
+    if args.local_rank == 0 or args.local_rank == -1:
+        print("parsed args:")
+        print(args)
+    # Prepare optimizer
+    model, optimizer, lr_scheduler, checkpoint, global_step = prepare_model_and_optimizer(args, device)
+    model.train()
+    model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
+    worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
+    worker_seed = worker_seeds[args.local_rank]
+
+    random.seed(worker_seed)
+    np.random.seed(worker_seed)
+    torch.manual_seed(worker_seed)
+    worker_init = WorkerInitObj(worker_seed)
+    samples_trained = global_step * args.train_batch_size * args.gradient_accumulation_steps * args.world_size
+    final_loss = float("inf")
+    train_time_raw = float("inf")
+    raw_train_start = time.time()
+    if args.do_train:
+        model.train()
+        most_recent_ckpts_paths = []
+        average_loss = 0.0  # averaged loss every args.log_freq steps
+        epoch = 1
+        training_steps = 0
+        end_training, converged = False, False
+        samples_trained_prev = 0
+
+        # pre-compute eval boundaries
+        samples_trained_per_step = args.train_batch_size * args.gradient_accumulation_steps * args.world_size
+        start, stop, step = args.eval_iter_start_samples, args.max_samples_termination, args.eval_iter_samples
+        eval_steps = [math.ceil(i/samples_trained_per_step) for i in np.arange(start, stop, step)]
+        eval_count = 0
+        next_eval_step = eval_steps[eval_count]
+        pool = ProcessPoolExecutor(1)
+
+        if args.target_mlm_accuracy:
+            if args.train_mlm_accuracy_window_size > 0:
+                accuracy_scores = []
+                avg_mlm_accuracy = torch.Tensor([0])
+
+
+        first_epoch = True
+        if found_resume_checkpoint(args):
+            f_start_id = checkpoint['files'][0]
+            files = checkpoint['files'][1:]
+            num_files = len(files)
+        else:
+            files = [os.path.join(args.input_dir, f) for f in os.listdir(args.input_dir) if
+                     os.path.isfile(os.path.join(args.input_dir, f)) and 'part' in f]
+            files.sort()
+            num_files = len(files)
+            random.Random(shuffling_seeds[epoch%len(shuffling_seeds)]).shuffle(files)
+            f_start_id = 0
+    global skipped_steps
+    if torch.distributed.is_initialized():
+        model = torch.nn.parallel.DistributedDataParallel(model,
+                                                          find_unused_parameters=True,
+                                                          bucket_cap_mb=8192,
+                                                          gradient_as_bucket_view=args.use_gradient_as_bucket_view)
+
+    
+    now_step, now_skipped, skip_interval = 0, 0, 0
+    # Start prefetching eval dataset
+    if args.eval_dir:
+        eval_dataset_future = pool.submit(create_eval_dataset, args, worker_init_fn=worker_init)
+    # comparing to number of samples in a shard. There are ~38k samples in 4096-way shard, comparing to 10k to be safe
+    need_next_training_shard = args.train_batch_size * args.gradient_accumulation_steps *  args.max_steps > 10000
+
+    while global_step < args.max_steps and not end_training:
+        if args.local_rank == 0 or args.local_rank == -1:
+            now_time = time.time()
+            print("epoch:", epoch)
+
+        thread = None
+        
+        # Reshuffle file list on subsequent epochs
+        if not first_epoch:
+            files = [os.path.join(args.input_dir, f) for f in os.listdir(args.input_dir) if
+                     os.path.isfile(os.path.join(args.input_dir, f)) and 'part' in f]
+            files.sort()
+            num_files = len(files)
+            random.Random(shuffling_seeds[epoch%len(shuffling_seeds)]).shuffle(files)
+            f_start_id = 0
+
+        first_epoch = False
+
+        shared_file_list = {}
+
+        if torch.distributed.is_initialized() and args.world_size > num_files:
+            remainder = args.world_size % num_files
+            data_file = files[(f_start_id*args.world_size + args.local_rank +
+                               remainder * f_start_id) % num_files]
+        else:
+            data_file = files[(f_start_id*args.world_size + args.local_rank) % num_files]
+
+        previous_file = data_file
+        
+        train_data = pretraining_dataset(data_file, args.max_predictions_per_seq)
+        train_sampler = RandomSampler(train_data)
+        train_dataloader = DataLoader(train_data, sampler=train_sampler,
+                                      batch_size=args.train_batch_size)
+        send_lr_in_parallel = False
+        lr_cpu = torch.tensor([0.0], dtype=torch.float32, device='cpu')
+        completed_steps=0
+        bench_total_time=0
+        for f_id in range(f_start_id, len(files)):
+            if args.world_size > num_files:
+                data_file = files[(f_id*args.world_size + args.local_rank +
+                                   remainder * f_id) % num_files]
+            else:
+                data_file = files[(f_id*args.world_size + args.local_rank)%num_files]
+
+            previous_file = data_file
+            if need_next_training_shard:
+                dataset_future = pool.submit(create_pretraining_dataset, data_file, args.max_predictions_per_seq, shared_file_list, args, worker_init_fn=worker_init)
+            t0 = time.time()
+            for step, batch in enumerate(train_dataloader):
+                training_steps += 1
+                t_beg = time.time()
+                t1 = time.time()
+                input_ids, segment_ids, input_mask, masked_lm_labels, next_sentence_labels = batch
+                #print(f"Input shape: {batch['input_ids'].shape}")
+                t2 = time.time()
+                outputs = None
+                if args.bf16:
+                    with torch.cpu.amp.autocast():
+                        outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                             labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                else:
+                    outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                             labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                t3 = time.time()
+                loss = outputs.loss
+                loss = loss / args.gradient_accumulation_steps
+                loss.backward()
+                t4 = time.time()
+                if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
+                    optimizer.step()
+                    lr_scheduler.step()
+                    optimizer.zero_grad()
+                    #progress_bar.update(1)
+                t5 = time.time()
+                t_end = time.time()
+                completed_steps += 1
+                if args.benchmark and completed_steps > 10:
+                    bench_total_time = bench_total_time + (t_end -t_beg)
+                if args.benchmark and completed_steps > 60:
+                    throughput = 50 * args.train_batch_size / bench_total_time
+                    print("Throughput: {:.3f} sentence/s".format(throughput), flush=True)
+                    exit()
+
+                gloss, lm_acc, num_masked, seq_acc, seq_tot = calc_accuracy(outputs, masked_lm_labels, next_sentence_labels, args)
+                #if args.local_rank == 0:
+                print(f"Step {training_steps:5d}: loss: {gloss:6.3f} lm_acc: {lm_acc:.3f} seq_acc: {seq_acc:.3f} lbs: {args.train_batch_size} gbs: {total_batch_size} DT: {(t1-t0)*1000.0:.1f} XT: {(t2-t1)*1000.0:.1f} FT: {(t3-t2)*1000.0:.1f} BT: {(t4-t3)*1000.0:.1f} OT: {(t5-t4)*1000.0:.1f} TT: {(t5-t0)*1000.0:.1f}")
+
+                update_step = training_steps % args.gradient_accumulation_steps == 0
+                divisor = args.gradient_accumulation_steps
+                if args.log_freq>0:
+                    average_loss += loss.item()
+                if update_step:
+                    now_lr = optimizer.param_groups[0]['lr']
+                    global_step += 1
+                    if (args.eval_dir and args.eval_iter_samples > 0 and global_step == next_eval_step):
+                        # on first eval, get eval_dataloader
+                        if eval_count == 0:
+                            eval_dataloader = create_eval_dataset(args, worker_init_fn=worker_init) #eval_dataset_future.result(timeout=None)
+                        samples_trained = global_step * args.train_batch_size * args.gradient_accumulation_steps * args.world_size
+                        samples_trained_prev = samples_trained
+                        eval_avg_loss, eval_avg_mlm_accuracy = run_eval(model, eval_dataloader, device, args.num_eval_examples, args,
+                                                                                    first_eval=(eval_count == 0))
+                        if args.local_rank == 0 or args.local_rank == -1:
+                            print({"global_steps": global_step, "eval_loss": eval_avg_loss, "eval_mlm_accuracy":eval_avg_mlm_accuracy})
+
+                            if args.target_mlm_accuracy:
+                                if eval_avg_mlm_accuracy >= args.target_mlm_accuracy:
+                                    end_training, converged = True, True
+                                    if utils.is_main_process():
+                                        print("%f > %f, Target MLM Accuracy reached at %d"%(eval_avg_mlm_accuracy, args.target_mlm_accuracy, global_step))
+
+                        eval_count += 1
+                        next_eval_step = eval_steps[eval_count]
+                if args.target_mlm_accuracy and args.train_mlm_accuracy_window_size > 0:
+                    accuracy_scores.append(mlm_acc)
+                    if update_step:
+                        accuracy_scores = accuracy_scores[-args.train_mlm_accuracy_window_size * args.gradient_accumulation_steps:]
+                        avg_mlm_accuracy[0] = sum(accuracy_scores) / len(accuracy_scores)
+                        torch.distributed.all_reduce(avg_mlm_accuracy, op=torch.distributed.ReduceOp.SUM)
+                        avg_mlm_accuracy /= args.world_size
+
+                if args.log_freq > 0 and training_steps % (args.log_freq * args.gradient_accumulation_steps) == 0:
+                    samples_trained = global_step * args.train_batch_size * args.gradient_accumulation_steps * args.world_size
+                    if args.local_rank == 0 or args.local_rank == -1:
+                        time_interval = time.time() - now_time
+                        step_interval = global_step - now_step
+                        now_time = time.time()
+                        now_step = global_step
+                        training_perf = args.train_batch_size * args.gradient_accumulation_steps * args.world_size \
+                                        * (step_interval + skip_interval) / time_interval
+                        skip_interval = 0
+
+                        if args.train_mlm_accuracy_window_size > 0:
+                            print({"training_steps": training_steps,
+                                  "average_loss": average_loss / (args.log_freq * divisor),
+                                  "step_loss": loss.item() * args.gradient_accumulation_steps / divisor,
+                                  "learning_rate": now_lr,
+                                  "seq/s": training_perf,
+                                  "global_steps": now_step,
+                                  "samples_trained": samples_trained,
+                                  "skipped_steps": now_skipped,
+                                  "timestamp": now_time,
+                                  "mlm_accuracy": avg_mlm_accuracy[0].item()})
+                        else:
+                            print({"training_steps": training_steps,
+                                  "average_loss": average_loss / (args.log_freq * divisor),
+                                  "step_loss": loss.item() * args.gradient_accumulation_steps / divisor,
+                                  "learning_rate": now_lr,
+                                  "seq/s": training_perf,
+                                  "global_steps": now_step,
+                                  "samples_trained": samples_trained,
+                                  "skipped_steps": now_skipped,
+                                  "timestamp": now_time})
+
+                        
+                    average_loss = 0
+                
+                if global_step >= args.max_steps or end_training:
+                    status = 'success' if converged else 'aborted'
+                    end_training = True
+                    train_time_raw = time.time() - raw_train_start
+                    average_loss = torch.tensor(average_loss, dtype=torch.float32)
+                    if args.log_freq > 0:
+                        last_num_steps = int(training_steps / args.gradient_accumulation_steps) % args.log_freq
+                        last_num_steps = args.log_freq if last_num_steps == 0 else last_num_steps
+                        average_loss = average_loss / (last_num_steps * divisor)
+                    if (torch.distributed.is_initialized()):
+                        average_loss /= args.world_size
+                        torch.distributed.all_reduce(average_loss)
+                    final_loss = average_loss.item()
+                    if utils.is_main_process():
+                        if args.train_mlm_accuracy_window_size > 0:
+                            print((epoch, training_steps / args.gradient_accumulation_steps, ), {"final_loss": final_loss,
+                                "final_mlm_accuracy": avg_mlm_accuracy[0].item()})
+                        else:
+                            print((epoch, training_steps / args.gradient_accumulation_steps, ), {"final_loss": final_loss})
+
+                if end_training or (samples_trained - samples_trained_prev >= args.num_samples_per_checkpoint and samples_trained >= args.min_samples_to_start_checkpoints):
+                    samples_trained_prev = samples_trained
+                    if utils.is_main_process() and not args.skip_checkpoint:
+                        # Save a trained model
+                        model_to_save = model.module if hasattr(model,
+                                                                'module') else model  # Only save the model it-self
+                        if args.phase2:
+                            output_save_file = os.path.join(args.output_dir, "phase2_ckpt_{}.pt".format(samples_trained))
+                        else:
+                            output_save_file = os.path.join(args.output_dir, "phase1_ckpt_{}.pt".format(samples_trained))
+                        if args.do_train:
+                            torch.save({'model': model_to_save.state_dict(),
+                                        'optimizer': optimizer.state_dict(),
+                                        'master params': list(amp.master_params(optimizer)),
+                                        'files': [f_id] + files}, output_save_file)
+
+                            most_recent_ckpts_paths.append(output_save_file)
+                            if len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints:
+                                ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
+                                os.remove(ckpt_to_be_removed)
+
+                    if samples_trained >= args.max_samples_termination or end_training:
+                        status = 'success' if converged else 'aborted'
+                        end_training = True
+                        break
+                t0 = time.time()    
+
+            del train_dataloader
+
+            if samples_trained >= args.max_samples_termination or end_training:
+                status = 'success' if converged else 'aborted'
+                end_training = True
                 break
-            if args.benchmark and completed_steps > 10:
-                bench_total_time = bench_total_time + (t_end -t_beg)
-            if args.benchmark and completed_steps > 110:
-                throughput = 100 * args.per_device_train_batch_size / bench_total_time
-                print("Throughput: {:.3f} sentence/s".format(throughput), flush=True)
-                if args.output_dir is not None:
-                    accelerator.wait_for_everyone()
-                    unwrapped_model = accelerator.unwrap_model(model)
-                    unwrapped_model.save_pretrained(args.output_dir, save_function=accelerator.save)
-                exit(0)
 
-        model.eval()
-        losses = []
-        lm_trues = 0
-        lm_total = 0
-        seq_trues = 0
-        seq_total = 0
-        for step, batch in enumerate(eval_dataloader):
-            batch = transform_features(batch)
-            with torch.cpu.amp.autocast(), torch.no_grad():
-                outputs = model(**batch)
-
-            loss = outputs.loss
-            gloss, lm_acc, seq_acc, lm_true, lm_tot, seq_true, seq_tot = calc_accuracy(outputs, batch['labels'], batch['next_sentence_label'])
-            losses.append(gloss)
-            lm_trues += lm_true
-            lm_total += lm_tot
-            seq_trues += seq_true
-            seq_total += seq_tot
-            if accelerator.is_main_process:
-                print(f"Eval Step: {step}  loss: {gloss:.3f} lm_acc: {lm_acc:.3f}  seq_acc: {seq_acc:.3f} lbs: {args.per_device_eval_batch_size} gbs: {args.per_device_eval_batch_size*accelerator.num_processes}", flush=True)
-
-            if step*args.per_device_eval_batch_size*accelerator.num_processes > 10000: break
-
-        g_loss = sum(losses) / len(losses)
-        g_lm_acc = lm_trues / lm_total
-        g_seq_acc = seq_trues / seq_total
-        if accelerator.is_main_process:
-            print(f"Global Eval loss: {g_loss:.3f} lm_acc: {g_lm_acc:.3f}  seq_acc: {g_seq_acc:.3f}", flush=True)
-
-        #logger.info(f"epoch {epoch}: perplexity: {perplexity}")
-
-        if completed_steps >= args.max_train_steps:
-            break
-    if args.output_dir is not None:
-        accelerator.wait_for_everyone()
-        unwrapped_model = accelerator.unwrap_model(model)
-        unwrapped_model.save_pretrained(args.output_dir, save_function=accelerator.save)
-
-
+            if not need_next_training_shard:
+                dataset_future = pool.submit(create_pretraining_dataset, data_file, args.max_predictions_per_seq, shared_file_list, args, worker_init_fn=worker_init)
+            train_dataloader, data_file = dataset_future.result(timeout=None)
+        epoch += 1
+       
+    return args, final_loss, train_time_raw
+    
 if __name__ == "__main__":
     main()
+

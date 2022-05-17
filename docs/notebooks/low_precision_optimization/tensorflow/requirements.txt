@@ -1,0 +1,6 @@
+intel-tensorflow==2.3.0
+lpot==1.1
+notebook
+matplotlib
+runipy
+ipykernel

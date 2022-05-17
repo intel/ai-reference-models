@@ -38,7 +38,7 @@ slice_sets:
           <model name>: SSD-ResNet34
           <package dir>: ssd-resnet34-bfloat16-inference
           <package name>: ssd-resnet34-bfloat16-inference.tar.gz
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_6_0/ssd-resnet34-bfloat16-inference.tar.gz
+          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-bfloat16-inference.tar.gz
           <precision>: BFloat16
           <use case>: object_detection
         uri: models/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/bfloat16

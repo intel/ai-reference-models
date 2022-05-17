@@ -83,6 +83,8 @@ RUN cd ${TF_MODELS_DIR}/research && \
         wget && \
     apt-get autoremove -y
 
+RUN apt-get install --no-install-recommends --fix-missing -y google-perftools
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="faster-rcnn-int8-inference"

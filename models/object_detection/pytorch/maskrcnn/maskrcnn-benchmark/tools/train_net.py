@@ -56,11 +56,8 @@ def train(cfg, local_rank, distributed, bf16=False, iterations=-1, iter_warmup=-
     scheduler = make_lr_scheduler(cfg, optimizer)
 
     if distributed:
-        model = torch.nn.parallel.DistributedDataParallel(
-            model, device_ids=[local_rank], output_device=local_rank,
-            # this should be removed if we update BatchNorm stats
-            broadcast_buffers=False,
-        )
+        device_ids = None
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids, find_unused_parameters=True)
 
     arguments = {}
     arguments["iteration"] = 0
@@ -171,18 +168,39 @@ def main():
                         help='number of total iterations to run')
     parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
                         help='number of warm-up iterations to run')
+    parser.add_argument("--world-size", default=1, type=int, help='world size')
+    parser.add_argument("--master-addr", default='127.0.0.1', type=str, help='Master Addr')
+    parser.add_argument("--port", default='29500', type=str, help='Port')
+    parser.add_argument("--rank", default=0, type=int, help='rank')
+    parser.add_argument('--backend', default='gloo', type=str, help='DDP backend, default to gloo')
 
     args = parser.parse_args()
 
-    num_gpus = int(os.environ["WORLD_SIZE"]) if "WORLD_SIZE" in os.environ else 1
-    args.distributed = num_gpus > 1
+    args.distributed = False
+    if torch.distributed.is_available() and int(os.environ.get('PMI_SIZE', '0')) > 1:
+        print('Distributed training with DDP')
+        os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
+        os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
+        if not 'MASTER_ADDR' in os.environ:
+            os.environ['MASTER_ADDR'] = args.master_addr
+        if not 'MASTER_PORT' in os.environ:
+            os.environ['MASTER_PORT'] = args.port
 
-    if args.distributed:
-        torch.cuda.set_device(args.local_rank)
+        # Initialize the process group with ccl backend
+        if args.backend == 'ccl':
+            import torch_ccl
         torch.distributed.init_process_group(
-            backend="nccl", init_method="env://"
+                backend=args.backend                
         )
-        synchronize()
+        args.distributed = True
+        if torch.distributed.is_initialized():
+            print("Torch distributed is initialized.")
+            args.rank = torch.distributed.get_rank()
+            args.world_size = torch.distributed.get_world_size()
+        else:
+            print("Torch distributed is not initialized.")
+            args.rank = 0
+            args.world_size = 1
 
     cfg.merge_from_file(args.config_file)
     cfg.merge_from_list(args.opts)
@@ -193,7 +211,6 @@ def main():
         mkdir(output_dir)
 
     logger = setup_logger("maskrcnn_benchmark", output_dir, get_rank())
-    logger.info("Using {} GPUs".format(num_gpus))
     logger.info(args)
 
     logger.info("Collecting env info (might take some time)")
