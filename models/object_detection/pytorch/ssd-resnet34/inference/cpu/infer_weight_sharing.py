@@ -415,9 +415,6 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     # model = torch.jit.freeze(model)
                     model_decode = torch.jit.freeze(model_decode)
-                    # Suggest to run the Jit optimization in the main thread
-                    for _ in range(3):
-                        model_decode(torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
 
                     if args.use_throughput_benchmark:
                         print('bf16 throughput benchmark')
@@ -545,9 +542,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         batch_per_stream = (args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size
                         model_decode = torch.jit.trace(model_decode, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last)).eval()
                     model_decode = torch.jit.freeze(model_decode)
-                    # Suggest to run the Jit optimization in the main thread
-                    for _ in range(3):
-                        model_decode(torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
+
                     if args.use_throughput_benchmark:
                         print('fp32 throughput benchmark')
                         bench = ThroughputBenchmark(model_decode)

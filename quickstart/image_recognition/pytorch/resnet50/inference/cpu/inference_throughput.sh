@@ -104,7 +104,7 @@ if [ "$weight_sharing" = true ]; then
         end_core_i=`expr $start_core_i + $CORES_PER_INSTANCE - 1`
         LOG_i=resnet50_throughput_log_${PRECISION}_${i}.log
         echo "### running on instance $i, numa node $numa_node_i, core list {$start_core_i, $end_core_i}..."
-        numactl --membind=$numa_node_i python -u \
+        numactl --physcpubind=$start_core_i-$end_core_i --membind=$numa_node_i python -u \
             ${MODEL_DIR}/models/image_recognition/pytorch/common/main_runtime_extension.py \
             $ARGS \
             --ipex \

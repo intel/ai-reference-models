@@ -416,8 +416,6 @@ def main_worker(gpu, ngpus_per_node, args):
                     model = torch.jit.freeze(model)
             if args.use_multi_stream_module:
                 # Suggest to run the Jit optimization in the main thread
-                for _ in range(3):
-                    model(x)
                 print("---------convert to multi stream module, args.instance_number:{0}, args.number_instance:{1}".format(args.instance_number, args.number_instance))
                 if args.start_core != -1 and args.end_core != -1:
                     cpu_pool = ipex.cpu.runtime.CPUPool(core_ids=range(args.start_core, args.end_core + 1))
