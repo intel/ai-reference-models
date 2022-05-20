@@ -35,6 +35,8 @@ import torch.fx.experimental.optimization as optimization
 use_ipex = False
 if os.environ.get('USE_IPEX') == "1":
     import intel_extension_for_pytorch as ipex
+    from intel_extension_for_pytorch.quantization import prepare, convert
+    from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
     use_ipex = True
 
 
@@ -192,35 +194,36 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model.model = optimization.fuse(model.model, inplace=False)
-
+            qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8),
+                        weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+            example_inputs = torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)
+            prepared_model = prepare(model, qconfig, example_inputs=example_inputs, inplace=False)
             if args.calibration:
                 print("runing int8 LLGA calibration step\n")
-                conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)  # qscheme can is torch.per_tensor_affine, torch.per_tensor_symmetric
                 with torch.no_grad():
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         print("nbatch:{}".format(nbatch))
-                        with ipex.quantization.calibrate(conf):
-                            ploc, plabel = model(img)
+                        ploc, plabel = prepared_model(img)
                         if nbatch == args.iteration:
                             break
-                conf.save(args.configure)
+                prepared_model.save_qconf_summary(qconf_summary = args.configure)
                 return
 
             else:
                 print("INT8 LLGA start trace")
                 # insert quant/dequant based on configure.json
-                conf = ipex.quantization.QuantConf(configure_file=args.configure)
-                model = ipex.quantization.convert(model, conf, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                prepared_model.load_qconf_summary(qconf_summary = args.configure)
+                convert_model = convert(prepared_model)
+                with torch.no_grad():
+                   model = torch.jit.trace(convert_model, example_inputs, check_trace=False).eval()
+                model = torch.jit.freeze(model)
                 print("done ipex default recipe.......................")
-                # freeze the module
-                # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 
                 # After freezing, run 1 time to warm up the profiling graph executor to insert prim::profile
                 # At the 2nd run, the llga pass will be triggered and the model is turned into an int8 model: prim::profile will be removed and will have LlgaFusionGroup in the graph
                 with torch.no_grad():
                     for i in range(2):
-                        #_, _ = model(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
-                        _, _ = model(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                        _, _ = model(example_inputs)
 
                 print('runing int8 real inputs inference path')
                 with torch.no_grad():
