@@ -59,6 +59,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 | Script name | Description |
 |-------------|-------------|
 | `training.sh` | Run training for the specified precision (fp32, avx-fp32, or bf16). |
+| `test_convergency.sh` | Run fully convergency test for the specified precision (fp32, avx-fp32, or bf16). |
 | `distribute_training.sh` | Run distribute training on 1 node with 2 sockets for the specified precision (fp32, avx-fp32, or bf16). |
 
 ## Run the model
@@ -91,7 +92,7 @@ NUM_BATCH=10000 bash training.sh
 NUM_BATCH=50000 bash training.sh
 
 # Or, run quickstart script for testing fully convergency
-bash training.sh
+bash test_convergence.sh
 
 # Run quickstart to distribute training dlrm on 2 sockets
 # Note, you need to follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Torch-CCL and run this command on the machine which sockets larger than 2

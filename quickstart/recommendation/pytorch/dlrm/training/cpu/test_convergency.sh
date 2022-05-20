@@ -39,16 +39,6 @@ if [ ! -d "${DATASET_DIR}" ]; then
   echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
   exit 1
 fi
-
-export TEST_FULLY_CONVERGENCE=0
-if [ -z "${NUM_BATCH}" ]; then
-then
-  echo "The required environment variable NUM_BATCH has not been set"
-  exit 1
-else
-  ARGS="$ARGS --num-batches=${NUM_BATCH}"
-  echo "will train ${NUM_BATCH} batches"
-fi
  
 
 # Create the output directory in case it doesn't already exist
@@ -72,34 +62,15 @@ else
     exit 1
 fi
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-BATCHSIZE=$((128*CORES))
-export OMP_NUM_THREADS=$CORES
-
 LOG_0="${LOG}/socket_0"
 python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
-  --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+  --memory-map --mlperf-bin-loader --round-targets=True \
   --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
-  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-mini-batch-size=16384 --ipex-merged-emb \
-  $ARGS |tee $LOG_0
-wait
-
-throughput=$(grep 'Throughput:' ${LOG}/socket* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-sum = sum / i;
-        printf("%.3f", sum);
-}')
-echo ""dlrm";"training throughput";${PRECISION};${BATCHSIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+  --mini-batch-size=32768 --print-freq=640 --print-time --ipex-interaction \
+  --test-mini-batch-size=262144 --ipex-merged-emb \
+  --lr-num-warmup-steps=8000 --lr-decay-start-step=70000 --lr-num-decay-steps=50000 \
+  --learning-rate=18.0 --test-freq=6400 --should-test | tee $LOG_0

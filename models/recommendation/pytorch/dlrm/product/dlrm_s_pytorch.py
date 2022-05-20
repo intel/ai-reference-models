@@ -217,10 +217,11 @@ class DLRM_Net(nn.Module):
                 n = ln[i]
             else:
                 n = ln[local_ln_emb[i]]
-            EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True)
-            # initialize embeddings
-            if not args.inference_only:
-                nn.init.uniform_(EE.weight, a=-np.sqrt(1 / n), b=np.sqrt(1 / n))
+            print("Create Embedding: {}".format(n), flush=True)
+            W = np.random.uniform(
+                    low=-np.sqrt(1 / n), high=np.sqrt(1 / n), size=(n, m)
+                ).astype(np.float32)
+            EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True, _weight=torch.tensor(W, requires_grad=True))
             emb_l.append(EE)
         return emb_l
 
@@ -248,9 +249,10 @@ class DLRM_Net(nn.Module):
             self.local_ln_emb = self.ln_emb[self.local_ln_emb_slice]
         else:
             self.local_ln_emb = None
-        self.emb_l = self.create_emb(m_spa, ln_emb, self.local_ln_emb)
+        self.l_emb_seeds = np.random.randint(low=0, high=100000, size=len(ln_emb))
         self.bot_l = self.create_mlp(ln_bot, sigmoid_bot)
         self.top_l = self.create_mlp(ln_top, sigmoid_top)
+        self.emb_l = self.create_emb(m_spa, ln_emb, self.local_ln_emb)
         self.loss_fn = torch.nn.BCELoss(reduction="mean")
 
 
@@ -588,6 +590,10 @@ def inference(
             flush=True,
         )
         print("Accuracy: {:.34} ".format(validation_results["roc_auc"]))
+        if not args.inference_only:
+            if args.mlperf_auc_threshold != 0.0 and best_auc_test > args.mlperf_auc_threshold:
+                print("Have reached the auc threshold:", args.mlperf_auc_threshold, ", stop training")
+                exit()
     elif not args.inference_only:
         is_best = acc_test > best_acc_test
         if is_best:
