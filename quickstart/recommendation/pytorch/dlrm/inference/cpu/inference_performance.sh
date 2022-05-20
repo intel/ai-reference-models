@@ -13,12 +13,6 @@
 # limitations under the License.
 #
 
-export DATASET_DIR=/home/sdp/dataset/dlrm
-export MODEL_DIR=/localdisk/haozhe/frameworks.ai.models.intel-models
-export NUM_BATCH=1000
-export OUTPUT_DIR=./
-export PRECISION="int8"
-
 MODEL_DIR=${MODEL_DIR-$PWD}
 if [ ! -e "${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/dlrm_s_pytorch.py"  ]; then
     echo "Could not find the script of dlrm_s_pytorch.py. Please set environment variable '\${MODEL_DIR}'."
