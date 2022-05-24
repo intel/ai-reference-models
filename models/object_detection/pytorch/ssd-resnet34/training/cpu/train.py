@@ -162,6 +162,8 @@ def parse_args():
                         help='enable autocast')
     parser.add_argument('--profile', action='store_true', default=False,
                         help='enable profile')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable ipex bf32 path')
     return parser.parse_args()
 
 
@@ -465,6 +467,17 @@ def train300_mlperf_coco(args):
         device_ids = None
         ssd300 = torch.nn.parallel.DistributedDataParallel(ssd300, device_ids=device_ids)
 
+    if args.bf32 and args.autocast:
+        assert False, "args.bf32 and args.autocast can't be set together"
+        exit(-1)
+
+    if args.autocast:
+        print("training with bf16 data type autocast")
+    elif args.bf32:
+        print("training with bf32 fpmath mode")
+    else:
+        print("training with fp32 data type")
+
     optim.zero_grad(set_to_none=True)
     for epoch in range(args.epochs):
         mllogger.start(
@@ -583,6 +596,9 @@ def main():
     # start timing here
     mllogger.end(key=mllog_const.INIT_STOP)
     mllogger.start(key=mllog_const.RUN_START)
+
+    if args.bf32:
+        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
 
     success = train300_mlperf_coco(args)
 

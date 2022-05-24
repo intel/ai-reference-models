@@ -135,6 +135,8 @@ def parse_args():
                     help='the end core to creat cpu pool')
     parser.add_argument('--accuracy-mode', action='store_true', default=False,
                         help='enable accuracy mode')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable ipex bf32 path')
     return parser.parse_args()
 
 
@@ -228,6 +230,9 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
 
     inference_time = AverageMeter('InferenceTime', ':6.3f')
     decoding_time = AverageMeter('DecodingTime', ':6.3f')
+
+    if args.bf32:
+        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
 
     # Disable TE, there 2 cat at the end of the forward.
     # When the inputs of these 2 cat are fp32, there is a fused-cat-cat kernel by TE.
@@ -530,7 +535,10 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                         print("OOB Autocast imperative path in throughput benchmark not support")
                         exit(-1)
             else:
-                print('autocast disabled, fp32 is used')
+                if args.bf32:
+                    print('autocast disabled, bf32 is used')
+                else:
+                    print('autocast disabled, fp32 is used')
                 print('enable nhwc')
                 model_decode.model = model_decode.model.to(memory_format=torch.channels_last)
                 if use_ipex:

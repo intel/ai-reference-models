@@ -69,12 +69,14 @@ bash download_dataset.sh
 | ----------- | ----------- | ----------- |
 | FP32        | bash throughput.sh fp32 | bash accuracy.sh fp32 |
 | BF16        | bash throughput.sh bf16 | bash accuracy.sh bf16 |
+| BF32        | bash throughput.sh bf32 | bash accuracy.sh bf32 |
 
 |           Distributed Training          |
 |  DataType   | Throughput  |   Accuracy  |
 | ----------- | ----------- | ----------- |
 | FP32        | bash throughput_dist.sh fp32 | bash accuracy_dist.sh fp32 |
 | BF16        | bash throughput_dist.sh bf16 | bash accuracy_dist.sh bf16 |
+| BF32        | bash throughput_dist.sh bf32 | bash accuracy_dist.sh bf32 |
 
 ## Run the model
 
