@@ -845,7 +845,7 @@ def main():
                         if args.do_train:
                             torch.save({'model': model_to_save.state_dict(),
                                         'optimizer': optimizer.state_dict(),
-                                        'master params': list(amp.master_params(optimizer)),
+                                        #'master params': list(amp.master_params(optimizer)),
                                         'files': [f_id] + files}, output_save_file)
 
                             most_recent_ckpts_paths.append(output_save_file)
