@@ -74,9 +74,13 @@ elif [ "$1" = "fp32" ] ; then
     PREC="--fp32"
     precision="fp32"
     echo "### running fp32 datatype"
+elif [ "$1" = "bf32" ]; then
+    PREC="--bf32"
+    precision="bf32"
+    echo "### running bf32 datatype"
 else
     echo "The specified precision '${1}' is unsupported."
-    echo "Supported precisions now are: fp32 and bf16"
+    echo "Supported precisions now are: fp32, bf16 and bf32"
 fi
 
 IPEX="--ipex"
