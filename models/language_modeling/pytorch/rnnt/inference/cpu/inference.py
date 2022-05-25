@@ -67,6 +67,8 @@ def parse_args():
                     help='doing int8 calibration step')
     parser.add_argument('--configure-dir', default='configure.json', type=str, metavar='PATH',
                     help = 'path to int8 configures, default file name is configure.json')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable ipex bf32 path')    
     return parser.parse_args()
 
 def eval(
@@ -375,6 +377,8 @@ def main(args):
     if args.ipex:
         import intel_extension_for_pytorch as ipex
         from rnn import IPEXStackTime
+        if args.bf32:
+            ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)        
         model.joint_net.eval()
         data_type = torch.bfloat16 if args.mix_precision else torch.float32
         if model.encoder["stack_time"].factor == 2:

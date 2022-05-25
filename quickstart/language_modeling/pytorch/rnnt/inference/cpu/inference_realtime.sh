@@ -46,6 +46,9 @@ ARGS=""
 if [ "$1" == "bf16" ]; then
     ARGS="$ARGS --mix-precision"
     echo "### running bf16 datatype"
+elif [ "$1" == "bf32" ]; then
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 datatype"
 else
     echo "### running fp32 datatype"
 fi
