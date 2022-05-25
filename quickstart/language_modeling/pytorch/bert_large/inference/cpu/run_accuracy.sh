@@ -34,6 +34,11 @@ then
     precision=int8
     ARGS="$ARGS --int8"
     echo "### running int8 mode"
+elif [[ "$1" == "bf32" ]]
+then
+    precision=bf32
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 mode"
 elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]
 then
     precision=fp32

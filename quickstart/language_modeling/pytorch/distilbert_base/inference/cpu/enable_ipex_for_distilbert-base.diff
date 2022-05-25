@@ -40,10 +40,10 @@ index 14bc7b9e9..03b1f864a 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2fb10b9e..29d9159cf 100755
+index a2fb10b9e..efbfeca6d 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
-@@ -1027,7 +1027,62 @@ class Trainer:
+@@ -1027,7 +1027,64 @@ class Trainer:
  
          return model
  
@@ -85,6 +85,8 @@ index a2fb10b9e..29d9159cf 100755
 +                            y = model(**example_input)
 +                            y = model(**example_input)
 +                    else:
++                        if self.args.bf32:
++                            ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
 +                        model = ipex.optimize(model, dtype=torch.float32, level="O1", auto_kernel_selection=self.args.auto_kernel_selection)
 +                        with torch.no_grad():
 +                            model = torch.jit.trace(model, jit_inputs, strict=False)
@@ -107,7 +109,7 @@ index a2fb10b9e..29d9159cf 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -2372,6 +2427,38 @@ class Trainer:
+@@ -2372,6 +2429,38 @@ class Trainer:
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
  
@@ -146,7 +148,7 @@ index a2fb10b9e..29d9159cf 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -2401,7 +2488,7 @@ class Trainer:
+@@ -2401,7 +2490,7 @@ class Trainer:
              self.model_wrapped = deepspeed_engine
              self.deepspeed = deepspeed_engine
  
@@ -155,7 +157,7 @@ index a2fb10b9e..29d9159cf 100755
  
          # if full fp16 or bf16 eval is wanted and this ``evaluation`` or ``predict`` isn't called
          # while ``train`` is running, cast it to the right dtype first and then put on device
-@@ -2444,6 +2531,41 @@ class Trainer:
+@@ -2444,6 +2533,41 @@ class Trainer:
          # Will be useful when we have an iterable dataset so don't know its length.
  
          observed_num_examples = 0
@@ -198,10 +200,10 @@ index a2fb10b9e..29d9159cf 100755
          for step, inputs in enumerate(dataloader):
              # Update the observed num examples
 diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
-index 6176794ab..b5781ca80 100644
+index 6176794ab..843bf70a1 100644
 --- a/src/transformers/training_args.py
 +++ b/src/transformers/training_args.py
-@@ -756,6 +756,96 @@ class TrainingArguments:
+@@ -756,6 +756,102 @@ class TrainingArguments:
          default="",
          metadata={"help": "Used by the SageMaker launcher to send mp-specific args. Ignored in Trainer"},
      )
@@ -270,6 +272,12 @@ index 6176794ab..b5781ca80 100644
 +        metadata={
 +            "help": "The calibration result for int8 config"
 +        }
++    )
++    bf32: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable ipex bf32"
++        },
 +    )
 +    auto_kernel_selection: bool = field(
 +        default=False,

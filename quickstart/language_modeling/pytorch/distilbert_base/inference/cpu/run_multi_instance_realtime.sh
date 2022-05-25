@@ -35,6 +35,11 @@ then
 elif [[ "$1" == "fp32" ]]
 then
     echo "### running fp32 mode"
+elif [[ "$1" == "bf32" ]]
+then
+    precision="bf32"
+    ARGS="$ARGS --bf32 --auto_kernel_selection"
+    echo "### running bf32 mode"
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
@@ -47,7 +52,7 @@ then
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf16, int8-fp32, int8-bf16"
+    echo "Supported precisions are: fp32, bf32, bf16, int8-fp32, int8-bf16"
     exit 1
 fi
 

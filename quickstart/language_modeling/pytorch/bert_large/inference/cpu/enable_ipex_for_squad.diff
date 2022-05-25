@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..d314889f2 100644
+index 2bd4e90ff..95891d441 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -37,7 +37,7 @@ index 2bd4e90ff..d314889f2 100644
  
  def set_seed(args):
      random.seed(args.seed)
-@@ -264,19 +270,124 @@ def train(args, train_dataset, model, tokenizer):
+@@ -264,19 +270,130 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -78,6 +78,12 @@ index 2bd4e90ff..d314889f2 100644
 +            model = torch.jit.freeze(model)
 +            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 +            print(model.graph)
++    elif args.bf32:
++        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
++        model = ipex.optimize(model, dtype=torch.float32, level="O1", auto_kernel_selection=True)
++        with torch.no_grad():
++             model = torch.jit.trace(model, jit_inputs, strict=False)
++        model = torch.jit.freeze(model)
 +    elif args.use_jit:
 +        with torch.no_grad():
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
@@ -165,7 +171,7 @@ index 2bd4e90ff..d314889f2 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -285,10 +396,38 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -285,10 +402,38 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -206,7 +212,7 @@ index 2bd4e90ff..d314889f2 100644
      for batch in tqdm(eval_dataloader, desc="Evaluating"):
          model.eval()
          batch = tuple(t.to(args.device) for t in batch)
-@@ -658,6 +797,41 @@ def main():
+@@ -658,6 +803,42 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -222,6 +228,7 @@ index 2bd4e90ff..d314889f2 100644
 +                        help="Number iterations to collect time")
 +    parser.add_argument("--benchmark", action='store_true',
 +                        help="Bench the model speed")
++    parser.add_argument("--bf32", action='store_true', help="For enabling IPEX bf32")
 +    parser.add_argument("--use_jit", action='store_true', help="For jit trace")
 +    parser.add_argument('--int8', dest='int8', action='store_true',
 +                        help='use llga int8 in pytorch jit model')
