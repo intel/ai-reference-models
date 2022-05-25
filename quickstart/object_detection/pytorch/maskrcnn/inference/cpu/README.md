@@ -66,8 +66,10 @@ bash download_dataset.sh
 | ----------- | ------ | ----------- | ----------- | ----------- |
 | FP32        | imperative | bash inference_throughput.sh fp32 imperative | bash inference_realtime.sh fp32 imperative | bash accuracy.sh fp32 imperative |
 | BF16        | imperative | bash inference_throughput.sh bf16 imperative | bash inference_realtime.sh bf16 imperative | bash accuracy.sh bf16 imperative |
+| BF32        | imperative | bash inference_throughput.sh bf32 imperative | bash inference_realtime.sh bf32 imperative | bash accuracy.sh bf32 imperative |
 | FP32        | jit | bash inference_throughput.sh fp32 jit | bash inference_realtime.sh fp32 jit | bash accuracy.sh fp32 jit |
 | BF16        | jit | bash inference_throughput.sh bf16 jit | bash inference_realtime.sh bf16 jit | bash accuracy.sh bf16 jit |
+| BF32        | jit | bash inference_throughput.sh bf32 jit | bash inference_realtime.sh bf32 jit | bash accuracy.sh bf32 jit |
 
 ## Run the model
 

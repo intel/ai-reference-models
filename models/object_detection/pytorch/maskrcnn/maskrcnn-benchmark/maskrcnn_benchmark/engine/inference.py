@@ -36,7 +36,7 @@ import intel_extension_for_pytorch as ipex
 # from maskrcnn_benchmark.engine.utils_vis import draw, make_dot
 
 
-def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=False, jit=False, iterations=-1, iter_warmup=-1, enable_profiling=False):
+def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=False, bf32=False, jit=False, iterations=-1, iter_warmup=-1, enable_profiling=False):
     model.eval()
     results_dict = {}
     cpu_device = torch.device("cpu")
@@ -47,9 +47,15 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
     print('Evaluating MaskRCNN: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
 
     model = model.to(memory_format=torch.channels_last)
-    model.backbone = ipex.optimize(model.backbone, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
-    model.rpn = ipex.optimize(model.rpn, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
-    model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.bfloat16 if bf16 else torch.float, inplace=True)
+    if bf32:
+        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        model.backbone = ipex.optimize(model.backbone, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
+        model.rpn = ipex.optimize(model.rpn, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
+        model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
+    else:
+        model.backbone = ipex.optimize(model.backbone, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
+        model.rpn = ipex.optimize(model.rpn, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
+        model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.bfloat16 if bf16 else torch.float32, inplace=True)
 
     with torch.cpu.amp.autocast(enabled=bf16), torch.no_grad():
         # generate trace model
@@ -128,6 +134,7 @@ def inference(
         expected_results_sigma_tol=4,
         output_folder=None,
         bf16=False,
+        bf32=False,
         jit=False,
         iterations=-1,
         iter_warmup=-1,
@@ -142,7 +149,7 @@ def inference(
     total_timer = Timer()
     inference_timer = Timer()
     total_timer.tic()
-    predictions = compute_on_dataset(model, data_loader, device, bbox_aug, inference_timer, bf16, jit, iterations, iter_warmup, enable_profiling)
+    predictions = compute_on_dataset(model, data_loader, device, bbox_aug, inference_timer, bf16, bf32, jit, iterations, iter_warmup, enable_profiling)
     # wait for all processes to complete before measuring the time
     synchronize()
     total_time = total_timer.toc()

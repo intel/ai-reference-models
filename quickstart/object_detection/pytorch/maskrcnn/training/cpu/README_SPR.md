@@ -30,7 +30,7 @@ pytorch-spr-maskrcnn-training
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Runs training for the specified precision (fp32, avx-fp32, or bf16). |
+| `training.sh` | Runs training for the specified precision (fp32, avx-fp32， bf16, or bf32). |
 
 > Note: The `avx-fp32` precision runs the same scripts as `fp32`, except that the
 > `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is

@@ -46,7 +46,7 @@ from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir, save_config
 
 
-def train(cfg, local_rank, distributed, bf16=False, iterations=-1, iter_warmup=-1):
+def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, iter_warmup=-1):
     model = build_detection_model(cfg)
     device = torch.device(cfg.MODEL.DEVICE)
     model.to(device)
@@ -99,6 +99,7 @@ def train(cfg, local_rank, distributed, bf16=False, iterations=-1, iter_warmup=-
         test_period,
         arguments,
         bf16=bf16,
+        bf32=bf32,
         iterations=iterations,
         iter_warmup=iter_warmup
     )
@@ -164,6 +165,8 @@ def main():
     )
     parser.add_argument('--bf16', action='store_true', default=False,
                         help='enable BF16 by IPEX autocast')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable IPEX bf32 path')
     parser.add_argument('-i', '--iterations', default=-1, type=int, metavar='N',
                         help='number of total iterations to run')
     parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
@@ -228,7 +231,7 @@ def main():
     save_config(cfg, output_config_path)
 
     model = train(cfg, args.local_rank, args.distributed,
-                  bf16=args.bf16, iterations=args.iterations, iter_warmup=args.iter_warmup)
+                  bf16=args.bf16, bf32=args.bf32, iterations=args.iterations, iter_warmup=args.iter_warmup)
 
     if not args.skip_test:
         run_test(cfg, model, args.distributed)

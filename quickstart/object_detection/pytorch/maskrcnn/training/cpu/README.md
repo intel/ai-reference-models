@@ -67,12 +67,14 @@ bash download_dataset.sh
 | ----------- | ----------- |
 | FP32        | bash training.sh fp32 |
 | BF16        | bash training.sh bf16 |
+| BF32        | bash training.sh bf32 |
 
 |               stributed Training              |
 |  DataType   | Throughput  |
 | ----------- | ----------- |
 | FP32        | bash training_multinode.sh fp32 |
 | BF16        | bash training_multinode.sh bf16 |
+| BF32        | bash training_multinode.sh bf32 |
 
 ## Run the model
 
