@@ -151,6 +151,9 @@ parser.add_argument('--int8', action='store_true', default=False,
                     help='enable ipex int8 path')
 parser.add_argument('--bf16', action='store_true', default=False,
                     help='enable ipex bf16 path')
+parser.add_argument('--bf32', action='store_true', default=False,
+                    help='enable ipex bf32 path')
+
 parser.add_argument('--jit', action='store_true', default=False,
                     help='enable ipex jit fusionpath')
 parser.add_argument('--calibration', action='store_true', default=False,
@@ -249,6 +252,10 @@ def main_worker(gpu, ngpus_per_node, args):
     # TODO: int8 path: https://jira.devtools.intel.com/browse/MFDNN-6103
     if args.ipex and not args.int8:
         model = model.to(memory_format=torch.channels_last)
+
+    if args.ipex and args.bf32:
+        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        print("using bf32 fmath mode\n")
 
     if not torch.cuda.is_available():
         print('using CPU, this will be slow')
