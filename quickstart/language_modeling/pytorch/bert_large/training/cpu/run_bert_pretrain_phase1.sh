@@ -32,12 +32,16 @@ then
     precision=bf16
     batch_size=448
     echo "### running bf16 mode"
+elif [[ $1 == "bf32" ]]; then
+    echo "### running BF32 mode"
+    ARGS="$ARGS --bf32"
+    precision=bf32
 elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running FP32 mode"
 
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, bf16"
+    echo "Supported precisions are: fp32, bf32, avx-fp32, bf16"
     exit 1
 fi
 
