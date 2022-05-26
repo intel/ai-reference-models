@@ -394,13 +394,18 @@ def main_worker(gpu, ngpus_per_node, args):
             model.eval()
             if args.int8:
                 if not args.calibration:
-                    model = optimization.fuse(model, inplace=True)
-                    conf = ipex.quantization.QuantConf(args.configure_dir)
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
-                    model = ipex.quantization.convert(model, conf, x)
-                    with torch.no_grad():
-                        y = model(x)
-                        print(model.graph_for(x))
+                    from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
+                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last) 
+                    qconfig = QConfig(
+                            activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
+                            weight= PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+                    prepared_model = ipex.ao.quantization.prepare(model, qconfig, x, inplace=True)
+                    prepared_model.load_qconf_summary(qconf_summary=args.configure_dir)
+                    model = ipex.ao.quantization.convert(prepared_model)
+                    model = torch.jit.trace(model, x)
+                    model = torch.jit.freeze(model.eval())
+                    y = model(x)
+                    y = model(x)
                     print("running int8 evalation step\n")
             else:
                 if args.bf16:
@@ -575,19 +580,22 @@ def validate(val_loader, model, criterion, args):
     model.eval()
 
     if args.ipex and args.int8 and args.calibration:
-        model = optimization.fuse(model)
         print("runing int8 calibration step\n")
-        conf = ipex.QuantConf(qscheme=torch.per_tensor_symmetric)
+        import intel_extension_for_pytorch as ipex
+        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
+        qconfig = QConfig(
+                activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
+                weight= PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+        x = torch.randn(1, 3, 224, 224)
+        prepared_model = ipex.quantization.prepare(model, qconfig, x, inplace=True)
         with torch.no_grad():
             for i, (images, target) in enumerate(val_loader):
-                with ipex.quantization.calibrate(conf):
-                    # compute output
-                    images = images.contiguous(memory_format=torch.channels_last)
-                    output = model(images)
-                    if i == 120:
-                        break
-
-            conf.save(args.configure_dir)
+                images = images.contiguous(memory_format=torch.channels_last)
+                prepared_model(images)
+                if i == 4:
+                    print(i)
+                    break
+            prepared_model.save_qconf_summary(args.configure_dir)
             print(".........calibration step done..........")
     else:
         if args.dummy:
