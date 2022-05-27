@@ -47,29 +47,6 @@ if [ -z "${WEIGHT_PATH}" ]; then
   exit 1
 fi
 
-# Create the output directory in case it doesn't already exist
-mkdir -p ${OUTPUT_DIR}/dlrm_inference_accuracy_log
-
-LOG=${OUTPUT_DIR}/dlrm_inference_accuracy_log/${PRECISION}
-
-if [[ "$PRECISION" == *"avx"* ]]; then
-    unset DNNL_MAX_CPU_ISA
-fi
-
-ARGS=""
-if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
-    echo "running int8 path"
-    ARGS="$ARGS --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
-elif [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --bf16"
-    echo "running bf16 path"
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
-    echo "running fp32 path"
-else
-    echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16, int8, and avx-int8"
-    exit 1
-fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 # use first socket
@@ -84,9 +61,6 @@ python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $
 --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
 --arch-sparse-feature-size=128 --max-ind-range=40000000 \
 --numpy-rand-seed=727  --inference-only --ipex-interaction \
---print-freq=100 --print-time --mini-batch-size=2048 --test-mini-batch-size=16384 \
---test-freq=2048 --print-auc $ARGS \
---load-model=${WEIGHT_PATH} | tee $LOG
+--mini-batch-size=2048 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json \
+--load-model=${WEIGHT_PATH} --calibration | tee $LOG
 
-accuracy=$(grep 'Accuracy:' $LOG |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
-echo ""dlrm";"auc";${PRECISION};16384;${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
