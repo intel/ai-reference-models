@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..95891d441 100644
+index 2bd4e90ff..074c2a4b6 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -37,7 +37,7 @@ index 2bd4e90ff..95891d441 100644
  
  def set_seed(args):
      random.seed(args.seed)
-@@ -264,19 +270,130 @@ def train(args, train_dataset, model, tokenizer):
+@@ -264,19 +270,138 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -50,13 +50,21 @@ index 2bd4e90ff..95891d441 100644
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
 +    if args.int8:
-+        conf = ipex.quantization.QuantConf(configure_file=args.int8_config)
++        from intel_extension_for_pytorch.quantization import prepare, convert
++        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++        prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
++        prepared_model.load_qconf_summary(qconf_summary = args.int8_config)
++
 +        # convert model to trace model.
 +        if args.int8_fp32:
-+            model = ipex.quantization.convert(model, conf, jit_inputs)
++            model = convert(prepared_model)
++            model = torch.jit.trace(model, jit_inputs)
 +        else: #int8_bf16 mix
 +            with torch.cpu.amp.autocast():
-+                model = ipex.quantization.convert(model, conf, jit_inputs)
++                model = convert(prepared_model)
++                model = torch.jit.trace(model, jit_inputs)
++        model = torch.jit.freeze(model)
 +        input = {
 +                 "input_ids": dumpy_tensor,
 +                 "attention_mask": dumpy_tensor,
@@ -171,14 +179,21 @@ index 2bd4e90ff..95891d441 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -285,10 +402,38 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -285,10 +410,44 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
 -
 +    
 +    if args.do_calibration:
-+        conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)
++        import intel_extension_for_pytorch as ipex
++        from intel_extension_for_pytorch.quantization import prepare
++        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++        dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
++        jit_inputs=(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++        ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
++        prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
 +        for step, batch in enumerate(eval_dataloader):
 +            print("calibration step: {}".format(step))
 +            batch = {
@@ -186,11 +201,10 @@ index 2bd4e90ff..95891d441 100644
 +                "attention_mask": batch[1],
 +                "token_type_ids": batch[2],
 +            }
-+            with ipex.quantization.calibrate(conf):
-+                model(**batch)
++            prepared_model(**batch)
 +            if step == args.calibration_iters -1:
 +                print("calibration finished, quantization info saved on file {}".format(args.int8_config))
-+                conf.save(args.int8_config)
++                prepared_model.save_qconf_summary(qconf_summary = args.int8_config)
 +                exit()
 +    if args.benchmark:
 +        if args.use_share_weight:
@@ -212,7 +226,7 @@ index 2bd4e90ff..95891d441 100644
      for batch in tqdm(eval_dataloader, desc="Evaluating"):
          model.eval()
          batch = tuple(t.to(args.device) for t in batch)
-@@ -658,6 +803,42 @@ def main():
+@@ -658,6 +817,42 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
