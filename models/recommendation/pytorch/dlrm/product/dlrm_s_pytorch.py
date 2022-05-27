@@ -434,7 +434,6 @@ def trace_model(args, dlrm, test_ld):
                 ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
             dlrm = ipex.optimize(dlrm, dtype=torch.float, inplace=True, auto_kernel_selection=True)
         if args.int8:
-            ipex.enable_onednn_fusion(False)
             print("Start to trace/freeze for int8, may need {} to save int8 weight".format(dlrm.numel / 1024 / 1024 / 1024))
             print("Current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
             dlrm = torch.jit.trace(dlrm, [X, lS_o, lS_i])
