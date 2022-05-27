@@ -40,6 +40,8 @@ import torch.fx.experimental.optimization as optimization
 use_ipex = False
 if os.environ.get('USE_IPEX') == "1":
     import intel_extension_for_pytorch as ipex
+    from intel_extension_for_pytorch.quantization import prepare, convert
+    from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
     use_ipex = True
 
 def get_bs_per_stream(batch_size, stream_number):
@@ -243,38 +245,33 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
     start = time.time()
     if args.int8:
         model = model.eval()
-        model_decode = SSD_R34_NMS(model, encoder)
+        model_decode = SSD_R34_NMS(model, encoder).eval()
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model_decode.model.model = optimization.fuse(model_decode.model.model, inplace=False)
-
+            qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8),
+                    weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+            
+            example_inputs = torch.randn( ((args.batch_size // args.number_instance) if args.use_multi_stream_module else args.batch_size), 3, 1200, 1200).to(memory_format=torch.channels_last)
+            model_decode.model = prepare(model_decode.model, qconfig, example_inputs=example_inputs, inplace=False)
             if args.calibration:
                 print("runing int8 LLGA calibration step not support in throughput benchmark")
             else:
                 print("INT8 LLGA start trace")
                 # insert quant/dequant based on configure.json
-                conf = ipex.quantization.QuantConf(configure_file=args.configure)
-                model_decode.eval()
-                if args.use_multi_stream_module:
-                    batch_per_stream = args.batch_size // args.number_instance
-                    print("batch_per_stream for multi_stream_module is:", batch_per_stream)
-                    model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
-                else:
-                    model_decode = ipex.quantization.convert(model_decode, conf, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                model_decode.model.load_qconf_summary(qconf_summary = args.configure)
+                model_decode.model = convert(model_decode.model)
+                with torch.no_grad():
+                   model_decode = torch.jit.trace(model_decode, example_inputs, check_trace=False).eval()
+                model_decode = torch.jit.freeze(model_decode)
+
                 print("done ipex default recipe.......................")
-                # freeze the module
-                # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
-                # model_decode = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model_decode._c, preserveParameters=True))
 
                 # After freezing, run 1 time to warm up the profiling graph executor to insert prim::profile
                 # At the 2nd run, the llga pass will be triggered and the model is turned into an int8 model: prim::profile will be removed and will have LlgaFusionGroup in the graph
                 with torch.no_grad():
                     for i in range(2):
-                        # _ = model_decode(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
-                        if args.use_multi_stream_module:
-                            _ = model_decode(torch.randn(batch_per_stream, 3, 1200, 1200).to(memory_format=torch.channels_last))
-                        else:
-                            _ = model_decode(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                        _ = model_decode(example_inputs)
 
                 if args.use_throughput_benchmark:
 

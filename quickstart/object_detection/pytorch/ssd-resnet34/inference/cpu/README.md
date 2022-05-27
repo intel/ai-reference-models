@@ -61,7 +61,7 @@ bash download_dataset.sh
 | INT8        | bash inference_throughput.sh int8 | bash inference_realtime.sh int8 | bash accuracy.sh int8 |
 | BF32        | bash inference_throughput.sh bf32 | bash inference_realtime.sh bf32 | bash accuracy.sh bf32 |
 
-To do the int8 calibration `bash bare_metal_int8_calibration.sh int8 <file where to save the calibrated model> <steps to run calibration>`, for example `bash bare_metal_int8_calibration.sh int8 test.json 100`.
+To do the int8 calibration `bash bare_metal_int8_calibration.sh int8 <file where to save the calibrated model> <steps to run calibration>`, for example `bash bare_metal_int8_calibration.sh int8 test.json 10`.
 
 ## Run the model
 
