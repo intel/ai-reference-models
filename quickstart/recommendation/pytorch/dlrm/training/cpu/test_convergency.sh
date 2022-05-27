@@ -47,18 +47,17 @@ LOG=${OUTPUT_DIR}/dlrm_training_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-if [[ "$PRECISION" == *"avx"* ]]; then
-    unset DNNL_MAX_CPU_ISA
-fi
-
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "running bf32 path"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16"
+    echo "Supported PRECISIONs are: fp32, bf32, bf16"
     exit 1
 fi
 

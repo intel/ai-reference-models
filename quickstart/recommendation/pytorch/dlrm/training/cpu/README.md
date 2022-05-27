@@ -58,9 +58,9 @@ export OUTPUT_DIR=<directory where log files will be written>
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Run training for the specified precision (fp32, avx-fp32, or bf16). |
-| `test_convergency.sh` | Run fully convergency test for the specified precision (fp32, avx-fp32, or bf16). |
-| `distribute_training.sh` | Run distribute training on 1 node with 2 sockets for the specified precision (fp32, avx-fp32, or bf16). |
+| `training.sh` | Run training for the specified precision (fp32, bf16, bf32). |
+| `test_convergency.sh` | Run fully convergency test for the specified precision (fp32, bf16, bf32). |
+| `distribute_training.sh` | Run distribute training on 1 node with 2 sockets for the specified precision (fp32, bf16, bf32). |
 
 ## Run the model
 

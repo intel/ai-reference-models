@@ -47,22 +47,22 @@ LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-if [[ "$PRECISION" == *"avx"* ]]; then
-    unset DNNL_MAX_CPU_ISA
-fi
 
 ARGS=""
-if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
+if [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
     ARGS="$ARGS --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    echo "running bf32 path"
+    ARGS="$ARGS --bf32"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16, int8, and avx-int8"
+    echo "Supported PRECISIONs are: fp32, bf32, bf16, and int8"
     exit 1
 fi
 
@@ -75,7 +75,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
 --data-set=terabyte \
 --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
 --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
---arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
+--arch-sparse-feature-size=128 --max-ind-range=40000 --ipex-interaction \
 --numpy-rand-seed=727  --inference-only --num-batches=1000 \
 --print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
 $ARGS |tee $LOG_0
