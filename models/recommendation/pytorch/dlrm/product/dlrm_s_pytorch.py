@@ -104,6 +104,9 @@ from intel_extension_for_pytorch.quantization import prepare, convert
 # For distributed run
 import extend_distributed as ext_dist
 
+import os
+import psutil
+
 exc = getattr(builtins, "IOError", "FileNotFoundError")
 
 def freeze(model):
@@ -197,6 +200,7 @@ class DLRM_Net(nn.Module):
             # LL.weight = Parameter(torch.tensor(W),requires_grad=True)
             # LL.bias = Parameter(torch.tensor(bt),requires_grad=True)
             layers.append(LL)
+            self.numel += (LL.weight.numel() + LL.bias.numel())
 
             # construct sigmoid or relu operator
             if i == sigmoid_layer:
@@ -210,6 +214,12 @@ class DLRM_Net(nn.Module):
         return torch.nn.Sequential(*layers)
 
     def create_emb(self, m, ln, local_ln_emb=None):
+        total_numel = 0
+        for n in ln:
+            total_numel += m * n
+        print("start to create emb, minimally need ~{} G memory ".format(total_numel * 4 / 1024 / 1024 / 1024))
+        print("may actually use more memory depends on memory allocator like tcmalloc/jemalloc")
+        print("current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         emb_l = nn.ModuleList()
         n_embs = ln.size if local_ln_emb is None else len(local_ln_emb)
         for i in range(n_embs):
@@ -221,8 +231,10 @@ class DLRM_Net(nn.Module):
             W = np.random.uniform(
                     low=-np.sqrt(1 / n), high=np.sqrt(1 / n), size=(n, m)
                 ).astype(np.float32)
-            EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True, _weight=torch.tensor(W, requires_grad=True))
+            EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True, _weight=torch.from_numpy(W).requires_grad_())
             emb_l.append(EE)
+        print("create emb done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
+        self.numel += total_numel
         return emb_l
 
     def __init__(
@@ -237,6 +249,7 @@ class DLRM_Net(nn.Module):
         loss_threshold=0.0
     ):
         super(DLRM_Net, self).__init__()
+        self.numel = 0
         self.loss_threshold = loss_threshold
         #If running distributed, get local slice of embedding tables
         if ext_dist.my_size > 1:
@@ -421,8 +434,12 @@ def trace_model(args, dlrm, test_ld):
                 ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
             dlrm = ipex.optimize(dlrm, dtype=torch.float, inplace=True, auto_kernel_selection=True)
         if args.int8:
+            ipex.enable_onednn_fusion(False)
+            print("Start to trace/freeze for int8, may need {} to save int8 weight".format(dlrm.numel / 1024 / 1024 / 1024))
+            print("Current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
             dlrm = torch.jit.trace(dlrm, [X, lS_o, lS_i])
             dlrm = torch.jit.freeze(dlrm)
+            print("After trace/freeze, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
             dlrm(X, lS_o, lS_i)
             dlrm(X, lS_o, lS_i)
         else:
@@ -794,7 +811,10 @@ def run():
     # Load model is specified
     if not (args.load_model == ""):
         print("Loading saved model {}".format(args.load_model))
+        print("Loading weight will minimally cost ~{} G memory".format(dlrm.numel * 4 / 1024 / 1024 / 1024))
+        print("Current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         ld_model = torch.load(args.load_model, map_location=torch.device("cpu"))
+        print("Loading weight done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         dlrm.load_state_dict(ld_model["state_dict"])
         ld_j = ld_model["iter"]
         ld_k = ld_model["epoch"]
@@ -813,8 +833,9 @@ def run():
         else:
             args.print_freq = ld_nbatches
             args.test_freq = 0
-
+        print("Copy loaded state to model done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         del(ld_model)
+        print("Remove loaded state, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         print(
             "Saved at: epoch = {:d}/{:d}, batch = {:d}/{:d}, ntbatch = {:d}".format(
                 ld_k, ld_nepochs, ld_j, ld_nbatches, ld_nbatches_test
@@ -885,9 +906,13 @@ def run():
             break
 
         if args.bf16:
+            print("Start to split weight to bf16 and trail part, or saving whole fp32 master weight, create bf16 weight copy")
+            print("Maximum will use ~ {} G memory, may use less memory if useless fp32 weight (for split path) will be released in time ".format(dlrm.numel * 4 / 1024 / 1024 /1024))
             dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True, sample_input=sample_input)
             if args.ipex_merged_emb:
+                print("Current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
                 dlrm.emb_l.to_bfloat16_train()
+            print("Weight cast done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         else:
             dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.float, optimizer=optimizer, inplace=True, sample_input=sample_input, auto_kernel_selection=True)
             if args.bf32:
@@ -926,6 +951,7 @@ def run():
         print("Throughput: {:.3f} fps".format(throughput))
 
     test_freq = args.test_freq if args.test_freq != -1  else nbatches // 20
+    print("Initialize for not inference only done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
     with torch.autograd.profiler.profile(
         enabled=args.enable_profiling, use_cuda=False, record_shapes=False
     ) as prof:
