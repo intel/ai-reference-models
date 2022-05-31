@@ -40,6 +40,7 @@ python ${MULTI_INSTANCE_ARGS} \
     models/image_recognition/pytorch/common/main.py \
     --arch resnet50 ../ \
     --evaluate \
+    --jit \
     ${ARGS} \
     --bf16 \
     --batch-size 128 \

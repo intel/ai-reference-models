@@ -63,11 +63,26 @@ else
     exit 1
 fi
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
-TOTAL_CORES=`expr $CORES \* $SOCKETS`
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+MULTI_INSTANCE_ARGS=""
+if [[ ${PLATFORM} == "linux" ]]; then
+    pip list | grep intel-extension-for-pytorch
+    if [[ "$?" == 0 ]]; then
+        CORES=`lscpu | grep Core | awk '{print $4}'`
+        SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+        TOTAL_CORES=`expr $CORES \* $SOCKETS`
+        CORES_PER_INSTANCE=$CORES
+        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator --ninstance ${SOCKETS} \
+        --ncore_per_instance ${CORES_PER_INSTANCE} --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="./resnext101_throughput_log_${PRECISION}""
 
-CORES_PER_INSTANCE=$CORES
+        # in case IPEX is used, we set ipex arg
+        ARGS="${ARGS} --ipex"
+        echo "Running using ${ARGS} args ..."
+    fi
+fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
@@ -75,15 +90,9 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=116
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    --ninstance ${SOCKETS} \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
-    --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./resnext101_throughput_log_${PRECISION}" \
+python ${MULTI_INSTANCE_ARGS} \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
     $ARGS \
-    --ipex \
     --seed 2020 \
     -j 0 \
     -b $BATCH_SIZE

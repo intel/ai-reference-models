@@ -47,6 +47,7 @@ python ${TCMALLOC_ARGS} \
     --arch resnet50 ${DATASET_DIR} \
     --evaluate \
     --pretrained \
+    --jit \
     ${ARGS} \
     --bf16 \
     --workers 0 \
