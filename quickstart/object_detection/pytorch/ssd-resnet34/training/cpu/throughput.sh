@@ -88,7 +88,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --pretrained-backbone ${CHECKPOINT_DIR}/ssd/resnet34-333f7ec4.pth \
     --performance_only \
     -w 20 \
-    -iter 1000 \
+    -iter 100 \
     $ARGS 2>&1 | tee ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput.log
 
 # For the summary of results
