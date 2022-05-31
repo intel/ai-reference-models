@@ -11,7 +11,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 ### Model Specific Setup
 * Install dependencies
   ```
-  pip install matplotlib Pillow pycocotools
+  pip install matplotlib Pillow pycocotools defusedxml
   ```
 
 * Download pretrained model

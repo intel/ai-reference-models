@@ -13,7 +13,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   ```
   pip install --no-cache-dir cython
   pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip
-  pip install matplotlib Pillow pycocotools
+  pip install matplotlib Pillow pycocotools defusedxml
   pip install --no-cache-dir pytz==2018.5
   ```
 
