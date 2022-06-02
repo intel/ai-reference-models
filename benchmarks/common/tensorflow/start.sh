@@ -186,7 +186,12 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # a working commit replace next set of commands with something like:
       yum install -y git make
       yum clean all
-      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      git clone --recursive https://github.com/horovod/horovod.git
+      cd horovod
+      echo "Applying cpp17 horovod patch: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
+      git apply ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}/cpp_horovod_fix.patch
+      python3 -m pip install -v -e .
     fi
   elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
     zypper update -y
@@ -214,7 +219,12 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # a working commit replace next set of commands with something like:
       zypper install -y git make
       zypper clean all
-      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      git clone --recursive https://github.com/horovod/horovod.git
+      cd horovod
+      echo "Applying cpp17 horovod patch: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
+      git apply ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}/cpp_horovod_fix.patch
+      python3 -m pip install -v -e .
     fi
   elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     apt-get update -y
@@ -242,7 +252,12 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
-      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      git clone --recursive https://github.com/horovod/horovod.git
+      cd horovod
+      echo "Applying cpp17 horovod patch: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
+      git apply ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}/cpp_horovod_fix.patch
+      python3 -m pip install -v -e .
     fi
   fi
   python3 -m pip install --upgrade 'pip>=20.3.4'
