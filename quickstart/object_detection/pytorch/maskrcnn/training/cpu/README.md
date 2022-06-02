@@ -12,7 +12,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 * Install dependencies
   ```
-  pip install yacs opencv-python pycocotools cityscapesscripts
+  pip install yacs opencv-python pycocotools defusedxml cityscapesscripts
   conda install intel-openmp
   ```
 
