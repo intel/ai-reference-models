@@ -186,12 +186,17 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # a working commit replace next set of commands with something like:
       yum install -y git make
       yum clean all
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      git clone --recursive https://github.com/horovod/horovod.git
-      cd horovod
+      # python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      pushd .
+      cd /tmp
+      rm -rf horovod
+      git clone --recursive https://github.com/horovod/horovod.git && cd horovod
       echo "Applying cpp17 horovod patch: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
       git apply ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}/cpp_horovod_fix.patch
-      python3 -m pip install -v -e .
+      python3 setup.py bdist_wheel
+      python3 -m pip install --no-cache-dir dist/*.whl
+      horovodrun --check-build
+      popd
     fi
   elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
     zypper update -y
@@ -219,18 +224,24 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # a working commit replace next set of commands with something like:
       zypper install -y git make
       zypper clean all
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      git clone --recursive https://github.com/horovod/horovod.git
-      cd horovod
+      # python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      pushd .
+      cd /tmp
+      rm -rf hotovod
+      git clone --recursive https://github.com/horovod/horovod.git &&  cd horovod
       echo "Applying cpp17 horovod patch: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
       git apply ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}/cpp_horovod_fix.patch
-      python3 -m pip install -v -e .
+      python3 setup.py bdist_wheel
+      python3 -m pip install --no-cache-dir dist/*.whl
+      horovodrun --check-build
+      popd
     fi
   elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     apt-get update -y
-    apt-get install gcc-8 g++-8 cmake python-tk -y
+    apt-get install gcc-9 g++-9 cmake python3-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
     apt-get install -y libsm6 libxext6 python3-dev
 
     # install google-perftools for tcmalloc
@@ -246,18 +257,24 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
+      export HOROVOD_WITH_MPI=1
       export HOROVOD_VERSION=11c1389
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      git clone --recursive https://github.com/horovod/horovod.git
-      cd horovod
+      # python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      pushd .
+      cd /tmp
+      rm -rf horovod
+      git clone --recursive https://github.com/horovod/horovod.git && cd horovod
       echo "Applying cpp17 horovod patch: ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}"
       git apply ${MOUNT_INTELAI_MODELS_COMMON_SOURCE}/cpp_horovod_fix.patch
-      python3 -m pip install -v -e .
+      python3 setup.py bdist_wheel
+      python3 -m pip install --no-cache-dir dist/*.whl
+      horovodrun --check-build
+      popd
     fi
   fi
   python3 -m pip install --upgrade 'pip>=20.3.4'
