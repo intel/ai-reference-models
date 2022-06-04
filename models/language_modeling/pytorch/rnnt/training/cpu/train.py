@@ -324,7 +324,7 @@ def train(
         if args.num_steps is not None:
             total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
         else:
-            total_samples = len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size
+            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size * args.world_size) / args.world_size
         print("total samples tested: ", total_samples)
         print("Model training time:", total_time, "s")
         perf = total_samples / total_time
@@ -413,7 +413,7 @@ def train(
         if args.num_steps is not None:
             total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
         else:
-            total_samples = len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size
+            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size * args.world_size) / args.world_size
         print("total samples tested: ", total_samples)
         print("Model training time:", total_time, "s")
         perf = total_samples / total_time
