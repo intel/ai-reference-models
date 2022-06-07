@@ -105,7 +105,7 @@ index a2fb10b9e..b795ab390 100755
 +                            y = model(**example_input)
 +                    else:
 +                        if self.args.bf32:
-+                            ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
++                            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
 +                        model = ipex.optimize(model, dtype=torch.float32, level="O1", auto_kernel_selection=self.args.auto_kernel_selection)
 +                        with torch.no_grad():
 +                            model = torch.jit.trace(model, jit_inputs, strict=False)

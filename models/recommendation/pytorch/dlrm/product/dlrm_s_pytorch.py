@@ -414,7 +414,7 @@ def trace_model(args, dlrm, test_ld):
     for j, inputBatch in enumerate(test_ld):
         X, lS_o, lS_i, _, _, _ = unpack_batch(inputBatch)
         if args.bf32:
-            ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         if args.bf16:
             # at::GradMode::is_enabled() will query a threadlocal flag
             # but new thread generate from throughputbench mark will 
@@ -431,7 +431,7 @@ def trace_model(args, dlrm, test_ld):
             dlrm = convert(prepared_dlrm)
         else:
             if args.bf32:
-                ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
             dlrm = ipex.optimize(dlrm, dtype=torch.float, inplace=True, auto_kernel_selection=True)
         if args.int8:
             print("Start to trace/freeze for int8, may need {} to save int8 weight".format(dlrm.numel / 1024 / 1024 / 1024))
@@ -915,7 +915,7 @@ def run():
         else:
             dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.float, optimizer=optimizer, inplace=True, sample_input=sample_input, auto_kernel_selection=True)
             if args.bf32:
-                ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
 
         for i in range(len(dlrm.top_l)):
             if isinstance(dlrm.top_l[i], ipex.nn.utils._weight_prepack._IPEXLinear):

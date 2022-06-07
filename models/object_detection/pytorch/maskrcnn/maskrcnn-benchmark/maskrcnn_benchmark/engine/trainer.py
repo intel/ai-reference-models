@@ -95,7 +95,7 @@ def do_train(
     dataset_names = cfg.DATASETS.TEST
 
     if bf32:
-        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True, auto_kernel_selection=True)
     else:
         model, optimizer = ipex.optimize(model, dtype=torch.bfloat16 if bf16 else torch.float32, optimizer=optimizer, inplace=True)

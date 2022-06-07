@@ -48,7 +48,7 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
 
     model = model.to(memory_format=torch.channels_last)
     if bf32:
-        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         model.backbone = ipex.optimize(model.backbone, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
         model.rpn = ipex.optimize(model.rpn, dtype=torch.float32, inplace=True, auto_kernel_selection=True)
         model.roi_heads = ipex.optimize(model.roi_heads, dtype=torch.float32, inplace=True, auto_kernel_selection=True)

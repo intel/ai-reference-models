@@ -611,7 +611,7 @@ def main(args):
 
     if args.ipex:
         if args.bf32:
-            ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
         else:

@@ -378,7 +378,7 @@ def main(args):
         import intel_extension_for_pytorch as ipex
         from rnn import IPEXStackTime
         if args.bf32:
-            ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)        
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         model.joint_net.eval()
         data_type = torch.bfloat16 if args.mix_precision else torch.float32
         if model.encoder["stack_time"].factor == 2:

@@ -254,7 +254,7 @@ def main_worker(gpu, ngpus_per_node, args):
         model = model.to(memory_format=torch.channels_last)
 
     if args.ipex and args.bf32:
-        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         print("using bf32 fmath mode\n")
 
     if not torch.cuda.is_available():

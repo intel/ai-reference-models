@@ -186,7 +186,7 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
         prefix='Test: ')
 
     if args.bf32:
-        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
 
     # Disable TE, there 2 cat at the end of the forward.
     # When the inputs of these 2 cat are fp32, there is a fused-cat-cat kernel by TE.

@@ -87,7 +87,7 @@ index 2bd4e90ff..074c2a4b6 100644
 +            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 +            print(model.graph)
 +    elif args.bf32:
-+        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
++        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
 +        model = ipex.optimize(model, dtype=torch.float32, level="O1", auto_kernel_selection=True)
 +        with torch.no_grad():
 +             model = torch.jit.trace(model, jit_inputs, strict=False)

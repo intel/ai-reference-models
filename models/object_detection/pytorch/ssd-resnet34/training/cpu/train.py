@@ -598,7 +598,7 @@ def main():
     mllogger.start(key=mllog_const.RUN_START)
 
     if args.bf32:
-        ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
 
     success = train300_mlperf_coco(args)
 
