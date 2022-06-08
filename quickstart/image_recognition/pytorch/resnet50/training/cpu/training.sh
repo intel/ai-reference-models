@@ -104,6 +104,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --seed 2020 \
     --epochs $TRAINING_EPOCHS \
     --train-no-eval \
+    -w 50 \
     -b $BATCH_SIZE
 
 # For the summary of results

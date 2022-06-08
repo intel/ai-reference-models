@@ -488,10 +488,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         print("running bfloat16 training step\n")
     else:
         print("running fp32 training step\n")
-    end = time.time()
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
-        data_time.update(time.time() - end)
+        if i == args.warmup_iterations:
+            print("begin collecting time................................")
+        if i >= args.warmup_iterations:
+            data_time.update(time.time() - end)
         if args.ipex:
             images = images.contiguous(memory_format=torch.channels_last)
         # compute output
@@ -503,24 +505,25 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         else:
             output = model(images)
         loss = criterion(output, target)
-
-        # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))
-
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
+        if i >= args.warmup_iterations:
+            batch_time.update(time.time() - end)
+        # measure accuracy and record loss
+        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        losses.update(loss.item(), images.size(0))
+        top1.update(acc1[0], images.size(0))
+        top5.update(acc5[0], images.size(0))
 
         if i % args.print_freq == 0:
             progress.display(i)
+
+        if i >= args.warmup_iterations - 1:
+            end = time.time()
 
     batch_size = args.batch_size
     perf = batch_size / (batch_time.avg - data_time.avg)
