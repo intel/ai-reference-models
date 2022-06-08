@@ -280,9 +280,11 @@ def lr_warmup(optim, wb, iter_num, base_lr, args):
 		for param_group in optim.param_groups:
 			param_group['lr'] = new_lr
 
-def data_preprocess(img, bbox, label, loss_func):
+def data_preprocess(img, bbox, label, loss_func, autocast):
     trans_bbox = bbox.transpose(1,2).contiguous()
     # image to NHWC
+    if autocast:
+        img = img.to(torch.bfloat16)
     img = img.contiguous(memory_format=torch.channels_last)
     trans_bbox = loss_func._loc_vec(trans_bbox).to(torch.float32)
     mask = label > 0
@@ -495,7 +497,7 @@ def train300_mlperf_coco(args):
                 param_group['lr'] = current_lr
         for nbatch, (img, img_id, img_size, bbox, label) in enumerate(train_dataloader):
             # Here is the case when img.shape[0] == fragment_size (except the last batch in dataloader)
-            fimg, gloc, glabel, mask, pos_num, neg_num, num_mask = data_preprocess(img, bbox, label, loss_func)
+            fimg, gloc, glabel, mask, pos_num, neg_num, num_mask = data_preprocess(img, bbox, label, loss_func, args.autocast)
 
             if args.performance_only and iter_num >= args.warmup_iterations:
                 start_time = time.time()
