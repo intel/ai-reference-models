@@ -71,7 +71,8 @@ else
 fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
-BATCHSIZE=$((128*CORES))
+# BATCHSIZE=$((128*CORES))
+BATCHSIZE=32768 # a converged BS and have better performance on SPR
 export OMP_NUM_THREADS=$CORES
 
 LOG_0="${LOG}/socket_0"

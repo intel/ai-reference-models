@@ -71,5 +71,5 @@ python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $
   --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
   --mini-batch-size=32768 --print-freq=640 --print-time --ipex-interaction \
   --test-mini-batch-size=262144 --ipex-merged-emb \
-  --lr-num-warmup-steps=8000 --lr-decay-start-step=70000 --lr-num-decay-steps=50000 \
-  --learning-rate=18.0 --test-freq=6400 --should-test | tee $LOG_0
+  --lr-num-warmup-steps=8000 --lr-decay-start-step=70000 --lr-num-decay-steps=30000 \
+  --learning-rate=18.0 --test-freq=6400 --should-test --mlperf-bin-shuffle $ARGS | tee $LOG_0

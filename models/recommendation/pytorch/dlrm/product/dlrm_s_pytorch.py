@@ -871,39 +871,36 @@ def run():
     print("time/loss/accuracy (if enabled):")
 
     if not args.inference_only:
-        for j, inputBatch in enumerate(train_ld):
-            X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
+        X, lS_o, lS_i, T = train_ld.dataset.__getitem__(0)
+        if ext_dist.my_size > 1:
+            local_bs = X.size()[0] // ext_dist.my_size
+            rank_id = dlrm.rank
+            X = X[rank_id * local_bs: (rank_id + 1) * local_bs]
+            T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
+            global_bs = local_bs * ext_dist.my_size
+            lS_o = lS_o[:, :global_bs]
+            lS_i = lS_i[:, :global_bs]
+
+        if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
             if ext_dist.my_size > 1:
-                local_bs = X.size()[0] // ext_dist.my_size
-                rank_id = dlrm.rank
-                X = X[rank_id * local_bs: (rank_id + 1) * local_bs]
-                T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
-                global_bs = local_bs * ext_dist.my_size
-                lS_o = lS_o[:, :global_bs]
-                lS_i = lS_i[:, :global_bs]
-
-            if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
-                if ext_dist.my_size > 1:
-                    batch_size = X.size()[0]
-                    g_i = lS_i[dlrm.local_ln_emb]
-                    g_o = lS_o[dlrm.local_ln_emb]
-                    n_tables = g_i.shape[0]
-                    idx = [g_i[i] for i in range(n_tables)]
-                    offset = [g_o[i] for i in range(n_tables)]
-                    include_last = [False for i in range(n_tables)]
-                    indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
-                else:
-                    n_tables = lS_i.shape[0]
-                    idx = [lS_i[i] for i in range(n_tables)]
-                    offset = [lS_o[i] for i in range(n_tables)]
-                    include_last = [False for i in range(n_tables)]
-                    indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
-            if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
-                sample_input = (X, indices, offsets, indices_with_row_offsets)
+                batch_size = X.size()[0]
+                g_i = lS_i[dlrm.local_ln_emb]
+                g_o = lS_o[dlrm.local_ln_emb]
+                n_tables = g_i.shape[0]
+                idx = [g_i[i] for i in range(n_tables)]
+                offset = [g_o[i] for i in range(n_tables)]
+                include_last = [False for i in range(n_tables)]
+                indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
             else:
-                sample_input = (X, lS_o, lS_i)
-            break
-
+                n_tables = lS_i.shape[0]
+                idx = [lS_i[i] for i in range(n_tables)]
+                offset = [lS_o[i] for i in range(n_tables)]
+                include_last = [False for i in range(n_tables)]
+                indices, offsets, indices_with_row_offsets = dlrm.emb_l.linearize_indices_and_offsets(idx, offset, include_last)
+        if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+            sample_input = (X, indices, offsets, indices_with_row_offsets)
+        else:
+            sample_input = (X, lS_o, lS_i)
         if args.bf16:
             print("Start to split weight to bf16 and trail part, or saving whole fp32 master weight, create bf16 weight copy")
             print("Maximum will use ~ {} G memory, may use less memory if useless fp32 weight (for split path) will be released in time ".format(dlrm.numel * 4 / 1024 / 1024 /1024))
@@ -915,7 +912,7 @@ def run():
         else:
             dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.float, optimizer=optimizer, inplace=True, sample_input=sample_input, auto_kernel_selection=True)
             if args.bf32:
-                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+                ipex.backends.cpu.set_fp32_low_precision_mode(mode=ipex.LowPrecisionMode.BF32)
 
         for i in range(len(dlrm.top_l)):
             if isinstance(dlrm.top_l[i], ipex.nn.utils._weight_prepack._IPEXLinear):
@@ -1002,6 +999,10 @@ def run():
                     mbs = T.shape[0]  # = args.mini_batch_size except maybe for last
 
                     # forward pass
+
+                    if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                        dlrm.emb_l.sgd_args = dlrm.emb_l.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0])
+
                     with torch.cpu.amp.autocast(enabled=args.bf16):
                         if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
                             Z = dlrm_wrap(
@@ -1033,9 +1034,8 @@ def run():
                     with record_function("DLRM update"):
                         # optimizer
                         optimizer.step()
+
                     lr_scheduler.step()
-                    if isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
-                        dlrm.emb_l.sgd_args = dlrm.emb_l.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0])
 
                     t2 = time_wrap()
                     total_time += t2 - t1
