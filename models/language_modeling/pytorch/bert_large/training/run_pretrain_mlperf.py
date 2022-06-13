@@ -79,9 +79,13 @@ from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
 from intel_extension_for_pytorch.optim._lamb import Lamb
 
 try:
-    import torch_ccl
+    if torch.__version__ >= '1.12.0':
+        import oneccl_bindings_for_pytorch
+    else:
+        import torch_ccl
+
 except ImportError as e:
-    torch_ccl = False
+    oneccl_bindings_for_pytorch = False
 import intel_extension_for_pytorch as ipex
 
 
@@ -409,7 +413,7 @@ def found_resume_checkpoint(args):
 
 def setup_training(args):
     device = torch.device("cpu")
-    if torch_ccl and int(os.environ.get('PMI_SIZE', '0')) > 1:
+    if oneccl_bindings_for_pytorch and int(os.environ.get('PMI_SIZE', '0')) > 1:
         os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
         os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
         torch.distributed.init_process_group(backend="ccl")

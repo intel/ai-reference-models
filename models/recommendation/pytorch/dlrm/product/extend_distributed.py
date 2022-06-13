@@ -6,10 +6,13 @@ from torch.autograd import Function
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.distributed as dist
 try:
-    import torch_ccl
+    if torch.__version__ >= '1.12.0':
+        import oneccl_bindings_for_pytorch
+    else:
+        import torch_ccl
 except ImportError as e:
     #print(e)
-    torch_ccl = False
+    oneccl_bindings_for_pytorch = False
 
 my_rank = -1
 my_size = -1
@@ -57,7 +60,7 @@ def init_distributed(rank = -1, size = -1, backend=''):
     # guess MPI ranks from env (works for IMPI, OMPI and MVAPICH2)
     num_mpi_ranks = env2int(['PMI_SIZE', 'OMPI_COMM_WORLD_SIZE', 'MV2_COMM_WORLD_SIZE', 'WORLD_SIZE'])
     if backend == '' and num_mpi_ranks > 1:
-        if torch_ccl and env2int(['CCL_WORKER_COUNT']) > 0:
+        if oneccl_bindings_for_pytorch and env2int(['CCL_WORKER_COUNT']) > 0:
             backend = 'ccl'
         elif dist.is_mpi_available():
             backend = 'mpi'

@@ -441,7 +441,10 @@ def main(args):
 
         # Initialize the process group with ccl backend
         if args.backend == 'ccl':
-            import torch_ccl
+            if torch.__version__ >= '1.12.0':
+                import oneccl_bindings_for_pytorch
+            else:
+                import torch_ccl 
         dist.init_process_group(
                 backend=args.backend                
         )

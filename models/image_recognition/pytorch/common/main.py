@@ -229,7 +229,11 @@ def main_worker(gpu, ngpus_per_node, args):
 
         # Initialize the process group with ccl backend
         if args.dist_backend == 'ccl':
-            import torch_ccl
+            if torch.__version__ >= '1.12.0':
+                import oneccl_bindings_for_pytorch
+            else:
+                import torch_ccl
+
         dist.init_process_group(backend=args.dist_backend)
         #dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
         #                        world_size=args.world_size, rank=args.rank)
