@@ -128,7 +128,6 @@ parser.add_argument('--world-size', default=1, type=int,
                     help='number of nodes for distributed training')
 parser.add_argument('--rank', default=0, type=int,
                     help='node rank for distributed training')
-parser.add_argument('--master_addr', default='127.0.0.1', type=str, help='Master Addr')
 parser.add_argument('--port', default='29500', type=str, help='Port')
 parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
@@ -218,7 +217,6 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.distributed:
         os.environ['RANK'] = str(os.environ.get('PMI_RANK', args.rank))
         os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', args.world_size))
-        os.environ['MASTER_ADDR'] = args.master_addr
         os.environ['MASTER_PORT'] = args.port
         if args.dist_url == "env://" and args.rank == -1:
             args.rank = int(os.environ["RANK"])
