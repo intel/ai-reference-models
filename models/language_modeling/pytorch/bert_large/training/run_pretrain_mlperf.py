@@ -79,7 +79,7 @@ from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
 from intel_extension_for_pytorch.optim._lamb import Lamb
 
 try:
-    if torch.__version__ >= '1.12.0':
+    if torch.__version__[:6] >= '1.12.0':
         import oneccl_bindings_for_pytorch
     else:
         import torch_ccl
