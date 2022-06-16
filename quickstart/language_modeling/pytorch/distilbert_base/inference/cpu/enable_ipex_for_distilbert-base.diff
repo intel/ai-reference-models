@@ -11,7 +11,7 @@ index 1f78503ad..8eb35aa9d 100755
      )
      tokenizer = AutoTokenizer.from_pretrained(
 diff --git a/examples/pytorch/text-classification/run_glue.py b/examples/pytorch/text-classification/run_glue.py
-index aedf63e5f..f1568cd33 100755
+index aedf63e5f..559f533fa 100755
 --- a/examples/pytorch/text-classification/run_glue.py
 +++ b/examples/pytorch/text-classification/run_glue.py
 @@ -335,6 +335,7 @@ def main():
@@ -22,6 +22,29 @@ index aedf63e5f..f1568cd33 100755
          revision=model_args.model_revision,
          use_auth_token=True if model_args.use_auth_token else None,
      )
+@@ -461,9 +462,12 @@ def main():
+     if data_args.task_name is not None:
+         metric = load_metric("glue", data_args.task_name)
+     else:
+-        metric = load_metric("accuracy")
++        curpath = os.path.abspath(os.path.dirname(__file__))
++        accuracy_path = os.path.join( curpath, "../../../../", "accuracy.py")
++        #accuracy_path = curpath + "/accuracy.py"
++        metric = load_metric(accuracy_path)
+ 
+-    # You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
++# You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
+     # predictions and label_ids field) and has to return a dictionary string to float.
+     def compute_metrics(p: EvalPrediction):
+         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
+@@ -545,6 +549,7 @@ def main():
+ 
+             trainer.log_metrics("eval", metrics)
+             trainer.save_metrics("eval", combined if task is not None and "mnli" in task else metrics)
++        exit(0)
+ 
+     if training_args.do_predict:
+         logger.info("*** Predict ***")
 diff --git a/src/transformers/models/distilbert/modeling_distilbert.py b/src/transformers/models/distilbert/modeling_distilbert.py
 index 14bc7b9e9..03b1f864a 100755
 --- a/src/transformers/models/distilbert/modeling_distilbert.py
@@ -40,7 +63,7 @@ index 14bc7b9e9..03b1f864a 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2fb10b9e..b795ab390 100755
+index a2fb10b9e..33635aced 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -134,6 +134,9 @@ from .utils import (

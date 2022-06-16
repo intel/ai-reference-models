@@ -56,6 +56,23 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   #Set the SEQUENCE_LENGTH to which is going to run when doing the calibration.
   bash do_calibration.sh
   ```
+* [Optional for offline tests] Prepare model and dataset files locally
+  ```
+  (1) download model and sst2 dataset (make sure to install git-lfs first by apt-get install git-lfs)
+  bash download_model_dataset.sh
+  #by default they are downloaded in current path
+  #note that you should do this after you prepared model (transformers repo)
+
+  (2) make following changes in the scirpts to run:
+  delete: --task_name sst2  ==>  add: --train_file {path/to/data_file}/SST-2/train.csv --validation_file {path/to/data_file}/SST-2/dev.csv 
+  
+  (3) export model path
+  export FINETUNED_MODEL={path/to/model_file}/distilbert-base-uncased-finetuned-sst-2-english
+  
+  (4) run scirpt with HF_DATASETS_OFFLINE=1 flag, like:
+  HF_DATASETS_OFFLINE=1 bash run_multi_instance_throughput.sh fp32
+  
+  ```
 
 # Quick Start Scripts
 
