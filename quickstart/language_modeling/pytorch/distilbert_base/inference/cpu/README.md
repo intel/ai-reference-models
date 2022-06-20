@@ -47,8 +47,10 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 * About the BATCH_SIZE in scripts
   ```
-  Throughput mode is using BATCH_SIZE=[4 x core number] by default in script; 
+  Throughput mode is using BATCH_SIZE=[4 x core number] by default in script (which could be further tuned according to the testing host); 
   Realtime mode is using BATCH_SIZE=[1] by default in script; 
+  
+  Note: If you would have a SPR-56C host, BATCH_SIZE=205 is perferred for INT8-BF16 Throughput mode and BATCH_SIZE=198 is perferred for BF16 Throughput mode.
   ```
 
 * Do calibration to get quantization config before running INT8 (Default attached is produced with sequence length 128).
