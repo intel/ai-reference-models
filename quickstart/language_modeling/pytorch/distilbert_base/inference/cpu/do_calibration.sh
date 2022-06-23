@@ -47,5 +47,5 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0 --ena
   --output_dir ./tmp \
   --per_device_eval_batch_size $BATCH_SIZE \
   --do_calibration \
-  --calibration_iters 50 \
+  --calibration_iters 100 \
   --int8_config configure.json

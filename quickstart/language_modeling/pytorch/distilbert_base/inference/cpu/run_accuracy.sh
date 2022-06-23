@@ -69,7 +69,7 @@ if [ -z "${SEQUENCE_LENGTH}" ]; then
 fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
-BATCH_SIZE=${BATCH_SIZE:-224}
+BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"distilbert-base-uncased-finetuned-sst-2-english"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/text-classification/run_glue.py"}
