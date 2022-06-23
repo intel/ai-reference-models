@@ -39,13 +39,13 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
   <tr>
     <td>
-      <p>AI Kit does not currently support TF 1.15.2 models</p>
+      <p>AI Kit does not currently support wide and deep large ds</p>
     </td>
     <td>
       <p>To run without AI Kit you will need:</p>
       <ul>
         <li>Python 3.6 or 3.7
-        <li><a href="https://pypi.org/project/intel-tensorflow/1.15.2/">intel-tensorflow==1.15.2</a>
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>numactl
         <li>git
         <li>wget
