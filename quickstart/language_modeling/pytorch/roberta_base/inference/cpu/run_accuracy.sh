@@ -66,6 +66,5 @@ python -m intel_extension_for_pytorch.cpu.launch --enable_jemalloc --log_path=${
 
 match=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_exact_match" |sed -e 's/.*= //;s/[^0-9.]//g')
 f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')
-echo ""roberta-base";"exact_match";${precision};${BATCH_SIZE};${match}" | tee -a ${WORK_SPACE}/summary.log
 echo ""roberta-base";"f1";${precision};${BATCH_SIZE};${f1}" | tee -a ${WORK_SPACE}/summary.log
 
