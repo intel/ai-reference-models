@@ -213,7 +213,7 @@ class DLRM_Net(nn.Module):
         # approach 2: use Sequential container to wrap all layers
         return torch.nn.Sequential(*layers)
 
-    def create_emb(self, m, ln, local_ln_emb=None):
+    def create_emb(self, m, ln, local_ln_emb=None, np_init_emb_weight=False):
         total_numel = 0
         for n in ln:
             total_numel += m * n
@@ -228,10 +228,13 @@ class DLRM_Net(nn.Module):
             else:
                 n = ln[local_ln_emb[i]]
             print("Create Embedding: {}".format(n), flush=True)
-            W = np.random.uniform(
-                    low=-np.sqrt(1 / n), high=np.sqrt(1 / n), size=(n, m)
-                ).astype(np.float32)
-            EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True, _weight=torch.from_numpy(W).requires_grad_())
+            if np_init_emb_weight:
+                W = np.random.uniform(
+                        low=-np.sqrt(1 / n), high=np.sqrt(1 / n), size=(n, m)
+                    ).astype(np.float32)
+                EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True, _weight=torch.from_numpy(W).requires_grad_())
+            else:
+                EE = nn.EmbeddingBag(n, m, mode="sum", sparse=True)
             emb_l.append(EE)
         print("create emb done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
         self.numel += total_numel
@@ -246,7 +249,8 @@ class DLRM_Net(nn.Module):
         sigmoid_bot=-1,
         sigmoid_top=-1,
         weighted_pooling=None,
-        loss_threshold=0.0
+        loss_threshold=0.0,
+        np_init_emb_weight=False
     ):
         super(DLRM_Net, self).__init__()
         self.numel = 0
@@ -265,7 +269,7 @@ class DLRM_Net(nn.Module):
         self.l_emb_seeds = np.random.randint(low=0, high=100000, size=len(ln_emb))
         self.bot_l = self.create_mlp(ln_bot, sigmoid_bot)
         self.top_l = self.create_mlp(ln_top, sigmoid_top)
-        self.emb_l = self.create_emb(m_spa, ln_emb, self.local_ln_emb)
+        self.emb_l = self.create_emb(m_spa, ln_emb, self.local_ln_emb, np_init_emb_weight)
         self.loss_fn = torch.nn.BCELoss(reduction="mean")
 
 
@@ -426,9 +430,9 @@ def trace_model(args, dlrm, test_ld):
         elif args.int8:
             qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
                 weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
-            prepared_dlrm = prepare(dlrm, qconfig, example_inputs=(X, lS_o, lS_i), inplace=True)
-            prepared_dlrm.load_qconf_summary(qconf_summary = args.int8_configure)
-            dlrm = convert(prepared_dlrm)
+            prepare(dlrm, qconfig, example_inputs=(X, lS_o, lS_i), inplace=True)
+            dlrm.load_qconf_summary(qconf_summary = args.int8_configure)
+            convert(dlrm, inplace=True)
         else:
             if args.bf32:
                 ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
@@ -772,6 +776,7 @@ def run():
     # the weights we need to start from the same random seed.
     # np.random.seed(args.numpy_rand_seed)
     global dlrm
+    np_init_emb_weight = not args.inference_only
     dlrm = DLRM_Net(
         m_spa,
         ln_emb,
@@ -780,6 +785,7 @@ def run():
         sigmoid_bot=-1,
         sigmoid_top=ln_top.size - 2,
         loss_threshold=args.loss_threshold,
+        np_init_emb_weight=np_init_emb_weight,
     )
 
     if args.ipex_merged_emb:
