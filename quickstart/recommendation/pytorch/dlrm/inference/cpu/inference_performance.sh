@@ -76,7 +76,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
 --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
 --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
 --arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
---numpy-rand-seed=727  --inference-only --num-batches=1000 \
+--numpy-rand-seed=727  --inference-only --num-batches=1000 --num-cpu-cores=$CORES \
 --print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
 $ARGS |tee $LOG_0
 wait

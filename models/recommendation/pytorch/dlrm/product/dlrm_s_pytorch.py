@@ -414,6 +414,7 @@ def dash_separated_ints(value):
 
 
 def trace_model(args, dlrm, test_ld):
+    torch.set_num_threads(args.num_cpu_cores)
     dlrm.eval()
     for j, inputBatch in enumerate(test_ld):
         X, lS_o, lS_i, _, _, _ = unpack_batch(inputBatch)
@@ -455,6 +456,7 @@ def trace_model(args, dlrm, test_ld):
 
 
 def run_throughput_benchmark(args, dlrm, test_ld):
+    torch.set_num_threads(1)
     bench = ThroughputBenchmark(dlrm)
     for j, inputBatch in enumerate(test_ld):
         X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
@@ -703,6 +705,7 @@ def run():
     parser.add_argument("--bf16", action="store_true", default=False)
     parser.add_argument("--bf32", action="store_true", default=False)
     parser.add_argument("--share-weight-instance", type=int, default=0)
+    parser.add_argument("--num-cpu-cores", type=int, default=0)
     parser.add_argument("--ipex-interaction", action="store_true", default=False)
     parser.add_argument("--ipex-merged-emb", action="store_true", default=False)
     parser.add_argument("--num-warmup-iters", type=int, default=1000)
