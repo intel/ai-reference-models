@@ -387,9 +387,9 @@ def main_worker(gpu, ngpus_per_node, args):
                     qconfig = QConfig(
                             activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
                             weight= PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
-                    prepared_model = ipex.ao.quantization.prepare(model, qconfig, x, inplace=True)
+                    prepared_model = ipex.quantization.prepare(model, qconfig, x, inplace=True)
                     prepared_model.load_qconf_summary(qconf_summary=args.configure_dir)
-                    model = ipex.ao.quantization.convert(prepared_model)
+                    model = ipex.quantization.convert(prepared_model)
                     model = torch.jit.trace(model, x)
                     model = torch.jit.freeze(model.eval())
                     y = model(x)
