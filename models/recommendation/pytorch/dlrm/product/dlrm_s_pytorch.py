@@ -414,7 +414,6 @@ def dash_separated_ints(value):
 
 
 def trace_model(args, dlrm, test_ld):
-    torch.set_num_threads(args.num_cpu_cores)
     dlrm.eval()
     for j, inputBatch in enumerate(test_ld):
         X, lS_o, lS_i, _, _, _ = unpack_batch(inputBatch)
@@ -429,6 +428,8 @@ def trace_model(args, dlrm, test_ld):
                 dlrm.emb_l.bfloat16()
             dlrm = ipex.optimize(dlrm, dtype=torch.bfloat16, inplace=True)
         elif args.int8:
+            if args.num_cpu_cores != 0:
+                torch.set_num_threads(args.num_cpu_cores)
             qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
                 weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
             prepare(dlrm, qconfig, example_inputs=(X, lS_o, lS_i), inplace=True)
@@ -456,7 +457,8 @@ def trace_model(args, dlrm, test_ld):
 
 
 def run_throughput_benchmark(args, dlrm, test_ld):
-    torch.set_num_threads(1)
+    if args.num_cpu_cores != 0:
+        torch.set_num_threads(1)
     bench = ThroughputBenchmark(dlrm)
     for j, inputBatch in enumerate(test_ld):
         X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)

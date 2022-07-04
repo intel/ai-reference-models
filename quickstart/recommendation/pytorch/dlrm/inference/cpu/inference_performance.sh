@@ -51,7 +51,7 @@ mkdir -p ${LOG}
 ARGS=""
 if [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
-    ARGS="$ARGS --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
+    ARGS="$ARGS --num-cpu-cores=$CORES --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
@@ -76,7 +76,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
 --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
 --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
 --arch-sparse-feature-size=128 --max-ind-range=40000000 --ipex-interaction \
---numpy-rand-seed=727  --inference-only --num-batches=1000 --num-cpu-cores=$CORES \
+--numpy-rand-seed=727  --inference-only --num-batches=1000 \
 --print-freq=10 --print-time --mini-batch-size=128 --share-weight-instance=$CORES \
 $ARGS |tee $LOG_0
 wait
