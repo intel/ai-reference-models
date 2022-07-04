@@ -47,7 +47,7 @@ LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-
+CORES=`lscpu | grep Core | awk '{print $4}'`
 ARGS=""
 if [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
@@ -66,7 +66,6 @@ else
     exit 1
 fi
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
 export OMP_NUM_THREADS=1
 
 LOG_0="${LOG}/throughput.log"
