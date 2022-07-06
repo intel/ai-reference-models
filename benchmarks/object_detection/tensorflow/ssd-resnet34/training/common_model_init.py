@@ -90,6 +90,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         cmd_args += " --model=ssd300 --data_name coco"
         cmd_args += " --mkl=True --device=cpu --data_format=NHWC"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
+        cmd_args += " --batch_group_size={0}".format(self.args.num_train_steps + 10)
         # check if user has any kmp related environmental variables set
         # if set, then pass those parameter to the training script
         if os.environ["KMP_AFFINITY"]:
@@ -122,6 +123,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
             cmd_args += " --optimizer=momentum"
             cmd_args += " --weight_decay={0}".format(self.args.weight_decay)
             cmd_args += " --momentum=0.9"
+
             if self.args.epochs > 0:
                 cmd_args += " --num_epochs={0}".format(self.args.epochs)
             else:
