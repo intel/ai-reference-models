@@ -1,4 +1,4 @@
-### PREPARE:
+### Prepare the environment:
     gcc >= 5
     Cmake >= 3.19.6
     wget https://repo.continuum.io/archive/Anaconda3-5.0.0-Linux-x86_64.sh -O anaconda3.sh
@@ -13,23 +13,12 @@
     export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
     export work_space=/home/sdp  (you can get the summary.log in this path where the models performance and accuracy write)   
 
-### build pytorch and intel-pytorch-extension
-    git clone https://github.com/intel-innersource/frameworks.ai.pytorch.private-cpu.git pytorch
-    git checkout dev
-    git submodule sync
-    git submodule update --init --recursive
-    cd ..
-    git clone https://github.com/intel-innersource/frameworks.ai.pytorch.ipex-cpu.git ipex-cpu-dev
-    cd ipex-cpu-dev
-    git checkout cpu-device
-    git submodule sync
-    git submodule update --init --recursive
-    cd ../pytorch
-    python setup.py install
-    cd ../ipex-cpu-dev
-    python setup.py install
+### Install Pytorch* and Intel® Extension for PyTorch*
+Follow [these instructions ](https://intel.github.io/intel-extension-for-pytorch/1.12.0/tutorials/installation.html) to install pytorch and IPEX via pip.
 
-### build jemalloc
+
+## The following components are required by some PyTorch* workloads. Only build them if indicated in the documentation for that workload. 
+### Build jemalloc
     cd ..
     git clone  https://github.com/jemalloc/jemalloc.git    
     cd jemalloc
@@ -39,7 +28,7 @@
     make
     make install
 
-### build tcmalloc 
+### Build tcmalloc 
     wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz
     tar -xzf gperftools-2.7.90.tar.gz 
     cd gperftools-2.7.90
@@ -47,13 +36,13 @@
     make
     make install
 
-### build vision
+### Build vision
     cd ..
     git clone https://github.com/pytorch/vision
     cd vision
     python setup.py install
 
-### build torch-ccl 
+### Build torch-ccl 
     cd ..
     git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
     cd frameworks.ai.pytorch.torch-ccl && git checkout torch-ccl-1.12-rc1
