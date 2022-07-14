@@ -1,2 +1,2 @@
 #!/bin/bash
-jupyter notebook --notebook-dir=./ --ip=0.0.0.0 --no-browser  --allow-root &
+jupyter notebook --notebook-dir=./ --ip=127.0.0.1 --no-browser &

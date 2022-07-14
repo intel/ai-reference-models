@@ -1,30 +1,49 @@
-# Quantizing a Pre-trained Model from Model Zoo for Intel® Architecture with LPOT
+# Quantizing a Pre-trained Model from Model Zoo for Intel® Architecture with Intel® Neural Compressor
 
+
+## Background
+
+Low-precision inference can speed up inference, by converting the fp32 model to int8 or bf16 model. Intel provides Intel® Deep Learning Boost technology in the Second Generation Intel® Xeon® Scalable Processors and newer Xeon®, which supports to speed up int8 and bf16 model by hardware.
+
+Intel® Neural Compressor helps the user to simplify the processing to convert the fp32 model to int8/bf16.
+
+At the same time, Intel® Neural Compressor will tune the quanization method to reduce the accuracy loss, which is a big blocker for low-precision inference.
+
+Intel® Neural Compressor is released in Intel® AI Analytics Toolkit and works with Intel® Optimization of TensorFlow*.
+
+Please refer to the official website for detailed info and news: [https://github.com/intel/neural-compressor](https://github.com/intel/neural-compressor)
 
 ## Purpose
 
-Demostrate how to quantize a pre-trained model from Model Zoo for Intel(R) Architecture with LPOT and show the performance gain after quantization.
+Demostrate how to quantize a pre-trained model from Model Zoo for Intel(R) Architecture with Intel® Neural Compressor and show the performance gain after quantization.
 
+We will learn the acceleration of AI inference by Intel AI technology:
+
+1. Intel® Deep Learning Boost
+
+2. Intel® Neural Compressor
+
+3. Intel® Optimization for Tensorflow*
 
 ## Prerequisites
 
 | Optimized for                       | Description
 |:---                               |:---
 | OS                                | Linux* Ubuntu* 18.04 or newer
-| Hardware                          | The Second Generation Intel(R) Xeon(R) Scalable processor family or later (support AVX2, AVX512 or Intel(R) Deep Learning Boost).
-| Software                          | LPOT, Intel Optimization for Tensorflow 2.3 (or later)
-| What you will learn               | How to use LPOT to quantize a pre-trained TensorFlow model and achieve better inference performance on Intel(R) Xeon(R) CPU
+| Hardware                          | The Second Generation Intel(R) Xeon(R) Scalable processor family or newer (support AVX2, AVX512 or Intel(R) Deep Learning Boost).
+| Software                          | Intel® Neural Compressor, Intel Optimization for Tensorflow 2.5 (or newer)
+| What you will learn               | How to use Intel® Neural Compressor to quantize a pre-trained TensorFlow model and achieve better inference performance on Intel(R) Xeon(R) CPU
 | Time to complete                  | 1-2+ hours
 
 ## Running Environment
 
 ### Running on Devcloud
 
-Follow the “Prepare Software Environment” section to set up the Python environment on DevCloud. For more information, refer to the [Intel(R) oneAPI AI Analytics Toolkit Get Started Guide] https://devcloud.intel.com/oneapi/get-started/analytics-toolkit/)
+Follow the [Prepare Software Environment](#prepare-software-environment) section to set up the Python environment on DevCloud. For more information, refer to the [Intel(R) oneAPI AI Analytics Toolkit Get Started Guide](https://devcloud.intel.com/oneapi/get-started/analytics-toolkit/)
 
 ### Running in a Local Machine
 
-Follow the “Prepare Software Environment” section to setup the Python environment and ensure that the prerequisites are in comply with your local machine.
+Follow the "Prepare Software Environment" section to setup the Python environment and ensure that the prerequisites are in comply with your local machine.
 
 ## Prepare Software Environment
 
@@ -39,21 +58,7 @@ sudo apt-get update && apt-get install -y  build-essential python3-opencv python
 ### Setup Python Virtual Environment
 
 ```
-rm -rf vlpot
-python -m venv vlpot
-
-source vlpot/bin/activate
-python -m pip install --upgrade pip
-python -m pip install -r requirements.txt
-```
-
-### Register the kernel to Jupyter NB
-
-```
-deactivate vlpot
-
-vlpot/bin/python -m ipykernel install --user --name=vlopt
-
+./set_env.sh
 ```
 
 ## Files and folders structure
@@ -62,14 +67,14 @@ vlpot/bin/python -m ipykernel install --user --name=vlopt
 | File/Folder | Description
 |:---                               |:---
 |format2json.py| A Translation Script to convert the result of benchmark from text format to JSON format.
-|local_banchmark.sh| A bash script to test the model banchmark (Throughput, Latency & Accuracy). It is wrapper layer for launch_benchmark.py provided by Model Zoo for Intel(R) Architecture.
-|lpot_for_tensorflow.ipynb| A Jupyter notebook file for this tutorial. 
-|lpot_quantize_model.py| A separated python script to quantize the FP32 model to INT8 by calling LPOT API.
+|local_benchmark.sh| A bash script to test the model benchmark (Throughput, Latency & Accuracy). It is wrapper layer for launch_benchmark.py provided by Model Zoo for Intel(R) Architecture.
+|inc_for_tensorflow.ipynb| A Jupyter notebook file for this tutorial. 
+|inc_quantize_model.py| A python script to quantize the FP32 model to INT8 by calling Intel® Neural Compressor API.
 |requirements.txt| A PIP installation dependency file. List all of packages needed by this sample.
-|resnet50_v1.yaml| A default YAML file for LPOT. No update needed.
+|resnet50_v1.yaml| A default YAML file for Intel® Neural Compressor. No update needed.
 |run_jupyter.sh| A script to start running Jupyter notebook.
 |tf_2012_val | A default folder to save the dataset. Put the TFRecord format dataset files into it.
-|tips.md| An addtional document for some tips of LPOT usage.
+|tips.md| An addtional document for some tips on Intel® Neural Compressor usage.
 |ut.sh| A Unit test script. The dataset should be saved in tf_2012_val folder befure users run the script.
 
 
@@ -97,17 +102,15 @@ Steps:
         http://yyy:8888/?token=146761d9317552c43e0d6b8b6b9e1108053d465f6ca32fca
      or http://127.0.0.1:8888/?token=146761d9317552c43e0d6b8b6b9e1108053d465f6ca32fca
 [I 09:48:26.128 NotebookApp] Kernel started: bc5b0e60-058b-4a4f-8bad-3f587fc080fd, name: python3
-[IPKernelApp] ERROR | No such comm target registered: jupyter.widget.version
-
 ```
 
 ### Open Jupyter Notebook
 
-Open link: **http://yyy:8888** in a web browser and enter the token generated during Jupyter startup. Click 'lpot_for_tensorflow.ipynb'.
+Open link: **http://yyy:8888** in a web browser and enter the token generated during Jupyter startup. Click 'inc_for_tensorflow.ipynb'.
 
 ### Choose Kernel
 
-Choose the vlop kernel in the menu: Kernel -> Change kernel -> vlopt
+Choose the env_inc kernel in the menu: Kernel -> Change kernel -> env_inc
 
 ### Run
 
@@ -123,6 +126,6 @@ It returns 0 if there is no error.
 
 
 ## Additional Information
-Please refer to the [LPOT document](https://intel.github.io/lpot/) for further details.
+Please refer to the [Intel® Neural Compressor document](https://intel.github.io/neural-compressor/README.html) for further details.
 
 Some [tips](tips.md) to reduce the data processing time are also provided for this tutorial .
