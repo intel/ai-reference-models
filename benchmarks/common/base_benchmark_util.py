@@ -172,7 +172,7 @@ class BaseBenchmarkUtil(object):
             dest="weight_sharing", action="store_true")
         self._common_arg_parser.add_argument(
             "--synthetic-data",
-            help="Enables synthetic data layer for some models where support exists",
+            help="Enables synthetic data layer for some models like SSD-ResNet34 where support exists",
             dest="synthetic_data", action="store_true")
 
         self._common_arg_parser.add_argument(

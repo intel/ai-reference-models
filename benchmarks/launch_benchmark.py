@@ -99,8 +99,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             dest="shm_size", default="64m", type=check_shm_size)
 
         arg_parser.add_argument(
-            "--debug", help="Launches debug mode which doesn't execute "
-                            "start.sh when running in a docker container.", action="store_true")
+            "--debug",
+            help="Launches debug mode which doesn't execute "
+                 "start.sh when running in a docker container.", action="store_true")
 
         arg_parser.add_argument(
             "--noinstall",
