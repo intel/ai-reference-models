@@ -239,7 +239,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "TF_SERVING_VERSION": args.tf_serving_version,
             "USE_CASE": str(use_case),
             "VERBOSE": args.verbose,
-            "WEIGHT_SHARING": args.weight_sharing
+            "WEIGHT_SHARING": args.weight_sharing,
+            "SYNTHETIC_DATA": args.synthetic_data
         }
 
         # Add custom model args as env vars)

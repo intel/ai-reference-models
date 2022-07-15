@@ -307,6 +307,10 @@ weight_sharing_arg=""
 if [ ${WEIGHT_SHARING} == "True" ]; then
   weight_sharing_arg="--weight-sharing"
 fi
+synthetic_data_arg=""
+if [ ${SYNTHETIC_DATA} == "True" ]; then
+  synthetic_data_arg="--synthetic-data"
+fi
 accuracy_only_arg=""
 if [ ${ACCURACY_ONLY} == "True" ]; then
   accuracy_only_arg="--accuracy-only"
@@ -402,6 +406,7 @@ ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
 ${weight_sharing_arg} \
+${synthetic_data_arg} \
 ${verbose_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
@@ -1291,7 +1296,10 @@ function ssd-resnet34() {
           if [ ${PRECISION} == "bfloat16" ]; then
             git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
           fi
-          cd ${old_dir}
+          if [ ${SYNTHETIC_DATA} == "True" ]; then
+	    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/no_gpu_preprocess.diff
+          fi  
+	  cd ${old_dir}
 
           CMD="${CMD} \
           $(add_arg "--weight_decay" ${WEIGHT_DECAY}) \

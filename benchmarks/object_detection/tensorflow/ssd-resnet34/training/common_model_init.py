@@ -91,6 +91,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         cmd_args += " --mkl=True --device=cpu --data_format=NHWC"
         cmd_args += " --variable_update=horovod --horovod_device=cpu"
         cmd_args += " --batch_group_size={0}".format(self.args.num_train_steps + 10)
+
         # check if user has any kmp related environmental variables set
         # if set, then pass those parameter to the training script
         if os.environ["KMP_AFFINITY"]:
