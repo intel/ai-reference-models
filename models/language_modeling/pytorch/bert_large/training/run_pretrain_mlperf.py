@@ -406,9 +406,9 @@ def parse_args():
 
 def found_resume_checkpoint(args):
     if args.phase2:
-        checkpoint_str = "phase2_ckpt*.pt"
+        checkpoint_str = "pytorch_model.bin"
     else:
-        checkpoint_str = "phase1_ckpt*.pt"
+        checkpoint_str = "pytorch_model.bin"
     return args.resume_from_checkpoint and len(glob.glob(os.path.join(args.output_dir, checkpoint_str))) > 0
 
 def setup_training(args):
@@ -848,22 +848,25 @@ def main():
                     samples_trained_prev = samples_trained
                     if utils.is_main_process() and not args.skip_checkpoint:
                         # Save a trained model
-                        model_to_save = model.module if hasattr(model,
-                                                                'module') else model  # Only save the model it-self
-                        if args.phase2:
-                            output_save_file = os.path.join(args.output_dir, "phase2_ckpt_{}.pt".format(samples_trained))
-                        else:
-                            output_save_file = os.path.join(args.output_dir, "phase1_ckpt_{}.pt".format(samples_trained))
-                        if args.do_train:
-                            torch.save({'model': model_to_save.state_dict(),
-                                        'optimizer': optimizer.state_dict(),
-                                        #'master params': list(amp.master_params(optimizer)),
-                                        'files': [f_id] + files}, output_save_file)
+                        model.save_pretrained(args.output_dir)
+                        model.config.to_json_file(args.output_dir+"config.json")
 
-                            most_recent_ckpts_paths.append(output_save_file)
-                            if len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints:
-                                ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
-                                os.remove(ckpt_to_be_removed)
+                        #model_to_save = model.module if hasattr(model,
+                        #                                        'module') else model  # Only save the model it-self
+                        #if args.phase2:
+                        #    output_save_file = os.path.join(args.output_dir, "phase2_ckpt_{}.pt".format(samples_trained))
+                        #else:
+                        #    output_save_file = os.path.join(args.output_dir, "phase1_ckpt_{}.pt".format(samples_trained))
+                        #if args.do_train:
+                        #    torch.save({'model': model_to_save.state_dict(),
+                        #                'optimizer': optimizer.state_dict(),
+                        #                #'master params': list(amp.master_params(optimizer)),
+                        #                'files': [f_id] + files}, output_save_file)
+                        #
+                        #    most_recent_ckpts_paths.append(output_save_file)
+                        #    if len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints:
+                        #        ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
+                        #        os.remove(ckpt_to_be_removed)
 
                     if samples_trained >= args.max_samples_termination or end_training:
                         status = 'success' if converged else 'aborted'
