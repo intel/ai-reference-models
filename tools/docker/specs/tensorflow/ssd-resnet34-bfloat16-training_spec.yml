@@ -114,7 +114,7 @@ slice_sets:
       source: quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16
     partials:
     - cpio
-    - tensorflow-addons-0.11.0
+    - tensorflow-addons-0.17.1
     - opencv
     - model_package
     - entrypoint

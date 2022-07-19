@@ -1433,7 +1433,6 @@ function transformer_lt_official() {
 function transformer_mlperf() {
   export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
   if [[ ${MODE} == "training" ]]; then
-    #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
     if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
     then
 
