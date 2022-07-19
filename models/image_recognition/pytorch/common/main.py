@@ -232,9 +232,10 @@ def main_worker(gpu, ngpus_per_node, args):
             else:
                 import torch_ccl
 
-        dist.init_process_group(backend=args.dist_backend)
-        #dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
-        #                        world_size=args.world_size, rank=args.rank)
+            dist.init_process_group(backend=args.dist_backend)
+        else:
+            dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
+                                    world_size=args.world_size, rank=args.rank)
     if args.hub:
         torch.set_flush_denormal(True)
         model = torch.hub.load('facebookresearch/WSL-Images', args.arch)
@@ -294,7 +295,7 @@ def main_worker(gpu, ngpus_per_node, args):
                 model.cuda()
         else:
             model = torch.nn.DataParallel(model)
-            if args.cuda():
+            if args.cuda:
                 model.cuda()
 
     # define loss function (criterion) and optimizer
@@ -397,7 +398,7 @@ def main_worker(gpu, ngpus_per_node, args):
             if args.int8:
                 if not args.calibration:
                     from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last) 
+                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
                     qconfig = QConfig(
                             activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
                             weight= PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
@@ -499,6 +500,10 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         if args.ipex:
             images = images.contiguous(memory_format=torch.channels_last)
         # compute output
+        if args.gpu is not None:
+            images = images.cuda(args.gpu, non_blocking=True)
+        if torch.cuda.is_available():
+            target = target.cuda(args.gpu, non_blocking=True)
 
         if args.bf16:
             with torch.cpu.amp.autocast():
@@ -654,6 +659,12 @@ def validate(val_loader, model, criterion, args):
                         images = images.contiguous(memory_format=torch.channels_last)
                     if args.bf16:
                         images = images.to(torch.bfloat16)
+
+                    if args.gpu is not None:
+                        images = images.cuda(args.gpu, non_blocking=True)
+                        if torch.cuda.is_available():
+                            target = target.cuda(args.gpu, non_blocking=True)
+
                     if not args.jit and args.bf16:
                         with torch.cpu.amp.autocast():
                             output = model(images)
