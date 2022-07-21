@@ -44,8 +44,8 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
     <td>
       <p>To run without AI Kit you will need:</p>
       <ul>
-        <li>Python 3.6 or 3.7
-        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
+        <li>Python 3.7 or newer
+        <li><a href="https://pypi.org/project/intel-tensorflow">intel-tensorflow>=2.5.0</a>
         <li>numactl
         <li>git
         <li>wget

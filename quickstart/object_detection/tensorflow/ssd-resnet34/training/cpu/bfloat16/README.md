@@ -15,7 +15,8 @@ Intel-optimized TensorFlow.
 <!--- 30. Datasets -->
 ## Datasets
 
-SSD-ResNet34 training uses the COCO training dataset. Use the [instructions](https://github.com/IntelAI/models/tree/master/datasets/coco/README_train.md) to download and preprocess the dataset.
+SSD-ResNet34 training uses the COCO training dataset. Use the
+[instructions](https://github.com/IntelAI/models/tree/master/datasets/coco/README_train.md) to download and preprocess the dataset.
 
 For accuracy testing, download the COCO validation dataset, using the
 [instructions here](https://github.com/IntelAI/models/tree/master/datasets/coco/README.md).
