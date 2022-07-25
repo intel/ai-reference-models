@@ -38,6 +38,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   mkdir bert_squad_model
   wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-config.json -O bert_squad_model/config.json
   wget https://cdn.huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad-pytorch_model.bin  -O bert_squad_model/pytorch_model.bin
+  wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-vocab.txt -O bert_squad_model/vocab.txt
 ```
 
 * Set ENV to use AMX if you are using SPR
@@ -45,10 +46,16 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
 ```
 
-* Set ENV for model and dataset path
+* Set ENV for model and dataset path, and optionally run with no network support
 ```
   export FINETUNED_MODEL=#path/bert_squad_model
   export EVAL_DATA_FILE=#/path/dev-v1.1.json
+  
+  
+  ### [optional] Pure offline mode to benchmark:
+  change --tokenizer_name to #path/bert_squad_model in scripts before running
+  e.g. --tokenizer_name ${FINETUNED_MODEL} in run_multi_instance_throughput.sh
+  
 ```
 
 * [optional] Do calibration to get quantization config if you want do calibration by yourself.
