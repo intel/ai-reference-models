@@ -117,13 +117,6 @@ and a list of models that are supported on Windows, see the
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Inference | [FP32 Int8 BFloat16**](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md) | [Criteo Terabyte](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md#datasets) |
 | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | PyTorch | Training  | [FP32 BFloat16**](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) | [Criteo Terabyte](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md#datasets) |
 
-
-### Reinforcement
-
-| Model                                          | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
-| ---------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [MiniGo](https://arxiv.org/abs/1712.01815.pdf) | TensorFlow | Training | [FP32](/benchmarks/reinforcement/tensorflow/minigo/README.md#fp32-training-instructions) |
-
 ### Text-to-Speech
 
 | Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
