@@ -104,7 +104,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
-    elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+    elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
       if [[ ! "${OS_VERSION}" =~ "15".* ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
@@ -189,7 +189,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
       horovodrun --check-build
     fi
-  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
     zypper update -y
     zypper install -y gcc gcc-c++ cmake python3-tk libXext6 libSM6
 
@@ -280,7 +280,7 @@ if _running-in-container ; then
       yum update -y
       yum install -y numactl
     fi
-  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
     if [[ $INSTALL_NUMACTL == "True" ]]; then
       zypper update -y
       zypper install -y numactl
