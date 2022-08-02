@@ -310,7 +310,7 @@ class RNNT(torch.nn.Module):
 
         batch_size = y_in.shape[0]
         embedding_dim = self.prediction["embed"].weight.shape[1]
-        y = torch.zeros([batch_size, y_in.shape[1], embedding_dim], dtype=self.prediction["embed"].weight.dtype)
+        y = torch.empty([batch_size, y_in.shape[1], embedding_dim], dtype=self.prediction["embed"].weight.dtype)
 
         self._SOS = -1
         torch.ops.torch_ipex.rnnt_embedding(

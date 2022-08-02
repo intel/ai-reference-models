@@ -294,6 +294,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
         
         # (row, col) of current labels end
         label_col = torch.zeros((batch_size), dtype=torch.int)
+        ones = torch.ones((1), dtype=torch.int)
         time_idxs = torch.zeros((batch_size), dtype=torch.int)
         blank_vec = torch.zeros((batch_size), dtype=torch.int)
         symbols_added = torch.zeros((batch_size), dtype=torch.int)
@@ -348,7 +349,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
                 break
 
         for i in range(batch_size):
-            label_copy[i]=label_tensor[i][1:label_col[i]+1].tolist()
+            label_copy[i]=label_tensor[i][1:label_col[i]+ones].tolist()
         return label_copy
 
     def _pred_step_batch(self, label, hidden, batch_size, ipex):
