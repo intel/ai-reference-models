@@ -62,6 +62,7 @@ def parse_args():
     parser.add_argument("--jit", action='store_true', help='use jit', default=False)
     parser.add_argument("--mix-precision", action='store_true', help='use bf16', default=False)
     parser.add_argument("--profiling", action='store_true', help='do profiling', default=False)
+    parser.add_argument("--dump_tracing", action='store_true', help='dump the profiler tracing result', default=False)
     parser.add_argument("--sort_by_duration", action='store_true', help='sort sequence by duration', default=False)
     parser.add_argument('--calibration', action='store_true', default=False,
                     help='doing int8 calibration step')
@@ -153,12 +154,20 @@ def eval(
                                 break
                             t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
                             if args.profiling:
-                                # with torch.autograd.profiler.profile(args.profiling) as prof:
-                                with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
-                                    conf = None
-                                    t0 = time.perf_counter()
-                                    t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                                    t1 = time.perf_counter()
+                                if args.dump_tracing:
+                                    with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as prof, torch.profiler.record_function("model_inference"):
+                                        conf = None
+                                        t0 = time.perf_counter()
+                                        t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                        t1 = time.perf_counter()
+                                    prof.export_chrome_trace("rnnt_trace_iter_%d.json" % it)
+                                else:                                    
+                                    with torch.autograd.profiler.profile(args.profiling) as prof:
+                                        conf = None
+                                        t0 = time.perf_counter()
+                                        t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                        t1 = time.perf_counter()
+                                    print(prof.key_averages().table(sort_by="self_cpu_time_total"))
                             else:
                                 conf = None
                                 t0 = time.perf_counter()
@@ -200,12 +209,20 @@ def eval(
                                         break
                                     t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
                                     if args.profiling:
-                                        # with torch.autograd.profiler.profile(args.profiling) as prof:
-                                        with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
-                                            conf = None
-                                            t0 = time.perf_counter()
-                                            t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                                            t1 = time.perf_counter()
+                                        if args.dump_tracing:
+                                            with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as prof, torch.profiler.record_function("model_inference"):
+                                                conf = None
+                                                t0 = time.perf_counter()
+                                                t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                                t1 = time.perf_counter()
+                                            prof.export_chrome_trace("rnnt_trace_iter_%d.json" % it)
+                                        else:
+                                            with torch.autograd.profiler.profile(args.profiling) as prof:
+                                                conf = None
+                                                t0 = time.perf_counter()
+                                                t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                                t1 = time.perf_counter()
+                                            print(prof.key_averages().table(sort_by="self_cpu_time_total"))                                          
                                     else:
                                         conf = None
                                         t0 = time.perf_counter()
@@ -245,12 +262,20 @@ def eval(
                                     break
                                 t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
                                 if args.profiling:
-                                    # with torch.autograd.profiler.profile(args.profiling) as prof:
-                                    with torch.profiler.profile(on_trace_ready=torch.profiler.tensorboard_trace_handler('./log')) as prof:
-                                        conf = None
-                                        t0 = time.perf_counter()
-                                        t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
-                                        t1 = time.perf_counter()
+                                    if args.dump_tracing:
+                                        with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as prof, torch.profiler.record_function("model_inference"):
+                                            conf = None
+                                            t0 = time.perf_counter()
+                                            t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                            t1 = time.perf_counter()
+                                        prof.export_chrome_trace("rnnt_trace_iter_%d.json" % it)
+                                    else:
+                                        with torch.autograd.profiler.profile(args.profiling) as prof:
+                                            conf = None
+                                            t0 = time.perf_counter()
+                                            t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
+                                            t1 = time.perf_counter()
+                                        print(prof.key_averages().table(sort_by="self_cpu_time_total"))                                        
                                 else:
                                     conf = None
                                     t0 = time.perf_counter()
