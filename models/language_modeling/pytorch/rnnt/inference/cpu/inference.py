@@ -192,6 +192,8 @@ def eval(
                             print("\nstart warm up, warmp_up steps = ", args.warm_up)
                             for it, data in enumerate(tqdm(data_layer.data_iterator)):
                                 t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
+                                t_audio_signal_e = t_audio_signal_e.to(torch.bfloat16)
+                                
                                 conf = None
                                 t_predictions_e = greedy_decoder.decode(t_audio_signal_e, t_a_sig_length_e, args, conf)
                                 
@@ -208,6 +210,7 @@ def eval(
                                     if epoch * steps_per_epoch + it >= total_steps:
                                         break
                                     t_audio_signal_e, t_a_sig_length_e, t_transcript_e, t_transcript_len_e = audio_processor(data)
+                                    t_audio_signal_e = t_audio_signal_e.to(torch.bfloat16)
                                     if args.profiling:
                                         if args.dump_tracing:
                                             with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as prof, torch.profiler.record_function("model_inference"):
