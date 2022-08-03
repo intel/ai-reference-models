@@ -281,7 +281,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
         not_blank = True
         # initially time_idx is 0 for all input
         # then advance time_idx for each 'track' when needed and update f
-        f = x[:, 0, :].unsqueeze(1)
+        f = x[:, 0, :]
         # this list will be used to return labels to caller
         label_copy = [0 for i in range(batch_size)]
 
@@ -364,7 +364,6 @@ class RNNTGreedyDecoder(TransducerDecoder):
     def _joint_step_batch(self, enc, pred, log_normalize=False):
         logits = self._model.joint_inference(enc, pred)
         # In inference, logits is 3d: (B, T=1, H)
-        logits = logits[:, 0, :]
         if not log_normalize:
             return logits
 

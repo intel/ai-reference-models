@@ -331,7 +331,7 @@ class RNNT(torch.nn.Module):
 
         y = y.transpose_(0, 1)  # .contiguous()   # (U + 1, B, H)
         g, hid = self.prediction["dec_rnn"](y, state)
-        g = g.transpose_(0, 1)  # .contiguous()   # (B, U + 1, H)
+        g = g.squeeze(0)  # .contiguous()   # (B, U + 1, H)
         # del y, state
         return g, hid
         
@@ -370,7 +370,7 @@ class RNNT(torch.nn.Module):
         # In inference case, time step = 1
         # f: (B, T = 1, H1 = 1024)
         # g: (B, T = 1, H2 = 320)
-        inp = torch.cat([f, g], dim=2)   # (B, T, H1 + H2)
+        inp = torch.cat([f, g], dim=1)   # (B, T, H1 + H2)
         res = self.joint_net(inp)
         del f, g, inp
         return res
