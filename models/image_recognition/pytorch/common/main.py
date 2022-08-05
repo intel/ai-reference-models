@@ -436,15 +436,6 @@ def main_worker(gpu, ngpus_per_node, args):
         return
 
 
-    if args.ipex:
-        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
-        if args.bf16:
-            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16,
-                                             optimizer=optimizer, sample_input=sample_input)
-        else:
-            model, optimizer = ipex.optimize(model, dtype=torch.float32,
-                                             optimizer=optimizer, sample_input=sample_input)
-
     # parallelize
     if args.distributed and not args.cuda and args.gpu is None:
         print("create DistributedDataParallel in CPU")
@@ -496,14 +487,17 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         print("running bfloat16 training step\n")
     else:
         print("running fp32 training step\n")
+
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
+        if args.ipex:
+            images = images.contiguous(memory_format=torch.channels_last)
+        if args.bf16:
+            images = images.to(torch.bfloat16)
         if i == args.warmup_iterations:
             print("begin collecting time................................")
         if i >= args.warmup_iterations:
             data_time.update(time.time() - end)
-        if args.ipex:
-            images = images.contiguous(memory_format=torch.channels_last)
         # compute output
         if args.gpu is not None:
             images = images.cuda(args.gpu, non_blocking=True)
@@ -518,7 +512,8 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
             output = model(images)
         loss = criterion(output, target)
         # compute gradient and do SGD step
-        optimizer.zero_grad()
+        if not args.distributed:
+            optimizer.zero_grad(set_to_none=True)
         loss.backward()
         optimizer.step()
 
