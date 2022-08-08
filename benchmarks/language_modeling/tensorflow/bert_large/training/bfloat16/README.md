@@ -86,6 +86,8 @@ cd models
 export CHECKPOINT_DIR=<path to the pretrained bert model directory>
 export DATASET_DIR=<path to the dataset being used>
 export OUTPUT_DIR=<directory where checkpoints and log files will be saved>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/<script name>.sh
@@ -116,6 +118,8 @@ export CHECKPOINT_DIR=<path to the pretrained bert model directory>
 export DATASET_DIR=<path to the dataset being used>
 export OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 export MPI_NUM_PROCESSES=<number of sockets to use>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/language_modeling/tensorflow/bert_large/training/cpu/bfloat16/<script name>.sh

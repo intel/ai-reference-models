@@ -53,6 +53,12 @@ cd ${TF_MODELS_DIR}
 git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
 cd ${MODEL_DIR}
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="100"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 # Run training with one mpi process
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -63,7 +69,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --precision fp32 \
    --mode training \
    --num-train-steps 100 \
-   --batch-size 100 \
+   --batch-size ${BATCH_SIZE} \
    --weight_decay=1e-4 \
    --mpi_num_processes=${MPI_NUM_PROCESSES} \
    --mpi_num_processes_per_socket=1 \

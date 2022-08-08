@@ -58,6 +58,12 @@ if [ ! -d "${CHECKPOINT_DIR}" ]; then
   exit 1
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="100"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 # Run training with one mpi process
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -67,7 +73,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --framework tensorflow \
   --precision bfloat16 \
   --mode training \
-  --batch-size=100 \
+  --batch-size=${BATCH_SIZE} \
   --mpi_num_processes=${MPI_NUM_PROCESSES} \
   --mpi_num_processes_per_socket=1 \
   --checkpoint ${CHECKPOINT_DIR} \

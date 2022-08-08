@@ -13,6 +13,8 @@ cd tf-spr-resnet50v1-5-training
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
 export OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run the container with training.sh quickstart script
 ./run.sh

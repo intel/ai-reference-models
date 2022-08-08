@@ -30,6 +30,12 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+batch_size_env=""
+
+if [ ! -z "${BATCH_SIZE}" ]; then
+  batch_size_env="--env BATCH_SIZE=${BATCH_SIZE}"
+fi
+
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:tf-spr-bert-large-pretraining}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
 WORKDIR=/workspace/tf-spr-bert-large-pretraining
@@ -43,6 +49,7 @@ if [[ ${SCRIPT} != quickstart* ]]; then
 fi
 
 docker run --rm \
+  ${batch_size_env} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
