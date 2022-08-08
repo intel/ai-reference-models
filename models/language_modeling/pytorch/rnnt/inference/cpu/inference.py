@@ -407,11 +407,11 @@ def main(args):
         from rnn import IPEXStackTime
         if args.bf32:
             ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-        model.joint_net.eval()
+        model.eval()
         data_type = torch.bfloat16 if args.mix_precision else torch.float32
         if model.encoder["stack_time"].factor == 2:
             model.encoder["stack_time"] = IPEXStackTime(model.encoder["stack_time"].factor)
-        model.joint_net = ipex.optimize(model.joint_net, dtype=data_type, auto_kernel_selection=True)
+        model = ipex.optimize(model, dtype=data_type, auto_kernel_selection=True, optimize_lstm=True)
         model.prediction["embed"] = model.prediction["embed"].to(data_type)
         if args.jit:
             print("running jit path")
