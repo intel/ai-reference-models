@@ -81,6 +81,8 @@ export DATASET_DIR=<path to the Wide & Deep dataset directory>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<pretrained model directory>
 export TF_MODELS_DIR=<path to tensorflow-models directory>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/recommendation/tensorflow/wide_deep/inference/cpu/fp32/<script name>.sh
 ```
@@ -94,6 +96,8 @@ set PRETRAINED_MODEL=<pretrained model directory>
 set DATASET_DIR=<path to the Wide & Deep dataset directory>
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<path to tensorflow-models directory>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\recommendation\tensorflow\wide_deep\inference\cpu\fp32\<script name>.sh
 ```

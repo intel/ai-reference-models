@@ -49,7 +49,12 @@ if [[ -z "${CHECKPOINT_DIR}" ]]; then
 fi
 
 PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/pretrained_model/asymmetric_per_channel_bert_int8.pb}
-BATCH_SIZE="32"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="32"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

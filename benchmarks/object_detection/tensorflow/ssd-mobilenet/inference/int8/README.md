@@ -117,6 +117,8 @@ cd models
 export PRETRAINED_MODEL=<path to the pretrained model pb file>
 export DATASET_DIR=<path to the coco tf record file>
 export OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8/<script name>.sh
 ```
@@ -130,6 +132,8 @@ cd models
 set PRETRAINED_MODEL=<path to the pretrained model pb file>
 set DATASET_DIR=<path to the coco tf record file>
 set OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\object_detection\tensorflow\ssd-mobilenet\inference\cpu\int8\<script name>.sh
 ```

@@ -46,6 +46,8 @@ cd models
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the frozen graph>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run inference with an accuracy check
 ./quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/cpu/int8/int8_accuracy.sh

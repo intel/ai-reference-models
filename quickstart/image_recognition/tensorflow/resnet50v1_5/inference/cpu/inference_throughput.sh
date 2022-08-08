@@ -62,12 +62,17 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-BATCH_SIZE="256"
 MODE="inference"
 CORES_PER_INSTANCE="socket"
 # Get number of cores per socket line from lscpu
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="256"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr

@@ -47,8 +47,13 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-BATCH_SIZE="56"
 CORES_PER_INSTANCE="socket"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="56"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \

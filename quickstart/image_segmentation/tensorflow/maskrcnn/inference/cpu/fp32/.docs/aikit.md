@@ -70,6 +70,8 @@ cd models
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export MODEL_SRC_DIR=<path to the Mask RCNN models repo with pre-trained model>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_segmentation/tensorflow/maskrcnn/inference/cpu/fp32/fp32_inference.sh
 ```

@@ -25,6 +25,12 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
+batch_size_env=""
+
+if [ ! -z "${BATCH_SIZE}" ]; then
+  batch_size_env="--env BATCH_SIZE=${BATCH_SIZE}"
+fi
+
 dataset_volume=""
 dataset_env=""
 
@@ -49,6 +55,7 @@ fi
 
 docker run --rm \
   ${dataset_env} \
+  ${batch_size_env} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env http_proxy=${http_proxy} \

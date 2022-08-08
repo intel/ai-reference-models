@@ -21,6 +21,8 @@ cd <package dir>
 
 DATASET_DIR=<path to the SQuAD dataset>
 OUTPUT_DIR=<directory where log files will be saved>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/<script name>.sh

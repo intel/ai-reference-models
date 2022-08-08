@@ -113,6 +113,7 @@ export PRETRAINED_MODEL=<path to the pretrained model frozen graph file>
 
 ./quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/<script name>.sh
 ```
+
 <!--- 90. Resource Links-->
 ## Additional Resources
 

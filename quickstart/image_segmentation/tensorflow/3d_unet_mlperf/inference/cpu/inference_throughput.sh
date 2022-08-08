@@ -54,9 +54,17 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 if [[ $PRECISION == "bfloat16" ]]; then
-    BATCH_SIZE="8"
+    # If batch size env is not mentioned, then the workload will run with the default batch size.
+    if [ -z "${BATCH_SIZE}"]; then
+      BATCH_SIZE="8"
+      echo "Running with default batch size of ${BATCH_SIZE}"
+    fi
 else
-    BATCH_SIZE="6"
+    # If batch size env is not mentioned, then the workload will run with the default batch size.
+    if [ -z "${BATCH_SIZE}"]; then
+      BATCH_SIZE="6"
+      echo "Running with default batch size of ${BATCH_SIZE}"
+    fi
 fi
 
 MODE="inference"

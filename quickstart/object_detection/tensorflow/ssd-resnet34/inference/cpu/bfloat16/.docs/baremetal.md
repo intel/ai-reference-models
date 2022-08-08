@@ -50,6 +50,8 @@ testing only -- inference benchmarking uses synthetic data) and an
 ```
 DATASET_DIR=<path to the dataset (for accuracy testing only)>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xzf <package name>

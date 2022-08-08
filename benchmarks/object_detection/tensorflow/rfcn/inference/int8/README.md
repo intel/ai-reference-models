@@ -148,6 +148,8 @@ cd models
 export DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
 export OUTPUT_DIR=<directory where log files will be written>
 export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_inference.sh
 ```
@@ -160,6 +162,8 @@ cd models
 export DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
 export OUTPUT_DIR=<directory where log files will be written>
 export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_accuracy.sh
 ```
@@ -186,6 +190,8 @@ set PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 set DATASET_DIR=<path to COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts>
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\object_detection\tensorflow\rfcn\inference\cpu\int8\<script name>.sh
 ```

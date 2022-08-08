@@ -65,6 +65,8 @@ export DATASET_DIR=<path to the SQuAD dataset>
 export OUTPUT_DIR=<directory where log files will be saved>
 export CHECKPOINT_DIR=<path to the pretrained model checkpoints>
 export PRETRAINED_MODEL=<path to the frozen graph>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/int8/<script name>.sh

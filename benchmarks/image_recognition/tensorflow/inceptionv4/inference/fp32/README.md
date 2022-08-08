@@ -91,6 +91,8 @@ cd models
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 export DATASET_DIR=<path to the ImageNet TF records>
 export OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_recognition/tensorflow/inceptionv4/inference/cpu/fp32/<script name>.sh
 ```
@@ -104,6 +106,8 @@ cd models
 set PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 set DATASET_DIR=<path to the ImageNet TF records>
 set OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\image_recognition\tensorflow\inceptionv4\inference\cpu\fp32\<script name>.sh
 ```

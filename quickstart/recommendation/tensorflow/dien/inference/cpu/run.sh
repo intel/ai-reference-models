@@ -25,6 +25,12 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
+batch_size_env=""
+
+if [ ! -z "${BATCH_SIZE}" ]; then
+  batch_size_env="--env BATCH_SIZE=${BATCH_SIZE}"
+fi
+
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:tf-spr-dien-inference}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
 WORKDIR=/workspace/tf-spr-dien-inference
@@ -41,6 +47,7 @@ fi
 
 docker run --rm \
   ${dataset_env} \
+  ${batch_size_env} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \

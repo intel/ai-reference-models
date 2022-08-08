@@ -272,6 +272,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         checkpoint_path = args.checkpoint
         backbone_model_path = args.backbone_model
         dataset_path = args.data_location
+        batch_size = args.batch_size
 
         mount_external_models_source = args.model_source_dir
         mount_intelai_models = intelai_models
@@ -329,6 +330,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path
+
+        if batch_size:
+            env_var_dict["BATCH_SIZE"] = batch_size
 
         # if using the default output directory, get the full path
         if args.output_dir == "/models/benchmarks/common/tensorflow/logs":
@@ -388,6 +392,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         if args.data_location:
             env_vars += ["--env", "DATASET_LOCATION=/dataset"]
+
+        if args.batch_size:
+            env_vars += ["--env", "BATCH_SIZE=args.batch_size"]
 
         if args.checkpoint:
             env_vars += ["--env", "CHECKPOINT_DIRECTORY=/checkpoints"]

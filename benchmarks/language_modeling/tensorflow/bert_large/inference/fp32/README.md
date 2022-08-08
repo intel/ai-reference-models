@@ -115,6 +115,8 @@ export DATASET_DIR=<path to the dataset being used>
 export OUTPUT_DIR=<directory where log files will be saved>
 export CHECKPOINT_DIR=<path to the pretrained model checkpoints>
 export PRETRAINED_MODEL=<path to the frozen graph>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/fp32/<script name>.sh
@@ -139,10 +141,12 @@ set DATASET_DIR=<path to the dataset being used>
 set OUTPUT_DIR=<directory where log files will be saved>
 set CHECKPOINT_DIR=<path to the pretrained model checkpoints>
 set PRETRAINED_MODEL=<path to the frozen graph>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage (`fp32_benchmark.sh`, `fp32_accuracy.sh`, or `fp32_profile.sh`)
 bash quickstart\language_modeling\tensorflow\bert_large\inference\cpu\fp32\<script name>.sh
-```
+````
 
 <!--- 90. Resource Links-->
 ## Additional Resources

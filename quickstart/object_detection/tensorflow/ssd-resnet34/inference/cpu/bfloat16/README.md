@@ -91,6 +91,8 @@ testing only -- inference benchmarking uses synthetic data) and an
 ```
 DATASET_DIR=<path to the dataset (for accuracy testing only)>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ssd-resnet34-bfloat16-inference.tar.gz
 tar -xzf ssd-resnet34-bfloat16-inference.tar.gz
@@ -113,10 +115,13 @@ data.
 To run inference using synthetic data:
 ```
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env http_proxy=${http_proxy} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env https_proxy=${https_proxy} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
@@ -128,10 +133,13 @@ To test accuracy using the COCO dataset:
 ```
 DATASET_DIR=<path to the COCO directory>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \

@@ -87,12 +87,15 @@ cd tf-spr-mobilenet-v1-inference
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
 export OUTPUT_DIR=<directory where log files will be written>
+Set env variable for BATCH_SIZE to run the workload with a different batch size. If not set, the workload will run with the default batch size which gives the best performance.
+export BATCH_SIZE=<Mention the batch size>
 
 # Run the container with inference_realtime.sh quickstart script
 ./run.sh
 
 # To test accuracy, also specify the dataset directory
 export DATASET_DIR=<path to the dataset>
+export BATCH_SIZE=<Mention the batch size>
 SCRIPT=accuracy.sh ./run.sh
 ```
 

@@ -71,6 +71,8 @@ export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export TF_MODELS_DIR=<path to the TensorFlow models directory tf_models>
 export PRETRAINED_MODEL=<path to the pretrained model>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/recommendation/tensorflow/ncf/inference/cpu/fp32/<script name>.sh
 ```

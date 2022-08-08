@@ -80,6 +80,8 @@ cd models
 export OUTPUT_DIR=<directory where log files will be written>
 export TF_UNET_DIR=<path to the TF UNet directory tf_unet>
 export PRETRAINED_MODEL=<path to the pretrained model>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_segmentation/tensorflow/unet/inference/cpu/fp32/fp32_inference.sh
 ```
