@@ -435,6 +435,10 @@ def main_worker(gpu, ngpus_per_node, args):
         validate(val_loader, model, criterion, args)
         return
 
+    # for bf32 path, calling ipex.optimize to calling ipex conv which enabled bf32 path
+    if args.ipex and args.bf32:
+        model, optimizer = ipex.optimize(model, dtype=torch.float32,
+                                         optimizer=optimizer, sample_input=sample_input)
 
     # parallelize
     if args.distributed and not args.cuda and args.gpu is None:
