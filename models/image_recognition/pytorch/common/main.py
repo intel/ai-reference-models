@@ -437,6 +437,7 @@ def main_worker(gpu, ngpus_per_node, args):
 
     # for bf32 path, calling ipex.optimize to calling ipex conv which enabled bf32 path
     if args.ipex and args.bf32:
+        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
         model, optimizer = ipex.optimize(model, dtype=torch.float32,
                                          optimizer=optimizer, sample_input=sample_input)
 
