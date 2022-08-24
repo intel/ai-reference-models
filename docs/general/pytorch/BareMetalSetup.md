@@ -1,3 +1,8 @@
+# Install Pytorch* and Intel® Extension for PyTorch*
+Follow [these instructions ](https://intel.github.io/intel-extension-for-pytorch/1.12.0/tutorials/installation.html) to install pytorch and IPEX via pip.
+
+## The following components are required by some PyTorch* workloads. Only build them if indicated in the documentation for that workload. 
+
 ### Prepare the environment:
     gcc >= 5
     Cmake >= 3.19.6
@@ -13,11 +18,6 @@
     export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
     export work_space=/home/sdp  (you can get the summary.log in this path where the models performance and accuracy write)   
 
-### Install Pytorch* and Intel® Extension for PyTorch*
-Follow [these instructions ](https://intel.github.io/intel-extension-for-pytorch/1.12.0/tutorials/installation.html) to install pytorch and IPEX via pip.
-
-
-## The following components are required by some PyTorch* workloads. Only build them if indicated in the documentation for that workload. 
 ### Build jemalloc
     cd ..
     git clone  https://github.com/jemalloc/jemalloc.git    
