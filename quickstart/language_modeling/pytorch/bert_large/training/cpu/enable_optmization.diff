@@ -1,8 +1,8 @@
 diff --git a/src/transformers/models/bert/modeling_bert.py b/src/transformers/models/bert/modeling_bert.py
-index ecb0d184a..201913fc8 100755
+index 6e1a41a6b..9d310844f 100755
 --- a/src/transformers/models/bert/modeling_bert.py
 +++ b/src/transformers/models/bert/modeling_bert.py
-@@ -322,6 +322,8 @@ class BertSelfAttention(nn.Module):
+@@ -323,6 +323,8 @@ class BertSelfAttention(nn.Module):
  
          attention_scores = attention_scores / math.sqrt(self.attention_head_size)
          if attention_mask is not None:
@@ -11,15 +11,15 @@ index ecb0d184a..201913fc8 100755
              # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
              attention_scores = attention_scores + attention_mask
  
-@@ -1035,6 +1037,7 @@ class BertForPreTraining(BertPreTrainedModel):
-         self.cls = BertPreTrainingHeads(config)
+@@ -1037,6 +1039,7 @@ class BertForPreTraining(BertPreTrainedModel):
  
-         self.init_weights()
+         # Initialize weights and apply final processing
+         self.post_init()
 +        self.dense_seq_output = config.dense_seq_output
  
      def get_output_embeddings(self):
          return self.cls.predictions.decoder
-@@ -1103,12 +1106,24 @@ class BertForPreTraining(BertPreTrainedModel):
+@@ -1107,12 +1110,24 @@ class BertForPreTraining(BertPreTrainedModel):
          )
  
          sequence_output, pooled_output = outputs[:2]

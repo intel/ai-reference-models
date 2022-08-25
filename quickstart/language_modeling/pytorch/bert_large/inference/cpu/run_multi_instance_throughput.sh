@@ -50,7 +50,7 @@ BATCH_SIZE=${BATCH_SIZE:-56}
 EVAL_DATA_FILE=${EVAL_DATA_FILE:-"${PWD}/squad1.1/dev-v1.1.json"}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"bert_squad_model"}
 OUTPUT_DIR=${OUTPUT_DIR:-${PWD}}
-EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/question-answering/run_squad.py"}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/legacy/question-answering/run_squad.py"}
 work_space=${work_space:-${OUTPUT_DIR}}
 
 rm -rf ${OUTPUT_DIR}/throughput_log*

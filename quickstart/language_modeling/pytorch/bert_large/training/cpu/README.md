@@ -153,7 +153,7 @@ export MODEL_DIR=$(pwd)
 cd quickstart/language_modeling/pytorch/bert_large/training/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.11.3
+git checkout v4.18.0
 git apply ../enable_optmization.diff
 pip install -e ./
 cd ..

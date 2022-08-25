@@ -17,7 +17,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   cd <clone of the model zoo>/quickstart/language_modeling/pytorch/bert_large/inference/cpu
   git clone https://github.com/huggingface/transformers.git
   cd transformers
-  git checkout v3.0.2
+  git checkout v4.18.0
   git apply ../enable_ipex_for_squad.diff
   pip install -e ./
   cd ../

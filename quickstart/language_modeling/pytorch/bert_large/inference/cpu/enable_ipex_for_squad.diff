@@ -1,43 +1,31 @@
-diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..074c2a4b6 100644
---- a/examples/question-answering/run_squad.py
-+++ b/examples/question-answering/run_squad.py
+diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
+index fbf2ebd63..31a64a0b6 100644
+--- a/examples/legacy/question-answering/run_squad.py
++++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
  import os
  import random
  import timeit
 +import time
 +import sys
-+import threading 
++import threading
  
  import numpy as np
  import torch
-@@ -45,19 +48,22 @@ from transformers.data.metrics.squad_metrics import (
-     squad_evaluate,
- )
+@@ -48,7 +51,11 @@ from transformers.data.metrics.squad_metrics import (
  from transformers.data.processors.squad import SquadResult, SquadV1Processor, SquadV2Processor
+ from transformers.trainer_utils import is_main_process
+ 
 -
 +import intel_extension_for_pytorch as ipex
- 
- try:
-     from torch.utils.tensorboard import SummaryWriter
- except ImportError:
-     from tensorboardX import SummaryWriter
- 
--
- logger = logging.getLogger(__name__)
- 
- MODEL_CONFIG_CLASSES = list(MODEL_FOR_QUESTION_ANSWERING_MAPPING.keys())
- MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
- 
 +def trace_handler(prof):
 +    print(prof.key_averages().table(
 +        sort_by="self_cpu_time_total", row_limit=-1))
 +    prof.export_chrome_trace("./log/test_trace_" + str(prof.step_num) + ".json")
- 
- def set_seed(args):
-     random.seed(args.seed)
-@@ -264,19 +270,138 @@ def train(args, train_dataset, model, tokenizer):
+ try:
+     from torch.utils.tensorboard import SummaryWriter
+ except ImportError:
+@@ -266,6 +273,126 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -59,11 +47,11 @@ index 2bd4e90ff..074c2a4b6 100644
 +        # convert model to trace model.
 +        if args.int8_fp32:
 +            model = convert(prepared_model)
-+            model = torch.jit.trace(model, jit_inputs)
++            model = torch.jit.trace(model, jit_inputs, strict=False)
 +        else: #int8_bf16 mix
 +            with torch.cpu.amp.autocast():
 +                model = convert(prepared_model)
-+                model = torch.jit.trace(model, jit_inputs)
++                model = torch.jit.trace(model, jit_inputs, strict=False)
 +        model = torch.jit.freeze(model)
 +        input = {
 +                 "input_ids": dumpy_tensor,
@@ -160,31 +148,22 @@ index 2bd4e90ff..074c2a4b6 100644
 +                    if epoch * steps_per_epoch + it > args.perf_begin_iter:
 +                        total_time +=(time_end - time_start)
 +                    pbar.update(1)
++
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
--
-     if not os.path.exists(args.output_dir) and args.local_rank in [-1, 0]:
-         os.makedirs(args.output_dir)
--
-+ 
+@@ -275,6 +402,7 @@ def evaluate(args, model, tokenizer, prefix=""):
+ 
      args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
  
 +    model = wrap_model(model, args)
      # Note that DistributedSampler samples randomly
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
--
-+      
-     # multi-gpu evaluate
-     if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
-         model = torch.nn.DataParallel(model)
-@@ -285,10 +410,44 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -287,6 +415,40 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
--
-+    
 +    if args.do_calibration:
 +        import intel_extension_for_pytorch as ipex
 +        from intel_extension_for_pytorch.quantization import prepare
@@ -219,14 +198,19 @@ index 2bd4e90ff..074c2a4b6 100644
 +        else:
 +            benchmark_evaluate(args, model, eval_dataloader)        
 +        exit()
+ 
      all_results = []
      start_time = timeit.default_timer()
--
-+    
-     for batch in tqdm(eval_dataloader, desc="Evaluating"):
-         model.eval()
-         batch = tuple(t.to(args.device) for t in batch)
-@@ -658,6 +817,42 @@ def main():
+@@ -321,7 +483,7 @@ def evaluate(args, model, tokenizer, prefix=""):
+             eval_feature = features[feature_index.item()]
+             unique_id = int(eval_feature.unique_id)
+ 
+-            output = [to_list(output[i]) for output in outputs.to_tuple()]
++            output = [to_list(output[i]) for output in outputs]
+ 
+             # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
+             # models only use two.
+@@ -659,6 +821,43 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -266,24 +250,30 @@ index 2bd4e90ff..074c2a4b6 100644
 +                        help="The number of stream to use, used for multi stream module")
 +    parser.add_argument("--instance_number", type=int, default=0,
 +                        help="The socket to run multi stream module, used for multi stream module with multi sockets")
++
      args = parser.parse_args()
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
-diff --git a/src/transformers/modeling_bert.py b/src/transformers/modeling_bert.py
-index 23d25cfa0..b281147af 100644
---- a/src/transformers/modeling_bert.py
-+++ b/src/transformers/modeling_bert.py
-@@ -139,7 +139,7 @@ def mish(x):
-     return x * torch.tanh(nn.functional.softplus(x))
+@@ -730,11 +929,13 @@ def main():
+     args.model_type = args.model_type.lower()
+     config = AutoConfig.from_pretrained(
+         args.config_name if args.config_name else args.model_name_or_path,
++        return_dict=False,
+         cache_dir=args.cache_dir if args.cache_dir else None,
+     )
+     tokenizer = AutoTokenizer.from_pretrained(
+         args.tokenizer_name if args.tokenizer_name else args.model_name_or_path,
+         do_lower_case=args.do_lower_case,
++        return_dict=False,
+         cache_dir=args.cache_dir if args.cache_dir else None,
+         use_fast=False,  # SquadDataset is not compatible with Fast tokenizers which have a smarter overflow handeling
+     )
+diff --git a/src/transformers/models/bert/modeling_bert.py b/src/transformers/models/bert/modeling_bert.py
+index 6e1a41a6b..ae6cdbba2 100755
+--- a/src/transformers/models/bert/modeling_bert.py
++++ b/src/transformers/models/bert/modeling_bert.py
+@@ -323,6 +323,8 @@ class BertSelfAttention(nn.Module):
  
- 
--ACT2FN = {"gelu": gelu, "relu": torch.nn.functional.relu, "swish": swish, "gelu_new": gelu_new, "mish": mish}
-+ACT2FN = {"gelu": torch.nn.functional.gelu, "relu": torch.nn.functional.relu, "swish": swish, "gelu_new": gelu_new, "mish": mish}
- 
- 
- BertLayerNorm = torch.nn.LayerNorm
-@@ -239,6 +239,8 @@ class BertSelfAttention(nn.Module):
-         attention_scores = torch.matmul(query_layer, key_layer.transpose(-1, -2))
          attention_scores = attention_scores / math.sqrt(self.attention_head_size)
          if attention_mask is not None:
 +            if attention_mask.dtype != attention_scores.dtype:
@@ -291,3 +281,16 @@ index 23d25cfa0..b281147af 100644
              # Apply the attention mask is (precomputed for all layers in BertModel forward() function)
              attention_scores = attention_scores + attention_mask
  
+@@ -1863,9 +1865,9 @@ class BertForQuestionAnswering(BertPreTrainedModel):
+             end_loss = loss_fct(end_logits, end_positions)
+             total_loss = (start_loss + end_loss) / 2
+ 
+-        if not return_dict:
+-            output = (start_logits, end_logits) + outputs[2:]
+-            return ((total_loss,) + output) if total_loss is not None else output
++        #if not return_dict:
++        output = (start_logits, end_logits) + outputs[2:]
++        return ((total_loss,) + output) if total_loss is not None else output
+ 
+         return QuestionAnsweringModelOutput(
+             loss=total_loss,
