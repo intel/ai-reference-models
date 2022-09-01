@@ -37,6 +37,7 @@ fi
 mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
+IPEX_ARGS=""
 PRECISION="fp32"
 if [ "$1" == "bf16" ]; then
   ARGS="$ARGS --precision bf16"
@@ -55,39 +56,52 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+
+if [[ ${PLATFORM} == "windows" ]]; then
+  CORES="${NUMBER_OF_PROCESSORS}"
+else
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+fi
 BATCH_SIZE=`expr $CORES \* 2`
 
 rm -rf ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_throughput_log_${PRECISION}_*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-  --use_default_allocator \
-  --throughput_mode \
-  --log_path=${OUTPUT_DIR} \
-  --log_file_prefix="fasterrcnn_resnet50_fpn_throughput_log_${PRECISION}" \
+# check if stoch PYT or IPEX is installed on the system
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch --use_default_allocator \
+	--throughput_mode --log_path=${OUTPUT_DIR} \
+  --log_file_prefix="fasterrcnn_resnet50_fpn_throughput_log_${PRECISION}""
+  ARGS="$ARGS --ipex "
+fi
+
+python ${IPEX_ARGS} \
   ${MODEL_DIR}/models/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/inference.py \
   --data_path ${DATASET_DIR}/coco \
   --arch fasterrcnn_resnet50_fpn \
   --batch_size $BATCH_SIZE \
-  --ipex \
   --jit \
   -j 0 \
   $ARGS
 
 wait
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_throughput_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-        sum = sum / i;
-        printf("%.3f", sum);
-}')
+if [[ ${PLATFORM} == "linux" ]]; then
+  throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_throughput_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+  BEGIN {
+          sum = 0;
+          i = 0;
+        }
+        {
+          sum = sum + $1;
+          i++;
+        }
+  END   {
+          sum = sum / i;
+          printf("%.3f", sum);
+  }')
 
-echo "fasterrcnn_resnet50_fpn;"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+  echo "fasterrcnn_resnet50_fpn;"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

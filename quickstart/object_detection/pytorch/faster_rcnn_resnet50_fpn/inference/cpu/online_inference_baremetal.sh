@@ -37,6 +37,7 @@ fi
 mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
+IPEX_ARGS=""
 PRECISION="fp32"
 if [ "$1" == "bf16" ]; then
   ARGS="$ARGS --precision bf16"
@@ -60,38 +61,47 @@ BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_latency_log_${PRECISION}_*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-  --use_default_allocator \
-  --latency_mode \
-  --log_path=${OUTPUT_DIR} \
-  --log_file_prefix="fasterrcnn_resnet50_fpn_latency_log_${PRECISION}" \
+# check if stoch PYT or IPEX is installed on the system
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch --use_default_allocator \
+	--latency_mode --log_path=${OUTPUT_DIR} \
+	--log_file_prefix="fasterrcnn_resnet50_fpn_latency_log_${PRECISION}""
+  ARGS="$ARGS --ipex "
+fi
+
+python ${IPEX_ARGS} \
   ${MODEL_DIR}/models/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/inference.py \
   --data_path ${DATASET_DIR}/coco \
   --arch fasterrcnn_resnet50_fpn \
   --batch_size $BATCH_SIZE \
-  --ipex \
   --jit \
   -j 0 \
   $ARGS
 
 wait
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-CORES_PER_INSTANCE=4
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
 
-INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+if [[ ${PLATFORM} == "linux" ]]; then
+	CORES=`lscpu | grep Core | awk '{print $4}'`
+	CORES_PER_INSTANCE=4
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_latency_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-        sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.2f", sum);
-}')
-echo "fasterrcnn_resnet50_fpn;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+	INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+
+	throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_latency_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+	BEGIN {
+			sum = 0;
+			i = 0;
+		  }
+		  {
+			sum = sum + $1;
+			i++;
+		  }
+	END   {
+			sum = sum / i * INSTANCES_PER_SOCKET;
+			printf("%.2f", sum);
+	}')
+	echo "fasterrcnn_resnet50_fpn;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

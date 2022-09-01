@@ -80,9 +80,15 @@ BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --enable_jemalloc \
-    --latency_mode \
+# check if stoch PYT or IPEX is installed on the system
+IPEX_ARGS=""
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
+    --enable_jemalloc --latency_mode"
+fi
+
+python ${IPEX_ARGS} \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/test_net.py \
     $ARGS \
     --iter-warmup 20 \
@@ -96,22 +102,27 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-CORES_PER_INSTANCE=4
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
 
-INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+if [[ ${PLATFORM} == "linux" ]]; then
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+  CORES_PER_INSTANCE=4
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-        sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.3f", sum);
-}')
-echo ""maskrcnn";"latency";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+  INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+
+  throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+  BEGIN {
+          sum = 0;
+          i = 0;
+        }
+        {
+          sum = sum + $1;
+          i++;
+        }
+  END   {
+          sum = sum / i * INSTANCES_PER_SOCKET;
+          printf("%.3f", sum);
+  }')
+  echo ""maskrcnn";"latency";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi
