@@ -87,6 +87,9 @@ python ${IPEX_ARGS} \
   --batch_size $BATCH_SIZE \
   --jit \
   -j 0 \
+  -w 1 \
+  -p 1 \
+  --max_iterations 10 \
   $ARGS
 
 wait
