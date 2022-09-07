@@ -30,6 +30,11 @@ if [ -z "${PRECISION}" ]; then
   echo "Please set PRECISION to fp32, int8, or bfloat16."
   exit 1
 fi
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16, and int8"
+  exit 1
+fi
 
 # Use synthetic data (no --data-location arg) if no DATASET_DIR is set
 dataset_arg="--data-location=${DATASET_DIR}"
@@ -42,34 +47,42 @@ elif [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-    if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_int8_pretrained_model.pb"
-    elif [[ $PRECISION == "bfloat16" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_bfloat16_pretrained_model.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_fp32_pretrained_model.pb"
-    else
-        echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
-        exit 1
-    fi
-    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
-    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
-    exit 1
-    fi
-elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+  exit 1
+fi
+    
+if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
 
 MODE="inference"
+# Use 4core/instance 
 CORES_PER_INSTANCE="4"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1"
-  echo "Running with default batch size of ${BATCH_SIZE}"
+BATCH_SIZE="${BATCH_SIZE:-"1"}"
+
+if [ -z "${STEPS}" ]; then
+  STEPS="steps=5000"
+else
+  STEPS="steps=$STEPS"
 fi
+echo "STEPS: $STEPS"
+
+if [ -z "${WARMUP_STEPS}" ]; then
+  WARMUP_STEPS="warmup_steps=2000"
+else
+  WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
+fi
+echo "WARMUP_STEPS: $WARMUP_STEPS"
+
+# System envirables  
+export NOINSTALL=True 
+export TF_ENABLE_MKL_NATIVE_FORMAT=1 
+export TF_ONEDNN_ENABLE_FAST_CONV=1 
+export KMP_BLOCKTIME=1 
+export TF_USE_SYSTEM_ALLOCATOR=1
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
@@ -86,8 +99,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-num-intra-threads ${CORES_PER_INSTANCE} --data-num-inter-threads 1 \
   $@ \
   -- \
-  warmup_steps=50 \
-  steps=1500
+  $WARMUP_STEPS \
+  $STEPS \
 
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep Throughput: | sed -e s"/.*: //"

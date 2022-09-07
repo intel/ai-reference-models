@@ -15,10 +15,13 @@ For any performance and/or benchmarking information on specific Intel platforms,
 
 ## Use cases
 The model documentation in the tables below have information on the
-prerequisites to run each model. The model scripts run on Linux. Select
+prerequisites to run each model. The model scripts run on Linux. Certain
 models are also able to run using bare metal on Windows. For more information
 and a list of models that are supported on Windows, see the
 [documentation here](/docs/general/tensorflow/Windows.md#using-intel-model-zoo-on-windows-systems).
+
+Instructions available to run [TensorFlow ResNet50 v1.5 inference](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README_SPR_baremetal.md) on [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx).
+
 
 ### Image Recognition
 
@@ -31,6 +34,7 @@ and a list of models that are supported on Windows, see the
 | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf)     | TensorFlow | Inference |  [Int8](/benchmarks/image_recognition/tensorflow/resnet101/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/resnet101/inference/fp32/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)      | TensorFlow | Inference | [Int8](/benchmarks/image_recognition/tensorflow/resnet50/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/resnet50/inference/fp32/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | TensorFlow | Inference | [Int8](/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/int8/README.md) [FP32](/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/fp32/README.md) [BFloat16**](/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
+| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet)  [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | TensorFlow | Inference | [Int8 FP32 BFloat16**](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README_SPR_baremetal.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | TensorFlow | Training |  [FP32](/benchmarks/image_recognition/tensorflow/resnet50v1_5/training/fp32/README.md) [BFloat16**](/benchmarks/image_recognition/tensorflow/resnet50v1_5/training/bfloat16/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf)   | TensorFlow Serving | Inference | [FP32](/benchmarks/image_recognition/tensorflow_serving/inceptionv3/README.md#fp32-inference-instructions) | Synthetic Data |
 | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/master/official/resnet) | TensorFlow Serving | Inference | [FP32](/benchmarks/image_recognition/tensorflow_serving/resnet50v1_5/README.md#fp32-inference-instructions) | Synthetic Data |

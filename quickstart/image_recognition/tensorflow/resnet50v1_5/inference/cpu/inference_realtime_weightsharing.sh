@@ -30,6 +30,11 @@ if [ -z "${PRECISION}" ]; then
   echo "Please set PRECISION to int8 or bfloat16."
   exit 1
 fi
+if [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: bfloat16, and int8"
+  exit 1
+fi
 
 # Use synthetic data (no --data-location arg) if no DATASET_DIR is set
 dataset_arg="--data-location=${DATASET_DIR}"
@@ -42,39 +47,59 @@ elif [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-    if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_int8_pretrained_model.pb"
-    elif [[ $PRECISION == "bfloat16" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_bfloat16_pretrained_model.pb"
-    else
-        echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: bfloat16, and int8"
-        exit 1
-    fi
-    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
-    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
-    exit 1
-    fi
-elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+  exit 1
+fi
+    
+if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
 
 # Get number of cores per socket line from lscpu
 export OMP_NUM_THREADS=4
-export KMP_BLOCKTIME=1
+
 MODE="inference"
 
-# If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1"
-  echo "Running with default batch size of ${BATCH_SIZE}"
+# If batch size env is not set, then the workload will run with the default batch size.
+BATCH_SIZE="${BATCH_SIZE:-"1"}"
+
+if [ -z "${STEPS}" ]; then
+  if [[ $PRECISION == "int8" ]]; then
+    STEPS="steps=25000"
+  else
+    STEPS="steps=18000"
+  fi
+else
+  STEPS="steps=$STEPS"
 fi
+echo "STEPS: $STEPS"
+
+if [ -z "${WARMUP_STEPS}" ]; then
+  if [[ $PRECISION == "int8" ]]; then
+    WARMUP_STEPS="warmup_steps=10000"
+  else
+    WARMUP_STEPS="warmup_steps=7200"
+  fi
+else
+  WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
+fi
+echo "WARMUP_STEPS: $WARMUP_STEPS"
+
+# System envirables  
+export NOINSTALL=True 
+export TF_ENABLE_MKL_NATIVE_FORMAT=1 
+export TF_ONEDNN_ENABLE_FAST_CONV=1 
+export KMP_BLOCKTIME=1 
+export TF_USE_SYSTEM_ALLOCATOR=1
+
+# clean up old log files if found
+rm -rf ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _get_numa_cores_lists
-_command numactl --localalloc --physcpubind=${cores_arr[0]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_command numactl --physcpubind=${cores_arr[0]} -m 0 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -83,14 +108,14 @@ _command numactl --localalloc --physcpubind=${cores_arr[0]} python ${MODEL_DIR}/
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${number_of_cores} --num-inter-threads -1 \
-  --data-num-intra-threads ${number_of_cores} --data-num-inter-threads -1 \
+  --num-intra-threads ${cores_per_socket} --num-inter-threads -1 \
+  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads -1 \
   --weight-sharing \
   $@ \
   -- \
-  warmup_steps=100 \
-  steps=1500 >> ${OUTPUT_DIR}/ResNet-50-v1.5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
-numactl --localalloc --physcpubind=${cores_arr[1]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  $WARMUP_STEPS \
+  $STEPS >> ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
+numactl --physcpubind=${cores_arr[1]} -m 1 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -99,11 +124,20 @@ numactl --localalloc --physcpubind=${cores_arr[1]} python ${MODEL_DIR}/benchmark
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${number_of_cores} --num-inter-threads -1 \
-  --data-num-intra-threads ${number_of_cores} --data-num-inter-threads -1 \
+  --num-intra-threads ${cores_per_socket} --num-inter-threads -1 \
+  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads -1 \
   --weight-sharing \
   $@ \
   -- \
-  warmup_steps=100 \
-  steps=1500 >> ${OUTPUT_DIR}/ResNet-50-v1.5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_1.log 2>&1 & \
+  $WARMUP_STEPS \
+  $STEPS >> ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_1.log 2>&1 & \
   wait
+
+if [[ $? == 0 ]]; then
+  cat ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*.log | grep "Total aggregated Throughput" | sed -e s"/.*: //"
+  echo "Throughput summary:"
+  grep 'Total aggregated Throughput' ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*.log | awk -F' ' '{sum+=$4;} END{print sum} '
+  exit 0
+else
+  exit 1
+fi

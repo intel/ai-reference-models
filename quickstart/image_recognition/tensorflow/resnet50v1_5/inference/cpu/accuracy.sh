@@ -30,6 +30,11 @@ if [ -z "${PRECISION}" ]; then
   echo "Please set PRECISION to fp32, int8, or bfloat16."
   exit 1
 fi
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16, and int8"
+  exit 1
+fi
 
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"
@@ -42,33 +47,24 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-    if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_int8_pretrained_model.pb"
-    elif [[ $PRECISION == "bfloat16" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_bfloat16_pretrained_model.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_fp32_pretrained_model.pb"
-    else
-        echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
-        exit 1
-    fi
-    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
-    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
-    exit 1
-    fi
-elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+  exit 1
+fi
+    
+if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
 
+# System envirables
+export NOINSTALL=True
+export TF_ENABLE_MKL_NATIVE_FORMAT=1
+export TF_ONEDNN_ENABLE_FAST_CONV=1
+
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="100"
-  echo "Running with default batch size of ${BATCH_SIZE}"
-fi
+BATCH_SIZE="${BATCH_SIZE:-"100"}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
@@ -82,11 +78,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --accuracy-only \
+  --socket-id 0  --disable-tcmalloc=True \
   $@ 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
 
 if [[ $? == 0 ]]; then
   echo "Accuracy summary:"
-  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Processed 50000 images" | sed -e "s/.* = //"
+  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Processed 50000 images. (Top1 accuracy, Top5 accuracy)" | sed -e "s/.* = //"
   exit 0
 else
   exit 1
