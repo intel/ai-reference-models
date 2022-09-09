@@ -13,3 +13,4 @@ scipy
 batchgenerators
 sklearn
 pandas
+matplotlib

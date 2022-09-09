@@ -87,7 +87,7 @@ modes/precisions:
 
 #### Run FP32 Inference on Windows
 If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
-Then, install the model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt` and `matplotlib`.
+Then, install the model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt`.
 
 Evaluate the model performance:
 Currently, for performance evaluation dummy data is used. The required parameters include: the pre-trained `3dunet_dynamic_ndhwc.pb` input graph file (from step 2) and the `--benchmark-only` flag.
