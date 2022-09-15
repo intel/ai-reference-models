@@ -116,7 +116,7 @@ cd models
 
 export TF_MODELS_DIR=<path to your clone of the TensorFlow models repo>
 export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log and checkpoint files will be written>
+export OUTPUT_DIR=<path to the directory where log and checkpoint files will be written>
 export MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>

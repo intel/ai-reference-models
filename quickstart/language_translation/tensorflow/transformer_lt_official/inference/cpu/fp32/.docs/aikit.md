@@ -69,7 +69,7 @@ cd models
 # Set env vars
 export DATASET_DIR=<path to the test dataset directory>
 export PRETRAINED_MODEL=<path to the frozen graph .pb file>
-export OUTPUT_DIR=<directory where the log and translation file will be written>
+export OUTPUT_DIR=<path to the directory where the log and translation file will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 

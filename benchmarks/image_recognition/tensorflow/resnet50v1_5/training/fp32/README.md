@@ -82,7 +82,7 @@ Navigate to your model zoo directory and then run a [quickstart script](#quick-s
 cd models
 
 export DATASET_DIR=<path to the ImageNet TF records>
-export OUTPUT_DIR=<directory where log files and checkpoints will be written>
+export OUTPUT_DIR=<path to the directory where log files and checkpoints will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 

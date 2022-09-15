@@ -57,7 +57,7 @@ cd models
 
 export DATASET_DIR=<path to the dataset being used>
 export CHECKPOINT_DIR=<path to the unzipped checkpoints>
-export OUTPUT_DIR=<directory where log files will be saved>
+export OUTPUT_DIR=<path to the directory where log files will be saved>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 

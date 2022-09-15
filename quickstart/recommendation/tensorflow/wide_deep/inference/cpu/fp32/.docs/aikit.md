@@ -78,7 +78,7 @@ to run.
 cd models
 
 export DATASET_DIR=<path to the Wide & Deep dataset directory>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<pretrained model directory>
 export TF_MODELS_DIR=<path to tensorflow-models directory>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.

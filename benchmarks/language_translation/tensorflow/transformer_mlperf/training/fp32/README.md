@@ -104,7 +104,7 @@ cd models
 
 # Set required environment variables
 export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 
 # Run a quickstart script
 ./quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/fp32/<script name>.sh

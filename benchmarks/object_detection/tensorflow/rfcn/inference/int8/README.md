@@ -146,7 +146,7 @@ To run inference with performance metrics:
 cd models
 
 export DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
@@ -160,7 +160,7 @@ To get accuracy metrics:
 cd models
 
 export DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>

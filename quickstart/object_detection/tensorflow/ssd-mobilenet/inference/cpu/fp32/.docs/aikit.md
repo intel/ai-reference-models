@@ -89,7 +89,7 @@ cd models
 
 export PRETRAINED_MODEL=<path to the downloaded frozen graph>
 export DATASET_DIR=<path to the coco tf record file>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 

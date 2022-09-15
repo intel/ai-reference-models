@@ -111,7 +111,7 @@ cd models
 export DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
 export TF_MODELS_DIR=<path to the TensorFlow Models repo>
 export PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 

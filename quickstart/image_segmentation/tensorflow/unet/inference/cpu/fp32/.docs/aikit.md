@@ -61,7 +61,7 @@ Once the environment variables are all set, you can run a
 # cd to your model zoo directory
 cd models
 
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_UNET_DIR=<path to the TF UNet directory tf_unet>
 export PRETRAINED_MODEL=<path to the pretrained model>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.

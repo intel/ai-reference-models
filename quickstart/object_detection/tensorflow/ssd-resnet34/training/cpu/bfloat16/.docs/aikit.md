@@ -103,7 +103,7 @@ cd models
 
 export TF_MODELS_DIR=<path to the clone of the TensorFlow models repo>
 export DATASET_DIR=<path to the COCO training data>
-export OUTPUT_DIR=<directory where the log and checkpoint files will be written>
+export OUTPUT_DIR=<path to the directory where the log and checkpoint files will be written>
 export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
@@ -131,7 +131,7 @@ cd models
 
 export TF_MODELS_DIR=<path to the clone of the TensorFlow models repo>
 export DATASET_DIR=<path to the COCO training data>
-export OUTPUT_DIR=<directory where the log file and checkpoints will be written>
+export OUTPUT_DIR=<path to the directory where the log file and checkpoints will be written>
 export MPI_NUM_PROCESSES=<optional, defaults to 4>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
@@ -150,7 +150,7 @@ cd models
 
 export TF_MODELS_DIR=<path to the clone of the TensorFlow models repo>
 export DATASET_DIR=<path to the COCO validation data>
-export OUTPUT_DIR=<directory where the log file will be written>
+export OUTPUT_DIR=<path to the directory where the log file will be written>
 export CHECKPOINT_DIR=<directory where your checkpoint files are located>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
