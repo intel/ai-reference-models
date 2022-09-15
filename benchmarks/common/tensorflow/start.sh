@@ -95,7 +95,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
         exit 1
       fi
     elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
-      if [[ ! "${OS_VERSION}" =~ "18.04".* ]] && [[ ! "${OS_VERSION}" =~ "20.04".* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "18.04".* ]] && [[ ! "${OS_VERSION}" =~ "20.04".* ]] && [[ ! "${OS_VERSION}" =~ "22.04".* ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
