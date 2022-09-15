@@ -80,7 +80,7 @@ Set the directory path to the `PRETRAINED_MODEL` environment variable.
 ```
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/wide_deep_fp32_pretrained_model.tar.gz
 tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
-export PRETRAINED_MODEL=wide_deep_fp32_pretrained_model
+export PRETRAINED_MODEL=$(pwd)/wide_deep_fp32_pretrained_model
 ```
 
 Wide & Deep inference also uses code from the [TensorFlow models repo](https://github.com/tensorflow/models).
