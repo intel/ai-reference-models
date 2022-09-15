@@ -25,6 +25,9 @@ class Model(object):
         elif data_type == 'fp16':
             self.model_dtype = tf.float16
             self.model_vdtype = tf.float16
+        elif data_type == 'bf16' or data_type == 'bfloat16' :
+            self.model_dtype = tf.bfloat16
+            self.model_vdtype = tf.float32
         else:
             raise ValueError("Invalid model data type: %s" % data_type)
 
@@ -58,7 +61,7 @@ class Model(object):
                 self.mask = tf.random.uniform([batch_size, max_length], 
                     minval = 0, 
                     maxval= 1, # TODO
-                    dtype = self.model_dtype,
+                    dtype = self.model_vdtype,
                     name='mask')    
                 self.target_ph = tf.random.uniform([batch_size, 2], 
                     minval = 0, 
@@ -86,7 +89,7 @@ class Model(object):
                 self.uid_batch_ph = tf.compat.v1.placeholder(tf.int32, [None, ], name='uid_batch_ph')
                 self.mid_batch_ph = tf.compat.v1.placeholder(tf.int32, [None, ], name='mid_batch_ph')
                 self.cat_batch_ph = tf.compat.v1.placeholder(tf.int32, [None, ], name='cat_batch_ph')
-                self.mask = tf.compat.v1.placeholder(self.model_dtype, [None, None], name='mask')
+                self.mask = tf.compat.v1.placeholder(self.model_vdtype, [None, None], name='mask')
                 self.seq_len_ph = tf.compat.v1.placeholder(tf.int32, [None], name='seq_len_ph')
                 self.target_ph = tf.compat.v1.placeholder(self.model_vdtype, [None, None], name='target_ph')
                 self.lr = tf.compat.v1.placeholder(tf.float64, [])
@@ -100,18 +103,18 @@ class Model(object):
             if device == 'cpu':
                 with tf.device('/cpu:0'):
                     print('embedding on ' + device)
-                    self.uid_embeddings_var = tf.compat.v1.get_variable("uid_embedding_var", [n_uid, EMBEDDING_DIM], dtype=self.model_dtype)
+                    self.uid_embeddings_var = tf.compat.v1.get_variable("uid_embedding_var", [n_uid, EMBEDDING_DIM], dtype=self.model_vdtype)
                     tf.compat.v1.summary.histogram('uid_embeddings_var', self.uid_embeddings_var)
                     self.uid_batch_embedded = tf.nn.embedding_lookup(self.uid_embeddings_var, self.uid_batch_ph)
 
-                    self.mid_embeddings_var = tf.compat.v1.get_variable("mid_embedding_var", [n_mid, EMBEDDING_DIM], dtype=self.model_dtype)
+                    self.mid_embeddings_var = tf.compat.v1.get_variable("mid_embedding_var", [n_mid, EMBEDDING_DIM], dtype=self.model_vdtype)
                     tf.compat.v1.summary.histogram('mid_embeddings_var', self.mid_embeddings_var)
                     self.mid_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.mid_batch_ph)
                     self.mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.mid_his_batch_ph)
                     if self.use_negsampling:
                         self.noclk_mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.noclk_mid_batch_ph)
 
-                    self.cat_embeddings_var = tf.compat.v1.get_variable("cat_embedding_var", [n_cat, EMBEDDING_DIM], dtype=self.model_dtype)
+                    self.cat_embeddings_var = tf.compat.v1.get_variable("cat_embedding_var", [n_cat, EMBEDDING_DIM], dtype=self.model_vdtype)
                     tf.compat.v1.summary.histogram('cat_embeddings_var', self.cat_embeddings_var)
                     self.cat_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.cat_batch_ph)
                     self.cat_his_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.cat_his_batch_ph)
@@ -119,18 +122,18 @@ class Model(object):
                         self.noclk_cat_his_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.noclk_cat_batch_ph)
             else:
                 print('embedding on ' + device)
-                self.uid_embeddings_var = tf.compat.v1.get_variable("uid_embedding_var", [n_uid, EMBEDDING_DIM], dtype=self.model_dtype)
+                self.uid_embeddings_var = tf.compat.v1.get_variable("uid_embedding_var", [n_uid, EMBEDDING_DIM], dtype=self.model_vdtype)
                 tf.compat.v1.summary.histogram('uid_embeddings_var', self.uid_embeddings_var)
                 self.uid_batch_embedded = tf.nn.embedding_lookup(self.uid_embeddings_var, self.uid_batch_ph)
 
-                self.mid_embeddings_var = tf.compat.v1.get_variable("mid_embedding_var", [n_mid, EMBEDDING_DIM], dtype=self.model_dtype)
+                self.mid_embeddings_var = tf.compat.v1.get_variable("mid_embedding_var", [n_mid, EMBEDDING_DIM], dtype=self.model_vdtype)
                 tf.compat.v1.summary.histogram('mid_embeddings_var', self.mid_embeddings_var)
                 self.mid_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.mid_batch_ph)
                 self.mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.mid_his_batch_ph)
                 if self.use_negsampling:
                     self.noclk_mid_his_batch_embedded = tf.nn.embedding_lookup(self.mid_embeddings_var, self.noclk_mid_batch_ph)
 
-                self.cat_embeddings_var = tf.compat.v1.get_variable("cat_embedding_var", [n_cat, EMBEDDING_DIM], dtype=self.model_dtype)
+                self.cat_embeddings_var = tf.compat.v1.get_variable("cat_embedding_var", [n_cat, EMBEDDING_DIM], dtype=self.model_vdtype)
                 tf.compat.v1.summary.histogram('cat_embeddings_var', self.cat_embeddings_var)
                 self.cat_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.cat_batch_ph)
                 self.cat_his_batch_embedded = tf.nn.embedding_lookup(self.cat_embeddings_var, self.cat_his_batch_ph)
@@ -155,11 +158,16 @@ class Model(object):
         return [(tf.convert_to_tensor(g), v) for g, v in grads_and_vars]
 
     def build_fcn_net(self, inp, use_dice = False):
-        def dtype_getter(getter, name, dtype=None, *args, **kwargs):
-            var = getter(name, dtype=self.model_dtype, *args, **kwargs)
+        def dtype_getter(getter, name, dtype=self.model_dtype, *args, **kwargs):
+            var = getter(name, dtype=dtype, *args, **kwargs)
+            return var
+
+        def dtype_getter_v(getter, name, dtype=self.model_vdtype, *args, **kwargs):
+            var = getter(name, dtype=dtype, *args, **kwargs)
             return var
 
         with tf.compat.v1.variable_scope("fcn1", custom_getter=dtype_getter, dtype=self.model_dtype):
+          with tf.compat.v1.tpu.bfloat16_scope():
             bn1 = tf.compat.v1.layers.batch_normalization(inputs=inp, name='bn1')
             dnn1 = tf.compat.v1.layers.dense(bn1, 200, activation=None, name='f1')
             if use_dice:
@@ -173,10 +181,11 @@ class Model(object):
             else:
                 dnn2 = prelu(dnn2, 'prelu2')
             dnn3 = tf.compat.v1.layers.dense(dnn2, 2, activation=None, name='f3')
-            self.y_hat = tf.nn.softmax(dnn3) + 0.00000001
-            self.y_hat = tf.cast(self.y_hat, tf.float32)
+          dnn3 = tf.cast(dnn3, tf.float32)
+          self.y_hat = tf.nn.softmax(dnn3) + 0.00000001
 
-            with tf.name_scope("Metrics"):
+        with tf.compat.v1.variable_scope("fcn2", custom_getter=dtype_getter_v, dtype=self.model_vdtype):
+          with tf.name_scope("Metrics"):
             #with tf.compat.v1.variable_scope("Metrics", custom_getter=dtype_getter, dtype=self.model_dtype):
                 # Cross-entropy loss and optimizer initialization
                 ctr_loss = - tf.reduce_mean(tf.math.log(self.y_hat) * self.target_ph)
@@ -198,15 +207,14 @@ class Model(object):
                 self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.y_hat), self.target_ph), self.model_vdtype))
                 tf.compat.v1.summary.scalar('accuracy', self.accuracy)
 
-            self.merged =  tf.compat.v1.summary.merge_all()
+          self.merged =  tf.compat.v1.summary.merge_all()
 
     def auxiliary_loss(self, h_states, click_seq, noclick_seq, mask, stag = None):
-        def dtype_getter(getter, name, dtype=None, *args, **kwargs):
-            var = getter(name, dtype=self.model_dtype, *args, **kwargs)
+        def dtype_getter(getter, name, dtype=self.model_dtype, *args, **kwargs):
+            var = getter(name, dtype=dtype, *args, **kwargs)
             return var
 
         with tf.compat.v1.variable_scope("aux_loss", custom_getter=dtype_getter, dtype=self.model_dtype):
-            mask = tf.cast(mask, self.model_dtype)
             click_input_ = tf.concat([h_states, click_seq], -1)
             noclick_input_ = tf.concat([h_states, noclick_seq], -1)
             click_prop_ = self.auxiliary_net(click_input_, stag = stag)[:, :, 0]
@@ -217,8 +225,8 @@ class Model(object):
             return loss_
 
     def auxiliary_net(self, in_, stag='auxiliary_net'):
-        def dtype_getter(getter, name, dtype=None, *args, **kwargs):
-            var = getter(name, dtype=self.model_dtype, *args, **kwargs)
+        def dtype_getter(getter, name, dtype=self.model_dtype, *args, **kwargs):
+            var = getter(name, dtype=dtype, *args, **kwargs)
             return var
 
         with tf.compat.v1.variable_scope("aux_net", custom_getter=dtype_getter, dtype=self.model_dtype):
@@ -506,37 +514,46 @@ class Model_DIN_V2_Gru_Vec_attGru_Neg(Model):
         super(Model_DIN_V2_Gru_Vec_attGru_Neg, self).__init__(n_uid, n_mid, n_cat,
                                                           EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, data_type,
                                                           use_negsampling, synthetic_input, batch_size, max_length, device)
-        def dtype_getter(getter, name, dtype=None, *args, **kwargs):
-            var = getter(name, dtype=self.model_dtype, *args, **kwargs)
+        def castif(inp):
+          return tf.cast(inp, self.model_dtype) if inp.dtype != self.model_dtype else inp
+
+        def castb(inp):
+          return tf.cast(inp, self.model_vdtype) if inp.dtype != self.model_vdtype else inp
+
+        def dtype_getter(getter, name, dtype=self.model_dtype, *args, **kwargs):
+            var = getter(name, dtype=dtype, *args, **kwargs)
             return var
 
-        with tf.compat.v1.variable_scope("dien", custom_getter=dtype_getter, dtype=self.model_dtype):
+        with tf.compat.v1.variable_scope("dien", custom_getter=dtype_getter, dtype=self.model_vdtype):
             # RNN layer(-s)
             with tf.name_scope('rnn_1'):
-                rnn_outputs, _ = dynamic_rnn(tf.compat.v1.nn.rnn_cell.GRUCell(HIDDEN_SIZE), inputs=self.item_his_eb,
+              with tf.compat.v1.tpu.bfloat16_scope():
+                rnn_outputs, _ = dynamic_rnn(tf.compat.v1.nn.rnn_cell.GRUCell(HIDDEN_SIZE), inputs=castif(self.item_his_eb),
                                              sequence_length=self.seq_len_ph, dtype=self.model_dtype,
                                              scope="gru1")
                 tf.compat.v1.summary.histogram('GRU_outputs', rnn_outputs)
 
-            aux_loss_1 = self.auxiliary_loss(rnn_outputs[:, :-1, :], self.item_his_eb[:, 1:, :],
+            aux_loss_1 = self.auxiliary_loss(castb(rnn_outputs[:, :-1, :]), self.item_his_eb[:, 1:, :],
                                              self.noclk_item_his_eb[:, 1:, :],
                                              self.mask[:, 1:], stag="gru")
             self.aux_loss = aux_loss_1
 
             # Attention layer
             with tf.name_scope('Attention_layer_1'):
-                att_outputs, alphas = din_fcn_attention(self.item_eb, rnn_outputs, ATTENTION_SIZE, self.mask,
+                att_outputs, alphas = din_fcn_attention(self.item_eb, castb(rnn_outputs), ATTENTION_SIZE, self.mask,
                                                         softmax_stag=1, stag='1_1', mode='LIST', return_alphas=True)
                 tf.compat.v1.summary.histogram('alpha_outputs', alphas)
 
             with tf.name_scope('rnn_2'):
+              with tf.compat.v1.tpu.bfloat16_scope():
                 rnn_outputs2, final_state2 = dynamic_rnn(VecAttGRUCell(HIDDEN_SIZE), inputs=rnn_outputs,
-                                                         att_scores = tf.expand_dims(alphas, -1),
+                                                         att_scores = tf.expand_dims(castif(alphas), -1),
                                                          sequence_length=self.seq_len_ph, dtype=self.model_dtype,
                                                          scope="gru2")
                 tf.compat.v1.summary.histogram('GRU2_Final_State', final_state2)
 
-            inp = tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum, self.item_eb * self.item_his_eb_sum, final_state2], 1)
+            final_state2 = tf.cast(final_state2, self.model_vdtype)
+            inp = castif(tf.concat([self.uid_batch_embedded, self.item_eb, self.item_his_eb_sum, self.item_eb * self.item_his_eb_sum, final_state2], 1))
             self.build_fcn_net(inp, use_dice=True)
 
 

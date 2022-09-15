@@ -62,6 +62,7 @@ class ModelInitializer(BaseModelInitializer):
 
         self.run_cmd += "{0} {1}".format(self.python_exe, train_script)
         self.run_cmd += " --batch_size {0}".format(args.batch_size)
+        self.run_cmd += " --data_type {0}".format(args.precision)
         self.run_cmd += " --num_inter_threads {0}".format(self.args.num_inter_threads)
         self.run_cmd += " --num_intra_threads {0}".format(self.args.num_intra_threads)
         self.run_cmd += " --data_location {0}".format(self.args.data_location)

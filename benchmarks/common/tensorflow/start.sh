@@ -751,6 +751,9 @@ function dien_options() {
   if [[ -n "${NUM_ITERATIONS}" && ${NUM_ITERATIONS} != "" ]]; then
     CMD=" ${CMD} --num-iterations=${NUM_ITERATIONS}"
   fi
+  if [[ -n "${PRECISION}" && ${PRECISION} != "" ]]; then
+    CMD=" ${CMD} --data-type=${PRECISION}"
+  fi
 }
 
 # DIEN model
@@ -765,7 +768,7 @@ function dien() {
       exit 1
     fi
   elif [ ${MODE} == "training" ]; then
-    if [ ${PRECISION} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
       dien_options
       CMD=${CMD} run_model
 
