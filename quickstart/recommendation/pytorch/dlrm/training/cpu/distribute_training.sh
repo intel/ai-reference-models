@@ -52,18 +52,17 @@ LOG=${OUTPUT_DIR}/dlrm_distribute_training_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-if [[ "$PRECISION" == *"avx"* ]]; then
-    unset DNNL_MAX_CPU_ISA
-fi
-
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "running bf32 path"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16"
+    echo "Supported PRECISIONs are: fp32, bf32, bf16"
     exit 1
 fi
 
@@ -71,8 +70,8 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCHSIZE=$((256*CORES))
 export OMP_NUM_THREADS=$CORES
-torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
-source $torch_ccl_path/env/setvars.sh
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 LOG_0="${LOG}/socket.log"
 python -m intel_extension_for_pytorch.cpu.launch --enable_jemalloc --distributed \

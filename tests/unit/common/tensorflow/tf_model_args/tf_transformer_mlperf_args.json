@@ -2,13 +2,13 @@
   {
     "_comment": "Transformer MLPerf FP32 inference",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=transformer_mlperf --precision=fp32 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --batch-size=64 -i=0 --in-graph=graph.pb --data-location=/dataset --file=newstest2014.en --file_out=translate.txt --reference=newstest2014.de",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/transformer/translate.py --params=big --input_graph=graph.pb --batch_size=64 --test_mode=inference --warmup_steps=3 --steps=100 --vocab_file= --file=newstest2014.en --file_out=/models/benchmarks/common/tensorflow/logs/translate.txt --data_dir=/dataset --num_inter=None --num_intra=None",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/transformer/translate.py --params=big --input_graph=graph.pb --batch_size=64 --test_mode=inference --warmup_steps=3 --steps=100 --vocab_file= --file=newstest2014.en --file_out=/models/benchmarks/common/tensorflow/logs/translate.txt --data_dir=/dataset --inter_op_parallelism_threads=1 --intra_op_parallelism_threads=28",
     "cpuset": "0-111"
   },
   {
     "_comment": "Transformer MLPerf BFloat16 inference",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_translation --model-name=transformer_mlperf --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --batch-size=64 -i=0 --in-graph=graph.pb --data-location=/dataset --file=newstest2014.en --file_out=translate.txt --reference=newstest2014.de",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/bfloat16/transformer/translate.py --params=big --input_graph=graph.pb --batch_size=64 --test_mode=inference --warmup_steps=3 --steps=100 --vocab_file= --file=newstest2014.en --file_out=/models/benchmarks/common/tensorflow/logs/translate.txt --data_dir=/dataset --num_inter=None --num_intra=None",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/bfloat16/transformer/translate.py --params=big --input_graph=graph.pb --batch_size=64 --test_mode=inference --warmup_steps=3 --steps=100 --vocab_file= --file=newstest2014.en --file_out=/models/benchmarks/common/tensorflow/logs/translate.txt --data_dir=/dataset --inter_op_parallelism_threads=1 --intra_op_parallelism_threads=28",
     "cpuset": "0-111"
   },
   {

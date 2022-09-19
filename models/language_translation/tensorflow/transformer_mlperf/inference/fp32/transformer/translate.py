@@ -50,7 +50,7 @@ class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
 
   def begin(self):
     self._global_step_tensor = training_util.get_global_step()
-    if self._global_step_tensor is None:
+    if self._global_step_tensor == None:
       raise RuntimeError("Global step should be created to use UpdateGlobalStepHook.")
     tf.compat.v1.get_default_graph()._unsafe_unfinalize()
     self._updated_global_step = state_ops.assign_add(self._global_step_tensor, 1, use_locking=True)
@@ -157,7 +157,7 @@ def translate_file(
     print('Total number of sentences is %s ' %(num_sentences))
 
     # Write translations in the order they appeared in the original file.
-    if output_file is not None:
+    if output_file != None:
       if tf.io.gfile.isdir(output_file):
         raise ValueError("File output is a directory, will not save outputs to "
                          "file.")
@@ -223,7 +223,7 @@ def translate_text(estimator, subtokenizer, txt):
 def main(unused_argv):
   tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.INFO)
 
-  if FLAGS.text is None and FLAGS.file is None:
+  if FLAGS.text == None and FLAGS.file == None:
     tf.compat.v1.logging.warn("Nothing to translate. Make sure to call this script using "
                     "flags --text or --file.")
     return
@@ -255,18 +255,18 @@ def main(unused_argv):
       model_fn=transformer_main.model_fn, model_dir=FLAGS.model_dir, params=params,
       config=run_config)
 
-  if FLAGS.text is not None:
+  if FLAGS.text != None:
     tf.compat.v1.logging.info("Translating text: %s" % FLAGS.text)
     translate_text(estimator, subtokenizer, FLAGS.text)
 
-  if FLAGS.file is not None:
+  if FLAGS.file != None:
     input_file = os.path.abspath(FLAGS.file)
     tf.compat.v1.logging.info("Translating file: %s" % input_file)
     if not tf.io.gfile.exists(FLAGS.file):
       raise ValueError("File does not exist: %s" % input_file)
 
     output_file = None
-    if FLAGS.file_out is not None:
+    if FLAGS.file_out != None:
       output_file = os.path.abspath(FLAGS.file_out)
       tf.compat.v1.logging.info("File output specified: %s" % output_file)
 
@@ -314,11 +314,11 @@ if __name__ == "__main__":
            "translation to this file.",
       metavar="<FO>")
   parser.add_argument(
-      "--intra_op_parallelism_threads", "-intra", type=int, default=None,
+      "--intra_op_parallelism_threads", "-intra", type=int, default=28,
       help="the intra op parallelism thread to use", metavar="<INTRA>")
   parser.add_argument(
-      "--inter_op_parallelism_threads", "-inter", type=int, default=None,
-      help="the intra op parallelism thread to use", metavar="<INTER>")
+      "--inter_op_parallelism_threads", "-inter", type=int, default=1,
+      help="the inter op parallelism thread to use", metavar="<INTER>")
   parser.add_argument(
       "--batch_size", "-batch", type=int, default=_DECODE_BATCH_SIZE,
       help="the batch size for inference", metavar="<INTER>")

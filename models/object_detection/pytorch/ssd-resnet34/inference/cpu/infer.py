@@ -35,6 +35,8 @@ import torch.fx.experimental.optimization as optimization
 use_ipex = False
 if os.environ.get('USE_IPEX') == "1":
     import intel_extension_for_pytorch as ipex
+    from intel_extension_for_pytorch.quantization import prepare, convert
+    from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
     use_ipex = True
 
 
@@ -90,6 +92,8 @@ def parse_args():
                         help='enable throughput mode')
     parser.add_argument('--latency-mode', action='store_true', default=False,
                         help='enable latency mode')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable ipex bf32 path')
     return parser.parse_args()
 
 
@@ -181,6 +185,13 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
         [inference_time, decoding_time],
         prefix='Test: ')
 
+    if args.bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+
+    # Disable TE, there 2 cat at the end of the forward.
+    # When the inputs of these 2 cat are fp32, there is a fused-cat-cat kernel by TE.
+    # This fused-cat-cat kernel is not efficient as the native cat operation.
+    torch._C._jit_set_texpr_fuser_enabled(False)
     Profilling_iterator = 99
     start = time.time()
     if args.int8:
@@ -188,35 +199,36 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
         print('int8 conv_bn_fusion enabled')
         with torch.no_grad():
             model.model = optimization.fuse(model.model, inplace=False)
-
+            qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8),
+                        weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+            example_inputs = torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last)
+            prepared_model = prepare(model, qconfig, example_inputs=example_inputs, inplace=False)
             if args.calibration:
                 print("runing int8 LLGA calibration step\n")
-                conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)  # qscheme can is torch.per_tensor_affine, torch.per_tensor_symmetric
                 with torch.no_grad():
                     for nbatch, (img, img_id, img_size, bbox, label) in enumerate(val_dataloader):
                         print("nbatch:{}".format(nbatch))
-                        with ipex.quantization.calibrate(conf):
-                            ploc, plabel = model(img)
+                        ploc, plabel = prepared_model(img)
                         if nbatch == args.iteration:
                             break
-                conf.save(args.configure)
+                prepared_model.save_qconf_summary(qconf_summary = args.configure)
                 return
 
             else:
                 print("INT8 LLGA start trace")
                 # insert quant/dequant based on configure.json
-                conf = ipex.quantization.QuantConf(configure_file=args.configure)
-                model = ipex.quantization.convert(model, conf, torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                prepared_model.load_qconf_summary(qconf_summary = args.configure)
+                convert_model = convert(prepared_model)
+                with torch.no_grad():
+                   model = torch.jit.trace(convert_model, example_inputs, check_trace=False).eval()
+                model = torch.jit.freeze(model)
                 print("done ipex default recipe.......................")
-                # freeze the module
-                # model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 
                 # After freezing, run 1 time to warm up the profiling graph executor to insert prim::profile
                 # At the 2nd run, the llga pass will be triggered and the model is turned into an int8 model: prim::profile will be removed and will have LlgaFusionGroup in the graph
                 with torch.no_grad():
                     for i in range(2):
-                        #_, _ = model(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
-                        _, _ = model(torch.randn(args.batch_size, 3, 1200, 1200).to(memory_format=torch.channels_last))
+                        _, _ = model(example_inputs)
 
                 print('runing int8 real inputs inference path')
                 with torch.no_grad():
@@ -484,7 +496,10 @@ def coco_eval(model, val_dataloader, cocoGt, encoder, inv_map, args):
                                             break
                                         total_iteration += 1
             else:
-                print('autocast disabled, fp32 is used')
+                if args.bf32:
+                    print('autocast disabled, bf32 is used')
+                else:
+                    print('autocast disabled, fp32 is used')
                 print('enable nhwc')
                 model = model.to(memory_format=torch.channels_last)
                 if use_ipex:

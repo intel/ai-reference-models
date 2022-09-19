@@ -42,11 +42,14 @@ ARGS=""
 if [[ "$1" == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "### running bf16 datatype"
+elif [[ "$1" == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 datatype"
 elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, and bf16."
+    echo "Supported precisions are: fp32, avx-fp32, bf16, and bf32."
     exit 1
 fi
 
@@ -71,7 +74,7 @@ rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_train_throughput*
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --enable_jemalloc \
-    --throughput_mode \
+    --node_id=0 \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/train_net.py \
     $ARGS \
     --iter-warmup 10 \

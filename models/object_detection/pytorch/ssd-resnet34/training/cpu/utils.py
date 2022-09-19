@@ -4,7 +4,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torch.utils.data as data
 from PIL import Image
-from xml.etree import ElementTree
+from defusedxml import ElementTree
 import os
 import glob
 from pathlib import Path

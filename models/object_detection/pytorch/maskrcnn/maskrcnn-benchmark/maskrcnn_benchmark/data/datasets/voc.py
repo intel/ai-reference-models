@@ -6,9 +6,9 @@ from PIL import Image
 import sys
 
 if sys.version_info[0] == 2:
-    import xml.etree.cElementTree as ET
+    import defusedxml.cElementTree as ET
 else:
-    import xml.etree.ElementTree as ET
+    import defusedxml.ElementTree as ET
 
 
 from maskrcnn_benchmark.structures.bounding_box import BoxList

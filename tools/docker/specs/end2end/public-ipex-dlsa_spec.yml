@@ -1,0 +1,14 @@
+releases:
+  versioned:
+    is_dockerfiles: true
+    tag_specs:
+    - "{_TAG_PREFIX}{end2end-public}{public-ipex-dlsa}"
+slice_sets:
+  public-ipex-dlsa:
+  - add_to_name: -ipex-dlsa
+    dockerfile_subdirectory: "end2end"
+    args: []
+    partials:
+        - end2end/profiling-transformers
+        - end2end/dlsa-conda-patch-installed-ipex
+        - end2end/dlsa-pip-installs

@@ -1,0 +1,13 @@
+diff --git a/scripts/tf_cnn_benchmarks/models/model.py b/scripts/tf_cnn_benchmarks/models/model.py
+index 959195a..6626795 100644
+--- a/scripts/tf_cnn_benchmarks/models/model.py
++++ b/scripts/tf_cnn_benchmarks/models/model.py
+@@ -277,7 +277,7 @@ class CNNModel(Model):
+         information.
+     """
+     images = inputs[0]
+-    images = self.gpu_preprocess_nhwc(images, phase_train)
++    #images = self.gpu_preprocess_nhwc(images, phase_train)
+     if self.data_format == 'NCHW':
+       images = tf.transpose(a=images, perm=[0, 3, 1, 2])
+     var_type = tf.float32

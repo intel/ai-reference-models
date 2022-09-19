@@ -62,38 +62,51 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 BATCH_SIZE=1
 
-python -m intel_extension_for_pytorch.cpu.launch \
-  --use_default_allocator \
-  --latency_mode \
-  --log_path=${OUTPUT_DIR} \
-  --log_file_prefix="inception_v3_latency_log_${PRECISION}" \
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+MULTI_INSTANCE_ARGS=""
+if [[ ${PLATFORM} == "linux" ]]; then
+    pip list | grep intel-extension-for-pytorch
+    if [[ "$?" == 0 ]]; then
+        MULTI_INSTANCE_ARGS="-m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator --latency_mode --log_path=${OUTPUT_DIR} \
+        --log_file_prefix="inception_v3_latency_log_${PRECISION}""
+
+        # in case IPEX is used, we set ipex arg
+        ARGS="${ARGS} --ipex"
+        echo "Running using ${ARGS} args ..."
+    fi
+fi
+
+python ${MULTI_INSTANCE_ARGS} \
   ${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py \
   --data_path ${DATASET_DIR} \
   --arch inception_v3 \
   --batch_size $BATCH_SIZE \
-  --ipex \
   --jit \
   -j 0 \
   $ARGS 
 
 wait
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-CORES_PER_INSTANCE=4
+if [[ ${PLATFORM} == "linux" ]]; then
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+  CORES_PER_INSTANCE=4
 
-INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+  INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/inception_v3_latency_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-        sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.2f", sum);
-}')
-echo "inception_v3;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+  throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/inception_v3_latency_log_${PRECISION}_* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+  BEGIN {
+          sum = 0;
+          i = 0;
+        }
+        {
+          sum = sum + $1;
+          i++;
+        }
+  END   {
+          sum = sum / i * INSTANCES_PER_SOCKET;
+          printf("%.2f", sum);
+  }')
+  echo "inception_v3;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

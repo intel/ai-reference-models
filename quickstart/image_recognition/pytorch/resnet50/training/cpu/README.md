@@ -103,7 +103,7 @@ export MODEL_DIR=$(pwd)
 # Env vars
 export DATASET_DIR=<path_to_Imagenet_Dataset>
 export OUTPUT_DIR=<Where_to_save_log>
-export PRECISION=<precision to run (fp32, avx-fp32, or bf16)>
+export PRECISION=<precision to run (fp32, avx-fp32, bf16, or bf32)>
 export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 
 # Run the training quickstart script

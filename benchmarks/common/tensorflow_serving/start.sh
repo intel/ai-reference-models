@@ -163,10 +163,11 @@ function ssd_mobilenet(){
     # Install protofbuf and other requirement
     pip install \
         Cython \
+        'pillow>=8.1.2' \
         absl-py \
         contextlib2 \
         lxml \
-        'pillow>=8.1.2' \
+        scipy \
         tf_slim
 
     cd ${WORKSPACE}

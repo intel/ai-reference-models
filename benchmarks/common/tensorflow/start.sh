@@ -104,7 +104,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
-    elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+    elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
       if [[ ! "${OS_VERSION}" =~ "15".* ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
@@ -167,7 +167,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=87094a4
+      export HOROVOD_VERSION=1b3452f
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -186,9 +186,10 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # a working commit replace next set of commands with something like:
       yum install -y git make
       yum clean all
-      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      horovodrun --check-build
     fi
-  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
     zypper update -y
     zypper install -y gcc gcc-c++ cmake python3-tk libXext6 libSM6
 
@@ -208,19 +209,21 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=87094a4
+      export HOROVOD_VERSION=1b3452f
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       zypper install -y git make
       zypper clean all
-      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      horovodrun --check-build
     fi
   elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]] || [[ ${OS_PLATFORM} == *"Debian"* ]]; then
     apt-get update -y
-    apt-get install gcc-8 g++-8 cmake python-tk -y
+    apt-get install gcc-9 g++-9 cmake python3-tk -y
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-7 700 --slave /usr/bin/g++ g++ /usr/bin/g++-7
     update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
+    update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 900 --slave /usr/bin/g++ g++ /usr/bin/g++-9
     apt-get install -y libsm6 libxext6 python3-dev
 
     # install google-perftools for tcmalloc
@@ -236,15 +239,15 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=87094a4
+      export HOROVOD_WITH_MPI=1
+      export HOROVOD_VERSION=1b3452f
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
-      python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      # apt-get install -y --no-install-recommends --fix-missing cmake
-      # python3 -m pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      horovodrun --check-build
     fi
   fi
   python3 -m pip install --upgrade 'pip>=20.3.4'
@@ -277,7 +280,7 @@ if _running-in-container ; then
       yum update -y
       yum install -y numactl
     fi
-  elif [[ ${OS_PLATFORM} == *"SLES"* ]]; then
+  elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
     if [[ $INSTALL_NUMACTL == "True" ]]; then
       zypper update -y
       zypper install -y numactl
@@ -303,6 +306,10 @@ fi
 weight_sharing_arg=""
 if [ ${WEIGHT_SHARING} == "True" ]; then
   weight_sharing_arg="--weight-sharing"
+fi
+synthetic_data_arg=""
+if [ ${SYNTHETIC_DATA} == "True" ]; then
+  synthetic_data_arg="--synthetic-data"
 fi
 accuracy_only_arg=""
 if [ ${ACCURACY_ONLY} == "True" ]; then
@@ -399,6 +406,7 @@ ${accuracy_only_arg} \
 ${benchmark_only_arg} \
 ${output_results_arg} \
 ${weight_sharing_arg} \
+${synthetic_data_arg} \
 ${verbose_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
@@ -1288,7 +1296,10 @@ function ssd-resnet34() {
           if [ ${PRECISION} == "bfloat16" ]; then
             git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/${PRECISION}/benchmark-bfloat16.diff
           fi
-          cd ${old_dir}
+          if [ ${SYNTHETIC_DATA} == "True" ]; then
+	    git apply ${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/no_gpu_preprocess.diff
+          fi  
+	  cd ${old_dir}
 
           CMD="${CMD} \
           $(add_arg "--weight_decay" ${WEIGHT_DECAY}) \
@@ -1422,7 +1433,6 @@ function transformer_lt_official() {
 function transformer_mlperf() {
   export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
   if [[ ${MODE} == "training" ]]; then
-    #pip install tensorflow-addons==0.6.0  #/workspace/benchmarks/common/tensorflow/tensorflow_addons-0.6.0.dev0-cp36-cp36m-linux_x86_64.whl
     if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") ]]
     then
 

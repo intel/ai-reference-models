@@ -67,3 +67,20 @@ _get_numa_cores_lists()
     cores_arr[$i]=${node_cores// /,}
   done
 }
+
+_get_platform_type()
+{
+    # check if running on Windows OS
+    PLATFORM='unknown'
+    unamestr=`uname`
+    if [[ "$unamestr" == 'Linux' ]]; then
+       PLATFORM='linux'
+    elif [[ "$unamestr" == "MSYS"* ]]; then
+       PLATFORM='windows'
+    else
+       echo "$unamestr is not supported!"
+    fi
+    echo
+    echo "Running on ${PLATFORM}"
+    echo
+}

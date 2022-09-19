@@ -79,9 +79,13 @@ from schedulers import LinearWarmUpScheduler, LinearWarmupPolyDecayScheduler
 from intel_extension_for_pytorch.optim._lamb import Lamb
 
 try:
-    import torch_ccl
+    if torch.__version__[:6] >= '1.12.0':
+        import oneccl_bindings_for_pytorch
+    else:
+        import torch_ccl
+
 except ImportError as e:
-    torch_ccl = False
+    oneccl_bindings_for_pytorch = False
 import intel_extension_for_pytorch as ipex
 
 
@@ -343,6 +347,10 @@ def parse_args():
                         default=False,
                         action='store_true',
                         help="Enale BFloat16 training")
+    parser.add_argument("--bf32",
+                        default=False,
+                        action='store_true',
+                        help="Enale BFloat32 training")
     parser.add_argument("--benchmark", action="store_true", help="Whether to enable benchmark")
     parser.add_argument("--weight_decay", type=float, default=0.0, help="Weight decay to use.")
     parser.add_argument("--num_train_epochs", type=int, default=3, help="Total number of training epochs to perform.")
@@ -405,7 +413,7 @@ def found_resume_checkpoint(args):
 
 def setup_training(args):
     device = torch.device("cpu")
-    if torch_ccl and int(os.environ.get('PMI_SIZE', '0')) > 1:
+    if oneccl_bindings_for_pytorch and int(os.environ.get('PMI_SIZE', '0')) > 1:
         os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
         os.environ['WORLD_SIZE'] = os.environ.get('PMI_SIZE', '1')
         torch.distributed.init_process_group(backend="ccl")
@@ -593,7 +601,11 @@ def main():
     # Prepare optimizer
     model, optimizer, lr_scheduler, checkpoint, global_step = prepare_model_and_optimizer(args, device)
     model.train()
-    model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
+    if args.bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
+    else:
+        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
     worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
     worker_seed = worker_seeds[args.local_rank]
 
@@ -845,7 +857,7 @@ def main():
                         if args.do_train:
                             torch.save({'model': model_to_save.state_dict(),
                                         'optimizer': optimizer.state_dict(),
-                                        'master params': list(amp.master_params(optimizer)),
+                                        #'master params': list(amp.master_params(optimizer)),
                                         'files': [f_id] + files}, output_save_file)
 
                             most_recent_ckpts_paths.append(output_save_file)

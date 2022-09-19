@@ -3014,7 +3014,7 @@ index a6ceb7c..79691ff 100644
                       train,
                       datasets_repeat_cached_sample,
 -                     num_threads=None,
-+                     num_threads=28,
++                     num_threads=-1,
                       datasets_use_caching=False,
                       datasets_parallel_interleave_cycle_length=None,
                       datasets_sloppy_parallel_interleave=False,
