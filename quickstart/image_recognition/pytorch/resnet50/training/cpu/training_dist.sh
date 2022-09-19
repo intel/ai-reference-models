@@ -61,6 +61,9 @@ fi
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16 --jit"
     echo "running bf16 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    ARGS="$ARGS --bf32 --jit"
+    echo "running bf32 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     ARGS="$ARGS --jit"
     echo "running fp32 path"
@@ -89,8 +92,8 @@ BATCH_SIZE=128
 
 rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_*
 
-torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
-source $torch_ccl_path/env/setvars.sh
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
@@ -107,6 +110,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --epochs $TRAINING_EPOCHS \
     --world-size ${NUM_RANKS} \
     --dist-backend ccl \
+    --train-no-eval \
     -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
 # For the summary of results
 wait

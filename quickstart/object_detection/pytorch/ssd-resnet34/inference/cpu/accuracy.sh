@@ -53,9 +53,12 @@ elif [[ "$1" == "bf16" ]]; then
     echo "### running bf16 datatype"
 elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
+elif [[ "$1" == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, and avx-int8"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, int8, bf32, and avx-int8"
     exit 1
 fi
 
@@ -89,7 +92,7 @@ if [ "$weight_sharing" = true ]; then
     INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
     BATCH_PER_STREAM=1
-    CORES_PER_STREAM=4
+    CORES_PER_STREAM=1
     STREAM_PER_INSTANCE=`expr $CORES / $CORES_PER_STREAM`
     BATCH_SIZE=`expr $BATCH_PER_STREAM \* $STREAM_PER_INSTANCE`
 

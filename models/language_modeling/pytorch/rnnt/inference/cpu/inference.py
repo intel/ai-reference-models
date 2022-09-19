@@ -67,6 +67,8 @@ def parse_args():
                     help='doing int8 calibration step')
     parser.add_argument('--configure-dir', default='configure.json', type=str, metavar='PATH',
                     help = 'path to int8 configures, default file name is configure.json')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable ipex bf32 path')    
     return parser.parse_args()
 
 def eval(
@@ -113,7 +115,7 @@ def eval(
             print("INFERENCE TIME\t\t: {} ms".format((t1-t0)*1000.0))
             print("TRANSCRIPT\t\t:", hypotheses[0])
             return
-        steps_per_epoch = len(data_layer)
+        steps_per_epoch = len(data_layer.data_iterator)
         total_steps = args.steps if args.steps is not None else steps_per_epoch
         test_epoches = int(total_steps / steps_per_epoch)
         print('Evaluating RNNT: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
@@ -300,7 +302,7 @@ def eval(
                         pickle.dump(logits, f, protocol=pickle.HIGHEST_PROTOCOL)
 
             if args.steps:
-                total_samples = args.steps * args.batch_size
+                total_samples = test_epoches * len(data_layer) + (total_steps - test_epoches * steps_per_epoch) * args.batch_size
             else:
                 total_samples = len(data_layer)
 
@@ -375,6 +377,8 @@ def main(args):
     if args.ipex:
         import intel_extension_for_pytorch as ipex
         from rnn import IPEXStackTime
+        if args.bf32:
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         model.joint_net.eval()
         data_type = torch.bfloat16 if args.mix_precision else torch.float32
         if model.encoder["stack_time"].factor == 2:
@@ -405,7 +409,9 @@ def main(args):
         if args.steps is not None:
             print('-----------------')
             # print('Have {0} examples to eval on.'.format(args.steps * args.batch_size * (1 if not torch.distributed.is_available() else torch.distributed.get_world_size())))
-            print('Have {0} examples to eval on.'.format(args.steps * args.batch_size * (1 if not torch.distributed.is_initialized() else torch.distributed.get_world_size())))
+            test_epoches = int(args.steps / step_per_epoch)
+            total_samples = test_epoches * len(data_layer) + (args.steps - test_epoches * step_per_epoch) * args.batch_size
+            print('Have {0} examples to eval on.'.format(total_samples * (1 if not torch.distributed.is_initialized() else torch.distributed.get_world_size())))
             print('Have {0} warm up steps / (gpu * epoch).'.format(args.warm_up))
             print('Have {0} measure steps / (gpu * epoch).'.format(args.steps))
             print('-----------------')

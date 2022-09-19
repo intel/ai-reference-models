@@ -1,5 +1,5 @@
 # Copyright (c) Facebook, Inc. and its affiliates. All Rights Reserved.
-import random
+import numpy as np
 
 import torch
 import torchvision
@@ -34,7 +34,7 @@ class Resize(object):
     # modified from torchvision to add support for max size
     def get_size(self, image_size):
         w, h = image_size
-        size = random.choice(self.min_size)
+        size = np.random.choice(self.min_size)
         max_size = self.max_size
         if max_size is not None:
             min_original_size = float(min((w, h)))
@@ -68,7 +68,7 @@ class RandomHorizontalFlip(object):
         self.prob = prob
 
     def __call__(self, image, target):
-        if random.random() < self.prob:
+        if np.random.random() < self.prob:
             image = F.hflip(image)
             target = target.transpose(0)
         return image, target
@@ -78,7 +78,7 @@ class RandomVerticalFlip(object):
         self.prob = prob
 
     def __call__(self, image, target):
-        if random.random() < self.prob:
+        if np.random.random() < self.prob:
             image = F.vflip(image)
             target = target.transpose(1)
         return image, target

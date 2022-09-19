@@ -34,7 +34,7 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION="3.8"
+ARG PY_VERSION="3.9"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
@@ -73,7 +73,7 @@ RUN apt-get install --no-install-recommends --fix-missing -y \
     systemd && \
     systemctl enable ssh
 
-ARG HOROVOD_VERSION=87094a4
+ARG HOROVOD_VERSION=11c1389
 
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \
@@ -93,7 +93,7 @@ RUN pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
 #
 # RUN pip install git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
 
-ARG PY_VERSION="3.8"
+ARG PY_VERSION="3.9"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \

@@ -42,9 +42,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as functional
-
-import random
-
+import numpy as np
 
 class TransNetV2(nn.Module):
 
@@ -169,7 +167,7 @@ class StackedDDCNNV2(nn.Module):
         if self.shortcut is not None:
             if self.stochastic_depth_drop_prob != 0.:
                 if self.training:
-                    if random.random() < self.stochastic_depth_drop_prob:
+                    if np.random.random() < self.stochastic_depth_drop_prob:
                         x = shortcut
                     else:
                         x = x + shortcut

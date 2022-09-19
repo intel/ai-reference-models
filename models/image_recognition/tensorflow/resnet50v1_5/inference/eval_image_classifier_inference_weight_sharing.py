@@ -157,7 +157,7 @@ class eval_classifier_optimized_graph:
         warm_up = self.args.warmup_steps
         steps = self.args.steps
         time_consume = 0
-        image_np = np.random.uniform(0, 255.0, input_shape)
+        image_np = data_sess.run(images)
         while num_images < steps:
           start_time = time.time()
           predictions = infer_sess.run(output_tensor, feed_dict={input_tensor: image_np})

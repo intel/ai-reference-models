@@ -1,5 +1,5 @@
 diff --git a/examples/question-answering/run_squad.py b/examples/question-answering/run_squad.py
-index 2bd4e90ff..cf28e434a 100644
+index 2bd4e90ff..074c2a4b6 100644
 --- a/examples/question-answering/run_squad.py
 +++ b/examples/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -37,24 +37,34 @@ index 2bd4e90ff..cf28e434a 100644
  
  def set_seed(args):
      random.seed(args.seed)
-@@ -264,19 +270,101 @@ def train(args, train_dataset, model, tokenizer):
+@@ -264,19 +270,138 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
 +def wrap_model(model, args):
 +    model.eval()
 +    ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
-+    dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
++    dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long) \
++                    if not args.use_multi_stream_module \
++                    else torch.ones((args.eval_batch_size//args.num_streams, 384), dtype=torch.long)
 +    jit_inputs = (dumpy_tensor, dumpy_tensor, dumpy_tensor)
 +    print(args)
 +    if args.int8:
-+        conf = ipex.quantization.QuantConf(configure_file=args.int8_config)
++        from intel_extension_for_pytorch.quantization import prepare, convert
++        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++        prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
++        prepared_model.load_qconf_summary(qconf_summary = args.int8_config)
++
 +        # convert model to trace model.
 +        if args.int8_fp32:
-+            model = ipex.quantization.convert(model, conf, jit_inputs)
++            model = convert(prepared_model)
++            model = torch.jit.trace(model, jit_inputs)
 +        else: #int8_bf16 mix
 +            with torch.cpu.amp.autocast():
-+                model = ipex.quantization.convert(model, conf, jit_inputs)
++                model = convert(prepared_model)
++                model = torch.jit.trace(model, jit_inputs)
++        model = torch.jit.freeze(model)
 +        input = {
 +                 "input_ids": dumpy_tensor,
 +                 "attention_mask": dumpy_tensor,
@@ -76,11 +86,28 @@ index 2bd4e90ff..cf28e434a 100644
 +            model = torch.jit.freeze(model)
 +            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 +            print(model.graph)
++    elif args.bf32:
++        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
++        model = ipex.optimize(model, dtype=torch.float32, level="O1", auto_kernel_selection=True)
++        with torch.no_grad():
++             model = torch.jit.trace(model, jit_inputs, strict=False)
++        model = torch.jit.freeze(model)
 +    elif args.use_jit:
 +        with torch.no_grad():
 +            model = torch.jit.trace(model, jit_inputs, strict=False)
 +            #model = torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True)) 
 +            model = torch.jit.freeze(model)
++    if args.use_multi_stream_module:
++        print("Use multi stream module on numa node:{0}, num of streams:{1}, batch per stream:{2}".format(args.instance_number, args.num_streams, args.eval_batch_size//args.num_streams))
++        input_hint_object = {"input_ids": 0, "attention_mask": 0, "token_type_ids": 0}
++        multi_stream_input_hint = ipex.cpu.runtime.MultiStreamModuleHint(**input_hint_object)
++        multi_stream_output_hint = ipex.cpu.runtime.MultiStreamModuleHint((0, 0))
++        cpu_pool = ipex.cpu.runtime.CPUPool(node_id=args.instance_number)
++        model = ipex.cpu.runtime.MultiStreamModule(model,
++                                                num_streams=args.num_streams,
++                                                cpu_pool=cpu_pool,
++                                                input_split_hint = multi_stream_input_hint,
++                                                output_concat_hint = multi_stream_output_hint)
 +    return model 
 +
 +def benchmark_evaluate(args, model, eval_dataloader):
@@ -116,8 +143,18 @@ index 2bd4e90ff..cf28e434a 100644
 +                        "attention_mask": batch[1],
 +                        "token_type_ids": batch[2],
 +                    }
++                    #print("---------------**inputs is:{}".format(**inputs))
 +                    time_start = time.time()
++                    #print("inputs type is: {}".format(type(inputs)))
++                    #print("inputs is: {}".format(inputs))
++
 +                    outputs = model(**inputs)          
++
++                    # print("outputs type is: {}".format(type(outputs)))
++                    # print("outputs len is: {}".format(len(outputs)))
++                    # print("output[0] size is: {}".format(outputs[0].size()))
++                    # print("output[1] size is: {}".format(outputs[1].size()))
++                    # print("outputs is: {}".format(outputs))
 +                    #prof.step()
 +                    time_end = time.time()
 +                    if epoch * steps_per_epoch + it > args.perf_begin_iter:
@@ -142,14 +179,21 @@ index 2bd4e90ff..cf28e434a 100644
      # multi-gpu evaluate
      if args.n_gpu > 1 and not isinstance(model, torch.nn.DataParallel):
          model = torch.nn.DataParallel(model)
-@@ -285,10 +373,38 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -285,10 +410,44 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
 -
 +    
 +    if args.do_calibration:
-+        conf = ipex.quantization.QuantConf(qscheme=torch.per_tensor_affine)
++        import intel_extension_for_pytorch as ipex
++        from intel_extension_for_pytorch.quantization import prepare
++        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++        dumpy_tensor = torch.ones((args.eval_batch_size, 384), dtype=torch.long)
++        jit_inputs=(dumpy_tensor, dumpy_tensor, dumpy_tensor)
++        ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
++        prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
 +        for step, batch in enumerate(eval_dataloader):
 +            print("calibration step: {}".format(step))
 +            batch = {
@@ -157,11 +201,10 @@ index 2bd4e90ff..cf28e434a 100644
 +                "attention_mask": batch[1],
 +                "token_type_ids": batch[2],
 +            }
-+            with ipex.quantization.calibrate(conf):
-+                model(**batch)
++            prepared_model(**batch)
 +            if step == args.calibration_iters -1:
 +                print("calibration finished, quantization info saved on file {}".format(args.int8_config))
-+                conf.save(args.int8_config)
++                prepared_model.save_qconf_summary(qconf_summary = args.int8_config)
 +                exit()
 +    if args.benchmark:
 +        if args.use_share_weight:
@@ -183,7 +226,7 @@ index 2bd4e90ff..cf28e434a 100644
      for batch in tqdm(eval_dataloader, desc="Evaluating"):
          model.eval()
          batch = tuple(t.to(args.device) for t in batch)
-@@ -658,6 +774,36 @@ def main():
+@@ -658,6 +817,42 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -199,6 +242,7 @@ index 2bd4e90ff..cf28e434a 100644
 +                        help="Number iterations to collect time")
 +    parser.add_argument("--benchmark", action='store_true',
 +                        help="Bench the model speed")
++    parser.add_argument("--bf32", action='store_true', help="For enabling IPEX bf32")
 +    parser.add_argument("--use_jit", action='store_true', help="For jit trace")
 +    parser.add_argument('--int8', dest='int8', action='store_true',
 +                        help='use llga int8 in pytorch jit model')
@@ -216,7 +260,12 @@ index 2bd4e90ff..cf28e434a 100644
 +                        help="Number iterations to collect time")
 +    parser.add_argument("--total_cores", type=int, default=28,
 +                        help="Total cores used for this process, used for share_weight mode")
-+
++    parser.add_argument('--use_multi_stream_module', dest='use_multi_stream_module', action='store_true',
++                        help='Whether use multi stream module for throughput mode')
++    parser.add_argument("--num_streams", type=int, default=1,
++                        help="The number of stream to use, used for multi stream module")
++    parser.add_argument("--instance_number", type=int, default=0,
++                        help="The socket to run multi stream module, used for multi stream module with multi sockets")
      args = parser.parse_args()
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:

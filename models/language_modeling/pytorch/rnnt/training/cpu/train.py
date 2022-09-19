@@ -101,8 +101,10 @@ def evaluator(model, data_transforms, loss_fn, greedy_decoder, labels, eval_data
         if args.ipex:
             if args.bf16:
                 print("running bfloat16 evaluation step\n")
-            else:
+            elif args.fp32:
                 print("running fp32 evaluation step\n")
+            elif args.bf32:
+                print("running bf32 evaluation step\n")
 
         for dataset, frequency, name in eval_datasets:
             if epoch % frequency != 0:
@@ -126,7 +128,7 @@ def evaluator(model, data_transforms, loss_fn, greedy_decoder, labels, eval_data
                                 t_log_probs_t, (x_len, y_len) = model(
                                     ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                                 )
-                        elif args.fp32:
+                        elif args.fp32 or args.bf32:
                             t_log_probs_e, (x_len, y_len) = model(
                                 ((t_audio_signal_e, t_transcript_e), (t_a_sig_length_e, t_transcript_len_e)),
                             )
@@ -203,6 +205,8 @@ def train(
             print("running bfloat16 training step\n")
         elif args.fp32:
             print("running fp32 training step\n")
+        elif args.bf32:
+            print("running bf32 training step\n")
         total_time = 0
         while True:
             if multi_gpu:
@@ -231,7 +235,7 @@ def train(
                                 t_log_probs_t, (x_len, y_len) = model(
                                     ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                                 )
-                        elif args.fp32:
+                        elif args.fp32 or args.bf32:
                             t_log_probs_t, (x_len, y_len) = model(
                                 ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                             )
@@ -260,7 +264,7 @@ def train(
                             t_log_probs_t, (x_len, y_len) = model(
                                 ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                             )
-                    elif args.fp32:
+                    elif args.fp32 or args.bf32:
                         t_log_probs_t, (x_len, y_len) = model(
                             ((t_audio_signal_t, t_transcript_t), (t_a_sig_length_t, t_transcript_len_t)),
                         )
@@ -320,7 +324,7 @@ def train(
         if args.num_steps is not None:
             total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
         else:
-            total_samples = len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size
+            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size * args.world_size) / args.world_size
         print("total samples tested: ", total_samples)
         print("Model training time:", total_time, "s")
         perf = total_samples / total_time
@@ -409,7 +413,7 @@ def train(
         if args.num_steps is not None:
             total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
         else:
-            total_samples = len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size
+            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size * args.world_size) / args.world_size
         print("total samples tested: ", total_samples)
         print("Model training time:", total_time, "s")
         perf = total_samples / total_time
@@ -437,7 +441,10 @@ def main(args):
 
         # Initialize the process group with ccl backend
         if args.backend == 'ccl':
-            import torch_ccl
+            if torch.__version__[:6] >= '1.12.0':
+                import oneccl_bindings_for_pytorch
+            else:
+                import torch_ccl 
         dist.init_process_group(
                 backend=args.backend                
         )
@@ -606,12 +613,12 @@ def main(args):
         optimizer.load_state_dict(checkpoint['optimizer'])
 
     if args.ipex:
+        if args.bf32:
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
-            ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
         else:
-            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
-            ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
+            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
 
     if args.world_size > 1:
         device_ids = None
@@ -682,6 +689,7 @@ def parse_args():
     parser.add_argument("--port", default='29500', type=str, help='Port')
     parser.add_argument("--rank", default=0, type=int, help='rank')
     parser.add_argument('--backend', default='gloo', type=str, help='DDP backend, default to gloo')
+    parser.add_argument('--bf32', action='store_true', default=False, help='enable ipex bf32 path')
     args=parser.parse_args()
     return args
 

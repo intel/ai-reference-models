@@ -34,7 +34,7 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION="3.8"
+ARG PY_VERSION="3.9"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \

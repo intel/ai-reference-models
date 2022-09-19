@@ -73,6 +73,7 @@ def do_train(
     test_period,
     arguments,
     bf16=False,
+    bf32=False,
     iterations=-1,
     iter_warmup=-1
 ):
@@ -93,7 +94,11 @@ def do_train(
         iou_types = iou_types + ("keypoints",)
     dataset_names = cfg.DATASETS.TEST
 
-    model, optimizer = ipex.optimize(model, dtype=torch.bfloat16 if bf16 else torch.float, optimizer=optimizer, inplace=True)
+    if bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True, auto_kernel_selection=True)
+    else:
+        model, optimizer = ipex.optimize(model, dtype=torch.bfloat16 if bf16 else torch.float32, optimizer=optimizer, inplace=True)
 
     for iteration, (images, targets, _) in enumerate(data_loader, start_iter):
 
