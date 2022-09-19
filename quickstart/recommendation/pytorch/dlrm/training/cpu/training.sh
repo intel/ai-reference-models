@@ -41,14 +41,12 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 export TEST_FULLY_CONVERGENCE=0
-if [[ "$NUM_BATCH" != "" ]]
-then
-    ARGS="$ARGS --num-batches=${NUM_BATCH}"
-    echo "will early stop after ${NUM_BATCH} batches"
+if [ -z "${NUM_BATCH}" ]; then
+  echo "The required environment variable NUM_BATCH has not been set"
+  exit 1
 else
-    ARGS="$ARGS --lr-num-warmup-steps=8000 --lr-decay-start-step=70000 --lr-num-decay-steps=30000 --learning-rate=18.0 --should-test"
-    echo "not set early stop interaction, will fully test convergence"
-    TEST_FULLY_CONVERGENCE=1
+  ARGS="$ARGS --num-batches=${NUM_BATCH}"
+  echo "will train ${NUM_BATCH} batches"
 fi
  
 
@@ -58,27 +56,27 @@ LOG=${OUTPUT_DIR}/dlrm_training_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
-if [[ "$PRECISION" == *"avx"* ]]; then
-    unset DNNL_MAX_CPU_ISA
-fi
-
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
-elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
+elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "running bf32 path"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, avx-fp32, bf16"
+    echo "Supported PRECISIONs are: fp32, bf32, bf16"
     exit 1
 fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
-BATCHSIZE=$((128*CORES))
+# BATCHSIZE=$((128*CORES))
+BATCHSIZE=32768 # a converged BS and have better performance on SPR
 export OMP_NUM_THREADS=$CORES
 
 LOG_0="${LOG}/socket_0"
-python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+python -m intel_extension_for_pytorch.cpu.launch --node_id=0 --enable_tcmalloc $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
   --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \

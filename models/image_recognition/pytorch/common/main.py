@@ -118,6 +118,8 @@ parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
+parser.add_argument('--train-no-eval', action='store_true',
+                    help='only train, but not evaluate model on validation set')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
 parser.add_argument('--pretrained', dest='pretrained', action='store_true',
@@ -126,7 +128,6 @@ parser.add_argument('--world-size', default=1, type=int,
                     help='number of nodes for distributed training')
 parser.add_argument('--rank', default=0, type=int,
                     help='node rank for distributed training')
-parser.add_argument('--master_addr', default='127.0.0.1', type=str, help='Master Addr')
 parser.add_argument('--port', default='29500', type=str, help='Port')
 parser.add_argument('--dist-url', default='tcp://224.66.41.62:23456', type=str,
                     help='url used to set up distributed training')
@@ -149,6 +150,9 @@ parser.add_argument('--int8', action='store_true', default=False,
                     help='enable ipex int8 path')
 parser.add_argument('--bf16', action='store_true', default=False,
                     help='enable ipex bf16 path')
+parser.add_argument('--bf32', action='store_true', default=False,
+                    help='enable ipex bf32 path')
+
 parser.add_argument('--jit', action='store_true', default=False,
                     help='enable ipex jit fusionpath')
 parser.add_argument('--calibration', action='store_true', default=False,
@@ -213,7 +217,6 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.distributed:
         os.environ['RANK'] = str(os.environ.get('PMI_RANK', args.rank))
         os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', args.world_size))
-        os.environ['MASTER_ADDR'] = args.master_addr
         os.environ['MASTER_PORT'] = args.port
         if args.dist_url == "env://" and args.rank == -1:
             args.rank = int(os.environ["RANK"])
@@ -224,7 +227,11 @@ def main_worker(gpu, ngpus_per_node, args):
 
         # Initialize the process group with ccl backend
         if args.dist_backend == 'ccl':
-            import torch_ccl
+            if torch.__version__[:6] >= '1.12.0':
+                import oneccl_bindings_for_pytorch
+            else:
+                import torch_ccl
+
         dist.init_process_group(backend=args.dist_backend)
         #dist.init_process_group(backend=args.dist_backend, init_method=args.dist_url,
         #                        world_size=args.world_size, rank=args.rank)
@@ -247,6 +254,10 @@ def main_worker(gpu, ngpus_per_node, args):
     # TODO: int8 path: https://jira.devtools.intel.com/browse/MFDNN-6103
     if args.ipex and not args.int8:
         model = model.to(memory_format=torch.channels_last)
+
+    if args.ipex and args.bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        print("using bf32 fmath mode\n")
 
     if not torch.cuda.is_available():
         print('using CPU, this will be slow')
@@ -385,13 +396,18 @@ def main_worker(gpu, ngpus_per_node, args):
             model.eval()
             if args.int8:
                 if not args.calibration:
-                    model = optimization.fuse(model, inplace=True)
-                    conf = ipex.quantization.QuantConf(args.configure_dir)
-                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
-                    model = ipex.quantization.convert(model, conf, x)
-                    with torch.no_grad():
-                        y = model(x)
-                        print(model.graph_for(x))
+                    from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
+                    x = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last) 
+                    qconfig = QConfig(
+                            activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
+                            weight= PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+                    prepared_model = ipex.quantization.prepare(model, qconfig, x, inplace=True)
+                    prepared_model.load_qconf_summary(qconf_summary=args.configure_dir)
+                    model = ipex.quantization.convert(prepared_model)
+                    model = torch.jit.trace(model, x)
+                    model = torch.jit.freeze(model.eval())
+                    y = model(x)
+                    y = model(x)
                     print("running int8 evalation step\n")
             else:
                 if args.bf16:
@@ -415,10 +431,13 @@ def main_worker(gpu, ngpus_per_node, args):
 
 
     if args.ipex:
+        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
         if args.bf16:
-            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16,
+                                             optimizer=optimizer, sample_input=sample_input)
         else:
-            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
+            model, optimizer = ipex.optimize(model, dtype=torch.float32,
+                                             optimizer=optimizer, sample_input=sample_input)
 
     # parallelize
     if args.distributed and not args.cuda and args.gpu is None:
@@ -434,22 +453,23 @@ def main_worker(gpu, ngpus_per_node, args):
         # train for one epoch
         train(train_loader, model, criterion, optimizer, epoch, args)
 
-        # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, args)
+        if not args.train_no_eval:
+            # evaluate on validation set
+            acc1 = validate(val_loader, model, criterion, args)
 
-        # remember best acc@1 and save checkpoint
-        is_best = acc1 > best_acc1
-        best_acc1 = max(acc1, best_acc1)
+            # remember best acc@1 and save checkpoint
+            is_best = acc1 > best_acc1
+            best_acc1 = max(acc1, best_acc1)
 
-        if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-                and args.rank % ngpus_per_node == 0):
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'state_dict': model.state_dict(),
-                'best_acc1': best_acc1,
-                'optimizer' : optimizer.state_dict(),
-            }, is_best)
+            if not args.multiprocessing_distributed or (args.multiprocessing_distributed
+                    and args.rank % ngpus_per_node == 0):
+                save_checkpoint({
+                    'epoch': epoch + 1,
+                    'arch': args.arch,
+                    'state_dict': model.state_dict(),
+                    'best_acc1': best_acc1,
+                    'optimizer' : optimizer.state_dict(),
+                }, is_best)
 
 
 def train(train_loader, model, criterion, optimizer, epoch, args):
@@ -470,10 +490,12 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         print("running bfloat16 training step\n")
     else:
         print("running fp32 training step\n")
-    end = time.time()
     for i, (images, target) in enumerate(train_loader):
         # measure data loading time
-        data_time.update(time.time() - end)
+        if i == args.warmup_iterations:
+            print("begin collecting time................................")
+        if i >= args.warmup_iterations:
+            data_time.update(time.time() - end)
         if args.ipex:
             images = images.contiguous(memory_format=torch.channels_last)
         # compute output
@@ -485,24 +507,25 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         else:
             output = model(images)
         loss = criterion(output, target)
-
-        # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))
-
         # compute gradient and do SGD step
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         # measure elapsed time
-        batch_time.update(time.time() - end)
-        end = time.time()
+        if i >= args.warmup_iterations:
+            batch_time.update(time.time() - end)
+        # measure accuracy and record loss
+        acc1, acc5 = accuracy(output, target, topk=(1, 5))
+        losses.update(loss.item(), images.size(0))
+        top1.update(acc1[0], images.size(0))
+        top5.update(acc5[0], images.size(0))
 
         if i % args.print_freq == 0:
             progress.display(i)
+
+        if i >= args.warmup_iterations - 1:
+            end = time.time()
 
     batch_size = args.batch_size
     perf = batch_size / (batch_time.avg - data_time.avg)
@@ -556,25 +579,28 @@ def validate(val_loader, model, criterion, args):
         prefix='Test: ')
     print('Evaluating RESNET: total Steps: {}'.format(number_iter))
 
-             
+
 
     # switch to evaluate mode
     model.eval()
 
     if args.ipex and args.int8 and args.calibration:
-        model = optimization.fuse(model)
         print("runing int8 calibration step\n")
-        conf = ipex.QuantConf(qscheme=torch.per_tensor_symmetric)
+        import intel_extension_for_pytorch as ipex
+        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
+        qconfig = QConfig(
+                activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
+                weight= PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
+        x = torch.randn(1, 3, 224, 224)
+        prepared_model = ipex.quantization.prepare(model, qconfig, x, inplace=True)
         with torch.no_grad():
             for i, (images, target) in enumerate(val_loader):
-                with ipex.quantization.calibrate(conf):
-                    # compute output
-                    images = images.contiguous(memory_format=torch.channels_last)
-                    output = model(images)
-                    if i == 120:
-                        break
-
-            conf.save(args.configure_dir)
+                images = images.contiguous(memory_format=torch.channels_last)
+                prepared_model(images)
+                if i == 4:
+                    print(i)
+                    break
+            prepared_model.save_qconf_summary(args.configure_dir)
             print(".........calibration step done..........")
     else:
         if args.dummy:

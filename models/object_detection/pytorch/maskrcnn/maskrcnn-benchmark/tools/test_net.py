@@ -66,6 +66,8 @@ def main():
     )
     parser.add_argument('--bf16', action='store_true', default=False,
                         help='enable BF16 by IPEX autocast')
+    parser.add_argument('--bf32', action='store_true', default=False,
+                        help='enable IPEX bf32 path')
     parser.add_argument('--jit', action='store_true', default=False,
                         help='enable IPEX JIT path')
     parser.add_argument('-i', '--iterations', default=-1, type=int, metavar='N',
@@ -137,6 +139,7 @@ def main():
             expected_results_sigma_tol=cfg.TEST.EXPECTED_RESULTS_SIGMA_TOL,
             output_folder=output_folder,
             bf16=args.bf16,
+            bf32=args.bf32,
             jit=args.jit,
             iterations=args.iterations,
             iter_warmup=args.iter_warmup,

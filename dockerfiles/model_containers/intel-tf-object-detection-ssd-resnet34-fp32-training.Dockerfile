@@ -34,7 +34,7 @@ RUN apt-get update && \
         python-tk && \
     pip install requests
 
-ARG PY_VERSION="3.8"
+ARG PY_VERSION="3.9"
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
@@ -86,7 +86,7 @@ RUN cd ${TF_MODELS_DIR}/research && \
 RUN apt-get update && \
     apt-get install -y cpio
 
-RUN pip install tensorflow-addons==0.11.0
+RUN pip install tensorflow-addons==0.17.1
 
 RUN pip install opencv-python
 
@@ -103,7 +103,7 @@ RUN apt-get install --no-install-recommends --fix-missing -y \
     systemd && \
     systemctl enable ssh
 
-ARG HOROVOD_VERSION=87094a4
+ARG HOROVOD_VERSION=11c1389
 
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \

@@ -57,6 +57,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 | FP32 (run 100 steps)        | bash training.sh fp32 | --- | --- |
 | BF16        | bash training.sh bf16 | --- | --- |
 | BF16 (run 500 steps)       | NUM_STEPS=500 bash training.sh bf16 | --- | --- |
+| BF32        | bash training.sh bf32 | --- | --- |
+| BF32 (run 100 steps)       | NUM_STEPS=100 bash training.sh bf32 | --- | --- |
 
 |               Distributed Training                    |
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
@@ -64,6 +66,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 | FP32 (run 100 steps)       | bash training_multinode.sh fp32 | --- | --- |
 | BF16        | bash training_multinode.sh bf16 | --- | --- |
 | BF16 (run 500 steps)        | NUM_STEPS=500 bash training_multinode.sh bf16 | --- | --- |
+| BF32        | bash training_multinode.sh bf32 | --- | --- |
+| BF32 (run 100 steps)        | NUM_STEPS=100 bash training_multinode.sh bf32 | --- | --- |
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and

@@ -60,23 +60,37 @@ export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+MULTI_INSTANCE_ARGS=""
+if [[ ${PLATFORM} == "linux" ]]; then
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+    pip list | grep intel-extension-for-pytorch
+    if [[ "$?" == 0 ]]; then
+        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch \
+        --use_default_allocator --log_path=${OUTPUT_DIR} --log_file_prefix="resnet101_accuracy_log_${PRECISION}""
+        # in case IPEX is used, we set ipex arg
+        ARGS="${ARGS} --ipex"
+        echo "Running using ${ARGS} args ..."
+    fi
+elif [[ ${PLATFORM} == "windows" ]]; then
+  CORES="${NUMBER_OF_PROCESSORS}"
+fi
+
 BATCH_SIZE=`expr $CORES \* 4`
 
-python -m intel_extension_for_pytorch.cpu.launch \
-  --use_default_allocator \
-  --log_path=${OUTPUT_DIR} \
-  --log_file_prefix="resnet101_accuracy_log_${PRECISION}" \
+python ${MULTI_INSTANCE_ARGS} \
   ${MODEL_DIR}/models/image_recognition/pytorch/common/inference.py \
   --data_path ${DATASET_DIR} \
   --arch resnet101 \
   --batch_size $BATCH_SIZE \
-  --ipex \
   --jit \
   -j 0 \
   $ARGS
 
 wait
 
-accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnet101_accuracy_log_${PRECISION}_* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
-echo "resnet101;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+if [[ ${PLATFORM} == "linux" ]]; then
+  accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnet101_accuracy_log_${PRECISION}_* |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+  echo "resnet101;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

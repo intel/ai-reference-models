@@ -1,8 +1,9 @@
 # Transfer Learning for Object Detection using PyTorch
 
 This notebook uses object detection models from torchvision that were originally trained 
-using COCO and does transfer learning with the PennFudan dataset, consisting of 170 images 
-with 345 labeled pedestrians.
+using COCO and does transfer learning with the [PennFudan dataset](https://www.cis.upenn.edu/~jshi/ped_html/), 
+available via public download, or the [Kitti dataset](http://www.cvlibs.net/datasets/kitti/eval_object.php?obj_benchmark=2d), 
+available through torchvision datasets.
 
 The notebook performs the following steps:
 
@@ -24,7 +25,7 @@ virtual environment.
    git clone https://github.com/IntelAI/models.git intelai_models
    export MODEL_ZOO_DIR=$(pwd)/intelai_models
    ```
-2. Create a Python3 virtual environment and install `intel_extension_for_pytorch` and other required packages.
+2. Create a Python3 virtual environment and install required packages.
    
    You can use virtualenv:
    ```
@@ -36,12 +37,9 @@ virtual environment.
    conda create -n intel-pyt python=3.9
    conda activate intel-pyt
    ```
-   Then, from inside the activated virtualenv or conda environment run these steps (note: if you are 
-   inside the Intel firewall, you may need to remove intel.com from your no_proxy environment
-   variable in order to apply proxying for the IPEX download):
+   Then, from inside the activated virtualenv or conda environment run these steps: 
    ```
    pip install --upgrade pip
-   pip install intel_extension_for_pytorch==1.10.100 -f https://software.intel.com/ipex-whl-stable
    pip install -r ${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/pytorch_object_detection/requirements.txt
    ```
 3. Set environment variables for the path to the dataset folder and an output directory.
@@ -63,8 +61,8 @@ virtual environment.
 5. Copy and paste the URL from the terminal to your browser to view and run
    the notebook.
    
-Dataset Citation:
-
+Dataset Citations:
+```
 @InProceedings{10.1007/978-3-540-76386-4_17,
     author="Wang, Liming
     and Shi, Jianbo
@@ -83,4 +81,12 @@ Dataset Citation:
     abstract="We develop an object detection method combining top-down recognition with bottom-up image segmentation. There are two main steps in this method: a hypothesis generation step and a verification step. In the top-down hypothesis generation step, we design an improved Shape Context feature, which is more robust to object deformation and background clutter. The improved Shape Context is used to generate a set of hypotheses of object locations and figure-ground masks, which have high recall and low precision rate. In the verification step, we first compute a set of feasible segmentations that are consistent with top-down object hypotheses, then we propose a False Positive Pruning(FPP) procedure to prune out false positives. We exploit the fact that false positive regions typically do not align with any feasible image segmentation. Experiments show that this simple framework is capable of achieving both high recall and high precision with only a few positive training examples and that this method can be generalized to many object classes.",
     isbn="978-3-540-76386-4"
 }
+
+@INPROCEEDINGS{Geiger2012CVPR,
+    author = {Andreas Geiger and Philip Lenz and Raquel Urtasun},
+    title = {Are we ready for Autonomous Driving? The KITTI Vision Benchmark Suite},
+    booktitle = {Conference on Computer Vision and Pattern Recognition (CVPR)},
+    year = {2012}
+}
+```
 

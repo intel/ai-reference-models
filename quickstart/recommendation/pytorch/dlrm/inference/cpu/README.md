@@ -65,8 +65,8 @@ scripts will automatically use the preprocessed data.
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, avx-fp32, int8, avx-int8, or bf16). |
-| `accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, avx-fp32, int8, avx-int8, or bf16). |
+| `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, bf32, bf16, or int8). |
+| `accuracy.sh` | Measures the inference accuracy for the specified precision (fp32, bf32, bf16, or int8). |
 
 ## Run the model
 

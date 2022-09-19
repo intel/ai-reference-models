@@ -58,12 +58,17 @@ class FeedFowardNetwork(tf.compat.v1.layers.Layer):
     batch_size = tf.shape(input=x)[0]
     length = tf.shape(input=x)[1]
 
+    # Reshape to 2D teansor
+    x = tf.reshape(x, [-1, self.hidden_size])
     output = self.filter_dense_layer(x)
     if self.train:
       mlperf_log.transformer_print(
           key=mlperf_log.MODEL_HP_RELU_DROPOUT, value=self.relu_dropout)
       output = tf.nn.dropout(output, 1 - (1.0 - self.relu_dropout))
     output = self.output_dense_layer(output)
+
+    # Reshaped back to 3D tensor
+    output = tf.reshape(output, [batch_size, length, self.hidden_size])
 
     return output
 

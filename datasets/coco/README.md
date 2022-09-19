@@ -1,4 +1,4 @@
-# COCO Dataset Scripts
+# COCO Validation Dataset
 
 ## Download and preprocess the COCO validation images
 

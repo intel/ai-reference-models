@@ -177,9 +177,6 @@ class Loss(nn.Module):
         # http://jany.st/post/2017-11-05-single-shot-detector-ssd-from-scratch-in-tensorflow.html
         self.con_loss = nn.CrossEntropyLoss(reduce=False)
 
-        #self.con_loss_part1 = nn.LogSoftmax(dim=-1)
-        #self.con_loss_part2 = nn.NLLLoss(reduce=False)
-
     def _loc_vec(self, loc):
         """
             Generate Location Vectors
@@ -189,7 +186,7 @@ class Loss(nn.Module):
 
         return torch.cat((gxy, gwh), dim=1).contiguous()
 
-    def forward(self, ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask, use_autocast):
+    def forward(self, ploc, plabel, gloc, glabel, mask, pos_num, neg_num, num_mask):
         """
             ploc, plabel: Nx4x8732, Nxlabel_numx8732
                 predicted location and labels
@@ -212,20 +209,9 @@ class Loss(nn.Module):
 
         # sum on four coordinates, and mask
         sl1 = self.sl1_loss(ploc, gloc).sum(dim=1)
-        if use_autocast:
-            sl1 = (mask.bfloat16()*sl1).sum(dim=1)
-        else:
-            sl1 = (mask.float()*sl1).sum(dim=1)
+        sl1 = (mask.float()*sl1).sum(dim=1)
 
         # hard negative mining
-
-        ## Original Implementation
-        # con = self.con_loss(plabel, glabel)
-
-        ## Logsoftmax along the last dim
-        # temp = self.con_loss_part1(plabel.permute(0, 2, 1).contiguous())
-        # con = self.con_loss_part2(temp.view(32*8732, 81), glabel.view(32*8732)).view(32, 8732)
-
         con = self.con_loss(plabel.permute(0, 2, 1).contiguous().view(collapse_dim, class_number), glabel.view(collapse_dim)).view(batch_size, detection_number) # con: torch.Size([32, 8732])
 
         # postive mask will never selected
@@ -237,17 +223,11 @@ class Loss(nn.Module):
         # number of negative three times positive
         neg_mask = con_rank < neg_num
 
-        if use_autocast:
-            closs = (con*(mask.bfloat16() + neg_mask.bfloat16())).sum(dim=1)
-        else:
-            closs = (con*(mask.float() + neg_mask.float())).sum(dim=1)
+        closs = (con*(mask.float() + neg_mask.float())).sum(dim=1)
 
         # avoid no object detected
         total_loss = sl1 + closs
-        if use_autocast:
-            pos_num = pos_num.bfloat16().clamp(min=1e-6)
-        else:
-            pos_num = pos_num.float().clamp(min=1e-6)
+        pos_num = pos_num.float().clamp(min=1e-6)
 
         ret = (total_loss*num_mask/pos_num).mean(dim=0)
         return ret

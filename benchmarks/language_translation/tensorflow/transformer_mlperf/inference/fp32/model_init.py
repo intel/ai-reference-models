@@ -21,6 +21,7 @@ import os
 from argparse import ArgumentParser
 
 from common.base_model_init import BaseModelInitializer
+from common.base_model_init import set_env_var
 
 
 class ModelInitializer(BaseModelInitializer):
@@ -28,6 +29,11 @@ class ModelInitializer(BaseModelInitializer):
 
     def __init__(self, args, custom_args, platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+
+        # set num_inter_threads and num_intra_threads
+        self.set_num_inter_intra_threads()
+
+        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.cmd = self.get_command_prefix(self.args.socket_id)
         self.bleu_params = ""
@@ -77,6 +83,9 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
+        self.args = arg_parser.parse_args(self.custom_args,
+                                          namespace=self.args)
+
         # Model parameter control
         translate_file = os.path.join(self.args.output_dir,
                                       self.args.decode_to_file)
@@ -98,8 +107,8 @@ class ModelInitializer(BaseModelInitializer):
                    " --file=" + self.args.decode_from_file + \
                    " --file_out=" + translate_file + \
                    " --data_dir=" + self.args.data_location + \
-                   " --num_inter=" + str(self.args.num_inter_threads) + \
-                   " --num_intra=" + str(self.args.num_intra_threads)
+                   " --inter_op_parallelism_threads=" + str(self.args.num_inter_threads) + \
+                   " --intra_op_parallelism_threads=" + str(self.args.num_intra_threads)
 
         self.bleu_params += " --translation=" + translate_file + \
                             " --reference=" + self.args.reference

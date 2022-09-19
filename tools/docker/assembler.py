@@ -24,10 +24,6 @@ written to stdout.
 Read README.md (in this directory) for instructions!
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-
 import collections
 import copy
 from distutils.dir_util import copy_tree
@@ -743,7 +739,7 @@ def gather_existing_partials(partial_path):
         continue
       # partial_dir/foo/bar.partial.Dockerfile -> foo/bar
       simple_name = fullpath[len(partial_path) + 1:-len('.partial.dockerfile')]
-      with open(fullpath, 'r') as f:
+      with open(fullpath, 'r', encoding="utf-8") as f:
         try:
           partial_contents = f.read()
         except Exception as e:
@@ -784,7 +780,11 @@ def get_download(source, destination):
     # Ensure that the directories exist first, otherwise the file copy will fail
     if not os.path.isdir(os.path.dirname(destination)):
         os.makedirs(os.path.dirname(destination))
-    urllib.request.urlretrieve(source, destination)
+    if source.lower().startswith('http'):
+        urllib.request.Request(source)
+    else:
+        raise ValueError from None
+    urllib.request.urlretrieve(source, destination)  # nosec
     eprint("Copied {} to {}".format(source, destination), verbose=FLAGS.verbose)
 
 def run(cmd):
@@ -796,7 +796,7 @@ def run(cmd):
     return proc.returncode, stdout, stderr
 
 def set_test_args(tag_def, test, test_uri):
-  with open(test_uri, 'r') as f:
+  with open(test_uri, 'r', encoding="utf-8") as f:
     test_file = f.read()
     if 'args' in test:
       for arg in test['args']:
@@ -879,7 +879,7 @@ def write_deployment(tag_def):
         cfg_set_namespace(package, dir, tag_def)
         returncode, out, err = run(["kustomize", "build", dir])
         eprint("Creating deployment file: {}".format(deployment_output[len(os.getcwd()+"/models/"):]))
-        with open(deployment_output, "w") as file:
+        with open(deployment_output, "w", encoding="utf-8") as file:
           file.write(out.decode("utf-8"))
     except Exception as e:
       eprint("Error when generating deployment from k8s package: {}".format(tar_file), verbose=FLAGS.verbose)
@@ -952,7 +952,7 @@ def write_package(package_def, succeeded_packages, failed_packages):
                   if not model_commit:
                     model_commit = str(repo.commit.hexsha)
                   eprint("Write info.txt to {}".format(info_file_path), verbose=FLAGS.verbose)
-                with open(info_file_path, "w") as f:
+                with open(info_file_path, "w", encoding="utf-8") as f:
                   f.write("model_zoo_branch: {}\n".format(model_branch))
                   f.write("model_zoo_commit: {}\n".format(model_commit))
               except Exception as e:
@@ -993,7 +993,7 @@ def extract_tar(tar_file, temp_dir):
         raise e
 
 def read_spec_file(spec_dir, spec_file, tag_spec, replace=False):
-    with open(os.path.join(spec_dir, spec_file), 'r') as spec_file:
+    with open(os.path.join(spec_dir, spec_file), 'r', encoding="utf-8") as spec_file:
         try:
             spec_contents = yaml.safe_load(spec_file)
             update_spec(tag_spec, spec_contents, replace)
@@ -1417,7 +1417,7 @@ def auto_generate_model_spec(spec_name):
     model_spec['slice_sets'][spec_name] = model_slice_set
 
     # write the model spec to a file
-    with open(spec_file_path, 'w') as f:
+    with open(spec_file_path, 'w', encoding="utf-8") as f:
         yaml.dump(model_spec, f)
 
     # print out info for the user to see the spec and file name
@@ -1612,7 +1612,7 @@ def main(argv):
             replace_string = 'ARG {}="{}"'.format(build_arg_name, build_arg_value)
             dockerfile_contents = re.sub(search_string, replace_string, dockerfile_contents)
 
-          with open(path, 'w') as f:
+          with open(path, 'w', encoding="utf-8") as f:
             f.write(dockerfile_contents)
 
           if os.path.exists(path):
@@ -1632,7 +1632,7 @@ def main(argv):
         model_deployments_dir = os.path.join(os.getcwd(), FLAGS.deployment_dir, model_name)
         try:
           eprint('>> Writing {}...'.format(tests_bats), verbose=FLAGS.verbose)
-          with open(tests_bats, 'w') as f:
+          with open(tests_bats, 'w', encoding="utf-8") as f:
             # add at the beginning of the test
             f.write('#!/usr/bin/env tools/tests/bin/bats\npushd {}\n'.format(model_dir))
             # get test uri from the model spec file and append it to model-builder.bats file
@@ -1689,7 +1689,7 @@ def main(argv):
       # directory)
       dockerfile = os.path.join(FLAGS.dockerfile_dir, tag + '.temp.Dockerfile')
       if not FLAGS.dry_run:
-        with open(dockerfile, 'w') as f:
+        with open(dockerfile, 'w', encoding="utf-8") as f:
           f.write(tag_def['dockerfile_contents'])
       eprint('>> (Temporary) writing {}...'.format(dockerfile), verbose=FLAGS.verbose)
 

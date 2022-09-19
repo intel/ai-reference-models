@@ -28,6 +28,7 @@
 # limitations under the License.
 
 import random
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -54,9 +55,9 @@ class SpecCutoutRegions(nn.Module):
 
         for idx in range(sh[0]):
             for i in range(self.cutout_rect_regions):
-                cutout_rect_x = int(random.uniform(
+                cutout_rect_x = int(np.random.uniform(
                         0, sh[1] - self.cutout_rect_freq))
-                cutout_rect_y = int(random.uniform(
+                cutout_rect_y = int(np.random.uniform(
                         0, sh[2] - self.cutout_rect_time))
 
                 mask[idx, cutout_rect_x:cutout_rect_x + self.cutout_rect_freq,
@@ -85,12 +86,12 @@ class SpecAugment(nn.Module):
         mask = torch.zeros(x.shape).bool()
         for idx in range(sh[0]):
             for _ in range(self.cutout_x_regions):
-                cutout_x_left = int(random.uniform(0, sh[1] - self.cutout_x_width))
+                cutout_x_left = int(np.random.uniform(0, sh[1] - self.cutout_x_width))
 
                 mask[idx, cutout_x_left:cutout_x_left + self.cutout_x_width, :] = 1
 
             for _ in range(self.cutout_y_regions):
-                cutout_y_left = int(random.uniform(0, sh[2] - self.cutout_y_width))
+                cutout_y_left = int(np.random.uniform(0, sh[2] - self.cutout_y_width))
 
                 mask[idx, :, cutout_y_left:cutout_y_left + self.cutout_y_width] = 1
 

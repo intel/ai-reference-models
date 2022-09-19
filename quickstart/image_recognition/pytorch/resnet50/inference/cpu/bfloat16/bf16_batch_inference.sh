@@ -15,18 +15,33 @@
 # limitations under the License.
 #
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+MODEL_DIR=${MODEL_DIR-$PWD}
 
-python -m intel_pytorch_extension.launch \
-    --enable_tcmalloc \
-    --ninstances ${SOCKETS} \
-    --ncore_per_instance ${CORES} \
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+MULTI_INSTANCE_ARGS=""
+ARGS=""
+
+if [[ ${PLATFORM} == "linux" ]]; then
+    pip list | grep intel-extension-for-pytorch
+    if [[ "$?" == 0 ]]; then
+        CORES=`lscpu | grep Core | awk '{print $4}'`
+        SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --ninstances ${SOCKETS} --ncore_per_instance ${CORES}"
+        
+        echo "Running '${SOCKETS}' instance"
+        # in case IPEX is used we set ipex and jit path args
+        ARGS="--ipex --jit"
+        echo "Running using ${ARGS} args ..."
+    fi
+fi
+
+python ${MULTI_INSTANCE_ARGS} \
     models/image_recognition/pytorch/common/main.py \
-    --arch resnet50 \
+    --arch resnet50 ../ \
     --evaluate \
-    --ipex \
     --jit \
-    --precision bf16 \
+    ${ARGS} \
+    --bf16 \
     --batch-size 128 \
     --dummy

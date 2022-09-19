@@ -14,8 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
-source $torch_ccl_path/env/setvars.sh
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 MODEL_DIR=${MODEL_DIR-../../../../../..}
 
@@ -29,12 +29,16 @@ then
     precision=bf16
     batch_size=56
     echo "### running bf16 mode"
+elif [[ $1 == "bf32" ]]; then
+    echo "### running BF32 mode"
+    ARGS="$ARGS --bf32"
+    precision=bf32
 elif [[ $1 == "fp32" ]]; then
     echo "### running FP32 mode"
 
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf16"
+    echo "Supported precisions are: fp32, bf16, bf32"
     exit 1
 fi
 

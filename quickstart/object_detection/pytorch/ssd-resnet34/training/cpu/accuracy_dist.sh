@@ -57,9 +57,12 @@ if [ "$1" == "bf16" ]; then
     echo "### running bf16 datatype"
 elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
+elif [[ "$1" == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf32, and bf16"
     exit 1
 fi
 
@@ -73,8 +76,8 @@ BATCH_SIZE=100
 
 rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_accuracy_dist*
 
-torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
-source $torch_ccl_path/env/setvars.sh
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \

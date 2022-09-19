@@ -170,6 +170,10 @@ class BaseBenchmarkUtil(object):
             "--weight-sharing",
             help="Enables experimental weight-sharing feature for RN50 int8/bf16 inference only",
             dest="weight_sharing", action="store_true")
+        self._common_arg_parser.add_argument(
+            "--synthetic-data",
+            help="Enables synthetic data layer for some models where support exists",
+            dest="synthetic_data", action="store_true")
 
         self._common_arg_parser.add_argument(
             "-c", "--checkpoint",

@@ -121,7 +121,7 @@ slice_sets:
     partials:
     - libgl
     - opencv
-    - tensorflow-addons-0.11.0
+    - tensorflow-addons-0.17.1
     - tcmalloc
     - model_package
     - entrypoint

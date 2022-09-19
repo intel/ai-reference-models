@@ -127,11 +127,13 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 |  DataType   | Phase 1  |  Phase 2 |
 | ----------- | ----------- | ----------- |
 | FP32        | bash run_bert_pretrain_phase1.sh fp32 | bash run_bert_pretrain_phase2.sh fp32 |
+| BF32        | bash run_bert_pretrain_phase1.sh bf32 | bash run_bert_pretrain_phase2.sh bf32 |
 | BF16        | bash run_bert_pretrain_phase1.sh bf16 | bash run_bert_pretrain_phase2.sh bf16 |
 
 |  DataType   | Distributed Training Phase 1  |  Distributed Training Phase 2 |
 | ----------- | ----------- | ----------- |
 | FP32        | bash run_ddp_bert_pretrain_phase1.sh fp32 | bash run_ddp_bert_pretrain_phase2.sh fp32 |
+| BF32        | bash run_ddp_bert_pretrain_phase1.sh bf32 | bash run_ddp_bert_pretrain_phase2.sh bf32 |
 | BF16        | bash run_ddp_bert_pretrain_phase1.sh bf16 | bash run_ddp_bert_pretrain_phase2.sh bf16 |
 ## Run the model
 
@@ -172,6 +174,17 @@ export PRETRAINED_MODEL=/path/to/bert_large_mlperf_checkpoint/checkpoint/
 
 # Run the phase 2 quickstart script for fp32 (or bf16)
 bash run_bert_pretrain_phase2.sh fp32
+```
+
+## CheckPoint in Your Training Phase 1 or Phase 2
+
+By default it is `--skip_checkpoint` in run_bert_pretrain_phase2.sh.
+To configure checkpoint for Phase 1 or Phase 2, you could set the following args properly according to your training samples:
+
+```
+--min_samples_to_start_checkpoints // "Number of update steps until model checkpoints start saving to disk."
+--num_samples_per_checkpoint  // "Number of update steps until a model checkpoint is saved to disk."
+--log_freq  // "frequency of logging loss. If not positive, no logging is provided for training loss"
 ```
 
 <!--- 80. License -->

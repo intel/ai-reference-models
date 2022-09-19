@@ -18,4 +18,32 @@ and [Intel Extension for PyTorch](https://github.com/intel/intel-extension-for-p
 | Notebook | Framework | Description |
 | ---------| ----------|-------------|
 | [Transfer Learning for Image Classification with TF Hub](/docs/notebooks/transfer_learning/tf_image_classification) | TensorFlow | Demonstrates transfer learning with multiple [TF Hub](https://tfhub.dev) image classifiers, TF datasets, and custom image datasets |
-| [Transfer Learning for Object Detection with PyTorch & torchvision](/docs/notebooks/transfer_learning/pytorch_object_detection) | PyTorch | Demonstrates transfer learning with multiple [torchvision](https://pytorch.org/vision/stable/index.html) object detection models and a public image dataset |
+| [Transfer Learning for Image Classification with PyTorch & torchvision](/docs/notebooks/transfer_learning/pytorch_image_classification) | PyTorch | Demonstrates transfer learning with multiple [torchvision](https://pytorch.org/vision/stable/index.html) image classification models, torchvision datasets, and custom datasets |
+| [Transfer Learning for Object Detection with PyTorch & torchvision](/docs/notebooks/transfer_learning/pytorch_object_detection) | PyTorch | Demonstrates transfer learning with multiple [torchvision](https://pytorch.org/vision/stable/index.html) object detection models, a public image dataset, and a customized torchvision dataset |
+
+# Remove Notebook Cells and Run as a Script
+Cells in a Jupyter notebook can be tagged with metadata and then selectively removed when the notebook
+is converted into a python script via nbconvert with a custom preprocessor. This allows specific paths
+through the notebook to be executed in automated tests. As an example, the
+[Transfer Learning for Image Classification with TF Hub](/docs/notebooks/transfer_learning/tf_image_classification)
+notebook can be exported and run with the following steps.
+
+## Export and Run the Custom Dataset Code Path
+1. Set up and activate the environment for the notebook according to its [README.md](/docs/notebooks/transfer_learning/tf_image_classification/README.md)
+2. Export environment variables required by the notebook's [README.md](/docs/notebooks/transfer_learning/tf_image_classification/README.md) (e.g. DATASET_DIR and OUTPUT_DIR) 
+3. Run the below command to convert the notebook into a script that can be executed by ipython (this assumes you are in the current directory):
+```
+jupyter nbconvert \
+    --TagRemovePreprocessor.enabled=True \
+    --TagRemovePreprocessor.remove_cell_tags remove_for_custom_dataset \
+    --to script \
+    tf_image_classification/Image_Classification_Transfer_Learning.ipynb
+```
+4. Run the exported script at the command line using `ipython`:
+```
+ipython tf_image_classification/Image_Classification_Transfer_Learning.py
+```
+
+## Define Other Custom Paths
+To visually remove cells for a different code path, open the Jupyter notebook in a web browser, select "View" -> "Cell Toolbar", and then select either "Edit Metadata" or "Tags". Each cell of the notebook will then have a toolbar item available for adding or editing metadata tags. You will need to tag each cell you want to omit in the exported script with a unique string, and then run the nbconvert command with the new tag passed in place of `rm_custom_dataset` for the `--TagRemovePreprocessor.remove_cell_tags` argument.
+

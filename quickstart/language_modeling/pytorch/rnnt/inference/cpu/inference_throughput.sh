@@ -46,6 +46,9 @@ ARGS=""
 if [ "$1" == "bf16" ]; then
     ARGS="$ARGS --mix-precision"
     echo "### running bf16 datatype"
+elif [ "$1" == "bf32" ]; then
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 datatype"
 else
     echo "### running fp32 datatype"
 fi
@@ -62,6 +65,8 @@ rm -rf ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_throughput*
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
     --throughput_mode \
+    --log_path ${OUTPUT_DIR} \
+    --log_file_prefix rnnt_${PRECISION}_inference_throughput \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py \
     --dataset_dir ${DATASET_DIR}/dataset/LibriSpeech/ \
     --val_manifest ${DATASET_DIR}/dataset/LibriSpeech/librispeech-dev-clean-wav.json \
@@ -72,7 +77,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --jit \
     --warm_up 3 \
     --sort_by_duration \
-    $ARGS 2>&1 | tee ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_throughput.log
+    $ARGS
 
 # For the summary of results
 wait

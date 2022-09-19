@@ -1,276 +1,363 @@
 diff --git a/examples/pytorch/question-answering/run_qa.py b/examples/pytorch/question-answering/run_qa.py
-index cad46c5c2..7c3b1744f 100755
+index 1f78503ad..8eb35aa9d 100755
 --- a/examples/pytorch/question-answering/run_qa.py
 +++ b/examples/pytorch/question-answering/run_qa.py
-@@ -85,7 +85,18 @@ class ModelArguments:
-             "with private models)."
-         },
+@@ -298,6 +298,7 @@ def main():
+         model_args.config_name if model_args.config_name else model_args.model_name_or_path,
+         cache_dir=model_args.cache_dir,
+         revision=model_args.model_revision,
++        return_dict=False,
+         use_auth_token=True if model_args.use_auth_token else None,
      )
--
-+    use_ipex: bool = field(
-+        default=False, metadata={"help": "Choose if use intel extension for pytorch, dafault is just use pytorch"}
-+    )
-+    jit_mode: bool = field(
-+        default=False, metadata={"help": "Choose if run with jit mode, default is imperative mode"}
-+    )
-+    bf16: bool = field(
-+        default=False, metadata={"help": "Enable bf16 mix-precision"}
-+    )
-+    profile: bool = field(
-+        default=False, metadata={"help": "Choose if run with torch profile tools"}
-+    )
+     tokenizer = AutoTokenizer.from_pretrained(
+diff --git a/examples/pytorch/text-classification/run_glue.py b/examples/pytorch/text-classification/run_glue.py
+index aedf63e5f..559f533fa 100755
+--- a/examples/pytorch/text-classification/run_glue.py
++++ b/examples/pytorch/text-classification/run_glue.py
+@@ -335,6 +335,7 @@ def main():
+         num_labels=num_labels,
+         finetuning_task=data_args.task_name,
+         cache_dir=model_args.cache_dir,
++        return_dict = False,
+         revision=model_args.model_revision,
+         use_auth_token=True if model_args.use_auth_token else None,
+     )
+@@ -461,9 +462,12 @@ def main():
+     if data_args.task_name is not None:
+         metric = load_metric("glue", data_args.task_name)
+     else:
+-        metric = load_metric("accuracy")
++        curpath = os.path.abspath(os.path.dirname(__file__))
++        accuracy_path = os.path.join( curpath, "../../../../", "accuracy.py")
++        #accuracy_path = curpath + "/accuracy.py"
++        metric = load_metric(accuracy_path)
  
- @dataclass
- class DataTrainingArguments:
-@@ -601,7 +612,7 @@ def main():
-     # Evaluation
-     if training_args.do_eval:
-         logger.info("*** Evaluate ***")
--        metrics = trainer.evaluate()
-+        metrics = trainer.evaluate(profile=model_args.profile, use_ipex =model_args.use_ipex, bf16=model_args.bf16, jit_mode=model_args.jit_mode, max_seq_length=data_args.max_seq_length)
+-    # You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
++# You can define your custom compute_metrics function. It takes an `EvalPrediction` object (a namedtuple with a
+     # predictions and label_ids field) and has to return a dictionary string to float.
+     def compute_metrics(p: EvalPrediction):
+         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
+@@ -545,6 +549,7 @@ def main():
  
-         max_eval_samples = data_args.max_eval_samples if data_args.max_eval_samples is not None else len(eval_dataset)
-         metrics["eval_samples"] = min(max_eval_samples, len(eval_dataset))
-diff --git a/examples/pytorch/question-answering/trainer_qa.py b/examples/pytorch/question-answering/trainer_qa.py
-index 7f98eba23..934520e96 100644
---- a/examples/pytorch/question-answering/trainer_qa.py
-+++ b/examples/pytorch/question-answering/trainer_qa.py
-@@ -15,6 +15,12 @@
- """
- A subclass of `Trainer` specific to Question-Answering tasks
- """
-+import torch
-+import sys
-+if "--use_ipex" in sys.argv:
-+    import intel_extension_for_pytorch as ipex
-+else:
-+    from torch.utils import mkldnn as mkldnn_utils
+             trainer.log_metrics("eval", metrics)
+             trainer.save_metrics("eval", combined if task is not None and "mnli" in task else metrics)
++        exit(0)
  
- from transformers import Trainer, is_torch_tpu_available
- from transformers.trainer_utils import PredictionOutput
-@@ -31,7 +37,7 @@ class QuestionAnsweringTrainer(Trainer):
-         self.eval_examples = eval_examples
-         self.post_process_function = post_process_function
+     if training_args.do_predict:
+         logger.info("*** Predict ***")
+diff --git a/src/transformers/models/distilbert/modeling_distilbert.py b/src/transformers/models/distilbert/modeling_distilbert.py
+index 14bc7b9e9..03b1f864a 100755
+--- a/src/transformers/models/distilbert/modeling_distilbert.py
++++ b/src/transformers/models/distilbert/modeling_distilbert.py
+@@ -731,11 +731,11 @@ class DistilBertForSequenceClassification(DistilBertPreTrainedModel):
+     )
+     def forward(
+         self,
++        labels: Optional[torch.LongTensor] = None,
+         input_ids: Optional[torch.Tensor] = None,
+         attention_mask: Optional[torch.Tensor] = None,
+         head_mask: Optional[torch.Tensor] = None,
+         inputs_embeds: Optional[torch.Tensor] = None,
+-        labels: Optional[torch.LongTensor] = None,
+         output_attentions: Optional[bool] = None,
+         output_hidden_states: Optional[bool] = None,
+         return_dict: Optional[bool] = None,
+diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
+index a2fb10b9e..33635aced 100755
+--- a/src/transformers/trainer.py
++++ b/src/transformers/trainer.py
+@@ -134,6 +134,9 @@ from .utils import (
+     logging,
+ )
  
--    def evaluate(self, eval_dataset=None, eval_examples=None, ignore_keys=None, metric_key_prefix: str = "eval"):
-+    def evaluate(self, profile= False, use_ipex=None, bf16=None, jit_mode=None, max_seq_length=None, eval_dataset=None, eval_examples=None, ignore_keys=None, metric_key_prefix: str = "eval"):
-         eval_dataset = self.eval_dataset if eval_dataset is None else eval_dataset
-         eval_dataloader = self.get_eval_dataloader(eval_dataset)
-         eval_examples = self.eval_examples if eval_examples is None else eval_examples
-@@ -40,17 +46,160 @@ class QuestionAnsweringTrainer(Trainer):
-         compute_metrics = self.compute_metrics
-         self.compute_metrics = None
-         eval_loop = self.prediction_loop if self.args.use_legacy_prediction_loop else self.evaluation_loop
--        try:
--            output = eval_loop(
--                eval_dataloader,
--                description="Evaluation",
--                # No point gathering the predictions if there are no metrics, otherwise we defer to
--                # self.args.prediction_loss_only
--                prediction_loss_only=True if compute_metrics is None else None,
--                ignore_keys=ignore_keys,
--            )
--        finally:
--            self.compute_metrics = compute_metrics
-+        self.model.eval()
-+        if jit_mode:
-+            jit_inputs=()
-+            for _,batch in enumerate(eval_dataloader):
-+                for _,label in enumerate(batch):
-+                    if (batch[label].dim()) >=4:
-+                        dumpy_tensor = torch.ones((batch[label].shape), dtype=torch.long).to(memory_format=torch.channels_last)
-+                    else:
++def trace_handler(prof):
++    print(prof.key_averages().table(
++        sort_by="self_cpu_time_total", row_limit=-1))
+ 
+ _is_torch_generator_available = False
+ _is_native_amp_available = False
+@@ -1027,7 +1030,73 @@ class Trainer:
+ 
+         return model
+ 
+-    def _wrap_model(self, model, training=True):
++    def _wrap_model(self, model, training=True, dataloader=None):
++        if not self.args.do_calibration and not training:
++            model.eval()
++            import torch
++            if self.args.use_ipex:
++                import intel_extension_for_pytorch as ipex
++
++            if self.args.jit_mode:
++                jit_inputs=()
++                for _,batch in enumerate(dataloader):
++                    example_input = batch
++                    for _,label in enumerate(batch):
 +                        dumpy_tensor = torch.ones((batch[label].shape), dtype=torch.long)
++                        L1=list(jit_inputs)
++                        L1.append(dumpy_tensor)
++                        jit_inputs=tuple(L1)
++                    break
++
++                if self.args.use_ipex:
++                    if self.args.mix_bf16 and not self.args.int8:
++                        model = ipex.optimize(model, dtype=torch.bfloat16, level="O1")
++                        with torch.cpu.amp.autocast(), torch.no_grad():
++                            model = torch.jit.trace(model, jit_inputs, strict=False)
++                        model = torch.jit.freeze(model)
++                    elif self.args.int8:
++                        from intel_extension_for_pytorch.quantization import prepare, convert
++                        from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++                        qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++                        ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
++                        prepared_model = prepare(model, qconfig, example_inputs=jit_inputs, inplace=False)
++                        prepared_model.load_qconf_summary(qconf_summary = self.args.int8_config)
++                        # convert model to trace model.
++                        if self.args.mix_bf16:
++                            with torch.cpu.amp.autocast():
++                                model = convert(prepared_model)
++                                model = torch.jit.trace(model, jit_inputs)
++                        else:
++                            prepared_model.eval()
++                            model = convert(prepared_model)
++                            model = torch.jit.trace(model, jit_inputs)
++                        model = torch.jit.freeze(model)
++                        # enable fusion path work(need to run two interation)
++                        with torch.no_grad():
++                            y = model(**example_input)
++                            y = model(**example_input)
++                    else:
++                        if self.args.bf32:
++                            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
++                        model = ipex.optimize(model, dtype=torch.float32, level="O1", auto_kernel_selection=self.args.auto_kernel_selection)
++                        with torch.no_grad():
++                            model = torch.jit.trace(model, jit_inputs, strict=False)
++                        if self.args.jit_opt:
++                            model = torch.jit.optimize_for_inference(model)
++                        else:
++                            model = torch.jit.freeze(model)
++                else:
++                    if self.args.int8:
++                        import torch.quantization
++                        model = torch.quantization.quantize_dynamic(model, {torch.nn.Linear}, dtype=torch.qint8)
++                    with torch.no_grad():
++                        model = torch.jit.trace(model, jit_inputs, strict=False)
++                    if self.args.jit_opt:
++                        model = torch.jit.optimize_for_inference(model)
++                    else:
++                        model = torch.jit.freeze(model)
++
++
+         if is_sagemaker_mp_enabled():
+             # Wrapping the base model twice in a DistributedModel will raise an error.
+             if isinstance(self.model_wrapped, smp.model.DistributedModel):
+@@ -2372,6 +2441,48 @@ class Trainer:
+ 
+         return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
+ 
++    def benchmark_evaluate(self, model, dataloader):
++        steps_per_epoch = len(dataloader)
++        total_steps = (self.args.perf_run_iters + self.args.perf_begin_iter)
++        test_epoches = int(total_steps / steps_per_epoch)
++        print('Evaluating BERT: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
++        i = 0;
++        timeBuff = []
++        import time
++        # with torch.profiler.profile(
++        #   activities=[
++        #      torch.profiler.ProfilerActivity.CPU],
++        #      schedule=torch.profiler.schedule(
++        #      wait=1,
++        #      warmup=9,
++        #      active=5),
++        #   on_trace_ready=trace_handler
++        # ) as prof:
++        with tqdm(total=total_steps, desc="Evaluating") as pbar:
++            for epoch in range(test_epoches + 1):
++                for it, batch in enumerate(dataloader):
++                    if epoch * steps_per_epoch + it >= total_steps:
++                        timeBuff = np.asarray(timeBuff)
++                        totalTime = np.sum(timeBuff)
++                        p50 = np.percentile(timeBuff, 50) # return 50th percentile, e.g median.
++                        p90 = np.percentile(timeBuff, 90)
++                        print("#############################")
++                        print("#############################")
++                        print('P50 Latency {:.2f} ms'.format(p50*1000))
++                        print('P90 Latency {:.2f} ms'.format(p90*1000))
++                        print('Throughput: {:.2f} sentences/s'.format(self.args.per_device_eval_batch_size*self.args.perf_run_iters/totalTime))
++                        print("#############################")
++                        break
++                    with torch.no_grad():
++                        start = time.time()
++                        outputs = model(**batch)
++                        #prof.step()
++                        end = time.time()
++                        if epoch * steps_per_epoch + it > self.args.perf_begin_iter:
++                            timeBuff.append(end-start)
++                        pbar.update(1)
++
++
+     def evaluation_loop(
+         self,
+         dataloader: DataLoader,
+@@ -2401,7 +2512,7 @@ class Trainer:
+             self.model_wrapped = deepspeed_engine
+             self.deepspeed = deepspeed_engine
+ 
+-        model = self._wrap_model(self.model, training=False)
++        model = self._wrap_model(self.model, training=False, dataloader=dataloader)
+ 
+         # if full fp16 or bf16 eval is wanted and this ``evaluation`` or ``predict`` isn't called
+         # while ``train`` is running, cast it to the right dtype first and then put on device
+@@ -2444,6 +2555,44 @@ class Trainer:
+         # Will be useful when we have an iterable dataset so don't know its length.
+ 
+         observed_num_examples = 0
++
++        if self.args.do_calibration:
++            import intel_extension_for_pytorch as ipex
++            from intel_extension_for_pytorch.quantization import prepare
++            from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++            qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++            jit_inputs=()
++            for _ , batch in enumerate(dataloader):
++                for _,label in enumerate(batch):
++                    dumpy_tensor = torch.ones_like(batch[label])
 +                    L1=list(jit_inputs)
 +                    L1.append(dumpy_tensor)
 +                    jit_inputs=tuple(L1)
 +                break
-+            if use_ipex:
-+                if bf16:
-+                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.bfloat16, level="O1")
-+                    with torch.cpu.amp.autocast(), torch.no_grad():
-+                        self.model = torch.jit.trace(self.model, jit_inputs, strict=False)
-+                    self.model = torch.jit.freeze(self.model)
-+                else:
-+                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.float32, level="O1", auto_kernel_selection=True)
-+                    with torch.no_grad():
-+                        self.model = torch.jit.trace(self.model, jit_inputs, strict=False)
-+                    self.model = torch.jit.freeze(self.model)
-+            else:
-+                if bf16:
-+                    with torch.cpu.amp.autocast(), torch.no_grad():
-+                        self.model = torch.jit.trace(self.model.to(memory_format=torch.channels_last), jit_inputs, strict=False)
-+                    self.model = torch.jit.freeze(self.model)
-+                    with torch.no_grad():
-+                        for _,batch in enumerate(eval_dataloader):
-+                            for _,label in enumerate(batch):
-+                                if batch[label].dim() >=4:
-+                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
-+                else:
-+                    with torch.no_grad():
-+                        self.model = torch.jit.trace(self.model.to(memory_format=torch.channels_last), jit_inputs, strict=False)
-+                    self.model = torch.jit.freeze(self.model)
-+                    with torch.no_grad():
-+                        for _,batch in enumerate(eval_dataloader):
-+                            for _,label in enumerate(batch):
-+                                if batch[label].dim() >=4:
-+                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
-+        else:
-+            if use_ipex:
-+                if bf16:
-+                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.bfloat16, level="O1")
-+                else:
-+                    self.model = ipex.optimize(self.model.to(memory_format=torch.channels_last), dtype=torch.float32, level="O1")
-+            else:
-+                if bf16:
-+                    for _,batch in enumerate(eval_dataloader):
-+                        for _,label in enumerate(batch):
-+                            batch[label]=batch[label].to(torch.bfloat16)
-+                    self.model = mkldnn_utils.to_mkldnn(self.model, dtype=torch.bfloat16)
-+                else:
-+                    self.model = mkldnn_utils.to_mkldnn(self.model)
++            ipex.nn.utils._model_convert.replace_dropout_with_identity(self.model)
++            prepared_model = prepare(self.model, qconfig, example_inputs=jit_inputs, inplace=False)
++            for step, inputs in enumerate(dataloader):
++                print("calibration step: {}".format(step))
++                prepared_model(**inputs)
++                if step == self.args.calibration_iters -1:
++                    prepared_model.save_qconf_summary(qconf_summary = self.args.int8_config)
++                    exit()
 +
-+        with torch.autograd.profiler.profile(
-+            enabled=profile,
-+            use_cuda=False,
-+            record_shapes=False,
-+            with_flops=False,
-+        ) as prof:
-+            if bf16:
-+                if use_ipex:
-+                    with torch.cpu.amp.autocast(), torch.no_grad():
-+                        for _,batch in enumerate(eval_dataloader):
-+                            for _,label in enumerate(batch):
-+                                if batch[label].dim() >=4:
-+                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
-+                    if jit_mode:
-+                        try:
-+                            output = eval_loop(
-+                                eval_dataloader,
-+                                description="Evaluation",
-+                                # No point gathering the predictions if there are no metrics, otherwise we defer to
-+                                # self.args.prediction_loss_only
-+                                prediction_loss_only=True if compute_metrics is None else None,
-+                                ignore_keys=ignore_keys,
-+                            )
-+                        finally:
-+                            self.compute_metrics = compute_metrics
-+                    else:
-+                        with torch.cpu.amp.autocast():
-+                            try:
-+                                output = eval_loop(
-+                                    eval_dataloader,
-+                                    description="Evaluation",
-+                                    # No point gathering the predictions if there are no metrics, otherwise we defer to
-+                                    # self.args.prediction_loss_only
-+                                    prediction_loss_only=True if compute_metrics is None else None,
-+                                    ignore_keys=ignore_keys,
-+                                )
-+                            finally:
-+                                self.compute_metrics = compute_metrics
-+                else:
-+                    if jit_mode:
-+                        try:
-+                            output = eval_loop(
-+                                eval_dataloader,
-+                                description="Evaluation",
-+                                # No point gathering the predictions if there are no metrics, otherwise we defer to
-+                                # self.args.prediction_loss_only
-+                                prediction_loss_only=True if compute_metrics is None else None,
-+                                ignore_keys=ignore_keys,
-+                            )
-+                        finally:
-+                            self.compute_metrics = compute_metrics
-+                    else:
-+                        with torch.cpu.amp.autocast():
-+                            try:
-+                                output = eval_loop(
-+                                    eval_dataloader,
-+                                    description="Evaluation",
-+                                    # No point gathering the predictions if there are no metrics, otherwise we defer to
-+                                    # self.args.prediction_loss_only
-+                                    prediction_loss_only=True if compute_metrics is None else None,
-+                                    ignore_keys=ignore_keys,
-+                                )
-+                            finally:
-+                                self.compute_metrics = compute_metrics
++        if args.benchmark:
++            if self.args.use_share_weight:
++                threads = []
++                import threading
++                num_instances = self.args.total_cores // self.args.cores_per_instance
++                for i in range(0, num_instances):
++                     t = threading.Thread(target=self.benchmark_evaluate, args=(model, dataloader))
++                     threads.append(t)
++                     t.start()
++                for t in threads:
++                    t.join()
 +            else:
-+                if use_ipex:
-+                    with torch.no_grad():
-+                        for _,batch in enumerate(eval_dataloader):
-+                            for _,label in enumerate(batch):
-+                                if batch[label].dim() >=4:
-+                                    batch[label]=batch[label].to(memory_format=torch.channels_last)
-+                    try:
-+                        output = eval_loop(
-+                            eval_dataloader,
-+                            description="Evaluation",
-+                            # No point gathering the predictions if there are no metrics, otherwise we defer to
-+                            # self.args.prediction_loss_only
-+                            prediction_loss_only=True if compute_metrics is None else None,
-+                            ignore_keys=ignore_keys,
-+                        )
-+                    finally:
-+                        self.compute_metrics = compute_metrics
-+                else:
-+                    try:
-+                        output = eval_loop(
-+                            eval_dataloader,
-+                            description="Evaluation",
-+                            # No point gathering the predictions if there are no metrics, otherwise we defer to
-+                            # self.args.prediction_loss_only
-+                            prediction_loss_only=True if compute_metrics is None else None,
-+                            ignore_keys=ignore_keys,
-+                        )
-+                    finally:
-+                        self.compute_metrics = compute_metrics
-+        if profile:
-+            print(prof.key_averages().table(sort_by="self_cpu_time_total"))
- 
-         if self.post_process_function is not None and self.compute_metrics is not None:
-             eval_preds = self.post_process_function(eval_examples, eval_dataset, output.predictions)
-diff --git a/examples/pytorch/question-answering/utils_qa.py b/examples/pytorch/question-answering/utils_qa.py
-index 1157849c9..0bdd947a9 100644
---- a/examples/pytorch/question-answering/utils_qa.py
-+++ b/examples/pytorch/question-answering/utils_qa.py
-@@ -135,7 +135,9 @@ def postprocess_qa_predictions(
-                         start_index >= len(offset_mapping)
-                         or end_index >= len(offset_mapping)
-                         or offset_mapping[start_index] is None
-+                        or len(offset_mapping[start_index]) < 2
-                         or offset_mapping[end_index] is None
-+                        or len(offset_mapping[end_index]) < 2
-                     ):
-                         continue
-                     # Don't consider answers with a length that is either < 0 or > max_answer_length.
-diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index f59cec776..b2dc9bfc4 100755
---- a/src/transformers/trainer.py
-+++ b/src/transformers/trainer.py
-@@ -2208,9 +2208,15 @@ class Trainer:
-         all_labels = None
-         # Will be useful when we have an iterable dataset so don't know its length.
- 
-+        start_time = time.time()
-+        # record iteration start time
-+        iter_num = 0
-+        # record iteration number
-         observed_num_examples = 0
++                self.benchmark_evaluate(model, dataloader)
++            exit()
++
          # Main evaluation loop
          for step, inputs in enumerate(dataloader):
-+            iter_num = iter_num + 1
-+
              # Update the observed num examples
-             observed_batch_size = find_batch_size(inputs)
-             if observed_batch_size is not None:
-@@ -2253,6 +2259,10 @@ class Trainer:
-                 # Set back to None to begin a new accumulation
-                 losses_host, preds_host, labels_host = None, None, None
+diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
+index 6176794ab..843bf70a1 100644
+--- a/src/transformers/training_args.py
++++ b/src/transformers/training_args.py
+@@ -756,6 +756,102 @@ class TrainingArguments:
+         default="",
+         metadata={"help": "Used by the SageMaker launcher to send mp-specific args. Ignored in Trainer"},
+     )
++    jit_mode: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable jit mode for inference"
++        },
++    )
++    jit_opt: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable pytorch jit optimize for inference"
++        },
++    )
++    use_ipex: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable ipex for inference"
++        },
++    )
++    mix_bf16: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable ipex bf16 mix-precision"
++        },
++    )
++    int8: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable int8 low-precision inference"
++        },
++    )
++    use_share_weight: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable weight sharing for real time mode inference"
++        },
++    )
++    total_cores: int = field(
++        default=56,
++        metadata={
++            "help": "Total cores one socket for use_share_weight"
++        },
++    )
++    cores_per_instance: int = field(
++        default=4,
++        metadata={
++            "help": "cores per instance for use_share_weight"
++        },
++    )
++    do_calibration: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable calibration process for ipex int8"
++        },
++    )
++    calibration_iters: int = field(
++        default=200,
++        metadata={
++            "help": "The iterations for calibration"
++        },
++    )
++    int8_config:str = field(
++        default="",
++        metadata={
++            "help": "The calibration result for int8 config"
++        }
++    )
++    bf32: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable ipex bf32"
++        },
++    )
++    auto_kernel_selection: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable mkldnn for ipex fp32"
++        },
++    )
++    benchmark: bool = field(
++        default=False,
++        metadata={
++            "help": "doing the customized benchmark process, getting P50, P90, THP"
++        },
++    )
++    perf_run_iters: int = field(
++        default=100,
++        metadata={
++            "help": "The iterations number for benchmark"
++        },
++    )
++    perf_begin_iter: int = field(
++        default=10,
++        metadata={
++            "help": "The iteration to start the benchmark iterations"
++        },
++    )
  
-+        total_iter_time = time.time() - start_time
-+        throughput = self.args.eval_batch_size * iter_num / total_iter_time
-+        print("Throughput: {:.3f} sentence/s".format(throughput))
-+
-         if self.args.past_index and hasattr(self, "_past"):
-             # Clean the state at the end of the evaluation loop
-             delattr(self, "_past")
+     def __post_init__(self):
+         # Handle --use_env option in torch.distributed.launch (local_rank not passed as an arg then).

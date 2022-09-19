@@ -123,7 +123,7 @@ slice_sets:
     - numactl
     - libgl
     - opencv
-    - tensorflow-addons-0.11.0
+    - tensorflow-addons-0.17.1
     - tensorflow/benchmarks-source
     - model_package
     - entrypoint

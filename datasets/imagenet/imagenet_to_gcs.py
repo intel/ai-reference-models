@@ -89,7 +89,11 @@ def download_dataset(raw_data_dir):
   """Download the Imagenet dataset into the temporary directory."""
   def _download(url, filename):
     """Download the dataset at the provided filepath."""
-    urllib.urlretrieve(url, filename)
+    if url.lower().startswith('http'):
+      urllib.request.Request(url)
+    else:
+      raise ValueError from None
+    urllib.urlretrieve(url, filename)  # nosec
 
   def _get_members(filename):
     """Get all members of a tarfile."""

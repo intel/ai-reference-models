@@ -31,7 +31,6 @@ __version__ = '2.0'
 #  annToMask  - Convert segmentation in an annotation to binary mask.
 #  showAnns   - Display the specified annotations.
 #  loadRes    - Load algorithm results and create API for accessing them.
-#  download   - Download COCO images from mscoco.org server.
 # Throughout the API "ann"=annotation, "cat"=category, and "img"=image.
 # Help on each functions can be accessed by: "help COCO>function".
 
@@ -355,30 +354,6 @@ class COCO:
         res.dataset['annotations'] = anns
         res.createIndex()
         return res
-
-    def download(self, tarDir = None, imgIds = [] ):
-        '''
-        Download COCO images from mscoco.org server.
-        :param tarDir (str): COCO results directory name
-               imgIds (list): images to be downloaded
-        :return:
-        '''
-        if tarDir is None:
-            print('Please specify target directory')
-            return -1
-        if len(imgIds) == 0:
-            imgs = self.imgs.values()
-        else:
-            imgs = self.loadImgs(imgIds)
-        N = len(imgs)
-        if not os.path.exists(tarDir):
-            os.makedirs(tarDir)
-        for i, img in enumerate(imgs):
-            tic = time.time()
-            fname = os.path.join(tarDir, img['file_name'])
-            if not os.path.exists(fname):
-                urlretrieve(img['coco_url'], fname)
-            print('downloaded {}/{} images (t={:0.1f}s)'.format(i, N, time.time()- tic))
 
     def loadNumpyAnnotations(self, data):
         """

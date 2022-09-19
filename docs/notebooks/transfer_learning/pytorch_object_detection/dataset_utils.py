@@ -40,6 +40,9 @@ COCO_LABELS = [
     'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush'
 ]
 
+KITTI_LABELS = [
+    '__background__', 'Person', 'Vehicle'
+]
 
 class PennFudanDataset(torch.utils.data.Dataset):
     def __init__(self, root, transforms):
@@ -103,3 +106,27 @@ class PennFudanDataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.imgs)
+
+class Kitti(torchvision.datasets.Kitti):
+    def _parse_target(self, index: int):
+        labels = []
+        boxes = []
+        with open(self.targets[index]) as inp:
+            content = csv.reader(inp, delimiter=" ")
+            for line in content:
+                if line[0] in ['Pedestrian', 'Person_sitting', 'Cyclist']:
+                    boxes.append([float(x) for x in line[4:8]])
+                    labels.append(1) # Re-label Pedestrian, Person_sitting, Cyclist to Person=1
+                if line[0] in ['Car', 'Truck', 'Van', 'Tram']:
+                    boxes.append([float(x) for x in line[4:8]])
+                    labels.append(2) # Re-label Car, Truck, Van, Tram to Vehicle=2
+        
+        boxes = torch.FloatTensor(boxes)  
+        target = {}
+        target['image_id'] = torch.tensor([index])
+        target['boxes'] = boxes
+        target['labels'] = torch.tensor(labels)
+        target['area'] = (boxes[:, 3] - boxes[:, 1]) * (boxes[:, 2] - boxes[:, 0])
+        target['iscrowd'] = torch.zeros((len(target['labels']),), dtype=torch.int64)
+
+        return target

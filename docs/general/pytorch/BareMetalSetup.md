@@ -15,13 +15,13 @@
 
 ### build pytorch and intel-pytorch-extension
     git clone https://github.com/pytorch/pytorch.git pytorch
-    git checkout release/1.11
+    git checkout release/1.12
     git submodule sync
     git submodule update --init --recursive
     cd ..
     git clone https://github.com/intel/intel-extension-for-pytorch.git ipex-cpu-dev
     cd ipex-cpu-dev
-    git checkout release/1.11
+    git checkout release/1.12
     git submodule sync
     git submodule update --init --recursive
     cd ../pytorch
@@ -51,14 +51,13 @@
     cd ..
     git clone https://github.com/pytorch/vision
     cd vision
-    git checkout v0.8.0
     python setup.py install
 
 ### build torch-ccl
     cd ..
     git clone https://github.com/intel/torch-ccl.git
     cd torch-ccl
-    git checkout v1.11.0
+    git checkout v1.12.0
     git submodule sync
     git submodule update --init --recursive
     python setup.py install

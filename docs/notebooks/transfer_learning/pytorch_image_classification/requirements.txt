@@ -1,0 +1,15 @@
+intel-extension-for-pytorch==1.11.0
+ipython==8.0.1
+ipython-genutils==0.2.0
+ipywidgets==7.6.5
+matplotlib==3.5.1
+matplotlib-inline==0.1.3
+notebook==6.4.7
+numpy==1.22.1
+pandas==1.4.2
+Pillow==9.0.0
+psutil==5.9.0
+torch==1.11.0
+torchvision==0.12.0
+urllib3==1.26.8
+

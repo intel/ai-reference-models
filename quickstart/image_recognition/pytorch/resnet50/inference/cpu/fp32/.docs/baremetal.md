@@ -17,6 +17,5 @@ export DATASET_DIR=<path to the preprocessed imagenet dataset>
 wget <package url>
 tar -xzf <package name>
 cd <package dir>
-
 ./quickstart/<script name>.sh
 ```

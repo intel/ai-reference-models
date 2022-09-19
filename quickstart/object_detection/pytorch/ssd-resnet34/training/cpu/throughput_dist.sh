@@ -48,9 +48,12 @@ if [ "$1" == "bf16" ]; then
     echo "### running bf16 datatype"
 elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running fp32 datatype"
+elif [[ "$1" == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "### running bf32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32, and bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf32, and bf16"
     exit 1
 fi
 
@@ -69,12 +72,12 @@ export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
-BATCH_SIZE=100
+BATCH_SIZE=224
 
 rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput_dist*
 
-torch_ccl_path=$(python -c "import torch; import torch_ccl; import os;  print(os.path.abspath(os.path.dirname(torch_ccl.__file__)))")
-source $torch_ccl_path/env/setvars.sh
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --use_default_allocator \
@@ -95,7 +98,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --pretrained-backbone ${CHECKPOINT_DIR}/ssd/resnet34-333f7ec4.pth \
     --performance_only \
     -w 20 \
-    -iter 1000 \
+    -iter 100 \
     --world_size ${NUM_RANKS} \
     --backend ccl \
     $ARGS 2>&1 | tee ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_throughput_dist.log

@@ -71,6 +71,9 @@ if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16 --jit"
     echo "running bf16 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    ARGS="$ARGS --bf32 --jit"
+    echo "running bf32 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     ARGS="$ARGS --jit"
     echo "running fp32 path"
@@ -80,16 +83,29 @@ else
     exit 1
 fi
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+MULTI_INSTANCE_ARGS=""
+if [[ ${PLATFORM} == "linux" ]]; then
+    pip list | grep intel-extension-for-pytorch
+    if [[ "$?" == 0 ]]; then
+        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch --use_default_allocator"
+        # in case IPEX is used, we set ipex arg
+        ARGS="${ARGS} --ipex"
+        echo "Running using ${ARGS} args ..."
+    fi
+fi
+
+python ${MULTI_INSTANCE_ARGS} \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
     $ARGS \
-    --ipex \
     --pretrained \
     -j 0 \
     -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnext101_accuracy_log_${PRECISION}.log
 
 wait
 
-accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnext101_accuracy_log_${PRECISION}.log |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
-echo "resnext101;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+if [[ ${PLATFORM} == "linux" ]]; then
+  accuracy=$(grep 'Accuracy:' ${OUTPUT_DIR}/resnext101_accuracy_log_${PRECISION}.log |sed -e 's/.*Accuracy//;s/[^0-9.]//g')
+  echo "resnext101;"accuracy";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
+fi
