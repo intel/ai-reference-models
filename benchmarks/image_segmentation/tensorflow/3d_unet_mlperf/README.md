@@ -86,7 +86,7 @@ modes/precisions:
    to get additional debug output or change the default output location.
 
 #### Run FP32 Inference on Windows
-If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
 Then, install the model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt`.
 
 Evaluate the model performance:

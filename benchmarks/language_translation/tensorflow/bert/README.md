@@ -85,7 +85,7 @@ For throughput, recommend batch size is 32 (using `--batch-size 32`).
    Use `--docker-image intel/intel-optimized-tensorflow:latest` to run with Intel optimized TensorFlow docker container.
    
    #### Run on Windows:
-   If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
+   If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
    Then, run inference using `cmd.exe`:
    ```
    # Set dataset dir

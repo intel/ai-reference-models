@@ -18,7 +18,7 @@ The model documentation in the tables below have information on the
 prerequisites to run each model. The model scripts run on Linux. Certain
 models are also able to run using bare metal on Windows. For more information
 and a list of models that are supported on Windows, see the
-[documentation here](/docs/general/tensorflow/Windows.md#using-intel-model-zoo-on-windows-systems).
+[documentation here](/docs/general/Windows.md#using-intel-model-zoo-on-windows-systems).
 
 Instructions available to run [TensorFlow ResNet50 v1.5 inference](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README_SPR_baremetal.md) on [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx).
 

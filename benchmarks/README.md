@@ -10,7 +10,7 @@ The model documentation in the tables below have information on the
 prerequisites to run each model. The model scripts run on Linux. Select
 models are also able to run using bare metal on Windows. For more information
 and a list of models that are supported on Windows, see the
-[documentation here](/docs/general/tensorflow/Windows.md#using-intel-model-zoo-on-windows-systems).
+[documentation here](/docs/general/Windows.md#using-intel-model-zoo-on-windows-systems).
 
 For information on running more advanced use cases using the workload containers see the:
 [advanced options documentation](/quickstart/common/tensorflow/ModelPackagesAdvancedOptions.md).

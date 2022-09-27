@@ -104,7 +104,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
     <td>
       <p>To run without AI Kit on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>build-essential
         <li>libgl1-mesa-glx
         <li>libglib2.0-0

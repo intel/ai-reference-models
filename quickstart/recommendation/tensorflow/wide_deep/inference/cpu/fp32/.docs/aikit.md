@@ -36,7 +36,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
     <td>
       <p>To run without AI Kit on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>git
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>

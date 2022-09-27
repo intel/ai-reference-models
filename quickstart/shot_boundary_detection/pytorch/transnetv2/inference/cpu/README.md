@@ -3,12 +3,24 @@
 ## Description
 This document has instructions for running TransNetV2 Inference using Intel-optimized PyTorch.
 
-## Bare Metal
-### General setup
+## Quick Start Scripts
+
+|  DataType   | Throughput  |  Latency    |
+| ----------- | ----------- | ----------- |
+| FP32        | bash inference_throughput.sh fp32 | bash inference_realtime.sh fp32 |
+| BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 |
+
+Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Once all the setup is done,
+the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+Ensure that you have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
+```
+git clone https://github.com/IntelAI/models.git
+```
+
+## Run the model on Linux
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison and Jemalloc.
 
-### Model Specific Setup
 * Install dependencies
   ```
   pip install ffmpeg-python matplotlib Pillow pycocotools pandas
@@ -34,35 +46,33 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
   export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
   ```
 
-## Quick Start Scripts
+* Run the model:
+  ```
+  cd models
 
-|  DataType   | Throughput  |  Latency    |
-| ----------- | ----------- | ----------- |
-| FP32        | bash inference_throughput.sh fp32 | bash inference_realtime.sh fp32 |
-| BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 |
+  # Set environment variables
+  export OUTPUT_DIR=<path to an output directory>
 
+  # Run a quickstart script (for example, FP32 batch inference)
+  bash quickstart/shot_boundary_detection/pytorch/transnetv2/inference/cpu/inference_throughput.sh fp32
+  ```
 
-## Run the model
+## Run the model on Windows
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
+* Install dependencies
+  ```
+  pip install ffmpeg-python matplotlib Pillow pycocotools pandas
+  ```
+* Using Windows CMD.exe, run:
+  ```
+  cd models
 
-Follow the instructions above to setup your bare metal environment, download and
-preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
-Ensure that you have an enviornment variables set to point to the dataset directory,
-the downloaded pretrained model, and an output directory.
+  # Set environment variables
+  set OUTPUT_DIR=<path to an output directory>
 
-```
-# Clone the model zoo repo and set the MODEL_DIR
-git clone https://github.com/IntelAI/models.git
-cd models
-export MODEL_DIR=$(pwd)
-
-# Env vars
-export OUTPUT_DIR=<path to an output directory>
-
-# Run a quickstart script (for example, FP32 batch inference)
-cd ${MODEL_DIR}/quickstart/shot_boundary_detection/pytorch/transnetv2/inference/cpu
-bash inference_throughput.sh fp32
-```
+  # Run a quickstart script (FP32 realtime inference or batch inference)
+  bash quickstart\shot_boundary_detection\pytorch\transnetv2\inference\cpu\inference_realtime.sh fp32
+  ```
 
 <!--- 80. License -->
 ## License
