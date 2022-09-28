@@ -108,6 +108,8 @@ parser.add_argument('-b', '--batch-size', default=256, type=int,
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--steps', default=-1, type=int,
                     help='steps for validation')
+parser.add_argument('--training_steps', default=-1, type=int,
+                    help='steps for validation')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
@@ -447,45 +449,21 @@ def main_worker(gpu, ngpus_per_node, args):
         print("create DistributedDataParallel in CPU")
         device_ids = None
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
-
-    for epoch in range(args.start_epoch, args.epochs):
-        if args.distributed:
-            train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
-
-        # train for one epoch
-        train(train_loader, model, criterion, optimizer, epoch, args)
-
-        if not args.train_no_eval:
-            # evaluate on validation set
-            acc1 = validate(val_loader, model, criterion, args)
-
-            # remember best acc@1 and save checkpoint
-            is_best = acc1 > best_acc1
-            best_acc1 = max(acc1, best_acc1)
-
-            if not args.multiprocessing_distributed or (args.multiprocessing_distributed
-                    and args.rank % ngpus_per_node == 0):
-                save_checkpoint({
-                    'epoch': epoch + 1,
-                    'arch': args.arch,
-                    'state_dict': model.state_dict(),
-                    'best_acc1': best_acc1,
-                    'optimizer' : optimizer.state_dict(),
-                }, is_best)
+    
+    train(train_loader, model, criterion, optimizer, args)
 
 
-def train(train_loader, model, criterion, optimizer, epoch, args):
+def train(train_loader, model, criterion, optimizer, args):
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
     top1 = AverageMeter('Acc@1', ':6.2f')
     top5 = AverageMeter('Acc@5', ':6.2f')
     progress = ProgressMeter(
-        len(train_loader),
-        [batch_time, data_time, losses, top1, top5],
-        prefix="Epoch: [{}]".format(epoch))
-
+            len(train_loader) * (args.epochs - args.start_epoch),
+            [batch_time, data_time, losses, top1, top5],
+            prefix="Training: ")
+    
     # switch to train mode
     model.train()
 
@@ -493,54 +471,82 @@ def train(train_loader, model, criterion, optimizer, epoch, args):
         print("running bfloat16 training step\n")
     else:
         print("running fp32 training step\n")
+    
+    for epoch in range(args.start_epoch, args.epochs):
+        
+        if args.distributed:
+            train_sampler.set_epoch(epoch)
+        adjust_learning_rate(optimizer, epoch, args)
+    
+        for i, (images, target) in enumerate(train_loader):
+            if args.training_steps > 0 and (epoch - args.start_epoch) * len(train_loader) + i >= args.training_steps:
+                break
+            # measure data loading time
+            if args.ipex:
+                images = images.contiguous(memory_format=torch.channels_last)
+            if args.bf16:
+                images = images.to(torch.bfloat16)
+            if (epoch - args.start_epoch) * len(train_loader) + i == args.warmup_iterations:
+                print("begin collecting time................................")
+            if (epoch - args.start_epoch) * len(train_loader) + i >= args.warmup_iterations:
+                data_time.update(time.time() - end)
+            # compute output
+            if args.gpu is not None:
+                images = images.cuda(args.gpu, non_blocking=True)
+            if torch.cuda.is_available():
+                target = target.cuda(args.gpu, non_blocking=True)
 
-    for i, (images, target) in enumerate(train_loader):
-        # measure data loading time
-        if args.ipex:
-            images = images.contiguous(memory_format=torch.channels_last)
-        if args.bf16:
-            images = images.to(torch.bfloat16)
-        if i == args.warmup_iterations:
-            print("begin collecting time................................")
-        if i >= args.warmup_iterations:
-            data_time.update(time.time() - end)
-        # compute output
-        if args.gpu is not None:
-            images = images.cuda(args.gpu, non_blocking=True)
-        if torch.cuda.is_available():
-            target = target.cuda(args.gpu, non_blocking=True)
-
-        if args.bf16:
-            with torch.cpu.amp.autocast():
+            if args.bf16:
+                with torch.cpu.amp.autocast():
+                    output = model(images)
+                output = output.to(torch.float32)
+            else:
                 output = model(images)
-            output = output.to(torch.float32)
-        else:
-            output = model(images)
-        loss = criterion(output, target)
-        # compute gradient and do SGD step
-        if not args.distributed:
-            optimizer.zero_grad(set_to_none=True)
-        loss.backward()
-        optimizer.step()
+            loss = criterion(output, target)
+            # compute gradient and do SGD step
+            if not args.distributed:
+                optimizer.zero_grad(set_to_none=True)
+            loss.backward()
+            optimizer.step()
 
-        # measure elapsed time
-        if i >= args.warmup_iterations:
-            batch_time.update(time.time() - end)
-        # measure accuracy and record loss
-        acc1, acc5 = accuracy(output, target, topk=(1, 5))
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))
+            # measure elapsed time
+            if (epoch - args.start_epoch) * len(train_loader) + i >= args.warmup_iterations:
+                batch_time.update(time.time() - end)
+            # measure accuracy and record loss
+            acc1, acc5 = accuracy(output, target, topk=(1, 5))
+            losses.update(loss.item(), images.size(0))
+            top1.update(acc1[0], images.size(0))
+            top5.update(acc5[0], images.size(0))
 
-        if i % args.print_freq == 0:
-            progress.display(i)
+            if ((epoch - args.start_epoch) * len(train_loader) + i) % args.print_freq == 0:
+                progress.display((epoch - args.start_epoch) * len(train_loader) + i)
 
-        if i >= args.warmup_iterations - 1:
-            end = time.time()
+            if (epoch - args.start_epoch) * len(train_loader) + i >= args.warmup_iterations - 1:
+                end = time.time()
+        
+        if not args.train_no_eval:
+                # evaluate on validation set
+                acc1 = validate(val_loader, model, criterion, args)
 
+                # remember best acc@1 and save checkpoint
+                is_best = acc1 > best_acc1
+                best_acc1 = max(acc1, best_acc1)
+
+                if not args.multiprocessing_distributed or (args.multiprocessing_distributed
+                        and args.rank % ngpus_per_node == 0):
+                    save_checkpoint({
+                        'epoch': epoch + 1,
+                        'arch': args.arch,
+                        'state_dict': model.state_dict(),
+                        'best_acc1': best_acc1,
+                        'optimizer' : optimizer.state_dict(),
+                    }, is_best)
+    
     batch_size = args.batch_size
     perf = batch_size / (batch_time.avg - data_time.avg)
     print("Training throughput: {:.3f} fps".format(perf))
+
+    
 
 def run_weights_sharing_model(m, tid, args):
     steps = args.steps if args.steps > 0 else 300
