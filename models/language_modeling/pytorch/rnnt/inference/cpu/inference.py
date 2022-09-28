@@ -147,6 +147,7 @@ def eval(
                                 break
                 print("\nstart measure performance, measure steps = ", total_steps)
                 total_time = 0
+                timeBuff = []
                 with tqdm(total=total_steps) as pbar:
                     for epoch in range(test_epoches + 1):
                         for it, data in enumerate(data_layer.data_iterator):
@@ -175,6 +176,7 @@ def eval(
                                 t1 = time.perf_counter()
 
                             total_time += (t1 - t0)
+                            timeBuff.append(t1 - t0)
 
                             values_dict = dict(
                                 predictions=[t_predictions_e],
@@ -203,6 +205,7 @@ def eval(
                         # measure performance
                         print("\nstart measure performance, measure steps = ", total_steps)
                         total_time = 0
+                        timeBuff = []
                         # with torch.autograd.profiler.profile(args.profiling) as prof:
                         with tqdm(total=total_steps) as pbar:
                             for epoch in range(test_epoches + 1):
@@ -233,6 +236,7 @@ def eval(
                                         t1 = time.perf_counter()
 
                                     total_time += (t1 - t0)
+                                    timeBuff.append(t1 - t0)
 
                                     values_dict = dict(
                                         predictions=[t_predictions_e],
@@ -257,6 +261,7 @@ def eval(
                     # measure performance
                     print("\nstart measure performance, measure steps = ", total_steps)
                     total_time = 0
+                    timeBuff = []                    
                     # with torch.autograd.profiler.profile(args.profiling) as prof:
                     with tqdm(total=total_steps) as pbar:
                         for epoch in range(test_epoches + 1):
@@ -286,6 +291,7 @@ def eval(
                                     t1 = time.perf_counter()
 
                                 total_time += (t1 - t0)
+                                timeBuff.append(t1 - t0)                                
 
                                 values_dict = dict(
                                     predictions=[t_predictions_e],
@@ -334,6 +340,9 @@ def eval(
             else:
                 total_samples = len(data_layer)
 
+            timeBuff = np.asarray(timeBuff)
+            p99 = np.percentile(timeBuff, 99)
+            print('P99 Latency {:.2f} ms'.format(p99*1000))
             print("total samples tested: ", total_samples)
             print("total time (encoder + decoder, excluded audio processing): ", total_time, "s")
             print("dataset size: ", len(data_layer))

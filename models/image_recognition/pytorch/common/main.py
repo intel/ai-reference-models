@@ -59,6 +59,7 @@ import shutil
 import time
 import warnings
 import threading
+import numpy as np
 
 import torch
 import torch.nn as nn
@@ -546,6 +547,7 @@ def run_weights_sharing_model(m, tid, args):
     start_time = time.time()
     num_images = 0
     time_consume = 0
+    timeBuff = []
     x = torch.randn(args.batch_size, 3, 224, 224)
     if args.bf16:
         x = x.to(torch.bfloat16)
@@ -564,9 +566,13 @@ def run_weights_sharing_model(m, tid, args):
             end_time = time.time()
             if num_images > args.warmup_iterations:
                 time_consume += end_time - start_time
+                timeBuff.append(end_time - start_time)
             num_images += 1
         fps = (steps - args.warmup_iterations) / time_consume
         avg_time = time_consume * 1000 / (steps - args.warmup_iterations)
+        timeBuff = np.asarray(timeBuff)
+        p99 = np.percentile(timeBuff, 99)
+        print('P99 Latency {:.2f} ms'.format(p99*1000))
         print('Instance num: %d Avg Time/Iteration: %f msec Throughput: %f fps' %(tid, avg_time, fps))
 
 def validate(val_loader, model, criterion, args):
