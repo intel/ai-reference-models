@@ -56,6 +56,9 @@ elif [[ $PRECISION == "bf16" ]]; then
 elif [[ $PRECISION == "bf32" ]]; then
     ARGS="$ARGS --bf32 --jit"
     echo "running bf32 path"
+elif [[ $PRECISION == "fp16" ]]; then
+    ARGS="$ARGS --fp16 --jit"
+    echo "running fp16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     ARGS="$ARGS --jit"
     echo "running fp32 path"
