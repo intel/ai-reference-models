@@ -129,6 +129,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 | FP32        | bash run_bert_pretrain_phase1.sh fp32 | bash run_bert_pretrain_phase2.sh fp32 |
 | BF32        | bash run_bert_pretrain_phase1.sh bf32 | bash run_bert_pretrain_phase2.sh bf32 |
 | BF16        | bash run_bert_pretrain_phase1.sh bf16 | bash run_bert_pretrain_phase2.sh bf16 |
+| FP16        | bash run_bert_pretrain_phase1.sh fp16 | bash run_bert_pretrain_phase2.sh fp16 |
 
 |  DataType   | Distributed Training Phase 1  |  Distributed Training Phase 2 |
 | ----------- | ----------- | ----------- |

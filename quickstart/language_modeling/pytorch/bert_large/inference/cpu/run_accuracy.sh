@@ -29,6 +29,12 @@ then
     precision=bf16
     ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
+elif [[ "$1" == "fp16" ]]
+then
+    precision=fp16
+    ARGS="$ARGS --fp16_cpu"
+    echo "### running fp16 mode"
+
 elif [[ "$1" == "int8" || "$1" == "avx-int8" ]]
 then
     precision=int8

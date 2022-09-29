@@ -36,6 +36,10 @@ elif [[ $1 == "bf32" ]]; then
     echo "### running BF32 mode"
     ARGS="$ARGS --bf32"
     precision=bf32
+elif [[ $1 == "fp16" ]]; then
+    echo "### running FP16 mode"
+    ARGS="$ARGS --fp16"
+    precision=fp16
 elif [[ $1 == "fp32" || $1 == "avx-fp32" ]]; then
     echo "### running FP32 mode"
 
