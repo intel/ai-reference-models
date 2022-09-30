@@ -1,7 +1,7 @@
 # TransNetV2 Inference
 
 ## Description
-This document has instructions for running TransNetV2 Inference using Intel-optimized PyTorch.
+This document has instructions for running TransNetV2 Inference.
 
 ## Quick Start Scripts
 
@@ -28,7 +28,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 * Set Jemalloc Preload for better performance
 
-  The jemalloc should be built from the [General setup](#general-setup) section.
+  After [Jemalloc setup](/docs/general/pytorch/BareMetalSetup.md#build-jemalloc), set the following environment variables.
   ```
   export LD_PRELOAD="path/lib/libjemalloc.so":$LD_PRELOAD
   export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
@@ -36,7 +36,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 * Set IOMP preload for better performance
 
-  IOMP should be installed in your conda env from the [General setup](#general-setup) section.
+  IOMP should be installed in your conda env. Set the following environment variables.
   ```
   export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
   ```

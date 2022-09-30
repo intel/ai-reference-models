@@ -51,13 +51,13 @@ if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
     echo "running int8 path"
     ARGS="$ARGS --int8 --configure-dir ${MODEL_DIR}/models/image_recognition/pytorch/common/resnext101_configure_sym.json"
 elif [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --bf16 --jit"
+    ARGS="$ARGS --bf16"
     echo "running bf16 path"
 elif [[ $PRECISION == "bf32" ]]; then
-    ARGS="$ARGS --bf32 --jit"
+    ARGS="$ARGS --bf32"
     echo "running bf32 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
-    ARGS="$ARGS --jit"
+    ARGS="$ARGS"
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
@@ -86,7 +86,10 @@ if [[ ${PLATFORM} == "linux" ]]; then
         --log_file_prefix="./resnext101_latency_log_${PRECISION}""
 
         # in case IPEX is used, we set ipex arg
-        ARGS="${ARGS} --ipex --weight-sharing --number-instance $NUMBER_INSTANCE"
+        if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
+            ARGS="${ARGS} --ipex --weight-sharing --number-instance $NUMBER_INSTANCE"
+        else:
+            ARGS="${ARGS} --ipex --jit --weight-sharing --number-instance $NUMBER_INSTANCE"
         echo "Running using ${ARGS} args ..."
     fi
 fi
