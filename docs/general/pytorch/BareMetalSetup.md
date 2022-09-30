@@ -1,5 +1,5 @@
 # Install Pytorch* and Intel® Extension for PyTorch*
-Follow [these instructions ](https://intel.github.io/intel-extension-for-pytorch/1.12.0/tutorials/installation.html) to install pytorch and IPEX via pip.
+Follow [these instructions ](https://pypi.org/project/intel-extension-for-pytorch/) to install pytorch and IPEX via pip.
 
 ## The following components are required by some PyTorch* workloads. Only build them if indicated in the documentation for that workload. 
 
