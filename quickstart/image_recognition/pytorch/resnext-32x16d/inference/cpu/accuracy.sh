@@ -93,8 +93,9 @@ if [[ ${PLATFORM} == "linux" ]]; then
         # in case IPEX is used, we set ipex arg
         if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
             ARGS="${ARGS} --ipex"
-        else:
+        else
             ARGS="${ARGS} --ipex --jit"
+	fi
         echo "Running using ${ARGS} args ..."
     fi
 fi
