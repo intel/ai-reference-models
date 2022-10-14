@@ -27,10 +27,10 @@ slice_sets:
           source: benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/inference
         - destination: benchmarks/launch_benchmark.py
           source: benchmarks/launch_benchmark.py
-        - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_realtime.sh
-          destination: quickstart/inference_realtime.sh
-        - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_throughput.sh
-          destination: quickstart/inference_throughput.sh
+        - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_realtime_multi_instance.sh
+          destination: quickstart/inference_realtime_multi_instance.sh
+        - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_throughput_multi_instance.sh
+          destination: quickstart/inference_throughput_multi_instance.sh
         - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh
         - destination: models/common
@@ -85,3 +85,23 @@ slice_sets:
             <package dir>: tf-spr-3d-unet-mlperf-inference
             <docker image>: model-zoo:tf-spr-3d-unet-mlperf-inference
           uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu
+        - docs:
+          - name: Title
+            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/description.md
+          - name: Datasets
+            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/datasets.md
+          - name: Quick Start Scripts
+            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/quickstart.md
+          - name: Bare Metal
+            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/baremetal.md
+          - name: License
+            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/license.md
+          name: README.md
+          text_replace:
+            <mode>: inference
+            <model name>: MLPerf 3D U-Net
+            <use case>: image_segmentation
+            <workload container url>: ""
+          uri: models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/inference

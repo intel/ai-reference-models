@@ -8,7 +8,7 @@ modes/precisions:
 
 ## FP32 Inference Instructions
 
-1. Please download [Brats 2019](https://www.med.upenn.edu/cbica/brats2019/data.html) 
+1. Please download [Brats 2019](https://www.med.upenn.edu/cbica/brats2019/data.html)
    separately and unzip the dataset. The directory that contains the dataset files will be
    passed to the launch script when running the benchmarking script.
 
@@ -86,7 +86,7 @@ modes/precisions:
    to get additional debug output or change the default output location.
 
 #### Run FP32 Inference on Windows
-If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
 Then, install the model dependencies in `models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt`.
 
 Evaluate the model performance:
