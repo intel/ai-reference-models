@@ -478,7 +478,7 @@ def main(args):
 
     model.eval()
     if args.ipex:
-        ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model)
+        ipex.nn.utils._model_convert.replace_lstm_with_ipex_lstm(model, None)
 
     greedy_decoder = RNNTGreedyDecoder(len(ctc_vocab) - 1, model.module if multi_gpu else model)
 
