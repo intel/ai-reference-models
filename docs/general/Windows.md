@@ -70,6 +70,7 @@ The following list of models are tested on Windows, please check each model inst
 | Image Recognition       | [VGG-11 with batch normalization](https://arxiv.org/abs/1409.1556) | Inference | [FP32](/quickstart/image_recognition/pytorch/vgg11_bn/inference/cpu/README.md) |
 | Image Recognition       | [Wide ResNet-50-2](https://arxiv.org/pdf/1605.07146.pdf)   | Inference | [FP32](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md) |
 | Image Recognition       | [Wide ResNet-101-2](https://arxiv.org/pdf/1605.07146.pdf)  | Inference | [FP32](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md) |
+| Language Modeling       | [T5](https://arxiv.org/abs/1910.10683) | Inference  | [FP32](/quickstart/language_modeling/pytorch/t5/inference/cpu/README.md) [Int8**](/quickstart/language_modeling/pytorch/t5/inference/cpu/README.md) |
 | Object Detection        | [Faster R-CNN ResNet50 FPN](https://arxiv.org/abs/1506.01497) | Inference  | [FP32](/quickstart/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/README.md) |
 | Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | [FP32](/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README.md) |
 | Object Detection        | [Mask R-CNN ResNet50 FPN](https://arxiv.org/abs/1703.06870)   | Inference  | [FP32](/quickstart/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/README.md) |

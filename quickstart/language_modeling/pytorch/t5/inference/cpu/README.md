@@ -7,101 +7,84 @@
 This document has instructions for running [T5](https://huggingface.co/docs/transformers/model_doc/t5) inference using
 Intel-optimized PyTorch.
 
-## Bare Metal
+Follow the instructions to setup your bare metal environment on either Linux or Windows systems. Once all the setup is done,
+the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+Ensure that you install dependencies and have a clone of the [Model Zoo Github repository](https://github.com/IntelAI/models).
 
-### General setup
-
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, and Jemalloc.
-
-### Model Specific Setup
-
-* Install dependency
+* Install dependencies
 
 ```bash
 pip install transformers
 pip install -r requirements.txt
 ```
-
-* Setup the output dir to store the log
-
-```bash
-    export OUTPUT_DIR=$Where_to_save_log
+* Clone Model Zoo repo
+```
+git clone https://github.com/IntelAI/models.git
 ```
 
-* Setup runnning precision
+## Run on Linux
 
-```bash
-    export PRECISION=$Data_type(fp32, int8)
-```
-
-* Setup model name running
-
-```bash
-    export MODEL_NAME=$Model_name(t5-small, t5-base, t5-large, t5-3b and t5-11b)
-```
-
-* Setup predict samples to do inference
-
-```bash
-    export MAX_PREDICT_SAMPLES=$Max_predict_samples
-```
-
-* Setup cores number to use
-
-```bash
-    export CORES_PER_INSTANCE=$Cores_use
-```
-
-* Set Jemalloc Preload for better performance
-
-The jemalloc should be built from the [General setup](#general-setup) section.
-
-```bash
-    export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":$LD_PRELOAD
-    export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
-```
-
-* Set IOMP preload for better performance
-
-IOMP should be installed in your conda env from the [General setup](#general-setup) section.
-
-```bash
-    export LD_PRELOAD=<path to the intel-openmp directory>/lib/libiomp5.so:$LD_PRELOAD
-```
-
-* Set ENV to use AMX if you are using SPR
-
-```bash
-    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-```
-
-## Quick Start Scripts
+### Quick Start Scripts
 
 |  backend   | performance  |
 | ----------- | ----------- |
 | IPEX        | bash run_inference.sh ipex |
 | Offical Pytorch        | bash run_inference.sh pytorch | 
-## Run the model
 
-Follow the instructions above to setup your bare metal environment, download and
-preprocess the dataset, and do the model specific setup. Once all the setup is done,
-the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
-Ensure that you have an enviornment variable set to point to an output directory.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison and Jemalloc.
 
-```bash
-# Clone the model zoo repo and set the MODEL_DIR
-git clone https://github.com/IntelAI/models.git
+* Set Jemalloc Preload for better performance
+
+  After [Jemalloc setup](/docs/general/pytorch/BareMetalSetup.md#build-jemalloc), set the following environment variables.
+  ```
+  export LD_PRELOAD="<path to the jemalloc directory>/lib/libjemalloc.so":$LD_PRELOAD
+  export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+  ```
+
+* Set IOMP preload for better performance
+
+  IOMP should be installed in your conda env. Set the following environment variables.
+  ```
+  export LD_PRELOAD=<path to the intel-openmp directory>/lib/libiomp5.so:$LD_PRELOAD
+  ```
+
+* Set ENV to use AMX if you are using SPR
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  ```
+
+* Run the model:
+  ```
+  cd models
+
+    # Set environment variables
+    export OUTPUT_DIR=<path to an output directory>
+    export PRECISION=fp32(for example, fp32, int8)
+    export MODEL_NAME=t5-small(for example, t5-small, t5-base, t5-large, t5-3b and t5-11b)
+    export MAX_PREDICT_SAMPLES=30(Setup predict samples to do inference)
+    export CORES_PER_INSTANCE=4(Setup cores number to use)
+    
+    # Run a quickstart script (for example, ipex inference)
+    bash quickstart/language_modeling/pytorch/t5/inference/cpu/run_inference.sh ipex
+  ```
+
+## Run on Windows
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
+
+Using Windows CMD.exe, run:
+```
 cd models
-export MODEL_DIR=$(pwd)
 
-# Env vars
-export OUTPUT_DIR=<path to an output directory>
-export PRECISION=int8
-export MODEL_NAME=t5-small
-export MAX_PREDICT_SAMPLES=30
-export CORES_PER_INSTANCE=4
-# Run a quickstart script (for example, ipex inference)
-bash run_inference.sh ipex
+#Set environment variables
+set OUTPUT_DIR=<path to an output directory>
+set PRECISION=fp32(for example, fp32, int8)
+set MODEL_NAME=t5-small(for example, t5-small, t5-base, t5-large, t5-3b and t5-11b)
+set MAX_PREDICT_SAMPLES=30(Setup predict samples to do inference)
+set CORES_PER_INSTANCE=4(Setup cores number to use)
+
+#Run a quickstart script (FP32 online inference or batch inference or accuracy)
+bash quickstart\language_modeling\pytorch\t5\inference\cpu\run_inference.sh 
+
 ```
 
 <!--- 80. License -->
