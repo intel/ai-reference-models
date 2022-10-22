@@ -76,6 +76,12 @@ For Linux, run:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_int8_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/resnet50_int8_pretrained_model.pb
 ```
+Intel® Neural Compressor int8 quantized ResNet50 pre-trained model is available as another option to download and try.
+```
+wget https://storage.googleapis.com/intel-optimized-tensorflow/intel-neural-compressor/v1_13/resnet-50-inc-int8-inference.pb
+export PRETRAINED_MODEL=$(pwd)/resnet-50-inc-int8-inference.pb
+```
+Check the [instructions](/quickstart/image_recognition/tensorflow/generate_int8/README.md) for more details on how to quantize FP32 model using Intel® Neural Compressor.
 
 Set environment variables for the path to your `DATASET_DIR` for ImageNet
 and an `OUTPUT_DIR` where log files will be written. Navigate to your
@@ -94,6 +100,7 @@ export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_recognition/tensorflow/resnet50/inference/cpu/int8/<script name>.sh
 ```
+
 ### Run on Windows
 Using `cmd.exe`, run:
 ```

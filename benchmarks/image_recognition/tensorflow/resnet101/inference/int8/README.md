@@ -78,6 +78,12 @@ For Linux, run:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet101_int8_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/resnet101_int8_pretrained_model.pb
 ```
+Intel® Neural Compressor int8 quantized ResNet101 pre-trained model is available as another option to download and try.
+```
+wget https://storage.googleapis.com/intel-optimized-tensorflow/intel-neural-compressor/v1_13/resnet-101-inc-int8-inference.pb
+export PRETRAINED_MODEL=$(pwd)/resnet-101-inc-int8-inference.pb
+```
+Check the [instructions](/quickstart/image_recognition/tensorflow/generate_int8/README.md) for more details on how to quantize FP32 model using Intel® Neural Compressor.
 
 Set environment variables for the path to your `DATASET_DIR` for ImageNet
 and an `OUTPUT_DIR` where log files will be written. Navigate to your
@@ -111,7 +117,7 @@ set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\image_recognition\tensorflow\resnet101\inference\cpu\int8\<script name>.sh
 ```
-> Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+> Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables.
 As an example, if the dataset location on Windows is `D:\user\ImageNet`, convert the Windows path to Unix as shown:
 > ```
 > cygpath D:\user\ImageNet

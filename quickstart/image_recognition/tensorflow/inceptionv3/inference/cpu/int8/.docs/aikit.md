@@ -43,7 +43,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
 </table>
 
-After finishing the setup above, download the pretrained model and set the
+Download the pretrained model and set the
 `PRETRAINED_MODEL` environment var to the path to the frozen graph.
 If you run on Windows, please use a browser to download the pretrained model using the link below.
 For Linux, run:
@@ -51,7 +51,13 @@ For Linux, run:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/inceptionv3_int8_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/inceptionv3_int8_pretrained_model.pb
 ```
-
+Intel® Neural Compressor int8 quantized Inception V3 pre-trained model is available as another option to download and try.
+```
+wget https://storage.googleapis.com/intel-optimized-tensorflow/intel-neural-compressor/v1_13/inceptionv3-inc-int8-inference.pb
+export PRETRAINED_MODEL=$(pwd)/inceptionv3-inc-int8-inference.pb
+```
+Check the [instructions](/quickstart/image_recognition/tensorflow/generate_int8/README.md) for more details on how to quantize FP32 model using Intel® Neural Compressor.
+ 
 Set environment variables for the path to your `DATASET_DIR` for ImageNet
 and an `OUTPUT_DIR` where log files will be written. Navigate to your
 model zoo directory and then run a [quickstart script](#quick-start-scripts) on either Linux or Windows systems.
