@@ -45,7 +45,7 @@ Follow [these instructions ](https://pypi.org/project/intel-extension-for-pytorc
 ### Build torch-ccl 
     cd ..
     git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
-    cd frameworks.ai.pytorch.torch-ccl && git checkout torch-ccl-1.12-rc1
+    cd frameworks.ai.pytorch.torch-ccl && git checkout ccl_torch_1.13
     git submodule sync 
     git submodule update --init --recursive
     python setup.py install 
