@@ -57,7 +57,7 @@ slice_sets:
               - openssh-7.6
               - horovod
           args:
-              - PY_VERSION=3.9
+              - PY_VERSION=3.8
 
     image-recognition:
         - add_to_name: "-image-recognition"
@@ -108,7 +108,7 @@ slice_sets:
               - object_detection/pip_installs
               - object_detection/protoc
           args:
-              - PY_VERSION=3.9
+              - PY_VERSION=3.8
           files:
                - source: LICENSE
                  destination: licenses/LICENSE
