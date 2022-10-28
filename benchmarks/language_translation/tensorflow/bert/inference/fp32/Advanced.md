@@ -1,8 +1,5 @@
-# BERT
-
-- [FP32 inference](#fp32-inference-instructions)
-
-## FP32 Inference Instructions
+<!--- 0. Title -->
+## BERT FP32 Inference - Advanced Instructions
 
 Clone [intelai/models](https://github.com/IntelAI/models) repository:
 
