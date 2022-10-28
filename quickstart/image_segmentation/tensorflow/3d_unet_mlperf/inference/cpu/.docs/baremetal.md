@@ -46,7 +46,7 @@ Install dependencies:
 pip install numactl
 
 # install the model dependencies in requirements.txt if you would run accuracy.sh
-pip install models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt
+pip install -r models/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt
 ```
 
 Set the environment variables and one of the
@@ -65,7 +65,7 @@ export PRETRAINED_MODEL=<path to the pretrained model file based on the chosen p
 export BATCH_SIZE=<customized batch size value>
 
 # run a script for (example inference_realtime_multi_instance.sh)
-./quickstart/image_segmentation/tensorflow/3d_unet/inference/cpu/inference_realtime_multi_instance.sh
+./quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_realtime_multi_instance.sh
 ```
 
 ### Run on Windows
@@ -84,7 +84,7 @@ set PRETRAINED_MODEL=<path to the pretrained model file based on the chosen prec
 set BATCH_SIZE=<customized batch size value>
 
 # run a script for inference
-bash quickstart\image_segmentation\tensorflow\3d_unet\inference\cpu\inference.sh
+bash quickstart\image_segmentation\tensorflow\3d_unet_mlperf\inference\cpu\inference.sh
 ```
 > Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables.
 As an example, if the output folder location is `D:\user\output`, convert the Windows path to Unix as shown:
