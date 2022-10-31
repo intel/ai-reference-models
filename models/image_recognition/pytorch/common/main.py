@@ -453,6 +453,12 @@ def main_worker(gpu, ngpus_per_node, args):
         model, optimizer = ipex.optimize(model, dtype=torch.float32,
                                          optimizer=optimizer, sample_input=sample_input)
 
+    if args.ipex and args.bf16:
+        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
+        model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer,
+                                         weights_prepack=True, split_master_weight_for_bf16=False, sample_input=sample_input)
+
+
     scaler = None
     if args.ipex and args.fp16:
         scaler = torch.cpu.amp.GradScaler()
@@ -551,7 +557,7 @@ def train(train_loader, val_loader, model, criterion, optimizer, args, train_sam
 
             if (epoch - args.start_epoch) * len(train_loader) + i >= args.warmup_iterations - 1:
                 end = time.time()
-        
+
         if not args.train_no_eval:
                 # evaluate on validation set
                 acc1 = validate(val_loader, model, criterion, args)
