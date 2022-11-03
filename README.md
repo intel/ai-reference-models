@@ -133,6 +133,12 @@ Instructions available to run [TensorFlow ResNet50 v1.5 inference](/quickstart/i
 | ------------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
 | [TransNetV2](https://arxiv.org/pdf/2008.04838.pdf)| PyTorch | Inference  | [FP32 BFloat16](/quickstart/shot_boundary_detection/pytorch/transnetv2/inference/cpu/README.md) | Synthetic Data |
 
+### AI Drug Design (AIDD)
+
+| Model                                             | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
+| ------------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
+| [AlphaFold2](https://www.nature.com/articles/s41586-021-03819-2)| PyTorch | Inference  | [FP32](/quickstart/aidd/pytorch/alphafold2/inference/README.md) | [AF2Dataset](/quickstart/aidd/pytorch/alphafold2/inference/README.md#datasets) |
+
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
 
