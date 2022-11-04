@@ -1,9 +1,9 @@
-# Using Intel® Model Zoo on Windows Systems
+# Using Model Zoo for Intel® Architecture on Windows Systems
 
 ## Prerequisites for running on bare metal
 
 Basic requirements for running all TensorFlow models on Windows include:
- * Install [Python 3.7+ 64-bit release for Windows](https://www.python.org/downloads/windows/), and add it to your system `%PATH%` environment variable.
+ * Install [Python 3.9+ 64-bit release for Windows](https://www.python.org/downloads/windows/), and add it to your system `%PATH%` environment variable.
  * Download and Install [Microsoft Visual C++ 2022 Redistributable](https://docs.microsoft.com/en-us/cpp/windows/latest-supported-vc-redist?view=msvc-170).
  * [MSYS2](https://www.msys2.org). If MSYS2 is installed to `C:\msys64`, add `C:\msys64\usr\bin` to your `%PATH%` environment variable.
  Then, using `cmd.exe`, run:
@@ -48,6 +48,8 @@ The following list of models are tested on Windows, please check each model inst
 
 
 ## PyTorch models
+Intel® Extension for PyTorch is currently not supported on Windows.
+
 Install [PyTorch](https://pytorch.org/)
 ```
 pip install torch torchvision
