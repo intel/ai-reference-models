@@ -100,7 +100,7 @@ you can use "SHARD_NUM" to control the shard files number. the default "SHARD_NU
 
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison, Torch-CCL, Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL, Jemalloc and TCMalloc.
 
 ### Model Specific Setup
 * Install dependence

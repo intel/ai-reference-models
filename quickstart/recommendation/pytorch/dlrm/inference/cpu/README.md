@@ -9,7 +9,7 @@ Intel-optimized PyTorch for bare metal.
 
 ## Bare Metal
 ### General Setup
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, and Jemalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, and Jemalloc.
 
 ### Model Specific Setup
 
