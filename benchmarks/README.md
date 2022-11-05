@@ -7,7 +7,7 @@ Intel® Extension for PyTorch.
 ## Prerequisites
 
 The model documentation in the tables below have information on the
-prerequisites to run each model. The model scripts run on Linux. Select
+prerequisites to run each model. The model scripts run on Linux. Certain
 models are also able to run using bare metal on Windows. For more information
 and a list of models that are supported on Windows, see the
 [documentation here](/docs/general/Windows.md#using-intel-model-zoo-on-windows-systems).
@@ -17,8 +17,8 @@ For information on running more advanced use cases using the workload containers
 
 ## TensorFlow Use Cases
 
-| Use Case                | Model              | Mode      | oneContainer Portal | Model Documentation | Dataset |
-| ------------------------| ------------------ | --------- | ------------------- | ------------------- | ------- |
+| Use Case                | Model              | Mode      | Intel® Developer Catalog | Model Documentation | Benchmark/Test Dataset |
+| ------------------------| ------------------ | --------- | ------------------------ | ------------------- | ------- |
 | Image Recognition       | [DenseNet169](https://arxiv.org/pdf/1608.06993.pdf) | Inference | Model Containers: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/densenet169-fp32-inference-tensorflow-container.html) <br> Model Packages: [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/densenet169-fp32-inference-tensorflow-model.html) | [FP32](image_recognition/tensorflow/densenet169/inference/fp32/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | Image Recognition       | [Inception V3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | Model Containers: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-int8-inference-tensorflow-container.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-fp32-inference-tensorflow-container.html) <br> Model Packages: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-int8-inference-tensorflow-model.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv3-fp32-inference-tensorflow-model.html)  | [Int8](image_recognition/tensorflow/inceptionv3/inference/int8/README.md) [FP32](image_recognition/tensorflow/inceptionv3/inference/fp32/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
 | Image Recognition       | [Inception V4](https://arxiv.org/pdf/1602.07261.pdf) | Inference | Model Containers: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-int8-inference-tensorflow-container.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-fp32-inference-tensorflow-container.html) <br> Model Packages: [Int8](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-int8-inference-tensorflow-model.html) [FP32](https://software.intel.com/content/www/us/en/develop/articles/containers/inceptionv4-fp32-inference-tensorflow-model.html)  | [Int8](image_recognition/tensorflow/inceptionv4/inference/int8/README.md) [FP32](image_recognition/tensorflow/inceptionv4/inference/fp32/README.md) | [ImageNet 2012](https://github.com/IntelAI/models/tree/master/datasets/imagenet/README.md) |
@@ -62,39 +62,40 @@ For information on running more advanced use cases using the workload containers
 
 ## PyTorch Use Cases
 
-| Use Case                | Model              | Mode      | oneContainer Portal | Model Documentation |
-| ----------------------- | ------------------ | --------- | ------------------- | --------------------|
-| Image Recognition       | [GoogLeNet](https://arxiv.org/abs/1409.4842)         | Inference |  | [FP32 BFloat16](/quickstart/image_recognition/pytorch/googlenet/inference/cpu/README.md) |
-| Image Recognition       | [Inception v3](https://arxiv.org/pdf/1512.00567.pdf) | Inference |  | [FP32 BFloat16](/quickstart/image_recognition/pytorch/inception_v3/inference/cpu/README.md) |
-| Image Recognition       | [MNASNet 0.5](https://arxiv.org/abs/1807.11626)      | Inference |  | [FP32 BFloat16](/quickstart/image_recognition/pytorch/mnasnet0_5/inference/cpu/README.md) |
-| Image Recognition       | [MNASNet 1.0](https://arxiv.org/abs/1807.11626)      | Inference |  | [FP32 BFloat16](/quickstart/image_recognition/pytorch/mnasnet1_0/inference/cpu/README.md) |
-| Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | Inference |  | [FP32 Int8 BFloat16](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/README.md) |
-| Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | Training  | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet50/training/cpu/README.md) |
-| Image Recognition       | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf)   | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet101/inference/cpu/README.md) |
-| Image Recognition       | [ResNet 152](https://arxiv.org/pdf/1512.03385.pdf)   | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet152/inference/cpu/README.md) |
-| Image Recognition       | [ResNext 32x4d](https://arxiv.org/abs/1611.05431)    | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnext-32x4d/inference/cpu/README.md) |
-| Image Recognition       | [ResNext 32x16d](https://arxiv.org/abs/1611.05431)   | Inference | | [FP32 Int8 BFloat16](/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/README.md) |
-| Image Recognition       | [VGG-11](https://arxiv.org/abs/1409.1556)            | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/vgg11/inference/cpu/README.md) |
-| Image Recognition       | [VGG-11 with batch normalization](https://arxiv.org/abs/1409.1556) | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/vgg11_bn/inference/cpu/README.md) |
-| Image Recognition       | [Wide ResNet-50-2](https://arxiv.org/pdf/1605.07146.pdf)   | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md) |
-| Image Recognition       | [Wide ResNet-101-2](https://arxiv.org/pdf/1605.07146.pdf)  | Inference | | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md) |
-| Language Modeling       | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | Inference | | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) |
-| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Inference | | [FP32 Int8 BFloat16](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
-| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Training  | | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md) |
-| Language Modeling       | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | Inference | | [FP32 BFloat16](/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/README.md) |
-| Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Inference | | [FP32 BFloat16](/quickstart/language_modeling/pytorch/rnnt/inference/cpu/README.md) |
-| Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Training  | | [FP32 BFloat16](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) |
-| Language Modeling       | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | Inference | | [FP32 BFloat16](/quickstart/language_modeling/pytorch/roberta_base/inference/cpu/README.md) |
-| Language Modeling       | [T5](https://arxiv.org/abs/1910.10683)     | Inference | | [FP32 Int8**](/quickstart/language_modeling/pytorch/t5/inference/cpu/README.md) |
-| Object Detection        | [Faster R-CNN ResNet50 FPN](https://arxiv.org/abs/1506.01497) | Inference  | | [FP32 BFloat16](/quickstart/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/README.md) |
-| Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | | [FP32 BFloat16](/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README.md) |
-| Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Training   | | [FP32 BFloat16](/quickstart/object_detection/pytorch/maskrcnn/training/cpu/README.md) |
-| Object Detection        | [Mask R-CNN ResNet50 FPN](https://arxiv.org/abs/1703.06870)   | Inference  | | [FP32 BFloat16](/quickstart/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/README.md) |
-| Object Detection        | [RetinaNet ResNet-50 FPN](https://arxiv.org/abs/1708.02002)   | Inference  | | [FP32 BFloat16](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md) |
-| Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Inference  | | [FP32 Int8 BFloat16](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md) |
-| Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Training   | | [FP32 BFloat16](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md) |
-| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Inference | | [FP32 Int8 BFloat16](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md) |
-| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Training  | | [FP32 BFloat16](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) |
-| Shot Boundary Detection          | [TransNetV2](https://arxiv.org/pdf/2008.04838.pdf)         | Inference  | | [FP32 BFloat16](/quickstart/shot_boundary_detection/pytorch/transnetv2/inference/cpu/README.md) |
+| Use Case                | Model              | Mode      | Model Documentation |
+| ----------------------- | --------- | ------------------- | --------------------|
+| Image Recognition       | [GoogLeNet](https://arxiv.org/abs/1409.4842)         | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/googlenet/inference/cpu/README.md) |
+| Image Recognition       | [Inception v3](https://arxiv.org/pdf/1512.00567.pdf) | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/inception_v3/inference/cpu/README.md) |
+| Image Recognition       | [MNASNet 0.5](https://arxiv.org/abs/1807.11626)      | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/mnasnet0_5/inference/cpu/README.md) |
+| Image Recognition       | [MNASNet 1.0](https://arxiv.org/abs/1807.11626)      | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/mnasnet1_0/inference/cpu/README.md) |
+| Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | Inference | [FP32 Int8 BFloat16](/quickstart/image_recognition/pytorch/resnet50/inference/cpu/README.md) |
+| Image Recognition       | [ResNet 50](https://arxiv.org/pdf/1512.03385.pdf)    | Training | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet50/training/cpu/README.md) |
+| Image Recognition       | [ResNet 101](https://arxiv.org/pdf/1512.03385.pdf)   | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet101/inference/cpu/README.md) |
+| Image Recognition       | [ResNet 152](https://arxiv.org/pdf/1512.03385.pdf)   | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnet152/inference/cpu/README.md) |
+| Image Recognition       | [ResNext 32x4d](https://arxiv.org/abs/1611.05431)    | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/resnext-32x4d/inference/cpu/README.md) |
+| Image Recognition       | [ResNext 32x16d](https://arxiv.org/abs/1611.05431)   | Inference | [FP32 Int8 BFloat16](/quickstart/image_recognition/pytorch/resnext-32x16d/inference/cpu/README.md) |
+| Image Recognition       | [VGG-11](https://arxiv.org/abs/1409.1556)            | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/vgg11/inference/cpu/README.md) |
+| Image Recognition       | [VGG-11 with batch normalization](https://arxiv.org/abs/1409.1556) | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/vgg11_bn/inference/cpu/README.md) |
+| Image Recognition       | [Wide ResNet-50-2](https://arxiv.org/pdf/1605.07146.pdf)   | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet50_2/inference/cpu/README.md) |
+| Image Recognition       | [Wide ResNet-101-2](https://arxiv.org/pdf/1605.07146.pdf)  | Inference | [FP32 BFloat16](/quickstart/image_recognition/pytorch/wide_resnet101_2/inference/cpu/README.md) |
+| Language Modeling       | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) |
+| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Inference | [FP32 Int8 BFloat16](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
+| Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Training  | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md) |
+| Language Modeling       | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/README.md) |
+| Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/rnnt/inference/cpu/README.md) |
+| Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Training  | [FP32 BFloat16](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) |
+| Language Modeling       | [RoBERTa base](https://arxiv.org/abs/1907.11692)     | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/roberta_base/inference/cpu/README.md) |
+| Language Modeling       | [T5](https://arxiv.org/abs/1910.10683)     | Inference | [FP32 Int8](/quickstart/language_modeling/pytorch/t5/inference/cpu/README.md) |
+| Object Detection        | [Faster R-CNN ResNet50 FPN](https://arxiv.org/abs/1506.01497) | Inference | [FP32 BFloat16](/quickstart/object_detection/pytorch/faster_rcnn_resnet50_fpn/inference/cpu/README.md) |
+| Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Inference  | [FP32 BFloat16](/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README.md) |
+| Object Detection        | [Mask R-CNN](https://arxiv.org/abs/1703.06870)                | Training   | [FP32 BFloat16](/quickstart/object_detection/pytorch/maskrcnn/training/cpu/README.md) |
+| Object Detection        | [Mask R-CNN ResNet50 FPN](https://arxiv.org/abs/1703.06870)   | Inference | [FP32 BFloat16](/quickstart/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/README.md) |
+| Object Detection        | [RetinaNet ResNet-50 FPN](https://arxiv.org/abs/1708.02002)   | Inference | [FP32 BFloat16](/quickstart/object_detection/pytorch/retinanet_resnet50_fpn/inference/cpu/README.md) |
+| Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Inference | [FP32 Int8 BFloat16](/quickstart/object_detection/pytorch/ssd-resnet34/inference/cpu/README.md) |
+| Object Detection        | [SSD-ResNet34](https://arxiv.org/abs/1512.02325)              | Training | [FP32 BFloat16](/quickstart/object_detection/pytorch/ssd-resnet34/training/cpu/README.md) |
+| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Inference | [FP32 Int8 BFloat16](/quickstart/recommendation/pytorch/dlrm/inference/cpu/README.md) |
+| Recommendation          | [DLRM](https://arxiv.org/pdf/1906.00091.pdf)         | Training  | [FP32 BFloat16](/quickstart/recommendation/pytorch/dlrm/training/cpu/README.md) |
+| Shot Boundary Detection          | [TransNetV2](https://arxiv.org/pdf/2008.04838.pdf)         | Inference  | [FP32 BFloat16](/quickstart/shot_boundary_detection/pytorch/transnetv2/inference/cpu/README.md) |
+| AI Drug Design (AIDD) | [AlphaFold2](https://www.nature.com/articles/s41586-021-03819-2)| Inference  | [FP32](/quickstart/aidd/pytorch/alphafold2/inference/README.md) |
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
