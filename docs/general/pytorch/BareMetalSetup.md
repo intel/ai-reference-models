@@ -14,13 +14,28 @@ pip install intel-extension-for-pytorch==1.12.300
     source ./miniconda/bin/activate pytorch
     pip install sklearn onnx
     pip install lark-parser hypothesis
-    pip install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses psutil
+    conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses psutil
+    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
+    export work_space=/home/sdp  (you can get the summary.log in this path where the models performance and accuracy write) 
     
     # Install torch,torchvision and torchaudio
     python -m pip install torch==1.12.1 torchvision==0.13.1 torchaudio==0.12.1
     
 ### Install jemalloc
+    Install jemalloc either using conda or from source
+
+    Using conda:
     conda install jemalloc
+
+    From source:
+    cd ..
+    git clone  https://github.com/jemalloc/jemalloc.git    
+    cd jemalloc
+    git checkout c8209150f9d219a137412b06431c9d52839c7272
+    ./autogen.sh
+    ./configure --prefix=your_path(eg: /home/tdoux/tdoux/jemalloc/)
+    make
+    make install
 
 ### Build tcmalloc 
     wget https://github.com/gperftools/gperftools/releases/download/gperftools-2.7.90/gperftools-2.7.90.tar.gz
