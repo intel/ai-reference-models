@@ -35,6 +35,12 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${NODE}" ]; then
+  echo "The  environment variable NONE which is the number of node(machine) has not been set"
+  exit 1
+fi
+
+
 if [ ! -d "${DATASET_DIR}" ]; then
   echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
   exit 1
@@ -66,24 +72,40 @@ else
     exit 1
 fi
 
+
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
-BATCHSIZE=$((256*CORES))
-export OMP_NUM_THREADS=$CORES
+BATCHSIZE=32768
+seed_num=1665468325 #1665462256 #$(date +%s)
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
+export CCL_MNIC=global
+export CCL_MNIC_NAME=rocep56s0,rocep73s0,rocep152s0,rocep216s0 #rocep56s0,rocep59s0,rocep73s0,rocep76s0,rocep152s0,rocep155s0,rocep216s0,rocep219s0
+export CCL_MNIC_COUNT=4
+export OMP_NUM_THREADS=44
+export PSM3_PRINT_STATS=0
+export FI_PROVIDER=psm3
+export CCL_ALLREDUCE=rabenseifner
+export PSM3_IDENTIFY=1
+export PSM3_IDENTIFY=1
+export PSM3_ALLOW_ROUTERS=1
+export PSM3_RDMA=1 
+export PSM3_RV_MR_CACHE_SIZE=8192 
+export FI_PROVIDER_PATH=/usr/lib64/libfabric
+
 LOG_0="${LOG}/socket.log"
-python -m intel_extension_for_pytorch.cpu.launch --enable_jemalloc --distributed \
+python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --distributed --hostfile hostfile --nnodes $NODE \
 $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
-  --memory-map --mlperf-bin-loader --round-targets=True --learning-rate=1.0 \
+  --memory-map --mlperf-bin-loader --mlperf-bin-shuffle --round-targets=True --learning-rate=18.0 \
   --arch-mlp-bot=13-512-256-128 --arch-mlp-top=1024-1024-512-256-1 \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
-  --numpy-rand-seed=727 --print-auc --mlperf-auc-threshold=0.8025 \
-  --mini-batch-size=${BATCHSIZE} --print-freq=100 --print-time --ipex-interaction \
-  --test-mini-batch-size=16384 --ipex-merged-emb \
+  --numpy-rand-seed=${seed_num} --print-auc --mlperf-auc-threshold=0.8025 \
+  --lr-num-warmup-steps=8000   --lr-decay-start-step=70000 --lr-num-decay-steps=30000\
+  --mini-batch-size=${BATCHSIZE} --print-freq=1024 --print-time --ipex-interaction \
+  --test-mini-batch-size=65536 --ipex-merged-emb --should-test --test-freq 6400\
   $ARGS |tee $LOG_0
 wait
 

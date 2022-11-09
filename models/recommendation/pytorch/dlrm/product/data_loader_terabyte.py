@@ -84,7 +84,6 @@ def _transform_features(
     batch_size = x_cat_batch.shape[0]
     feature_count = x_cat_batch.shape[1]
     lS_o = torch.arange(batch_size).reshape(1, -1).repeat(feature_count, 1)
-
     return x_int_batch, lS_o, x_cat_batch.t(), y_batch.view(-1, 1)
 
 
@@ -215,16 +214,16 @@ class CriteoBinDataset(Dataset):
 
         data_file_size = os.path.getsize(data_file)
         bytes_per_sample = bytes_per_feature * self.tot_fea
-        if ext_dist.my_size > 1:
-            self.bytes_per_rank = self.bytes_per_entry // ext_dist.my_size
-        else:
-            self.bytes_per_rank = self.bytes_per_entry
+        #if ext_dist.my_size > 1:
+        #    self.bytes_per_rank = self.bytes_per_entry // ext_dist.my_size
+        #else:
+        self.bytes_per_rank = self.bytes_per_entry
 
-        if ext_dist.my_size > 1 and self.num_entries * self.bytes_per_entry > data_file_size:
-            last_batch = (data_file_size % self.bytes_per_entry) // bytes_per_sample
-            self.bytes_last_batch = last_batch // ext_dist.my_size * bytes_per_sample
-        else:
-            self.bytes_last_batch = self.bytes_per_rank
+        #if ext_dist.my_size > 1 and self.num_entries * self.bytes_per_entry > data_file_size:
+        #    last_batch = (data_file_size % self.bytes_per_entry) // bytes_per_sample
+        #    self.bytes_last_batch = last_batch // ext_dist.my_size * bytes_per_sample
+        #else:
+        self.bytes_last_batch = self.bytes_per_rank
 
         if self.bytes_last_batch == 0:
             self.num_entries = self.num_entries - 1
@@ -245,7 +244,8 @@ class CriteoBinDataset(Dataset):
     def __getitem__(self, idx):
         my_rank = ext_dist.dist.get_rank() if ext_dist.my_size > 1 else 0
         rank_size = self.bytes_last_batch if idx == (self.num_entries - 1) else self.bytes_per_rank 
-        self.file.seek(idx * self.bytes_per_entry + rank_size * my_rank, 0)
+        #self.file.seek(idx * self.bytes_per_entry + rank_size * my_rank, 0)
+        self.file.seek(idx * self.bytes_per_entry, 0)
         raw_data = self.file.read(rank_size)
         array = np.frombuffer(raw_data, dtype=np.int32)
         tensor = torch.from_numpy(array).view((-1, self.tot_fea))
