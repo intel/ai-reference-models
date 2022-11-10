@@ -45,6 +45,12 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+
+if [ -z "${BATCH_SIZE}" ]; then
+  echo "The required environment variable BATCH_SIZE has not been set"
+  exit 1
+fi
+
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to fp32, avx-fp32, or bf16."
@@ -90,7 +96,20 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-BATCH_SIZE=128
+
+export CCL_MNIC=global
+export CCL_MNIC_NAME=rocep56s0,rocep73s0,rocep152s0,rocep216s0 #rocep56s0,rocep59s0,rocep73s0,rocep76s0,rocep152s0,rocep155s0,rocep216s0,rocep219s0
+export CCL_MNIC_COUNT=4
+export PSM3_PRINT_STATS=0
+export FI_PROVIDER=psm3
+export CCL_ALLREDUCE=rabenseifner
+export PSM3_IDENTIFY=1
+export PSM3_IDENTIFY=1
+export PSM3_ALLOW_ROUTERS=1
+export PSM3_RDMA=1
+export PSM3_RV_MR_CACHE_SIZE=8192
+export FI_PROVIDER_PATH=/usr/lib64/libfabric
+
 
 rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_*
 
@@ -112,7 +131,9 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --epochs $TRAINING_EPOCHS \
     --world-size ${NUM_RANKS} \
     --dist-backend ccl \
-    --train-no-eval \
+    --base-op=LARS \
+    --base-lr 10.5 \
+    --weight-decay 0.00005 \
     -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
 # For the summary of results
 wait
