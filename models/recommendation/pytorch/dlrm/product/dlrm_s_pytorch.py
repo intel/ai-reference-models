@@ -1042,6 +1042,7 @@ def run():
     print("Initialize for not inference only done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
     print(dlrm)
     train_start = time.time()
+    total_train_time_wo_dl_eval = 0
     with torch.autograd.profiler.profile(
         enabled=args.enable_profiling, use_cuda=False, record_shapes=False
     ) as prof:
@@ -1102,6 +1103,7 @@ def run():
                     lr_scheduler.step()
 
                     t2 = time_wrap()
+                    total_train_time_wo_dl_eval += (t2 - t1)
                     total_time += t2 - t1
 
                     total_loss += L * mbs
@@ -1180,7 +1182,8 @@ def run():
                         ):
                             train_end = time.time()
                             if ext_dist.dist.get_rank() == 0:
-                                print("The TTT is {} mins".format((train_end - train_start)/60.0))
+                                print("The TTT w/ dataloader and metric evaluation is {} mins".format((train_end - train_start)/60.0))
+                                print("The TTT w/o dataloader and metric evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
                             exit()
                 k += 1  # nepochs
         else:
