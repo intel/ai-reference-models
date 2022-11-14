@@ -633,15 +633,13 @@ def inference(
                     y_true=y_true, y_pred=np.round(y_score)
                 ),
                 "ap": sklearn.metrics.average_precision_score,
-                "roc_auc": sklearn.metrics.roc_auc_score,
-                "accuracy": lambda y_true, y_score: sklearn.metrics.accuracy_score(
-                    y_true=y_true, y_pred=np.round(y_score)
-                ),
             }
-
+        roc_auc, _, accuracy = ipex._C.roc_auc_score_all(torch.Tensor(targets), torch.Tensor(scores))
         validation_results = {}
         for metric_name, metric_function in metrics.items():
             validation_results[metric_name] = metric_function(targets, scores)
+        validation_results["roc_auc"] = roc_auc
+        validation_results["accuracy"] = accuracy
         acc_test = validation_results["accuracy"]
     elif not args.inference_only:
         acc_test = test_accu / test_samp
