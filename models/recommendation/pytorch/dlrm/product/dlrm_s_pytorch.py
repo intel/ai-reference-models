@@ -234,6 +234,7 @@ class DLRM_Net(nn.Module):
                 W = np.random.uniform(
                         low=-np.sqrt(1 / n), high=np.sqrt(1 / n), size=(n, m)
                     ).astype(np.float32)
+                # W = np.zeros(shape=(n, m)).astype(np.float32)
                 EE = nn.EmbeddingBag(n, m, mode="sum", sparse=sparse_grad, _weight=torch.from_numpy(W).requires_grad_())
             else:
                 EE = nn.EmbeddingBag(n, m, mode="sum", sparse=sparse_grad)
@@ -307,7 +308,7 @@ class DLRM_Net(nn.Module):
         is_ddp = isinstance(emb_l,  ext_dist.DDP)
         
         if (not is_ddp and isinstance(emb_l,ipex.nn.modules.MergedEmbeddingBag)) or (is_ddp and isinstance(emb_l.module,ipex.nn.modules.MergedEmbeddingBag)): 
-             n_tables = lS_i.shape[0]
+             n_tables = len(lS_i)
              #prepare the input for sparse mergedembedding
              idx = [lS_i[i] for i in range(n_tables)]
              offset = [lS_o[i] for i in range(n_tables)]
@@ -370,21 +371,22 @@ class DLRM_Net(nn.Module):
             return self.sequential_forward(dense_x, lS_o, lS_i)
 
     def distributed_forward(self, dense_x, lS_o, lS_i):
-        batch_size = dense_x.size()[0]
+        local_batch_size = dense_x.size()[0]
+
         #vector_lenght = self.emb_l.weights[0].size()[1]
         # WARNING: # of ranks must be <= batch size in distributed_forward call
-        if batch_size < ext_dist.my_size:
-            sys.exit("ERROR: batch_size (%d) must be larger than number of ranks (%d)" % (batch_size, ext_dist.my_size))
+        if local_batch_size < ext_dist.my_size:
+            sys.exit("ERROR: local_batch_size (%d) must be larger than number of ranks (%d)" % (local_batch_size, ext_dist.my_size))
         
-        local_bs = dense_x.size()[0] // ext_dist.my_size
         rank_id = dlrm.rank
         #print("#####################rank_id:", rank_id)
-        dense_x = dense_x[rank_id * local_bs: (rank_id + 1) * local_bs]
-        global_bs = local_bs * ext_dist.my_size
-        lS_o_sparse = lS_o[dlrm.local_ln_emb_sparse, :global_bs]
-        lS_i_sparse = lS_i[dlrm.local_ln_emb_sparse, :global_bs]
-        lS_o_dense = lS_o[dlrm.ln_emb_dense, 0 : local_bs]
-        lS_i_dense = lS_i[dlrm.ln_emb_dense, rank_id * local_bs: (rank_id + 1) * local_bs]
+        lS_o_dense = [lS_o[i] for i in self.ln_emb_dense]
+        lS_i_dense = [lS_i[i] for i in self.ln_emb_dense]
+        lS_o_sparse = [lS_o[i] for i in self.ln_emb_sparse]
+        lS_i_sparse = [lS_i[i] for i in self.ln_emb_sparse]
+
+        lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
+        g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
         #torch.set_printoptions(threshold=500000)
         if 0:
             dense_x = torch.load("dense.{}".format(rank_id))
@@ -401,7 +403,9 @@ class DLRM_Net(nn.Module):
         #    exit()
         #exit()
         #batch_size = X.size()[0]
-        ly_sparse = self.apply_emb(dlrm.emb_sparse, lS_o_sparse, lS_i_sparse)
+        offset = torch.arange(local_batch_size * ext_dist.my_size)
+        g_o_sparse = [offset for i in range(self.n_local_emb_sparse)]
+        ly_sparse = self.apply_emb(dlrm.emb_sparse, g_o_sparse, g_i_sparse)
         #print("ly_sparse", ly_sparse)
         a2a_req = ext_dist.alltoall(ly_sparse, self.n_sparse_emb_per_rank)
         #dense embedding 
@@ -582,10 +586,6 @@ def inference(
             X_test, lS_o_test, lS_i_test, T_test, W_test, CBPP_test = unpack_batch(
                 testBatch
             )
-            if ext_dist.my_size > 1 :
-                rank_id = dlrm.rank 
-                local_bs = X_test.size()[0] // ext_dist.my_size
-                T_test = T_test[rank_id * local_bs: (rank_id + 1) * local_bs]
             # forward pass
             start = time_wrap()
             Z_test = dlrm(X_test, lS_o_test, lS_i_test)
@@ -1086,10 +1086,6 @@ def run():
                             lS_i,
                         ).float()
                     # losis
-                    if ext_dist.my_size > 1 :
-                        rank_id = dlrm.rank
-                        local_bs = mbs // ext_dist.my_size
-                        T = T[rank_id * local_bs: (rank_id + 1) * local_bs]
                     E = loss_fn_wrap(Z, T)
 
                     # compute loss and accuracy
@@ -1187,8 +1183,8 @@ def run():
                         ):
                             train_end = time.time()
                             if ext_dist.dist.get_rank() == 0:
-                                print("The TTT w/ dataloader and metric evaluation is {} mins".format((train_end - train_start)/60.0))
-                                print("The TTT w/o dataloader and metric evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
+                                print("The TTT w/ dataloader and evaluation is {} mins".format((train_end - train_start)/60.0))
+                                print("The TTT w/o dataloader and evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
                             exit()
                 k += 1  # nepochs
         else:
