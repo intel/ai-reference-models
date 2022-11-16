@@ -622,25 +622,27 @@ def inference(
             scores = np.concatenate(scores, axis=0)
             targets = np.concatenate(targets, axis=0)
 
-            metrics = {
-                "recall": lambda y_true, y_score: sklearn.metrics.recall_score(
-                    y_true=y_true, y_pred=np.round(y_score)
-                ),
-                "precision": lambda y_true, y_score: sklearn.metrics.precision_score(
-                    y_true=y_true, y_pred=np.round(y_score)
-                ),
-                "f1": lambda y_true, y_score: sklearn.metrics.f1_score(
-                    y_true=y_true, y_pred=np.round(y_score)
-                ),
-                "ap": sklearn.metrics.average_precision_score,
-            }
+            if args.print_recall_precision_f1_ap:
+                metrics = {
+                    "recall": lambda y_true, y_score: sklearn.metrics.recall_score(
+                        y_true=y_true, y_pred=np.round(y_score)
+                    ),
+                    "precision": lambda y_true, y_score: sklearn.metrics.precision_score(
+                        y_true=y_true, y_pred=np.round(y_score)
+                    ),
+                    "f1": lambda y_true, y_score: sklearn.metrics.f1_score(
+                        y_true=y_true, y_pred=np.round(y_score)
+                    ),
+                    "ap": sklearn.metrics.average_precision_score,
+                }
         roc_auc, _, accuracy = ipex._C.roc_auc_score_all(torch.Tensor(targets), torch.Tensor(scores))
         validation_results = {}
-        for metric_name, metric_function in metrics.items():
-            validation_results[metric_name] = metric_function(targets, scores)
         validation_results["roc_auc"] = roc_auc
         validation_results["accuracy"] = accuracy
         acc_test = validation_results["accuracy"]
+        if args.print_recall_precision_f1_ap:
+            for metric_name, metric_function in metrics.items():
+                validation_results[metric_name] = metric_function(targets, scores)
     elif not args.inference_only:
         acc_test = test_accu / test_samp
     else:
@@ -659,20 +661,24 @@ def inference(
         if is_best:
             best_auc_test = validation_results["roc_auc"]
             model_metrics_dict["test_auc"] = best_auc_test
-        print(
-            "recall {:.4f}, precision {:.4f},".format(
+
+        result_fmt_str = (" auc {:.4f}, best auc {:.4f},".format(
+                validation_results["roc_auc"], best_auc_test
+            )
+            + " accuracy {:3.3f} %, best accuracy {:3.3f} %".format(
+                validation_results["accuracy"] * 100, best_acc_test * 100
+            ))
+        if args.print_recall_precision_f1_ap:
+            result_fmt_str =  ("recall {:.4f}, precision {:.4f},".format(
                 validation_results["recall"],
                 validation_results["precision"],
             )
             + " f1 {:.4f}, ap {:.4f},".format(
                 validation_results["f1"], validation_results["ap"]
-            )
-            + " auc {:.4f}, best auc {:.4f},".format(
-                validation_results["roc_auc"], best_auc_test
-            )
-            + " accuracy {:3.3f} %, best accuracy {:3.3f} %".format(
-                validation_results["accuracy"] * 100, best_acc_test * 100
-            ),
+            )) + result_fmt_str
+
+        print(
+            result_fmt_str,
             flush=True,
         )
         print("Accuracy: {:.34} ".format(validation_results["roc_auc"]))
@@ -761,6 +767,7 @@ def run():
     parser.add_argument("--lr-num-decay-steps", type=int, default=0)
     # intel
     parser.add_argument("--print-auc", action="store_true", default=False)
+    parser.add_argument("--print-recall-precision-f1-ap", action="store_true", default=False)
     parser.add_argument("--should-test", action="store_true", default=False)
     parser.add_argument("--bf16", action="store_true", default=False)
     parser.add_argument("--bf32", action="store_true", default=False)

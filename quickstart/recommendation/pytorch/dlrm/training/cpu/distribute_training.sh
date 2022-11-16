@@ -36,7 +36,7 @@ if [ -z "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${NODE}" ]; then
-  echo "The  environment variable NONE which is the number of node(machine) has not been set"
+  echo "The  environment variable NODE which is the number of node(machine) has not been set"
   exit 1
 fi
 
