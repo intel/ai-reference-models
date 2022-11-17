@@ -63,6 +63,12 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="32"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name=bert_large \
@@ -70,7 +76,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --mode=inference \
     --framework=tensorflow \
     --in-graph ${PRETRAINED_MODEL} \
-    --batch-size=32 \
+    --batch-size=${BATCH_SIZE} \
     --data-location ${DATASET_DIR} \
     --checkpoint ${CHECKPOINT_DIR} \
     --output-dir ${OUTPUT_DIR} \

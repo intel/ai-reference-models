@@ -1,20 +1,16 @@
 mkdir -p tf_2012_val
 
 #copy ImageNet validation (tf record) to tf_2012_val
-#cd tf_2012_val
-#rm tf_2012_val/val*
-#cd -
-rm -rf vlpot
-python -m venv vlpot 
 
-source vlpot/bin/activate
+rm -rf env_inc
+python -m venv env_inc 
+
+source env_inc/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-runipy lpot_for_tensorflow.ipynb
-#runipy ut.ipynb
+runipy inc_for_tensorflow.ipynb
 
-if [ $? != 0 ]
-then
+if [ $? != 0 ]; then
   echo "ut is wrong!"
   deactivate
   exit 1
@@ -23,3 +19,4 @@ else
   deactivate
   exit 0
 fi
+

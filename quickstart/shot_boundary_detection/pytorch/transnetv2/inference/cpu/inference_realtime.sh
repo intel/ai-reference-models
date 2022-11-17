@@ -59,14 +59,24 @@ BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/transnetv2_latency_log_${PRECISION}_*
 
-python -m intel_extension_for_pytorch.cpu.launch \
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+
+# check if stock PYT or IPEX is installed on the system
+IPEX_ARGS=""
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
   --use_default_allocator \
   --latency_mode \
   --log_path=${OUTPUT_DIR} \
-  --log_file_prefix="transnetv2_latency_log_${PRECISION}" \
+  --log_file_prefix="transnetv2_latency_log_${PRECISION}""
+  ARGS="$ARGS --ipex"
+fi
+
+python ${IPEX_ARGS} \
   ${MODEL_DIR}/models/shot_boundary_detection/pytorch/transnetv2/inference/cpu/inference.py \
   --batch_size $BATCH_SIZE \
-  --ipex \
   --jit \
   -w 50 \
   -m 200 \
@@ -75,22 +85,24 @@ python -m intel_extension_for_pytorch.cpu.launch \
 
 wait
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-CORES_PER_INSTANCE=4
+if [[ ${PLATFORM} == "linux" ]]; then
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+  CORES_PER_INSTANCE=4
 
-INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
+  INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/transnetv2_latency_log_${PRECISION}* | sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
-BEGIN {
-        sum = 0;
-i = 0;
-      }
-      {
-        sum = sum + $1;
-i++;
-      }
-END   {
-sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.2f", sum);
-}')
-echo ""TransNetV2";"latency";$1; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+  throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/transnetv2_latency_log_${PRECISION}* | sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+  BEGIN {
+          sum = 0;
+  i = 0;
+        }
+        {
+          sum = sum + $1;
+  i++;
+        }
+  END   {
+  sum = sum / i * INSTANCES_PER_SOCKET;
+          printf("%.2f", sum);
+  }')
+  echo ""TransNetV2";"latency";$1; ${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

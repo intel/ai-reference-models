@@ -60,7 +60,7 @@ setup is done, you can run the `fp32_inference.sh` [quickstart script](#quick-st
 # cd to your model zoo directory
 cd models
 
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_WAVENET_DIR=<tensorflow-wavenet directory>
 export PRETRAINED_MODEL=<path to the downloaded and extracted checkpoints>
 

@@ -30,6 +30,8 @@ Set environment variables for the path to your `DATASET_DIR` and an
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
 TF_MODELS_DIR=<path to the TensorFlow models directory tf_models>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/ncf-fp32-inference.tar.gz
 tar -xzf ncf-fp32-inference.tar.gz

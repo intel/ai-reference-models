@@ -56,6 +56,9 @@ elif [[ $PRECISION == "bf16" ]]; then
 elif [[ $PRECISION == "bf32" ]]; then
     ARGS="$ARGS --bf32 --jit"
     echo "running bf32 path"
+elif [[ $PRECISION == "fp16" ]]; then
+    ARGS="$ARGS --fp16 --jit"
+    echo "running fp16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     ARGS="$ARGS --jit"
     echo "running fp32 path"
@@ -110,4 +113,18 @@ sum = sum / i * INSTANCES_PER_SOCKET;
         printf("%.2f", sum);
 }')
 
+p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/resnet50_latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+BEGIN {
+    sum = 0;
+    i = 0;
+    }
+    {
+        sum = sum + $1;
+        i++;
+    }
+END   {
+    sum = sum / i;
+    printf("%.3f ms", sum);
+}')
 echo "resnet50;"latency";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo "resnet50;"p99_latency";${PRECISION};${BATCH_SIZE};${p99_latency}" | tee -a ${OUTPUT_DIR}/summary.log

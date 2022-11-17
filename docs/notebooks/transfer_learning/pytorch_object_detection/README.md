@@ -17,7 +17,7 @@ The notebook performs the following steps:
 
 ## Running the notebook
 
-The instructions below explain how to run the notebook on [bare metal](#bare-metal) using a
+The instructions below explain how to run the notebook on bare metal using a
 virtual environment.
 
 1. Get a clone of the Model Zoo repository from GitHub:
@@ -26,7 +26,7 @@ virtual environment.
    export MODEL_ZOO_DIR=$(pwd)/intelai_models
    ```
 2. Create a Python3 virtual environment and install required packages.
-   
+
    You can use virtualenv:
    ```
    python3 -m venv intel-pyt-venv

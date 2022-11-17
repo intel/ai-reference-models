@@ -43,6 +43,8 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/resnet50-fp32-inference.tar.gz
 tar -xzf resnet50-fp32-inference.tar.gz
@@ -63,10 +65,13 @@ the ImageNet dataset and an output directory where checkpoint files will be writ
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \

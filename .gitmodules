@@ -1,0 +1,3 @@
+[submodule "models/aidd/pytorch/alphafold2/inference/alphafold"]
+	path = models/aidd/pytorch/alphafold2/inference/alphafold
+	url = https://github.com/deepmind/alphafold

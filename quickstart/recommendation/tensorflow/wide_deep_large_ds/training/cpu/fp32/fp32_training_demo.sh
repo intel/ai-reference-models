@@ -46,6 +46,12 @@ fi
 # Use for 100 steps for a demo training run
 STEPS=${STEPS-100}
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="512"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 # Run wide and deep large dataset training
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -53,7 +59,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
  --precision fp32 \
  --mode training  \
  --framework tensorflow \
- --batch-size 512 \
+ --batch-size ${BATCH_SIZE} \
  --data-location $DATASET_DIR \
 $CHECKPOINT_ARG \
  --output-dir $OUTPUT_DIR \

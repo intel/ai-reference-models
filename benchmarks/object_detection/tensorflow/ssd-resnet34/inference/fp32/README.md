@@ -102,7 +102,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
     <td>
       <p>To run without AI Kit on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>build-essential
         <li>libgl1-mesa-glx
         <li>libglib2.0-0
@@ -176,7 +176,9 @@ cd models
 export DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
 export TF_MODELS_DIR=<path to the TensorFlow Models repo>
 export PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/<script name>.sh
 ```
@@ -191,6 +193,8 @@ set PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
 set DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<path to the TensorFlow Models repo>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\object_detection\tensorflow\ssd-resnet34\inference\cpu\fp32\<script name>.sh
 ```

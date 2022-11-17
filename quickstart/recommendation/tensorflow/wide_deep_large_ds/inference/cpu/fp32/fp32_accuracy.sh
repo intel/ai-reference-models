@@ -37,6 +37,12 @@ fi
 
 PRETRAINED_MODEL=${PRETRAINED_MODEL-$MODEL_DIR/wide_deep_fp32_pretrained_model.pb}
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1000"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 # Run wide and deep large dataset inference
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -44,7 +50,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --precision fp32 \
    --mode inference \
    --framework tensorflow \
-   --batch-size 1000 \
+   --batch-size ${BATCH_SIZE} \
    --data-location $DATASET_DIR \
    --output-dir $OUTPUT_DIR \
    --in-graph ${PRETRAINED_MODEL} \

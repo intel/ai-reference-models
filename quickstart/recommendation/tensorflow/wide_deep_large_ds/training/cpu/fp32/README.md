@@ -55,6 +55,8 @@ output directory where log files and the saved model will be written.
 DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training.tar.gz
 tar -xvf wide-deep-large-ds-fp32-training.tar.gz
@@ -79,10 +81,13 @@ directory where logs and the saved model will be written.
 DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \

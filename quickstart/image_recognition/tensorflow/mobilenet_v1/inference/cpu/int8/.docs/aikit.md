@@ -35,7 +35,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
     <td>
       <p>To run without AI Kit on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -51,6 +51,12 @@ For Linux, run:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/mobilenetv1_int8_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/mobilenetv1_int8_pretrained_model.pb
 ```
+Intel® Neural Compressor int8 quantized MobileNet V1 pre-trained model is available as another option to download and try.
+```
+wget https://storage.googleapis.com/intel-optimized-tensorflow/intel-neural-compressor/v1_13/mobilenetv1-inc-int8-inference.pb
+export PRETRAINED_MODEL=$(pwd)/mobilenetv1-inc-int8-inference.pb
+```
+Check the [instructions](/quickstart/image_recognition/tensorflow/generate_int8/README.md) for more details on how to quantize FP32 model using Intel® Neural Compressor.
 
 Set environment variables for the path to your `DATASET_DIR` for ImageNet
 and an `OUTPUT_DIR` where log files will be written. Navigate to your
@@ -63,7 +69,9 @@ cd models
 
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 export DATASET_DIR=<path to the ImageNet TF records>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/int8/<script name>.sh
 ```
@@ -77,6 +85,8 @@ cd models
 set PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 set DATASET_DIR=<path to the ImageNet TF records>
 set OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\image_recognition\tensorflow\mobilenet_v1\inference\cpu\int8\<script name>.sh
 ```

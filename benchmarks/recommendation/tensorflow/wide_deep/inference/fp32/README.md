@@ -65,7 +65,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
     <td>
       <p>To run without AI Kit on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/tensorflow/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>git
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
@@ -80,7 +80,7 @@ Set the directory path to the `PRETRAINED_MODEL` environment variable.
 ```
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/wide_deep_fp32_pretrained_model.tar.gz
 tar -xzvf wide_deep_fp32_pretrained_model.tar.gz
-export PRETRAINED_MODEL=wide_deep_fp32_pretrained_model
+export PRETRAINED_MODEL=$(pwd)/wide_deep_fp32_pretrained_model
 ```
 
 Wide & Deep inference also uses code from the [TensorFlow models repo](https://github.com/tensorflow/models).
@@ -107,9 +107,11 @@ to run.
 cd models
 
 export DATASET_DIR=<path to the Wide & Deep dataset directory>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<pretrained model directory>
 export TF_MODELS_DIR=<path to tensorflow-models directory>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/recommendation/tensorflow/wide_deep/inference/cpu/fp32/<script name>.sh
 ```
@@ -123,6 +125,8 @@ set PRETRAINED_MODEL=<pretrained model directory>
 set DATASET_DIR=<path to the Wide & Deep dataset directory>
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<path to tensorflow-models directory>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
 
 bash quickstart\recommendation\tensorflow\wide_deep\inference\cpu\fp32\<script name>.sh
 ```

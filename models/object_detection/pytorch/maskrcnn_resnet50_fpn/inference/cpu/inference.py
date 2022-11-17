@@ -55,16 +55,36 @@ class AverageMeter(object):
         fmtstr = '{name} {val' + self.fmt + '} ({avg' + self.fmt + '})'
         return fmtstr.format(**self.__dict__)
 
+class ProgressMeter(object):
+    def __init__(self, num_batches, meters, prefix=""):
+        self.batch_fmtstr = self._get_batch_fmtstr(num_batches)
+        self.meters = meters
+        self.prefix = prefix
+
+    def display(self, batch):
+        entries = [self.prefix + self.batch_fmtstr.format(batch)]
+        entries += [str(meter) for meter in self.meters]
+        print('\t'.join(entries))
+
+    def _get_batch_fmtstr(self, num_batches):
+        num_digits = len(str(num_batches // 1))
+        fmt = '{:' + str(num_digits) + 'd}'
+        return '[' + fmt + '/' + fmt.format(num_batches) + ']'
+
 def inference(model, dataloader, datatype, args):
     batch_time = AverageMeter('Time', ':6.3f')
     batch_size = args.batch_size
     warmup_iters = args.warmup_iterations
-    max_iters = args.max_iterations if dataloader is None else len(dataloader)
+    max_iters = len(dataloader) if args.max_iterations is None else args.max_iterations
     model.eval()
     coco = get_coco_api_from_dataset(dataloader.dataset)
     iou_types = ["bbox"]
     iou_types.append("segm")
     coco_evaluator = CocoEvaluator(coco, iou_types)
+    progress = ProgressMeter(
+        max_iters,
+        [batch_time],
+        prefix='Test: ')
     if args.ipex:
         import intel_extension_for_pytorch as ipex
         model = model.to(memory_format=torch.channels_last)
@@ -125,6 +145,8 @@ def inference(model, dataloader, datatype, args):
                 coco_evaluator.update(res)
                 if max_iters != -1 and i >= max_iters:
                     break
+                if i % args.print_freq == 0:
+                    progress.display(i)
     print(prof.key_averages().table(sort_by="cpu_time_total", row_limit=-1))
     latency = batch_time.avg / batch_size * 1000
     perf = batch_size / batch_time.avg
@@ -177,7 +199,7 @@ if __name__ == "__main__":
                         help="using  dummu data to test the performance of inference")
     parser.add_argument('-w', '--warmup_iterations', default=30, type=int, metavar='N',
                         help='number of warmup iterations to run')
-    parser.add_argument('-m', '--max_iterations', default=50, type=int,
+    parser.add_argument('-m', '--max_iterations', default=None, type=int,
                         help='number of max iterations to run')
     parser.add_argument('--log-path', required = False, default = "", type=str,
                         help="Path for the log file")

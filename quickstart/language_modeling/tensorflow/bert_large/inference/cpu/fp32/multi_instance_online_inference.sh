@@ -49,8 +49,13 @@ if [[ -z "${CHECKPOINT_DIR}" ]]; then
 fi
 
 PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/pretrained_model/fp32_bert_squad.pb}
-BATCH_SIZE="1"
 CORES_PER_INSTANCE="4"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 echo 'CHECKPOINT_DIR='$CHECKPOINT_DIR
 echo 'PRETRAINED_MODEL='$PRETRAINED_MODEL

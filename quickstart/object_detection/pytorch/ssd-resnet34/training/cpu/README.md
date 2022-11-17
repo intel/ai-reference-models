@@ -6,7 +6,7 @@ This document has instructions for running SSD-ResNet34 training using Intel-opt
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison, Torch-CCL and Jemalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL and Jemalloc.
 
 ### Model Specific Setup
 * Install dependencies
