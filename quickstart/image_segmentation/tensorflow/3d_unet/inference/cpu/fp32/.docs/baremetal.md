@@ -32,6 +32,8 @@ Follow the [instructions above for downloading the BraTS dataset](#dataset).
    export DATASET_DIR=<path to the BraTS dataset>
    export PRETRAINED_MODEL=<Path to the downloaded tumor_segmentation_model.h5 file>
    export OUTPUT_DIR=<directory where log files will be written>
+   # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+   export BATCH_SIZE=<customized batch size value>
 
    ./quickstart/fp32_inference.sh
    ```

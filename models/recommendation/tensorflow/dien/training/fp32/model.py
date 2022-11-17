@@ -14,15 +14,17 @@ from tensorflow.python.platform import gfile
 
 class Model(object):
     def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, 
-     data_type='FP32', use_negsampling = False, synthetic_input = False, batch_size = 32,
+     data_type='fp32', use_negsampling = False, synthetic_input = False, batch_size = 32,
      max_length=100, device = 'gpu'):
         self.synthetic_input = synthetic_input
         self.seq_len_ph = np.ones((batch_size)) * max_length
 
-        if data_type == 'FP32':
+        if data_type == 'fp32':
             self.model_dtype = tf.float32
-        elif data_type == 'FP16':
+            self.model_vdtype = tf.float32
+        elif data_type == 'fp16':
             self.model_dtype = tf.float16
+            self.model_vdtype = tf.float16
         else:
             raise ValueError("Invalid model data type: %s" % data_type)
 
@@ -61,7 +63,7 @@ class Model(object):
                 self.target_ph = tf.random.uniform([batch_size, 2], 
                     minval = 0, 
                     maxval= 1,
-                    dtype = self.model_dtype,
+                    dtype = self.model_vdtype,
                     name='target_ph') 
                 
                 self.lr = 0.5 # half it every iteration
@@ -86,7 +88,7 @@ class Model(object):
                 self.cat_batch_ph = tf.compat.v1.placeholder(tf.int32, [None, ], name='cat_batch_ph')
                 self.mask = tf.compat.v1.placeholder(self.model_dtype, [None, None], name='mask')
                 self.seq_len_ph = tf.compat.v1.placeholder(tf.int32, [None], name='seq_len_ph')
-                self.target_ph = tf.compat.v1.placeholder(self.model_dtype, [None, None], name='target_ph')
+                self.target_ph = tf.compat.v1.placeholder(self.model_vdtype, [None, None], name='target_ph')
                 self.lr = tf.compat.v1.placeholder(tf.float64, [])
                 self.use_negsampling =use_negsampling
                 if use_negsampling:
@@ -157,7 +159,7 @@ class Model(object):
             var = getter(name, dtype=self.model_dtype, *args, **kwargs)
             return var
 
-        with tf.compat.v1.variable_scope("fcn", custom_getter=dtype_getter, dtype=self.model_dtype):
+        with tf.compat.v1.variable_scope("fcn1", custom_getter=dtype_getter, dtype=self.model_dtype):
             bn1 = tf.compat.v1.layers.batch_normalization(inputs=inp, name='bn1')
             dnn1 = tf.compat.v1.layers.dense(bn1, 200, activation=None, name='f1')
             if use_dice:
@@ -172,6 +174,7 @@ class Model(object):
                 dnn2 = prelu(dnn2, 'prelu2')
             dnn3 = tf.compat.v1.layers.dense(dnn2, 2, activation=None, name='f3')
             self.y_hat = tf.nn.softmax(dnn3) + 0.00000001
+            self.y_hat = tf.cast(self.y_hat, tf.float32)
 
             with tf.name_scope("Metrics"):
             #with tf.compat.v1.variable_scope("Metrics", custom_getter=dtype_getter, dtype=self.model_dtype):
@@ -179,7 +182,7 @@ class Model(object):
                 ctr_loss = - tf.reduce_mean(tf.math.log(self.y_hat) * self.target_ph)
                 self.loss = ctr_loss
                 if self.use_negsampling:
-                    self.loss += self.aux_loss
+                    self.loss += tf.cast(self.aux_loss, self.model_vdtype)
                 tf.compat.v1.summary.scalar('loss', self.loss)
                 # self.optimizer = tf.compat.v1.train.AdamOptimizer(learning_rate=self.lr).minimize(self.loss)
                 # self.optimizer = tf.compat.v1.train.GradientDescentOptimizer(learning_rate=self.lr).minimize(self.loss)
@@ -192,7 +195,7 @@ class Model(object):
                 self.optimizer = adam_optimizer.apply_gradients(gradients)
 
                 # Accuracy metric
-                self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.y_hat), self.target_ph), self.model_dtype))
+                self.accuracy = tf.reduce_mean(tf.cast(tf.equal(tf.round(self.y_hat), self.target_ph), self.model_vdtype))
                 tf.compat.v1.summary.scalar('accuracy', self.accuracy)
 
             self.merged =  tf.compat.v1.summary.merge_all()
@@ -254,7 +257,7 @@ class Model(object):
                 fetched_timeline = timeline.Timeline(run_metadata.step_stats)
                 chrome_trace = fetched_timeline.generate_chrome_trace_format()
 
-                with open('./timeline/dien_timeline.json', 'w') as f:
+                with open('./timeline/dien_timeline_bfloat16.json', 'w') as f:
                     f.write(chrome_trace)
             else:
                 loss, accuracy, aux_loss, _ = sess.run([self.loss, self.accuracy, self.aux_loss, self.optimizer], feed_dict={
@@ -459,7 +462,7 @@ class Model_DIN_V2_Gru_QA_attGru(Model):
         self.build_fcn_net(inp, use_dice=True)
 
 class Model_DNN(Model):
-    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, data_type='FP32', use_negsampling=False, 
+    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, data_type='fp32', use_negsampling=False, 
      synthetic_input = False, batch_size = 32, max_length=100, device = 'gpu'):
         super(Model_DNN, self).__init__(n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE,
                                                           ATTENTION_SIZE, data_type,
@@ -498,7 +501,7 @@ class Model_DIN(Model):
 
 
 class Model_DIN_V2_Gru_Vec_attGru_Neg(Model):
-    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, data_type='FP32', 
+    def __init__(self, n_uid, n_mid, n_cat, EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, data_type='fp32', 
         use_negsampling=True, synthetic_input = False, batch_size = 32, max_length=100, device = 'gpu'):
         super(Model_DIN_V2_Gru_Vec_attGru_Neg, self).__init__(n_uid, n_mid, n_cat,
                                                           EMBEDDING_DIM, HIDDEN_SIZE, ATTENTION_SIZE, data_type,

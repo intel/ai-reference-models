@@ -47,6 +47,12 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=resnet50v1_5 \
@@ -56,7 +62,7 @@ _command python benchmarks/launch_benchmark.py \
          --in-graph ${PRETRAINED_MODEL} \
          ${dataset_arg} \
          --output-dir ${OUTPUT_DIR} \
-         --batch-size=1 \
+         --batch-size=${BATCH_SIZE} \
          --socket-id 0 \
          $@ \
          -- \

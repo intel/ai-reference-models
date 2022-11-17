@@ -3,7 +3,7 @@
 This notebook demonstrates fine tuning [pretrained models from Hugging Face](https://huggingface.co/models)
 using text classification datasets from the [Hugging Face Datasets catalog](https://huggingface.co/datasets) or
 a custom dataset. The [IMDb Larget Movie Review dataset](https://ai.stanford.edu/~amaas/data/sentiment/) is used
-from the Hugging Face Datasets catalog, and the [SMS Spam Collection dataset](https://archive-beta.ics.uci.edu/ml/datasets/sms+spam+collection)
+from the Hugging Face Datasets catalog, and the [SMS Spam Collection dataset](https://archive.ics.uci.edu/ml/datasets/SMS+Spam+Collection)
 is used as an example of a custom dataset being loaded from a csv file.
 
 The notebook uses
@@ -20,7 +20,7 @@ The notebook performs the following steps:
 
 ## Running the notebook
 
-The instructions below explain how to run the notebook on [bare metal](#bare-metal) using a
+The instructions below explain how to run the notebook on bare metal using a
 virtual environment.
 
 1. Get a clone of the Model Zoo repository from GitHub:

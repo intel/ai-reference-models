@@ -49,6 +49,8 @@ Set environment variables for the path to your `DATASET_DIR` and an
 ```
 DATASET_DIR=<path to the dataset> # This is only for running accuracy
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/mobilenet-v1-int8-inference.tar.gz
 tar -xzf mobilenet-v1-int8-inference.tar.gz
@@ -69,10 +71,13 @@ set it and do not provide `--env` and `--volume` arguments for `DATASET_DIR`.
 ```
 DATASET_DIR=<path to the dataset> # Only for running accuracy
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \

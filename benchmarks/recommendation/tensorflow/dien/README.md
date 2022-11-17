@@ -225,7 +225,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/die
     ```
 
 ### Run FP32 inference on Windows:
-If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
 Then, run inference to calculate throughput, accuracy, or latency.
 * **Throughput**:
     Please specify the `data-location` and `in-graph`. 

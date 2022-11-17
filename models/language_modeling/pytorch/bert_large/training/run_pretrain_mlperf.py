@@ -347,6 +347,10 @@ def parse_args():
                         default=False,
                         action='store_true',
                         help="Enale BFloat16 training")
+    parser.add_argument("--fp16",
+                        default=False,
+                        action='store_true',
+                        help="Enale Float16 training")
     parser.add_argument("--bf32",
                         default=False,
                         action='store_true',
@@ -406,9 +410,9 @@ def parse_args():
 
 def found_resume_checkpoint(args):
     if args.phase2:
-        checkpoint_str = "phase2_ckpt*.pt"
+        checkpoint_str = "pytorch_model.bin"
     else:
-        checkpoint_str = "phase1_ckpt*.pt"
+        checkpoint_str = "pytorch_model.bin"
     return args.resume_from_checkpoint and len(glob.glob(os.path.join(args.output_dir, checkpoint_str))) > 0
 
 def setup_training(args):
@@ -604,6 +608,9 @@ def main():
     if args.bf32:
         ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
         model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, auto_kernel_selection=True)
+    elif args.fp16:
+        scaler = torch.cpu.amp.GradScaler()
+        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, weights_prepack=True, fuse_update_step=False)
     else:
         model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.bfloat16 if args.bf16 else torch.float32)
     worker_seeds, shuffling_seeds = utils.setup_seeds(args.seed, args.num_epochs_to_generate_seeds_for, device)
@@ -723,7 +730,11 @@ def main():
                 #print(f"Input shape: {batch['input_ids'].shape}")
                 t2 = time.time()
                 outputs = None
-                if args.bf16:
+                if args.fp16:
+                    with torch.cpu.amp.autocast(enabled=True, dtype=torch.half):
+                        outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
+                                labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
+                elif args.bf16:
                     with torch.cpu.amp.autocast():
                         outputs = model(input_ids=input_ids, token_type_ids=segment_ids, attention_mask=input_mask,
                              labels=masked_lm_labels, next_sentence_label=next_sentence_labels)
@@ -733,10 +744,17 @@ def main():
                 t3 = time.time()
                 loss = outputs.loss
                 loss = loss / args.gradient_accumulation_steps
-                loss.backward()
+                if args.fp16:
+                    scaler.scale(loss).backward()
+                else:
+                    loss.backward()
                 t4 = time.time()
                 if step % args.gradient_accumulation_steps == 0 or step == len(train_dataloader) - 1:
-                    optimizer.step()
+                    if args.fp16:
+                        scaler.step(optimizer)
+                        scaler.update()
+                    else:
+                        optimizer.step()
                     lr_scheduler.step()
                     optimizer.zero_grad()
                     #progress_bar.update(1)
@@ -745,8 +763,8 @@ def main():
                 completed_steps += 1
                 if args.benchmark and completed_steps > 10:
                     bench_total_time = bench_total_time + (t_end -t_beg)
-                if args.benchmark and completed_steps > 60:
-                    throughput = 50 * args.train_batch_size / bench_total_time
+                if args.benchmark and completed_steps > 50:
+                    throughput = 40 * args.train_batch_size / bench_total_time
                     print("Throughput: {:.3f} sentence/s".format(throughput), flush=True)
                     exit()
 
@@ -848,22 +866,25 @@ def main():
                     samples_trained_prev = samples_trained
                     if utils.is_main_process() and not args.skip_checkpoint:
                         # Save a trained model
-                        model_to_save = model.module if hasattr(model,
-                                                                'module') else model  # Only save the model it-self
-                        if args.phase2:
-                            output_save_file = os.path.join(args.output_dir, "phase2_ckpt_{}.pt".format(samples_trained))
-                        else:
-                            output_save_file = os.path.join(args.output_dir, "phase1_ckpt_{}.pt".format(samples_trained))
-                        if args.do_train:
-                            torch.save({'model': model_to_save.state_dict(),
-                                        'optimizer': optimizer.state_dict(),
-                                        #'master params': list(amp.master_params(optimizer)),
-                                        'files': [f_id] + files}, output_save_file)
+                        model.save_pretrained(args.output_dir)
+                        model.config.to_json_file(args.output_dir+"config.json")
 
-                            most_recent_ckpts_paths.append(output_save_file)
-                            if len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints:
-                                ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
-                                os.remove(ckpt_to_be_removed)
+                        #model_to_save = model.module if hasattr(model,
+                        #                                        'module') else model  # Only save the model it-self
+                        #if args.phase2:
+                        #    output_save_file = os.path.join(args.output_dir, "phase2_ckpt_{}.pt".format(samples_trained))
+                        #else:
+                        #    output_save_file = os.path.join(args.output_dir, "phase1_ckpt_{}.pt".format(samples_trained))
+                        #if args.do_train:
+                        #    torch.save({'model': model_to_save.state_dict(),
+                        #                'optimizer': optimizer.state_dict(),
+                        #                #'master params': list(amp.master_params(optimizer)),
+                        #                'files': [f_id] + files}, output_save_file)
+                        #
+                        #    most_recent_ckpts_paths.append(output_save_file)
+                        #    if len(most_recent_ckpts_paths) > args.keep_n_most_recent_checkpoints:
+                        #        ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
+                        #        os.remove(ckpt_to_be_removed)
 
                     if samples_trained >= args.max_samples_termination or end_training:
                         status = 'success' if converged else 'aborted'

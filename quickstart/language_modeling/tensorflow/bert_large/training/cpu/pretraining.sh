@@ -42,9 +42,17 @@ if [ -z "${PRECISION}" ]; then
 fi
 
 if [[ $PRECISION == "fp32" ]]; then
-  BATCH_SIZE="32"
+  # If batch size env is not mentioned, then the workload will run with the default batch size.
+  if [ -z "${BATCH_SIZE}"]; then
+    BATCH_SIZE="32"
+    echo "Running with default batch size of ${BATCH_SIZE}"
+  fi
 elif [[ $PRECISION == "bfloat16" ]]; then
-  BATCH_SIZE="128"
+  # If batch size env is not mentioned, then the workload will run with the default batch size.
+  if [ -z "${BATCH_SIZE}"]; then
+    BATCH_SIZE="128"
+    echo "Running with default batch size of ${BATCH_SIZE}"
+  fi
 else
   echo "The specified precision '${PRECISION}' is unsupported."
   echo "Supported precisions are: fp32 and bfloat16"

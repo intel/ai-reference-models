@@ -37,6 +37,12 @@ fi
 
 PRETRAINED_MODEL=${PRETRAINED_MODEL-${MODEL_DIR}/densenet169_fp32_pretrained_model.pb}
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="100"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=densenet169 \
@@ -46,7 +52,7 @@ _command python benchmarks/launch_benchmark.py \
          --in-graph ${PRETRAINED_MODEL} \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \
-         --batch-size=100 \
+         --batch-size=${BATCH_SIZE} \
          --socket-id 0 \
          $@ \
          -- input_height=224 input_width=224 warmup_steps=20 steps=100 \

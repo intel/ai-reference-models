@@ -100,7 +100,7 @@ you can use "SHARD_NUM" to control the shard files number. the default "SHARD_NU
 
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison, Torch-CCL, Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL, Jemalloc and TCMalloc.
 
 ### Model Specific Setup
 * Install dependence
@@ -129,6 +129,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 | FP32        | bash run_bert_pretrain_phase1.sh fp32 | bash run_bert_pretrain_phase2.sh fp32 |
 | BF32        | bash run_bert_pretrain_phase1.sh bf32 | bash run_bert_pretrain_phase2.sh bf32 |
 | BF16        | bash run_bert_pretrain_phase1.sh bf16 | bash run_bert_pretrain_phase2.sh bf16 |
+| FP16        | bash run_bert_pretrain_phase1.sh fp16 | bash run_bert_pretrain_phase2.sh fp16 |
 
 |  DataType   | Distributed Training Phase 1  |  Distributed Training Phase 2 |
 | ----------- | ----------- | ----------- |
@@ -153,7 +154,7 @@ export MODEL_DIR=$(pwd)
 cd quickstart/language_modeling/pytorch/bert_large/training/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.11.3
+git checkout v4.18.0
 git apply ../enable_optmization.diff
 pip install -e ./
 cd ..

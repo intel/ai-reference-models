@@ -32,6 +32,8 @@ To run on bare metal, the following prerequisites must be installed in your envi
     DATASET_DIR=<path to the Wide & Deep dataset directory>
     OUTPUT_DIR=<directory where log files will be written>
     TF_MODELS_DIR=<path to tensorflow-models>
+    # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+    export BATCH_SIZE=<customized batch size value>
 
     ./quickstart/<script name>.sh
     ```

@@ -1,5 +1,5 @@
-intel-tensorflow==2.3.0
-lpot==1.1
+intel-tensorflow<2.9.1
+neural-compressor
 notebook
 matplotlib
 runipy

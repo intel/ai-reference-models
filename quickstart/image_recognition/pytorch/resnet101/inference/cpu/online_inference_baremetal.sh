@@ -82,6 +82,8 @@ python ${MULTI_INSTANCE_ARGS} \
   --batch_size $BATCH_SIZE \
   --jit \
   -j 0 \
+  -p 100 \
+  --max_iterations 1000 \
   $ARGS 
 
 wait

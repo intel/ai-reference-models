@@ -11,17 +11,16 @@ Intel-optimized PyTorch.
 
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison, Torch-CCL and Jemalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL and Tcmalloc.
 
 ### Model Specific Setup
 
 * Set Jemalloc Preload for better performance
 
-The jemalloc should be built from the [General setup](#general-setup) section.
+The tcmalloc should be built from the [General setup](#general-setup) section.
 
 ```bash
-    export LD_PRELOAD="path/lib/libjemalloc.so":$LD_PRELOAD
-    export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+    export LD_PRELOAD="path/lib/libtcmalloc.so":$LD_PRELOAD
 ```
 
 * Set IOMP preload for better performance
@@ -83,8 +82,8 @@ The folder that contains the `val` and `train` directories should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, or bf16). |
-| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, or bf16). |
+| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, or fp16). |
+| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, or fp16). |
 
 ## Run the model
 

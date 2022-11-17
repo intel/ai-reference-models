@@ -165,7 +165,9 @@ optional arguments:
                         it
   --weight-sharing      Supports experimental weight-sharing feature for RN50
                         int8/bf16 inference only
-                      
+
+  --synthetic-data   Enables synthetic data layer for some models like
+                        SSD-ResNet34 where support exists
 ```
 
 ## Volume mounts

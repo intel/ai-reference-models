@@ -60,6 +60,7 @@ python -m intel_extension_for_pytorch.cpu.launch --latency_mode --enable_jemallo
   --max_seq_length 384 \
   --doc_stride 128 \
   --output_dir ./tmp \
+  --max_eval_samples 100 \
   --per_device_eval_batch_size $BATCH_SIZE \
 
 CORES_PER_INSTANCE=4
