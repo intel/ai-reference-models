@@ -8,7 +8,7 @@ This document has instructions for running DLRM training using
 Intel-optimized PyTorch for bare metal.
 
 ### General Setup
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, and Jemalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, and Jemalloc.
 
 ### Model Specific Setup
 

@@ -55,6 +55,7 @@ fi
 BATCH_SIZE=1
 
 ARGS=""
+IPEX_ARGS=""
 
 if [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
@@ -88,12 +89,30 @@ BATCH_SIZE=1
 rm -rf ${OUTPUT_DIR}/${MODEL_NAME}_log*
 SOUREC_PREFIX="translate English to Romanian: "
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
-    --ninstances 1 \
+#Get platform type
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+
+#Add platform specific source_prefix
+if [[ ${PLATFORM} == "windows" ]]
+then
+	SOURCE_PREFIX='translate English to Romanian:'
+else
+	SOURCE_PREFIX=\"translate English to Romanian: \" 
+fi
+
+# check if stoch PYT or IPEX is installed on the system
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
+	  --use_default_allocator \
+	  --ninstances 1 \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     --log_path=${OUTPUT_DIR} \
-    --log_file_prefix="./${MODEL_NAME}_log_${PRECISION}_${OPTIMIZATION}" \
+    --log_file_prefix="./${MODEL_NAME}_log_${PRECISION}_${OPTIMIZATION}""
+fi
+
+python ${IPEX_ARGS} \
     ${MODEL_DIR}/models/language_modeling/pytorch/t5/inference/cpu/run_translation.py \
     $ARGS \
     --model_name_or_path $MODEL_NAME \
@@ -102,7 +121,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --overwrite_cache 1 \
     --source_lang en \
     --target_lang ro \
-    --source_prefix \"translate English to Romanian: \" \
+    --source_prefix SOURCE_PREFIX \
     --dataset_name wmt16 \
     --dataset_config_name ro-en \
     --output_dir ${OUTPUT_DIR} \
@@ -113,8 +132,10 @@ python -m intel_extension_for_pytorch.cpu.launch \
 #For the summary of results
 wait
 
-key_words="predict_samples_per_second"
+if [[ ${PLATFORM} != "windows" ]]; then
+  key_words="predict_samples_per_second"
 
-METRIC=$(grep ${key_words} ${OUTPUT_DIR}/${MODEL_NAME}_log_${PRECISION}_${OPTIMIZATION}*.log | awk '{print $4}')
-echo $METRIC
-echo "${MODEL_NAME};"Inference performance";${PRECISION};${BATCH_SIZE};${OPTIMIZATION};${METRIC}" | tee -a ${OUTPUT_DIR}/summary.log
+  METRIC=$(grep ${key_words} ${OUTPUT_DIR}/${MODEL_NAME}_log_${PRECISION}_${OPTIMIZATION}*.log | awk '{print $4}')
+  echo $METRIC
+  echo "${MODEL_NAME};"Inference performance";${PRECISION};${BATCH_SIZE};${OPTIMIZATION};${METRIC}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

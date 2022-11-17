@@ -47,6 +47,12 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
   PRETRAINED_MODEL="${MODEL_DIR}/${pretrained_model}"
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
@@ -58,6 +64,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --mode inference \
     --socket-id 0 \
     --benchmark-only \
-    --batch-size 1 \
+    --batch-size ${BATCH_SIZE} \
     $@
 

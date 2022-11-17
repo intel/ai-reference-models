@@ -49,6 +49,12 @@ if [ ! -d "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="100"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 # Run training with one mpi process
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -61,7 +67,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --precision bfloat16 \
   --mode training \
   --num-train-steps ${TRAIN_STEPS} \
-  --batch-size=100 \
+  --batch-size=${BATCH_SIZE} \
   --weight_decay=1e-4 \
   --num_warmup_batches=20 \
   --mpi_num_processes=${MPI_NUM_PROCESSES} \

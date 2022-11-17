@@ -78,8 +78,10 @@ cd models
 
 # Set env var paths
 export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<path to the pretrained model frozen graph>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a quickstart script
 ./quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/<script name>.sh

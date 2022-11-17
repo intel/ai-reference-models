@@ -83,7 +83,12 @@ fi
 
 MODE="inference"
 CORES_PER_INSTANCE="socket"
-BATCH_SIZE="128"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="128"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr

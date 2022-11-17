@@ -18,15 +18,18 @@
 #
 
 from __future__ import division
-
+import sys
 import tensorflow as tf
 from tensorflow.python.data.experimental import parallel_interleave
 from tensorflow.python.data.experimental import map_and_batch
+from tensorflow.python.framework import dtypes
 import time
-
+from tensorflow.python.client import timeline
 from argparse import ArgumentParser
-from inference.coco_detection_evaluator import CocoDetectionEvaluator
-from inference.coco_label_map import category_map
+from coco_detection_evaluator import CocoDetectionEvaluator
+from coco_label_map import category_map
+
+from optimize_for_benchmark import optimize_for_benchmark
 
 IMAGE_SIZE = 300
 COCO_NUM_VAL_IMAGES = 4952
@@ -118,6 +121,9 @@ class model_infer:
     arg_parser.add_argument('-w', "--warmup_iter",
                             help='For accuracy measurement only.',
                             dest='warmup_iter', default=200, type=int)
+    arg_parser.add_argument("--benchmark",
+                            help='Run in benchmark mode.',
+                            dest='benchmark', action='store_true')                        
 
     # parse the arguments
     self.args = arg_parser.parse_args()
@@ -135,8 +141,9 @@ class model_infer:
     input_layer = 'Preprocessor/subpart2'
     output_layers = ['num_detections', 'detection_boxes', 'detection_scores', 'detection_classes']
     self.input_tensor = self.infer_graph.get_tensor_by_name(input_layer + ":0")
-    self.output_tensors = [self.infer_graph.get_tensor_by_name(x + ":0") for x in output_layers]
-  
+    if not self.args.benchmark: 
+      self.output_tensors = [self.infer_graph.get_tensor_by_name(x + ":0") for x in output_layers]
+
     self.category_map_reverse = {v : k for k, v in category_map.items()}
 
   def build_data_sess(self):
@@ -149,7 +156,7 @@ class model_infer:
     preprocess_graph = tf.Graph()
     with preprocess_graph.as_default():
       graph_def = tf.compat.v1.GraphDef()
-      with tf.compat.v1.gfile.FastGFile(os.path.join(os.path.dirname(dir_path), 'ssdmobilenet_preprocess.pb'), 'rb') as input_file:
+      with tf.compat.v1.gfile.FastGFile(os.path.join(dir_path, 'ssdmobilenet_preprocess.pb'), 'rb') as input_file:
         input_graph_content = input_file.read()
         graph_def.ParseFromString(input_graph_content)
 
@@ -170,7 +177,15 @@ class model_infer:
         input_graph_content = input_file.read()
         graph_def.ParseFromString(input_graph_content)
 
-      tf.import_graph_def(graph_def, name='')
+      if self.args.benchmark:
+        input_shape = [self.args.batch_size, IMAGE_SIZE, IMAGE_SIZE, 3]
+        dummy_input = np.random.normal(0, 1, input_shape)
+        graph_def = optimize_for_benchmark(graph_def, dtypes.float32.as_datatype_enum, dummy_input)  
+        tf.import_graph_def(graph_def, name='')
+        output_layers = ['Postprocessor/Reshape_2', 'Postprocessor/convert_scores']
+        self.output_tensors = [tf.reshape(self.infer_graph.get_tensor_by_name(x + ":0"), [-1, 1])[0, :] for x in output_layers]
+      else:
+        tf.import_graph_def(graph_def, name='')  
 
   def run_benchmark(self):
     if self.args.data_location:
@@ -195,16 +210,19 @@ class model_infer:
 
       print('total iteration is {0}'.format(str(total_iter)))
       print('warm up iteration is {0}'.format(str(warmup_iter)))
-
       for step in range(total_iter):
         start_time = time.time()
         if self.args.data_location:
           input_images = self.data_sess.run([self.input_images])
           input_images = input_images[0]
           input_images = self.pre_sess.run(self.pre_output, {self.pre_input: input_images})
-        _ = sess.run(self.output_tensors, {self.input_tensor: input_images})
-        end_time = time.time()
 
+        if self.args.benchmark:
+            _ = sess.run(self.output_tensors)
+        else:
+            _ = sess.run(self.output_tensors, {self.input_tensor: input_images})
+            
+        end_time = time.time()
         duration = end_time - start_time
         if (step + 1) % 10 == 0:
           print('steps = {0}, {1} sec'.format(str(step), str(duration)))
@@ -275,8 +293,6 @@ class model_infer:
       self.run_benchmark()
 
 
-
 if __name__ == "__main__":
   infer = model_infer()
   infer.run()
-

@@ -72,7 +72,7 @@ been installed.
    mkdir -p $OUTPUT_DIR
 
    # The notebook directory in your clone of the model zoo, or your notebook download directory
-   NOTEBOOK_DIR=${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/tfhub_bert
+   export NOTEBOOK_DIR=${MODEL_ZOO_DIR}/docs/notebooks/transfer_learning/tfhub_bert
 
    docker run -d --rm \
      -p 8888:8888 \

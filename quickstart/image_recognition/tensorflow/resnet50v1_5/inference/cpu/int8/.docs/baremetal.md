@@ -18,6 +18,8 @@ Otherwise `DATASET_DIR` needs to be set:
 ```
 DATASET_DIR=<path to the dataset>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/<model-precision-mode>.tar.gz
 tar -xzf <model-precision-mode>.tar.gz

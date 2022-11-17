@@ -38,7 +38,12 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
 fi
 
 CORES_PER_INSTANCE="socket"
-BATCH_SIZE="448"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size which gives the best performance
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="448"
+  echo "Running with default/best batch size of ${BATCH_SIZE}"
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

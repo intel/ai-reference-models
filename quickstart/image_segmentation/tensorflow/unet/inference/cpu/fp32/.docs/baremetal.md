@@ -27,6 +27,8 @@ Set environment variables for the path to your `TF_UNET_DIR` and an `OUTPUT_DIR`
 ```
 TF_UNET_DIR=<path to tf_unet directory>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xzf <package name>

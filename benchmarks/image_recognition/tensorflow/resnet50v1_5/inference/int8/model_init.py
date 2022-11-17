@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,7 +68,8 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+        if not self.args.gpu:
+            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
     def run_benchmark_or_accuracy(self):
         # If weight-sharing flag is ON, then use the weight-sharing script.
@@ -76,6 +77,10 @@ class ModelInitializer(BaseModelInitializer):
             cmd = os.path.join(
                 self.args.intelai_models, self.args.mode,
                 "eval_image_classifier_inference_weight_sharing.py")
+        if self.args.gpu:
+            cmd = os.path.join(
+                self.args.intelai_models, self.args.mode, self.args.precision,
+                "eval_image_classifier_inference.py")
         else:
             cmd = os.path.join(
                 self.args.intelai_models, self.args.mode,
@@ -83,12 +88,18 @@ class ModelInitializer(BaseModelInitializer):
 
         cmd = self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + cmd
 
-        cmd += " --input-graph=" + self.args.input_graph + \
-               " --num-inter-threads=" + str(self.args.num_inter_threads) + \
-               " --num-intra-threads=" + str(self.args.num_intra_threads) + \
-               " --batch-size=" + str(self.args.batch_size) + \
-               " --warmup-steps=" + str(self.args.warmup_steps) + \
-               " --steps=" + str(self.args.steps)
+        if self.args.gpu:
+            cmd += " --input-graph=" + self.args.input_graph + \
+                   " --batch-size=" + str(self.args.batch_size) + \
+                   " --warmup-steps=" + str(self.args.warmup_steps) + \
+                   " --steps=" + str(self.args.steps)
+        else:
+            cmd += " --input-graph=" + self.args.input_graph + \
+                   " --num-inter-threads=" + str(self.args.num_inter_threads) + \
+                   " --num-intra-threads=" + str(self.args.num_intra_threads) + \
+                   " --batch-size=" + str(self.args.batch_size) + \
+                   " --warmup-steps=" + str(self.args.warmup_steps) + \
+                   " --steps=" + str(self.args.steps)
 
         if self.args.calibrate:
             cmd += " --calibrate=" + str(self.args.calibrate)
@@ -102,6 +113,9 @@ class ModelInitializer(BaseModelInitializer):
             cmd += " --data-location=" + self.args.data_location
         if self.args.accuracy_only:
             cmd += " --accuracy-only"
+        if self.args.benchmark_only and self.args.gpu:
+            cmd += " --benchmark"
+
         self.run_command(cmd)
 
     def run_calibration(self):

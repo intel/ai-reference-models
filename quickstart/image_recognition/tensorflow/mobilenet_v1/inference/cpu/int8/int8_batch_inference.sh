@@ -37,13 +37,19 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="240"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
      --model-name mobilenet_v1 \
      --precision int8 \
      --mode inference \
      --framework tensorflow \
      --benchmark-only \
-     --batch-size 240  \
+     --batch-size ${BATCH_SIZE}  \
      --socket-id 0 \
      --output-dir ${OUTPUT_DIR} \
      --in-graph ${PRETRAINED_MODEL} \

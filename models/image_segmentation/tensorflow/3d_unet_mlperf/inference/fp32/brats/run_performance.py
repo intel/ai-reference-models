@@ -102,14 +102,12 @@ class unet_3d_tf:
                 _ = sess.run(output_tensor, {input_tensor: input_data})
             print("Warmup done.")
             print("Started benchmark for {} steps...".format(steps))
-            predictions = []
             print("Inference with dummy data")
             start = time.time()
             for i in range(steps):
                 if i%10 == 0:
                     print("Iteration {}".format(i))
                 output = sess.run(output_tensor, {input_tensor: input_data})
-                predictions.append(output)
             end = time.time()
             average_time = (end - start)/steps
             throughput = batch_size/average_time

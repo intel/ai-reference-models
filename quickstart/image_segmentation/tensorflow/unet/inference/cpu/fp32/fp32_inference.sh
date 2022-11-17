@@ -72,6 +72,12 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --model-name unet \
@@ -79,7 +85,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --mode inference \
       --framework tensorflow \
       --benchmark-only \
-      --batch-size 1 \
+      --batch-size ${BATCH_SIZE} \
       --socket-id 0 \
       --checkpoint ${PRETRAINED_MODEL} \
       --model-source-dir ${TF_UNET_DIR} \

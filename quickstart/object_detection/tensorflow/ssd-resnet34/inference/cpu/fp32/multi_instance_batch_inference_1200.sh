@@ -27,9 +27,14 @@ mkdir -p ${OUTPUT_DIR}
 
 PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb"}
 CORES_PER_INSTANCE="socket"
-BATCH_SIZE="1"
 PRECISION="fp32"
 MODE="inference"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

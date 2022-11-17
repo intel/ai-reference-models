@@ -12,7 +12,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.025485550984740257
+                            0.025485552847385406
                         ],
                         "zero_point": [
                             146
@@ -1621,7 +1621,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.008879014290869236
+                            0.008879013359546661
                         ],
                         "zero_point": [
                             0
@@ -1657,7 +1657,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.008879014290869236
+                            0.008879013359546661
                         ],
                         "zero_point": [
                             0
@@ -2026,7 +2026,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.10660196095705032
+                            0.10660196840763092
                         ],
                         "zero_point": [
                             198
@@ -2082,7 +2082,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.3182624280452728
+                            0.3182624876499176
                         ],
                         "zero_point": [
                             214
@@ -6944,7 +6944,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
@@ -7000,7 +7000,7 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
@@ -7066,7 +7066,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03929102420806885
+                            0.039291027933359146
                         ],
                         "zero_point": [
                             93
@@ -8925,7 +8925,7 @@
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7f59fdabe830>",
+                "op_type": "<function softmax at 0x7fe730db65f0>",
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
                     {
@@ -15238,7 +15238,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.07182129472494125
+                            0.07182128727436066
                         ],
                         "zero_point": [
                             2
@@ -17003,7 +17003,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.10847435146570206
+                            0.10847434401512146
                         ],
                         "zero_point": [
                             195
@@ -17015,7 +17015,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233904838562
+                            0.0508233867585659
                         ],
                         "zero_point": [
                             191
@@ -17059,7 +17059,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.7653557062149048
+                            0.76535564661026
                         ],
                         "zero_point": [
                             249
@@ -17164,7 +17164,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233904838562
+                            0.0508233867585659
                         ],
                         "zero_point": [
                             191
@@ -18753,7 +18753,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233904838562
+                            0.0508233867585659
                         ],
                         "zero_point": [
                             191
@@ -20342,7 +20342,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233904838562
+                            0.0508233867585659
                         ],
                         "zero_point": [
                             191
@@ -21921,7 +21921,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
@@ -21943,7 +21943,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.07137679308652878
+                            0.07137680053710938
                         ],
                         "zero_point": [
                             137
@@ -21977,7 +21977,7 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
@@ -21999,7 +21999,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03892306238412857
+                            0.03892306983470917
                         ],
                         "zero_point": [
                             111
@@ -23902,7 +23902,7 @@
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7f59fdabe830>",
+                "op_type": "<function softmax at 0x7fe730db65f0>",
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
@@ -30215,7 +30215,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.1447792798280716
+                            0.1447792649269104
                         ],
                         "zero_point": [
                             1
@@ -31835,7 +31835,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.0439857542514801
+                            0.04398574307560921
                         ],
                         "zero_point": [
                             139
@@ -31891,7 +31891,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.9983832240104675
+                            0.998383104801178
                         ],
                         "zero_point": [
                             251
@@ -36753,7 +36753,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
@@ -36775,7 +36775,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.05403391644358635
+                            0.05403390899300575
                         ],
                         "zero_point": [
                             139
@@ -36809,7 +36809,7 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
@@ -36831,7 +36831,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.04678581655025482
+                            0.04678582400083542
                         ],
                         "zero_point": [
                             134
@@ -36875,7 +36875,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.036223169416189194
+                            0.03622317314147949
                         ],
                         "zero_point": [
                             139
@@ -38734,7 +38734,7 @@
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7f59fdabe830>",
+                "op_type": "<function softmax at 0x7fe730db65f0>",
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
@@ -45047,7 +45047,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.09822209924459457
+                            0.09822208434343338
                         ],
                         "zero_point": [
                             2
@@ -46667,7 +46667,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.055289532989263535
+                            0.05528954043984413
                         ],
                         "zero_point": [
                             155
@@ -46723,7 +46723,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.08726979047060013
+                            0.08726979792118073
                         ],
                         "zero_point": [
                             148
@@ -51585,7 +51585,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
@@ -51595,7 +51595,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.007643361110240221
+                            0.007643359247595072
                         ],
                         "zero_point": [
                             138
@@ -51607,7 +51607,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.061737436801195145
+                            0.06173744052648544
                         ],
                         "zero_point": [
                             127
@@ -51641,7 +51641,7 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
@@ -51707,7 +51707,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.04299405589699745
+                            0.04299403354525566
                         ],
                         "zero_point": [
                             125
@@ -53566,7 +53566,7 @@
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7f59fdabe830>",
+                "op_type": "<function softmax at 0x7fe730db65f0>",
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
@@ -59879,7 +59879,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0275071170181036
+                            0.027507109567523003
                         ],
                         "zero_point": [
                             6
@@ -61511,7 +61511,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.08957237750291824
+                            0.08957237005233765
                         ],
                         "zero_point": [
                             214
@@ -61555,7 +61555,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            5.071918487548828
+                            5.07191801071167
                         ],
                         "zero_point": [
                             168
@@ -61567,7 +61567,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.24626228213310242
+                            0.24626225233078003
                         ],
                         "zero_point": [
                             218
@@ -61660,7 +61660,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.08957237750291824
+                            0.08957237005233765
                         ],
                         "zero_point": [
                             214
@@ -63249,7 +63249,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.08957237750291824
+                            0.08957237005233765
                         ],
                         "zero_point": [
                             214
@@ -64838,7 +64838,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.08957237750291824
+                            0.08957237005233765
                         ],
                         "zero_point": [
                             214
@@ -66417,7 +66417,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
@@ -66427,7 +66427,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.007776916492730379
+                            0.007776917889714241
                         ],
                         "zero_point": [
                             132
@@ -66473,7 +66473,7 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
@@ -66495,7 +66495,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.04719216004014015
+                            0.04719216749072075
                         ],
                         "zero_point": [
                             126
@@ -66539,7 +66539,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03943760320544243
+                            0.039437610656023026
                         ],
                         "zero_point": [
                             132
@@ -68398,7 +68398,7 @@
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7f59fdabe830>",
+                "op_type": "<function softmax at 0x7fe730db65f0>",
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
@@ -68514,7 +68514,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.24626228213310242
+                            0.24626225233078003
                         ],
                         "zero_point": [
                             218
@@ -74711,7 +74711,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.31002092361450195
+                            0.31002089381217957
                         ],
                         "zero_point": [
                             1
@@ -76331,7 +76331,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.09456483274698257
+                            0.09456484764814377
                         ],
                         "zero_point": [
                             137
@@ -76343,7 +76343,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.10347627848386765
+                            0.10347627103328705
                         ],
                         "zero_point": [
                             220
@@ -76387,7 +76387,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.04283905774354935
+                            0.04283904284238815
                         ],
                         "zero_point": [
                             154
@@ -76492,7 +76492,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.10347627848386765
+                            0.10347627103328705
                         ],
                         "zero_point": [
                             220
@@ -78081,7 +78081,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.10347627848386765
+                            0.10347627103328705
                         ],
                         "zero_point": [
                             220
@@ -79670,7 +79670,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.10347627848386765
+                            0.10347627103328705
                         ],
                         "zero_point": [
                             220
@@ -81249,7 +81249,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
@@ -81259,7 +81259,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.00656919926404953
+                            0.006569200661033392
                         ],
                         "zero_point": [
                             130
@@ -81271,7 +81271,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.05540752038359642
+                            0.05540752783417702
                         ],
                         "zero_point": [
                             132
@@ -81305,7 +81305,7 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7f5a1ce9ffc0>",
+                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
@@ -81327,7 +81327,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.057793986052274704
+                            0.057793982326984406
                         ],
                         "zero_point": [
                             124
@@ -81371,7 +81371,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03462732583284378
+                            0.03462732955813408
                         ],
                         "zero_point": [
                             111
@@ -83230,7 +83230,7 @@
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7f59fdabe830>",
+                "op_type": "<function softmax at 0x7fe730db65f0>",
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
@@ -89543,7 +89543,7 @@
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03482947498559952
+                            0.034829478710889816
                         ],
                         "zero_point": [
                             5

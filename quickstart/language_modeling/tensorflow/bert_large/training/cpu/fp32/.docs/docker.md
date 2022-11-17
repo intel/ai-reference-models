@@ -13,10 +13,13 @@ The snippet below shows a quickstart script running with a single instance:
 CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where checkpoints and log files will be saved>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
@@ -48,10 +51,13 @@ CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 MPI_NUM_PROCESSES=<number of sockets to use>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env MPI_NUM_PROCESSES=${MPI_NUM_PROCESSES} \
   --env http_proxy=${http_proxy} \

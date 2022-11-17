@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2019 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,26 @@ echo "    NUMA_CORES_PER_INSTANCE: ${NUMA_CORES_PER_INSTANCE}"
 echo "    PYTHON_EXE: ${PYTHON_EXE}"
 echo "    PYTHONPATH: ${PYTHONPATH}"
 echo "    DRY_RUN: ${DRY_RUN}"
+echo "    GPU: ${GPU}"
 
+#  Enable GPU Flag
+gpu_arg=""
+is_model_gpu_supported="False"
+if [ ${GPU} == "True" ]; then
+  gpu_arg="--gpu"
+  # Environment variables for GPU
+  export RenderCompressedBuffersEnabled=0
+  export CreateMultipleSubDevices=1
+  export ForceLocalMemoryAccessMode=1
+  export SYCL_PI_LEVEL_ZERO_BATCH_SIZE=1
+else
+  unset RenderCompressedBuffersEnabled
+  unset CreateMultipleSubDevices
+  unset ForceLocalMemoryAccessMode
+  unset ForceNonSystemMemoryPlacement
+  unset TF_ENABLE_LAYOUT_OPT
+  unset SYCL_PI_LEVEL_ZERO_BATCH_SIZE
+fi
 #  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   echo "${MODE} mode for ${MODEL_NAME} is not supported"
@@ -95,7 +114,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
         exit 1
       fi
     elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
-      if [[ ! "${OS_VERSION}" =~ "18.04".* ]] && [[ ! "${OS_VERSION}" =~ "20.04".* ]]; then
+      if [[ ! "${OS_VERSION}" =~ "18.04".* ]] && [[ ! "${OS_VERSION}" =~ "20.04".* ]] && [[ ! "${OS_VERSION}" =~ "22.04".* ]]; then
         echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
         exit 1
       fi
@@ -343,6 +362,10 @@ export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_COMMON_SOURCE}:${MOUNT_IN
 
 # Common execution command used by all models
 function run_model() {
+  if [ ${is_model_gpu_supported} == "False"  ] && [ ${GPU} == "True" ]; then
+    echo "Runing ${MODEL_NAME} ${MODE} with precision ${PRECISION} does not support --gpu."
+    exit 1
+  fi
   # Navigate to the main benchmark directory before executing the script,
   # since the scripts use the benchmark/common scripts as well.
   cd ${MOUNT_BENCHMARK}
@@ -407,7 +430,8 @@ ${benchmark_only_arg} \
 ${output_results_arg} \
 ${weight_sharing_arg} \
 ${synthetic_data_arg} \
-${verbose_arg}"
+${verbose_arg} \
+${gpu_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
@@ -751,6 +775,9 @@ function dien_options() {
   if [[ -n "${NUM_ITERATIONS}" && ${NUM_ITERATIONS} != "" ]]; then
     CMD=" ${CMD} --num-iterations=${NUM_ITERATIONS}"
   fi
+  if [[ -n "${PRECISION}" && ${PRECISION} != "" ]]; then
+    CMD=" ${CMD} --data-type=${PRECISION}"
+  fi
 }
 
 # DIEN model
@@ -765,7 +792,7 @@ function dien() {
       exit 1
     fi
   elif [ ${MODE} == "training" ]; then
-    if [ ${PRECISION} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
       dien_options
       CMD=${CMD} run_model
 
@@ -869,131 +896,6 @@ function inceptionv4() {
   fi
 }
 
-# MiniGo model
-function minigo() {
-  if [ ${MODE} == "training" ] && [ ${PRECISION} == "fp32" ]; then
-      original_dir=$(pwd)
-      local MODEL_DIR=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
-      local INTELAI_MODEL_DIR=${INTELAI_MODELS}
-      local BENCHMARK_DIR=${BENCHMARK_SCRIPTS}
-
-      if [ -n "${DOCKER}" ]; then
-        MODEL_DIR=${MOUNT_EXTERNAL_MODELS_SOURCE}
-        INTELAI_MODEL_DIR=${MOUNT_INTELAI_MODELS_SOURCE}
-        BENCHMARK_DIR=${MOUNT_BENCHMARK}
-        # install dependencies
-        apt-get update && apt-get install -y cpio
-        # python3 -m pip install -r ${MODEL_DIR}/requirements.txt
-        python3 -m pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
-        if [ ! -f "bazel-0.22.0-installer-linux-x86_64.sh" ];then
-          wget https://github.com/bazelbuild/bazel/releases/download/0.22.0/bazel-0.22.0-installer-linux-x86_64.sh
-          chmod 755 bazel-0.22.0-installer-linux-x86_64.sh
-        fi
-        ./bazel-0.22.0-installer-linux-x86_64.sh --prefix=/tmp/bazel
-        rm /root/.bazelrc
-        export PATH=/tmp/bazel/bin:$PATH
-        cd /l_mpi
-        sh install.sh --silent silent.cfg
-        source /opt/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
-        python3 -m pip install mpi4py
-      fi
-    if [ ${NOINSTALL} != "True" ]; then
-      # install dependencies
-      apt-get update && apt-get install -y git
-      python3 -m pip install -r ${MOUNT_EXTERNAL_MODELS_SOURCE}/requirements.txt
-      python3 -m pip install -r ${BENCHMARK_DIR}/reinforcement/tensorflow/minigo/requirements.txt
-      if [ "${EXTERNAL_MODELS_SOURCE_DIRECTORY}" == "None" ]; then
-        echo "You are supposed to provide model dir."
-        exit 1
-      fi
-
-      # MODEL_DIR is the official mlperf minigo repo
-      cd ${MODEL_DIR}
-      git checkout 60ecb12f29582227a473fdc7cd09c2605f42bcd6
-
-      # delete the previous patch influence
-      git reset --hard
-      git clean -fd
-      rm -rf ./ml_perf/flags/9.mn/
-
-      # remove the quantization tools downloaded before
-      rm -rf ${MODEL_DIR}/ml_perf/tools/
-      rm -rf ${MODEL_DIR}/cc/ml_perf/tools/
-
-      if [ "${LARGE_SCALE}" == "True" ]; then
-        # multi-node mode
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf_large_scale.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-multinode.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-large-scale.patch
-        # git apply ${INTELAI_MODEL_DIR}/training/fp32/large-scale-no-bg.patch
-      elif [ "${LARGE_NUM_CORES}" == "True" ]; then
-        # single-node large num mode
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/tune_for_many_core.patch
-      else
-        # single-node normal mode
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/minigo_mlperf.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/mlperf_split.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/avoid-repeated-clone-singlenode.patch
-        git apply ${INTELAI_MODEL_DIR}/training/fp32/bazel-clean-single-node.patch
-      fi
-
-      # generate the flags with specified iterations
-      if [ -z "${STEPS}" ];then
-        steps=30
-      fi
-      mv ml_perf/flags/9/rl_loop.flags ml_perf/flags/9/rl_loop.flags-org
-      sed "s/iterations=30/iterations=${STEPS}/g" ml_perf/flags/9/rl_loop.flags-org &> ml_perf/flags/9/rl_loop.flags
-      mv ml_perf/flags/9/train.flags ml_perf/flags/9/train.flags-org
-      sed "s/train_batch_size=8192/train_batch_size=4096/g" ml_perf/flags/9/train.flags-org &> ml_perf/flags/9/train.flags
-
-      # MiniGo need specified tensorflow version and to build selfplay part with tensorflow c lib.
-      rm -rf cc/minigo_tf/tensorflow-*.data
-      rm -rf cc/minigo_tf/tensorflow-*.dist-info
-      chmod +777 ./cc/configure_tensorflow.sh
-      chmod +777 ./build.sh
-      ./cc/configure_tensorflow.sh
-      pip uninstall -y ./cc/tensorflow_pkg/tensorflow-*.whl
-      pip uninstall -y tensorflow
-      pip uninstall -y intel-tensorflow
-      python3 -m pip install ./cc/tensorflow_pkg/tensorflow-*.whl
-      ./build.sh
-
-      # ensure horovod installed
-      python3 -m pip install horovod==0.15.1
-
-
-      # set the python path for quantization tools
-      export PYTHONPATH=${PYTHONPATH}:${MODEL_DIR}/cc/ml_perf/tools/api/intel_quantization:${MODEL_DIR}/ml_perf/tools/api/intel_quantization
-
-      # freeze the tfrecord and target to the checkpoint for training
-      git apply ${INTELAI_MODEL_DIR}/training/fp32/get-data.patch
-      BOARD_SIZE=9 python ml_perf/get_data.py
-
-      # $HOSTLIST.txt contains all the ip address
-
-      if [ ! $multi_node ];then
-        unset -v HOSTLIST
-      else
-        export HOSTLIST=${BENCHMARK_DIR}/node_list
-      fi
-
-      cd ${original_dir}
-      CMD="${CMD} \
-      $(add_arg "--large-scale" ${LARGE_SCALE}) \
-      $(add_arg "--num-train-nodes" ${NUM_TRAIN_NODES}) \
-      $(add_arg "--num-eval-nodes" ${NUM_EVAL_NODES}) \
-      $(add_arg "--quantization" ${QUANTIZATION}) \
-      $(add_arg "--multi-node" ${MULTI_NODE})"
-      PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    fi
-  else
-    echo "MODE=${MODE} PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
-        exit 1
-  fi
-}
 # Mask R-CNN model
 function maskrcnn() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -1114,6 +1016,7 @@ function resnet101_inceptionv3() {
 # ResNet50  model
 function resnet50() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+    is_model_gpu_supported="True"
 
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
@@ -1124,7 +1027,11 @@ function resnet50() {
     if [ ${PRECISION} == "int8" ]; then
         CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+    elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        if  [ ${PRECISION} == "fp16" ] && [ ${GPU} == "False" ]; then
+          echo "PRECISION=${PRECISION} is not supported without --gpu."
+          exit 1
+        fi
       CMD="${CMD} $(add_steps_args)"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -1198,6 +1105,7 @@ function rfcn() {
 
 # SSD-MobileNet model
 function ssd_mobilenet() {
+  is_model_gpu_supported="True"
   if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
     if [ ${BATCH_SIZE} != "-1" ]; then
       echo "Warning: SSD-MobileNet FP32 inference script does not use the batch_size arg"
@@ -1243,6 +1151,9 @@ function ssd-resnet34() {
           fi
           benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+          
+
+
 
 
           cd  ${model_source_dir}/../
@@ -1543,7 +1454,21 @@ function wavenet() {
 
 # BERT base
 function bert_base() {
-  if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+  if [ ${GPU} == "True" ]; then
+    if [ ${MODE} == "inference" ]; then
+      echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+      exit 1
+    elif [ ${MODE} == "training" ]; then
+      if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+        echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+        exit 1
+      fi
+    fi
+    is_model_gpu_supported="True"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    bert_options
+    CMD=${CMD} run_model
+  elif [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     bert_options
     CMD=${CMD} run_model
@@ -1555,17 +1480,35 @@ function bert_base() {
 
 # BERT Large model
 function bert_large() {
-    # Change if to support fp32
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ]; then
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}
+    if [ ${GPU} == "True" ]; then
+      if [ ${MODE} == "inference" ]; then
+        if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "fp16" ] && [ ${PRECISION} != "bfloat16" ]; then
+          echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+          exit 1
+        fi
+      elif [ ${MODE} == "training" ]; then
+        if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+          echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+          exit 1
+        fi
+      fi
+      is_model_gpu_supported="True"
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       bert_options
       CMD=${CMD} run_model
     else
-      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
-      exit 1
+      # Change if to support fp32
+      if [ ${PRECISION} == "fp32" ]  || [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "bfloat16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+        bert_options
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
     fi
 }
-
 
 # Wide & Deep model
 function wide_deep() {
@@ -1674,8 +1617,6 @@ elif [ ${MODEL_NAME} == "inceptionv3" ]; then
   resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "inceptionv4" ]; then
   inceptionv4
-elif [ ${MODEL_NAME} == "minigo" ]; then
-  minigo
 elif [ ${MODEL_NAME} == "maskrcnn" ]; then
   maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then

@@ -80,6 +80,12 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1024"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --framework tensorflow \
@@ -87,7 +93,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --precision fp32 \
       --mode inference \
       --model-name wide_deep \
-      --batch-size 1024 \
+      --batch-size ${BATCH_SIZE} \
       --data-location ${DATASET_DIR} \
       --checkpoint ${CHECKPOINT_DIR} \
       --output-dir ${OUTPUT_DIR} \

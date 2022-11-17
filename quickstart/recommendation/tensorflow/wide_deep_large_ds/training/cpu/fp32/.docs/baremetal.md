@@ -14,6 +14,8 @@ output directory where log files and the saved model will be written.
 DATASET_DIR=<path to the dataset directory>
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xvf <package name>

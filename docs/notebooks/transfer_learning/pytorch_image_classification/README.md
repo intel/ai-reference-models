@@ -16,7 +16,7 @@ The notebook performs the following steps:
 
 ## Running the notebook
 
-The instructions below explain how to run the notebook on [bare metal](#bare-metal) using a
+The instructions below explain how to run the notebook on bare metal using a
 virtual environment. It is assumed that the host has Python3 and wget pre-installed.
 
 1. Get a clone of the Model Zoo repository from GitHub:

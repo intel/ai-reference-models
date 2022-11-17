@@ -77,14 +77,27 @@ export TRAIN=0
 
 PRECISION=$1
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+
+if [[ ${PLATFORM} == "windows" ]]; then
+  CORES="${NUMBER_OF_PROCESSORS}"
+else
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+fi
 BATCH_SIZE=`expr $CORES \* 2`
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput*
 
-python -m intel_extension_for_pytorch.cpu.launch \
-    --enable_jemalloc \
-    --throughput_mode \
+# check if stoch PYT or IPEX is installed on the system
+IPEX_ARGS=""
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
+    --enable_jemalloc --throughput_mode"
+fi
+
+python ${IPEX_ARGS} \
     ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/tools/test_net.py \
     $ARGS \
     --iter-warmup 10 \
@@ -98,17 +111,19 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
-BEGIN {
-        sum = 0;
-        i = 0;
-      }
-      {
-        sum = sum + $1;
-        i++;
-      }
-END   {
-        sum = sum / i;
-        printf("%.3f", sum);
-}')
-echo ""maskrcnn";"throughput";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+if [[ ${PLATFORM} == "linux" ]]; then
+  throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/maskrcnn_${PRECISION}_inference_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+  BEGIN {
+          sum = 0;
+          i = 0;
+        }
+        {
+          sum = sum + $1;
+          i++;
+        }
+  END   {
+          sum = sum / i;
+          printf("%.3f", sum);
+  }')
+  echo ""maskrcnn";"throughput";$1;${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

@@ -3,7 +3,7 @@
 
 import time
 import datetime
-
+import numpy as np
 
 class Timer(object):
     def __init__(self):
@@ -11,7 +11,9 @@ class Timer(object):
 
     @property
     def average_time(self):
-        return self.total_time / self.calls if self.calls > 0 else 0.0
+        timeBuff_output = np.asarray(self.timeBuff)
+        p99 = np.percentile(timeBuff_output, 99)
+        return self.total_time / self.calls if self.calls > 0 else 0.0, p99
 
     def tic(self):
         # using time.time instead of time.clock because time time.clock
@@ -28,6 +30,7 @@ class Timer(object):
     def add(self, time_diff):
         self.diff = time_diff
         self.total_time += self.diff
+        self.timeBuff.append(self.diff)
         self.calls += 1
 
     def reset(self):
@@ -35,6 +38,7 @@ class Timer(object):
         self.calls = 0
         self.start_time = 0.0
         self.diff = 0.0
+        self.timeBuff = []
 
     def avg_time_str(self):
         time_str = str(datetime.timedelta(seconds=self.average_time))

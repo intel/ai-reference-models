@@ -58,6 +58,7 @@ class ModelInitializer(BaseModelInitializer):
         else:
             # Did not support multi-batch accuracy check.
             self.command_prefix += " -b {0}".format(self.args.batch_size)
+            self.command_prefix += " --benchmark"
 
     def run(self):
         self.run_command(self.command_prefix)

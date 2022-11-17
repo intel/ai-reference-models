@@ -33,6 +33,7 @@ from ..utils.comm import synchronize
 from ..utils.timer import Timer, get_time_str
 from .bbox_aug import im_detect_bbox_aug
 import intel_extension_for_pytorch as ipex
+import numpy as np
 # from maskrcnn_benchmark.engine.utils_vis import draw, make_dot
 
 
@@ -152,12 +153,13 @@ def inference(
     predictions = compute_on_dataset(model, data_loader, device, bbox_aug, inference_timer, bf16, bf32, jit, iterations, iter_warmup, enable_profiling)
     # wait for all processes to complete before measuring the time
     synchronize()
-    total_time = total_timer.toc()
+    total_time, p99 = total_timer.toc()
     total_time_str = get_time_str(total_time)
 
     if iterations == -1:
         iterations = len(data_loader)
 
+    logger.info('P99 Latency {:.2f} ms'.format(p99*1000))
     logger.info(
         "Total run time: {} ({} s / iter per device, on {} devices)".format(
             total_time_str, total_time * num_devices / iterations, num_devices

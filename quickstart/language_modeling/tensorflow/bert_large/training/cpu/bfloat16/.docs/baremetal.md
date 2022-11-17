@@ -23,6 +23,8 @@ cd <package dir>
 CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where checkpoints and log files will be saved>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/<script name>.sh
@@ -62,9 +64,9 @@ CHECKPOINT_DIR=<path to the pretrained bert model directory>
 DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where checkpoints and log files will be saved>
 MPI_NUM_PROCESSES=<number of sockets to use>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run a script for your desired usage
 ./quickstart/<script name>.sh
 ```
-
-

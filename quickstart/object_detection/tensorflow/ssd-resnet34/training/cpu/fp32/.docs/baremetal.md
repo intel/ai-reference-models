@@ -39,6 +39,8 @@ After all the setup is complete, run the [quickstart script](#quick-start-script
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log and checkpoint files will be written>
 export MPI_NUM_PROCESSES=<number of MPI processes (optional, defaults to 1)>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Clone the tensorflow/models repo at the specified commit.
 # Please note that required commit for this section is different from the one used for dataset preparation.

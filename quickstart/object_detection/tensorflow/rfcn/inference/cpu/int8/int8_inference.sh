@@ -40,6 +40,12 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
   PRETRAINED_MODEL="${MODEL_DIR}/rfcn_resnet101_int8_coco_pretrained_model.pb"
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name rfcn \
@@ -50,7 +56,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --data-location ${DATASET_DIR} \
     --in-graph ${PRETRAINED_MODEL} \
     --output-dir ${OUTPUT_DIR} \
-    --batch-size 1 \
+    --batch-size ${BATCH_SIZE} \
     --benchmark-only \
     $@ \
     -- number_of_steps=500

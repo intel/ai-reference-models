@@ -7,6 +7,3 @@
 | [`bf16_batch_inference.sh`](bf16_batch_inference.sh) | Runs batch inference using synthetic data (batch_size=128). |
 | [`bf16_accuracy.sh`](bf16_accuracy.sh) | Measures the model accuracy (batch_size=128). |
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)

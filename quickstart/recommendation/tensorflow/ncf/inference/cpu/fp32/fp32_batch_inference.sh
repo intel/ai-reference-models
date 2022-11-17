@@ -82,6 +82,12 @@ for i in "${!input_dirs[@]}"; do
   fi
 done
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="256"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --checkpoint ${CHECKPOINT_DIR} \
@@ -89,7 +95,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --model-source-dir ${TF_MODELS_DIR} \
       --model-name ncf \
       --socket-id 0 \
-      --batch-size 256 \
+      --batch-size ${BATCH_SIZE} \
       --framework tensorflow \
       --precision fp32 \
       --mode inference \

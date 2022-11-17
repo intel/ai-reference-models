@@ -41,13 +41,19 @@ if [[ -n $MPI_NUM_PROCESSES ]]; then
   mpi_num_proc_arg="--mpi_num_processes=${MPI_NUM_PROCESSES}"
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="256"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
          --model-name=resnet50v1_5 \
          --precision=bfloat16 \
          --mode=training \
          --framework tensorflow \
-         --batch-size 256 \
+         --batch-size ${BATCH_SIZE} \
          --checkpoint ${OUTPUT_DIR} \
          --data-location=${DATASET_DIR} \
          --output-dir ${OUTPUT_DIR} \

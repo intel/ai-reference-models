@@ -48,13 +48,19 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --in-graph ${PRETRAINED_MODEL} \
     --model-name resnet50v1_5 \
     --framework tensorflow \
     --precision bfloat16 \
     --mode inference \
-    --batch-size=1 \
+    --batch-size=${BATCH_SIZE} \
     --output-dir ${OUTPUT_DIR} \
     ${DATASET_OPTION} \
     --benchmark-only

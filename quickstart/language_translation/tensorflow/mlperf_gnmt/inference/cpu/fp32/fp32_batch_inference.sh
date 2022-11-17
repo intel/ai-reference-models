@@ -47,13 +47,19 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="32"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name mlperf_gnmt \
   --framework tensorflow \
   --precision fp32 \
   --mode inference \
-  --batch-size 32 \
+  --batch-size ${BATCH_SIZE} \
   --socket-id 0 \
   --data-location ${DATASET_DIR} \
   --in-graph ${PRETRAINED_MODEL} \

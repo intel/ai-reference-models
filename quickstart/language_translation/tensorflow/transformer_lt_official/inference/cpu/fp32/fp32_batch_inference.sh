@@ -51,13 +51,19 @@ EN_DATA_FILE=${EN_DATA_FILE-newstest2014.en}
 DE_DATA_FILE=${DE_DATA_FILE-newstest2014.de}
 VOCAB_FILE=${VOCAB_FILE-vocab.txt}
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="64"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name transformer_lt_official \
   --precision fp32 \
   --mode inference \
   --framework tensorflow \
-  --batch-size 64 \
+  --batch-size ${BATCH_SIZE} \
   --socket-id 0 \
   --in-graph ${PRETRAINED_MODEL} \
   --data-location ${DATASET_DIR} \

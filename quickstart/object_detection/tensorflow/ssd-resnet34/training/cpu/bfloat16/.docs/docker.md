@@ -19,10 +19,13 @@ export DATASET_DIR=<path to the COCO training data>
 export OUTPUT_DIR=<directory where the log and checkpoint file will be written>
 export TRAIN_STEPS=<optional, defaults to 100>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env TRAIN_STEPS=${TRAIN_STEPS} \
   --env MPI_NUM_PROCESSES=${MPI_NUM_PROCESSES} \
   --env http_proxy=${http_proxy} \
@@ -51,10 +54,13 @@ wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tenso
 export DATASET_DIR=<path to the COCO training data>
 export OUTPUT_DIR=<directory where the log file and checkpoints will be written>
 export MPI_NUM_PROCESSES=<optional, defaults to 4>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env BACKBONE_MODEL_DIR=${BACKBONE_MODEL_DIR} \
   --env MPI_NUM_PROCESSES=${MPI_NUM_PROCESSES} \
   --env http_proxy=${http_proxy} \
@@ -79,10 +85,13 @@ export DATASET_DIR=<path to the COCO validation data>
 export OUTPUT_DIR=<directory where the log file will be written>
 export CHECKPOINT_DIR=<directory where your checkpoint files are located>
 export MPI_NUM_PROCESSES=<optional, defaults to 1>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \
   --env MPI_NUM_PROCESSES=${MPI_NUM_PROCESSES} \
   --env http_proxy=${http_proxy} \

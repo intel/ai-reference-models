@@ -472,7 +472,7 @@ def run_throughput_benchmark(args, dlrm, test_ld):
     )
     print(stats)
     latency = stats.latency_avg_ms
-    throughput = (1 / latency) * 1000 * args.mini_batch_size * args.share_weight_instance
+    throughput = (1 / latency) * 1000 * args.test_mini_batch_size * args.share_weight_instance
     print("Throughput: {:.3f} fps".format(throughput))
     sys.exit()
 

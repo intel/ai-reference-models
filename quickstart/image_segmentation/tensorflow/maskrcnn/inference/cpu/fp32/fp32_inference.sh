@@ -43,6 +43,12 @@ fi
 
 echo 'MODEL_SRC_DIR='$MODEL_SRC_DIR
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-source-dir $MODEL_SRC_DIR \
@@ -50,7 +56,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --framework tensorflow \
     --precision fp32 \
     --mode inference \
-    --batch-size 1 \
+    --batch-size ${BATCH_SIZE} \
     --socket-id 0 \
     --data-location $DATASET_DIR \
     --output-dir ${OUTPUT_DIR} \

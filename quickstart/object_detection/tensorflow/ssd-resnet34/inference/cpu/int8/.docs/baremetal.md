@@ -64,6 +64,8 @@ variables are setup, then run a [quickstart script](#quick-start-scripts).
 To run inference using synthetic data:
 ```
 export OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/int8_inference.sh
 ```
@@ -72,6 +74,8 @@ To test accuracy using the COCO dataset:
 ```
 export DATASET_DIR=<path to the coco directory>
 export OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/int8_accuracy.sh
 ```

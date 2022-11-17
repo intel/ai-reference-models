@@ -11,6 +11,8 @@ Download and untar the model package and then run a [quickstart script](#quick-s
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xvf <package name>
@@ -35,6 +37,8 @@ installed in your environment:
 DATASET_DIR=<path to the preprocessed imagenet dataset>
 OUTPUT_DIR=<directory where checkpoint and log files will be written>
 MPI_NUM_PROCESSES=<number of sockets to use>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xvf <package name>

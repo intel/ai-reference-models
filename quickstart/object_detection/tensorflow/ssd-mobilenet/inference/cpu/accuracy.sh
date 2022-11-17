@@ -58,8 +58,13 @@ if [[ $PRECISION == "bfloat16" ]]; then
 fi
 
 MODE="inference"
-BATCH_SIZE="1"
 CORES_PER_INSTANCE="socket"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
 
 if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
     source "${MODEL_DIR}/quickstart/common/utils.sh"

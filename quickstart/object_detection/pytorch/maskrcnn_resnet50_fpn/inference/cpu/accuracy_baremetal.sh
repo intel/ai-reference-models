@@ -56,27 +56,44 @@ export USE_IPEX=1
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
+source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+
+if [[ ${PLATFORM} == "windows" ]]; then
+  CORES="${NUMBER_OF_PROCESSORS}"
+else
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+fi
+
 BATCH_SIZE=`expr $CORES \* 2`
 
 rm -rf ${OUTPUT_DIR}/maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}_*
 
-python -m intel_extension_for_pytorch.cpu.launch \
+# check if stoch PYT or IPEX is installed on the system
+IPEX_ARGS=""
+pip list | grep intel-extension-for-pytorch
+if [[ "$?" == 0 ]]; then
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
   --use_default_allocator \
   --log_path=${OUTPUT_DIR} \
-  --log_file_prefix="maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}" \
+  --log_file_prefix="maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}""
+  ARGS="$ARGS --ipex"
+fi
+
+python ${IPEX_ARGS} \
   ${MODEL_DIR}/models/object_detection/pytorch/maskrcnn_resnet50_fpn/inference/cpu/inference.py \
   --data_path ${DATASET_DIR}/coco \
   --arch maskrcnn_resnet50_fpn \
   --batch_size $BATCH_SIZE \
-  --ipex \
   --jit \
   -j 0 \
   $ARGS
 
 wait
 
-bbox_ap=$(grep 'Bbox AP:' ${OUTPUT_DIR}/maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}_* |sed -e 's/.*Bbox AP//;s/[^0-9.]//g')
-segm_ap=$(grep 'Segm AP:' ${OUTPUT_DIR}/maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}_* |sed -e 's/.*Segm AP//;s/[^0-9.]//g')
-echo "maskrcnn_resnet50_fpn;"Bbox AP";${PRECISION};${BATCH_SIZE};${bbox_ap}" | tee -a ${OUTPUT_DIR}/summary.log
-echo "maskrcnn_resnet50_fpn;"Segm AP";${PRECISION};${BATCH_SIZE};${segm_ap}" | tee -a ${OUTPUT_DIR}/summary.log
+if [[ ${PLATFORM} == "linux" ]]; then
+  bbox_ap=$(grep 'Bbox AP:' ${OUTPUT_DIR}/maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}_* |sed -e 's/.*Bbox AP//;s/[^0-9.]//g')
+  segm_ap=$(grep 'Segm AP:' ${OUTPUT_DIR}/maskrcnn_resnet50_fpn_accuracy_log_${PRECISION}_* |sed -e 's/.*Segm AP//;s/[^0-9.]//g')
+  echo "maskrcnn_resnet50_fpn;"Bbox AP";${PRECISION};${BATCH_SIZE};${bbox_ap}" | tee -a ${OUTPUT_DIR}/summary.log
+  echo "maskrcnn_resnet50_fpn;"Segm AP";${PRECISION};${BATCH_SIZE};${segm_ap}" | tee -a ${OUTPUT_DIR}/summary.log
+fi

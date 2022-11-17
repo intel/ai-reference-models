@@ -4,13 +4,7 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running ResNet50 BFloat16 inference using
-[intel-extension-for-pytorch](https://github.com/intel/intel-extension-for-pytorch).
-
-<!--- 20. Download link -->
-## Download link
-
-[pytorch-resnet50-bfloat16-inference.tar.gz](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/pytorch-resnet50-bfloat16-inference.tar.gz)
+This document has instructions for running ResNet50 BFloat16 inference.
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -51,78 +45,52 @@ The folder that contains the `val` directory should be set as the
 | [`bf16_batch_inference.sh`](bf16_batch_inference.sh) | Runs batch inference using synthetic data (batch_size=128). |
 | [`bf16_accuracy.sh`](bf16_accuracy.sh) | Measures the model accuracy (batch_size=128). |
 
-These quickstart scripts can be run in different environments:
-* [Bare Metal](#bare-metal)
-* [Docker](#docker)
 
 <!--- 50. Bare Metal -->
 ## Bare Metal
 
-To run on bare metal, the following prerequisites must be installed in your environment:
+Follow the instructions to setup your bare metal environment on either Linux or Windows systems, download and
+preprocess the dataset, and do the model specific setup. Once all the setup is done,
+the Model Zoo can be used to run a [quickstart script](#quick-start-scripts).
+Ensure that you have enviornment variables set to point to the dataset directory
+and an output directory.
+
+Follow the instructions below to clone the Model Zoo repo before running the model on Linux or Windows:
+```
+# Clone the Model Zoo repo 
+git clone https://github.com/IntelAI/models.git
+cd models
+```
+
+### Run on Linux
+Install the following prerequisites in your environment:
 * Python 3
 * [intel-extension-for-pytorch](https://github.com/intel/intel-extension-for-pytorch)
 * [torchvision==v0.6.1](https://github.com/pytorch/vision/tree/v0.6.1)
 * numactl
+* Run the model:
 
-Download and untar the model package and then run a [quickstart script](#quick-start-scripts).
+  ```
+  # Env vars
+  export DATASET_DIR=<path to the Imagenet Dataset>
+  export OUTPUT_DIR=<path to the directory where log files will be written>
 
+  # Run a quickstart script (for example, bfloat16 batch inference)
+  bash quickstart/image_recognition/pytorch/resnet50/inference/cpu/bfloat16/fp32_batch_inference.sh 
+  ```
+
+### Run on Windows
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
+
+Using Windows CMD.exe, run:
 ```
-# Optional: to run accuracy script
-export DATASET_DIR=<path to the preprocessed imagenet dataset>
+# Env vars
+set DATASET_DIR=<path to the Imagenet Dataset>
+set OUTPUT_DIR=<path to the directory where log files will be written>
 
-# Download and extract the model package
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/pytorch-resnet50-bfloat16-inference.tar.gz
-tar -xzf pytorch-resnet50-bfloat16-inference.tar.gz
-cd pytorch-resnet50-bfloat16-inference
-./quickstart/<script name>.sh
+#Run a quickstart script for bfloat16 precision(for example, BFloat16 batch inference)
+bash quickstart\image_recognition\pytorch\resnet50\inference\cpu\bfloat16\fp32_batch_inference.sh 
 ```
-
-<!--- 60. Docker -->
-## Docker
-
-Use the base [PyTorch 1.8 container](https://hub.docker.com/layers/intel/intel-optimized-pytorch/1.8.0/images/sha256-5ca5d619b33bc6abc42cef654e9ee119ed0959c65f37de22a0bd8764c71412dd?context=explore)
-`intel/intel-optimized-pytorch:1.8.0` to run ResNet50 BFloat16 inference.
-To run the model quickstart scripts using the base PyTorch 1.8 container,
-you will need to provide a volume mount for the pytorch-resnet50-bfloat16-inference package.
-
-To run the accuracy test, you will need
-mount a volume and set the `DATASET_DIR` environment variable to point
-to the [ImageNet validation dataset](#dataset). The accuracy
-script also downloads the pretrained model at runtime, so provide proxy
-environment variables, if necessary.
-
-```
-DATASET_DIR=<path to the dataset folder>
-
-docker run \
-  --env DATASET_DIR=${DATASET_DIR} \
-  --env http_proxy=${http_proxy} \
-  --env https_proxy=${https_proxy} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
-  --volume <path to the model package directory>:/pytorch-resnet50-bfloat16-inference \
-  --privileged --init -it \
-  intel/intel-optimized-pytorch:1.8.0 /bin/bash
-```
-
-Synthetic data is used when running batch or online inference, so no
-dataset mount is needed.
-
-```
-docker run \
-  --privileged --init -it \
-  --volume <path to the model package directory>:/pytorch-resnet50-bfloat16-inference \
-  intel/intel-optimized-pytorch:1.8.0 /bin/bash
-```
-
-Run quickstart scripts:
-```
-cd /pytorch-resnet50-bfloat16-inference
-bash quickstart/<script name>.sh
-```
-
-If you are new to docker and are running into issues with the container,
-see [this document](https://github.com/IntelAI/models/tree/master/docs/general/docker.md)
-for troubleshooting tips.
 
 <!--- 80. License -->
 ## License

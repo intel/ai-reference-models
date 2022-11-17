@@ -2,7 +2,13 @@
   {
     "_comment": "dien_fp32_training",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=fp32 --mode=training --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --socket-id=0 --batch-size 128",
-    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/training/fp32/train.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 28 --data_location /dataset/dien-dataset-folder --mode train",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/training/fp32/train.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 28 --data_location /dataset/dien-dataset-folder --mode train --data_type fp32",
+    "cpuset": "0-111"
+  },
+  {
+    "_comment": "dien_bfloat16_training",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=dien --precision=bfloat16 --mode=training --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --data-location=/dataset/dien-dataset-folder --socket-id=0 --batch-size 128",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/training/bfloat16/train.py --batch_size 128 --num_inter_threads 1 --num_intra_threads 28 --data_location /dataset/dien-dataset-folder --mode train --data_type bfloat16",
     "cpuset": "0-111"
   },
   {

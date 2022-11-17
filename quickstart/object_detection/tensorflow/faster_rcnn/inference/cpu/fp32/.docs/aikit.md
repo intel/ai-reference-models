@@ -76,7 +76,7 @@ where log files will be written, then run a [quickstart script](#quick-start-scr
 cd models
 
 export DATASET_DIR=<path to the directory that contains the coco_val.record file>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_MODELS_DIR=<path to the TensorFlow models dir>
 export PRETRAINED_MODEL=<path to the extracted pretrained model dir>
 

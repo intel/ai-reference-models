@@ -51,6 +51,12 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
   PRETRAINED_MODEL="${pretrained_model_dir}/frozen_inference_graph.pb"
 fi
 
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name rfcn \
@@ -60,7 +66,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \
     --in-graph ${PRETRAINED_MODEL} \
-    --batch-size 1 \
+    --batch-size ${BATCH_SIZE} \
     --accuracy-only \
     --output-dir ${OUTPUT_DIR} \
     $@ \

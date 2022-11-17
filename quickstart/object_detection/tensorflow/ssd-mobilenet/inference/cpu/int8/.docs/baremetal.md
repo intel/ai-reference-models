@@ -26,6 +26,8 @@ Set environment variables for the path to your `DATASET_DIR` and an
 ```
 DATASET_DIR=<path to the coco tf record file>
 OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xzf <package name>

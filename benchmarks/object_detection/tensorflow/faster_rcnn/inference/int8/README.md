@@ -107,12 +107,13 @@ will be written, then run a [quickstart script](#quick-start-scripts).
 cd models
 
 export DATASET_DIR=<path to the coco dataset>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_MODELS_DIR=<path to the TensorFlow models dir>
 export PRETRAINED_MODEL=<path to the pretrained model frozen graph file>
 
 ./quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/int8/<script name>.sh
 ```
+
 <!--- 90. Resource Links-->
 ## Additional Resources
 

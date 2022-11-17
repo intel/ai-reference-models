@@ -74,7 +74,7 @@ def inference(model, dataloader, datatype, args):
     top5 = AverageMeter('Acc@5', ':6.2f')
     batch_size = args.batch_size
     warmup_iters = args.warmup_iterations
-    max_iters = args.max_iterations if dataloader is None else len(dataloader)
+    max_iters = len(dataloader) if args.max_iterations is None else args.max_iterations
     progress = ProgressMeter(
         max_iters,
         [batch_time, losses, top1, top5],
@@ -233,7 +233,7 @@ if __name__ == "__main__":
                         help="using  dummu data to test the performance of inference")
     parser.add_argument('-w', '--warmup_iterations', default=30, type=int, metavar='N',
                         help='number of warmup iterations to run')
-    parser.add_argument('-m', '--max_iterations', default=50, type=int, 
+    parser.add_argument('-m', '--max_iterations', default=None, type=int, 
                         help='number of max iterations to run')
     parser.add_argument('--log-path', required = False, default = "", type=str,
                         help="Path for the log file")

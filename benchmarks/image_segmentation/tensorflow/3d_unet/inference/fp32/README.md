@@ -127,8 +127,10 @@ Once the environment variables are all set, you can run the
 cd models
 
 export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log files will be written>
+export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<path to the pretrained model>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_segmentation/tensorflow/3d_unet/inference/cpu/fp32/fp32_inference.sh
 ```

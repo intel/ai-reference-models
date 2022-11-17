@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -99,8 +99,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             dest="shm_size", default="64m", type=check_shm_size)
 
         arg_parser.add_argument(
-            "--debug", help="Launches debug mode which doesn't execute "
-                            "start.sh when running in a docker container.", action="store_true")
+            "--debug",
+            help="Launches debug mode which doesn't execute "
+                 "start.sh when running in a docker container.", action="store_true")
 
         arg_parser.add_argument(
             "--noinstall",
@@ -240,7 +241,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "USE_CASE": str(use_case),
             "VERBOSE": args.verbose,
             "WEIGHT_SHARING": args.weight_sharing,
-            "SYNTHETIC_DATA": args.synthetic_data
+            "SYNTHETIC_DATA": args.synthetic_data,
+            "GPU": str(args.gpu)
         }
 
         # Add custom model args as env vars)
@@ -271,6 +273,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         checkpoint_path = args.checkpoint
         backbone_model_path = args.backbone_model
         dataset_path = args.data_location
+        batch_size = args.batch_size
 
         mount_external_models_source = args.model_source_dir
         mount_intelai_models = intelai_models
@@ -328,6 +331,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         if dataset_path:
             env_var_dict["DATASET_LOCATION"] = dataset_path
+
+        if batch_size:
+            env_var_dict["BATCH_SIZE"] = batch_size
 
         # if using the default output directory, get the full path
         if args.output_dir == "/models/benchmarks/common/tensorflow/logs":
@@ -387,6 +393,9 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
 
         if args.data_location:
             env_vars += ["--env", "DATASET_LOCATION=/dataset"]
+
+        if args.batch_size:
+            env_vars += ["--env", "BATCH_SIZE=args.batch_size"]
 
         if args.checkpoint:
             env_vars += ["--env", "CHECKPOINT_DIRECTORY=/checkpoints"]

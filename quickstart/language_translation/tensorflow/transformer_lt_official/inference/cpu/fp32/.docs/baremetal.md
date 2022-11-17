@@ -15,6 +15,8 @@ that point to your dataset and an output directory.
 ```
 DATASET_DIR=<path to the test dataset directory>
 OUTPUT_DIR=<directory where the log and translation file will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 wget <package url>
 tar -xzf <package name>

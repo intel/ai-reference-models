@@ -229,7 +229,7 @@ class PlatformUtil:
                 start, end = section.split("-")
                 section_list = range(int(start), int(end) + 1)
                 result_list += section_list
-            elif(len(section)):
+            elif len(section):
                 # This section is either empty or just a single number and not a range
                 result_list.append(int(section))
 

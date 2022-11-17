@@ -29,6 +29,12 @@ then
     precision=bf16
     ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
+elif [[ "$1" == "fp16" ]]
+then
+    precision=fp16
+    ARGS="$ARGS --fp16_cpu"
+    echo "### running fp16 mode"
+
 elif [[ "$1" == "int8" || "$1" == "avx-int8" ]]
 then
     precision=int8
@@ -51,7 +57,7 @@ BATCH_SIZE=${BATCH_SIZE:-8}
 EVAL_DATA_FILE=${EVAL_DATA_FILE:-"${PWD}/squad1.1/dev-v1.1.json"}
 FINETUNED_MODEL=${FINETUNED_MODEL:-bert_squad_model}
 OUTPUT_DIR=${OUTPUT_DIR:-"${PWD}"}
-EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/question-answering/run_squad.py"}
+EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/legacy/question-answering/run_squad.py"}
 work_space=${work_space:-"${OUTPUT_DIR}"}
 
 if [ ${WEIGHT_SHAREING} ]; then
