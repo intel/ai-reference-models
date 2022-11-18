@@ -289,6 +289,7 @@ class DLRM_Net(nn.Module):
         else:
             self.emb_l, _, _ = self.create_emb(m_spa, ln_emb, None, None, np_init_emb_weight)
         self.loss_fn = torch.nn.BCELoss(reduction="mean")
+        self.emb_args_preprocessing = 0
                 
     def apply_mlp(self, x, layers):
         # approach 1: use ModuleList
@@ -308,6 +309,7 @@ class DLRM_Net(nn.Module):
         is_ddp = isinstance(emb_l,  ext_dist.DDP)
         
         if (not is_ddp and isinstance(emb_l,ipex.nn.modules.MergedEmbeddingBag)) or (is_ddp and isinstance(emb_l.module,ipex.nn.modules.MergedEmbeddingBag)): 
+             start = time.time()
              n_tables = len(lS_i)
              #prepare the input for sparse mergedembedding
              idx = [lS_i[i] for i in range(n_tables)]
@@ -318,6 +320,7 @@ class DLRM_Net(nn.Module):
              else:
                  indices, offsets, indices_with_row_offsets = emb_l.linearize_indices_and_offsets(idx, offset, include_last)
              emb_args = (indices, offsets, indices_with_row_offsets)
+             self.emb_args_preprocessing += time.time() - start
              return emb_l(emb_args, self.need_linearize_indices_and_offsets)
         ly = []
         for k, sparse_index_group_batch in enumerate(lS_i):
@@ -443,6 +446,7 @@ class DLRM_Net(nn.Module):
 
     def sequential_forward(self, dense_x, lS_o, lS_i):
         # process dense features (using bottom mlp), resulting in a row vector
+        self.emb_args_preprocessing = 0
         x = self.apply_mlp(dense_x, self.bot_l)
         # debug prints
         # print("intermediate")
@@ -996,7 +1000,7 @@ def run():
         if args.bf16:
             print("Start to split weight to bf16 and trail part, or saving whole fp32 master weight, create bf16 weight copy")
             print("Maximum will use ~ {} G memory, may use less memory if useless fp32 weight (for split path) will be released in time ".format(dlrm.numel * 4 / 1024 / 1024 /1024))
-            dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)#, sample_input=sample_input)
+            dlrm, optimizer = ipex.optimize(dlrm, dtype=torch.bfloat16, optimizer=optimizer, inplace=True, sample_input=sample_input)
             print("args.ipex_merged_emb:", args.ipex_merged_emb)
             if args.ipex_merged_emb:
                 print("###############Current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
@@ -1103,7 +1107,8 @@ def run():
 
                     lr_scheduler.step()
 
-                    t2 = time_wrap()
+                    t2 = time_wrap() - dlrm.emb_args_preprocessing
+
                     total_train_time_wo_dl_eval += (t2 - t1)
                     total_time += t2 - t1
 
