@@ -84,8 +84,8 @@ The folder that contains the `val` and `train` directories should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, or fp16). |
-| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, or fp16). |
+| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
+| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
 
 ## Run the model
 
