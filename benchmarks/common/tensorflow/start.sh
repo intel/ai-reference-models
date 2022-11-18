@@ -1119,18 +1119,17 @@ function ssd-resnet34() {
             model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
             infer_dir="${INTELAI_MODELS}/${MODE}"
           fi
-          benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
-          model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-
-
-          cd  ${model_source_dir}/../
-          cd ssd-resnet-benchmarks
-          git apply ${benchmarks_patch_path}
-
-          cd ${model_source_dir}
-          git apply ${model_patch_path}
 
           if [ ${NOINSTALL} != "True" ]; then
+            benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
+            model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+
+            cd  ${model_source_dir}/../
+            cd ssd-resnet-benchmarks
+            git apply ${benchmarks_patch_path}
+
+            cd ${model_source_dir}
+            git apply ${model_patch_path}
             export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
             export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
           fi
