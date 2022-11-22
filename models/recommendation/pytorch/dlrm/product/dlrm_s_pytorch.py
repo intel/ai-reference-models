@@ -93,6 +93,7 @@ from torch.nn.parallel.replicate import replicate
 from torch.nn.parallel.scatter_gather import gather, scatter
 from torch.nn.parameter import Parameter
 from torch.optim.lr_scheduler import _LRScheduler
+from torch.profiler import profile, record_function, ProfilerActivity
 
 # intel
 import intel_extension_for_pytorch as ipex
@@ -387,26 +388,17 @@ class DLRM_Net(nn.Module):
         lS_i_dense = [lS_i[i] for i in self.ln_emb_dense]
         lS_o_sparse = [lS_o[i] for i in self.ln_emb_sparse]
         lS_i_sparse = [lS_i[i] for i in self.ln_emb_sparse]
-
-        lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
+        shuffle_start = time.time()
+        #lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
+        lS_i_sparse = torch.cat(lS_i_sparse)
+        output_lS_i_sparse = lS_i_sparse.new_empty(lS_i_sparse.size())
+        #print("cat time:", 1000*(time.time() - shuffle_start))
+        req = ext_dist.dist.all_to_all_single(output_lS_i_sparse, lS_i_sparse)
+        lS_i_sparse = output_lS_i_sparse.reshape(ext_dist.my_size, -1)
         g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
-        #torch.set_printoptions(threshold=500000)
-        if 0:
-            dense_x = torch.load("dense.{}".format(rank_id))
-            for i, lsi in enumerate(lS_i_sparse):
-                lS_i_sparse[i] = torch.load("lS_i_sparse_{}.{}".format(i, rank_id))
-            for i, lsi in enumerate(lS_i_dnese):
-                lS_i_dense[i] = torch.load("lS_i_dense_{}.{}".format(i, rank_id))
-        #if ext_dist.dist.get_rank() == 0:        
-        #    import pdb 
-        #    pdb.set_trace()
-        #    #print("dense_x:", dense_x)
-        #    print("lS_i_sparse:{}", lS_i_sparse)
-        #    print("lS_i_dense:", lS_i_dense)
-        #    exit()
-        #exit()
-        #batch_size = X.size()[0]
         offset = torch.arange(local_batch_size * ext_dist.my_size)
+        shuffle_end = time.time()
+        #print("shuffle time:", 1000*(shuffle_end - shuffle_start))
         g_o_sparse = [offset for i in range(self.n_local_emb_sparse)]
         ly_sparse = self.apply_emb(dlrm.emb_sparse, g_o_sparse, g_i_sparse)
         #print("ly_sparse", ly_sparse)
@@ -680,12 +672,12 @@ def inference(
             + " f1 {:.4f}, ap {:.4f},".format(
                 validation_results["f1"], validation_results["ap"]
             )) + result_fmt_str
-
-        print(
-            result_fmt_str,
-            flush=True,
-        )
-        print("Accuracy: {:.34} ".format(validation_results["roc_auc"]))
+        if ext_dist.my_size > 1 and ext_dist.dist.get_rank() == 1:
+            print(
+                result_fmt_str,
+                flush=True,
+            )
+            print("Accuracy: {:.34} ".format(validation_results["roc_auc"]))
         if not args.inference_only:
             if args.mlperf_auc_threshold != 0.0 and best_auc_test > args.mlperf_auc_threshold:
                 train_end = time.time()
@@ -1030,9 +1022,9 @@ def run():
                 dlrm.bot_l[i + 1] = torch.nn.Identity()
 
         if ext_dist.my_size > 1:
-            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l)
-            dlrm.top_l = ext_dist.DDP(dlrm.top_l)
-            dlrm.emb_dense = ext_dist.DDP(dlrm.emb_dense)
+            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l, gradient_as_bucket_view=True)
+            dlrm.top_l = ext_dist.DDP(dlrm.top_l, gradient_as_bucket_view=True)
+            dlrm.emb_dense = ext_dist.DDP(dlrm.emb_dense, gradient_as_bucket_view=True)
     training_record = [0, 0]
     def update_training_performance(time, iters, training_record=training_record):
         if iters > args.num_warmup_iters:
@@ -1052,15 +1044,39 @@ def run():
     print(dlrm)
     train_start = time.time()
     total_train_time_wo_dl_eval = 0
-    with torch.autograd.profiler.profile(
-        enabled=args.enable_profiling, use_cuda=False, record_shapes=False
-    ) as prof:
+    wait_it = 0
+    warmup_it = 400
+    active_it = 20
+    lrs =[]
+    def trace_handler(prof):
+        print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+        if ext_dist.my_size > 1:
+            rank = ext_dist.dist.get_rank()
+            prof.export_chrome_trace("dlrm_training_trace_rank_{}_step{}.json".format(rank,str(prof.step_num)))
+        else:
+            rank = 0
+            prof.export_chrome_trace("dlrm_training_trace_step_{}.json".format(str(prof.step_num)))
+
+        file_prefix = "%s/dlrm_s_pytorch_r%d" % (".", rank)
+        #with open("dlrm_s_pytorch.prof", "w") as prof_f:
+        with open("%s.prof" % file_prefix, "w") as prof_f:
+            prof_f.write(prof.key_averages().table(sort_by="cpu_time_total"))
+
+    with torch.profiler.profile(
+        activities=[ProfilerActivity.CPU],
+        schedule=torch.profiler.schedule(
+            wait=wait_it,
+            warmup=warmup_it,
+            active=active_it),
+        on_trace_ready=trace_handler
+        ) as prof:
         if not args.inference_only:
             k = 0
             while k < args.nepochs:
 
                 if k < skip_upto_epoch:
                     continue
+
                 for j, inputBatch in enumerate(train_ld):
                     if j < skip_upto_batch:
                         continue
@@ -1108,14 +1124,17 @@ def run():
                     lr_scheduler.step()
 
                     t2 = time_wrap() - dlrm.emb_args_preprocessing
-
+                    dlrm.emb_args_preprocessing = 0 
                     total_train_time_wo_dl_eval += (t2 - t1)
                     total_time += t2 - t1
 
                     total_loss += L * mbs
                     total_iter += 1
                     total_samp += mbs
-
+                    if args.enable_profiling:
+                        prof.step()
+                        if j >=  wait_it + warmup_it + active_it:
+                            break
                     should_print = ((j + 1) % args.print_freq == 0) or (
                         j + 1 == nbatches
                     )
@@ -1139,15 +1158,15 @@ def run():
                         wall_time = ""
                         if args.print_wall_time:
                             wall_time = " ({})".format(time.strftime("%H:%M"))
-
-                        print(
-                            "Finished {} it {}/{} of epoch {}, {:.2f} ms/it,".format(
-                                str_run_type, j + 1, nbatches, k, gT
-                            )
-                            + " loss {:.6f}".format(train_loss)
-                            + wall_time,
-                            flush=True,
-                        )
+                        if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
+                           print(
+                               "Finished {} it {}/{} of epoch {}, {:.2f} ms/it,".format(
+                                   str_run_type, j + 1, nbatches, k, gT
+                               )
+                               + " loss {:.6f}".format(train_loss)
+                               + wall_time,
+                               flush=True,
+                           )
                         update_training_performance(gT, j)
 
                         total_iter = 0
@@ -1166,7 +1185,9 @@ def run():
                         best_auc_test = model_metrics_dict["test_auc"]
                         best_acc_test = model_metrics_dict["test_acc"]
                         eval_end = time.time()
-                        print("Evauation at {} iteration using {} s".format(j+1, eval_end- eval_begin))
+                        dlrm.emb_args_preprocessing = 0
+                        if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
+                            print("Evauation at {} iteration using {} s".format(j+1, eval_end- eval_begin))
                         if (
                             is_best
                             and not (args.save_model == "")
@@ -1187,7 +1208,7 @@ def run():
                             and (best_auc_test > args.mlperf_auc_threshold)
                         ):
                             train_end = time.time()
-                            if ext_dist.dist.get_rank() == 0:
+                            if ext_dist.dist.get_rank() == 1:
                                 print("The TTT w/ dataloader and evaluation is {} mins".format((train_end - train_start)/60.0))
                                 print("The TTT w/o dataloader and evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
                             exit()
