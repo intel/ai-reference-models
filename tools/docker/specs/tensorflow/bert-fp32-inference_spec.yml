@@ -35,6 +35,7 @@ slice_sets:
     partials:
     - model_package
     documentation:
+      - docs:
         - name: Title
           uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/title.md
         - name: Description
@@ -42,9 +43,9 @@ slice_sets:
         - name: Datasets
           uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/datasets.md
         - name: Quick Start Scripts
-          uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/fp32/.docs/quickstart.md
+          uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/quickstart.md
         - name: AI Kit
-          uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/fp32/.docs/aikit.md
+          uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/aikit.md
         name: README.md
         text_replace:
           <mode>: inference
@@ -52,4 +53,4 @@ slice_sets:
           <precision>: FP32
           <use case>: language_translation
         uri: models/benchmarks/language_translation/tensorflow/bert/inference/fp32
-      
+
