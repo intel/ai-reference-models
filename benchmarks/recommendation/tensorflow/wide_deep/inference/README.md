@@ -1,3 +1,32 @@
+<!--- 0. Title -->
+# Wide & Deep inference
+
+<!-- 10. Description -->
+
+This document has instructions for running Wide & Deep inference using
+Intel-optimized TensorFlow.
+
+<!--- 30. Datasets -->
+## Dataset
+Download and preprocess the [income census data](https://archive.ics.uci.edu/ml/datasets/Census+Income) by running 
+following python script, which is a standalone version of [census_dataset.py](https://github.com/tensorflow/models/blob/v2.2.0/official/r1/wide_deep/census_dataset.py)
+Please note that below program requires `requests` module to be installed. You can install it using `pip install requests`.
+Dataset will be downloaded in directory provided using `--data_dir`. If you are behind corporate proxy, then you can provide proxy URLs
+using `--http_proxy` and `--https_proxy` arguments.
+```
+git clone https://github.com/IntelAI/models.git
+cd models
+python ./benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/data_download.py --data_dir /home/<user>/widedeep_dataset
+```
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`inference_online.sh`](/quickstart/recommendation/tensorflow/wide_deep/inference/cpu/inference_online.sh) | Runs wide & deep model inference online mode (batch size = 1)|
+| [`inference_batch.sh`](/quickstart/recommendation/tensorflow/wide_deep/inference/cpu/inference_batch.sh) | Runs wide & deep model inference in batch mode (batch size = 1024)|
+
 <!--- 50. AI Kit -->
 ## Run the model
 
@@ -67,17 +96,15 @@ git fetch origin pull/7461/head:wide-deep-tf2
 git checkout wide-deep-tf2
 ```
 
-Once your environment is setup, navigate back to your model zoo directory and set
-environment variables pointing to your dataset and an output directory for log files.
-Ensure that you also have the pretrained model and TensorFlow models repo paths
-set from the previous steps. Select a [quickstart script](#quick-start-scripts)
-to run.
+Set the environment variables and run quickstart script on either Linux or Windows systems. See the list of quickstart scripts for details on the different options.
+
 ### Run on Linux
 ```
 # cd to your model zoo directory
 cd models
 
 export DATASET_DIR=<path to the Wide & Deep dataset directory>
+export PRECISION=fp32
 export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<pretrained model directory>
 export TF_MODELS_DIR=<path to tensorflow-models directory>
@@ -94,6 +121,7 @@ cd models
 
 set PRETRAINED_MODEL=<pretrained model directory>
 set DATASET_DIR=<path to the Wide & Deep dataset directory>
+set PRECISION=fp32
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<path to tensorflow-models directory>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
@@ -108,3 +136,11 @@ As an example, if the dataset location on Windows is `D:\<user>\widedeep_dataset
 > /d/<user>/widedeep_dataset
 >```
 >Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/<user>/widedeep_dataset`.
+
+<!--- 90. Resource Links-->
+## Additional Resources
+
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [<bfloat16 precision>](<bfloat16 advanced readme link>) for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
+  workload container:<br />
+  [https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-fp32-inference-tensorflow-container.html).

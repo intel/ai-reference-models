@@ -37,7 +37,18 @@ elif [ -z ${TF_MODELS_DIR} ]; then
     exit 1
 fi
 
-echo 'TF_MODELS_DIR='$TF_MODELS_DIR
+echo 'TF_MODELS_DIR='TF_MODELS_DIR
+
+if [ -z "${PRECISION}"]; then
+  PRECISION=fp32
+  echo "Running with default precision ${PRECISION}"
+fi
+
+if [[ $PRECISION != "fp32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precision is fp32."
+  exit 1
+fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
   # If the env var is not set, we might be running as part of a workload container
@@ -82,7 +93,7 @@ done
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1"
+  BATCH_SIZE="1024"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -90,7 +101,7 @@ source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
       --framework tensorflow \
       --model-source-dir ${TF_MODELS_DIR} \
-      --precision fp32 \
+      --precision ${PRECISION} \
       --mode inference \
       --model-name wide_deep \
       --batch-size ${BATCH_SIZE} \
