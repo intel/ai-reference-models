@@ -133,6 +133,21 @@ def unpack_batch(b):
     # Experiment with unweighted samples
     return b[0], b[1], b[2], b[3], torch.ones(b[3].size()), None
 
+class AlltoallOutputs():
+    def __init__(self):
+        self.data = None
+        self.tail_data = None
+
+    def get_data_base_on_input(self, input, shape):
+        if self.data is None:
+            self.data = input.new_empty(shape)
+            return self.data
+        if self.data.shape == torch.Size(shape):
+            return self.data
+        else:
+            if self.tail_data is None:
+                self.tail_data = input.new_empty(shape)
+            return self.tail_data
 
 class LRPolicyScheduler(_LRScheduler):
     def __init__(self, optimizer, num_warmup_steps, decay_start_step, num_decay_steps):
@@ -285,6 +300,10 @@ class DLRM_Net(nn.Module):
         print("#############seed self.l_emb_seeds:", self.l_emb_seeds)
         self.bot_l = self.create_mlp(ln_bot, sigmoid_bot)
         self.top_l = self.create_mlp(ln_top, sigmoid_top)
+        self.all2all_validation_outputs0 = AlltoallOutputs()
+        self.all2all_validation_outputs1 = AlltoallOutputs()
+        self.validation_output_ind0 = AlltoallOutputs()
+        self.validation_output_ind1 = AlltoallOutputs()
         if ext_dist.my_size > 1:
             self.emb_l, self.emb_dense, self.emb_sparse = self.create_emb(m_spa, ln_emb, self.local_ln_emb_sparse, self.ln_emb_dense,np_init_emb_weight)
         else:
@@ -374,6 +393,292 @@ class DLRM_Net(nn.Module):
         else:
             return self.sequential_forward(dense_x, lS_o, lS_i)
 
+    def distributed_forward_2iter_overlap(self, cur_data, next_data):
+        if not cur_data[0]:
+            return None, None
+
+        dense_x0 = cur_data[0]['dense_x']
+        T_test0 = cur_data[0]['T_test']
+        lS_i0 = cur_data[0]['lS_i']
+        lS_o0 = cur_data[0]['lS_o']
+        batch_size0 = dense_x0.size()[0]
+
+        lS_i_dense0 = [lS_i0[i] for i in self.ln_emb_dense]
+        lS_i_sparse0 = [lS_i0[i] for i in self.ln_emb_sparse]
+
+        if not cur_data[1]:
+            lS_i_sparse0 = ext_dist.shuffle_data(lS_i_sparse0)
+            g_i_sparse0 = [lS_i_sparse0[:, i * batch_size0:(i + 1) * batch_size0].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
+            offset = torch.arange(batch_size0 * ext_dist.my_size)
+            g_o_sparse0 = [offset for i in range(self.n_local_emb_sparse)]
+
+            # sparse embeddings
+            with torch.autograd.profiler.record_function('Prof_sparse_emb_forward'):
+                ly_sparse0 = self.apply_emb(dlrm.emb_sparse, g_o_sparse0, g_i_sparse0)
+
+            with torch.autograd.profiler.record_function('Prof_alltoall_emb_forward'):
+                a2a_req0 = ext_dist.alltoall(ly_sparse0, self.n_sparse_emb_per_rank)
+
+            # dense embeddings
+            with torch.autograd.profiler.record_function('Prof_dense_emb_forward'):
+                ly_dense0 = self.apply_emb(batch_size0, lS_i_dense0, self.emb_dense)
+
+            # bottom mlp
+            # with torch.autograd.profiler.record_function('Prof_bot_mlp_forward'):
+            x0 = self.apply_mlp(dense_x0, self.bot_l)
+            with torch.autograd.profiler.record_function('Prof_alltoall_emb_wait_forward'):
+                ly_sparse0 = a2a_req0.wait()
+
+            # concat emb data for split sparse embs
+            ly_sparse0_full = []
+            if ext_dist.my_size > len(self.ln_emb_sparse):
+                for i in range(len(self.ln_emb_sparse)):
+                    ly_sparse0_split = torch.cat([ly_sparse0[j] for j in range(i, ext_dist.my_size, len(self.ln_emb_sparse))], 1)
+                    ly_sparse0_full.append(ly_sparse0_split)
+            else:
+                ly_sparse0_full = list(ly_sparse0)
+
+            ly0 = list(ly_dense0) + ly_sparse0_full
+
+            with torch.autograd.profiler.record_function('Prof_interaction_forward'):
+                z0 = self.interact_features(x0, ly0)
+            # top mlp
+            with torch.autograd.profiler.record_function('Prof_top_mlp_forward'):
+                p0 = self.apply_mlp(z0, self.top_l)
+
+            # clamp output if needed
+            if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
+                z0 = torch.clamp(
+                    p0, min=self.loss_threshold, max=(1.0 - self.loss_threshold)
+                )
+            else:
+                z0 = p0
+            z0 = z0.float()
+
+            Z_test0 = ext_dist.all_gather(z0, None)
+            T_test0 = ext_dist.all_gather(T_test0, None)
+
+            return (Z_test0, T_test0), None
+
+        # if not cur_data[1]:
+        #     self.distributed_forward(cur_data[0])
+
+        if cur_data[1]:
+            dense_x1 = cur_data[1]['dense_x']
+            T_test1 = cur_data[1]['T_test']
+            lS_i1 = cur_data[1]['lS_i']
+            lS_o1 = cur_data[1]['lS_o']
+            batch_size1 = dense_x1.size()[0]
+
+            lS_i_dense1 = [lS_i1[i] for i in self.ln_emb_dense]
+            lS_i_sparse1 = [lS_i1[i] for i in self.ln_emb_sparse]
+
+        if next_data[0]:
+            next_dense_x0 = next_data[0]['dense_x']
+            # next_T_test0 = next_data[0]['T_test']
+            next_lS_i0 = next_data[0]['lS_i']
+            next_lS_o0 = next_data[0]['lS_o']
+            next_batch_size0 = next_dense_x0.size()[0]
+
+            # next_lS_i_dense0 = [lS_i0[i] for i in self.ln_emb_dense]
+            next_lS_i_sparse0 = [next_lS_i0[i] for i in self.ln_emb_sparse]
+
+        if next_data[1]:
+            next_dense_x1 = next_data[1]['dense_x']
+            # next_T_test1 = next_data[1]['T_test']
+            next_lS_i1 = next_data[1]['lS_i']
+            next_lS_o1 = next_data[1]['lS_o']
+            next_batch_size1 = next_dense_x1.size()[0]
+
+            # next_lS_i_dense1 = [lS_i1[i] for i in self.ln_emb_dense]
+            next_lS_i_sparse1 = [next_lS_i1[i] for i in self.ln_emb_sparse]
+
+        if 'lS_i_sparse_res' not in cur_data[0]:
+            if ext_dist.my_size > len(self.ln_emb_sparse):
+                num_split_grps = ext_dist.my_size // len(self.ln_emb_sparse)
+                lS_i_sparse0 = torch.cat([lS_i_sparse0 for _ in range(num_split_grps) ])
+            lS_i_sparse0 = ext_dist.shuffle_data(lS_i_sparse0)
+            g_i_sparse0 = [lS_i_sparse0[:, i * batch_size0:(i + 1) * batch_size0].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
+        else:
+            g_i_sparse0 = cur_data[0]['lS_i_sparse_res']
+
+        if cur_data[1] and 'lS_i_sparse_res' not in cur_data[1]:
+            lS_i_sparse1 = torch.cat(lS_i_sparse1)
+            output1 = lS_i_sparse1.new_empty(lS_i_sparse1.size())
+            ind_req1 = ext_dist.dist.all_to_all_single(output1, lS_i_sparse1, async_op=True)
+
+        if 'ly_sparse' not in cur_data[0]:
+            with torch.autograd.profiler.record_function('Prof_sparse_emb_forward'):
+                # sparse0 embeddings
+                offset = torch.arange(batch_size0 * ext_dist.my_size)
+                g_o_sparse0 = [offset for i in range(self.n_local_emb_sparse)]
+                ly_sparse0 = self.apply_emb(dlrm.emb_sparse, g_o_sparse0, g_i_sparse0)
+        else:
+            ly_sparse0 = cur_data[0]['ly_sparse']
+
+        if cur_data[1] and 'lS_i_sparse_res' not in cur_data[1]:
+            ind_req1.wait()
+            lS_i_sparse1 = output1.reshape(ext_dist.my_size, -1)
+            g_i_sparse1 = [lS_i_sparse1[:, i * batch_size1:(i + 1) * batch_size1].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
+        else:
+            g_i_sparse1 = cur_data[1]['lS_i_sparse_res']
+
+
+        with torch.autograd.profiler.record_function('Prof_alltoall_emb_forward'):
+            a2a_req0 = ext_dist.alltoall(ly_sparse0, self.n_sparse_emb_per_rank)
+
+        # dense0 embeddings
+        with torch.autograd.profiler.record_function('Prof_dense_emb_forward'):
+            ly_dense0 =  self.apply_emb(dlrm.emb_dense, lS_o0, lS_i_dense0)
+
+        # bottom mlp 0
+        with torch.autograd.profiler.record_function('Prof_bot_mlp_forward'):
+            x0 = self.apply_mlp(dense_x0, self.bot_l)
+        
+        if cur_data[1]:
+            # sparse1 embeddings
+            with torch.autograd.profiler.record_function('Prof_sparse_emb_forward1'):
+                offset = torch.arange(batch_size1 * ext_dist.my_size)
+                g_o_sparse1 = [offset for i in range(self.n_local_emb_sparse)]
+                ly_sparse1 = self.apply_emb(dlrm.emb_sparse, g_o_sparse1, g_i_sparse1)
+
+        with torch.autograd.profiler.record_function('Prof_alltoall_emb_wait_forward'):
+            ly_sparse0 = a2a_req0.wait()
+
+        T_test_req0, T_test0 = ext_dist.all_gather_validation(T_test0, None)
+
+        # concat emb data for split sparse0 embs
+        ly_sparse0_full = []
+        if ext_dist.my_size > len(self.ln_emb_sparse):
+            for i in range(len(self.ln_emb_sparse)):
+                ly_sparse0_split = torch.cat([ly_sparse0[j] for j in range(i, ext_dist.my_size, len(self.ln_emb_sparse))], 1)
+                ly_sparse0_full.append(ly_sparse0_split)
+        else:
+            vector_lenght = 128
+            for item in ly_sparse0:
+                ly_sparse0_full += [item[:, emb_id * vector_lenght: (emb_id + 1) * vector_lenght] for emb_id in range(self.emb_sparse.n_tables)]
+            ly_sparse0_full = [item.contiguous() for item in ly_sparse0_full]
+            ly_sparse0_full = list(ly_sparse0_full)
+
+        ly0 = list(ly_dense0) + ly_sparse0_full
+
+        with torch.autograd.profiler.record_function('Prof_interaction_forward'):
+            z0 = self.interact_features(x0, ly0)
+
+        with torch.autograd.profiler.record_function('Prof_all_gather_t0'):
+            T_test_req0.wait()
+
+        if cur_data[1]:
+            with torch.autograd.profiler.record_function('Prof_alltoall_emb_forward1'):
+                a2a_req1 = ext_dist.alltoall(ly_sparse1, self.n_sparse_emb_per_rank)
+
+        if next_data[0]:
+            if ext_dist.my_size > len(self.ln_emb_sparse):
+                num_split_grps = ext_dist.my_size // len(self.ln_emb_sparse)
+                next_lS_i_sparse0 = torch.cat([next_lS_i_sparse0 for _ in range(num_split_grps) ])
+            next_lS_i_sparse0 = torch.cat(next_lS_i_sparse0)
+            next_output0 = self.validation_output_ind0.get_data_base_on_input(next_lS_i_sparse0, next_lS_i_sparse0.size())
+            next_ind_req0 = ext_dist.dist.all_to_all_single(next_output0, next_lS_i_sparse0, async_op=True)
+
+        # top mlp 0
+        with torch.autograd.profiler.record_function('Prof_top_mlp_forward'):
+            p0 = self.apply_mlp(z0, self.top_l)
+
+        if cur_data[1]:
+            with torch.autograd.profiler.record_function('Prof_alltoall_emb_wait_forward1'):
+                ly_sparse1 = a2a_req1.wait()
+
+        if next_data[0]:
+            next_ind_req0.wait()
+            next_lS_i_sparse0 = next_output0.reshape(ext_dist.my_size, -1)
+            next_g_i_sparse0 = [next_lS_i_sparse0[:, i * next_batch_size0:(i + 1) * next_batch_size0].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
+            next_data[0]['lS_i_sparse_res'] = next_g_i_sparse0
+
+        # clamp output if needed
+        if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
+            z0 = torch.clamp(
+                p0, min=self.loss_threshold, max=(1.0 - self.loss_threshold)
+            )
+        else:
+            z0 = p0
+        z0 = z0.float()
+
+        Z_test_req0, Z_test0 = ext_dist.all_gather_validation(z0, None)
+
+        if cur_data[1]:
+            # dense1 embeddings
+            with torch.autograd.profiler.record_function('Prof_dense_emb_forward1'):
+                ly_dense1 =  self.apply_emb(dlrm.emb_dense, lS_o1, lS_i_dense1)
+            # bottom mlp 1
+            with torch.autograd.profiler.record_function('Prof_bot_mlp_forward1'):
+                x1 = self.apply_mlp(dense_x1, self.bot_l)
+
+        with torch.autograd.profiler.record_function('Prof_all_gather_z0'):
+            Z_test_req0.wait()
+
+        if cur_data[1]:
+            T_test_req1, T_test1 = ext_dist.all_gather_validation(T_test1, None)
+
+            # concat emb data for split sparse1 embs
+            ly_sparse1_full = []
+            vector_lenght = 128
+            for item in ly_sparse1:
+                ly_sparse1_full += [item[:, emb_id * vector_lenght: (emb_id + 1) * vector_lenght] for emb_id in range(self.emb_sparse.n_tables)]
+            ly_sparse1_full = [item.contiguous() for item in ly_sparse1_full]
+            ly_sparse1_full = list(ly_sparse1_full)
+
+            ly1 = list(ly_dense1) + ly_sparse1_full
+
+            with torch.autograd.profiler.record_function('Prof_interaction_forward1'):
+                z1 = self.interact_features(x1, ly1)
+
+        if next_data[1]:
+            if ext_dist.my_size > len(self.ln_emb_sparse):
+                num_split_grps = ext_dist.my_size // len(self.ln_emb_sparse)
+                next_lS_i_sparse1 = torch.cat([next_lS_i_sparse1 for _ in range(num_split_grps) ])
+            next_lS_i_sparse1 = torch.cat(next_lS_i_sparse1)
+            next_output1 = self.validation_output_ind1.get_data_base_on_input(next_lS_i_sparse1, next_lS_i_sparse1.size())
+            next_ind_req1 = ext_dist.dist.all_to_all_single(next_output1, next_lS_i_sparse1, async_op=True)
+
+        if cur_data[1]:
+            p1 = self.apply_mlp(z1, self.top_l)
+
+            with torch.autograd.profiler.record_function('Prof_all_gather_t1'):
+                T_test_req1.wait()
+
+            # clamp output if needed
+            if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
+                z1 = torch.clamp(
+                    p1, min=self.loss_threshold, max=(1.0 - self.loss_threshold)
+                )
+            else:
+                z1 = p1
+            z1 = z1.float()
+
+        if next_data[1]:
+            next_ind_req1.wait()
+            next_lS_i_sparse1 = next_output1.reshape(ext_dist.my_size, -1)
+            next_g_i_sparse1 = [next_lS_i_sparse1[:, i * next_batch_size1:(i + 1) * next_batch_size1].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
+            next_data[1]['lS_i_sparse_res'] = next_g_i_sparse1
+
+        if cur_data[1]:
+            Z_test_req1, Z_test1 = ext_dist.all_gather_validation(z1, None)
+
+        if next_data[0]:
+            offset = torch.arange(next_batch_size0 * ext_dist.my_size)
+            next_g_o_sparse0 = [offset for i in range(self.n_local_emb_sparse)]
+            next_ly_sparse0 = self.apply_emb(dlrm.emb_sparse, next_g_o_sparse0, next_data[0]['lS_i_sparse_res'])
+            next_data[0]['ly_sparse'] = next_ly_sparse0
+
+        if cur_data[1]:
+            Z_test_req1.wait()
+
+        if cur_data[1]:
+            return (Z_test0, T_test0), (Z_test1, T_test1)
+        else:
+            return (Z_test0, T_test0), None
+
+
     def distributed_forward(self, dense_x, lS_o, lS_i):
         local_batch_size = dense_x.size()[0]
 
@@ -395,22 +700,19 @@ class DLRM_Net(nn.Module):
         #print("cat time:", 1000*(time.time() - shuffle_start))
         req = ext_dist.dist.all_to_all_single(output_lS_i_sparse, lS_i_sparse)
         lS_i_sparse = output_lS_i_sparse.reshape(ext_dist.my_size, -1)
+
         g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
         offset = torch.arange(local_batch_size * ext_dist.my_size)
         shuffle_end = time.time()
         #print("shuffle time:", 1000*(shuffle_end - shuffle_start))
         g_o_sparse = [offset for i in range(self.n_local_emb_sparse)]
         ly_sparse = self.apply_emb(dlrm.emb_sparse, g_o_sparse, g_i_sparse)
-        #print("ly_sparse", ly_sparse)
         a2a_req = ext_dist.alltoall(ly_sparse, self.n_sparse_emb_per_rank)
         #dense embedding 
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
-        #print("ly_dense:", ly_dense)
         # bottom mlp
         x = self.apply_mlp(dense_x, self.bot_l)
-        #print("bot_mlp:", x)
         ly_sparse = a2a_req.wait()
-        #print("ly_sparse_wait:", ly_sparse)
         _ly = []
         vector_lenght = 128
         for item in ly_sparse:
@@ -419,13 +721,8 @@ class DLRM_Net(nn.Module):
         _ly = list(ly_dense) + list(_ly)
         # interactions
         z = self.interact_features(x, _ly)
-        #print("_ly:", _ly)
-        #print("interaction:", z)
-        #import pdb 
-        #pdb.set_trace()
         # top mlp
         p = self.apply_mlp(z, self.top_l)
-        #print("Top mlp:", p)
         # clamp output if needed
         if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
             z = torch.clamp(
@@ -563,55 +860,128 @@ def inference(
     if args.share_weight_instance != 0:
         run_throughput_benchmark(args, dlrm, test_ld)
     with torch.cpu.amp.autocast(enabled=args.bf16):
-        for i, testBatch in enumerate(test_ld):
-            should_print = ((i + 1) % args.print_freq == 0 or i + 1 == len(test_ld)) and args.inference_only
-            if should_print:
-                gT = 1000.0 * total_time / total_iter
-                print(
-                    "Finished {} it {}/{}, {:.2f} ms/it,".format(
-                        "inference", i + 1, len(test_ld), gT
-                    ),
-                    flush=True,
+        if ext_dist.my_size > 1:
+            i = 0
+            n_test_iter = 2     # exec 2 iter per validation
+            cur_data = [dict() for _ in range(n_test_iter)]
+            next_data = [dict() for _ in range(n_test_iter)]
+            n = nbatches_test // n_test_iter
+            batch_remainder = nbatches_test % n_test_iter
+            
+            while i < n:
+                # load 2 iter
+                if i == 0:
+                    cur_batch_0 = test_ld.dataset[i]
+                    cur_batch_1 = test_ld.dataset[i + 1]
+
+                    X_test0, lS_o_test0, lS_i_test0, T_test0, _, _ = unpack_batch(
+                        cur_batch_0
+                    )
+                    X_test1, lS_o_test1, lS_i_test1, T_test1, _, _ = unpack_batch(
+                        cur_batch_1
+                    )
+                    cur_data[0]['dense_x'] = X_test0
+                    cur_data[0]['T_test'] = T_test0
+                    cur_data[0]['lS_i'] = lS_i_test0
+                    cur_data[0]['lS_o'] = lS_o_test0
+
+                    cur_data[1]['dense_x'] = X_test1
+                    cur_data[1]['T_test'] = T_test1
+                    cur_data[1]['lS_i'] = lS_i_test1
+                    cur_data[1]['lS_o'] = lS_o_test1
+                else:
+                    for j in range(n_test_iter):
+                        cur_data[j] = next_data[j]
+                # preload 2 iter
+                if i + 1 < n:
+                    next_batch_0 = test_ld.dataset[(i+1)*n_test_iter]
+                    next_batch_1 = test_ld.dataset[(i+1)*n_test_iter + 1]
+
+                    X_test0, lS_o_test0, lS_i_test0, T_test0, _, _ = unpack_batch(
+                        next_batch_0
+                    )
+                    X_test1, lS_o_test1, lS_i_test1, T_test1, _, _ = unpack_batch(
+                        next_batch_1
+                    )
+                    next_data[0] = {'dense_x': X_test0, 'T_test': T_test0, 'lS_i': lS_i_test0, 'lS_o': lS_o_test0}
+
+                    next_data[1] = {'dense_x': X_test1, 'T_test': T_test1, 'lS_i': lS_i_test1, 'lS_o': lS_o_test1}
+                elif batch_remainder == 1:
+                    next_batch_0 = test_ld.dataset[len(test_ld) - 1]
+                    X_test0, lS_o_test0, lS_i_test0, T_test0, _, _ = unpack_batch(
+                        next_batch_0
+                    )
+                    next_data[0] = {'dense_x': X_test0, 'T_test': T_test0, 'lS_i': lS_i_test0, 'lS_o': lS_o_test0}
+                    next_data[1] = None
+
+                res_pack = dlrm.distributed_forward_2iter_overlap(cur_data, next_data)
+                if i == n - 1:
+                    last_Z_test = dlrm(next_data[0]['dense_x'], next_data[0]['lS_o'], next_data[0]['lS_i'])
+                if args.print_auc:
+                    for j in range(n_test_iter):
+                        if res_pack[j]:
+                            Z_test, T_test = res_pack[j]
+                            S_test = Z_test.detach().cpu().float()  # numpy array
+                            T_test = T_test.detach().cpu().float()  # numpy array
+                            scores.append(S_test)
+                            targets.append(T_test)
+                    if i == n - 1:
+                        S_test = last_Z_test.detach().cpu().float()  # numpy array
+                        T_test = T_test0.detach().cpu().float()  # numpy array
+                        scores.append(S_test)
+                        targets.append(T_test)
+                i += 1
+            
+        else:
+            for i, testBatch in enumerate(test_ld):
+                should_print = ((i + 1) % args.print_freq == 0 or i + 1 == len(test_ld)) and args.inference_only
+                if should_print:
+                    gT = 1000.0 * total_time / total_iter
+                    print(
+                        "Finished {} it {}/{}, {:.2f} ms/it,".format(
+                            "inference", i + 1, len(test_ld), gT
+                        ),
+                        flush=True,
+                    )
+                    total_time = 0
+                    total_iter = 0
+                # early exit if nbatches was set by the user and was exceeded
+                if args.inference_only and nbatches > 0 and i >= nbatches:
+                    break
+
+                X_test, lS_o_test, lS_i_test, T_test, W_test, CBPP_test = unpack_batch(
+                    testBatch
                 )
-                total_time = 0
-                total_iter = 0
-            # early exit if nbatches was set by the user and was exceeded
-            if args.inference_only and nbatches > 0 and i >= nbatches:
-                break
 
-            X_test, lS_o_test, lS_i_test, T_test, W_test, CBPP_test = unpack_batch(
-                testBatch
-            )
-            # forward pass
-            start = time_wrap()
-            Z_test = dlrm(X_test, lS_o_test, lS_i_test)
+                # forward pass
+                start = time_wrap()
+                Z_test = dlrm(X_test, lS_o_test, lS_i_test, i)
 
-    
-            total_time += (time_wrap() - start)
-            total_iter += 1
+                total_time += (time_wrap() - start)
+                total_iter += 1
 
-            if args.print_auc:
-                if ext_dist.my_size > 1:
-                    Z_test = ext_dist.all_gather(Z_test, None)
-                    T_test = ext_dist.all_gather(T_test, None)
-                S_test = Z_test.detach().cpu().float().numpy()  # numpy array
-                T_test = T_test.detach().cpu().float().numpy()  # numpy array
-                scores.append(S_test)
-                targets.append(T_test)
-            elif not args.inference_only:
-                with record_function("DLRM accuracy compute"):
-                    # compute loss and accuracy
+                if args.print_auc:
+                    if ext_dist.my_size > 1:
+                        Z_test = ext_dist.all_gather(Z_test, None)
+                        T_test = ext_dist.all_gather(T_test, None)
                     S_test = Z_test.detach().cpu().float().numpy()  # numpy array
                     T_test = T_test.detach().cpu().float().numpy()  # numpy array
+                    scores.append(S_test)
+                    targets.append(T_test)
+                elif not args.inference_only:
+                    with record_function("DLRM accuracy compute"):
+                        # compute loss and accuracy
+                        S_test = Z_test.detach().cpu().float().numpy()  # numpy array
+                        T_test = T_test.detach().cpu().float().numpy()  # numpy array
 
-                    mbs_test = T_test.shape[0]  # = mini_batch_size except last
-                    A_test = np.sum((np.round(S_test, 0) == T_test).astype(np.uint8))
+                        mbs_test = T_test.shape[0]  # = mini_batch_size except last
+                        A_test = np.sum((np.round(S_test, 0) == T_test).astype(np.uint8))
 
-                    test_accu += A_test
-                    test_samp += mbs_test
-            else:
-                # do nothing to save time
-                pass
+                        test_accu += A_test
+                        test_samp += mbs_test
+                else:
+                    # do nothing to save time
+                    pass
 
     if args.print_auc:
         with record_function("DLRM mlperf sklearn metrics compute"):
@@ -1041,7 +1411,7 @@ def run():
 
     test_freq = args.test_freq if args.test_freq != -1  else nbatches // 20
     print("Initialize for not inference only done, current mem usage: {} G".format(psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024))
-    print(dlrm)
+    # print(dlrm)
     train_start = time.time()
     total_train_time_wo_dl_eval = 0
     wait_it = 0
@@ -1182,8 +1552,9 @@ def run():
                             best_auc_test,
                             test_ld,
                         )
-                        best_auc_test = model_metrics_dict["test_auc"]
-                        best_acc_test = model_metrics_dict["test_acc"]
+                        if is_best:
+                            best_auc_test = model_metrics_dict["test_auc"]
+                            best_acc_test = model_metrics_dict["test_acc"]
                         eval_end = time.time()
                         dlrm.emb_args_preprocessing = 0
                         if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
