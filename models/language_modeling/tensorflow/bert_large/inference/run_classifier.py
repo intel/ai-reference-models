@@ -173,8 +173,10 @@ class LoggerHook(tf.estimator.SessionRunHook):
     ms = duration.total_seconds() * 1000.00
     if self._step > self._warmup:
       self._total_duration += ms
-      if self._step % 100 == 0:
-        print("Current step: %d, time in ms: %.2f" %(self._step, ms))
+      #if self._step % 100 == 0:
+      print("Current step: %d, time in ms: %.2f" %(self._step, ms))
+      time_takes = self._total_duration / (self._step - self._warmup)
+      print("Throughput is %.2f samples/s" % (self.batch_size * 1000 / time_takes))
     else:
       print("Warmup step: %d, time in ms: %.2f" %(self._step, ms))
 
