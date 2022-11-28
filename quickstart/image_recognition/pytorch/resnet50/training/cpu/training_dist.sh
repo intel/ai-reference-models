@@ -57,6 +57,11 @@ if [ -z "${PRECISION}" ]; then
   exit 1
 fi
 
+if [ -z "${MASTER_ADDR}" ]; then
+  echo "The required environment variable MASTER_ADDR has not been set"
+  exit 1
+fi
+
 ARGS=""
 ARGS="$ARGS -a resnet50 ${DATASET_DIR}"
 
@@ -67,12 +72,6 @@ fi
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
-elif [[ $PRECISION == "bf32" ]]; then
-    ARGS="$ARGS --bf32"
-    echo "running bf32 path"
-elif [[ $PRECISION == "fp16" ]]; then
-    ARGS="$ARGS --fp16"
-    echo "running fp16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
@@ -123,18 +122,18 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --hostfile ${HOSTFILE} \
     --nproc_per_node ${SOCKETS} \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
-    ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
+    ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
     $ARGS \
+    --epochs $TRAINING_EPOCHS \
+    --warmup-epochs 2  \
     --ipex \
     -j 0 \
+    -b $BATCH_SIZE \
     --seed 2020 \
-    --epochs $TRAINING_EPOCHS \
-    --world-size ${NUM_RANKS} \
     --dist-backend ccl \
     --base-op=LARS \
     --base-lr 10.5 \
-    --weight-decay 0.00005 \
-    -b $BATCH_SIZE 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
+    --weight-decay 0.00005 2>&1 | tee ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log
 # For the summary of results
 wait
 
