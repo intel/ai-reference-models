@@ -110,6 +110,12 @@ import psutil
 
 exc = getattr(builtins, "IOError", "FileNotFoundError")
 
+first_iteration_for_train = True
+
+buffer_num = 20
+data_buffer = None
+data_iter = None
+
 def freeze(model):
     return torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
 
@@ -118,9 +124,9 @@ def time_wrap():
     return time.time()
 
 
-def dlrm_wrap(X, lS_o, lS_i):
+def dlrm_wrap(X, lS_o, lS_i, is_train=False):
     with record_function("DLRM forward"):
-        return dlrm(X, lS_o, lS_i)
+        return dlrm(X, lS_o, lS_i, is_train)
 
 
 def loss_fn_wrap(Z, T):
@@ -132,6 +138,14 @@ def loss_fn_wrap(Z, T):
 def unpack_batch(b):
     # Experiment with unweighted samples
     return b[0], b[1], b[2], b[3], torch.ones(b[3].size()), None
+
+def load_data(data_iter, buffer_num):
+    with torch.autograd.profiler.record_function('load_data'):
+        for d in range(buffer_num):
+            # (X, lS_i, T) = next(data_iter)
+            Batch = next(data_iter)
+            X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
+            data_buffer[d] = (X.bfloat16(), lS_o, lS_i, T, W, CBPP)
 
 class AlltoallOutputs():
     def __init__(self):
@@ -302,6 +316,7 @@ class DLRM_Net(nn.Module):
         self.top_l = self.create_mlp(ln_top, sigmoid_top)
         self.all2all_validation_outputs0 = AlltoallOutputs()
         self.all2all_validation_outputs1 = AlltoallOutputs()
+        self.output_ind = AlltoallOutputs()
         self.validation_output_ind0 = AlltoallOutputs()
         self.validation_output_ind1 = AlltoallOutputs()
         if ext_dist.my_size > 1:
@@ -387,9 +402,9 @@ class DLRM_Net(nn.Module):
             R = torch.cat([x] + [Zflat], dim=1)
         return R
 
-    def forward(self, dense_x, lS_o, lS_i):
+    def forward(self, dense_x, lS_o, lS_i, is_train=False):
         if ext_dist.my_size > 1:
-            return self.distributed_forward(dense_x, lS_o, lS_i)
+            return self.distributed_forward(dense_x, lS_o, lS_i, is_train=is_train)
         else:
             return self.sequential_forward(dense_x, lS_o, lS_i)
 
@@ -679,7 +694,7 @@ class DLRM_Net(nn.Module):
             return (Z_test0, T_test0), None
 
 
-    def distributed_forward(self, dense_x, lS_o, lS_i):
+    def distributed_forward(self, dense_x, lS_o, lS_i, is_train=False):
         local_batch_size = dense_x.size()[0]
 
         #vector_lenght = self.emb_l.weights[0].size()[1]
@@ -689,25 +704,47 @@ class DLRM_Net(nn.Module):
         
         rank_id = dlrm.rank
         #print("#####################rank_id:", rank_id)
-        lS_o_dense = [lS_o[i] for i in self.ln_emb_dense]
-        lS_i_dense = [lS_i[i] for i in self.ln_emb_dense]
-        lS_o_sparse = [lS_o[i] for i in self.ln_emb_sparse]
-        lS_i_sparse = [lS_i[i] for i in self.ln_emb_sparse]
-        shuffle_start = time.time()
-        #lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
-        lS_i_sparse = torch.cat(lS_i_sparse)
-        output_lS_i_sparse = lS_i_sparse.new_empty(lS_i_sparse.size())
-        #print("cat time:", 1000*(time.time() - shuffle_start))
-        req = ext_dist.dist.all_to_all_single(output_lS_i_sparse, lS_i_sparse)
-        lS_i_sparse = output_lS_i_sparse.reshape(ext_dist.my_size, -1)
+        if not isinstance(lS_i, list):
+            lS_i_dense = [lS_i[i] for i in self.ln_emb_dense]
+            lS_i_sparse = [lS_i[i] for i in self.ln_emb_sparse]
 
-        g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
+        lS_o_dense = [lS_o[i] for i in self.ln_emb_dense]
+        lS_o_sparse = [lS_o[i] for i in self.ln_emb_sparse]
+        # shuffle_start = time.time()
+        # #lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
+        # lS_i_sparse = torch.cat(lS_i_sparse)
+        # output_lS_i_sparse = lS_i_sparse.new_empty(lS_i_sparse.size())
+        # #print("cat time:", 1000*(time.time() - shuffle_start))
+        # req = ext_dist.dist.all_to_all_single(output_lS_i_sparse, lS_i_sparse)
+        # lS_i_sparse = output_lS_i_sparse.reshape(ext_dist.my_size, -1)
+
+        # g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
+
+        global first_iteration_for_train
+        if first_iteration_for_train or not is_train: 
+            #lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
+            lS_i_sparse = torch.cat(lS_i_sparse)
+            output_lS_i_sparse = lS_i_sparse.new_empty(lS_i_sparse.size())
+            #print("cat time:", 1000*(time.time() - shuffle_start))
+            req = ext_dist.dist.all_to_all_single(output_lS_i_sparse, lS_i_sparse)
+            lS_i_sparse = output_lS_i_sparse.reshape(ext_dist.my_size, -1)
+            g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
+            if is_train:
+                first_iteration_for_train = False
+        else:
+            g_i_sparse = lS_i[1]
+            lS_i_dense = lS_i[0]
+
         offset = torch.arange(local_batch_size * ext_dist.my_size)
-        shuffle_end = time.time()
         #print("shuffle time:", 1000*(shuffle_end - shuffle_start))
+
         g_o_sparse = [offset for i in range(self.n_local_emb_sparse)]
         ly_sparse = self.apply_emb(dlrm.emb_sparse, g_o_sparse, g_i_sparse)
         a2a_req = ext_dist.alltoall(ly_sparse, self.n_sparse_emb_per_rank)
+
+        if is_train:
+            load_data(data_iter, buffer_num)
+
         #dense embedding 
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
         # bottom mlp
@@ -719,10 +756,39 @@ class DLRM_Net(nn.Module):
             _ly += [item[:, emb_id * vector_lenght: (emb_id + 1) * vector_lenght] for emb_id in range(self.emb_sparse.n_tables)]
         _ly = [item.contiguous() for item in _ly]
         _ly = list(ly_dense) + list(_ly)
+
+        a2a_ind_req = None #ovlerlap the a2a_ind_req with interaction/top_mlp
+        if is_train:
+            #get global index for sparse embedding
+            (X_next, lS_o_next, lS_i_next, T_next, W_next, CBPP_next) = data_buffer[0]
+            lS_i_dense_next = [lS_i_next[i] for i in self.ln_emb_dense]
+            lS_i_sparse_next = [lS_i_next[i] for i in self.ln_emb_sparse]
+            if ext_dist.my_size > len(self.ln_emb_sparse):
+                num_split_grps = ext_dist.my_size // len(self.ln_emb_sparse)
+                lS_i_sparse_next = torch.cat([lS_i_sparse_next for _ in range(num_split_grps) ])
+            lS_i_sparse_next = torch.cat(lS_i_sparse_next)
+            output_lS_i_sparse_next = lS_i_sparse_next.new_empty(lS_i_sparse_next.size())
+            # output_ind = self.output_ind.get_data_base_on_input(lS_i_sparse_next, lS_i_sparse_next.size())
+            a2a_ind_req = ext_dist.dist.all_to_all_single(output_lS_i_sparse_next, lS_i_sparse_next, async_op=True)
+
         # interactions
         z = self.interact_features(x, _ly)
         # top mlp
         p = self.apply_mlp(z, self.top_l)
+
+        if is_train:
+            a2a_ind_req.wait()
+            lS_i_sparse_next = output_lS_i_sparse_next.reshape(ext_dist.my_size, -1)
+            batch_size_next = X_next.size()[0]
+            # g_i_sparse = [lS_i_sparse_next[:, i * batch_size_next:(i + 1) * batch_size_next].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
+            g_i_sparse_next = [lS_i_sparse_next[:, i * batch_size_next:(i + 1) * batch_size_next].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
+            # lS_i_sparse_next = torch.cat(g_i_sparse)
+            # import pdb
+            # pdb.set_trace()
+            # for i in self.ln_emb_sparse:
+            #    lS_i_next[i] = lS_i_sparse_next[i]
+            data_buffer[0] = (X_next, lS_o_next, [lS_i_dense_next, g_i_sparse_next], T_next, W_next, CBPP_next)
+
         # clamp output if needed
         if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
             z = torch.clamp(
@@ -1320,6 +1386,18 @@ def run():
 
     print("time/loss/accuracy (if enabled):")
     
+    global buffer_num
+    if ext_dist.my_size > 1:
+        buffer_num = 1
+    global data_buffer
+    data_buffer = buffer_num * [None]
+    global data_iter
+    data_iter = iter(train_ld)
+    buffer_num = buffer_num if buffer_num <= nbatches else nbatches
+    # data_load_begin = time.time()
+    load_data(data_iter, buffer_num)
+    # print(buffer_num, ": data item loaded, data_load_time is {:.6f}s".format(time.time() - data_load_begin))
+
         
     if not args.inference_only:
         X, lS_o, lS_i, T = train_ld.dataset.__getitem__(0)
@@ -1418,6 +1496,8 @@ def run():
     warmup_it = 400
     active_it = 20
     lrs =[]
+
+
     def trace_handler(prof):
         print(prof.key_averages().table(sort_by="self_cpu_time_total"))
         if ext_dist.my_size > 1:
@@ -1446,143 +1526,156 @@ def run():
 
                 if k < skip_upto_epoch:
                     continue
+                
+                j = 0
+                # for j, inputBatch in enumerate(train_ld):
+                while j < nbatches: 
+                    # if j < skip_upto_batch:
+                    #     continue
 
-                for j, inputBatch in enumerate(train_ld):
-                    if j < skip_upto_batch:
-                        continue
+                    for d in range(buffer_num):
+                        # X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
+                        (X, lS_o, lS_i, T, W, CBPP) = data_buffer[d]
+                        
+                        t1 = time_wrap()
 
-                    X, lS_o, lS_i, T, W, CBPP = unpack_batch(inputBatch)
-                    
-                    t1 = time_wrap()
-
-                    # early exit if nbatches was set by the user and has been exceeded
-                    if nbatches > 0 and j >= nbatches:
-                        break
-
-                    mbs = T.shape[0]  # = args.mini_batch_size except maybe for last
-
-                    # forward pass
-
-                    if hasattr(dlrm, 'emb_l') and isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
-                        dlrm.emb_l.sgd_args = dlrm.emb_l.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0])
-
-                    if hasattr(dlrm, 'emb_sparse') and isinstance(dlrm.emb_sparse, ipex.nn.modules.MergedEmbeddingBagWithSGD):
-                        dlrm.emb_sparse.sgd_args = dlrm.emb_sparse.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0]/ext_dist.my_size)
-
-                    with torch.cpu.amp.autocast(enabled=args.bf16):
-                        Z = dlrm_wrap(
-                            X,
-                            lS_o,
-                            lS_i,
-                        ).float()
-                    # losis
-                    E = loss_fn_wrap(Z, T)
-
-                    # compute loss and accuracy
-                    L = E.detach().cpu().numpy()  # numpy array
-
-                    with record_function("DLRM backward"):
-                        # scaled error gradient propagation
-                        # (where we do not accumulate gradients across mini-batches)
-                        optimizer.zero_grad(set_to_none=True)
-                        # backward pass
-                        E.backward()
-                    with record_function("DLRM update"):
-                        # optimizer
-                        optimizer.step()
-
-                    lr_scheduler.step()
-
-                    t2 = time_wrap() - dlrm.emb_args_preprocessing
-                    dlrm.emb_args_preprocessing = 0 
-                    total_train_time_wo_dl_eval += (t2 - t1)
-                    total_time += t2 - t1
-
-                    total_loss += L * mbs
-                    total_iter += 1
-                    total_samp += mbs
-                    if args.enable_profiling:
-                        prof.step()
-                        if j >=  wait_it + warmup_it + active_it:
+                        # early exit if nbatches was set by the user and has been exceeded
+                        if nbatches > 0 and j >= nbatches:
                             break
-                    should_print = ((j + 1) % args.print_freq == 0) or (
-                        j + 1 == nbatches
-                    )
-                    should_test = (
-                        (args.should_test)
-                        and (((j + 1) % test_freq == 0) or (j + 1 == nbatches))
-                    )
 
-                    # print time, loss and accuracy
-                    if should_print or should_test:
-                        gT = 1000.0 * total_time / total_iter if args.print_time else -1
-                        total_time = 0
+                        mbs = T.shape[0]  # = args.mini_batch_size except maybe for last
 
-                        train_loss = total_loss / total_samp
-                        total_loss = 0
+                        # forward pass
 
-                        str_run_type = (
-                            "inference" if args.inference_only else "training"
+                        if hasattr(dlrm, 'emb_l') and isinstance(dlrm.emb_l, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                            dlrm.emb_l.sgd_args = dlrm.emb_l.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0])
+
+                        if hasattr(dlrm, 'emb_sparse') and isinstance(dlrm.emb_sparse, ipex.nn.modules.MergedEmbeddingBagWithSGD):
+                            dlrm.emb_sparse.sgd_args = dlrm.emb_sparse.sgd_args._replace(lr=lr_scheduler.get_last_lr()[0]/ext_dist.my_size)
+
+                        with torch.cpu.amp.autocast(enabled=args.bf16):
+                            Z = dlrm_wrap(
+                                X,
+                                lS_o,
+                                lS_i,
+                                True,
+                            ).float()
+                        # losis
+                        E = loss_fn_wrap(Z, T)
+
+                        # compute loss and accuracy
+                        L = E.detach().cpu().numpy()  # numpy array
+
+                        with record_function("DLRM backward"):
+                            # scaled error gradient propagation
+                            # (where we do not accumulate gradients across mini-batches)
+                            optimizer.zero_grad(set_to_none=True)
+                            # backward pass
+                            E.backward()
+                        with record_function("DLRM update"):
+                            # optimizer
+                            optimizer.step()
+
+                        lr_scheduler.step()
+
+                        t2 = time_wrap() - dlrm.emb_args_preprocessing
+                        dlrm.emb_args_preprocessing = 0 
+                        total_train_time_wo_dl_eval += (t2 - t1)
+                        total_time += t2 - t1
+
+                        total_loss += L * mbs
+                        total_iter += 1
+                        total_samp += mbs
+                        if args.enable_profiling:
+                            prof.step()
+                            if j >=  wait_it + warmup_it + active_it:
+                                break
+                        should_print = ((j + 1) % args.print_freq == 0) or (
+                            j + 1 == nbatches
+                        )
+                        should_test = (
+                            (args.should_test)
+                            and (((j + 1) % test_freq == 0) or (j + 1 == nbatches))
                         )
 
-                        wall_time = ""
-                        if args.print_wall_time:
-                            wall_time = " ({})".format(time.strftime("%H:%M"))
-                        if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
-                           print(
-                               "Finished {} it {}/{} of epoch {}, {:.2f} ms/it,".format(
-                                   str_run_type, j + 1, nbatches, k, gT
-                               )
-                               + " loss {:.6f}".format(train_loss)
-                               + wall_time,
-                               flush=True,
-                           )
-                        update_training_performance(gT, j)
+                        # print time, loss and accuracy
+                        if should_print or should_test:
+                            gT = 1000.0 * total_time / total_iter if args.print_time else -1
+                            total_time = 0
 
-                        total_iter = 0
-                        total_samp = 0
+                            train_loss = total_loss / total_samp
+                            total_loss = 0
 
-                    # testing
-                    if should_test:
-                        eval_begin = time.time()
-                        model_metrics_dict, is_best = inference(
-                            args,
-                            dlrm,
-                            best_acc_test,
-                            best_auc_test,
-                            test_ld,
-                        )
-                        if is_best:
-                            best_auc_test = model_metrics_dict["test_auc"]
-                            best_acc_test = model_metrics_dict["test_acc"]
-                        eval_end = time.time()
-                        dlrm.emb_args_preprocessing = 0
-                        if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
-                            print("Evauation at {} iteration using {} s".format(j+1, eval_end- eval_begin))
-                        if (
-                            is_best
-                            and not (args.save_model == "")
-                            and not args.inference_only
-                        ):
-                            model_metrics_dict["epoch"] = k
-                            model_metrics_dict["iter"] = j + 1
-                            model_metrics_dict["train_loss"] = train_loss
-                            model_metrics_dict["total_loss"] = total_loss
-                            model_metrics_dict[
-                                "opt_state_dict"
-                            ] = optimizer.state_dict()
-                            print("Saving model to {}".format(args.save_model))
-                            torch.save(model_metrics_dict, args.save_model)
+                            str_run_type = (
+                                "inference" if args.inference_only else "training"
+                            )
 
-                        if (
-                            (args.mlperf_auc_threshold > 0)
-                            and (best_auc_test > args.mlperf_auc_threshold)
-                        ):
-                            train_end = time.time()
-                            if ext_dist.dist.get_rank() == 1:
-                                print("The TTT w/ dataloader and evaluation is {} mins".format((train_end - train_start)/60.0))
-                                print("The TTT w/o dataloader and evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
-                            exit()
+                            wall_time = ""
+                            if args.print_wall_time:
+                                wall_time = " ({})".format(time.strftime("%H:%M"))
+                            if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
+                                print(
+                                    "Finished {} it {}/{} of epoch {}, {:.2f} ms/it,".format(
+                                        str_run_type, j + 1, nbatches, k, gT
+                                    )
+                                    + " loss {:.6f}".format(train_loss)
+                                    + wall_time,
+                                    flush=True,
+                                )
+                            update_training_performance(gT, j)
+
+                            total_iter = 0
+                            total_samp = 0
+
+                        # testing
+                        if should_test:
+                            eval_begin = time.time()
+                            model_metrics_dict, is_best = inference(
+                                args,
+                                dlrm,
+                                best_acc_test,
+                                best_auc_test,
+                                test_ld,
+                            )
+                            if is_best:
+                                best_auc_test = model_metrics_dict["test_auc"]
+                                best_acc_test = model_metrics_dict["test_acc"]
+                            eval_end = time.time()
+                            dlrm.emb_args_preprocessing = 0
+                            if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
+                                print("Evauation at {} iteration using {} s".format(j+1, eval_end- eval_begin))
+                            if (
+                                is_best
+                                and not (args.save_model == "")
+                                and not args.inference_only
+                            ):
+                                model_metrics_dict["epoch"] = k
+                                model_metrics_dict["iter"] = j + 1
+                                model_metrics_dict["train_loss"] = train_loss
+                                model_metrics_dict["total_loss"] = total_loss
+                                model_metrics_dict[
+                                    "opt_state_dict"
+                                ] = optimizer.state_dict()
+                                print("Saving model to {}".format(args.save_model))
+                                torch.save(model_metrics_dict, args.save_model)
+
+                            if (
+                                (args.mlperf_auc_threshold > 0)
+                                and (best_auc_test > args.mlperf_auc_threshold)
+                            ):
+                                train_end = time.time()
+                                if ext_dist.dist.get_rank() == 1:
+                                    print("The TTT w/ dataloader and evaluation is {} mins".format((train_end - train_start)/60.0))
+                                    print("The TTT w/o dataloader and evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
+                                exit()
+
+                    j += buffer_num
+                    if j >= nbatches:
+                        break
+                    if ext_dist.my_size == 1:
+                        buffer_num = buffer_num if (nbatches - j) > buffer_num else (nbatches - j)
+                        load_data(data_iter, buffer_num)
+
                 k += 1  # nepochs
         else:
             print("Testing for inference only")
