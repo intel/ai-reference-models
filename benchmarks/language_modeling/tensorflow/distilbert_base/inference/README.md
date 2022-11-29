@@ -14,6 +14,9 @@ We use a part of Stanford Sentiment Treebank corpus for our task. Specifically, 
 Download Frozen graph:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/distilbert_frozen_graph_fp32_final.pb
 
+Download Frozen graph for INT8:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/FusedBMM_int8_distilbert_frozen_graph.pb
+
 Downloading dataset:
 cd to directory:  <model_zoo_dir>/models/language_modeling/tensorflow/distilbert_base/inference/
 python download_dataset.py --path_to_save_dataset <enter path to save dataset>
@@ -60,6 +63,21 @@ python launch_benchmark.py
 --benchmark-only \
 --in-graph <path to frozen graph (.pb)>
 --data-location <path to the saved dataset>
+--warmup-steps=20
+```
+
+INT8:
+
+```
+python launch_benchmark.py 
+--model_name distilbert_base \
+--mode inference \
+--framework tensorflow \
+--precision int8 \
+--batch_size 32 \ 
+--benchmark-only \
+--in-graph [path to frozen graph (.pb)]
+--data-location [path to the saved dataset]
 --warmup-steps=20
 ```
 
