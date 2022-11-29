@@ -1392,9 +1392,9 @@ def run():
                 dlrm.bot_l[i + 1] = torch.nn.Identity()
 
         if ext_dist.my_size > 1:
-            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l, gradient_as_bucket_view=True)
-            dlrm.top_l = ext_dist.DDP(dlrm.top_l, gradient_as_bucket_view=True)
-            dlrm.emb_dense = ext_dist.DDP(dlrm.emb_dense, gradient_as_bucket_view=True)
+            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l, gradient_as_bucket_view=True, broadcast_buffers=False)
+            dlrm.top_l = ext_dist.DDP(dlrm.top_l, gradient_as_bucket_view=True, broadcast_buffers=False)
+            dlrm.emb_dense = ext_dist.DDP(dlrm.emb_dense, gradient_as_bucket_view=True, broadcast_buffers=False)
     training_record = [0, 0]
     def update_training_performance(time, iters, training_record=training_record):
         if iters > args.num_warmup_iters:
