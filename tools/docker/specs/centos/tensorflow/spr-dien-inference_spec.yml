@@ -22,17 +22,17 @@ slice_sets:
           source: benchmarks/recommendation/__init__.py
         - destination: benchmarks/recommendation/tensorflow/__init__.py
           source: benchmarks/recommendation/tensorflow/__init__.py
-        - destination: benchmarks/recommendation/tensorflow/dien/README.md
-          source: benchmarks/recommendation/tensorflow/dien/README.md
+        - destination: benchmarks/recommendation/tensorflow/dien/inference/README.md
+          source: benchmarks/recommendation/tensorflow/dien/inference/README.md
         - destination: benchmarks/recommendation/tensorflow/dien/__init__.py
           source: benchmarks/recommendation/tensorflow/dien/__init__.py
         - destination: benchmarks/recommendation/tensorflow/dien/inference
           source: benchmarks/recommendation/tensorflow/dien/inference
         - destination: benchmarks/launch_benchmark.py
           source: benchmarks/launch_benchmark.py
-        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/inference_realtime.sh
+        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/inference_realtime_multi_instance.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/inference_throughput.sh
+        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/inference_throughput_multi_instance.sh
           destination: quickstart/inference_throughput.sh
         - source: quickstart/recommendation/tensorflow/dien/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh
@@ -58,7 +58,7 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/README_SPR.md
+        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/README_SPR_container.md
           destination: README.md
       documentation:
         - docs:
@@ -69,7 +69,7 @@ slice_sets:
           - name: Model Package
             uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/wrapper_package.md
           - name: Quickstart
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/quickstart.md
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/quickstart_spr.md
           - name: Datasets
             uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/datasets.md
           - name: Container build
@@ -78,11 +78,31 @@ slice_sets:
             uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/docker_spr.md
           - name: License
             uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/license.md
-          name: README_SPR.md
+          name: README_SPR_container.md
           text_replace:
             <model name>: DIEN
             <mode>: inference
             <package name>: tf-spr-dien-inference.tar.gz
             <package dir>: tf-spr-dien-inference
             <docker image>: model-zoo:tf-spr-dien-inference
+          uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu
+        - docs:
+          - name: Title
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/title.md
+          - name: Description
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/description.md
+          - name: Baremetal setup SPR
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/baremetal_setup_spr.md
+          - name: Quickstart
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/quickstart_spr.md
+          - name: Datasets
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/datasets.md
+          - name: Baremetal SPR
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/baremetal_spr.md
+          - name: License
+            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/license.md
+          name: README_SPR_baremetal.md
+          text_replace:
+            <model name>: DIEN
+            <mode>: inference
           uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu

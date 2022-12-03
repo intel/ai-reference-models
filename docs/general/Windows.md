@@ -43,7 +43,7 @@ The following list of models are tested on Windows, please check each model inst
 | Object Detection        | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf) | Inference | [Int8](/benchmarks/object_detection/tensorflow/rfcn/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/rfcn/inference/fp32/README.md) |
 | Object Detection        | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8](/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/fp32/README.md) |
 | Object Detection        | [SSD-ResNet34*](https://arxiv.org/pdf/1512.02325.pdf) | Inference | [Int8](/benchmarks/object_detection/tensorflow/ssd-resnet34/inference/int8/README.md) [FP32](/benchmarks/object_detection/tensorflow/ssd-resnet34/inference/fp32/README.md) |
-| Recommendation          | [DIEN](https://arxiv.org/abs/1809.03672) | Inference | [FP32](/benchmarks/recommendation/tensorflow/dien#fp32-inference) |
+| Recommendation          | [DIEN](https://arxiv.org/abs/1809.03672) | Inference | [FP32](/benchmarks/recommendation/tensorflow/dien/inference/README.md) |
 | Recommendation          | [Wide & Deep](https://arxiv.org/pdf/1606.07792.pdf) | Inference | [FP32](/benchmarks/recommendation/tensorflow/wide_deep/inference/fp32/README.md) |
 
 

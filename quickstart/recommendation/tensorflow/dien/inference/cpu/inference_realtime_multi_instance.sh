@@ -27,7 +27,7 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to fp32"
   exit 1
 fi
 
@@ -43,15 +43,15 @@ fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [ $PRECISION == "fp32" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "bfloat32" ]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_dynamic_mklgrus.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_static_mklgrus.pb"
         # enable bfloat32 datatype on SPR systems
         if [ $PRECISION == "bfloat32" ]; then
           ONEDNN_DEFAULT_FPMATH_MODE=BF16
           PRECISION="fp32"
         fi
     else
-        echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16 and bfloat32"
+        echo "The specified precision '${PRECISION}' is unsupported"
+        echo "Supported precision is fp32, bfloat16 and bfloat32"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -64,10 +64,11 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
+CORES_PER_INSTANCE="4"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="128"
+  BATCH_SIZE="16"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -82,14 +83,15 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location=${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
+  --numa-cores-per-instance ${CORES_PER_INSTANCE} \
+  --exact-max-length=100 \
   --graph-type=static \
-  --accuracy-only \
   $@ \
-  -- DEBIAN_FRONTEND=noninteractive 2>&1 | tee -a ${OUTPUT_DIR}/dien_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
+  -- DEBIAN_FRONTEND=noninteractive
 
 if [[ $? == 0 ]]; then
-  echo "Accuracy summary:"
-  cat ${OUTPUT_DIR}/dien_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "test_accuracy:" | head -n 1 | sed -e "s/.*---- test_accuracy://" | sed -e "s/---- eval_time:.*$//"
+  echo "The recommendations/second summary:"
+  cat ${OUTPUT_DIR}/dien_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | grep "Approximate.*recommendations/second is " | sed -e s"/.*recommendations\/second is//" | gawk -F' ' '{sum+=$1}; END{print sum} '
   exit 0
 else
   exit 1
