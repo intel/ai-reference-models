@@ -35,12 +35,40 @@ if [ ! -f "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-NUM_OMP_THREADS="${NUM_OMP_THREADS:-1}"
-PRETRAINED_MODEL=${PRETRAINED_MODEL-$MODEL_DIR/wide_deep_int8_pretrained_model.pb}
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32 or int8"
+  exit 1
+fi
+
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32 and int8"
+  exit 1
+fi
+
+if [ -z "${PRETRAINED_MODEL}" ]; then
+  if [[ $PRECISION == "fp32" ]]; then
+    PRETRAINED_MODEL="${MODEL_DIR}/wide_deep_fp32_pretrained_model.pb"
+  elif [[ $PRECISION == "int8" ]]; then
+    PRETRAINED_MODEL="${MODEL_DIR}/wide_deep_int8_pretrained_model.pb"
+  else
+      echo "The specified precision '${PRECISION}' is unsupported."
+      echo "Supported precisions are: fp32 and int8"
+      exit 1
+  fi
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1"
+  BATCH_SIZE="1000"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -48,13 +76,12 @@ fi
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --model-name wide_deep_large_ds \
-   --precision int8 \
+   --precision ${PRECISION} \
    --mode inference \
    --framework tensorflow \
    --batch-size ${BATCH_SIZE} \
    --data-location $DATASET_DIR \
    --output-dir $OUTPUT_DIR \
    --in-graph ${PRETRAINED_MODEL} \
-   --benchmark-only \
-   $@ \
-   -- num_omp_threads=$NUM_OMP_THREADS
+   --accuracy-only \
+   $@
