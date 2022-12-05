@@ -114,7 +114,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   $@ \
   -- \
   $WARMUP_STEPS \
-  $STEPS \
+  $STEPS
 
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep Throughput: | sed -e s"/.*: //"

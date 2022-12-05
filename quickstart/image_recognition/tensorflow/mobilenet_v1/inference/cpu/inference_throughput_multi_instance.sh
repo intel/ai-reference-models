@@ -27,14 +27,15 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, bfloat16 or bfloat32."
+  echo "Please set PRECISION to fp32 or int8 or bfloat16 or bfloat32."
   exit 1
-fi
+  
 if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
+  echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
   exit 1
 fi
+
 # Use synthetic data (no --data-location arg) if no DATASET_DIR is set
 dataset_arg="--data-location=${DATASET_DIR}"
 if [ -z "${DATASET_DIR}" ]; then
@@ -47,14 +48,12 @@ fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
-    elif [[ $PRECISION == "bfloat16" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
-    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenetv1_int8_pretrained_model_new.pb"
+    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" || "bfloat32"]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenetv1_fp32_pretrained_model_new.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
+        echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -66,50 +65,29 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-# System envirables
-export TF_ENABLE_MKL_NATIVE_FORMAT=1
-export TF_ONEDNN_ENABLE_FAST_CONV=1
-
 MODE="inference"
 CORES_PER_INSTANCE="socket"
 
-#Set up env variable for bfloat32
-if [[ $PRECISION=="bfloat32" ]]; then
-  ONEDNN_DEFAULT_FPMATH_MODE=BF16
-  PRECISION="fp32"
-fi
-
-# Get number of cores per socket line from lscpu
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
-
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-if [[ $PRECISION == "fp32" ]]; then
-  BATCH_SIZE="${BATCH_SIZE:-"80"}"
-elif [[ $PRECISION == "bfloat16" ]]; then
-  BATCH_SIZE="${BATCH_SIZE:-"256"}"
-elif [[ $PRECISION == "int8" ]]; then
-  BATCH_SIZE="${BATCH_SIZE:-"116"}"
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="448"
+  echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
-if [ -z "${STEPS}" ]; then
-  STEPS="steps=1500"
-else
-  STEPS="steps=$STEPS"
+if [ $PRECISION == "bfloat16"]; then
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="BiasAdd"
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE="Softmax"
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD="BiasAdd|Softmax"
 fi
-echo "STEPS: $STEPS"
-
-if [ -z "${WARMUP_STEPS}" ]; then
-  WARMUP_STEPS="warmup_steps=50"
-else
-  WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
+if [ $PRECISION == "bfloat32"]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
+  export PRECISION="fp32"
 fi
-echo "WARMUP_STEPS: $WARMUP_STEPS"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-  --model-name=resnet50v1_5 \
+  --model-name=mobilenet_v1 \
   --precision ${PRECISION} \
   --mode=${MODE} \
   --framework tensorflow \
@@ -118,16 +96,13 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
-  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads 1 \
   $@ \
-  -- \
-  $WARMUP_STEPS \
-  $STEPS
+  -- input_height=224 input_width=224 warmup_steps=500 steps=1000 \
+  input_layer='input' output_layer='MobilenetV1/Predictions/Reshape_1'
 
 if [[ $? == 0 ]]; then
-  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep Throughput: | sed -e s"/.*: //"
-  echo "Throughput summary:"
-  grep 'Throughput' ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
+  echo "Summary total images/sec:"
+  grep 'Average Throughput:' ${OUTPUT_DIR}/mobilenet_v1_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log  | awk -F' ' '{sum+=$3;} END{print sum} '
   exit 0
 else
   exit 1

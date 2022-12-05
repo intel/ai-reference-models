@@ -27,7 +27,13 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to fp32 or int8 or bfloat16 or bfloat32."
+  exit 1
+fi
+
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
   exit 1
 fi
 
@@ -43,17 +49,12 @@ fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenet_v1_int8_pretrained_model.pb"
-    elif [[ $PRECISION == "bfloat16" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenet_v1_bfloat16_pretrained_model.pb"
-        export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="BiasAdd"
-        export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE="Softmax"
-        export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD="BiasAdd|Softmax"
-    elif [[ $PRECISION == "fp32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenet_v1_fp32_pretrained_model.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenetv1_int8_pretrained_model_new.pb"
+    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" || "bfloat32"]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenetv1_fp32_pretrained_model_new.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -63,6 +64,16 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
 elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
+fi
+
+if [ $PRECISION == "bfloat16"]; then
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="BiasAdd"
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE="Softmax"
+  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD="BiasAdd|Softmax"
+fi
+if [ $PRECISION == "bfloat32"]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
+  export PRECISION="fp32"
 fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.

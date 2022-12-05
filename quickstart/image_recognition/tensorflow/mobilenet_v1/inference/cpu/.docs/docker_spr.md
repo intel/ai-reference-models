@@ -7,7 +7,7 @@ specify the dataset directory, precision to run, and
 an output directory. 
 The dataset is required for accuracy and optional for other inference scripts.
 By default, the `run.sh` script will run the
-`inference_realtime.sh` quickstart script. To run a different script, specify
+`inference.sh` quickstart script. To run a different script, specify
 the name of the script using the `SCRIPT` environment variable.
 ```
 # Navigate to the container package directory
@@ -17,7 +17,7 @@ cd <package dir>
 export PRECISION=<specify the precision to run>
 export OUTPUT_DIR=<directory where log files will be written>
 
-# Run the container with inference_realtime.sh quickstart script
+# Run the container with inference.sh quickstart script
 ./run.sh
 
 # To test accuracy, also specify the dataset directory

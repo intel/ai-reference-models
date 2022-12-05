@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# TensorFlow MobileNet V1 inference
+# MobileNet V1 inference
 
 <!-- 10. Description -->
 ## Description
@@ -12,26 +12,17 @@ Intel-optimized TensorFlow.
 The model package includes the Dockerfile and scripts needed to build and
 run MobileNet V1 inference in a container.
 ```
-tf-spr-mobilenet-v1-inference
+<package dir>
 ├── README.md
 ├── build.sh
 ├── licenses
 │   ├── LICENSE
 │   └── third_party
 ├── model_packages
-│   └── tf-spr-mobilenet-v1-inference.tar.gz
-├──tf-spr-mobilenet-v1-inference.Dockerfile
+│   └── <package name>
+├──<package dir>.Dockerfile
 └── run.sh
 ```
-
-<!--- 40. Quick Start Scripts -->
-## Quick Start Scripts
-
-| Script name | Description |
-|-------------|-------------|
-| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=1`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=448`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8, bfloat16, bfloat32) with `batch-size=100`. |
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -42,6 +33,15 @@ ImageNet dataset in the TF records format.
 
 Set the `DATASET_DIR` to point to the TF records directory when running MobileNet V1.
 
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (int8, fp32, bfloat16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
+| `inference_realtime_multi_instance.sh` | A multi-instance run that uses 4 cores per instance with `batch_size=1` for the specified precision (fp32, int8, bfloat16, bfloat32). Uses synthetic data if no DATASET_DIR is set|
+| `inference_throughput_multi_instance.sh` | A multi-instance run that uses 4 cores per instance with `batch_size=448` for the specified precision (fp32, int8, bfloat16, bfloat32). Uses synthetic data if no DATASET_DIR is set |
+| `accuracy.sh` | Measures the model accuracy (batch_size=100) for the specified precision (fp32, int8, bfloat16, bfloat32). |
 ## Build the container
 
 The MobileNet V1 inference package has scripts and a Dockerfile that are
@@ -59,15 +59,15 @@ To build the MobileNet V1 inference container, extract the package and
 run the `build.sh` script.
 ```
 # Extract the package
-tar -xzf tf-spr-mobilenet-v1-inference.tar.gz
-cd tf-spr-mobilenet-v1-inference
+tar -xzf <package name>
+cd <package dir>
 
 # Build the container
 ./build.sh
 ```
 
 After the build completes, you should have a container called
-`model-zoo:tf-spr-mobilenet-v1-inference` that will be used to run the model.
+`intel/image-recognition:tf-latest-mobilenet-v1-inference` that will be used to run the model.
 
 ## Run the model
 
@@ -82,20 +82,17 @@ By default, the `run.sh` script will run the
 the name of the script using the `SCRIPT` environment variable.
 ```
 # Navigate to the container package directory
-cd tf-spr-mobilenet-v1-inference
+cd <package dir>
 
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
 export OUTPUT_DIR=<directory where log files will be written>
-Set env variable for BATCH_SIZE to run the workload with a different batch size. If not set, the workload will run with the default batch size which gives the best performance.
-export BATCH_SIZE=<Mention the batch size>
 
 # Run the container with inference_realtime_multi_instance.sh quickstart script
 ./run.sh
 
 # To test accuracy, also specify the dataset directory
 export DATASET_DIR=<path to the dataset>
-export BATCH_SIZE=<Mention the batch size>
 SCRIPT=accuracy.sh ./run.sh
 ```
 
