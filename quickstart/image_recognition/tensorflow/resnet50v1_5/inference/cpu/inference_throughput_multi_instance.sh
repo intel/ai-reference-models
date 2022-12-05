@@ -50,12 +50,8 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
-    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32"]]; then
+    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
-        if [ $PRECISION == "bfloat32"]; then
-          export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
-          export PRECISION="fp32"
-        fi
     else
         echo "The specified precision '${PRECISION}' is unsupported."
         echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
@@ -76,6 +72,12 @@ export TF_ONEDNN_ENABLE_FAST_CONV=1
 
 MODE="inference"
 CORES_PER_INSTANCE="socket"
+
+#Set up env variable for bfloat32
+if [[ $PRECISION=="bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 # Get number of cores per socket line from lscpu
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')

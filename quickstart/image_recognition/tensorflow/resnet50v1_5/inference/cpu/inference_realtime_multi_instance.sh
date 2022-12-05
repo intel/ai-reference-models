@@ -51,12 +51,8 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
-    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32"]]; then
+    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
-        if [ $PRECISION == "bfloat32"]; then
-          export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
-          export PRECISION="fp32"
-        fi
     else
         echo "The specified precision '${PRECISION}' is unsupported."
         echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
@@ -74,6 +70,12 @@ fi
 MODE="inference"
 # Use 4core/instance 
 CORES_PER_INSTANCE="4"
+
+#Set up env variable for bfloat32
+if [[ $PRECISION=="bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"1"}"

@@ -44,11 +44,6 @@ fi
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [ $PRECISION == "fp32" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "bfloat32" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_static_mklgrus.pb"
-        # enable bfloat32 datatype on SPR systems
-        if [ $PRECISION == "bfloat32" ]; then
-          ONEDNN_DEFAULT_FPMATH_MODE=BF16
-          PRECISION="fp32"
-        fi
     else
         echo "The specified precision '${PRECISION}' is unsupported"
         echo "Supported precision is fp32, bfloat16 and bfloat32"
@@ -65,6 +60,12 @@ fi
 
 MODE="inference"
 CORES_PER_INSTANCE="4"
+
+# enable bfloat32 datatype on SPR systems
+if [ $PRECISION == "bfloat32" ]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
