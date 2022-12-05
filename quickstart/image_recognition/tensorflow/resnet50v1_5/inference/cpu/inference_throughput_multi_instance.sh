@@ -27,15 +27,14 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to int8 or bfloat16."
+  echo "Please set PRECISION to fp32, int8, bfloat16 or bfloat32."
   exit 1
 fi
-if [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: bfloat16, and int8"
+  echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
   exit 1
 fi
-
 # Use synthetic data (no --data-location arg) if no DATASET_DIR is set
 dataset_arg="--data-location=${DATASET_DIR}"
 if [ -z "${DATASET_DIR}" ]; then
@@ -71,44 +70,43 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-# Get number of cores per socket line from lscpu
-export OMP_NUM_THREADS=4
+# System envirables
+export TF_ENABLE_MKL_NATIVE_FORMAT=1
+export TF_ONEDNN_ENABLE_FAST_CONV=1
 
 MODE="inference"
+CORES_PER_INSTANCE="socket"
 
-# If batch size env is not set, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"1"}"
+# Get number of cores per socket line from lscpu
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [[ $PRECISION == "fp32" ]]; then
+  BATCH_SIZE="${BATCH_SIZE:-"80"}"
+elif [[ $PRECISION == "bfloat16" ]]; then
+  BATCH_SIZE="${BATCH_SIZE:-"256"}"
+elif [[ $PRECISION == "int8" ]]; then
+  BATCH_SIZE="${BATCH_SIZE:-"116"}"
+fi
 
 if [ -z "${STEPS}" ]; then
-  if [[ $PRECISION == "int8" || $PRECISION == "bfloat16" ]]; then
-    STEPS="steps=1500"
-  fi
+  STEPS="steps=1500"
 else
   STEPS="steps=$STEPS"
 fi
 echo "STEPS: $STEPS"
 
 if [ -z "${WARMUP_STEPS}" ]; then
-  if [[ $PRECISION == "int8" || $PRECISION == "bfloat16" ]]; then
-    WARMUP_STEPS="warmup_steps=100"
-  fi
+  WARMUP_STEPS="warmup_steps=50"
 else
   WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
-# System envirables  
-export TF_ENABLE_MKL_NATIVE_FORMAT=1 
-export TF_ONEDNN_ENABLE_FAST_CONV=1 
-export TF_ONEDNN_USE_SYSTEM_ALLOCATOR=1
-
-# clean up old log files if found
-rm -rf ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*
-
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
-_get_numa_cores_lists
-_command numactl --physcpubind=${cores_arr[0]} -m 0 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -117,35 +115,17 @@ _command numactl --physcpubind=${cores_arr[0]} -m 0 python ${MODEL_DIR}/benchmar
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${cores_per_socket} --num-inter-threads -1 \
-  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads -1 \
-  --weight-sharing \
+  --numa-cores-per-instance ${CORES_PER_INSTANCE} \
+  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads 1 \
   $@ \
   -- \
   $WARMUP_STEPS \
-  $STEPS >> ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
-numactl --physcpubind=${cores_arr[1]} -m 1 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-  --model-name=resnet50v1_5 \
-  --precision ${PRECISION} \
-  --mode=${MODE} \
-  --framework tensorflow \
-  --in-graph ${PRETRAINED_MODEL} \
-  ${dataset_arg} \
-  --output-dir ${OUTPUT_DIR} \
-  --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${cores_per_socket} --num-inter-threads -1 \
-  --data-num-intra-threads ${cores_per_socket} --data-num-inter-threads -1 \
-  --weight-sharing \
-  $@ \
-  -- \
-  $WARMUP_STEPS \
-  $STEPS >> ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_1.log 2>&1 & \
-  wait
+  $STEPS \
 
 if [[ $? == 0 ]]; then
-  cat ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*.log | grep "Total aggregated Throughput" | sed -e s"/.*: //"
+  cat ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep Throughput: | sed -e s"/.*: //"
   echo "Throughput summary:"
-  grep 'Total aggregated Throughput' ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*.log | awk -F' ' '{sum+=$4;} END{print sum} '
+  grep 'Throughput' ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
   exit 0
 else
   exit 1

@@ -29,7 +29,7 @@ tf-spr-resnet50v1-5-training
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Uses mpirun to execute 2 processes with 1 process per socket with a batch size of 512 for the specified precision (fp32 or bfloat16). Checkpoint files and logs for each instance are saved to the output directory. |
+| `multi_instance_training.sh` | Uses mpirun to execute 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16 or bfloat32). Checkpoint files and logs for each instance are saved to the output directory. |
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -75,7 +75,7 @@ and [prepare the dataset](#datasets), use the `run.sh` script from the container
 package to run ResNet50 v1.5 training in docker. Set environment variables to
 specify the dataset directory, precision to run, and
 an output directory. By default, the `run.sh` script will run the
-`training.sh` quickstart script.
+`multi_instance_training.sh` quickstart script.
 ```
 # Navigate to the container package directory
 cd tf-spr-resnet50v1-5-training
@@ -84,7 +84,7 @@ cd tf-spr-resnet50v1-5-training
 export PRECISION=<specify the precision to run>
 export OUTPUT_DIR=<directory where log files will be written>
 
-# Run the container with training.sh quickstart script
+# Run the container with multi_instance_training.sh quickstart script
 ./run.sh
 ```
 

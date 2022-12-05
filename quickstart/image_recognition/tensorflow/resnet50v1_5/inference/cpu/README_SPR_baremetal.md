@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# TensorFlow ResNet50 v1.5 inference
+# TensorFlow ResNet50 v1.5 Inference
 
 <!-- 10. Description -->
 ## Description
@@ -17,10 +17,11 @@ virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
 ```
 
-* Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow-avx512/2.10.dev202230/)
+* Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
 ```
 # Install Intel Optimized TensorFlow
-pip install intel-tensorflow-avx512==2.10.dev202230
+pip install intel-tensorflow==2.11.dev202242
+pip install keras-nightly==2.11.0.dev2022092907
 ```
 
 * Clone [Intel Model Zoo repository](https://github.com/IntelAI/models) if you haven't already cloned it.
@@ -30,10 +31,11 @@ pip install intel-tensorflow-avx512==2.10.dev202230
 
 | Script name | Description |
 |-------------|-------------|
-| [`inference_realtime.sh`](inference_realtime.sh) | Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, int8 or bfloat16). If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
-| [`inference_realtime_weightsharing.sh`](inference_realtime_weightsharing.sh) | Runs multi instance realtime inference with weight sharing for the specified precision (int8 or bfloat16). If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
-| [`inference_throughput.sh`](inference_throughput.sh) | Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8 or bfloat16). If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
-| [`accuracy.sh`](accuracy.sh) | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8 or bfloat16). |
+| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32, int8, bfloat16, bfloat32) with 1500 steps and 50 warmup steps. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_realtime_weightsharing.sh` | Runs multi instance realtime inference with weight sharing for the specified precision (int8 or bfloat16) with 1500 steps and 100 warmup steps. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8, bfloat16, bfloat32) with 1500 steps and 50 warmup steps. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value. |
+| `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8, bfloat16, bfloat32). |
+
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -47,14 +49,14 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 ## Download the pretrained model
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
 ```
-# FP32 Pretrained model:
+# FP32 and BFloat32 Pretrained model:
 wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
 
 # Int8 Pretrained model:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bias_resnet50.pb
+/tf_dataset/pre-trained-models/resnet50v1_5/int8/bias_resnet50.pb
 
 # BFloat16 Pretrained model:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb
+/tf_dataset/pre-trained-models/resnet50v1_5/bf16/bf16_resnet50_v1.pb
 ```
 
 ## Run the model
@@ -66,9 +68,6 @@ specify the path to the pretrained model, the dataset directory (if needed), pre
 The dataset is required for accuracy and optional for other inference scripts.
 Optionally, you can change the defaut values for the batch size, warmup steps and steps by setting `BATCH_SIZE`, `WARMUP_STEPS`, and `STEPS`. Otherwise the default values in the [quick start scripts](#quick-start-scripts) will be used.
 
-By default, the `run.sh` script will run the
-`inference_realtime.sh` quickstart script. To run a different script, specify
-the name of the script using the `SCRIPT` environment variable.
 ```
 # Set the required environment vars
 export PRECISION=<specify the precision to run>
@@ -81,53 +80,34 @@ export STEPS=<customized steps value>
 ```
 
 >Note: 
->* Use AVX3 instruction: If `kernel version >= 5.15` please set this environment variable, otherwise you can ignore it. 
->```
->export ONEDNN_MAX_CPU_ISA=AVX512_CORE_BF16
->```
->* Use AMX instruction: If you are using `official linux kernel` and `version > 5.15`, you can ignore this environment variable. If you are using `Intel-next kernel`, to use AMX instrucstion make sure `kernel version > 5.9` and set the environment variable.
->```
->export ONEDNN_MAX_CPU_ISA=AVX512_CORE_AMX
->```
->For `Intel next kernel > 5.15`, you can ignore this environment variable.
+For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment: DNNL_MAX_CPU_ISA=AVX512_CORE_AMX. To run VNNI, please set DNNL_MAX_CPU_ISA=AVX512_CORE_BF16.
 
 
 Navigate to the models directory to run any of the available benchmarks.
 ```
 cd models
 ```
-### Run real time fp32 inference (Latency):
+### Run real time inference (Latency):
 ```
-export PRECISION="fp32"
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded fp32 pretrained model file>
-
-./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime.sh
-```
-
-### Run real time fp32 inference (Latency with weight sharing enabled):
-```
-export PRECISION=<int8 or bfloat16 are supported>
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
-
-./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh
+./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_multi_instance.sh
 ```
 
 ### Run inference (Throughput):
 ```
-export PRECISION=<int8, bfloat16 or fp32 are supported>
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
+./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_throughput_multi_instance.sh
+```
 
-./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_throughput.sh
+### Run real time inference (Latency with weight sharing enabled):
+```
+# only int8 and bfloat16 precisions are supported for weight sharing
+export PRECISION=<int8 or bfloat16 are supported>
+export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
+
+./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh
 ```
 
 ### Run accuracy:
 ```
-export PRECISION=<int8, bfloat16 or fp32 are supported>
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
 # To test accuracy, also specify the dataset directory
 export DATASET_DIR=<path to the dataset>
 
