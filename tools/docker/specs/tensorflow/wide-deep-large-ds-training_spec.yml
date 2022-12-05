@@ -1,12 +1,12 @@
 releases:
   versioned:
     tag_specs:
-    - '{_TAG_PREFIX}{intel-tf}{recommendation}{wide-deep-large-ds-fp32-training}'
+    - '{_TAG_PREFIX}{intel-tf}{recommendation}{wide-deep-large-ds-training}'
 slice_sets:
-  wide-deep-large-ds-fp32-training:
-  - add_to_name: -wide-deep-large-ds-fp32-training
+  wide-deep-large-ds-training:
+  - add_to_name: -wide-deep-large-ds-training
     args:
-    - PACKAGE_NAME=wide-deep-large-ds-fp32-training
+    - PACKAGE_NAME=wide-deep-large-ds-training
     dockerfile_subdirectory: model_containers
     downloads: []
     files:
@@ -18,14 +18,12 @@ slice_sets:
       source: benchmarks/recommendation/__init__.py
     - destination: benchmarks/recommendation/tensorflow/__init__.py
       source: benchmarks/recommendation/tensorflow/__init__.py
-    - destination: benchmarks/recommendation/tensorflow/wide_deep_large_ds/README.md
-      source: benchmarks/recommendation/tensorflow/wide_deep_large_ds/README.md
     - destination: benchmarks/recommendation/tensorflow/wide_deep_large_ds/__init__.py
       source: benchmarks/recommendation/tensorflow/wide_deep_large_ds/__init__.py
     - destination: benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/__init__.py
       source: benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/__init__.py
-    - destination: benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/fp32
-      source: benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/fp32
+    - destination: benchmarks/recommendation/tensorflow/wide_deep_large_ds/training
+      source: benchmarks/recommendation/tensorflow/wide_deep_large_ds/training
     - destination: models/common
       source: models/common
     - destination: models/recommendation/tensorflow/wide_deep_large_ds/training
@@ -33,61 +31,54 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32
+      source: quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu
     partials:
     - tcmalloc
     - model_package
     - entrypoint
     documentation:
       - name: README.md
-        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32
+        uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu
         text_replace:
           <mode>: training
           <model name>: Wide and Deep Large Dataset
-          <precision>: FP32
           <use case>: recommendation
-          <package url>: https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/wide-deep-large-ds-fp32-training.tar.gz
-          <package name>: wide-deep-large-ds-fp32-training.tar.gz
-          <package dir>: wide-deep-large-ds-fp32-training
-          <docker image>: intel/recommendation:tf-latest-wide-deep-large-ds-fp32-training
+          <docker image>: intel/recommendation:tf-latest-wide-deep-large-ds-training
         docs:
         - name: Title
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/title.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/title.md
         - name: Description
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/description.md
-        - name: Download link
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/download.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/description.md
         - name: Datasets
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/datasets.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/datasets.md
         - name: Quick Start Scripts
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/quickstart.md
-        - name: Bare Metal
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/baremetal.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/quickstart.md
         - name: Docker
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/docker.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/docker.md
         - name: Advanced Options
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/advancedoptions.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/advancedoptions.md
         - name: License link
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/license.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/license.md
       - name: README.md
-        uri: models/benchmarks/recommendation/tensorflow/wide_deep_large_ds/training/fp32
+        uri: models/benchmarks/recommendation/tensorflow/wide_deep_large_ds/training
         text_replace:
           <mode>: training
+          <fp32 precision>: FP32
+          <fp32 advanced readme link>: fp32/Advanced.md
           <model name>: Wide and Deep Large Dataset
-          <precision>: FP32
           <use case>: recommendation
           <workload container url>: https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-large-dataset-fp32-training-tensorflow-container.html
         docs:
         - name: Title
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/title.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/title.md
         - name: Description
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/description.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/description.md
         - name: Datasets
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/datasets.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/datasets.md
         - name: Quick Start Scripts
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/quickstart.md
-        - name: AI Kit
-          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/.docs/aikit.md
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/.docs/baremetal.md
         - name: Resources
           uri: models/quickstart/common/.docs/resources_with_portal_link.md
       - docs:

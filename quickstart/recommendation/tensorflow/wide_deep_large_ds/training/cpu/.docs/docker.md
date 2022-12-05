@@ -2,12 +2,13 @@
 ## Docker
 
 The model container used in the example below includes the scripts and
-libraries needed to run <model name> <precision> <mode>. To run one of the
+libraries needed to run <model name> <mode>. To run one of the
 model quickstart scripts using this container, you'll need to provide
 volume mounts for the [dataset](#dataset), checkpoints, and an output
 directory where logs and the saved model will be written.
 ```
 DATASET_DIR=<path to the dataset directory>
+PRECISION=fp32
 OUTPUT_DIR=<directory where the logs and the saved model will be written>
 CHECKPOINT_DIR=<directory where checkpoint files will be read and written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
@@ -15,6 +16,7 @@ export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
+  --env PRECISION=fp32 \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env CHECKPOINT_DIR=${CHECKPOINT_DIR} \

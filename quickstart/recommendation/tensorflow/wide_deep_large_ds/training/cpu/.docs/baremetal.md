@@ -46,10 +46,11 @@ like `STEPS` and `TARGET_ACCURACY` for the `fp32_training_check_accuracy.sh` scr
 cd models
 
 export DATASET_DIR=<path to the dataset directory>
+export PRECISION=fp32
 export OUTPUT_DIR=<path to the directory where the logs and the saved model will be written>
 export CHECKPOINT_DIR=<Optional directory where checkpoint files will be read and written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/<script name>.sh
+./quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/<script name>.sh
 ```

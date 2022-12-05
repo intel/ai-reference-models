@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# Wide and Deep Large Dataset FP32 training
+# Wide and Deep Large Dataset training
 
 <!-- 10. Description -->
 
@@ -30,9 +30,9 @@ The `DATASET_DIR` environment variable will be used as the dataset directory whe
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_training_check_accuracy.sh`](fp32_training_check_accuracy.sh) | Trains the model for a specified number of steps (default is 500) and then compare the accuracy against the accuracy specified in the `TARGET_ACCURACY` env var (ex: `export TARGET_ACCURACY=0.75`). If the accuracy is not met, then script exits with error code 1. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
-| [`fp32_training.sh`](fp32_training.sh) | Trains the model for 10 epochs. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
-| [`fp32_training_demo.sh`](fp32_training_demo.sh) | A short demo run that trains the model for 100 steps. |
+| [`training_check_accuracy.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/training_check_accuracy.sh) | Trains the model for a specified number of steps (default is 500) and then compare the accuracy against the accuracy specified in the `TARGET_ACCURACY` env var (ex: `export TARGET_ACCURACY=0.75`). If the accuracy is not met, then script exits with error code 1. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`training.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/training.sh) | Trains the model for 10 epochs. The `CHECKPOINT_DIR` environment variable can optionally be defined to start training based on previous set of checkpoints. |
+| [`training_demo.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/training_demo.sh) | A short demo run that trains the model for 100 steps. |
 
 <!--- 50. AI Kit -->
 ## Run the model
@@ -82,20 +82,19 @@ like `STEPS` and `TARGET_ACCURACY` for the `fp32_training_check_accuracy.sh` scr
 cd models
 
 export DATASET_DIR=<path to the dataset directory>
+export PRECISION=fp32
 export OUTPUT_DIR=<path to the directory where the logs and the saved model will be written>
 export CHECKPOINT_DIR=<Optional directory where checkpoint files will be read and written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/fp32/<script name>.sh
+./quickstart/recommendation/tensorflow/wide_deep_large_ds/training/cpu/<script name>.sh
 ```
 
 <!--- 90. Resource Links-->
 ## Additional Resources
 
-* To run more advanced use cases, see the instructions [here](Advanced.md)
-  for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [<bfloat16 precision>](<bfloat16 advanced readme link>) for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
   workload container:<br />
   [https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-large-dataset-fp32-training-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/wide-deep-large-dataset-fp32-training-tensorflow-container.html).
-

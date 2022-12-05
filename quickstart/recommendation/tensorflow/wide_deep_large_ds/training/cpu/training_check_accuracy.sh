@@ -44,6 +44,18 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# If precision env is not mentioned, then the workload will run with the default precision.
+if [ -z "${PRECISION}"]; then
+  PRECISION=fp32
+  echo "Running with default precision ${PRECISION}"
+fi
+
+if [[ $PRECISION != "fp32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precision is fp32."
+  exit 1
+fi
+
 if [ ! -z "${TARGET_ACCURACY}" ]; then
   echo "Target Accuracy: ${TARGET_ACCURACY}"
 fi
@@ -70,7 +82,7 @@ temp_output_file=$(mktemp /tmp/output.XXXXXXXXX)
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
  --model-name wide_deep_large_ds \
- --precision fp32 \
+ --precision ${PRECISION} \
  --mode training  \
  --framework tensorflow \
  --batch-size ${BATCH_SIZE} \

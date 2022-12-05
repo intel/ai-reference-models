@@ -35,6 +35,18 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# If precision env is not mentioned, then the workload will run with the default precision.
+if [ -z "${PRECISION}"]; then
+  PRECISION=fp32
+  echo "Running with default precision ${PRECISION}"
+fi
+
+if [[ $PRECISION != "fp32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precision is fp32."
+  exit 1
+fi
+
 # Define a checkpoint arg, if CHECKPOINT_DIR was provided
 CHECKPOINT_ARG=""
 if [ ! -z "${CHECKPOINT_DIR}" ]; then
@@ -42,6 +54,9 @@ if [ ! -z "${CHECKPOINT_DIR}" ]; then
   mkdir -p ${CHECKPOINT_DIR}
   CHECKPOINT_ARG="--checkpoint=${CHECKPOINT_DIR}"
 fi
+
+# Use for 100 steps for a demo training run
+STEPS=${STEPS-100}
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
@@ -52,13 +67,14 @@ fi
 # Run wide and deep large dataset training
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-   --model-name wide_deep_large_ds \
-   --precision fp32 \
-   --mode training  \
-   --framework tensorflow \
-   --batch-size ${BATCH_SIZE} \
-   --data-location $DATASET_DIR \
-   $CHECKPOINT_ARG \
-   --output-dir $OUTPUT_DIR \
-   $@
+ --model-name wide_deep_large_ds \
+ --precision ${PRECISION} \
+ --mode training  \
+ --framework tensorflow \
+ --batch-size ${BATCH_SIZE} \
+ --data-location $DATASET_DIR \
+$CHECKPOINT_ARG \
+ --output-dir $OUTPUT_DIR \
+ $@ \
+ -- steps=${STEPS}
 
