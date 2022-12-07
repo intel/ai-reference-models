@@ -87,3 +87,4 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   file_out=translate.txt \
   reference=newstest2014.de \
   vocab_file=vocab.ende.32768
+
