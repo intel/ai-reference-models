@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -63,10 +63,11 @@ for i in "${!input_dirs[@]}"; do
     exit 1
   fi
 done
-
+num_inter_threads=" --num-inter-threads -1 "
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
+        num_inter_threads=" --num-inter-threads 1 "
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_bfloat16_pretrained_model.pb"
     elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
@@ -86,11 +87,11 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
-CORES_PER_INSTANCE="socket"
+CORES_PER_INSTANCE="4"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="128"
+  BATCH_SIZE="1"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -100,32 +101,54 @@ if [[ $PRECISION == "bfloat32" ]]; then
   PRECISION="fp32"
 fi
 
+export OMP_NUM_THREADS=4
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \
   --mode=${MODE} \
-  --warmup-steps=50 \
-  --steps=350 \
   --framework tensorflow \
   --in-graph ${PRETRAINED_MODEL} \
   --data-location=${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --numa-cores-per-instance ${CORES_PER_INSTANCE} \
   --checkpoint ${CHECKPOINT_DIR} \
+  --num-intra-threads 56 \
+  ${num_inter_threads} \
+  --weight-sharing \
+  --warmpup-steps=100 \
+  --steps=200 \
   --benchmark-only \
+  --verbose \
   $@ \
-  -- DEBIAN_FRONTEND=noninteractive \
-  init_checkpoint=model.ckpt-3649 \
-  infer-option=SQuAD \
-  experimental-gelu=True
+  infer-option=SQuAD >> ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
+python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+  --model-name=bert_large \
+  --precision ${PRECISION} \
+  --mode=${MODE} \
+  --framework tensorflow \
+  --in-graph ${PRETRAINED_MODEL} \
+  --data-location=${DATASET_DIR} \
+  --output-dir ${OUTPUT_DIR} \
+  --batch-size ${BATCH_SIZE} \
+  --checkpoint ${CHECKPOINT_DIR} \
+  --num-intra-threads 56 \
+  ${num_inter_threads} \
+  --weight-sharing \
+  --warmpup-steps=100 \
+  --steps=200 \
+  --benchmark-only \
+  --verbose \
+  $@ \
+  infer-option=SQuAD >> ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_1.log 2>&1 & \
+  wait
 
 if [[ $? == 0 ]]; then
-  cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
-  echo "Throughput:"
-  grep 'Throughput:' ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
+  cat ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*.log | grep -i "Total throughput" | sed -e s"/Total //"
+  echo "Total Throughput:"
+  grep -i 'Total Throughput' ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*.log | awk -F': ' '{sum+=$2;} END{print sum} '
   exit 0
 else
   exit 1

@@ -30,6 +30,7 @@ tf-spr-bert-large-inference
 | Script name | Description |
 |-------------|-------------|
 | `inference_realtime.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16). Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_realtime_weight_sharing.sh` | Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, int8, bfloat16). Waits for all instances to complete, then prints a summarized throughput value. |
 | `inference_throughput.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, int8 or bfloat16). Waits for all instances to complete, then prints a summarized throughput value. |
 | `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, int8 or bfloat16) with batch size 56. |
 
@@ -94,6 +95,9 @@ cd tf-spr-bert-large-inference
 export PRECISION=<specify the precision to run>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
+export PRETRAINED_MODEL=<path to the downloaded pre-trained model>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run the container with inference_realtime.sh quickstart script
 ./run.sh

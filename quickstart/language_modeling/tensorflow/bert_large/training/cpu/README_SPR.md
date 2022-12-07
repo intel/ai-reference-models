@@ -93,6 +93,8 @@ cd tf-spr-bert-large-pretraining
 export PRECISION=<specify the precision to run>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
 
 # Run the container with pretraining.sh quickstart script
 ./run.sh

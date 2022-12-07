@@ -27,7 +27,11 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to int8, fp32, bfloat32 or bfloat16."
+  exit 1
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: int8, fp32, bfloat32 and bfloat16"
   exit 1
 fi
 
@@ -63,14 +67,13 @@ num_inter_threads=" --num-inter-threads 3 "
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
-        num_inter_threads=" --num-inter-threads 1 "
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_bfloat16_pretrained_model.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
+    elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_fp32_pretrained_model.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -80,6 +83,12 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
 elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
+fi
+
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
 fi
 
 MODE="inference"
@@ -107,6 +116,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --num-intra-threads 8 \
   ${num_inter_threads} \
   --benchmark-only \
+  --verbose \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive \
   init_checkpoint=model.ckpt-3649 \
