@@ -29,6 +29,7 @@ if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
   echo "Please set PRECISION to fp32 or int8 or bfloat16 or bfloat32."
   exit 1
+fi
   
 if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
@@ -49,7 +50,7 @@ fi
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenetv1_int8_pretrained_model_new.pb"
-    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" || "bfloat32"]]; then
+    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" || "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/mobilenetv1_fp32_pretrained_model_new.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
@@ -74,12 +75,12 @@ if [ -z "${BATCH_SIZE}"]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
-if [ $PRECISION == "bfloat16"]; then
+if [ $PRECISION == "bfloat16" ]; then
   export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="BiasAdd"
   export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE="Softmax"
   export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD="BiasAdd|Softmax"
 fi
-if [ $PRECISION == "bfloat32"]; then
+if [ $PRECISION == "bfloat32" ]; then
   export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
   export PRECISION="fp32"
 fi
