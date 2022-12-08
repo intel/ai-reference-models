@@ -27,7 +27,13 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to fp32 or bfloat16 or bfloat32."
+  exit 1
+fi
+
+if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16 and bfloat32"
   exit 1
 fi
 
@@ -59,6 +65,8 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
+TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 
+
 # enable bfloat32 datatype on SPR systems
 if [ $PRECISION == "bfloat32" ]; then
   ONEDNN_DEFAULT_FPMATH_MODE=BF16

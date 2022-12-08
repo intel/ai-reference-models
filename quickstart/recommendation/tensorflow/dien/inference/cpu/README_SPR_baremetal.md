@@ -60,11 +60,11 @@ Download the model pretrained frozen graph from the given link based on the prec
 ```
 # FP32, BFloat16 & BFloat32 Pretrained model for inference:
 #TODO: To be publish externally
-/tf_dataset/pre-trained-models/dien/fp32/dien_fp32_static_mklgrus.pb
+/tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
 
 # FP32, BFloat16 & BFloat32 Pretrained model for accuracy:
 #TODO: To be publish externally
-/tf_dataset/pre-trained-models/dien/bfloat16/dien_fp32_dynamic_mklgrus.pb
+/tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
 ```
 
 ## Run the model
