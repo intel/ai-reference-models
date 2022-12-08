@@ -1021,7 +1021,7 @@ def inference(
 
                 # forward pass
                 start = time_wrap()
-                Z_test = dlrm(X_test, lS_o_test, lS_i_test, i)
+                Z_test = dlrm(X_test, lS_o_test, lS_i_test)
 
                 total_time += (time_wrap() - start)
                 total_iter += 1
@@ -1108,7 +1108,7 @@ def inference(
             + " f1 {:.4f}, ap {:.4f},".format(
                 validation_results["f1"], validation_results["ap"]
             )) + result_fmt_str
-        if ext_dist.my_size > 1 and ext_dist.dist.get_rank() == 1:
+        if (ext_dist.my_size > 1 and ext_dist.dist.get_rank() == 1) or ext_dist.my_size <= 1:
             print(
                 result_fmt_str,
                 flush=True,
