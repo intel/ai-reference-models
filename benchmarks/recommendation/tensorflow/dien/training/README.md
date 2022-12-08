@@ -31,7 +31,7 @@ Set the `DATASET_DIR` to point to the directory with the dataset files when runn
 
 | Script name | Description |
 |-------------|-------------|
-| [`training.sh`](/quickstart/recommendation/tensorflow/dien/training/cpu/training.sh) | Runs training with a batch size of 128 for the specified precision fp32. |
+| [`training.sh`](/quickstart/recommendation/tensorflow/dien/training/cpu/training.sh) | Runs training with a batch size of 128 for the specified precisions fp32, bfloat16 and bfloat32. |
 
 <!--- 50. AI Kit -->
 ## Run the model
@@ -49,7 +49,7 @@ cd models
 
 # Set env vars
 export DATASET_DIR=<path to the DIEN dataset>
-export PRECISION=fp32
+export PRECISION=<set precision to fp32 or bfloat16 or bfloat32>
 export OUTPUT_DIR=<path to the directory where log files will be written>
 
 # Run a quickstart script

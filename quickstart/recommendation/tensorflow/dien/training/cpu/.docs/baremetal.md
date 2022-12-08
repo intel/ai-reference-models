@@ -14,7 +14,7 @@ cd models
 
 # Set env vars
 export DATASET_DIR=<path to the DIEN dataset>
-export PRECISION=fp32
+export PRECISION=<set precision to fp32 or bfloat16 or bfloat32>
 export OUTPUT_DIR=<path to the directory where log files will be written>
 
 # Run a quickstart script
