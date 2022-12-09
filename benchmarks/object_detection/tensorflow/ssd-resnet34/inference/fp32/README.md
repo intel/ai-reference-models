@@ -65,7 +65,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>matplotlib
         <li>numpy>=1.17.4
         <li>opencv-python
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.11.0
         <li>Activate the tensorflow 2.5.0 conda environment
@@ -92,7 +92,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>matplotlib
         <li>numpy>=1.17.4
         <li>opencv-python
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.11.0
         <li>A clone of the Model Zoo repo<br />
@@ -115,7 +115,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>matplotlib
         <li>numpy>=1.17.4
         <li>opencv-python
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.11.0
         <li>A clone of the Model Zoo repo<br />
