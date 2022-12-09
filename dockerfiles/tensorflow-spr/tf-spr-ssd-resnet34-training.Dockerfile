@@ -127,7 +127,7 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy>=1.17.4 \
-        'pillow>=8.1.2' && \
+        'pillow>=9.3.0' && \
     pip install pycocotools
 
 ARG PACKAGE_DIR=model_packages

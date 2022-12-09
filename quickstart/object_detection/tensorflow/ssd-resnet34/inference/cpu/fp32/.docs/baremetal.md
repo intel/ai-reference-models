@@ -19,7 +19,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * matplotlib
 * numpy>=1.17.4
 * opencv-python
-* pillow>=8.1.2
+* pillow>=9.3.0
 * pycocotools
 * tensorflow-addons==0.11.0
 

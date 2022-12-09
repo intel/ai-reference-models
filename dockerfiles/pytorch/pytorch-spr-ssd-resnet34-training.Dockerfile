@@ -77,7 +77,7 @@ RUN source activate pytorch && \
         cycler==0.10.0 \
         kiwisolver==1.0.1 \
         matplotlib==2.2.2 \
-        Pillow==9.2.0 \
+        Pillow>=9.3.0 \
         pyparsing==2.2.0 \
         python-dateutil==2.7.3 \
         pytz==2018.5 \
