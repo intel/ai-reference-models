@@ -6,7 +6,11 @@ This file contains the list of third party software (“third party programs”)
 Third party programs and their corresponding required notices and/or license terms are listed below.
 
 ----------------------------------------------------------------------------------
-1. bleach
+1. alphafold
+
+   alphafold2
+
+   bleach
    Copyright (c) 2014-2017, Mozilla Foundation
 
    Cython

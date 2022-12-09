@@ -6,7 +6,7 @@ cython
 matplotlib
 scikit-image
 intel-tensorflow
-keras==2.0.8
+keras==2.6.0rc3 # upgrade required by Snyk to avoid a vulnerability
 opencv-python
 h5py
 imgaug

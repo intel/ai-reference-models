@@ -1,8 +1,7 @@
 # rest
 requests
 
-# grpc
-tensorflow-serving-api
+# grpc, tensorflow-serving-api is removed until version is fixed to avoid a vulnerability
 
 # object detection api
 Cython
