@@ -7,7 +7,7 @@ matplotlib-inline==0.1.3
 notebook==6.5.1
 numpy==1.22.1
 pandas==1.4.2
-Pillow==9.2.0
+Pillow>=9.3.0
 psutil==5.9.0
 torch==1.11.0
 torchvision==0.12.0
