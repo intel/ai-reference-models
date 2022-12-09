@@ -8,7 +8,7 @@ Cython
 contextlib2
 jupyter
 matplotlib
-pillow>=8.1.2
+pillow>=9.3.0
 lxml
 absl-py
 notebook>=6.1.5
