@@ -167,7 +167,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=811cf67
+      export HOROVOD_VERSION=35b27e9
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -209,7 +209,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=811cf67
+      export HOROVOD_VERSION=35b27e9
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
@@ -240,7 +240,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
       export HOROVOD_WITH_MPI=1
-      export HOROVOD_VERSION=811cf67
+      export HOROVOD_VERSION=35b27e9
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
