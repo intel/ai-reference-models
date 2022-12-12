@@ -87,7 +87,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/${MODEL_NAME}_log*
-SOUREC_PREFIX="translate English to Romanian: "
+SOURCE_PREFIX="translate English to Romanian: "
 
 #Get platform type
 source "${MODEL_DIR}/quickstart/common/utils.sh"
