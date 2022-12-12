@@ -179,11 +179,11 @@ index a2fb10b9e..33635aced 100755
 +                        timeBuff = np.asarray(timeBuff)
 +                        totalTime = np.sum(timeBuff)
 +                        p50 = np.percentile(timeBuff, 50) # return 50th percentile, e.g median.
-+                        p90 = np.percentile(timeBuff, 90)
++                        p99 = np.percentile(timeBuff, 99)
 +                        print("#############################")
 +                        print("#############################")
 +                        print('P50 Latency {:.2f} ms'.format(p50*1000))
-+                        print('P90 Latency {:.2f} ms'.format(p90*1000))
++                        print('P99 Latency {:.2f} ms'.format(p99*1000))
 +                        print('Throughput: {:.2f} sentences/s'.format(self.args.per_device_eval_batch_size*self.args.perf_run_iters/totalTime))
 +                        print("#############################")
 +                        break
@@ -343,7 +343,7 @@ index 6176794ab..843bf70a1 100644
 +    benchmark: bool = field(
 +        default=False,
 +        metadata={
-+            "help": "doing the customized benchmark process, getting P50, P90, THP"
++            "help": "doing the customized benchmark process, getting P50, P99, THP"
 +        },
 +    )
 +    perf_run_iters: int = field(

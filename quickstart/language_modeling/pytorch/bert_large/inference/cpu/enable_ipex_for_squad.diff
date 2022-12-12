@@ -1,5 +1,5 @@
 diff --git a/examples/legacy/question-answering/run_squad.py b/examples/legacy/question-answering/run_squad.py
-index fbf2ebd63..eaf700db4 100644
+index fbf2ebd63..793d16b62 100644
 --- a/examples/legacy/question-answering/run_squad.py
 +++ b/examples/legacy/question-answering/run_squad.py
 @@ -22,6 +22,9 @@ import logging
@@ -25,7 +25,7 @@ index fbf2ebd63..eaf700db4 100644
  try:
      from torch.utils.tensorboard import SummaryWriter
  except ImportError:
-@@ -266,6 +273,131 @@ def train(args, train_dataset, model, tokenizer):
+@@ -266,6 +273,136 @@ def train(args, train_dataset, model, tokenizer):
  
      return global_step, tr_loss / global_step
  
@@ -109,7 +109,8 @@ index fbf2ebd63..eaf700db4 100644
 +    test_epoches = int(total_steps / steps_per_epoch)
 +    print('Evaluating BERT: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
 +    total_time = 0
-+    i = 0;
++    i = 0
++    timeBuff = []
 +    #with torch.profiler.profile(
 +    #        activities=[
 +    #            torch.profiler.ProfilerActivity.CPU],
@@ -128,6 +129,9 @@ index fbf2ebd63..eaf700db4 100644
 +            for it, batch in enumerate(eval_dataloader):
 +                if epoch * steps_per_epoch + it >= total_steps:
 +                    throughput = args.eval_batch_size * args.perf_run_iters / total_time
++                    timeBuff = np.asarray(timeBuff)
++                    p99 = np.percentile(timeBuff, 99)
++                    print('P99 Latency {:.2f} ms'.format(p99*1000))
 +                    print("Throughput: {:.3f} sentence/s".format(throughput))     
 +                    break
 +                with torch.no_grad():
@@ -152,12 +156,13 @@ index fbf2ebd63..eaf700db4 100644
 +                    time_end = time.time()
 +                    if epoch * steps_per_epoch + it > args.perf_begin_iter:
 +                        total_time +=(time_end - time_start)
++                        timeBuff.append(time_end - time_start)
 +                    pbar.update(1)
 +
  
  def evaluate(args, model, tokenizer, prefix=""):
      dataset, examples, features = load_and_cache_examples(args, tokenizer, evaluate=True, output_examples=True)
-@@ -275,6 +407,7 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -275,6 +412,7 @@ def evaluate(args, model, tokenizer, prefix=""):
  
      args.eval_batch_size = args.per_gpu_eval_batch_size * max(1, args.n_gpu)
  
@@ -165,7 +170,7 @@ index fbf2ebd63..eaf700db4 100644
      # Note that DistributedSampler samples randomly
      eval_sampler = SequentialSampler(dataset)
      eval_dataloader = DataLoader(dataset, sampler=eval_sampler, batch_size=args.eval_batch_size)
-@@ -287,6 +420,40 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -287,6 +425,40 @@ def evaluate(args, model, tokenizer, prefix=""):
      logger.info("***** Running evaluation {} *****".format(prefix))
      logger.info("  Num examples = %d", len(dataset))
      logger.info("  Batch size = %d", args.eval_batch_size)
@@ -206,7 +211,7 @@ index fbf2ebd63..eaf700db4 100644
  
      all_results = []
      start_time = timeit.default_timer()
-@@ -321,7 +488,7 @@ def evaluate(args, model, tokenizer, prefix=""):
+@@ -321,7 +493,7 @@ def evaluate(args, model, tokenizer, prefix=""):
              eval_feature = features[feature_index.item()]
              unique_id = int(eval_feature.unique_id)
  
@@ -215,7 +220,7 @@ index fbf2ebd63..eaf700db4 100644
  
              # Some models (XLNet, XLM) use 5 arguments for their predictions, while the other "simpler"
              # models only use two.
-@@ -659,6 +826,47 @@ def main():
+@@ -659,6 +831,47 @@ def main():
      parser.add_argument("--server_port", type=str, default="", help="Can be used for distant debugging.")
  
      parser.add_argument("--threads", type=int, default=1, help="multiple threads for converting example to features")
@@ -263,7 +268,7 @@ index fbf2ebd63..eaf700db4 100644
      args = parser.parse_args()
  
      if args.doc_stride >= args.max_seq_length - args.max_query_length:
-@@ -730,11 +938,13 @@ def main():
+@@ -730,11 +943,13 @@ def main():
      args.model_type = args.model_type.lower()
      config = AutoConfig.from_pretrained(
          args.config_name if args.config_name else args.model_name_or_path,
