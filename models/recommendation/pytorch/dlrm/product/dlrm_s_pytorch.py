@@ -139,13 +139,14 @@ def unpack_batch(b):
     # Experiment with unweighted samples
     return b[0], b[1], b[2], b[3], torch.ones(b[3].size()), None
 
-def load_data(data_iter, buffer_num):
+def load_data(data_iter, buffer_num, is_bf16):
     with torch.autograd.profiler.record_function('load_data'):
         for d in range(buffer_num):
             # (X, lS_i, T) = next(data_iter)
             Batch = next(data_iter)
             X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
-            data_buffer[d] = (X.bfloat16(), lS_o, lS_i, T, W, CBPP)
+            X = X.bfloat16() if is_bf16 else X
+            data_buffer[d] = (X, lS_o, lS_i, T, W, CBPP)
 
 class AlltoallOutputs():
     def __init__(self):
@@ -743,7 +744,7 @@ class DLRM_Net(nn.Module):
         a2a_req = ext_dist.alltoall(ly_sparse, self.n_sparse_emb_per_rank)
 
         if is_train:
-            load_data(data_iter, buffer_num)
+            load_data(data_iter, buffer_num, args.bf16)
 
         #dense embedding 
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
@@ -1395,7 +1396,7 @@ def run():
     data_iter = iter(train_ld)
     buffer_num = buffer_num if buffer_num <= nbatches else nbatches
     # data_load_begin = time.time()
-    load_data(data_iter, buffer_num)
+    load_data(data_iter, buffer_num, args.bf16)
     # print(buffer_num, ": data item loaded, data_load_time is {:.6f}s".format(time.time() - data_load_begin))
 
         
@@ -1674,7 +1675,7 @@ def run():
                         break
                     if ext_dist.my_size == 1:
                         buffer_num = buffer_num if (nbatches - j) > buffer_num else (nbatches - j)
-                        load_data(data_iter, buffer_num)
+                        load_data(data_iter, buffer_num, args.bf16)
 
                 k += 1  # nepochs
         else:
