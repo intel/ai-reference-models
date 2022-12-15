@@ -30,14 +30,40 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32 or int8"
+  exit 1
+fi
+
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32 and int8"
+  exit 1
+fi
+
 if [ -z "${TF_MODELS_DIR}" ]; then
   echo "The required environment variable TF_MODELS_DIR has not been set"
   exit 1
 fi
 
-# the pretrained model
 if [ -z "${PRETRAINED_MODEL}" ]; then
-  PRETRAINED_MODEL="${MODEL_DIR}/rfcn_resnet101_int8_coco_pretrained_model.pb"
+  if [ $PRECISION == "int8" ]; then
+    PRETRAINED_MODEL="${MODEL_DIR}/final_fused_pad_and_conv.pb"
+  elif [[ $PRECISION == "fp32" ]]; then  
+    pretrained_model_dir="${OUTPUT_DIR}/frozen_inference_graph.pb"
+  else
+    echo "The specified precision '${PRECISION}' is unsupported."
+    echo "Supported precisions are: fp32 and int8"
+    exit 1
+  fi  
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+  fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
 fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
@@ -50,7 +76,7 @@ source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
-    --precision int8 \
+    --precision ${PRECISION} \
     --framework tensorflow \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \

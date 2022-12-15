@@ -1,3 +1,31 @@
+<!--- 0. Title -->
+# RFCN inference
+
+<!-- 10. Description -->
+
+This document has instructions for running RFCN inference using
+Intel-optimized TensorFlow.
+
+
+<!--- 30. Datasets -->
+## Dataset
+
+The [COCO validation dataset](http://cocodataset.org) is used in these
+RFCN quickstart scripts. The inference quickstart scripts use raw images,
+and the accuracy quickstart scripts require the dataset to be converted
+into the TF records format.
+See the [COCO dataset](/datasets/coco/README.md) for instructions on
+downloading and preprocessing the COCO validation dataset.
+
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`inference.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/inference.sh) | Runs inference on a directory of raw images for 500 steps and outputs performance metrics. |
+| [`accuracy.sh`](/quickstart/object_detection/tensorflow/rfcn/inference/cpu/accuracy.sh) | Processes the TF records to run inference and check accuracy on the results. |
+
 <!--- 50. AI Kit -->
 ## Run the model
 
@@ -74,13 +102,18 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 For more information on the required dependencies, see the documentation on [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
 in the TensorFlow models repo.
 
-Download the pretrained model and set the `PRETRAINED_MODEL`
+Download and extract the pretrained model and set the `PRETRAINED_MODEL`
 environment variable to point to the frozen graph file.
 If you run on Windows, please use a browser to download the pretrained model using the link below.
 For Linux, run:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/rfcn_resnet101_int8_coco_pretrained_model.pb
-export PRETRAINED_MODEL=$(pwd)/rfcn_resnet101_int8_coco_pretrained_model.pb
+# FP32 Pretrained Model
+https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/rfcn_frozen_inference_graph.pb
+export PRETRAINED_MODEL=$(pwd)/rfcn_frozen_inference_graph.pb
+
+# Int8 Pretrained Model
+https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/rfcn_final_fused_pad_and_conv.pb
+export PRETRAINED_MODEL=$(pwd)/rfcn_final_fused_pad_and_conv.pb
 ```
 
 RFCN uses the object detection code from the [TensorFlow Model Garden](https://github.com/tensorflow/models).
@@ -103,8 +136,7 @@ export TF_MODELS_DIR=$(pwd)
 Download and install [Google Protobuf version 3.3.0](https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip), and
 run [protobuf compilation](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#protobuf-compilation).
 ```
-# Protobuf compilation from the TF models research directory
-cd research
+cd TF_MODELS_DIR/research
 protoc object_detection/protos/*.proto --python_out=.
 cd ../..
 ```
@@ -119,12 +151,13 @@ To run inference with performance metrics:
 cd models
 
 export DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
+export PRECISION=<set the precision to "int8" or "fp32">
 export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_inference.sh
+./quickstart/object_detection/tensorflow/rfcn/inference/cpu/inference.sh
 ```
 
 To get accuracy metrics:
@@ -133,12 +166,13 @@ To get accuracy metrics:
 cd models
 
 export DATASET_DIR=<path to TF record file (ex: /home/user/coco_output/coco_val.record)>
+export PRECISION=<set the precision to "int8" or "fp32">
 export OUTPUT_DIR=<path to the directory where log files will be written>
 export TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/object_detection/tensorflow/rfcn/inference/cpu/int8/int8_accuracy.sh
+./quickstart/object_detection/tensorflow/rfcn/inference/cpu/accuracy.sh
 ```
 
 ### Run on Windows
@@ -161,12 +195,13 @@ cd models
 
 set PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 set DATASET_DIR=<path to COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts>
+set PRECISION=<set the precision to "int8" or "fp32">
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<directory where TensorFlow Model Garden is cloned>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 set BATCH_SIZE=<customized batch size value>
 
-bash quickstart\object_detection\tensorflow\rfcn\inference\cpu\int8\<script name>.sh
+bash quickstart\object_detection\tensorflow\rfcn\inference\cpu\<script name>.sh
 ```
 > Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
 As an example, if the dataset location on Windows is `D:\user\coco_dataset\val2017`, convert the Windows path to Unix as shown:
@@ -175,3 +210,11 @@ As an example, if the dataset location on Windows is `D:\user\coco_dataset\val20
 > /d/user/coco_dataset/val2017
 >```
 >Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/coco_dataset/val2017`.
+
+<!--- 90. Resource Links-->
+## Additional Resources
+
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [Int8](int8/Advanced.md) [<bfloat16 precision>](<bfloat16 advanced readme link>) for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
+  workload container:<br />
+  [https://software.intel.com/content/www/us/en/develop/articles/containers/rfcn-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/rfcn-fp32-inference-tensorflow-container.html).

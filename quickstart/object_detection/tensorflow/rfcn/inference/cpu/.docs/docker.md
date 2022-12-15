@@ -1,21 +1,22 @@
 <!-- 60. Docker -->
 ## Docker
 
-When running in docker, the <model name> <precision> <mode> container includes the
-libraries and the model package, which are needed to run <model name> <precision>
-<mode>. To run the quickstart scripts, you'll need to provide volume mounts for the
+When running in docker, the <model name> <mode> container includes the
+libraries and the model package, which are needed to run <model name> <mode>. To run the quickstart scripts, you'll need to provide volume mounts for the
 [COCO validation dataset](/dataset/coco/README.md) and an output directory
 where log files will be written.
 
 To run inference with performance metrics:
 ```
 DATASET_DIR=<path to the coco val2017 raw image directory (ex: /home/user/coco_dataset/val2017)>
+PRECISION=<set the precision to "int8" or "fp32">
 OUTPUT_DIR=<directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
 docker run \
   --env DATASET_DIR=${DATASET_DIR} \
+  --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env http_proxy=${http_proxy} \
@@ -24,7 +25,7 @@ docker run \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -t \
   <docker image> \
-  /bin/bash quickstart/fp32_inference.sh
+  /bin/bash quickstart/<script_name>.sh
 ```
 
 When the run completes, the log tail will note the average duration per step:

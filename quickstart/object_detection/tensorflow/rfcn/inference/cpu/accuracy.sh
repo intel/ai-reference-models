@@ -30,27 +30,42 @@ if [ -z "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32 or int8"
+  exit 1
+fi
+
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32 and int8"
+  exit 1
+fi
+
 if [ -z "${TF_MODELS_DIR}" ]; then
   echo "The required environment variable TF_MODELS_DIR has not been set"
   exit 1
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-  # If the PRETRAINED_MODEL env var is not set, then we are probably running in a workload
-  # container or model package, so check for the tar file and extract it, if needed
-  pretrained_model_dir="${OUTPUT_DIR}/pretrained_model/rfcn_resnet101_coco_2018_01_28"
-  if [ ! -d "${pretrained_model_dir}" ]; then
-    if [[ -f "pretrained_model/rfcn_fp32_model.tar.gz" ]]; then
-      mkdir -p ${OUTPUT_DIR}/pretrained_model
-      tar -C ${OUTPUT_DIR}/pretrained_model/ -xvf pretrained_model/rfcn_fp32_model.tar.gz
-    else
-      echo "The pretrained model was not found. Please set the PRETRAINED_MODEL var to point to the frozen graph file."
-      exit 1
-    fi
+  if [ $PRECISION == "int8" ]; then
+    PRETRAINED_MODEL="${MODEL_DIR}/rfcn_final_fused_pad_and_conv.pb"
+  elif [[ $PRECISION == "fp32" ]]; then  
+    pretrained_model_dir="${OUTPUT_DIR}/rfcn_frozen_inference_graph.pb"
+  else
+    echo "The specified precision '${PRECISION}' is unsupported."
+    echo "Supported precisions are: fp32 and int8"
+    exit 1
+  fi  
+  if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
   fi
-  PRETRAINED_MODEL="${pretrained_model_dir}/frozen_inference_graph.pb"
-fi
-
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi  
+  
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
   BATCH_SIZE="1"
@@ -61,7 +76,7 @@ source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-name rfcn \
     --mode inference \
-    --precision fp32 \
+    --precision ${PRECISION} \
     --framework tensorflow \
     --model-source-dir ${TF_MODELS_DIR} \
     --data-location ${DATASET_DIR} \
@@ -71,4 +86,3 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --output-dir ${OUTPUT_DIR} \
     $@ \
     -- split="accuracy_message"
-
