@@ -37,11 +37,11 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to fp32 or bfloat16 or bfloat32."
   exit 1
-elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32 and bfloat16"
+  echo "Supported precisions are: fp32, bfloat16 and bfloat32"
   exit 1
 fi
 
@@ -58,7 +58,7 @@ fi
 
 # Apply the TF 2.0 patch to the TF_MODELS_DIR
 cd ${TF_MODELS_DIR}
-if [ ${PRECISION} == "fp32" ]; then
+if [ ${PRECISION} == "fp32" || $PRECISION == "bfloat32" ]; then
   git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
 elif [ ${PRECISION} == "bfloat16" ]; then
   git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/bfloat16/tf-2.0.diff
@@ -72,11 +72,17 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 # Subtract 4 to use as the num_intra_threads
 num_intra_threads=$(($cores_per_socket - 4))
 
-NUM_INSTANCES="2"
+NUM_INSTANCES="1"
+
+#Set up env variable for bfloat32
+if [[ $PRECISION=="bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="56"
+  BATCH_SIZE="896"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
