@@ -67,7 +67,9 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-RUN source activate pytorch && \
+RUN yum install -y libpng-devel \
+        freetype-devel && \
+    source activate pytorch && \
     pip install --upgrade pip && \
     pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip && \
     pip install --no-cache-dir \

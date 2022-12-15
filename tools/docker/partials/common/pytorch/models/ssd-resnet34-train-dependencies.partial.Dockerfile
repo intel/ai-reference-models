@@ -1,4 +1,6 @@
-RUN source activate pytorch && \
+RUN yum install -y libpng-devel \
+        freetype-devel && \
+    source activate pytorch && \
     pip install --upgrade pip && \
     pip install --no-cache-dir https://github.com/mlperf/logging/archive/9ea0afa.zip && \
     pip install --no-cache-dir \
