@@ -37,16 +37,6 @@ if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != 
   exit 1
 fi
 
-if [ -z "${DATASET_DIR}" ]; then
-  echo "The required environment variable DATASET_DIR has not been set"
-  exit 1
-fi
-
-if [ ! -d "${DATASET_DIR}" ]; then
-  echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
-  exit 1
-fi
-
 if [ -z "${PRETRAINED_MODEL}" ]; then
   if [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
     PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb"
@@ -69,7 +59,7 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
-CORES_PER_INSTANCE="socket"
+CORES_PER_INSTANCE="4"
 if [ $PRECISION == "bfloat32" ]; then
   export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
   PRECISION="fp32"
@@ -78,7 +68,6 @@ elif [ $PRECISION == "bfloat16" ]; then
   export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="BiasAdd,AddV2,Mul"
   export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_CLEARLIST_REMOVE="Relu6"
 fi
-
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
@@ -94,9 +83,16 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --mode=${MODE} \
   --framework tensorflow \
   --in-graph ${PRETRAINED_MODEL} \
-  --data-location=${DATASET_DIR}/coco_val.record \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --numa-cores-per-instance ${CORES_PER_INSTANCE} \
-  --accuracy-only \
+  --benchmark-only \
   $@
+
+if [[ $? == 0 ]]; then
+  echo "Summary total samples/sec:"
+  grep 'Total samples/sec' ${OUTPUT_DIR}/ssd-mobilenet_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log  | awk -F' ' '{sum+=$3;} END{print sum} '
+else
+  exit 1
+fi
+

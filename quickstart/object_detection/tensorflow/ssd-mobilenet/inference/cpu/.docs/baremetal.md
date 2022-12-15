@@ -67,19 +67,23 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
   </tr>
 </table>
 
-For more information see the documentation on [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
+For more information on the dependencies, see the documentation on [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
 in the TensorFlow models repo.
 
 Download the pretrained model and set the `PRETRAINED_MODEL` environment
 variable to the path of the frozen graph. If you run on Windows, please use a browser to download the pretrained model using the link below.
 For Linux, run:
 ```
+# FP32 and BFloat16 Pretrained model
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+
+# Int8 Pretrained model
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 ```
 
-After installing the prerequisites and downloading the pretrained model, set the environment variables for the paths to your `PRETRAINED_MODEL`, an `OUTPUT_DIR` where log files will be written,
-and `DATASET_DIR` for COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.
+After installing the prerequisites and downloading the pretrained model, set the environment variables and for the `DATASET_DIR` use COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.
 Navigate to your model zoo directory and then run a [quickstart script](#quick-start-scripts) on either Linux or Windows.
 
 ### Run on Linux
@@ -87,13 +91,14 @@ Navigate to your model zoo directory and then run a [quickstart script](#quick-s
 # cd to your model zoo directory
 cd models
 
-export PRETRAINED_MODEL=<path to the pretrained model pb file>
+export PRETRAINED_MODEL=<path to the downloaded frozen graph>
 export DATASET_DIR=<path to the coco tf record file>
+export PRECISION=<set the precision to "int8", "fp32" or "bfloat16" >
 export OUTPUT_DIR=<path to the directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/int8/<script name>.sh
+./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/<script name>.sh
 ```
 
 ### Run on Windows
@@ -105,10 +110,12 @@ cd models
 set PRETRAINED_MODEL=<path to the pretrained model pb file>
 set DATASET_DIR=<path to the coco tf record file>
 set OUTPUT_DIR=<directory where log files will be written>
+set PRECISION=<set the precision to "int8" or "fp32">
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 set BATCH_SIZE=<customized batch size value>
 
-bash quickstart\object_detection\tensorflow\ssd-mobilenet\inference\cpu\int8\<script name>.sh
+# Run a quickstart script (inference.sh and accuracy.sh are supported on windows)
+bash quickstart\object_detection\tensorflow\ssd-mobilenet\inference\cpu\<script name>.sh
 ```
 > Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
 As an example, if the dataset location on Windows is `D:\user\coco_dataset\coco_val.record`, convert the Windows path to Unix as shown:
