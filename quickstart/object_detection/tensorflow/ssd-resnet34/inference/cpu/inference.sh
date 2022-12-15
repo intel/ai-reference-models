@@ -17,10 +17,6 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
-echo 'MODEL_DIR='$MODEL_DIR
-echo 'OUTPUT_DIR='$OUTPUT_DIR
-echo 'DATASET_DIR='$DATASET_DIR
-
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1
@@ -29,13 +25,15 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-if [ -z "${DATASET_DIR}" ]; then
-  echo "The required environment variable DATASET_DIR has not been set"
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32, int8, or bfloat16."
   exit 1
 fi
 
-if [ ! -d "${DATASET_DIR}" ]; then
-  echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16, and int8"
   exit 1
 fi
 
@@ -50,7 +48,24 @@ if [ ! -d "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
-PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_models/ssd_resnet34_int8_bs1_pretrained_model.pb"}
+if [ -z "${PRETRAINED_MODEL}" ]; then
+    if [[ $PRECISION == "int8" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_int8_bs1_pretrained_model.pb"
+    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb"
+    else
+        echo "The specified precision '${PRECISION}' is unsupported."
+        echo "Supported precisions are: fp32, bfloat16, and int8"
+        exit 1
+    fi
+    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+    fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
 
 export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}/research
 export PYTHONPATH=${PYTHONPATH}:${TF_BENCHMARKS_DIR}/scripts/tf_cnn_benchmarks
@@ -63,15 +78,15 @@ fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --data-location ${DATASET_DIR} \
-    --in-graph ${PRETRAINED_MODEL} \
-    --model-source-dir ${TF_MODELS_DIR} \
+    --in-graph $PRETRAINED_MODEL \
+    --model-source-dir $TF_MODELS_DIR \
     --model-name ssd-resnet34 \
     --framework tensorflow \
-    --precision int8 \
+    --precision ${PRECISION} \
     --mode inference \
     --socket-id 0 \
     --batch-size ${BATCH_SIZE} \
-    --accuracy-only \
+    --benchmark-only \
     --output-dir ${OUTPUT_DIR} \
-    $@
+    $@ 
+

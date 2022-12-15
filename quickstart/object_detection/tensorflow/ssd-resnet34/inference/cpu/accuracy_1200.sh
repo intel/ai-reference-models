@@ -25,6 +25,18 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32 or int8 or bfloat16 or bfloat32."
+  exit 1
+fi
+
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
+  exit 1
+fi
+
 if [ -z "${DATASET_DIR}" ]; then
   echo "The required environment variable DATASET_DIR has not been set"
   exit 1
@@ -32,18 +44,6 @@ fi
 
 if [ ! -d "${DATASET_DIR}" ]; then
   echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
-  exit 1
-fi
-
-if [ -z "${PRECISION}" ]; then
-  echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or int8 or bfloat16."
-  exit 1
-fi
-
-if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
-  echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, bfloat16 and int8"
   exit 1
 fi
 
@@ -60,12 +60,12 @@ fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_int8_bs1_pretrained_model.pb"
-    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_fp32_bs1_pretrained_model.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_int8_1200x1200_pretrained_model.pb"
+    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16 and int8"
+        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -77,6 +77,13 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+MODE="inference"
+
+if [ $PRECISION == "bfloat32" ]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
+  PRECISION="fp32"
+fi
+
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
   BATCH_SIZE="1"
@@ -84,18 +91,25 @@ if [ -z "${BATCH_SIZE}"]; then
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --data-location $DATASET_DIR \
-    --in-graph $PRETRAINED_MODEL \
-    --model-source-dir $TF_MODELS_DIR \
-    --model-name ssd-resnet34 \
-    --framework tensorflow \
-    --precision ${PRECISION} \
-    --mode inference \
-    --socket-id 0 \
-    --batch-size ${BATCH_SIZE} \
-    --accuracy-only \
-    --output-dir ${OUTPUT_DIR} \
-    $@
+  --model-source-dir ${TF_MODELS_DIR} \
+  --model-name ssd-resnet34 \
+  --precision ${PRECISION} \
+  --mode=${MODE} \
+  --framework tensorflow \
+  --in-graph ${PRETRAINED_MODEL} \
+  --data-location=${DATASET_DIR} \
+  --output-dir ${OUTPUT_DIR} \
+  --batch-size ${BATCH_SIZE} \
+  --accuracy-only \
+  $@ \
+  -- input-size=1200 2>&1 | tee ${OUTPUT_DIR}/ssd-resnet34_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
 
-
+if [[ $? == 0 ]]; then
+  echo "Average Precision:"
+  cat ${OUTPUT_DIR}/ssd-resnet34_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Average Precision" | head -n 1 | sed -e "s/.*] = //"
+  exit 0
+else
+  exit 1
+fi

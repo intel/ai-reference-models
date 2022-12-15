@@ -1,38 +1,43 @@
 <!--- 0. Title -->
-# SSD-ResNet34 FP32 inference
+# SSD-ResNet34 inference
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [SSD-ResNet34](https://arxiv.org/pdf/1512.02325.pdf)
-FP32 inference using Intel-optimized TensorFlow.
+This document has instructions for running SSD-ResNet34 inference using
+Intel-optimized TensorFlow.
 
 <!--- 30. Datasets -->
 ## Datasets
 
-The SSD-ResNet34 accuracy scripts ([fp32_accuracy.sh](fp32_accuracy.sh)
-and [fp32_accuracy_1200.sh](fp32_accuracy_1200.sh)) use the
+The SSD-ResNet34 accuracy script `accuracy.sh` uses the
 [COCO validation dataset](http://cocodataset.org) in the TF records
-format. See the [COCO dataset document](/datasets/coco/README.md) for
+format. See the [COCO dataset document](https://github.com/IntelAI/models/tree/master/datasets/coco) for
 instructions on downloading and preprocessing the COCO validation dataset.
+The inference scripts use synthetic data, so no dataset is required.
 
-The performance benchmarking scripts ([fp32_inference.sh](fp32_inference.sh)
-and [fp32_inference_1200.sh](fp32_inference_1200.sh)) use synthetic data,
-so no dataset is required.
-
-
+After the script to convert the raw images to the TF records file completes, rename the tf_records file:
+```
+mv ${OUTPUT_DIR}/coco_val.record ${OUTPUT_DIR}/validation-00000-of-00001
+```
+Set the `DATASET_DIR` to the folder that has the `validation-00000-of-00001`
+file when running the accuracy test. Note that the inference performance
+test uses synthetic dataset.
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| [fp32_accuracy_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/fp32_accuracy_1200.sh) | Runs an accuracy test using data in the TF records format with an input size of 1200x1200. |
-| [fp32_accuracy.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/fp32_accuracy.sh) | Runs an accuracy test using data in the TF records format with an input size of 300x300. |
-| [fp32_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/fp32_inference_1200.sh) | Runs inference with a batch size of 1 using synthetic data with an input size of 1200x1200. Prints out the time spent per batch and total samples/second. |
-| [fp32_inference.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/fp32_inference.sh) | Runs inference with a batch size of 1 using synthetic data with an input size of 300x300. Prints out the time spent per batch and total samples/second. |
-| [multi_instance_batch_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/multi_instance_batch_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with one instance per socket. Uses synthetic data with an input size of 1200x1200. Waits for all instances to complete, then prints a summarized throughput value. |
-| [multi_instance_online_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/multi_instance_online_inference_1200.sh) | Uses numactl to run inference (batch_size=1) with 4 cores per instance. Uses synthetic data with an input size of 1200x1200. Waits for all instances to complete, then prints a summarized throughput value. |
+| [accuracy_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/accuracy_1200.sh) | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8 or bfloat16) with an input size of 1200x1200. |
+| [accuracy.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/accuracy.sh) | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8 or bfloat16) with an input size of 300x300. |
+| [inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/inference_1200.sh) | Runs inference with a batch size of 1 using synthetic data for the specified precision (fp32, int8 or bfloat16) with an input size of 1200x1200. Prints out the time spent per batch and total samples/second. |
+| [inference.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/inference.sh) | Runs inference with a batch size of 1 using synthetic data for the specified precision (fp32, int8 or bfloat16) with an input size of 300x300. Prints out the time spent per batch and total samples/second. |
+| [multi_instance_online_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/multi_instance_online_inference_1200.sh) | Runs multi instance realtime inference (batch-size=1) using 4 cores per instance for the specified precision (fp32, int8 or bfloat16). Uses synthetic data with an input size of 1200x1200. Waits for all instances to complete, then prints a summarized throughput value. |
+| [multi_instance_batch_inference_1200.sh](/quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/multi_instance_batch_inference_1200.sh) | Runs multi instance batch inference (batch-size=16) using 1 instance per socket for the specified precision (fp32, int8 or bfloat16). Uses synthetic data with an input size of 1200x1200. Waits for all instances to complete, then prints a summarized throughput value. |
+
+
+
 
 <!--- 50. AI Kit -->
 ## Run the model
@@ -59,7 +64,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>wget
         <li>Cython
         <li>contextlib2
-        <li>horovod==0.19.1
+        <li>horovod==0.24.3
         <li>jupyter
         <li>lxml
         <li>matplotlib
@@ -67,7 +72,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>opencv-python
         <li>pillow>=9.3.0
         <li>pycocotools
-        <li>tensorflow-addons==0.11.0
+        <li>tensorflow-addons==0.18.0
         <li>Activate the tensorflow 2.5.0 conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
@@ -86,15 +91,14 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>Cython
         <li>contextlib2
-        <li>horovod==0.19.1
+        <li>horovod==0.24.3
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>numpy>=1.17.4
         <li>opencv-python
         <li>pillow>=9.3.0
         <li>pycocotools
-        <li>tensorflow-addons==0.11.0
+        <li>tensorflow-addons==0.18.0
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -104,20 +108,15 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       <ul>
         <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
         <li>build-essential
-        <li>libgl1-mesa-glx
-        <li>libglib2.0-0
-        <li>python3-dev
         <li>Cython
         <li>contextlib2
-        <li>horovod==0.19.1
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>numpy>=1.17.4
         <li>opencv-python
         <li>pillow>=9.3.0
         <li>pycocotools
-        <li>tensorflow-addons==0.11.0
+        <li>tensorflow-addons==0.18.0
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -127,7 +126,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
 The [TensorFlow models](https://github.com/tensorflow/models) and
 [benchmarks](https://github.com/tensorflow/benchmarks) repos are used by
-SSD-ResNet34 FP32 inference. Clone those at the git SHAs specified
+SSD-ResNet34 inference. Clone those at the git SHAs specified
 below and set the `TF_MODELS_DIR` environment variable to point to the
 directory where the models repo was cloned.
 
@@ -149,23 +148,25 @@ pretrained model that you'll be using.
 If you run on Windows, please use a browser to download the pretrained model using the link below.
 For Linux, run:
 ```
-# ssd-resnet34 300x300
+# SSD-ResNet34 FP32 and BFloat16 300x300 Pretrained model
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_fp32_bs1_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_fp32_bs1_pretrained_model.pb
 
-# ssd-resnet34 1200x1200
+# SSD-ResNet34 FP32 and BFloat16 1200x1200 Pretrained model
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_fp32_1200x1200_pretrained_model.pb
+
+# SSD-ResNet34 Int8 300x300 Pretrained model
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_bs1_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_bs1_pretrained_model.pb
+
+# SSD-ResNet34 Int8 1200x1200 Pretrained model
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 ```
 
-After installing the prerequisites and cloning the models and benchmarks
-repos, and downloading the pretrained model, set the required environment
-variables. Set an environment variable for the path to an `OUTPUT_DIR`
-where log files will be written. If the accuracy test is being run, then
-also set the `DATASET_DIR` to point to the folder where the COCO dataset
-`validation-00000-of-00001` file is located.  Once the environment variables
-are set, you can then run a [quickstart script](#quick-start-scripts) from the
-Model Zoo on either Linux or Windows.
+Set the environment variables and run quickstart script on either Linux or Windows systems. If the accuracy test is being run, then set the `DATASET_DIR` to point to the folder where the COCO dataset
+`validation-00000-of-00001` file is located. See the list of quickstart scripts for details on the different options.
 
 ### Run on Linux
 ```
@@ -175,12 +176,13 @@ cd models
 # set environment variables
 export DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
 export TF_MODELS_DIR=<path to the TensorFlow Models repo>
+export PRECISION=<set the precision to "int8" or "fp32" or "bfloat16">
 export PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
 export OUTPUT_DIR=<path to the directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-./quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/fp32/<script name>.sh
+./quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/<script name>.sh
 ```
 
 ### Run on Windows
@@ -191,12 +193,13 @@ cd models
 
 set PRETRAINED_MODEL=<path to the 300x300 or 1200x1200 pretrained model pb file>
 set DATASET_DIR=<directory with the validation-*-of-* files (for accuracy testing only)>
+set PRECISION=<set the precision to "int8" or "fp32">
 set OUTPUT_DIR=<directory where log files will be written>
 set TF_MODELS_DIR=<path to the TensorFlow Models repo>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 set BATCH_SIZE=<customized batch size value>
 
-bash quickstart\object_detection\tensorflow\ssd-resnet34\inference\cpu\fp32\<script name>.sh
+bash quickstart\object_detection\tensorflow\ssd-resnet34\inference\cpu\<script name>.sh
 ```
 > Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
 As an example, if the dataset location on Windows is `D:\user\coco_dataset`, convert the Windows path to Unix as shown:
@@ -209,9 +212,7 @@ As an example, if the dataset location on Windows is `D:\user\coco_dataset`, con
 <!--- 90. Resource Links-->
 ## Additional Resources
 
-* To run more advanced use cases, see the instructions [here](Advanced.md)
-  for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [Int8](int8/Advanced.md) [BFloat16](bfloat16/Advanced.md) for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
   workload container:<br />
   [https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-fp32-inference-tensorflow-container.html).
-

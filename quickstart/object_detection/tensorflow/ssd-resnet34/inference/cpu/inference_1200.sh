@@ -39,7 +39,36 @@ if [ ! -d "${TF_MODELS_DIR}" ]; then
   exit 1
 fi
 
-PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/pretrained_models/ssd_resnet34_fp32_bs1_pretrained_model.pb"}
+if [ -z "${PRECISION}" ]; then
+  echo "The required environment variable PRECISION has not been set"
+  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  exit 1
+fi
+
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16, and int8"
+  exit 1
+fi
+
+if [ -z "${PRETRAINED_MODEL}" ]; then
+    if [[ $PRECISION == "int8" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_int8_1200x1200_pretrained_model.pb"
+    elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/ssd_resnet34_fp32_1200x1200_pretrained_model.pb"
+    else
+        echo "The specified precision '${PRECISION}' is unsupported."
+        echo "Supported precisions are: fp32, bfloat16, and int8"
+        exit 1
+    fi
+    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+    fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+  echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
+  exit 1
+fi
 
 export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}/research
 export PYTHONPATH=${PYTHONPATH}:${TF_BENCHMARKS_DIR}/scripts/tf_cnn_benchmarks
@@ -56,10 +85,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --model-source-dir ${TF_MODELS_DIR} \
     --model-name ssd-resnet34 \
     --framework tensorflow \
-    --precision bfloat16 \
+    --precision ${PRECISION} \
     --mode inference \
     --socket-id 0 \
     --batch-size ${BATCH_SIZE} \
     --benchmark-only \
-    --output-dir ${OUTPUT_DIR} \
-    $@
+    $@ \
+    -- input-size=1200
