@@ -1614,15 +1614,15 @@ def run():
                             wall_time = ""
                             if args.print_wall_time:
                                 wall_time = " ({})".format(time.strftime("%H:%M"))
-                            if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
-                                print(
-                                    "Finished {} it {}/{} of epoch {}, {:.2f} ms/it,".format(
-                                        str_run_type, j + 1, nbatches, k, gT
-                                    )
-                                    + " loss {:.6f}".format(train_loss)
-                                    + wall_time,
-                                    flush=True,
+                            # if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
+                            print(
+                                "Finished {} it {}/{} of epoch {}, {:.2f} ms/it,".format(
+                                    str_run_type, j + 1, nbatches, k, gT
                                 )
+                                + " loss {:.6f}".format(train_loss)
+                                + wall_time,
+                                flush=True,
+                            )
                             update_training_performance(gT, j)
 
                             total_iter = 0
@@ -1669,10 +1669,8 @@ def run():
                                     print("The TTT w/ dataloader and evaluation is {} mins".format((train_end - train_start)/60.0))
                                     print("The TTT w/o dataloader and evaluation is {} mins".format((total_train_time_wo_dl_eval)/60.0))
                                 exit()
+                        j += 1
 
-                    j += buffer_num
-                    if j >= nbatches:
-                        break
                     if ext_dist.my_size == 1:
                         buffer_num = buffer_num if (nbatches - j) > buffer_num else (nbatches - j)
                         load_data(data_iter, buffer_num, args.bf16)
