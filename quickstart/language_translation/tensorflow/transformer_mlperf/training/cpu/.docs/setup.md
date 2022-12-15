@@ -15,11 +15,12 @@
   ```bash
   pip install keras-nightly==2.11.0.dev2022092907
   ```
+* OPENMPI_VERSION="openmpi-4.1.0", HOROVOD_VERSION=0.25.0, required for running the training models.
 
-* Note: For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment: 
+* Note: For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment:
   ```bash
   DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-  # To run VNNI, please set 
+  # To run VNNI, please set
   DNNL_MAX_CPU_ISA=AVX512_CORE_BF16
   ```
 

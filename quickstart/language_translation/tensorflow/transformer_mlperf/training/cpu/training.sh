@@ -37,11 +37,11 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to fp32, bfloat32 or bfloat16."
   exit 1
-elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32 and bfloat16"
+  echo "Supported precisions are: fp32, bfloat32 and bfloat16"
   exit 1
 fi
 
@@ -52,13 +52,26 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 # Subtract 4 to use as the num_intra_threads
 num_intra_threads=$(($cores_per_socket - 4))
 
-NUM_INSTANCES="2"
+NUM_INSTANCES="1"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="5120"
-  echo "Running with default batch size of ${BATCH_SIZE}"
+  if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat32" ]; then
+    BATCH_SIZE="5200"
+    echo "Running with default batch size of ${BATCH_SIZE}"
+  elif [ ${PRECISION} == "bfloat16" ]; then
+    BATCH_SIZE="12000"
+    echo "Running with default batch size of ${BATCH_SIZE}"
+  fi
 fi
+
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
+
+export TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
@@ -85,3 +98,4 @@ if [[ $? == 0 ]]; then
 else
   exit 1
 fi
+
