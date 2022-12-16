@@ -70,4 +70,4 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --mpi_num_processes=1 \
     --mpi_num_processes_per_socket=1 \
     --batch-size ${BATCH_SIZE} \
-    --train_epochs=1 epochs_between_evals=1 
+    --train_epochs=1 epochs_between_evals=1

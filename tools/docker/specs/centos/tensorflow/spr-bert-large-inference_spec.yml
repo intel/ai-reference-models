@@ -35,6 +35,8 @@ slice_sets:
           source: benchmarks/launch_benchmark.py
         - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime.sh
           destination: quickstart/inference_realtime.sh
+        - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime_weightsharing.sh
+          destination: quickstart/inference_realtime_weightsharing.sh
         - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_throughput.sh
           destination: quickstart/inference_throughput.sh
         - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/accuracy.sh

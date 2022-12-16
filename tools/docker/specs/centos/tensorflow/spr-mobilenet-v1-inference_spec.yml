@@ -32,9 +32,9 @@ slice_sets:
           source: benchmarks/image_recognition/tensorflow/mobilenet_v1/inference
         - destination: benchmarks/launch_benchmark.py
           source: benchmarks/launch_benchmark.py
-        - source: quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_realtime.sh
+        - source: quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_realtime_multi_instance.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_throughput.sh
+        - source: quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_throughput_multi_instance.sh
           destination: quickstart/inference_throughput.sh
         - source: quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh

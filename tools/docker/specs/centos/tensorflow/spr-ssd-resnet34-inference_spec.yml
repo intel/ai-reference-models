@@ -24,7 +24,7 @@ slice_sets:
         - object_detection/protoc
         - libgl
         - opencv
-        - tensorflow-addons-0.11.0
+        - tensorflow-addons-0.18.0
         - model_package
         - entrypoint
         - tensorflow/benchmarks-source
@@ -45,11 +45,11 @@ slice_sets:
           source: benchmarks/object_detection/tensorflow/ssd-resnet34/inference
         - destination: benchmarks/launch_benchmark.py
           source: benchmarks/launch_benchmark.py
-        - source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/inference_realtime.sh
+        - source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/multi_instance_online_inference_1200.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/inference_throughput.sh
+        - source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/multi_instance_batch_inference_1200.sh
           destination: quickstart/inference_throughput.sh
-        - source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/accuracy.sh
+        - source: quickstart/object_detection/tensorflow/ssd-resnet34/inference/cpu/accuracy_1200.sh
           destination: quickstart/accuracy.sh
         - destination: models/common
           source: models/common

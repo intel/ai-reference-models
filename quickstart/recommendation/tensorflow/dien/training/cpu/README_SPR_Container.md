@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-#  DIEN training
+# DIEN Training
 
 <!-- 10. Description -->
 ## Description
@@ -41,7 +41,7 @@ package to run DIEN training in docker. Set environment variables to
 specify the dataset directory, precision to run, and
 an output directory. 
 By default, the `run.sh` script will run the
-`inference_realtime.sh` quickstart script. To run a different script, specify
+`training.sh` quickstart script. To run a different script, specify
 the name of the script using the `SCRIPT` environment variable.
 ```
 # Navigate to the container package directory
@@ -54,11 +54,8 @@ export OUTPUT_DIR=<directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
-# Run the container with inference_realtime.sh quickstart script
+# Run the container with training.sh quickstart script
 ./run.sh
-
-# To run a different script, specify the name of the script using the `SCRIPT` environment variable.
-SCRIPT=accuracy.sh ./run.sh
 ```
 
 <!--- 80. License -->

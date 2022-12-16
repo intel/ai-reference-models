@@ -37,9 +37,9 @@ slice_sets:
           source: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference
         - destination: benchmarks/launch_benchmark.py
           source: benchmarks/launch_benchmark.py
-        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_realtime.sh
+        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_realtime_multi_instance.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_throughput.sh
+        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_throughput_multi_instance.sh
           destination: quickstart/inference_throughput.sh
         - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh

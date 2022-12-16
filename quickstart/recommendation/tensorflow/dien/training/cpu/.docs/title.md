@@ -1,2 +1,2 @@
 <!--- 0. Title -->
-#  <model name> <mode>
+# <model name> <mode>

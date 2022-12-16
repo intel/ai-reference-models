@@ -34,9 +34,9 @@ slice_sets:
           source: benchmarks/launch_benchmark.py
         - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh
           destination: quickstart/inference_realtime_weightsharing.sh
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime.sh
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_multi_instance.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_throughput.sh
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_throughput_multi_instance.sh
           destination: quickstart/inference_throughput.sh
         - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh

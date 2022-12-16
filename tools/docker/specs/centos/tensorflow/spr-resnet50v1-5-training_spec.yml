@@ -35,7 +35,7 @@ slice_sets:
           destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
         - source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
           destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training.sh
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh
           destination: quickstart/training.sh
         - destination: models/common
           source: models/common

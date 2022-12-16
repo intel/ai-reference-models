@@ -28,9 +28,9 @@ slice_sets:
         - destination: benchmarks/launch_benchmark.py
           source: benchmarks/launch_benchmark.py
         - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_realtime_multi_instance.sh
-          destination: quickstart/inference_realtime_multi_instance.sh
+          destination: quickstart/inference_realtime.sh
         - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/inference_throughput_multi_instance.sh
-          destination: quickstart/inference_throughput_multi_instance.sh
+          destination: quickstart/inference_throughput.sh
         - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/accuracy.sh
           destination: quickstart/accuracy.sh
         - destination: models/common
