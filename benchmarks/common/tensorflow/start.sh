@@ -89,30 +89,6 @@ if [[ ${PLATFORM} == "linux" ]]; then
     OS_PLATFORM=$(echo "${OS_PLATFORM#*=}")
     OS_VERSION=$(egrep '^(VERSION_ID)=' /etc/os-release)
     OS_VERSION=$(echo "${OS_VERSION#*=}")
-    if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
-      if [[ ! "${OS_VERSION}" =~ "7".* ]] && [[ ! "${OS_VERSION}" =~ "8".* ]]; then
-        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-        exit 1
-      fi
-    elif [[ ${OS_PLATFORM} == *"Ubuntu"* ]]; then
-      if [[ ! "${OS_VERSION}" =~ "18.04".* ]] && [[ ! "${OS_VERSION}" =~ "20.04".* ]] && [[ ! "${OS_VERSION}" =~ "22.04".* ]]; then
-        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-        exit 1
-      fi
-    elif [[ ${OS_PLATFORM} == *"Debian"* ]]; then
-      if [[ ! "${OS_VERSION}" =~ "10".* ]] && [[ ! "${OS_VERSION}" =~ "11".* ]]; then
-        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-        exit 1
-      fi
-    elif [[ ${OS_PLATFORM} == *"SLES"* ]] || [[ ${OS_PLATFORM} == *"SUSE"* ]]; then
-      if [[ ! "${OS_VERSION}" =~ "15".* ]]; then
-        echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-        exit 1
-      fi
-    else
-      echo "${OS_PLATFORM} version ${OS_VERSION} is not currently supported."
-      exit 1
-    fi
 
     echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
 fi
