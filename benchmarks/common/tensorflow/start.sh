@@ -94,8 +94,6 @@ if [[ "$unamestr" == 'Linux' ]]; then
    PLATFORM='linux'
 elif [[ "$unamestr" == "MSYS"* ]]; then
    PLATFORM='windows'
-else
-   echo "$unamestr is not supported!"
 fi
 echo
 echo "Running on ${PLATFORM}"
@@ -109,7 +107,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
     OS_VERSION=$(egrep '^(VERSION_ID)=' /etc/os-release)
     OS_VERSION=$(echo "${OS_VERSION#*=}")
 
-    echo "Running on ${OS_PLATFORM} version ${OS_VERSION} is supported."
+    echo "Running on ${OS_PLATFORM} version ${OS_VERSION}"
 fi
 
 if [[ ${NOINSTALL} != "True" ]]; then
