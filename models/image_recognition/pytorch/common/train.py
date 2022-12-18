@@ -16,7 +16,7 @@ import torch.multiprocessing as mp
 import torch.utils.data
 import torch.utils.data.distributed
 import torch.fx.experimental.optimization as optimization
-# import intel_extension_for_pytorch  as ipex
+import intel_extension_for_pytorch  as ipex
 
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
@@ -123,13 +123,8 @@ def main():
             args.rank = int(os.environ["RANK"])
 
     if args.seed is not None:
-        if args.distributed:
-            local_seed = args.seed + args.rank
-            random.seed(local_seed)
-            torch.manual_seed(local_seed)
-        else:            
-            random.seed(args.seed)
-            torch.manual_seed(args.seed)    
+        random.seed(args.seed)
+        torch.manual_seed(args.seed)
 
     main_worker(args)
 
@@ -166,10 +161,10 @@ def main_worker(args):
 
     if args.ipex:
         print("using ipex to do training.....................")
-        # if args.bf16:
-        #     model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer, weights_prepack=False, split_master_weight_for_bf16=False, fuse_update_step=False)
-        # else:
-        #     model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)     
+        if args.bf16:
+            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+        else:
+            model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
     # setup distributed training
     if args.distributed:
         dist.init_process_group(backend=args.dist_backend)
