@@ -6,7 +6,7 @@ notebook==6.5.1
 numpy==1.23.4
 opencv-python==4.6.0.66
 pandas==1.5.1
-Pillow==9.2.0
+Pillow>=9.3.0
 psutil==5.9.3
 pycocotools==2.0.5
 tensorflow-addons==0.18.0

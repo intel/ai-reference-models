@@ -59,7 +59,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>git
         <li>wget
         <li>IPython[all]
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>cython
         <li>h5py==2.10.0
         <li>imgaug
