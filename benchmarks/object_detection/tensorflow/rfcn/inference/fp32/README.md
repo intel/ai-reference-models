@@ -51,7 +51,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
         <li>Activate the `tensorflow` conda environment
@@ -72,7 +72,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
         <li>A clone of the Model Zoo repo<br />
@@ -89,7 +89,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
         <li>A clone of the Model Zoo repo<br />
