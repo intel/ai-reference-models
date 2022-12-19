@@ -35,6 +35,19 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# If precision env is not mentioned, then the workload will run with the default precision.
+if [ -z "${PRECISION}"]; then
+  PRECISION=fp32
+  echo "Running with default precision ${PRECISION}"
+fi
+
+if [[ $PRECISION != "fp32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precision is fp32."
+  exit 1
+fi
+
+
 if [ -z "${PRETRAINED_MODEL}" ]; then 
   PRETRAINED_MODEL="${DATASET_DIR}/uncased_L-12_H-768_A-12"
 
@@ -75,7 +88,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location $DATASET_DIR \
   --model-source-dir $MODEL_SOURCE \
   --model-name bert \
-  --precision fp32 \
+  --precision $PRECISION \
   --mode inference \
   --framework tensorflow \
   --batch-size=${BATCH_SIZE} \

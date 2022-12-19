@@ -1,12 +1,12 @@
 releases:
   versioned:
     tag_specs:
-    - '{_TAG_PREFIX}{intel-tf}{language-translation}{bert-fp32-inference}'
+    - '{_TAG_PREFIX}{intel-tf}{language-translation}{bert-inference}'
 slice_sets:
-  bert-fp32-inference:
-  - add_to_name: -bert-fp32-inference
+  bert-inference:
+  - add_to_name: -bert-inference
     args:
-    - PACKAGE_NAME=bert-fp32-inference
+    - PACKAGE_NAME=bert-inference
     dockerfile_subdirectory: model_containers
     downloads:
     - source: https://storage.googleapis.com/bert_models/2018_10_18/uncased_L-12_H-768_A-12.zip
@@ -31,7 +31,7 @@ slice_sets:
     - destination: quickstart/common
       source: quickstart/common
     - destination: quickstart
-      source: quickstart/language_translation/tensorflow/bert/inference/cpu/fp32
+      source: quickstart/language_translation/tensorflow/bert/inference/cpu
     partials:
     - model_package
     documentation:
@@ -44,12 +44,11 @@ slice_sets:
           uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/datasets.md
         - name: Quick Start Scripts
           uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/quickstart.md
-        - name: AI Kit
-          uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/aikit.md
+        - name: Bare Metal
+          uri: models/quickstart/language_translation/tensorflow/bert/inference/cpu/.docs/baremetal.md
         name: README.md
         text_replace:
           <mode>: inference
           <model name>: BERT
-          <precision>: FP32
           <use case>: language_translation
-        uri: models/benchmarks/language_translation/tensorflow/bert/inference/fp32
+        uri: models/benchmarks/language_translation/tensorflow/bert/inference
