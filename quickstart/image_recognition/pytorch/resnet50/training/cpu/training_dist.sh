@@ -122,6 +122,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --hostfile ${HOSTFILE} \
     --nproc_per_node ${SOCKETS} \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
+    --logical_core_for_ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
     $ARGS \
     --epochs $TRAINING_EPOCHS \
