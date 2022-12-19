@@ -1,4 +1,4 @@
 click
 numpy>=1.16.3
-Pillow>=8.1.2
+Pillow>=9.3.0
 matplotlib

@@ -12,7 +12,7 @@ To run on bare metal, the following prerequisites must be installed in your envi
 * lxml
 * matplotlib
 * numpy>=1.17.4
-* pillow>=8.1.2
+* pillow>=9.3.0
 * pycocotools
 
 For more information, see the documentation on [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)

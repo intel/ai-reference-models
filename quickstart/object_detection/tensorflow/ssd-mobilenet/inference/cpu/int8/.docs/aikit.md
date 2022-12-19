@@ -22,7 +22,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>pycocotools
         <li>Activate the `tensorflow` conda environment
         <pre>conda activate tensorflow</pre>
@@ -42,7 +42,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>pycocotools
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
@@ -58,7 +58,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>jupyter
         <li>lxml
         <li>matplotlib
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>pycocotools
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>

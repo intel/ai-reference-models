@@ -20,7 +20,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li><a href="https://pypi.org/project/intel-tensorflow/1.15.2/">intel-tensorflow==1.15.2</a>
         <li>numactl
         <li>numpy==1.16.3
-        <li>Pillow>=8.1.2
+        <li>Pillow>=9.3.0
         <li>matplotlib
         <li>click
         <li>wget

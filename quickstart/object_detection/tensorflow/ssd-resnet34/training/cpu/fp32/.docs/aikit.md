@@ -27,7 +27,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>opencv
         <li>openmpi
         <li>openssh
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>protoc
         <li>pycocotools
         <li>tensorflow-addons==0.11.0
@@ -53,7 +53,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>opencv
         <li>openmpi
         <li>openssh
-        <li>pillow>=8.1.2
+        <li>pillow>=9.3.0
         <li>protoc
         <li>pycocotools
         <li>tensorflow-addons==0.11.0
