@@ -15,6 +15,9 @@ pip install virtualenv
 # use `whereis python` to find the `python3.8` path in the system and specify it. Please install `Python3.8` if not installed on your system.
 virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
+
+# If git, numactl and wget were not installed, please install them using
+yum update -y && yum install -y git numactl wget
 ```
 
 * Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
@@ -48,10 +51,10 @@ Set the `DATASET_DIR` to point to the TF records directory when running MobileNe
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
 ```
 # FP32, BFloat16 and BFloat32 Pretrained model:
-/tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_fp32_pretrained_model.pb
 
 # Int8 Pretrained model:
-/tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_int8_pretrained_model.pb
 ```
 
 ## Run the model
@@ -70,30 +73,23 @@ For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel 
 Navigate to the models directory to run any of the available benchmarks.
 ```
 cd models
-```
-### Run real time fp32 inference (Latency):
-```
-export PRECISION="fp32"
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded fp32 pretrained model file>
 
-./quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_realtime_multi_instance.sh
-```
-
-### Run inference (Throughput):
-```
 export PRECISION=<int8, bfloat16, bfloat32 and fp32 are supported>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
+```
+### Run real time inference (Latency):
+```
+./quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_realtime_multi_instance.sh
+```
 
+### Run Throughput:
+```
 ./quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/inference_throughput_multi_instance.sh
 ```
 
 ### Run accuracy:
 ```
-export PRECISION=<int8, bfloat16, bfloat32 and fp32 are supported>
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
 # To test accuracy, also specify the dataset directory
 export DATASET_DIR=<path to the dataset>
 
