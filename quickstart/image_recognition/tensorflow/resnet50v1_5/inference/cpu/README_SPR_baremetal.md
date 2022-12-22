@@ -15,6 +15,9 @@ pip install virtualenv
 # use `whereis python` to find the `python3.8` path in the system and specify it. Please install `Python3.8` if not installed on your system.
 virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
+
+# If git, numactl and wget were not installed, please install them using
+yum update -y && yum install -y git numactl wget
 ```
 
 * Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
@@ -51,12 +54,15 @@ Download the model pretrained frozen graph from the given link based on the prec
 ```
 # FP32 and BFloat32 Pretrained model:
 wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
+export PRETRAINED_MODEL=$(pwd)/resnet50_v1.pb
 
 # Int8 Pretrained model:
-/tf_dataset/pre-trained-models/resnet50v1_5/int8/bias_resnet50.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bias_resnet50.pb
+export PRETRAINED_MODEL=$(pwd)/bias_resnet50.pb
 
 # BFloat16 Pretrained model:
-/tf_dataset/pre-trained-models/resnet50v1_5/bf16/bf16_resnet50_v1.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb
+export PRETRAINED_MODEL=$(pwd)/bf16_resnet50_v1.pb
 ```
 
 ## Run the model
@@ -68,24 +74,22 @@ specify the path to the pretrained model, the dataset directory (if needed), pre
 The dataset is required for accuracy and optional for other inference scripts.
 Optionally, you can change the defaut values for the batch size, warmup steps and steps by setting `BATCH_SIZE`, `WARMUP_STEPS`, and `STEPS`. Otherwise the default values in the [quick start scripts](#quick-start-scripts) will be used.
 
-```
-# Set the required environment vars
-export PRECISION=<specify the precision to run>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
-export OUTPUT_DIR=<directory where log files will be written>
-# Optional env vars
-export BATCH_SIZE=<customized batch size value>
-export WARMUP_STEPS=<customized warm up steps value>
-export STEPS=<customized steps value>
-```
-
 >Note: 
 For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel version < 5.16 , please set the following environment variable for AMX environment: DNNL_MAX_CPU_ISA=AVX512_CORE_AMX. To run VNNI, please set DNNL_MAX_CPU_ISA=AVX512_CORE_BF16.
-
 
 Navigate to the models directory to run any of the available benchmarks.
 ```
 cd models
+
+# Set the required environment vars
+export PRECISION=<Supported precisions are fp32, int8, bfloat16 and bfloat32>
+export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
+export OUTPUT_DIR=<directory where log files will be written>
+
+# Optional env vars
+export BATCH_SIZE=<customized batch size value>
+export WARMUP_STEPS=<customized warm up steps value>
+export STEPS=<customized steps value>
 ```
 ### Run real time inference (Latency):
 ```
@@ -101,7 +105,6 @@ cd models
 ```
 # only int8 and bfloat16 precisions are supported for weight sharing
 export PRECISION=<int8 or bfloat16 are supported>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
 
 ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/inference_realtime_weightsharing.sh
 ```
