@@ -10,7 +10,7 @@ slice_sets:
         - PYTORCH_IMAGE=model-zoo
         - PYTORCH_TAG=pytorch-ipex-spr
         - PACKAGE_NAME=pytorch-spr-bert-large-training
-        - TRANSFORMERS_COMMIT=v4.11.3
+        - TRANSFORMERS_COMMIT=v4.18.0
       partials:
         - pytorch/gcc-and-utils
         - pytorch/tcmalloc

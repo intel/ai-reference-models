@@ -62,7 +62,7 @@ RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WO
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
 
-ARG TRANSFORMERS_COMMIT="v4.11.3"
+ARG TRANSFORMERS_COMMIT="v4.18.0"
 
 RUN source activate pytorch && \
     pip install datasets==1.11.0 accelerate tfrecord && \
