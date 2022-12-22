@@ -15,6 +15,9 @@ pip install virtualenv
 # use `whereis python` to find the `python3.8` path in the system and specify it. Please install `Python3.8` if not installed on your system.
 virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
+
+# If git, numactl and wget were not installed, please install them using
+yum update -y && yum install -y git numactl wget
 ```
 
 * Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
@@ -60,7 +63,7 @@ specify the path to the dataset directory, precision to run, and an output direc
 
 ```
 # Set the required environment vars
-export PRECISION=<specify the precision to run>
+export PRECISION=<supported precisions are fp32, bfloat16, bfloat32>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 ```

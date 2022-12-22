@@ -15,6 +15,9 @@ pip install virtualenv
 # use `whereis python` to find the `python3.8` path in the system and specify it. Please install `Python3.8` if not installed on your system.
 virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
+
+# If git, numactl and wget were not installed, please install them using
+yum update -y && yum install -y git numactl wget
 ```
 
 * Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
@@ -59,12 +62,12 @@ Set the `DATASET_DIR` to point to the directory with the dataset files when runn
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
 ```
 # FP32, BFloat16 & BFloat32 Pretrained model for inference:
-#TODO: To be publish externally
-/tf_dataset/pre-trained-models/dien/dien_fp32_static_mklgrus.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/dien_fp32_static_mklgrus.pb
+export PRETRAINED_MODEL=$(pwd)/dien_fp32_static_mklgrus.pb
 
 # FP32, BFloat16 & BFloat32 Pretrained model for accuracy:
-#TODO: To be publish externally
-/tf_dataset/pre-trained-models/dien/dien_fp32_dynamic_mklgrus.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/dien_fp32_dynamic_mklgrus.pb
+export PRETRAINED_MODEL=$(pwd)/dien_fp32_dynamic_mklgrus.pb
 ```
 
 ## Run the model
@@ -75,19 +78,18 @@ specify the path to the pretrained model, the dataset directory, precision to ru
 
 You can change the defaut values for the batch size by setting `BATCH_SIZE` environemnt variable. Otherwise the default values in the [quick start scripts](#quick-start-scripts) will be used.
 
-```
-# Set the required environment vars
-export PRECISION=<specify the precision to run>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
-export DATASET_DIR=<path to the dataset>
-export OUTPUT_DIR=<directory where log files will be written>
-# Optional env vars
-export BATCH_SIZE=<customized batch size value>
-```
-
 Navigate to the models directory to run any of the available benchmarks.
 ```
 cd models
+
+# Set the required environment vars
+export PRECISION=<supported precisions are fp32, bfloat16, bfloat32>
+export PRETRAINED_MODEL=<path to the downloaded pretrained model file>
+export DATASET_DIR=<path to the dataset>
+export OUTPUT_DIR=<directory where log files will be written>
+
+# Optional env vars
+export BATCH_SIZE=<customized batch size value>
 ```
 ### Run real time inference (Latency):
 ```
