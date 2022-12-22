@@ -15,6 +15,9 @@ pip install virtualenv
 # use `whereis python` to find the `python3.8` path in the system and specify it. Please install `Python3.8` if not installed on your system.
 virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
+
+# If git, numactl and wget were not installed, please install them using
+yum update -y && yum install -y git numactl wget
 ```
 
 * Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
@@ -25,6 +28,11 @@ pip install keras-nightly==2.11.0.dev2022092907
 ```
 
 * Clone [Intel Model Zoo repository](https://github.com/IntelAI/models) if you haven't already cloned it.
+
+* After cloning Model Zoo repository, install model specific dependencies
+```
+pip install -r requirements.txt
+```
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -50,9 +58,11 @@ Download the model pretrained frozen graph from the given link based on the prec
 ```
 # FP32, BFloat16 and BFloat32 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
 
 # Int8 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
+export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 
 ```
 
@@ -71,30 +81,26 @@ For kernel version 5.16, AVX512_CORE_AMX is turned on by default. If the kernel 
 Navigate to the models directory to run any of the available benchmarks.
 ```
 cd models
-```
-### Run real time inference (Latency):
-```
+
 export PRECISION=<int8, bfloat16, bfloat32, fp32 are supported>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the downloaded pretrained model for the used precision>
 
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+```
+### Run real time inference (Latency):
+```
 ./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_realtime_multi_instance.sh
 ```
 
 ### Run inference (Throughput):
 ```
-export PRECISION=<int8, bfloat16, bfloat32, fp32 are supported>
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
-
 ./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_throughput_multi_instance.sh
 ```
 
 ### Run accuracy:
 ```
-export PRECISION=<int8, bfloat16, bfloat32, fp32 are supported>
-export OUTPUT_DIR=<directory where log files will be written>
-export PRETRAINED_MODEL=<path to the downloaded pretrained model file for the used precision>
 # To test accuracy, also specify the dataset directory
 export DATASET_DIR=<path to the dataset>
 
