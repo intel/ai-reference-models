@@ -15,6 +15,9 @@ pip install virtualenv
 # use `whereis python` to find the `python3.8` path in the system and specify it. Please install `Python3.8` if not installed on your system.
 virtualenv -p /usr/bin/python3.8 venv-tf
 source venv-tf/bin/activate
+
+# If git, numactl and wget were not installed, please install them using
+yum update -y && yum install -y git numactl wget
 ```
 
 * Install [Intel optimized TensorFlow](https://pypi.org/project/intel-tensorflow/2.11.dev202242/)
@@ -42,67 +45,6 @@ SSD-ResNet34 training uses the COCO training dataset. Use the [instructions](htt
 
 ## Run the model
 
-Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
-
-<table>
-  <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
-  </tr>
-  <tr>
-    <td>
-      <p>To run using AI Kit you will need:</p>
-      <ul>
-        <li>git
-        <li>numactl
-        <li>contextlib2
-        <li>cpio
-        <li>Cython
-        <li>horovod
-        <li>jupyter
-        <li>lxml
-        <li>matplotlib
-        <li>numpy>=1.17.4
-        <li>opencv
-        <li>openmpi
-        <li>openssh
-        <li>pillow>=9.3.0
-        <li>protoc
-        <li>pycocotools
-        <li>tensorflow-addons==0.11.0
-        <li>Activate the tensorflow 2.5.0 conda environment
-        <pre>conda activate tensorflow</pre>
-      </ul>
-    </td>
-    <td>
-      <p>To run without AI Kit you will need:</p>
-      <ul>
-        <li>Python 3
-        <li>git
-        <li>numactl
-        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
-        <li>contextlib2
-        <li>cpio
-        <li>Cython
-        <li>horovod==0.25.0
-        <li>jupyter
-        <li>lxml
-        <li>matplotlib
-        <li>opencv
-        <li>openmpi-4.1.0
-        <li>openssh
-        <li>pillow>=9.3.0
-        <li>protoc
-        <li>pycocotools
-        <li>tensorflow-addons==0.18.0
-        <li>A clone of the Model Zoo repo<br />
-        <pre>git clone https://github.com/IntelAI/models.git</pre>
-      </ul>
-    </td>
-  </tr>
-</table>
-
 For more information on the dependencies, see the
 [installation instructions](https://github.com/tensorflow/models/blob/8110bb64ca63c48d0caee9d565e5b4274db2220a/research/object_detection/g3doc/installation.md#installation)
 for object detection models at the
@@ -122,8 +64,12 @@ git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
 cd ..
 ```
 
-After finishing the setup above, set environment variables and run training script on Linux. Navigate to your model zoo directory and then run a quickstart script.
+Install model specific dependencies
+```
+./quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/setup_spr.sh
+```
 
+After finishing the setup above, set environment variables and run training script on Linux. Navigate to your model zoo directory and then run a quickstart script.
 
 ```
 # cd to your model zoo directory
