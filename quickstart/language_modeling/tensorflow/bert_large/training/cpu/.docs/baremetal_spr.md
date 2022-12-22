@@ -16,6 +16,9 @@ an output directory.
 # Navigate to the container package directory
 cd models
 
+# Install pre-requisites for the model:
+./quickstart/language_modeling/tensorflow/bert_large/training/cpu/setup_spr.sh
+
 # Set the required environment vars
 export PRECISION=<specify the precision to run:fp32, bfloat16 and bfloat32>
 export DATASET_DIR=<path to the dataset>

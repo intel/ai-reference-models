@@ -9,6 +9,9 @@ an output directory.
 # Navigate to the model zoo directory
 cd models
 
+# Install pre-requisites for the model:
+./quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/setup_spr.sh
+
 # Set the required environment vars
 export PRECISION=<specify the precision to run: fp32, bfloat16 or bfloat32>
 export DATASET_DIR=<path to the dataset>

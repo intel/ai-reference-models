@@ -14,6 +14,12 @@ using Intel-optimized TensorFlow.
   virtualenv -p python <virtualenv_name>
   source <virtualenv_name>/bin/activate
   ```
+
+* Install git, numactl and wget, if not installed already
+  ```bash
+  yum update -y && yum install -y git numactl wget
+  ```
+
 * Install Intel Tensorflow
   ```bash
   pip install intel-tensorflow==2.11.dev202242
@@ -81,6 +87,9 @@ an output directory.
 ```
 # Navigate to the container package directory
 cd models
+
+# Install pre-requisites for the model:
+./quickstart/language_modeling/tensorflow/bert_large/training/cpu/setup_spr.sh
 
 # Set the required environment vars
 export PRECISION=<specify the precision to run:fp32, bfloat16 and bfloat32>

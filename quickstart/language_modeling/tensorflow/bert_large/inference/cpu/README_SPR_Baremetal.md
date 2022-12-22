@@ -15,6 +15,12 @@ Intel-optimized TensorFlow.
   virtualenv -p python <virtualenv_name>
   source <virtualenv_name>/bin/activate
   ```
+
+* Install git, numactl and wget, if not installed already
+  ```bash
+  yum update -y && yum install -y git numactl wget
+  ```
+
 * Install Intel Tensorflow
   ```bash
   pip install intel-tensorflow==2.11.dev202242
@@ -67,16 +73,16 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 ## Pre-Trained Model
 
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
+```bash
+# INT8:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/per_channel_opt_int8_bf16_bert.pb
 
-Paths to the pb files relative to tf_dataset:
-* INT8:
-  BERT-Large-squad_int8 = /tf_dataset/pre-trained-models/bert_squad/int8/per_channel_opt_int8_bf16_bert.pb
+#FP32 and BFloat32:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/fp32_bert_squad.pb
 
-* FP32 and BFloat32:
-  BERT-Large-squad_fp32 = /tf_dataset/pre-trained-models/bert_squad/fp32/new_fp32_bert_squad.pb
-
-* BFloat16:
-  BERT-Large-squad_bfloat16 = /tf_dataset/pre-trained-models/bert_squad/bfloat16/optimized_bf16_bert.pb
+#BFloat16:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/optimized_bf16_bert.pb
+```
 
 ## Download checkpoints:
 ```bash

@@ -6,6 +6,12 @@
   virtualenv -p python <virtualenv_name>
   source <virtualenv_name>/bin/activate
   ```
+
+* Install git, numactl and wget, if not installed already
+  ```bash
+  yum update -y && yum install -y git numactl wget
+  ```
+
 * Install Intel Tensorflow
   ```bash
   pip install intel-tensorflow==2.11.dev202242

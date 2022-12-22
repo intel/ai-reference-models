@@ -125,8 +125,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
-  echo "Throughput:"
-  grep 'Throughput' ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
+  echo "Throughput summary:"
+  grep "Total throughput" ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
   exit 0
 else
   exit 1

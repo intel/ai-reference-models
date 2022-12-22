@@ -2,16 +2,16 @@
 ## Pre-Trained Model
 
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
+```bash
+# INT8:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
 
-Paths to the pb files relative to tf_dataset:
-* INT8:
-  BERT-Large-squad_int8 = /tf_dataset/pre-trained-models/bert_squad/int8/per_channel_opt_int8_bf16_bert.pb
+# FP32 and BFloat32:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_fp32.pb
 
-* FP32 and BFloat32:
-  BERT-Large-squad_fp32 = /tf_dataset/pre-trained-models/bert_squad/fp32/new_fp32_bert_squad.pb
-
-* BFloat16:
-  BERT-Large-squad_bfloat16 = /tf_dataset/pre-trained-models/bert_squad/bfloat16/optimized_bf16_bert.pb
+# BFloat16:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
+```
 
 ## Run the model
 
@@ -21,6 +21,9 @@ an output directory.
 ```
 # Navigate to the container package directory
 cd models
+
+# Install pre-requisites for the model:
+./quickstart/language_translation/tensorflow/transformer_mlperf/inference/cpu/setup_spr.sh
 
 # Set the required environment vars
 export PRECISION=<specify the precision to run: int8, fp32, bfloat16 or bfloat32>

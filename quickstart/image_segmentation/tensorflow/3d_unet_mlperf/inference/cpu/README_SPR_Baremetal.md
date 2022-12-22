@@ -15,6 +15,12 @@ Intel-optimized TensorFlow.
   virtualenv -p python <virtualenv_name>
   source <virtualenv_name>/bin/activate
   ```
+  
+* Install git, numactl and wget, if not installed already
+  ```bash
+  yum update -y && yum install -y git numactl wget
+  ```
+
 * Install Intel Tensorflow
   ```bash
   pip install intel-tensorflow==2.11.dev202242
@@ -57,16 +63,16 @@ Set the `DATASET_DIR` to point to the directory that contains the dataset files 
 ## Pre-Trained Model
 
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
+```bash
+# INT8:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
 
-Paths to the pb files relative to tf_dataset:
-* INT8:
-  BERT-Large-squad_int8 = /tf_dataset/pre-trained-models/3DUNet/int8/3dunet_new_int8_bf16.pb
+# FP32 and BFloat32:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
 
-* FP32 and BFloat32:
-  BERT-Large-squad_fp32 = /tf_dataset/pre-trained-models/3DUNet/fp32/3dunet_dynamic_ndhwc.pb
-
-* BFloat16:
-  BERT-Large-squad_bfloat16 = /tf_dataset/pre-trained-models/3DUNet/bfloat16/3dunet_dynamic_ndhwc.pb
+# BFloat16:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
+```
 
 ## Run the model
 
@@ -76,16 +82,18 @@ specify pretrained model, the dataset directory, precision to run, and an output
 # Navigate to the model zoo repository
 cd models
 
-# Install pre-requisites for thr model:
+# Install pre-requisites for the model:
 pip install -r benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/requirements.txt
 
 # Set the required environment vars
-export DATASET_DIR=<path to the dataset>
 export PRECISION=<specify the precision to run: int8, fp32, bfloat16 and bfloat32>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the downloaded pre-trained model>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
+
+# Dataset is only required for running accuracy script, Inference scripts don't require 'DATASET_DIR' to be set:
+export DATASET_DIR=<path to the dataset>
 
 # Run the script:
 ./quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/<script_name>.sh
