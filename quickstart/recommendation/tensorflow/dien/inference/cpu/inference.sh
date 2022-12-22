@@ -83,10 +83,3 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive
 
-if [[ $? == 0 ]]; then
-  echo "The recommendations/second summary:"
-  cat ${OUTPUT_DIR}/dien_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | grep "Approximate.*recommendations/second is " | sed -e s"/.*recommendations\/second is//"
-  exit 0
-else
-  exit 1
-fi

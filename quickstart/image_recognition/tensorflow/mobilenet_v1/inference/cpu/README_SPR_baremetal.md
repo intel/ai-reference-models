@@ -52,9 +52,11 @@ Download the model pretrained frozen graph from the given link based on the prec
 ```
 # FP32, BFloat16 and BFloat32 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_fp32_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/mobilenetv1_fp32_pretrained_model.pb
 
 # Int8 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_int8_pretrained_model.pb
+export PRETRAINED_MODEL=$(pwd)/mobilenetv1_int8_pretrained_model.pb
 ```
 
 ## Run the model
