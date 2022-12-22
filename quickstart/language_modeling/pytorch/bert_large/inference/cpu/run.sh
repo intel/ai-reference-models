@@ -39,7 +39,7 @@ echo "PRETRAINED_MODEL: ${PRETRAINED_MODEL}"
 IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-spr-bert-large-inference}
 DOCKER_ARGS=${DOCKER_ARGS:---privileged --init -it}
 WORKDIR=/workspace/pytorch-spr-bert-large-inference
-EVAL_SCRIPT="${WORKDIR}/quickstart/transformers/examples/question-answering/run_squad.py"
+EVAL_SCRIPT="${WORKDIR}/quickstart/transformers/examples/legacy/question-answering/run_squad.py"
 mkdir -p $OUTPUT_DIR
 
 # inference scripts:
