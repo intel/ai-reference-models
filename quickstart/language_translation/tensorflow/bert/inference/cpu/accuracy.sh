@@ -87,6 +87,13 @@ fi
 
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+if [[ ${PLATFORM} == "windows" ]]; then
+  CORES="${NUMBER_OF_PROCESSORS}"
+else
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+fi
+
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --accuracy-only \
   --checkpoint $DATASET_DIR/uncased_L-12_H-768_A-12/ \
@@ -97,11 +104,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --mode inference \
   --framework tensorflow \
   --batch-size=${BATCH_SIZE} \
-  --num-cores 28 \
+  --num-cores $CORES \
   --num-inter-threads 1 \
-  --num-intra-threads 28 \
+  --num-intra-threads $CORES \
   --socket-id 0 \
   --output-dir ${OUTPUT_DIR} \
+  $@ \
   -- \
   task-name=MRPC \
   max-seq-length=128 \
