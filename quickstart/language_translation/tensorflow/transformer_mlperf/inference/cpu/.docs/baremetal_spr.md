@@ -6,7 +6,7 @@ Download the model pretrained frozen graph from the given link based on the prec
 # INT8:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
 
-# FP32 and BFloat32:
+# FP32:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_fp32.pb
 
 # BFloat16:
