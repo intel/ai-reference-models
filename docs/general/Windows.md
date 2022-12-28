@@ -39,7 +39,7 @@ The following list of models are tested on Windows, please check each model inst
 | Image Segmentation      | [3D U-Net MLPerf](https://arxiv.org/pdf/1606.06650.pdf) | Inference | [FP32 BFloat16](/benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/inference/README.md) |
 | Language Modeling       | [BERT](https://arxiv.org/pdf/1810.04805.pdf) | Inference | [FP32](/benchmarks/language_modeling/tensorflow/bert_large/inference/fp32/README.md) |
 | Language Translation    | [BERT](https://arxiv.org/pdf/1810.04805.pdf) | Inference | [FP32](/benchmarks/language_translation/tensorflow/bert/inference/README.md) |
-| Language Translation    | [Transformer_LT_Official](https://arxiv.org/pdf/1706.03762.pdf) | Inference | [FP32](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/fp32/README.md) |
+| Language Translation    | [Transformer_LT_Official](https://arxiv.org/pdf/1706.03762.pdf) | Inference | [FP32](/benchmarks/language_translation/tensorflow/transformer_lt_official/inference/README.md) |
 | Object Detection        | [R-FCN](https://arxiv.org/pdf/1605.06409.pdf) | Inference | [Int8 FP32](/benchmarks/object_detection/tensorflow/rfcn/inference/README.md) |
 | Object Detection        | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf) | Inference | [Int8 FP32](/benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/README.md) |
 | Object Detection        | [SSD-ResNet34*](https://arxiv.org/pdf/1512.02325.pdf) | Inference | [Int8 FP32](/benchmarks/object_detection/tensorflow/ssd-resnet34/inference/README.md) |

@@ -1,3 +1,40 @@
+<!--- 0. Title -->
+# Transformer LT Official inference
+
+<!-- 10. Description -->
+
+This document has instructions for running
+[Transformer Language Translation](https://arxiv.org/pdf/1706.03762.pdf)
+ inference using Intel-optimized TensorFlow. The original code for
+the Transformer LT Official model came from the
+[TensorFlow Model Garden repository](https://github.com/tensorflow/models/tree/v2.2.0/official/nlp/transformer).
+
+
+<!--- 30. Datasets -->
+## Dataset
+
+Download and preprocess the English-German dataset using the
+[data_download.py](https://github.com/tensorflow/models/blob/v2.2.0/official/nlp/transformer/data_download.py)
+script from the [TensorFlow Model Garden repo](https://github.com/tensorflow/models).
+The Transformer model README has a section with
+[instructions for using the script](https://github.com/tensorflow/models/tree/v2.2.0/official/nlp/transformer#download-and-preprocess-datasets).
+
+Once the script completes, you should have a dataset directory with
+the following files: `newstest2014.de`, `newstest2014.en`, and
+a vocab text file. For simplicity, rename the vocab file to `vocab.txt`.
+The path to the directory with these files should be set as the
+`DATASET_DIR` environment variable when using the
+[quickstart scripts](#quick-start-scripts).
+
+
+<!--- 40. Quick Start Scripts -->
+## Quick Start Scripts
+
+| Script name | Description |
+|-------------|-------------|
+| [`online_inference.sh`](/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/online_inference.sh) | Runs online inference (batch_size=1). |
+| [`batch_inference.sh`](/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/batch_inference.sh) | Runs batch inference (batch_size=64). |
+
 <!--- 50. AI Kit -->
 ## Run the model
 
@@ -68,13 +105,14 @@ cd models
 
 # Set env vars
 export DATASET_DIR=<path to the test dataset directory>
+export PRECISION=fp32
 export PRETRAINED_MODEL=<path to the frozen graph .pb file>
 export OUTPUT_DIR=<path to the directory where the log and translation file will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
 # Run a quickstart script
-./quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/<script name>.sh
+./quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/<script name>.sh
 ```
 
 ### Run on Windows
@@ -85,13 +123,14 @@ cd models
 
 # Set env vars
 set DATASET_DIR=<path to the test dataset directory>
+set PRECISION=fp32
 set PRETRAINED_MODEL=<path to the frozen graph .pb file>
 set OUTPUT_DIR=<directory where the log and translation file will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 set BATCH_SIZE=<customized batch size value>
 
 # Run a quickstart script
-bash quickstart\language_translation\tensorflow\transformer_lt_official\inference\cpu\fp32\<script name>.sh
+bash quickstart\language_translation\tensorflow\transformer_lt_official\inference\cpu\<script name>.sh
 ```
 > Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
 As an example, if the pretrained model path on Windows is `D:\user\transformer_lt_official_fp32_pretrained_model\graph\fp32_graphdef.pb`, convert the Windows path to Unix as shown:
@@ -100,3 +139,11 @@ As an example, if the pretrained model path on Windows is `D:\user\transformer_l
 > /d/user/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb
 >```
 >Then, set the `PRETRAINED_MODEL` environment variable `set PRETRAINED_MODEL=/d/user/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb`.
+
+<!--- 90. Resource Links-->
+## Additional Resources
+
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [<bfloat16 precision>](<bfloat16 advanced readme link>) for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
+  workload container:<br />
+  [https://software.intel.com/content/www/us/en/develop/articles/containers/transformer-lt-official-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/transformer-lt-official-fp32-inference-tensorflow-container.html).

@@ -35,6 +35,18 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# If precision env is not mentioned, then the workload will run with the default precision.
+if [ -z "${PRECISION}"]; then
+  PRECISION=fp32
+  echo "Running with default precision ${PRECISION}"
+fi
+
+if [[ $PRECISION != "fp32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precision is fp32."
+  exit 1
+fi
+
 PRETRAINED_MODEL=${PRETRAINED_MODEL-"$MODEL_DIR/transformer_lt_official_fp32_pretrained_model/graph/fp32_graphdef.pb"}
 if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   # If the frozen graph is not found, check if we have to untar the file
@@ -53,14 +65,14 @@ VOCAB_FILE=${VOCAB_FILE-vocab.txt}
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1"
+  BATCH_SIZE="64"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name transformer_lt_official \
-  --precision fp32 \
+  --precision ${PRECISION} \
   --mode inference \
   --framework tensorflow \
   --batch-size ${BATCH_SIZE} \
