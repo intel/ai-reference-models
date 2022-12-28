@@ -1,10 +1,10 @@
 <!--- 0. Title -->
-# MLPerf GNMT FP32 inference
+# MLPerf GNMT inference
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running MLPerf GNMT FP32 inference using
+This document has instructions for running MLPerf GNMT inference using
 Intel-optimized TensorFlow.
 
 <!--- 30. Datasets -->
@@ -25,9 +25,9 @@ Set the `DATASET_DIR` to point as instructed above  when running MLPerf GNMT.
 
 | Script name | Description |
 |-------------|-------------|
-| [`fp32_online_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/fp32_online_inference.sh) | Runs online inference (batch_size=1). |
-| [`fp32_batch_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/fp32_batch_inference.sh) | Runs batch inference (batch_size=32). |
-| [`fp32_accuracy.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/fp32_accuracy.sh) | Runs accuracy |
+| [`online_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/online_inference.sh) | Runs online inference (batch_size=1). |
+| [`batch_inference.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/batch_inference.sh) | Runs batch inference (batch_size=32). |
+| [`accuracy.sh`](/quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/accuracy.sh) | Runs accuracy |
 
 <!--- 50. AI Kit -->
 ## Run the model
@@ -57,7 +57,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       <p>To run without AI Kit you will need:</p>
       <ul>
         <li>Python 3
-        <li>intel-tensorflow>=2.5.0
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>git
         <li>numactl
         <li>pip
@@ -85,14 +85,14 @@ then build and install the TensorFlow addons wheel.
 #   Clone TensorFlow addons (r0.5) and apply a patch: A patch file
 #   is attached in Intel Model Zoo MLpref GNMT model scripts,
 #   it fixes TensorFlow addons (r0.5) to work with TensorFlow
-#   version 2.3, and prevents TensorFlow 2.0.0 to be installed
+#   version 2.11, and prevents TensorFlow 2.0.0 to be installed
 #   by default as a required dependency.
 git clone --single-branch --branch=r0.5 https://github.com/tensorflow/addons.git
 cd addons
-git apply ../models/language_translation/tensorflow/mlperf_gnmt/gnmt-v0.5.2.patch
+git apply ../models/language_translation/tensorflow/mlperf_gnmt/gnmt-fix.patch
 
 #   Build TensorFlow addons source code and create TensorFlow addons
-#   pip wheel. Use bazel 3.0.0 version :
+#   pip wheel. Use bazel 6.0.0 version :
 #   Answer yes to questions while running configure.sh
 bash configure.sh
 bazel build --enable_runfiles build_pip_pkg
@@ -109,21 +109,20 @@ cd models
 
 # Set env var paths
 export DATASET_DIR=<path to the dataset>
+export PRECISION=fp32
 export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<path to the pretrained model frozen graph>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 
 # Run a quickstart script
-./quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/fp32/<script name>.sh
+./quickstart/language_translation/tensorflow/mlperf_gnmt/inference/cpu/<script name>.sh
 ```
 
 <!--- 90. Resource Links-->
 ## Additional Resources
 
-* To run more advanced use cases, see the instructions [here](Advanced.md)
-  for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [<bfloat16 precision>](<bfloat16 advanced readme link>) for calling the `launch_benchmark.py` script directly.
+* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
   workload container:<br />
   [https://software.intel.com/content/www/us/en/develop/articles/containers/gnmt-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/gnmt-fp32-inference-tensorflow-container.html).
-
