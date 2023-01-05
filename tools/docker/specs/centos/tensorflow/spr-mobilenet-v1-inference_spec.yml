@@ -45,12 +45,12 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/mobilenet_v1/int8/mobilenetv1_int8_pretrained_model_new.pb
-        destination: pretrained_model/mobilenet_v1_int8_pretrained_model.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-        destination: pretrained_model/mobilenet_v1_bfloat16_pretrained_model.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/mobilenet_v1/fp32/mobilenetv1_fp32_pretrained_model_new.pb
-        destination: pretrained_model/mobilenet_v1_fp32_pretrained_model.pb
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_int8_pretrained_model.pb
+        destination: pretrained_model/mobilenetv1_int8_pretrained_model_new.pb
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_fp32_pretrained_model.pb
+        destination: pretrained_model/mobilenetv1_fp32_pretrained_model_new.pb
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/mobilenetv1_fp32_pretrained_model.pb
+        destination: pretrained_model/mobilenetv1_fp32_pretrained_model_new.pb
       wrapper_package_files:
         - source: output/tf-spr-mobilenet-v1-inference.tar.gz
           destination: model_packages/tf-spr-mobilenet-v1-inference.tar.gz

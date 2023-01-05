@@ -40,10 +40,10 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/3DUNet/fp32/3dunet_dynamic_ndhwc.pb
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
         destination: pretrained_model/3dunet_dynamic_ndhwc.pb
-      - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/3DUNet/int8/3dunet_int8_bf16_manual_2_explicit_pad.pb
-        destination: pretrained_model/3dunet_fused_pad_int8.pb
+      - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_new_int8_bf16.pb
+        destination: pretrained_model/3dunet_new_int8_bf16.pb
       wrapper_package_files:
         - source: output/tf-spr-3d-unet-mlperf-inference.tar.gz
           destination: model_packages/tf-spr-3d-unet-mlperf-inference.tar.gz

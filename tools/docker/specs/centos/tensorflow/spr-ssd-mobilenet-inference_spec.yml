@@ -52,8 +52,10 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/SSDMobilenet/fp32/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
           destination: pretrained_model/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
+          destination: pretrained_model/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
       wrapper_package_files:
         - source: output/tf-spr-ssd-mobilenet-inference.tar.gz
           destination: model_packages/tf-spr-ssd-mobilenet-inference.tar.gz

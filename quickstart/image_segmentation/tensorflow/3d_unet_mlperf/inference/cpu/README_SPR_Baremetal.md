@@ -65,7 +65,7 @@ Set the `DATASET_DIR` to point to the directory that contains the dataset files 
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
 ```bash
 # INT8:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_new_int8_bf16.pb
 
 # FP32 and BFloat32:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/3dunet_dynamic_ndhwc.pb
