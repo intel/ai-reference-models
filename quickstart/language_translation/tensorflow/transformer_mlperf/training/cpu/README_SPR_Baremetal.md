@@ -6,7 +6,6 @@
 This document has instructions for running Transformer Language training on baremetal
 using Intel-optimized TensorFlow.
 
-
 <!-- 20. Environment setup on baremetal -->
 ## Setup on baremetal
 

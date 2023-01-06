@@ -28,15 +28,11 @@ cd /tmp/openmpi && \
 curl -fSsL -O ${OPENMPI_DOWNLOAD_URL} && \
 tar zxf ${OPENMPI_VERSION}.tar.gz && \
 cd ${OPENMPI_VERSION} && \
-./configure --enable-mpirun-prefix-by-default && \
-make -j $(nproc) all && \
-make install && \
-ldconfig && \
-cd / && \
-rm -rf /tmp/openmpi
+./configure --prefix=/tmp/openmpi/ && \
+make all install
+cd - 
 
-# Create a wrapper for OpenMPI to allow running as root by default
-mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
-echo '#!/bin/bash' > /usr/local/bin/mpirun && \
-echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
-chmod a+x /usr/local/bin/mpirun
+export PATH=$PATH:/tmp/openmpi/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/tmp/openmpi/lib
+
+source $HOME/.bashrc

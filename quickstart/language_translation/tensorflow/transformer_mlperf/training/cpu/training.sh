@@ -49,8 +49,13 @@ fi
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
-# Subtract 4 to use as the num_intra_threads
-num_intra_threads=$(($cores_per_socket - 4))
+# Select the num_intra_threads
+if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat32" ]; then
+  num_intra_threads=$(($cores_per_socket - 4))
+elif [ ${PRECISION} == "bfloat16" ]; then
+  export KMP_BLOCKTIME=5
+  num_intra_threads=$(($cores_per_socket - 2))
+fi
 
 NUM_INSTANCES="1"
 
