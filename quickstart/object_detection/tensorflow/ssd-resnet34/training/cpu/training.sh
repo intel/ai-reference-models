@@ -58,7 +58,7 @@ fi
 
 # Apply the TF 2.0 patch to the TF_MODELS_DIR
 cd ${TF_MODELS_DIR}
-if [ ${PRECISION} == "fp32" || $PRECISION == "bfloat32" ]; then
+if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat32" ]; then
   git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
 elif [ ${PRECISION} == "bfloat16" ]; then
   git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/bfloat16/tf-2.0.diff

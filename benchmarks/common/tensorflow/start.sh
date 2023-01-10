@@ -1093,20 +1093,17 @@ function ssd-resnet34() {
             model_source_dir=${EXTERNAL_MODELS_SOURCE_DIRECTORY}
             infer_dir="${INTELAI_MODELS}/${MODE}"
           fi
+          benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
+          model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
+          
+          cd  ${model_source_dir}/../
+          cd ssd-resnet-benchmarks
+          git apply ${benchmarks_patch_path}
 
-          if [ ${NOINSTALL} != "True" ]; then
-            benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
-            model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
-
-            cd  ${model_source_dir}/../
-            cd ssd-resnet-benchmarks
-            git apply ${benchmarks_patch_path}
-
-            cd ${model_source_dir}
-            git apply ${model_patch_path}
-            export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
-            export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
-          fi
+          cd ${model_source_dir}
+          git apply ${model_patch_path}
+          export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
+          export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
 
           cd ${old_dir}
 
@@ -1159,7 +1156,8 @@ function ssd-resnet34() {
           $(add_arg "--timeline" ${TIMELINE}) \
           $(add_arg "--num_warmup_batches" ${NUM_WARMUP_BATCHES})"
           local old_pythonpath=${PYTHONPATH}
-          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+          export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}:${TF_MODELS_DIR}/research:"/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
           CMD=${CMD} run_model
           PYTHONPATH=${old_pythonpath}
         else
