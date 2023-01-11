@@ -87,7 +87,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 BATCH_SIZE=1
 
 rm -rf ${OUTPUT_DIR}/${MODEL_NAME}_log*
-SOUREC_PREFIX="translate English to Romanian: "
+SOURCE_PREFIX="translate English to Romanian: "
 
 #Get platform type
 source "${MODEL_DIR}/quickstart/common/utils.sh"
@@ -98,7 +98,7 @@ if [[ ${PLATFORM} == "windows" ]]
 then
 	SOURCE_PREFIX='translate English to Romanian:'
 else
-	SOURCE_PREFIX=\"translate English to Romanian: \" 
+	SOURCE_PREFIX=\"translate English to Romanian: \"
 fi
 
 # check if stoch PYT or IPEX is installed on the system
@@ -121,7 +121,7 @@ python ${IPEX_ARGS} \
     --overwrite_cache 1 \
     --source_lang en \
     --target_lang ro \
-    --source_prefix SOURCE_PREFIX \
+    --source_prefix ${SOURCE_PREFIX} \
     --dataset_name wmt16 \
     --dataset_config_name ro-en \
     --output_dir ${OUTPUT_DIR} \
