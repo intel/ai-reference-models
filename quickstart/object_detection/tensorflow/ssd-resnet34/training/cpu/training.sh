@@ -69,9 +69,6 @@ cd ${MODEL_DIR}
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
-# Subtract 4 to use as the num_intra_threads
-num_intra_threads=$(($cores_per_socket - 4))
-
 NUM_INSTANCES="1"
 
 #Set up env variable for bfloat32
@@ -99,10 +96,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --mpi_num_processes=${NUM_INSTANCES} \
   --mpi_num_processes_per_socket=1 \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${num_intra_threads} \
+  --num-intra-threads ${cores_per_socket} \
   --num-inter-threads 1 \
   --num-cores ${cores_per_socket} \
-  --num-train-steps 100  --num_warmup_batches=20  --weight_decay=1e-4 \
+  --synthetic-data --num-train-steps 100 --num_warmup_batches=20 --weight_decay=1e-4 \
   $@ 2>&1 | tee ${OUTPUT_DIR}/ssd_resnet34_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
 
 if [[ $? == 0 ]]; then
