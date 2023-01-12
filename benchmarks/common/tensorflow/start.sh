@@ -1157,7 +1157,7 @@ function ssd-resnet34() {
           $(add_arg "--num_warmup_batches" ${NUM_WARMUP_BATCHES})"
           local old_pythonpath=${PYTHONPATH}
           export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-          export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}:${TF_MODELS_DIR}/research:"/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:"/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
           CMD=${CMD} run_model
           PYTHONPATH=${old_pythonpath}
         else
