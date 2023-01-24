@@ -27,12 +27,16 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to int8, fp32 or bfloat16."
+  echo "Please set PRECISION to int8, fp32, bfloat32 or bfloat16."
+  exit 1
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: int8, fp32, bfloat32 and bfloat16"
   exit 1
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-    if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
+    if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_dynamic_ndhwc.pb"
         if [ $PRECISION == "bfloat16" ]; then
             export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="Mul"
@@ -41,7 +45,7 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_fused_pad_int8.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: int8, fp32 and bfloat16"
+        echo "Supported precisions are: int8, fp32, bfloat32 and bfloat16"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -65,6 +69,12 @@ else
       BATCH_SIZE="6"
       echo "Running with default batch size of ${BATCH_SIZE}"
     fi
+fi
+
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
 fi
 
 MODE="inference"
@@ -93,3 +103,4 @@ if [[ $? == 0 ]]; then
 else
   exit 1
 fi
+

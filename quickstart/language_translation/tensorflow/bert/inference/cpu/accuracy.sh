@@ -38,6 +38,19 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+# If precision env is not mentioned, then the workload will run with the default precision.
+if [ -z "${PRECISION}"]; then
+  PRECISION=fp32
+  echo "Running with default precision ${PRECISION}"
+fi
+
+if [[ $PRECISION != "fp32" ]]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precision is fp32."
+  exit 1
+fi
+
+
 if [ -z "${PRETRAINED_MODEL}" ]; then
   PRETRAINED_MODEL="${DATASET_DIR}/uncased_L-12_H-768_A-12"
 
@@ -74,21 +87,29 @@ fi
 
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+_get_platform_type
+if [[ ${PLATFORM} == "windows" ]]; then
+  CORES="${NUMBER_OF_PROCESSORS}"
+else
+  CORES=`lscpu | grep Core | awk '{print $4}'`
+fi
+
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --accuracy-only \
   --checkpoint $DATASET_DIR/uncased_L-12_H-768_A-12/ \
   --data-location $DATASET_DIR \
   --model-source-dir $MODEL_SOURCE \
   --model-name bert \
-  --precision fp32 \
+  --precision $PRECISION \
   --mode inference \
   --framework tensorflow \
   --batch-size=${BATCH_SIZE} \
-  --num-cores 28 \
+  --num-cores $CORES \
   --num-inter-threads 1 \
-  --num-intra-threads 28 \
+  --num-intra-threads $CORES \
   --socket-id 0 \
   --output-dir ${OUTPUT_DIR} \
+  $@ \
   -- \
   task-name=MRPC \
   max-seq-length=128 \

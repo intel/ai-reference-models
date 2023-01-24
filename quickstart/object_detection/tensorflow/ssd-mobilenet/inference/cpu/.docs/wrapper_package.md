@@ -7,10 +7,10 @@ run <model name> <mode> in a container.
 ├── README.md
 ├── build.sh
 ├── licenses
-│   ├── LICENSE
-│   └── third_party
+│   ├── LICENSE
+│   └── third_party
 ├── model_packages
-│   └── <package name>
+│   └── <package name>
 ├──<package dir>.Dockerfile
 └── run.sh
 ```

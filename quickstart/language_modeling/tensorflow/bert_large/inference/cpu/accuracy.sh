@@ -31,7 +31,11 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to int8, fp32, bfloat32 or bfloat16."
+  exit 1
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: int8, fp32, bfloat32 and bfloat16"
   exit 1
 fi
 
@@ -69,11 +73,11 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_bfloat16_pretrained_model.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
+    elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_fp32_pretrained_model.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -89,7 +93,15 @@ MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="56"
+  if [[ $PRECISION == "int8" ]]; then
+    BATCH_SIZE="16"
+  elif [[ $PRECISION == "bfloat16" ]]; then
+    BATCH_SIZE="32"
+  elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
+    BATCH_SIZE="56"
+    ONEDNN_DEFAULT_FPMATH_MODE=BF16
+    PRECISION="fp32"
+  fi
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -118,3 +130,4 @@ if [[ $? == 0 ]]; then
 else
   exit 1
 fi
+
