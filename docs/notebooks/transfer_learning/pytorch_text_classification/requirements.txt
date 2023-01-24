@@ -1,10 +1,10 @@
 datasets==2.6.1
-intel-extension-for-pytorch==1.12.100
+intel-extension-for-pytorch==1.13.0 # fixed for Snyk scans to avoid vulnerability
 ipywidgets==7.6.5
 notebook==6.5.1
 pandas==1.5.1
 psutil==5.9.3
 scikit-learn==1.1.2
-torch==1.12.1
+torch==1.13.1 # fixed for Snyk scans to avoid vulnerability
 transformers==4.23.1
 wget==3.2

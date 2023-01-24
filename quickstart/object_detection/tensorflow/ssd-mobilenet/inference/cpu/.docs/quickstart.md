@@ -3,6 +3,7 @@
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_realtime.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision (fp32 or bfloat16). Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32 or bfloat16). Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32 or bfloat16). |
+| [`inference.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference.sh) | Runs inference and outputs performance metrics. Uses synthetic data if no `DATASET_DIR` is set. Supported versions are (fp32, int8, bfloat16) |
+| [`accuracy.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/accuracy.sh) | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required). Supported versions are (fp32, int8, bfloat16, bfloat32). |
+| [`inference_throughput_multi_instance.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_throughput_multi_instance.sh) | A multi-instance run that uses all the cores for each socket for each instance with a batch size of 448 and synthetic data. Supported versions are (fp32, int8, bfloat16, bfloat32) |
+| [`inference_realtime_multi_instance.sh`](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/inference_realtime_multi_instance.sh) | A multi-instance run that uses 4 cores per instance with a batch size of 1. Uses synthetic data if no `DATASET_DIR` is set. Supported versions are (fp32, int8, bfloat16, bfloat32) |
