@@ -1,0 +1,126 @@
+<!--- 50. AI Kit -->
+## Run the model
+
+Setup your environment using the instructions below, depending on if you are
+using [AI Kit](/docs/general/tensorflow/AIKit.md):
+
+<table>
+  <tr>
+    <th>Setup using AI Kit on Linux</th>
+    <th>Setup without AI Kit on Linux</th>
+    <th>Setup without AI Kit on Windows</th>
+  </tr>
+  <tr>
+    <td>
+      <p>To run using AI Kit on Linux you will need:</p>
+      <ul>
+        <li>numactl
+        <li>wget
+        <li>build-essential
+        <li>Cython
+        <li>contextlib2
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>pillow>=9.3.0
+        <li>pycocotools
+        <li>Activate the `tensorflow` conda environment
+        <pre>conda activate tensorflow</pre>
+      </ul>
+    </td>
+    <td>
+      <p>To run without AI Kit on Linux you will need:</p>
+      <ul>
+        <li>Python 3
+        <li>git
+        <li>numactl
+        <li>wget
+        <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
+        <li>build-essential
+        <li>Cython
+        <li>contextlib2
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>pillow>=9.3.0
+        <li>pycocotools
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+    <td>
+      <p>To run without AI Kit on Windows you will need:</p>
+      <ul>
+        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
+        <li>build-essential
+        <li>Cython
+        <li>contextlib2
+        <li>jupyter
+        <li>lxml
+        <li>matplotlib
+        <li>pillow>=9.3.0
+        <li>pycocotools
+        <li>A clone of the Model Zoo repo<br />
+        <pre>git clone https://github.com/IntelAI/models.git</pre>
+      </ul>
+    </td>
+  </tr>
+</table>
+
+For more information on the dependencies, see the documentation on [prerequisites](https://github.com/tensorflow/models/blob/6c21084503b27a9ab118e1db25f79957d5ef540b/research/object_detection/g3doc/installation.md#installation)
+in the TensorFlow models repo.
+
+Download the pretrained model and set the `PRETRAINED_MODEL` environment
+variable to the path of the frozen graph. If you run on Windows, please use a browser to download the pretrained model using the link below.
+For Linux, run:
+```
+# FP32 and BFloat16 Pretrained model
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
+
+# Int8 Pretrained model
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
+export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
+```
+
+After installing the prerequisites and downloading the pretrained model, set the environment variables and for the `DATASET_DIR` use COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.
+Navigate to your model zoo directory and then run a [quickstart script](#quick-start-scripts) on either Linux or Windows.
+
+### Run on Linux
+```
+# cd to your model zoo directory
+cd models
+
+export PRETRAINED_MODEL=<path to the downloaded frozen graph>
+export DATASET_DIR=<path to the coco tf record file>
+export PRECISION=<set the precision to "int8", "fp32" or "bfloat16" >
+export OUTPUT_DIR=<path to the directory where log files will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+
+./quickstart/object_detection/tensorflow/ssd-mobilenet/inference/cpu/<script name>.sh
+```
+
+### Run on Windows
+Using `cmd.exe`, run:
+```
+# cd to your model zoo directory
+cd models
+
+set PRETRAINED_MODEL=<path to the pretrained model pb file>
+set DATASET_DIR=<path to the coco tf record file>
+set OUTPUT_DIR=<directory where log files will be written>
+set PRECISION=<set the precision to "int8" or "fp32">
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+set BATCH_SIZE=<customized batch size value>
+
+# Run a quickstart script (inference.sh and accuracy.sh are supported on windows)
+bash quickstart\object_detection\tensorflow\ssd-mobilenet\inference\cpu\<script name>.sh
+```
+> Note: You may use `cygpath` to convert the Windows paths to Unix paths before setting the environment variables. 
+As an example, if the dataset location on Windows is `D:\user\coco_dataset\coco_val.record`, convert the Windows path to Unix as shown:
+> ```
+> cygpath D:\user\coco_dataset\coco_val.record
+> /d/user/coco_dataset/coco_val.record
+>```
+>Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/coco_dataset/coco_val.record`.
