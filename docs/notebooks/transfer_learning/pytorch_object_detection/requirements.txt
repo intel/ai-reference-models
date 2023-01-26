@@ -1,4 +1,4 @@
-intel_extension_for_pytorch==1.12.100
+intel_extension_for_pytorch==1.13.0 # fixed for Snyk scans to avoid vulnerability
 ipywidgets==8.0.2
 matplotlib==3.6.1
 matplotlib-inline==0.1.6
@@ -10,6 +10,6 @@ Pillow>=9.3.0
 psutil==5.9.3
 pycocotools==2.0.5
 tensorflow-addons==0.18.0
-torchvision==0.13.1
+torchvision==0.14.1 # fixed for Snyk scans to avoid vulnerability
 tqdm==4.64.1
 urllib3==1.26.12
