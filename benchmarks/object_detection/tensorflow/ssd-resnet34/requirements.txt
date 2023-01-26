@@ -1,4 +1,3 @@
-numpy>=1.17.4
 Cython
 contextlib2
 pillow>=9.3.0
@@ -8,6 +7,7 @@ matplotlib
 pycocotools
 tensorflow-addons
 opencv-python
+horovod==0.25.0
 notebook>=6.1.5
 tf_slim
 

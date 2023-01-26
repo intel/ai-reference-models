@@ -1,10 +1,10 @@
 <!--- 0. Title -->
 <!-- This document is auto-generated using markdown fragments and the model-builder -->
 <!-- To make changes to this doc, please change the fragments instead of modifying this doc directly -->
-# ResNet50 V1 FP32 inference - Advanced Instructions
+# ResNet50 FP32 inference - Advanced Instructions
 
 <!-- 10. Description -->
-This document has advanced instructions for running ResNet50 V1 FP32
+This document has advanced instructions for running ResNet50 FP32
 inference, which provides more control over the individual parameters that
 are used. For more information on using [`/benchmarks/launch_benchmark.py`](/benchmarks/launch_benchmark.py),
 see the [launch benchmark documentation](/docs/general/tensorflow/LaunchBenchmark.md).
@@ -41,7 +41,7 @@ export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the frozen graph that you downloaded>
 ```
 
-ResNet50 V1 FP32 inference can be run to test accuracy, batch inference, or online inference.
+ResNet50 FP32 inference can be run to test accuracy, batch inference, or online inference.
 Use one of the following examples below, depending on your use case.
 
 * For accuracy run the following command that uses the `DATASET_DIR`, a batch

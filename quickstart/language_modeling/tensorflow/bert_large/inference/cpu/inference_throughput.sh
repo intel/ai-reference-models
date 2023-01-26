@@ -27,7 +27,11 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to int8, fp32, bfloat32 or bfloat16."
+  exit 1
+elif [ ${PRECISION} != "int8" ] && [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: int8, fp32, bfloat32 and bfloat16"
   exit 1
 fi
 
@@ -65,11 +69,11 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_bfloat16_pretrained_model.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
+    elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_fp32_pretrained_model.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -90,12 +94,20 @@ if [ -z "${BATCH_SIZE}"]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \
   --mode=${MODE} \
+  --warmup-steps=50 \
+  --steps=350 \
   --framework tensorflow \
   --in-graph ${PRETRAINED_MODEL} \
   --data-location=${DATASET_DIR} \
@@ -112,8 +124,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
-  echo "Throughput:"
-  grep 'Throughput:' ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$2;} END{print sum} '
+  echo "Throughput summary:"
+  grep "Total throughput" ${OUTPUT_DIR}/bert_large_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
   exit 0
 else
   exit 1

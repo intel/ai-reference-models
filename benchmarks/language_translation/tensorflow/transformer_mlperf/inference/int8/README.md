@@ -7,7 +7,7 @@
 This document has instructions for running Transformer Language int8 Inference in mlperf
 Benchmark suits using Intel-optimized TensorFlow.
 
-Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
+Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlcommons/training/tree/v0.5/translation/tensorflow/transformer)
 
 The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modify the code of the model, so that it can achieve better performance on Intel CPUs.
 The qunatized model is generated with Intel [LPOT tool](https://github.com/intel/neural-compressor) from fp32 model, and Intel also has optimized the model in the process of quantization. 
@@ -18,12 +18,15 @@ The qunatized model is generated with Intel [LPOT tool](https://github.com/intel
 Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/transformer_data/README.md) to download and preprocess the WMT English-German dataset.
 Set `DATA_DIR` to point out to the location of the dataset directory.
 
+Download the pretrained model using the browser or if you run on Linux, run:
+```
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
+```
+Set the `PB_FILE` environment variable to local file path on your system.
+
+The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
+
 ## Run the model on Linux
-
-Before running inference, users should have the quantized model pb files downloaded from the trained models website the Intel published.
-
-The inference can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
-
 Set the environment variables to point to the dataset directory `DATA_DIR`, the pretrained model path `PB_FILE`, batch size `BATCH_SIZE`, the number of sockets `NUM_SOCKETS`, and the number of cores on your system `NUM_CORES`.
 ```
 export PB_FILE=<path to the frozen pre trained model file>
@@ -89,19 +92,7 @@ something like this, the real throughput and inferencing time varies:
 ```
 
 ## Run the model on Windows
-If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
-
-Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `%CHECKPOINT_DIR%`.
-In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
-To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/int8/transformer/export_transformer.py) in.
-
-Using `cmd.exe`, run:
-```
-set PYTHONPATH=%PYTHONPATH%;<PATH_TO_MODEL_ZOO_ROOT>\models\common\tensorflow
-python export_transformer.py --model_dir=<%CHECKPOINT_DIR%> --pb_path=<frozen_graph_full_path>
-```
-The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run.
-The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
 
 Set the environment variables to point to the dataset directory `DATA_DIR`, the path to the pretrained model file `PB_FILE`, batch size `BATCH_SIZE`, and  the number of sockets `NUM_SOCKETS`.
 You can use `wmic cpu get SocketDesignation` to list the available socket on your system, then set `NUM_SOCKETS` accordingly.
@@ -154,4 +145,3 @@ Using `cmd.exe`, run:
 ```
 where:
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
-

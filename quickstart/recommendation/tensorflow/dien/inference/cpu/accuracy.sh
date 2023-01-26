@@ -27,7 +27,13 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to fp32 or bfloat16 or bfloat32."
+  exit 1
+fi
+
+if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+  echo "The specified precision '${PRECISION}' is unsupported."
+  echo "Supported precisions are: fp32, bfloat16 and bfloat32"
   exit 1
 fi
 
@@ -42,11 +48,11 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-    if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_static_rnn_graph.pb"
+    if [ $PRECISION == "fp32" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "bfloat32" ]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_dynamic_mklgrus.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32 and bfloat16"
+        echo "Supported precisions are: fp32, bfloat16 and bfloat32"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -59,6 +65,13 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
+TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 
+
+# enable bfloat32 datatype on SPR systems
+if [ $PRECISION == "bfloat32" ]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
@@ -77,7 +90,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --data-location=${DATASET_DIR} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --exact-max-length=100 \
+  --graph-type=static \
   --accuracy-only \
   $@ \
   -- DEBIAN_FRONTEND=noninteractive 2>&1 | tee -a ${OUTPUT_DIR}/dien_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log

@@ -5,7 +5,7 @@ and [prepare the dataset](#datasets), use the `run.sh` script from the container
 package to run <model name> <mode> in docker. Set environment variables to
 specify the dataset directory, precision to run, and
 an output directory. By default, the `run.sh` script will run the
-`training.sh` quickstart script.
+`multi_instance_training.sh` quickstart script.
 ```
 # Navigate to the container package directory
 cd tf-spr-resnet50v1-5-training

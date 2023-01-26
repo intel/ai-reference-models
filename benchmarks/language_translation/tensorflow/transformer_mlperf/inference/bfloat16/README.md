@@ -7,7 +7,7 @@
 This document has instructions for running Transformer Language bfloat16 Inference in mlperf
 Benchmark suits using Intel-optimized TensorFlow.
 
-Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlperf/training/tree/master/translation/tensorflow/transformer)
+Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlcommons/training/tree/v0.5/translation/tensorflow/transformer)
 
 The inference code is based on the transformer mlperf evaluation code, but Intel has optimized the inference model by modifying the code of the model, so that it can achieve better performance on Intel CPUs. 
 The bfloat16 model is manually modfied by cast fp32 data type tensor to bfloat16 in the model, and we trained the modified model to reach the same or higher accuracy. The inference is based on the bfloat16 model we trained.
@@ -18,21 +18,15 @@ The bfloat16 model is manually modfied by cast fp32 data type tensor to bfloat16
 Follow [instructions](https://github.com/IntelAI/models/tree/master/datasets/transformer_data/README.md) to download and preprocess the WMT English-German dataset.
 Set `DATA_DIR` to point out to the location of the dataset directory.
 
-
-## Run the model on Linux
-
-Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `$CHECKPOINT_DIR`.
-In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
-
-To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/bfloat16/transformer/export_transformer.py) in:
-
+Download the pretrained model using the browser or if you run on Linux, run:
 ```
-export PYTHONPATH=$PYTHONPATH:<PATH_TO_MODEL_ZOO_ROOT>/models/common/tensorflow
-python export_transformer.py --model_dir=<$CHECKPOINT_DIR> --pb_path=<frozen_graph_full_path>
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
 ```
+Set the `PB_FILE` environment variable to local file path on your system.
+
 The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run. The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
 
-
+## Run the model on Linux
 Set the environment variables to point to the dataset directory `DATA_DIR`, the pretrained model path `PB_FILE`, batch size `BATCH_SIZE`, the number of sockets `NUM_SOCKETS`, and the number of cores on your system `NUM_CORES`.
 ```
 export PB_FILE=<path to the frozen pre trained model file>
@@ -82,7 +76,7 @@ export NUM_SOCKETS=2
 where:
 
    * $DATA_DIR -- the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768
-   * $PB_FILE  -- the path of the frozen model generated with the script, or downloaded from the webiste of trained models the Intel published 
+   * $PB_FILE  -- the path of the frozen model generated with the script, or downloaded from the webiste of trained models the Intel published
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
 The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
@@ -98,24 +92,12 @@ something like this, the real throughput and inferencing time varies:
 ```
 
 ## Run the model on Windows
-If not already setup, please follow instructions for [environment setup on Windows](/docs/general/tensorflow/Windows.md).
-
-Before running inference, users should have the model fully trained and have saved checkpoints ready at the path `%CHECKPOINT_DIR%`.
-In order to improve the performance, we added a new script to generate a frozen model from a fully trained model checkpoint.
-To generate the frozen model, users need to run the following command in the transformer model directory where [export_transformer.py](/models/language_translation/tensorflow/transformer_mlperf/inference/bfloat16/transformer/export_transformer.py) in.
-
-Using `cmd.exe`, run:
-```
-set PYTHONPATH=%PYTHONPATH%;<PATH_TO_MODEL_ZOO_ROOT>\models\common\tensorflow
-python export_transformer.py --model_dir=<%CHECKPOINT_DIR%> --pb_path=<frozen_graph_full_path>
-```
-The translate can be run with accuracy mode or benchmark mode. The benchmark mode will run with the best performance by setting warmup steps and the total steps users want to run.
-The accuracy mode will just run for testing accuracy without setting warmup steps and steps.
+If not already setup, please follow instructions for [environment setup on Windows](/docs/general/Windows.md).
 
 Set the environment variables to point to the dataset directory `DATA_DIR`, the path to the pretrained model file `PB_FILE`, batch size `BATCH_SIZE`, and  the number of sockets `NUM_SOCKETS`.
 You can use `wmic cpu get SocketDesignation` to list the available socket on your system, then set `NUM_SOCKETS` accordingly.
 ```
-set PB_FILE=<path to the directory where the frozen pre trained model file saved>\\transformer_mlperf_bfloat16.pb
+set PB_FILE=<path to the directory where the frozen pre trained model file saved>\\transformer_mlperf_bf16.pb
 set DATA_DIR=<the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768>
 set BATCH_SIZE=1
 set NUM_SOCKETS=2

@@ -19,10 +19,10 @@ Set the `DATASET_DIR` to point to the directory that contains the dataset files 
 
 | Script name | Description |
 |-------------|-------------|
-| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (fp32 or bfloat16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
-| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision ( fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32 or bfloat16). |
+| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (int8, fp32 or bfloat16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
+| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference using 4 cores per instance for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value. |
+| `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (int8, fp32 or bfloat16). |
 
 <!--- 50. AI Kit -->
 ## Run the model
@@ -58,6 +58,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md) on Linux or Windows systems.
 
 Download the pre-trained model based on precision:
 * Download the [FP32 and BFloat16 pre-trained model](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/3dunet_dynamic_ndhwc.pb). 3D-Unet BFloat16 inference depends on Auto-Mixed_precision to convert graph from FP32 to BFloat16 online.
+* Download the [Int8 pre-trained model](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/3dunet_int8_fully_quantized_perchannel.pb).
 
 In this example, we are using the model, trained using the fold 1 BRATS 2019 data.
 The validation files have been copied from [here](https://github.com/mlcommons/inference/tree/r0.7/vision/medical_imaging/3d-unet/folds).
@@ -83,7 +84,7 @@ Set DATASET_DIR if you run `accuracy.sh` to calculate the model accuracy.
 cd models
 
 export DATASET_DIR=<path to the dataset directory>
-export PRECISION=<set the precision "fp32" or "bfloat16">
+export PRECISION=<set the precision "fp32", "int8" or "bfloat16">
 export OUTPUT_DIR=<path to the directory where log files will be written>
 export PRETRAINED_MODEL=<path to the pretrained model file based on the chosen precision>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
@@ -123,3 +124,4 @@ As an example, if the output folder location is `D:\user\output`, convert the Wi
 ## License
 
 Licenses can be found in the model package, in the `licenses` directory.
+

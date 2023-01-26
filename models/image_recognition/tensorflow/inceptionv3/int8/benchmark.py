@@ -147,13 +147,13 @@ if __name__ == "__main__":
 
   print("[Running warmup steps...]")
   for t in range(warmup_steps):
-    data_start_time = time.time()
+    data_start_time = time.perf_counter()
     image_data = data_sess.run(images)
-    data_load_time = time.time() - data_start_time
+    data_load_time = time.perf_counter() - data_start_time
 
-    start_time = time.time()
+    start_time = time.perf_counter()
     infer_sess.run(output_tensor, {input_tensor: image_data})
-    elapsed_time = time.time() - start_time
+    elapsed_time = time.perf_counter() - start_time
 
     # only count the data loading and processing time for real data
     if args.data_location:
@@ -169,13 +169,13 @@ if __name__ == "__main__":
 
   for t in range(steps):
     try:
-      data_start_time = time.time()
+      data_start_time = time.perf_counter()
       image_data = data_sess.run(images)
-      data_load_time = time.time() - data_start_time
+      data_load_time = time.perf_counter() - data_start_time
 
-      start_time = time.time()
+      start_time = time.perf_counter()
       infer_sess.run(output_tensor, {input_tensor: image_data})
-      elapsed_time = time.time() - start_time
+      elapsed_time = time.perf_counter() - start_time
 
       # only count the data loading and processing time for real data
       if args.data_location:

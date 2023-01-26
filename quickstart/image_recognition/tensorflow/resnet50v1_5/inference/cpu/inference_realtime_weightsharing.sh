@@ -47,11 +47,22 @@ elif [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-  echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
-  exit 1
-fi
-    
-if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    if [[ $PRECISION == "int8" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
+    elif [[ $PRECISION == "bfloat16" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
+    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
+    else
+        echo "The specified precision '${PRECISION}' is unsupported."
+        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
+        exit 1
+    fi
+    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+    fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
@@ -61,14 +72,18 @@ export OMP_NUM_THREADS=4
 
 MODE="inference"
 
+#Set up env variable for bfloat32
+if [[ $PRECISION=="bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
+
 # If batch size env is not set, then the workload will run with the default batch size.
 BATCH_SIZE="${BATCH_SIZE:-"1"}"
 
 if [ -z "${STEPS}" ]; then
-  if [[ $PRECISION == "int8" ]]; then
-    STEPS="steps=25000"
-  else
-    STEPS="steps=18000"
+  if [[ $PRECISION == "int8" || $PRECISION == "bfloat16" ]]; then
+    STEPS="steps=1500"
   fi
 else
   STEPS="steps=$STEPS"
@@ -76,10 +91,8 @@ fi
 echo "STEPS: $STEPS"
 
 if [ -z "${WARMUP_STEPS}" ]; then
-  if [[ $PRECISION == "int8" ]]; then
-    WARMUP_STEPS="warmup_steps=10000"
-  else
-    WARMUP_STEPS="warmup_steps=7200"
+  if [[ $PRECISION == "int8" || $PRECISION == "bfloat16" ]]; then
+    WARMUP_STEPS="warmup_steps=100"
   fi
 else
   WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
@@ -87,11 +100,9 @@ fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
 # System envirables  
-export NOINSTALL=True 
 export TF_ENABLE_MKL_NATIVE_FORMAT=1 
 export TF_ONEDNN_ENABLE_FAST_CONV=1 
-export KMP_BLOCKTIME=1 
-export TF_USE_SYSTEM_ALLOCATOR=1
+export TF_ONEDNN_USE_SYSTEM_ALLOCATOR=1
 
 # clean up old log files if found
 rm -rf ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*

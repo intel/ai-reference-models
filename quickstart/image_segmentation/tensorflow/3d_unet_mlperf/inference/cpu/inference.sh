@@ -72,3 +72,4 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --batch-size ${BATCH_SIZE} \
   $@ \
   -- warmup_steps=50 steps=100
+

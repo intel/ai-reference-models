@@ -27,12 +27,12 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, or bfloat16."
+  echo "Please set PRECISION to fp32 or int8 or bfloat16 or bfloat32."
   exit 1
 fi
-if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, bfloat16, and int8"
+  echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
   exit 1
 fi
 
@@ -47,19 +47,35 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
-  echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
-  exit 1
-fi
-    
-if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    if [[ $PRECISION == "int8" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
+    elif [[ $PRECISION == "bfloat16" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
+    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
+    else
+        echo "The specified precision '${PRECISION}' is unsupported."
+        echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
+        exit 1
+    fi
+    if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
+    echo "The pretrained model could not be found. Please set the PRETRAINED_MODEL env var to point to the frozen graph file."
+    exit 1
+    fi
+elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
   echo "The file specified by the PRETRAINED_MODEL environment variable (${PRETRAINED_MODEL}) does not exist."
   exit 1
 fi
 
 # System envirables
-export NOINSTALL=True
 export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1
+
+#Set up env variable for bfloat32
+if [[ $PRECISION=="bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 MODE="inference"
 
@@ -78,7 +94,6 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --accuracy-only \
-  --socket-id 0  --disable-tcmalloc=True \
   $@ 2>&1 | tee ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
 
 if [[ $? == 0 ]]; then

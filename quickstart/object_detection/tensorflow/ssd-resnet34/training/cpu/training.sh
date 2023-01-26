@@ -37,11 +37,11 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or bfloat16."
+  echo "Please set PRECISION to fp32 or bfloat16 or bfloat32."
   exit 1
-elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32 and bfloat16"
+  echo "Supported precisions are: fp32, bfloat16 and bfloat32"
   exit 1
 fi
 
@@ -58,7 +58,7 @@ fi
 
 # Apply the TF 2.0 patch to the TF_MODELS_DIR
 cd ${TF_MODELS_DIR}
-if [ ${PRECISION} == "fp32" ]; then
+if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat32" ]; then
   git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/fp32/tf-2.0.diff
 elif [ ${PRECISION} == "bfloat16" ]; then
   git apply ${MODEL_DIR}/models/object_detection/tensorflow/ssd-resnet34/training/bfloat16/tf-2.0.diff
@@ -69,14 +69,17 @@ cd ${MODEL_DIR}
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
-# Subtract 4 to use as the num_intra_threads
-num_intra_threads=$(($cores_per_socket - 4))
+NUM_INSTANCES="1"
 
-NUM_INSTANCES="2"
+#Set up env variable for bfloat32
+if [[ $PRECISION=="bfloat32" ]]; then
+  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="56"
+  BATCH_SIZE="896"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -93,10 +96,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --mpi_num_processes=${NUM_INSTANCES} \
   --mpi_num_processes_per_socket=1 \
   --batch-size ${BATCH_SIZE} \
-  --num-intra-threads ${num_intra_threads} \
+  --num-intra-threads ${cores_per_socket} \
   --num-inter-threads 1 \
   --num-cores ${cores_per_socket} \
-  --num-train-steps 100  --num_warmup_batches=20  --weight_decay=1e-4 \
+  --synthetic-data --num-train-steps 100 --num_warmup_batches=20 --weight_decay=1e-4 \
   $@ 2>&1 | tee ${OUTPUT_DIR}/ssd_resnet34_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
 
 if [[ $? == 0 ]]; then

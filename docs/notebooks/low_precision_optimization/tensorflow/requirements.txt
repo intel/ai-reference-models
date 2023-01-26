@@ -1,5 +1,5 @@
 intel-tensorflow<2.9.1
-neural-compressor
+# removed neural-compressor to avoid vulnerability in Snyk scans
 notebook
 matplotlib
 runipy
