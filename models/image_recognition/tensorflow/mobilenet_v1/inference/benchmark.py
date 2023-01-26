@@ -130,9 +130,9 @@ if __name__ == "__main__":
     sys.stdout.flush()
     print("[Running warmup steps...]")
     for t in range(warmup_steps):
-      start_time = time.time()
+      start_time = time.perf_counter()
       sess.run(output_tensor, {input_tensor: image_data})
-      elapsed_time = time.time() - start_time
+      elapsed_time = time.perf_counter() - start_time
       if((t+1) % 10 == 0):
         print("steps = {0}, {1} images/sec"
               "".format(t+1, batch_size/elapsed_time))
@@ -141,9 +141,9 @@ if __name__ == "__main__":
     total_time   = 0;
     total_images = 0;
     for t in range(steps):
-      start_time = time.time()
+      start_time = time.perf_counter()
       results = sess.run(output_tensor, {input_tensor: image_data})
-      elapsed_time = time.time() - start_time
+      elapsed_time = time.perf_counter() - start_time
       total_time = total_time + elapsed_time
 
       if((t+1) % 10 == 0):

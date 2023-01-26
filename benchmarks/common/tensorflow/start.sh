@@ -160,7 +160,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=1b3452f
+      export HOROVOD_VERSION=35b27e9
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -202,7 +202,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=1b3452f
+      export HOROVOD_VERSION=35b27e9
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
@@ -233,7 +233,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
       export HOROVOD_WITH_MPI=1
-      export HOROVOD_VERSION=1b3452f
+      export HOROVOD_VERSION=35b27e9
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
@@ -1126,21 +1126,14 @@ function ssd-resnet34() {
           benchmarks_patch_path=${infer_dir}/tf_benchmarks.patch
           model_patch_path=${infer_dir}/tensorflow_models_tf2.0.patch
           
-
-
-
-
           cd  ${model_source_dir}/../
           cd ssd-resnet-benchmarks
           git apply ${benchmarks_patch_path}
 
           cd ${model_source_dir}
           git apply ${model_patch_path}
-
-          if [ ${NOINSTALL} != "True" ]; then
-            export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
-            export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
-          fi
+          export PYTHONPATH=${PYTHONPATH}:"/workspace/models/research"
+          export PYTHONPATH=${PYTHONPATH}:"/workspace/ssd-resnet-benchmarks/scripts/tf_cnn_benchmarks"
 
           cd ${old_dir}
 
@@ -1193,7 +1186,8 @@ function ssd-resnet34() {
           $(add_arg "--timeline" ${TIMELINE}) \
           $(add_arg "--num_warmup_batches" ${NUM_WARMUP_BATCHES})"
           local old_pythonpath=${PYTHONPATH}
-          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+          export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}:${TF_MODELS_DIR}/research:"/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
           CMD=${CMD} run_model
           PYTHONPATH=${old_pythonpath}
         else
@@ -1484,6 +1478,36 @@ function bert_large() {
     fi
 }
 
+# distilBERT base model
+function distilbert_base() {
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]|| [ ${PRECISION} == "int8" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+
+      if [ -z $MAX_SEQ_LENGTH ]; then
+        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
+      fi
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
+
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
@@ -1625,6 +1649,8 @@ elif [ ${MODEL_NAME} == "bert_large" ]; then
   bert_large
 elif [ ${MODEL_NAME} == "dien" ]; then
   dien
+elif [ ${MODEL_NAME} == "distilbert_base" ]; then
+  distilbert_base 
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

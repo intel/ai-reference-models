@@ -1,0 +1,152 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{_TAG_PREFIX}{intel-tf}{image-recognition}{resnet50v1-5-inference}'
+slice_sets:
+  resnet50v1-5-inference:
+  - add_to_name: -resnet50v1-5-inference
+    args:
+    - TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
+    - PACKAGE_NAME=resnet50v1-5-inference
+    dockerfile_subdirectory: model_containers
+    documentation:
+      - docs:
+        - name: Title
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/title.md
+        - name: Description
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/description.md
+        - name: Datasets
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/quickstart.md
+        - name: Docker
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/docker.md
+        - name: Advanced Options
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/advancedoptions.md
+        - name: License
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/license.md
+        name: README.md
+        text_replace:
+          <docker image>: intel/image-recognition:tf-latest-resnet50v1-5-inference
+          <mode>: inference
+          <model name>: ResNet50 v1.5
+          <use case>: image_recognition
+        uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu
+      - docs:
+        - name: Title
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/title.md
+        - name: Description
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/description.md
+        - name: Datasets
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/datasets.md
+        - name: Quick Start Scripts
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/quickstart.md
+        - name: Bare Metal
+          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/baremetal.md
+        - name: Resources
+          uri: models/quickstart/common/.docs/resources_with_portal_link.md
+        name: README.md
+        text_replace:
+          <mode>: inference
+          <fp32 precision>: FP32
+          <fp32 advanced readme link>: fp32/Advanced.md
+          <int8 precision>: Int8
+          <int8 advanced readme link>: int8/Advanced.md
+          <bfloat16 precision>: BFloat16
+          <bfloat16 advanced readme link>: bfloat16/Advanced.md
+          <model name>: ResNet50 v1.5
+          <use case>: image_recognition
+          <workload container url>: https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50v1-5-fp32-inference-tensorflow-container.html
+        uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference
+      - docs:
+        - name: Title
+          uri: models/quickstart/common/.docs/advanced/title.md
+        - name: Description
+          uri: models/quickstart/common/.docs/advanced/description.md
+        - name: Setup
+          uri: models/quickstart/common/.docs/advanced/setup.md
+        - name: Docker arg
+          uri: models/quickstart/common/.docs/advanced/docker_arg.md
+        - name: Launch benchmark instructions
+          uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/int8/.docs/advanced/launch_benchmark_instructions.md
+        name: Advanced.md
+        text_replace:
+          <mode>: inference
+          <model name>: ResNet50 v1.5
+          <precision>: Int8
+          <use case>: image_recognition
+          <docker image>: intel/intel-optimized-tensorflow:latest
+        uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/int8
+      - docs:
+        - name: Title
+          uri: models/quickstart/common/.docs/advanced/title.md
+        - name: Description
+          uri: models/quickstart/common/.docs/advanced/description.md
+        - name: Setup
+          uri: models/quickstart/common/.docs/advanced/setup.md
+        - name: Docker arg
+          uri: models/quickstart/common/.docs/advanced/docker_arg.md
+        - name: Launch benchmark instructions
+          uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/fp32/.docs/advanced/launch_benchmark_instructions.md
+        name: Advanced.md
+        text_replace:
+          <mode>: inference
+          <model name>: ResNet50 v1.5
+          <precision>: FP32
+          <use case>: image_recognition
+          <docker image>: intel/intel-optimized-tensorflow:latest
+        uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/fp32
+      - docs:
+        - name: Title
+          uri: models/quickstart/common/.docs/advanced/title.md
+        - name: Description
+          uri: models/quickstart/common/.docs/advanced/description.md
+        - name: Setup
+          uri: models/quickstart/common/.docs/advanced/setup.md
+        - name: Docker arg
+          uri: models/quickstart/common/.docs/advanced/docker_arg.md
+        - name: Launch benchmark instructions
+          uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16/.docs/advanced/launch_benchmark_instructions.md
+        name: Advanced.md
+        text_replace:
+          <mode>: inference
+          <model name>: ResNet50 v1.5
+          <precision>: BFloat16
+          <use case>: image_recognition
+          <docker image>: intel/intel-optimized-tensorflow:latest
+        uri: models/benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/bfloat16
+    downloads:
+    - destination: pretrained_model/resnet50v1_5_int8_pretrained_model.pb
+      source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50v1_5_int8_pretrained_model.pb
+    - destination: resnet50_v1.pb
+      source: https://zenodo.org/record/2535873/files/resnet50_v1.pb
+    - destination: resnet50_v1_5_bfloat16.pb
+      source: https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_v1_5_bfloat16.pb
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/image_recognition/__init__.py
+      source: benchmarks/image_recognition/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/__init__.py
+      source: benchmarks/image_recognition/tensorflow/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/__init__.py
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/inference
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/inference
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: models/common
+      source: models/common
+    - destination: models/image_recognition/tensorflow/resnet50v1_5/inference
+      source: models/image_recognition/tensorflow/resnet50v1_5/inference
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu
+    partials:
+    - numactl
+    - tcmalloc
+    - model_package
+    - entrypoint

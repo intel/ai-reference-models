@@ -1,0 +1,30 @@
+[
+    {
+      "_comment": "distilbert_base_inference_accuracy_fp32",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=distilbert_base --precision=fp32 --mode=inference --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=-1 --steps=872 --accuracy-only --in-graph=/in_graph/distilbert_base_pretrained.pb --data-location=/dataset --disable-tcmalloc=True",
+      "output": "python /workspace/intelai_models/inference/fp32/evaluate_distilbert.py --batch-size=128 --in-graph=/in_graph/distilbert_base_pretrained.pb --warmup-steps=10 --steps=872 --num-inter-threads=2 --num-intra-threads=56 --data-location=/dataset --accuracy-only --max-seq-length=128",
+      "cpuset": "0-111"
+    },
+
+    {
+        "_comment": "distilbert_base_inference_benchmark_fp32",
+        "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=distilbert_base --precision=fp32 --mode=inference --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=-1 --benchmark-only --in-graph=/in_graph/distilbert_base_pretrained.pb --data-location=/dataset --disable-tcmalloc=True",
+        "output": "python /workspace/intelai_models/inference/fp32/evaluate_distilbert.py --batch-size=128 --in-graph=/in_graph/distilbert_base_pretrained.pb --warmup-steps=10 --steps=850 --num-inter-threads=2 --num-intra-threads=56 --data-location=/dataset --benchmark-only --max-seq-length=128",
+        "cpuset": "0-111"
+    },
+
+    {
+        "_comment": "distilbert_base_inference_accuracy_bfloat16",
+        "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=distilbert_base --precision=bfloat16 --mode=inference --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=-1 --benchmark-only --in-graph=/in_graph/distilbert_base_pretrained.pb --data-location=/dataset --disable-tcmalloc=True",
+        "output": "python /workspace/intelai_models/inference/bfloat16/evaluate_distilbert.py --batch-size=128 --in-graph=/in_graph/distilbert_base_pretrained.pb --warmup-steps=10 --steps=850 --num-inter-threads=2 --num-intra-threads=56 --data-location=/dataset --benchmark-only --max-seq-length=128",
+        "cpuset": "0-111"
+    },
+
+    {
+        "_comment": "distilbert_base_inference_benchmark_bfloat16",
+        "input": "run_tf_benchmark.py --framework=tensorflow --use-case=language_modeling --model-name=distilbert_base --precision=bfloat16 --mode=inference --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=128 --socket-id=-1 --benchmark-only --in-graph=/in_graph/distilbert_base_pretrained.pb --data-location=/dataset --disable-tcmalloc=True",
+        "output": "python /workspace/intelai_models/inference/bfloat16/evaluate_distilbert.py --batch-size=128 --in-graph=/in_graph/distilbert_base_pretrained.pb --warmup-steps=10 --steps=850 --num-inter-threads=2 --num-intra-threads=56 --data-location=/dataset --benchmark-only --max-seq-length=128",
+        "cpuset": "0-111"
+    }
+]
+
