@@ -57,9 +57,9 @@ slice_sets:
         - name: Docker
           uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/.docs/docker.md
         - name: Advanced Options
-          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/advancedoptions.md
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/.docs/advancedoptions.md
         - name: License link
-          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/fp32/.docs/license.md
+          uri: models/quickstart/language_translation/tensorflow/transformer_lt_official/inference/cpu/.docs/license.md
       - name: README.md
         uri: models/benchmarks/language_translation/tensorflow/transformer_lt_official/inference
         text_replace:
