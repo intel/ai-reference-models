@@ -1,16 +1,16 @@
 <!--- 0. Title -->
-# Transformer Language INT8 Inference
+# Transformer Language BFloat16 Inference - Advanced Instructions
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running Transformer Language int8 Inference in mlperf
+This document has instructions for running Transformer Language bfloat16 Inference in mlperf
 Benchmark suits using Intel-optimized TensorFlow.
 
 Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlcommons/training/tree/v0.5/translation/tensorflow/transformer)
 
-The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modify the code of the model, so that it can achieve better performance on Intel CPUs.
-The qunatized model is generated with Intel [LPOT tool](https://github.com/intel/neural-compressor) from fp32 model, and Intel also has optimized the model in the process of quantization. 
+The inference code is based on the transformer mlperf evaluation code, but Intel has optimized the inference model by modifying the code of the model, so that it can achieve better performance on Intel CPUs. 
+The bfloat16 model is manually modfied by cast fp32 data type tensor to bfloat16 in the model, and we trained the modified model to reach the same or higher accuracy. The inference is based on the bfloat16 model we trained.
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -20,7 +20,7 @@ Set `DATA_DIR` to point out to the location of the dataset directory.
 
 Download the pretrained model using the browser or if you run on Linux, run:
 ```
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
 ```
 Set the `PB_FILE` environment variable to local file path on your system.
 
@@ -40,7 +40,7 @@ export NUM_SOCKETS=2
      --benchmark-only --framework tensorflow  \
      --in-graph=$PB_FILE \
      --model-name transformer_mlperf \
-     --mode inference --precision int8 \
+     --mode inference --precision bfloat16\
      --batch-size $BATCH_SIZE \
      --num-intra-threads $NUM_CORES --num-inter-threads $NUM_SOCKETS \
      --verbose \
@@ -60,7 +60,7 @@ export NUM_SOCKETS=2
      --accuracy-only --framework tensorflow  \
      --in-graph=$PB_FILE \
      --model-name transformer_mlperf \
-     --mode inference --precision int8 \
+     --mode inference --precision bfloat16 \
      --batch-size $BATCH_SIZE \
      --num-intra-threads $NUM_CORES --num-inter-threads $NUM_SOCKETS \
      --verbose \
@@ -74,8 +74,9 @@ export NUM_SOCKETS=2
         steps=100 
 ```
 where:
+
    * $DATA_DIR -- the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768
-   * $PB_FILE  -- the path of the quantized model downloaded from the trained models website the Intel published. 
+   * $PB_FILE  -- the path of the frozen model generated with the script, or downloaded from the webiste of trained models the Intel published
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
 The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
@@ -86,9 +87,8 @@ something like this, the real throughput and inferencing time varies:
 ```
   Total inferencing time: xxx
   Throughput: xxx  sentences/second
-  Case-insensitive results: 26.664000749588013
-  Case-sensitive results: 26.154428720474243
-
+  Case-insensitive results: 27.636119723320007
+  Case-sensitive results: 27.127626538276672
 ```
 
 ## Run the model on Windows
@@ -97,7 +97,7 @@ If not already setup, please follow instructions for [environment setup on Windo
 Set the environment variables to point to the dataset directory `DATA_DIR`, the path to the pretrained model file `PB_FILE`, batch size `BATCH_SIZE`, and  the number of sockets `NUM_SOCKETS`.
 You can use `wmic cpu get SocketDesignation` to list the available socket on your system, then set `NUM_SOCKETS` accordingly.
 ```
-set PB_FILE=<path to the directory where the frozen pre trained model file saved>\\transformer_mlperf_int8.pb
+set PB_FILE=<path to the directory where the frozen pre trained model file saved>\\transformer_mlperf_bf16.pb
 set DATA_DIR=<the input data directory, which should include newstest2014.en, newstest2014.de and vocab.ende.32768>
 set BATCH_SIZE=1
 set NUM_SOCKETS=2
@@ -110,7 +110,7 @@ Using `cmd.exe`, run:
      --benchmark-only --framework tensorflow  ^
      --in-graph=%PB_FILE% ^
      --model-name transformer_mlperf ^
-     --mode inference --precision int8 ^
+     --mode inference --precision bfloat16 ^
      --batch-size %BATCH_SIZE% ^
      --num-intra-threads %NUMBER_OF_PROCESSORS% --num-inter-threads %NUM_SOCKETS% ^
      --verbose ^
@@ -131,7 +131,7 @@ Using `cmd.exe`, run:
      --accuracy-only --framework tensorflow  ^
      --in-graph=%PB_FILE% ^
      --model-name transformer_mlperf ^
-     --mode inference --precision int8 ^
+     --mode inference --precision bfloat16 ^
      --batch-size %BATCH_SIZE% ^
      --num-intra-threads %NUMBER_OF_PROCESSORS% --num-inter-threads %NUM_SOCKETS% ^
      --verbose ^
