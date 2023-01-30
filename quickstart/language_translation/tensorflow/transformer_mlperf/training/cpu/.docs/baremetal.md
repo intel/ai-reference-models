@@ -46,15 +46,21 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
 
 After you've completed the setup, export environment variables for the `DATASET_DIR`
 and an `OUTPUT_DIR` where log files will be written, then run a
-[quickstart script](#quick-start-scripts) from your model zoo directory.
+[quickstart script](#quick-start-scripts) from your model zoo directory. To run
+multi-instance training, set the `MPI_NUM_PROCESSES` var to specify the number of
+instances to run (for example `export MPI_NUM_PROCESSES=2` for 2 instances).
 ```
 # cd to your model zoo directory
 cd models
 
 # Set required environment variables
 export DATASET_DIR=<path to the dataset>
+export PRECISION=<set precision to fp32 or bfloat16>
 export OUTPUT_DIR=<path to the directory where log files will be written>
 
+# Optional: Specify the number of sockets to use for multi-instance training
+export MPI_NUM_PROCESSES=<number of sockets to use>
+
 # Run a quickstart script
-./quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/fp32/<script name>.sh
+./quickstart/language_translation/tensorflow/transformer_mlperf/training/cpu/<script name>.sh
 ```
