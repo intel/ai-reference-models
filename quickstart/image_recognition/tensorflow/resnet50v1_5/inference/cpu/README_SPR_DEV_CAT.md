@@ -36,7 +36,7 @@ Download and preprocess the ImageNet dataset using the [instructions here](https
 After running the conversion script you should have a directory with the
 ImageNet dataset in the TF records format.
 
-Set the `DATASET_DIR` to point to the TF records directory when running MobileNet V1.
+Set the `DATASET_DIR` to point to the TF records directory when running ResNet50 v1.5
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.
@@ -49,7 +49,7 @@ export DOCKER_RUN_ENVS="-e ftp_proxy=${ftp_proxy} \
   -e SOCKS_PROXY=${SOCKS_PROXY}"
 ```
 
-To run MobileNet V1 inference, set environment variables to specify the dataset directory, precision and mode to run, and an output directory. 
+To run ResNet50 v1.5 inference, set environment variables to specify the dataset directory, precision, and an output directory. 
 ```bash
 # Set the required environment vars
 export BATCH_SIZE=<Mention the batch size>
