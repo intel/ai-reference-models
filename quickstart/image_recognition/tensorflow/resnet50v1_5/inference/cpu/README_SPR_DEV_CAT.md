@@ -25,6 +25,10 @@ docker pull intel/image-recognition:spr-resnet50v1-5-inference
          <td>Runs multi instance batch inference using 1 instance per socket for the specified precision (fp32, int8, bfloat16, bfloat32) with 1000 steps, 500 warmup steps and `batch-size=448`. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
       </tr>
       <tr>
+         <td>inference_realtime_weightsharing.sh</td>
+         <td>Runs multi instance realtime inference with weight sharing for the specified precision (int8 or bfloat16) with 1500 steps and 100 warmup steps. If no `DATASET_DIR` is set, synthetic data is used. Waits for all instances to complete, then prints a summarized throughput value.</td>
+      </tr>
+      <tr>
          <td>accuracy.sh</td>
          <td>Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (fp32, int8, bfloat16, bfloat32) with `batch-size=100`.</td>
       </tr>
@@ -67,7 +71,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-resnet50v1-5-inference \
+  -w /workspace/tf-spr-resnet50v1-5-inference \
   intel/image-recognition:spr-resnet50v1-5-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

@@ -67,7 +67,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-mobilenet-v1-inference \
+  -w /workspace/tf-spr-mobilenet-v1-inference \
   intel/image-recognition:spr-mobilenet-v1-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

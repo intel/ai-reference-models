@@ -70,8 +70,8 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-3d-unet-mlperf-inference \
-  iintel/image-segmentation:tf-spr-3d-unet-mlperf-inference \
+  -w /workspace/tf-spr-3d-unet-mlperf-inference \
+  intel/image-segmentation:tf-spr-3d-unet-mlperf-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

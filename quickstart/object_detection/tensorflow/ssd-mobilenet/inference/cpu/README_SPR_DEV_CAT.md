@@ -66,7 +66,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-ssd-mobilenet-inference \
+  -w /workspace/tf-spr-ssd-mobilenet-inference \
   intel/object-detection:spr-ssd-mobilenet-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

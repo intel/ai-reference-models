@@ -78,7 +78,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-bert-large-inference \
+  -w /workspace/tf-spr-bert-large-inference \
   intel/language-modeling:spr-bert-large-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

@@ -73,7 +73,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-resnet34-inference \
+  -w /workspace/tf-spr-ssd-resnet34-inference \
   intel/object-detection:spr-ssd-resnet34-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

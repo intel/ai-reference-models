@@ -54,7 +54,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-transformer-mlperf-training \
+  -w /workspace/tf-spr-transformer-mlperf-training \
   intel/language-translation:spr-transformer-mlperf-training \
   /bin/bash quickstart/training.sh
 ```

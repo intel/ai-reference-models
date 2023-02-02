@@ -17,7 +17,7 @@ docker pull intel/image-recognition:spr-resnet50v1-5-training
    </thead>
    <tbody>
       <tr>
-         <td>multi_instance_training.sh</td>
+         <td>training.sh</td>
          <td>Uses mpirun to execute 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16 or bfloat32). Checkpoint files and logs for each instance are saved to the output directory.</td>
       </tr>
    </tbody>
@@ -55,14 +55,14 @@ docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env PRECISION=${PRECISION}
+  --env PRECISION=${PRECISION} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-resnet50v1_5-training \
+  -w /workspace/tf-spr-resnet50v1-5-training \
   intel/image-recognition:spr-resnet50v1-5-training \
-  /bin/bash quickstart/multi_instance_training.sh
+  /bin/bash quickstart/training.sh
 ```
 
 ## Documentation and Sources

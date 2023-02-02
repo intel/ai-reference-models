@@ -68,7 +68,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-dien-training \
+  -w /workspace/tf-spr-dien-training \
   intel/recommendation:spr-dien-training \
   /bin/bash quickstart/training.sh
 ```

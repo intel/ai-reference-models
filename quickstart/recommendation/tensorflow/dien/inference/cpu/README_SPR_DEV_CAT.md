@@ -75,7 +75,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-dien-inference \
+  -w /workspace/tf-spr-dien-inference \
   intel/recommendation:tf-spr-dien-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

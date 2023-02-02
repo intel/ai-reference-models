@@ -53,7 +53,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-ssd-resnet34-training \
+  -w /workspace/tf-spr-ssd-resnet34-training \
   intel/object-detection:spr-ssd-resnet34-training \
   /bin/bash quickstart/training.sh
 ```

@@ -58,12 +58,12 @@ export PRECISION=<specify the precision to run>
 docker run --rm \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env PRECISION=${PRECISION}
+  --env PRECISION=${PRECISION} \
   --volume ${DATASET_DIR}:${DATASET_DIR} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-spr-transformer-mlperf-inference \
+  -w /workspace/tf-spr-transformer-mlperf-inference \
   intel/language-translation:spr-transformer-mlperf-inference \
   /bin/bash quickstart/${SCRIPT}
 ```

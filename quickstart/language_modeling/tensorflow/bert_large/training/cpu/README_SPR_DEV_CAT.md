@@ -67,7 +67,7 @@ docker run --rm \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --privileged --init -it \
   --shm-size 8G \
-  -w /workspace/tensorflow-bert-large-pretraining \
+  -w /workspace/tf-spr-bert-large-pretraining \
   intel/language-modeling:spr-bert-large-pretraining \
   /bin/bash quickstart/pretraining.sh
 ```
