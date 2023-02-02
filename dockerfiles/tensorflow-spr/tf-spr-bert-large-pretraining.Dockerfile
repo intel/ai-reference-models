@@ -65,7 +65,7 @@ RUN yum update -y && yum install -y  \
     openssh-clients && \
     yum clean all
 
-ARG HOROVOD_VERSION=11c1389
+ARG HOROVOD_VERSION=35b27e9
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \
     HOROVOD_WITH_TENSORFLOW=1 \

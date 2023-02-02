@@ -73,7 +73,7 @@ RUN yum update -y && yum install -y  \
     openssh-clients && \
     yum clean all
 
-ARG HOROVOD_VERSION=11c1389
+ARG HOROVOD_VERSION=35b27e9
 ENV HOROVOD_WITHOUT_MXNET=1 \
     HOROVOD_WITHOUT_PYTORCH=1 \
     HOROVOD_WITH_TENSORFLOW=1 \
@@ -91,7 +91,7 @@ RUN pip install opencv-python
 
 RUN yum update -y && yum install -y numactl
 
-RUN pip install tensorflow-addons==0.11.0
+RUN pip install tensorflow-addons==0.18.0
 
 ARG TF_MODELS_BRANCH="8110bb64ca63c48d0caee9d565e5b4274db2220a"
 

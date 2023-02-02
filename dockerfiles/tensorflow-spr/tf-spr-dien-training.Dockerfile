@@ -25,67 +25,9 @@ ARG TENSORFLOW_TAG="tensorflow-spr"
 
 FROM ${TENSORFLOW_IMAGE}:${TENSORFLOW_TAG}
 
-RUN yum update -y && \
-    yum install -y \
-        numactl \
-        libXext \
-        libSM \
-        python3-tkinter && \
-    pip install requests
-
-ARG PY_VER=38
-RUN yum install -y gcc gcc-c++ && \
-    yum install -y python${PY_VER}-devel && \
-    yum clean all
-
-ARG TF_MODELS_BRANCH="f505cecde2d8ebf6fe15f40fb8bc350b2b1ed5dc"
-
-ARG FETCH_PR
-
-ARG CODE_DIR="/workspace/tf_models"
-
-ENV TF_MODELS_DIR=${CODE_DIR}
-
-RUN yum update -y && yum install -y git && \
-    git clone https://github.com/tensorflow/models.git ${CODE_DIR} && \
-    ( cd ${CODE_DIR} && \
-    if [ ! -z "${FETCH_PR}" ]; then git fetch origin ${FETCH_PR}; fi && \
-    git checkout ${TF_MODELS_BRANCH} )
-
-# Note pycocotools has to be install after the other requirements
-RUN pip install \
-        Cython \
-        contextlib2 \
-        jupyter \
-        lxml \
-        matplotlib \
-        numpy>=1.17.4 \
-        'pillow>=9.3.0' && \
-    pip install pycocotools
-
-ARG TF_MODELS_DIR=/tensorflow/models
-
-# Downloads protoc and runs it for object detection
-RUN cd ${TF_MODELS_DIR}/research && \
-    yum update -y && yum install -y \
-        unzip \
-        wget && \
-    wget --quiet -O protobuf.zip https://github.com/google/protobuf/releases/download/v3.3.0/protoc-3.3.0-linux-x86_64.zip && \
-    unzip -o protobuf.zip && \
-    rm protobuf.zip && \
-    ./bin/protoc object_detection/protos/*.proto --python_out=.
-
-RUN yum update -y && yum install -y \
-       mesa-libGL \
-       glib2-devel
-
-RUN pip install opencv-python
-
-RUN pip install tensorflow-addons==0.18.0
-
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="tf-spr-ssd-resnet34-inference"
+ARG PACKAGE_NAME="tf-spr-dien-training"
 
 ARG MODEL_WORKSPACE
 
@@ -98,6 +40,43 @@ ADD --chown=0:0 ${PACKAGE_DIR}/${PACKAGE_NAME}.tar.gz ${MODEL_WORKSPACE}
 RUN chown -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chgrp -R root ${MODEL_WORKSPACE}/${PACKAGE_NAME} && chmod -R g+s+w ${MODEL_WORKSPACE}/${PACKAGE_NAME} && find ${MODEL_WORKSPACE}/${PACKAGE_NAME} -type d | xargs chmod o+r+x 
 
 WORKDIR ${MODEL_WORKSPACE}/${PACKAGE_NAME}
+
+RUN yum update -y && yum install -y numactl
+
+RUN yum update -y && \
+    yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM && \
+    yum clean all
+
+# Install OpenMPI
+ARG OPENMPI_VERSION="openmpi-4.1.0"
+ARG OPENMPI_DOWNLOAD_URL="https://www.open-mpi.org/software/ompi/v4.1/downloads/openmpi-4.1.0.tar.gz"
+
+RUN mkdir /tmp/openmpi && \
+    cd /tmp/openmpi && \
+    curl -fSsL -O ${OPENMPI_DOWNLOAD_URL} && \
+    tar zxf ${OPENMPI_VERSION}.tar.gz && \
+    cd ${OPENMPI_VERSION} && \
+    ./configure --enable-mpirun-prefix-by-default && \
+    make -j $(nproc) all && \
+    make install && \
+    ldconfig && \
+    cd / && \
+    rm -rf /tmp/openmpi
+
+# Create a wrapper for OpenMPI to allow running as root by default
+RUN mv /usr/local/bin/mpirun /usr/local/bin/mpirun.real && \
+    echo '#!/bin/bash' > /usr/local/bin/mpirun && \
+    echo 'mpirun.real --allow-run-as-root "$@"' >> /usr/local/bin/mpirun && \
+    chmod a+x /usr/local/bin/mpirun
+
+# Configure OpenMPI to run good defaults:
+RUN echo "btl_tcp_if_exclude = lo,docker0" >> /usr/local/etc/openmpi-mca-params.conf
+
+# Install OpenSSH for MPI to communicate between containers
+RUN yum update -y && yum install -y  \
+    openssh-server \
+    openssh-clients && \
+    yum clean all
 
 ENV USER_ID=0
 
@@ -135,14 +114,3 @@ exec /usr/local/bin/gosu $USER_NAME:$GROUP_NAME "$@"\n '\
 RUN chmod u+x,g+x /tmp/entrypoint.sh
 
 ENTRYPOINT ["/tmp/entrypoint.sh"]
-
-ARG TF_BENCHMARKS_BRANCH="509b9d288937216ca7069f31cfb22aaa7db6a4a7"
-
-ARG TF_BENCHMARKS_DIR="/workspace/ssd-resnet-benchmarks"
-
-ENV TF_BENCHMARKS_DIR=${TF_BENCHMARKS_DIR}
-
-RUN yum update -y && yum install -y git && \
-    git clone --single-branch https://github.com/tensorflow/benchmarks.git ${TF_BENCHMARKS_DIR} && \
-    ( cd ${TF_BENCHMARKS_DIR} && \
-    git checkout ${TF_BENCHMARKS_BRANCH} )

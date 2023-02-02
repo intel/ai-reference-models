@@ -27,8 +27,6 @@ slice_sets:
           source: benchmarks/object_detection/__init__.py
         - destination: benchmarks/object_detection/tensorflow/__init__.py
           source: benchmarks/object_detection/tensorflow/__init__.py
-        - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/README.md
-          source: benchmarks/object_detection/tensorflow/ssd-mobilenet/README.md
         - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/__init__.py
           source: benchmarks/object_detection/tensorflow/ssd-mobilenet/__init__.py
         - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py

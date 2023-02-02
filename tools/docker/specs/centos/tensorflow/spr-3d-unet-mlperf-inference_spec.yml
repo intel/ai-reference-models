@@ -21,8 +21,6 @@ slice_sets:
           source: benchmarks/common
         - destination: benchmarks/image_segmentation/__init__.py
           source: benchmarks/image_segmentation/__init__.py
-        - destination: benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/README.md
-          source: benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/README.md
         - destination: benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/inference
           source: benchmarks/image_segmentation/tensorflow/3d_unet_mlperf/inference
         - destination: benchmarks/launch_benchmark.py

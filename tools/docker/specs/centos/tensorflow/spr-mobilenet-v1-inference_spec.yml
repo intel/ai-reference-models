@@ -22,8 +22,6 @@ slice_sets:
           source: benchmarks/image_recognition/__init__.py
         - destination: benchmarks/image_recognition/tensorflow/__init__.py
           source: benchmarks/image_recognition/tensorflow/__init__.py
-        - destination: benchmarks/image_recognition/tensorflow/mobilenet_v1/README.md
-          source: benchmarks/image_recognition/tensorflow/mobilenet_v1/README.md
         - destination: benchmarks/image_recognition/tensorflow/mobilenet_v1/__init__.py
           source: benchmarks/image_recognition/tensorflow/mobilenet_v1/__init__.py
         - destination: benchmarks/image_recognition/tensorflow/mobilenet_v1/inference/__init__.py

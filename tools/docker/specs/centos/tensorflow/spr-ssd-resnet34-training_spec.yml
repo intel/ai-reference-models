@@ -23,7 +23,7 @@ slice_sets:
         - horovod
         - opencv
         - numactl
-        - tensorflow-addons-0.11.0
+        - tensorflow-addons-0.18.0
         - tensorflow/model-source
         - object_detection/protoc
         - object_detection/pip_installs
@@ -36,8 +36,6 @@ slice_sets:
           source: benchmarks/object_detection/__init__.py
         - destination: benchmarks/object_detection/tensorflow/__init__.py
           source: benchmarks/object_detection/tensorflow/__init__.py
-        - destination: benchmarks/object_detection/tensorflow/ssd-resnet34/README.md
-          source: benchmarks/object_detection/tensorflow/ssd-resnet34/README.md
         - destination: benchmarks/object_detection/tensorflow/ssd-resnet34/__init__.py
           source: benchmarks/object_detection/tensorflow/ssd-resnet34/__init__.py
         - destination: benchmarks/object_detection/tensorflow/ssd-resnet34/training/__init__.py

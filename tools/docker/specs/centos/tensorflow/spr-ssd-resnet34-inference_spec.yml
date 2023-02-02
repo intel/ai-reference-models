@@ -35,8 +35,6 @@ slice_sets:
           source: benchmarks/object_detection/__init__.py
         - destination: benchmarks/object_detection/tensorflow/__init__.py
           source: benchmarks/object_detection/tensorflow/__init__.py
-        - destination: benchmarks/object_detection/tensorflow/ssd-resnet34/README.md
-          source: benchmarks/object_detection/tensorflow/ssd-resnet34/README.md
         - destination: benchmarks/object_detection/tensorflow/ssd-resnet34/__init__.py
           source: benchmarks/object_detection/tensorflow/ssd-resnet34/__init__.py
         - destination: benchmarks/object_detection/tensorflow/ssd-resnet34/inference/__init__.py
