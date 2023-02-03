@@ -3,32 +3,23 @@ releases:
     tag_specs:
     - '{spr-dien-training}'
 slice_sets:
-  tf-spr-dien-training:
-  - add_to_name:  tf-spr-dien-training
+  spr-dien-training:
+  - add_to_name: tf-spr-dien-training
     args:
-    - PACKAGE_NAME= tf-spr-dien-training
+    - PACKAGE_NAME=tf-spr-dien-training
     dockerfile_subdirectory: tensorflow-spr
-    documentation:
-      - docs:
-        - name: Title
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/title.md
-        - name: Description
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/description.md
-        - name: Datasets
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/datasets.md
-        - name: Quick Start Scripts
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/quickstart.md
-        - name: Docker
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/docker_spr.md
-        - name: License
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/license.md
-        name: README_SPR_container.md
-        text_replace:
-         <docker image>: model-zoo:tf-spr-dien-training
-          <mode>: training
-          <model name>: DIEN
-          <use case>: recommendation
-        uri: models/quickstart/recommendation/tensorflow/dien/training/cpu
+    args:
+      - PACKAGE_NAME=tf-spr-dien-training
+      - TENSORFLOW_IMAGE=model-zoo
+      - TENSORFLOW_TAG=tensorflow-spr
+    partials:
+      - tensorflow/tensorflow-base
+      - model_package
+      - numactl
+      - gcc-8
+      - openmpi-4.1.0
+      - openssh
+      - entrypoint
     wrapper_package_files:
         - source: output/tf-spr-dien-training.tar.gz
           destination: model_packages/tf-spr-dien-training.tar.gz
@@ -42,8 +33,6 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/recommendation/tensorflow/dien/training/cpu/README_SPR_container.md
-          destination: README.md
     files:
         - destination: benchmarks/common
           source: benchmarks/common

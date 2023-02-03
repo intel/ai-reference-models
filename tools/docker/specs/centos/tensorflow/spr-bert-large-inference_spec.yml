@@ -35,8 +35,8 @@ slice_sets:
           source: benchmarks/launch_benchmark.py
         - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime.sh
           destination: quickstart/inference_realtime.sh
-        - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime_weightsharing.sh
-          destination: quickstart/inference_realtime_weightsharing.sh
+        - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_realtime_weight_sharing.sh
+          destination: quickstart/inference_realtime_weight_sharing.sh
         - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/inference_throughput.sh
           destination: quickstart/inference_throughput.sh
         - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/accuracy.sh
@@ -69,31 +69,3 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README_SPR.md
-          destination: README.md
-      documentation:
-        - docs:
-          - name: Title
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/title.md
-          - name: Description
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/description.md
-          - name: Model Package
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/wrapper_package.md
-          - name: Quickstart
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/quickstart.md
-          - name: Datasets
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/datasets.md
-          - name: Container build
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/container_build.md
-          - name: Docker
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/docker_spr.md
-          - name: License
-            uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/.docs/license.md
-          name: README_SPR.md
-          text_replace:
-            <model name>: BERT Large
-            <mode>: inference
-            <package name>: tf-spr-bert-large-inference.tar.gz
-            <package dir>: tf-spr-bert-large-inference
-            <docker image>: model-zoo:tf-spr-bert-large-inference
-          uri: models/quickstart/language_modeling/tensorflow/bert_large/inference/cpu
