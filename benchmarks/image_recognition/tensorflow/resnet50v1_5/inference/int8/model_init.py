@@ -77,14 +77,15 @@ class ModelInitializer(BaseModelInitializer):
             cmd = os.path.join(
                 self.args.intelai_models, self.args.mode,
                 "eval_image_classifier_inference_weight_sharing.py")
-        if self.args.gpu:
-            cmd = os.path.join(
-                self.args.intelai_models, self.args.mode, self.args.precision,
-                "eval_image_classifier_inference.py")
         else:
-            cmd = os.path.join(
-                self.args.intelai_models, self.args.mode,
-                "eval_image_classifier_inference.py")
+            if self.args.gpu:
+                cmd = os.path.join(
+                    self.args.intelai_models, self.args.mode, self.args.precision,
+                    "eval_image_classifier_inference.py")
+            else:
+                cmd = os.path.join(
+                    self.args.intelai_models, self.args.mode,
+                    "eval_image_classifier_inference.py")
 
         cmd = self.get_command_prefix(self.args.socket_id) + self.python_exe + " " + cmd
 

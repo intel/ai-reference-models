@@ -41,33 +41,5 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/language_modeling/pytorch/bert_large/training/cpu/README_SPR.md
-          destination: README.md
         - source: models/language_modeling/pytorch/bert_large/training/input_preprocessing
           destination: input_preprocessing
-      documentation:
-        - docs:
-          - name: Title
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/title.md
-          - name: Description
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/description.md
-          - name: Model Package
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/wrapper_package.md
-          - name: Quickstart
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/quickstart.md
-          - name: Datasets
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/dataset.md
-          - name: Container build
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/container_build.md
-          - name: Docker
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/docker_spr.md
-          - name: License
-            uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu/.docs/license.md
-          name: README_SPR.md
-          text_replace:
-            <model name>: BERT Large
-            <mode>: training
-            <package name>: pytorch-spr-bert-large-training.tar.gz
-            <package dir>: pytorch-spr-bert-large-training
-            <docker image>: model-zoo:pytorch-bert-large-training
-          uri: models/quickstart/language_modeling/pytorch/bert_large/training/cpu

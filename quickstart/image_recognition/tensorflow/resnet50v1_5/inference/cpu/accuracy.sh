@@ -72,7 +72,7 @@ export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1
 
 #Set up env variable for bfloat32
-if [[ $PRECISION=="bfloat32" ]]; then
+if [[ $PRECISION == "bfloat32" ]]; then
   ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi
