@@ -44,31 +44,4 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/object_detection/pytorch/maskrcnn/inference/cpu/README_SPR.md
-          destination: README.md
-      documentation:
-        - docs:
-          - name: Title
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/title.md
-          - name: Description
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/description.md
-          - name: Model Package
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/wrapper_package.md
-          - name: Quickstart
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/quickstart.md
-          - name: Datasets
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/datasets.md
-          - name: Container build
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/container_build.md
-          - name: Docker
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/docker_spr.md
-          - name: License
-            uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu/.docs/license.md
-          name: README_SPR.md
-          text_replace:
-            <model name>: Mask R-CNN
-            <mode>: inference
-            <package name>: pytorch-spr-maskrcnn-inference.tar.gz
-            <package dir>: pytorch-spr-maskrcnn-inference
-            <docker image>: model-zoo:pytorch-spr-maskrcnn-inference
-          uri: models/quickstart/object_detection/pytorch/maskrcnn/inference/cpu
+

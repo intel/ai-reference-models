@@ -20,27 +20,6 @@ slice_sets:
       - openmpi-4.1.0
       - openssh
       - entrypoint
-    documentation:
-      - docs:
-        - name: Title
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/title.md
-        - name: Description
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/description.md
-        - name: Datasets
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/datasets.md
-        - name: Quick Start Scripts
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/quickstart.md
-        - name: Docker
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/docker_spr.md
-        - name: License
-          uri: models/quickstart/recommendation/tensorflow/dien/training/cpu/.docs/license.md
-        name: README_SPR_container.md
-        text_replace:
-          <docker image>: model-zoo:tf-spr-dien-training
-          <mode>: training
-          <model name>: DIEN
-          <use case>: recommendation
-        uri: models/quickstart/recommendation/tensorflow/dien/training/cpu
     wrapper_package_files:
         - source: output/tf-spr-dien-training.tar.gz
           destination: model_packages/tf-spr-dien-training.tar.gz
@@ -54,8 +33,6 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/recommendation/tensorflow/dien/training/cpu/README_SPR_Container.md
-          destination: README.md
     files:
         - destination: benchmarks/common
           source: benchmarks/common

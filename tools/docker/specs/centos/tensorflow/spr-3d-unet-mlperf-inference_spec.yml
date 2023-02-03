@@ -55,34 +55,7 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/README_SPR.md
-          destination: README.md
       documentation:
-        - docs:
-          - name: Title
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/title.md
-          - name: Description
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/description.md
-          - name: Model Package
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/wrapper_package.md
-          - name: Quickstart
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/quickstart.md
-          - name: Datasets
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/datasets.md
-          - name: Container build
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/container_build.md
-          - name: Docker
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/docker_spr.md
-          - name: License
-            uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/license.md
-          name: README_SPR.md
-          text_replace:
-            <model name>: MLPerf 3D U-Net
-            <mode>: inference
-            <package name>: tf-spr-3d-unet-mlperf-inference.tar.gz
-            <package dir>: tf-spr-3d-unet-mlperf-inference
-            <docker image>: model-zoo:tf-spr-3d-unet-mlperf-inference
-          uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu
         - docs:
           - name: Title
             uri: models/quickstart/image_segmentation/tensorflow/3d_unet_mlperf/inference/cpu/.docs/title.md

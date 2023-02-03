@@ -64,31 +64,4 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/README_SPR_container.md
-          destination: README.md
-      documentation:
-        - docs:
-          - name: Title
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/title.md
-          - name: Description
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/description.md
-          - name: Model Package
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/wrapper_package.md
-          - name: Quickstart
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/quickstart.md
-          - name: Datasets
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/datasets.md
-          - name: Container build
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/container_build.md
-          - name: Docker
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/docker_spr.md
-          - name: License
-            uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/.docs/license.md
-          name: README_SPR.md
-          text_replace:
-            <model name>: ResNet50 v1.5
-            <mode>: inference
-            <package name>: tf-spr-resnet50v1-5-inference.tar.gz
-            <package dir>: tf-spr-resnet50v1-5-inference
-            <docker image>: model-zoo:tf-spr-resnet50v1-5-inference
-          uri: models/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu
+
