@@ -52,7 +52,7 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 NUM_INSTANCES="1"
 
 #Set up env variable for bfloat32
-if [[ $PRECISION=="bfloat32" ]]; then
+if [[ $PRECISION == "bfloat32" ]]; then
   ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi

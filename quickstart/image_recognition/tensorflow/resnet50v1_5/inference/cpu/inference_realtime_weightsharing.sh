@@ -73,7 +73,7 @@ export OMP_NUM_THREADS=4
 MODE="inference"
 
 #Set up env variable for bfloat32
-if [[ $PRECISION=="bfloat32" ]]; then
+if [[ $PRECISION == "bfloat32" ]]; then
   ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi
@@ -110,7 +110,7 @@ rm -rf ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inferen
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _get_numa_cores_lists
-_command numactl --physcpubind=${cores_arr[0]} -m 0 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_command numactl --localalloc --physcpubind=${cores_arr[0]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -126,7 +126,7 @@ _command numactl --physcpubind=${cores_arr[0]} -m 0 python ${MODEL_DIR}/benchmar
   -- \
   $WARMUP_STEPS \
   $STEPS >> ${OUTPUT_DIR}/ResNet_50_v1_5_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
-numactl --physcpubind=${cores_arr[1]} -m 1 python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+numactl --localalloc --physcpubind=${cores_arr[1]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -152,3 +152,4 @@ if [[ $? == 0 ]]; then
 else
   exit 1
 fi
+

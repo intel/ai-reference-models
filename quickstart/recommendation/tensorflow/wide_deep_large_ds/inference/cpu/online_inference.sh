@@ -74,12 +74,6 @@ if [ -z "${BATCH_SIZE}"]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
-# If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1"
-  echo "Running with default batch size of ${BATCH_SIZE}"
-fi
-
 # Run wide and deep large dataset inference
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

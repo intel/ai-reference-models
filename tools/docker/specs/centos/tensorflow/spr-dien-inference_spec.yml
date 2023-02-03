@@ -58,34 +58,7 @@ slice_sets:
           destination: licenses/LICENSE
         - source: third_party
           destination: licenses/third_party
-        - source: quickstart/recommendation/tensorflow/dien/inference/cpu/README_SPR_container.md
-          destination: README.md
       documentation:
-        - docs:
-          - name: Title
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/title.md
-          - name: Description
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/description.md
-          - name: Model Package
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/wrapper_package.md
-          - name: Quickstart
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/quickstart_spr.md
-          - name: Datasets
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/datasets.md
-          - name: Container build
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/container_build.md
-          - name: Docker
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/docker_spr.md
-          - name: License
-            uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/license.md
-          name: README_SPR_container.md
-          text_replace:
-            <model name>: DIEN
-            <mode>: inference
-            <package name>: tf-spr-dien-inference.tar.gz
-            <package dir>: tf-spr-dien-inference
-            <docker image>: model-zoo:tf-spr-dien-inference
-          uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu
         - docs:
           - name: Title
             uri: models/quickstart/recommendation/tensorflow/dien/inference/cpu/.docs/title.md

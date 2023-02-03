@@ -54,7 +54,7 @@ if [ -z "${BATCH_SIZE}"]; then
 fi
 
 #Set up env variable for bfloat32
-if [[ $PRECISION=="bfloat32" ]]; then
+if [[ $PRECISION == "bfloat32" ]]; then
   export ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi
