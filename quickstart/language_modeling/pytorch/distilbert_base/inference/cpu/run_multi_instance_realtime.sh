@@ -35,6 +35,11 @@ then
 elif [[ "$1" == "fp32" ]]
 then
     echo "### running fp32 mode"
+elif [[ "$1" == "fp16" ]]
+then
+    precision=fp16
+    ARGS="$ARGS --fp16_cpu"
+    echo "### running fp16 mode"
 elif [[ "$1" == "bf32" ]]
 then
     precision="bf32"

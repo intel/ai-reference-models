@@ -63,7 +63,7 @@ index 14bc7b9e9..03b1f864a 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index a2fb10b9e..33635aced 100755
+index a2fb10b9e..36ca8bef8 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -134,6 +134,9 @@ from .utils import (
@@ -76,7 +76,7 @@ index a2fb10b9e..33635aced 100755
  
  _is_torch_generator_available = False
  _is_native_amp_available = False
-@@ -1027,7 +1030,73 @@ class Trainer:
+@@ -1027,7 +1030,78 @@ class Trainer:
  
          return model
  
@@ -126,6 +126,11 @@ index a2fb10b9e..33635aced 100755
 +                        with torch.no_grad():
 +                            y = model(**example_input)
 +                            y = model(**example_input)
++                    elif self.args.fp16_cpu:
++                        model = ipex.optimize(model, dtype=torch.half, conv_bn_folding=False, auto_kernel_selection=True, weights_prepack=True)
++                        with torch.cpu.amp.autocast(enabled=True, dtype=torch.half), torch.no_grad():
++                            model = torch.jit.trace(model, jit_inputs, strict=False)
++                        model = torch.jit.freeze(model)
 +                    else:
 +                        if self.args.bf32:
 +                            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
@@ -151,7 +156,7 @@ index a2fb10b9e..33635aced 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -2372,6 +2441,48 @@ class Trainer:
+@@ -2372,6 +2446,48 @@ class Trainer:
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
  
@@ -200,7 +205,7 @@ index a2fb10b9e..33635aced 100755
      def evaluation_loop(
          self,
          dataloader: DataLoader,
-@@ -2401,7 +2512,7 @@ class Trainer:
+@@ -2401,7 +2517,7 @@ class Trainer:
              self.model_wrapped = deepspeed_engine
              self.deepspeed = deepspeed_engine
  
@@ -209,7 +214,7 @@ index a2fb10b9e..33635aced 100755
  
          # if full fp16 or bf16 eval is wanted and this ``evaluation`` or ``predict`` isn't called
          # while ``train`` is running, cast it to the right dtype first and then put on device
-@@ -2444,6 +2555,44 @@ class Trainer:
+@@ -2444,6 +2560,44 @@ class Trainer:
          # Will be useful when we have an iterable dataset so don't know its length.
  
          observed_num_examples = 0
@@ -255,10 +260,21 @@ index a2fb10b9e..33635aced 100755
          for step, inputs in enumerate(dataloader):
              # Update the observed num examples
 diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
-index 6176794ab..843bf70a1 100644
+index 6176794ab..732a51c92 100644
 --- a/src/transformers/training_args.py
 +++ b/src/transformers/training_args.py
-@@ -756,6 +756,102 @@ class TrainingArguments:
+@@ -563,6 +563,10 @@ class TrainingArguments:
+         default=False,
+         metadata={"help": "Whether to use fp16 (mixed) precision instead of 32-bit"},
+     )
++    fp16_cpu: bool = field(
++        default=False,
++        metadata={"help": "Whether to use fp16 (mixed) precision instead of 32-bit on cpu"},
++    )
+     fp16_opt_level: str = field(
+         default="O1",
+         metadata={
+@@ -756,6 +760,102 @@ class TrainingArguments:
          default="",
          metadata={"help": "Used by the SageMaker launcher to send mp-specific args. Ignored in Trainer"},
      )
