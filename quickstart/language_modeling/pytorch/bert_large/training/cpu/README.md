@@ -136,6 +136,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 | FP32        | bash run_ddp_bert_pretrain_phase1.sh fp32 | bash run_ddp_bert_pretrain_phase2.sh fp32 |
 | BF32        | bash run_ddp_bert_pretrain_phase1.sh bf32 | bash run_ddp_bert_pretrain_phase2.sh bf32 |
 | BF16        | bash run_ddp_bert_pretrain_phase1.sh bf16 | bash run_ddp_bert_pretrain_phase2.sh bf16 |
+
+## Quick Start Script for fast_bert with TPP optimization 
+|  DataType   | pre-train  |  finetune|
+| ----------- | ----------- | ----------- |
+| BF16        |bash sh run_fast_bert_pretrain_8_node.sh | bash sh fast_bert_squad_finetune.sh --use_tpp --tpp_bf16 --unpad |
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and

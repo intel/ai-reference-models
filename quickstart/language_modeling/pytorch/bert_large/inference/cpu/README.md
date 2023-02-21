@@ -74,6 +74,13 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 | FP16        | bash run_multi_instance_throughput.sh fp16 | bash run_multi_instance_realtime.sh fp16 | bash run_accuracy.sh fp16 |
 | INT8        | bash run_multi_instance_throughput.sh int8 | bash run_multi_instance_realtime.sh int8 | bash run_accuracy.sh int8 |
 
+## Quick Start Scripts for fast_bert with TPP optimization 
+
+|  DataType   |  Accuracy and Throughput  |
+| ----------- |  ----------- |
+| BF16        | bash fast_bert_squad_infer.sh --use_tpp --unpad --tpp_bf16|
+
+
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
