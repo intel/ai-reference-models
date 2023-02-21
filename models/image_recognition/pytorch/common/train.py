@@ -18,6 +18,7 @@ import torch.utils.data.distributed
 import torch.fx.experimental.optimization as optimization
 import intel_extension_for_pytorch  as ipex
 
+import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 import torchvision.models as models
@@ -59,12 +60,8 @@ parser.add_argument('--dist-backend', default='ccl', type=str,
 # IPEX args
 parser.add_argument('--ipex', action='store_true', default=False,
                     help='use intel pytorch extension')
-parser.add_argument('--int8', action='store_true', default=False,
-                    help='enable ipex int8 path')
 parser.add_argument('--bf16', action='store_true', default=False,
                     help='enable ipex bf16 path')
-parser.add_argument('--jit', action='store_true', default=False,
-                    help='enable ipex jit fusionpath')
 #Learning Hyperparams 
 parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')  
@@ -73,7 +70,11 @@ parser.add_argument('--base-op', type=str, default='sgd',
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')  # no need : use --base-lr for SGD too                  
 parser.add_argument('--base-lr', type=float, default=0.0125,
-                        help='learning rate for a single GPU')                                   
+                        help='base learning rate for SGD and LARS')
+parser.add_argument('--end-lr', type=float, default=0.0001,
+                        help='end learning rate for polynomial decay LR schedule')
+parser.add_argument('--poly-power', type=int, default=2,
+                        help='power for polynomial decay LR schedule')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--warmup-epochs', type=float, default=5,
@@ -90,7 +91,7 @@ parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)',
                     dest='weight_decay')             
-parser.add_argument('--epsilon', type=float, default=1e-5,
+parser.add_argument('--epsilon', type=float, default=0,
                         help='epsilon for optimizer')         
 parser.add_argument('--bn-bias-separately', action='store_true', default=True,
                         help='skip bn and bias') 
@@ -99,11 +100,16 @@ parser.add_argument('--label-smoothing', type=float, default=0.1,
 parser.add_argument('--zero-init-residual', action='store_true', default=False,
                     help='Initialize scale params in BN3 of a residual block to zeros instead ones. '
                          'Improves accuracy by 0.2~0.3 percent according to https://arxiv.org/abs/1706.02677'
-                         'Used by Nvidia, but not part of MLPerf reference ')                                                                                                    
+                         'Used by Nvidia, but not part of MLPerf reference ')
+# Evaluation args
+parser.add_argument('--target-acc', default=76, type=float, help='Target validation accuracy')
+parser.add_argument('--target-epoch', default=35, type=float, help='Target number of epochs')
 
 best_acc1 = 0
 
 def main():
+
+    torchvision.set_image_backend('accimage')
     args = parser.parse_args()
     print(args)
     
@@ -136,8 +142,7 @@ def main_worker(args):
     model = models.__dict__[args.arch](zero_init_residual=args.zero_init_residual)
 
     # for ipex path, always convert model to channels_last for bf16, fp32.
-    # TODO: int8 path: https://jira.devtools.intel.com/browse/MFDNN-6103
-    if args.ipex and not args.int8:
+    if args.ipex:
         model = model.to(memory_format=torch.channels_last)
 
     # Loss function (criterion)
@@ -167,13 +172,17 @@ def main_worker(args):
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
     # setup distributed training
     if args.distributed:
-        dist.init_process_group(backend=args.dist_backend)
+        dist.init_process_group(backend=args.dist_backend,
+                                init_method=args.dist_url,
+                                world_size=args.world_size,
+                                rank=args.rank)
         print("Rank and world size: ", dist.get_rank()," ", dist.get_world_size())            
 
         args.batch_size = int( args.batch_size / args.world_size)
         print("Using local batch size: ", args.batch_size)    
         print("Create DistributedDataParallel in CPU")
-        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=False)
+        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=False, broadcast_buffers=False,
+                                                                 gradient_as_bucket_view=True, bucket_cap_mb=50)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -237,7 +246,8 @@ def main_worker(args):
     if args.base_op.lower() == "lars":
         print("Creating LR scheduler ")
         lr_scheduler = MLPerfLRScheduler(optimizer, args.epochs, args.warmup_epochs,
-                                                    num_steps_per_epoch, args.base_lr)
+                                                    num_steps_per_epoch, args.base_lr,
+                                                    args.end_lr, args.poly_power)
     else:
         lr_scheduler=None
 
@@ -273,6 +283,9 @@ def main_worker(args):
                 'best_acc1': best_acc1,
                 'optimizer' : optimizer.state_dict(),
             }, is_best)
+ 
+        if (best_acc1 > args.target_acc) and (epoch + 1 >= args.target_epoch):
+            break
 
     print("final time_to_train(s): ", time_to_train)
 
