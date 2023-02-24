@@ -44,7 +44,7 @@ IOMP should be installed in your conda env from the [General setup](#general-set
     export BATCH_SIZE=#global batch_size (for lars optimizer convergency test, the number should be 3264)
     export NNODES=#your_node_number
     export HOSTFILE=#your_ip_list_file #one ip per line
-    export TRAINING_EPOCHS=39 #(optional, this numeber is for lars optimizer convergency test)
+    export TRAINING_EPOCHS=36 #(optional, this numeber is for lars optimizer convergency test)
     export MASTER_ADDR=#your_master_addr
 ```
 

@@ -103,7 +103,6 @@ parser.add_argument('--zero-init-residual', action='store_true', default=False,
                          'Used by Nvidia, but not part of MLPerf reference ')
 # Evaluation args
 parser.add_argument('--target-acc', default=76, type=float, help='Target validation accuracy')
-parser.add_argument('--target-epoch', default=35, type=float, help='Target number of epochs')
 
 best_acc1 = 0
 
@@ -284,7 +283,7 @@ def main_worker(args):
                 'optimizer' : optimizer.state_dict(),
             }, is_best)
  
-        if (best_acc1 > args.target_acc) and (epoch + 1 >= args.target_epoch):
+        if best_acc1 > args.target_acc:
             break
 
     print("final time_to_train(s): ", time_to_train)
