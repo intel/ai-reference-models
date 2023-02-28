@@ -1,5 +1,5 @@
 intel-extension-for-pytorch==1.13.0 # fixed for Snyk scans to avoid vulnerability
-ipython==8.0.1
+ipython==8.10.0 # fixed for Snyk scans to avoid vulnerability
 ipython-genutils==0.2.0
 ipywidgets==7.6.5
 matplotlib==3.5.1
