@@ -63,11 +63,9 @@ for i in "${!input_dirs[@]}"; do
     exit 1
   fi
 done
-num_inter_threads=" --num-inter-threads -1 "
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
-        num_inter_threads=" --num-inter-threads 1 "
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_bfloat16_pretrained_model.pb"
     elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
@@ -105,7 +103,8 @@ export OMP_NUM_THREADS=4
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_get_socket_cores_lists
+_command numactl --localalloc --physcpubind=${cores_per_socket_arr[0]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -115,8 +114,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --checkpoint ${CHECKPOINT_DIR} \
-  --num-intra-threads 56 \
-  ${num_inter_threads} \
+  --num-intra-threads ${cores_per_socket} \
+  --num-inter-threads -1 \
   --weight-sharing \
   --warmpup-steps=100 \
   --steps=200 \
@@ -124,7 +123,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --verbose \
   $@ \
   infer-option=SQuAD >> ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_0.log 2>&1 & \
-python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+numactl --localalloc --physcpubind=${cores_per_socket_arr[1]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=bert_large \
   --precision ${PRECISION} \
   --mode=${MODE} \
@@ -134,8 +133,8 @@ python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   --checkpoint ${CHECKPOINT_DIR} \
-  --num-intra-threads 56 \
-  ${num_inter_threads} \
+  --num-intra-threads ${cores_per_socket} \
+  --num-inter-threads -1 \
   --weight-sharing \
   --warmpup-steps=100 \
   --steps=200 \

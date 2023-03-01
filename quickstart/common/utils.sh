@@ -69,6 +69,23 @@ _get_numa_cores_lists()
   done
 }
 
+_get_socket_cores_lists()
+{
+  cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+  num_of_sockets=$(lscpu |grep 'Socket(s):' |sed 's/[^0-9]//g')
+  cores_per_socket_arr=()
+  for ((i=0;i<${num_of_sockets};i++)); do
+    start=$(($i * ${cores_per_socket}))
+    end=$((($i + 1) * ${cores_per_socket} - 1))
+    cores_list=""
+    for ((core=${start};core<=${end};core++)); do
+      cores_list="${cores_list}${core},"; done
+
+    cores_per_socket_arr[$i]=${cores_list%,}
+    echo "socket $i : ${cores_per_socket_arr[$i]}"
+  done
+}
+
 _get_platform_type()
 {
     # check if running on Windows OS
