@@ -70,24 +70,23 @@ fi
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"1"}"
+BATCH_SIZE="${BATCH_SIZE:-"128"}"
 
 if [ -z "${STEPS}" ]; then
   STEPS="steps=1500"
 else
   STEPS="steps=$STEPS"
 fi
-echo "STEPS: $STEPS"
+echo "Runs using $STEPS"
 
 if [ -z "${WARMUP_STEPS}" ]; then
   WARMUP_STEPS="warmup_steps=50"
 else
   WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
 fi
-echo "WARMUP_STEPS: $WARMUP_STEPS"
+echo "Runs using $WARMUP_STEPS"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=resnet50v1_5 \
   --precision ${PRECISION} \
@@ -95,10 +94,12 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --framework tensorflow \
   --in-graph ${PRETRAINED_MODEL} \
   ${dataset_arg} \
+  --socket-id 0 \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
   $@ \
   -- \
+  TF_ENABLE_MKL_NATIVE_FORMAT=1 \
   $WARMUP_STEPS \
-  $STEPS \
+  $STEPS
 
