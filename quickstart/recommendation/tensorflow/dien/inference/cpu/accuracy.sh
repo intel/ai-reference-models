@@ -65,11 +65,11 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
-TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 
+export TF_PATTERN_ALLOW_CTRL_DEPENDENCIES=1 
 
 # enable bfloat32 datatype on SPR systems
 if [ $PRECISION == "bfloat32" ]; then
-  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi
 
