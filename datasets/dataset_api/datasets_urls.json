@@ -1,0 +1,22 @@
+{
+    "tabformer":{
+        "urls": [{"url": "https://github.com/IBM/TabFormer/blob/main/data/credit_card/transactions.tgz"}],
+        "description": ""
+    },
+    "brca":{
+        "urls": [{"file_name": "Medical reports for cases .zip",
+            "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Medical%20reports%20for%20cases%20.zip?api=v2"
+        },
+        {
+            "file_name": "Radiology manual annotations.xlsx",
+            "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Radiology%20manual%20annotations.xlsx?api=v2"
+        },{
+                "file_name": "Radiology_hand_drawn_segmentations_v2.csv",
+                "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Radiology_hand_drawn_segmentations_v2.csv?api=v2"}],
+        "description": "Categorized dataset for Low energy and Subtracted Contrast Enhanced Spectral Mammography images (CDD-CESM)."
+    },
+    "dureader":{
+        "urls": [{"url": "https://dataset-bj.cdn.bcebos.com/dureader/dureader_raw.zip"}],
+        "description": ""
+    }
+}

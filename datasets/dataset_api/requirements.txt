@@ -1,0 +1,7 @@
+pandas
+tqdm
+requests
+docx2txt
+openpyxl
+pillow
+scikit-learn-intelex

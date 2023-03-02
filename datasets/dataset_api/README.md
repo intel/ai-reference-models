@@ -1,0 +1,57 @@
+# Dataset API
+
+## Dataset API structure
+```
+models/datasets/dataset_api/
+|── dataset.py
+├── dataset_urls.json
+├── README.md
+├── scripts
+├── setup.py
+└── dataset_api/
+    ├── __init__.py
+    ├── download.py
+    └── preprocess.py
+```
+
+## Environment setup
+Clone the [Model Zoo for Intel® Architecture](https://github.com/IntelAI/models) repository and navigate to the `dataset_api` directory.
+```
+# Optional: create and activate a virtual environment
+virtualenv -p python3 venv
+. venv/bin/activate
+
+cd models/datasets/dataset_api
+# Install dependencies 
+pip install -r requirements.txt
+```
+
+## Datasets
+| Dataset name | Description | Download | Preprocessing | command |
+| ------------ | ----------- | -------- | --------------| ------- |
+| `brca` | [Breast Cancer dataset](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=109379611#10937961150f24f71b869471e8366180549549d75) that contains categorized contrast enhanced mammography data and radiologists’ notes. | supported | **A prerequisite:** Use a browser, download [the Low Energy and Subtracted images](https://faspex.cancerimagingarchive.net/aspera/faspex/external_deliveries/260?passcode=5335d2514638afdaf03237780dcdfec29edf4238#), then provide the path to the directory that contains the downloaded images using `--directory` argument. | `python dataset.py -n brca --download --preprocess -d <path to the dataset directory>` |
+| `tabformer` | [Credit card data](https://ibm.ent.box.com/v/tabformer-data/folder/130748337023) for TabFormer | supported | not supported | `python dataset.py -n tabformer --download` |
+| `dureader` | [DuReader-vis](https://github.com/baidu/DuReader) for document automation. Chinese Open-domain Document Visual Question Answering (Open-Domain DocVQA) dataset | supported | WIP  | `python dataset.py -n dureader --download` |
+
+## Command-line Interface
+
+| Input Arguments | Description |
+| --------------- | ----------- |
+| --list (-l) | list the supported datasets. |
+| --name (-n) | dataset name |
+| --directory (-d) | directory location where the raw dataset will be saved on your system. It's also where the preprocessed dataset files will be written. If not set, a directory with the dataset name will be created. |
+| --download | download the dataset specified. |
+| --preprocess | preprocess the dataset if supported. |
+
+
+## Python API
+```
+from dataset_api.download import download_dataset
+from dataset_api.preprocess import preprocess_dataset
+
+# Download the datasets
+download_dataset('brca')
+
+# Preprocess the datasets
+preprocess_dataset('brca', <path to the raw dataset directory>)
+```
