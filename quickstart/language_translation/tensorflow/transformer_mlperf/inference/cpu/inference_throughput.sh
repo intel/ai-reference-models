@@ -72,7 +72,7 @@ CORES_PER_INSTANCE="socket"
 
 # Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
-  ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi
 

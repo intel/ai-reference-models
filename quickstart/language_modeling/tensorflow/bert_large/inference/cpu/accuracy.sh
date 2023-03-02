@@ -99,10 +99,14 @@ if [ -z "${BATCH_SIZE}"]; then
     BATCH_SIZE="32"
   elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
     BATCH_SIZE="56"
-    ONEDNN_DEFAULT_FPMATH_MODE=BF16
-    PRECISION="fp32"
   fi
   echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
+# Set up env variable for bfloat32
+if [[ $PRECISION == "bfloat32" ]]; then
+  export ONEDNN_DEFAULT_FPMATH_MODE=BF16
+  PRECISION="fp32"
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
