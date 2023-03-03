@@ -18,5 +18,10 @@
     "dureader":{
         "urls": [{"url": "https://dataset-bj.cdn.bcebos.com/dureader/dureader_raw.zip"}],
         "description": ""
+    },
+    "msmarco":{
+        "urls": [{"url": "https://msmarco.blob.core.windows.net/msmarco/train_v2.1.json.gz"},
+                {"url": "https://msmarco.blob.core.windows.net/msmarco/dev_v2.1.json.gz"}],
+        "description": ""
     }
 }
