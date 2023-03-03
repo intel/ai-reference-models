@@ -75,6 +75,10 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   HF_DATASETS_OFFLINE=1 bash run_multi_instance_throughput.sh fp32
   
   ```
+* Set ENV to use fp16 AMX if you are using a supported platform
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  ```
 
 # Quick Start Scripts
 

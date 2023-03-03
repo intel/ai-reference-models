@@ -41,9 +41,9 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-vocab.txt -O bert_squad_model/vocab.txt
 ```
 
-* Set ENV to use AMX if you are using SPR
+* Set ENV to use fp16 AMX if you are using a supported platform
 ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
 
 * Set ENV for model and dataset path, and optionally run with no network support

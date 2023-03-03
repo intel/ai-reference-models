@@ -111,10 +111,10 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   conda install intel-openmp
   ```
 
-* Set ENV to use AMX if you are using SPR
-  ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-  ```
+* Set ENV to use fp16 AMX if you are using a supported platform
+```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+```
 * Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes. 
