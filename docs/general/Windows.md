@@ -12,7 +12,7 @@ Basic requirements for running all TensorFlow models on Windows include:
  ```
 
 ## TensorFlow models
-* Install [intel-tensorflow](https://pypi.org/project/intel-tensorflow/)
+* Install [tensorflow-intel](https://pypi.org/project/tensorflow-intel/)
 * Set `MSYS64_BASH=C:\msys64\usr\bin\bash.exe` environment variable to your system. The path may change based on where have you installed MSYS2 on our system.
 * Install the common models dependencies:
      * python-tk
