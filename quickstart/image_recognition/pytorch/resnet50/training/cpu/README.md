@@ -31,10 +31,10 @@ IOMP should be installed in your conda env from the [General setup](#general-set
     export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
 ```
 
-* Set ENV to use AMX if you are using SPR
+* Set ENV to use fp16 AMX if you are using a supported platform
 
 ```bash
-    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
 
 * Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
