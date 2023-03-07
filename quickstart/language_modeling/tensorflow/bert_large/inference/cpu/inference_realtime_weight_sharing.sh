@@ -101,6 +101,10 @@ fi
 
 export OMP_NUM_THREADS=4
 
+# clean up old log files if found
+rm -rf ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*
+
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _get_socket_cores_lists

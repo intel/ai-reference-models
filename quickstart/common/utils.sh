@@ -82,7 +82,6 @@ _get_socket_cores_lists()
       cores_list="${cores_list}${core},"; done
 
     cores_per_socket_arr[$i]=${cores_list%,}
-    echo "socket $i : ${cores_per_socket_arr[$i]}"
   done
 }
 
