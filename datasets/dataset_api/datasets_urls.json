@@ -1,7 +1,6 @@
 {
     "tabformer":{
-        "urls": [{"url": "https://github.com/IBM/TabFormer/blob/main/data/credit_card/transactions.tgz"}],
-        "description": ""
+        "urls": [{"url": "https://github.com/IBM/TabFormer/blob/main/data/credit_card/transactions.tgz"}]
     },
     "brca":{
         "urls": [{"file_name": "Medical reports for cases .zip",
@@ -12,16 +11,22 @@
             "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Radiology%20manual%20annotations.xlsx?api=v2"
         },{
                 "file_name": "Radiology_hand_drawn_segmentations_v2.csv",
-                "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Radiology_hand_drawn_segmentations_v2.csv?api=v2"}],
-        "description": "Categorized dataset for Low energy and Subtracted Contrast Enhanced Spectral Mammography images (CDD-CESM)."
+                "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Radiology_hand_drawn_segmentations_v2.csv?api=v2"}]
     },
-    "dureader":{
-        "urls": [{"url": "https://dataset-bj.cdn.bcebos.com/dureader/dureader_raw.zip"}],
-        "description": ""
+    "dureader-vis":{
+        "urls": [{"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_1.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_2.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_3.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_4.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_5.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_6.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_7.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_8.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_9.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_10.tar.gz"}]
     },
     "msmarco":{
         "urls": [{"url": "https://msmarco.blob.core.windows.net/msmarco/train_v2.1.json.gz"},
-                {"url": "https://msmarco.blob.core.windows.net/msmarco/dev_v2.1.json.gz"}],
-        "description": ""
+                {"url": "https://msmarco.blob.core.windows.net/msmarco/dev_v2.1.json.gz"}]
     }
 }
