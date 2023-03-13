@@ -114,9 +114,7 @@ first_iteration_for_train = True
 
 buffer_num = 20
 data_buffer = None
-test_data_buffer = None
 data_iter = None
-test_data_iter = None
 
 def freeze(model):
     return torch.jit._recursive.wrap_cpp_module(torch._C._freeze_module(model._c, preserveParameters=True))
@@ -144,17 +142,11 @@ def unpack_batch(b):
 def load_data(data_iter, buffer_num, is_bf16):
     with torch.autograd.profiler.record_function('load_data'):
         for d in range(buffer_num):
+            # (X, lS_i, T) = next(data_iter)
             Batch = next(data_iter)
             X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
             X = X.bfloat16() if is_bf16 else X
             data_buffer[d] = (X, lS_o, lS_i, T, W, CBPP)
-
-def load_data_test(data_iter, buffer_num):
-    with torch.autograd.profiler.record_function('load_data'):
-        for d in range(buffer_num):
-            Batch = next(data_iter)
-            X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
-            test_data_buffer[d] = (X.bfloat16(), lS_o, lS_i, T, W, CBPP)
 
 class AlltoallOutputs():
     def __init__(self):
@@ -920,11 +912,9 @@ def inference(
     best_acc_test,
     best_auc_test,
     test_ld,
-    test_data_buffer,
 ):
     test_accu = 0
     test_samp = 0
-    total_inference_time = 0
 
     if args.print_auc:
         scores = []
@@ -948,10 +938,8 @@ def inference(
             while i < n:
                 # load 2 iter
                 if i == 0:
-                    # cur_batch_0 = test_ld.dataset[i]
-                    # cur_batch_1 = test_ld.dataset[i + 1]
-                    cur_batch_0 = test_data_buffer[i]
-                    cur_batch_1 = test_data_buffer[i + 1]
+                    cur_batch_0 = test_ld.dataset[i]
+                    cur_batch_1 = test_ld.dataset[i + 1]
 
                     X_test0, lS_o_test0, lS_i_test0, T_test0, _, _ = unpack_batch(
                         cur_batch_0
@@ -973,10 +961,8 @@ def inference(
                         cur_data[j] = next_data[j]
                 # preload 2 iter
                 if i + 1 < n:
-                    # next_batch_0 = test_ld.dataset[(i+1)*n_test_iter]
-                    # next_batch_1 = test_ld.dataset[(i+1)*n_test_iter + 1]
-                    next_batch_0 = test_data_buffer[(i+1)*n_test_iter]
-                    next_batch_1 = test_data_buffer[(i+1)*n_test_iter + 1]
+                    next_batch_0 = test_ld.dataset[(i+1)*n_test_iter]
+                    next_batch_1 = test_ld.dataset[(i+1)*n_test_iter + 1]
 
                     X_test0, lS_o_test0, lS_i_test0, T_test0, _, _ = unpack_batch(
                         next_batch_0
@@ -995,10 +981,7 @@ def inference(
                     next_data[0] = {'dense_x': X_test0, 'T_test': T_test0, 'lS_i': lS_i_test0, 'lS_o': lS_o_test0}
                     next_data[1] = None
 
-                t1 = time_wrap()
                 res_pack = dlrm.distributed_forward_2iter_overlap(cur_data, next_data)
-                t2 = time_wrap()
-                total_inference_time += t2 - t1
                 if i == n - 1:
                     last_Z_test = dlrm(next_data[0]['dense_x'], next_data[0]['lS_o'], next_data[0]['lS_i'])
                 if args.print_auc:
@@ -1148,9 +1131,6 @@ def inference(
         )
     else:
         pass
-
-    if ext_dist.my_size > 1 and ext_dist.dist.get_rank() == 1:
-        print("total infer time:{}".format(total_inference_time))
     if not args.inference_only:
         return model_metrics_dict, is_best
     else:
@@ -1419,13 +1399,7 @@ def run():
     load_data(data_iter, buffer_num, args.bf16)
     # print(buffer_num, ": data item loaded, data_load_time is {:.6f}s".format(time.time() - data_load_begin))
 
-    if args.should_test:
-      global test_data_buffer
-      test_data_buffer = nbatches_test * [None]
-      global test_data_iter
-      test_data_iter = iter(test_ld)
-      load_data_test(test_data_iter, nbatches_test)
-
+        
     if not args.inference_only:
         X, lS_o, lS_i, T = train_ld.dataset.__getitem__(0)
         #if ext_dist.my_size > 1:
@@ -1663,7 +1637,6 @@ def run():
                                 best_acc_test,
                                 best_auc_test,
                                 test_ld,
-                                test_data_buffer=test_data_buffer,
                             )
                             if is_best:
                                 best_auc_test = model_metrics_dict["test_auc"]
