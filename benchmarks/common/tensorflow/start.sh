@@ -141,7 +141,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=35b27e9
+      export HOROVOD_VERSION=b1d0ce8
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -220,7 +220,16 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
-      python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      # TODO: Once this PR https://github.com/horovod/horovod/pull/3864 is merged, we can install horovod as before.
+      # python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      git clone https://github.com/horovod/horovod.git
+      cd horovod
+      git reset --hard ${HOROVOD_VERSION}
+      git submodule update --init --recursive
+      git fetch origin pull/3864/head:ashahba/issue-3861-fix
+      git checkout ashahba/issue-3861-fix
+      python3 -m pip install --no-cache-dir -v -e .
+
       horovodrun --check-build
     fi
   fi
