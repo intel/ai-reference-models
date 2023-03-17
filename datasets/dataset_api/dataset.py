@@ -16,35 +16,45 @@
 
 #
 
-import json
-import argparse
-from dataset_api.download import download_dataset
-from dataset_api.preprocess import preprocess_dataset
+import os
 
-# Create the parser for the CLI
-parser = argparse.ArgumentParser(description='Download and preprocess datasets')
-parser.add_argument('-n', '--name', type=str, help='name of the dataset to download')
-parser.add_argument('-l', '--list', action='store_true', help='list the supported datasets')
-parser.add_argument('-d', '--directory', type=str, help='the desired dataset directory location')
-parser.add_argument('--download', action='store_true', help='download the raw dataset')
-parser.add_argument('--preprocess', action='store_true', help='preprocess the dataset')
+os.system("source ~/.bashrc")
+user_input = os.environ.get("USER_CONSENT")
 
-# Parse the command-line arguments
-args = parser.parse_args()
+if user_input == "y":
+    import json
+    import argparse
+    from dataset_api.download import download_dataset
+    from dataset_api.preprocess import preprocess_dataset
 
-# Download the dataset if the --download flag is true
-if args.download:
-    download_dataset(args.name, args.directory)
+    # Create the parser for the CLI
+    parser = argparse.ArgumentParser(description='Download and preprocess datasets')
+    parser.add_argument('-n', '--name', type=str, help='name of the dataset to download')
+    parser.add_argument('-l', '--list', action='store_true', help='list the supported datasets')
+    parser.add_argument('-d', '--directory', type=str, help='the desired dataset directory location')
+    parser.add_argument('--download', action='store_true', help='download the raw dataset')
+    parser.add_argument('--preprocess', action='store_true', help='preprocess the dataset')
 
-# Preprocess the dataset if the --preprocess flag is true
-if args.preprocess:
-    preprocess_dataset(args.name, args.directory)
+    # Parse the command-line arguments
+    args = parser.parse_args()
 
-# List the supported datasets if the --list flag is true
-if args.list:
-    with open('datasets_urls.json') as f:
-        datasets = json.load(f)
-    # Get the list of keys
-    keys = list(datasets.keys())
-    # Print the list of keys
-    print(keys)
+    # Download the dataset if the --download flag is true
+    if args.download:
+        download_dataset(args.name, args.directory)
+
+    # Preprocess the dataset if the --preprocess flag is true
+    if args.preprocess:
+        preprocess_dataset(args.name, args.directory)
+
+    # List the supported datasets if the --list flag is true
+    if args.list:
+        with open('datasets_urls.json') as f:
+            datasets = json.load(f)
+        # Get the list of keys
+        keys = list(datasets.keys())
+        # Print the list of keys
+        print(keys)
+
+else:
+    print("Please read and accept terms and conditions to be able to to use the dataset API.")
+    print("\nRun ./setup.sh to view and accept the terms and conditions.\n")

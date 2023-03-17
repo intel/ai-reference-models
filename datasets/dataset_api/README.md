@@ -23,7 +23,7 @@ virtualenv -p python3 venv
 
 cd models/datasets/dataset_api
 # Install dependencies 
-pip install -r requirements.txt
+./setup.sh
 ```
 
 ## Datasets
