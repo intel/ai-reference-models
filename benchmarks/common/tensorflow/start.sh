@@ -1453,6 +1453,35 @@ function distilbert_base() {
     fi
 }
 
+# vision-transformer base model
+function vision_transformer() {
+    if [ ${PRECISION} == "fp32" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+
+      if [ -z $MAX_SEQ_LENGTH ]; then
+        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
+      fi
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
 
 # Wide & Deep model
 function wide_deep() {
@@ -1597,6 +1626,8 @@ elif [ ${MODEL_NAME} == "dien" ]; then
   dien
 elif [ ${MODEL_NAME} == "distilbert_base" ]; then
   distilbert_base 
+elif [ ${MODEL_NAME} == "vision_transformer" ]; then
+  vision_transformer 
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

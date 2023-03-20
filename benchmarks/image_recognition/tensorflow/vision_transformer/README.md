@@ -1,0 +1,49 @@
+<!--- 0. Title -->
+# Vision Transformer inference
+
+<!-- 10. Description -->
+
+### Description
+This document has instructions for running Vision Transformer inference for FP32. The model based on this [paper](https://arxiv.org/abs/2010.11929). Inference is performed for the task of image recognition. 
+The following TF Hub [pretrained-model](https://tfhub.dev/sayakpaul/vit_b32_classification/1) is used.
+
+### Dataset
+
+Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+After running the conversion script you should have a directory with the
+ImageNet dataset in the TF records format.
+
+Set the `DATASET_DIR` to point to this directory when running Vision Transformer.
+
+```
+Download Frozen graph:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/vision_transformer_fp32_saved_model.pb
+
+```
+
+## Run the model
+
+### Run on Linux
+```
+# cd to your model zoo directory
+cd models
+
+export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
+export DATASET_DIR=<path to the ImageNet TF records>
+export PRECISION=<set the precision to "fp32">
+export OUTPUT_DIR=<path to the directory where log files and checkpoints will be written>
+# For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
+export BATCH_SIZE=<customized batch size value>
+```
+
+### Inference
+```
+./quickstart/image_recognition/tensorflow/vision_transformer/inference/cpu/inference.sh
+```
+
+### Accuracy
+```
+./quickstart/image_recognition/tensorflow/vision_transformer/inference/cpu/accuracy.sh
+```
+
+
