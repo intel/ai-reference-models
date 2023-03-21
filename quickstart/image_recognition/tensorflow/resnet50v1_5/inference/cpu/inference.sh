@@ -27,12 +27,12 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32 or int8 or bfloat16."
+  echo "Please set PRECISION to fp32 or int8 or bfloat16 or fp16."
   exit 1
 fi
-if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]]; then
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "fp16" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, bfloat16 and int8"
+  echo "Supported precisions are: fp32, bfloat16, fp16 and int8"
   exit 1
 fi
 
@@ -51,11 +51,11 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50v1_5_int8_pretrained_model.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1_5_bfloat16.pb"
-    elif [[ $PRECISION == "fp32" ]]; then
+    elif [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "fp16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, and int8"
+        echo "Supported precisions are: fp32, bfloat16, fp16 and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then

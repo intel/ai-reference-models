@@ -98,6 +98,11 @@ class eval_classifier_optimized_graph:
       '--num-cores', dest='num_cores',
       help='number of cores',
       type=int, default=28)
+    arg_parser.add_argument(
+      '--data-type', dest='data_type',
+      choices=['float32', 'fp16', 'bfloat16'],
+      help='data type used for computation',
+      default="float32")
 
     self.args = arg_parser.parse_args()
     # validate the arguements
@@ -114,7 +119,8 @@ class eval_classifier_optimized_graph:
   def run(self):
     """run benchmark with optimized graph"""
 
-    print("Run inference")
+    dtype = self.args.data_type
+    print("*** Run inference using data type:", dtype, "***")
 
     data_config = tf.compat.v1.ConfigProto()
     data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
@@ -127,6 +133,9 @@ class eval_classifier_optimized_graph:
     infer_config.use_per_session_threads = 1
     infer_config.graph_options.rewrite_options.remapping = (
                   rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+    if dtype == 'fp16':
+      infer_config.graph_options.rewrite_options.auto_mixed_precision = (
+                    rewriter_config_pb2.RewriterConfig.ON)
 
 
     data_graph = tf.Graph()
@@ -161,13 +170,13 @@ class eval_classifier_optimized_graph:
         input_graph_content = input_file.read()
         graph_def.ParseFromString(input_graph_content)
 
-      output_graph = optimize_for_inference(graph_def, [INPUTS], 
+      output_graph = optimize_for_inference(graph_def, [INPUTS],
                               [OUTPUTS], dtypes.float32.as_datatype_enum, False)
       tf.import_graph_def(output_graph, name='')
 
     # Definite input and output Tensors for detection_graph
-    input_tensor = infer_graph.get_tensor_by_name('input_tensor:0')
-    output_tensor = infer_graph.get_tensor_by_name('softmax_tensor:0')
+    input_tensor = infer_graph.get_tensor_by_name(INPUTS + ':0')
+    output_tensor = infer_graph.get_tensor_by_name(OUTPUTS + ':0')
 
     data_sess  = tf.compat.v1.Session(graph=data_graph,  config=data_config)
     infer_sess = tf.compat.v1.Session(graph=infer_graph, config=infer_config)

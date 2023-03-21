@@ -27,12 +27,12 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, int8, bfloat16 or bfloat32."
+  echo "Please set PRECISION to fp32, int8, bfloat16, fp16 or bfloat32."
   exit 1
 fi
-if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "bfloat32" ]]; then
+if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "int8" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION != "fp16" ]] && [[ $PRECISION != "bfloat32" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, int8, bfloat16 and bfloat32"
+  echo "Supported precisions are: fp32, int8, bfloat16, fp16 and bfloat32"
   exit 1
 fi
 # Use synthetic data (no --data-location arg) if no DATASET_DIR is set
@@ -50,11 +50,11 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
-    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" ]]; then
+    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" || $PRECISION == "fp16"]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
-        echo "Supported precisions are: fp32, bfloat16, bfloat32 and int8"
+        echo "Supported precisions are: fp32, bfloat16, fp16, bfloat32 and int8"
         exit 1
     fi
     if [[ ! -f "${PRETRAINED_MODEL}" ]]; then
@@ -86,7 +86,7 @@ cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [[ $PRECISION == "fp32" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"80"}"
-elif [[ $PRECISION == "bfloat16" ]]; then
+elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp16" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"256"}"
 elif [[ $PRECISION == "int8" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"116"}"

@@ -988,7 +988,7 @@ function resnet50() {
     if [ ${PRECISION} == "int8" ]; then
         CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
-    elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+    elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
       CMD="${CMD} $(add_steps_args)"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
