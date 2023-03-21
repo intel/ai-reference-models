@@ -29,11 +29,11 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 | Script name | Description |
 |-------------|-------------|
 | `profile.sh` | This script runs inference in profile mode with a default `batch_size=32`. |
-| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (fp32 or bfloat16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
-| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32 and bfloat16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (fp32, bfloat16 or fp16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
+| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, bfloat16 and fp16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
 | `inference_realtime_weightsharing.sh` | Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32 and bfloat16) to compute latency for weight sharing. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32 and bfloat16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32 and bfloat16). |
+| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, bfloat16 and fp16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
+| `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, bfloat16 and fp16). |
 
 <!-- 60. Docker -->
 ## Docker
@@ -47,7 +47,7 @@ The snippet below shows how to run a quickstart script:
 ```
 DATASET_DIR=<path to the dataset being used>
 OUTPUT_DIR=<directory where log files will be saved>
-export PRECISION=<specify the precision to run: fp32 and bfloat16>
+export PRECISION=<specify the precision to run: fp32, bfloat16 or fp16>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 

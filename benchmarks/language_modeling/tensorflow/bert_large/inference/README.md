@@ -29,11 +29,11 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 | Script name | Description |
 |-------------|-------------|
 | `profile.sh` | This script runs inference in profile mode with a default `batch_size=32`. |
-| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (fp32 or bfloat16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
-| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32 and bfloat16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference.sh` | Runs realtime inference using a default `batch_size=1` for the specified precision (fp32, bfloat16 or fp16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
+| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32, bfloat16 and fp16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
 | `inference_realtime_weightsharing.sh` | Runs multi instance realtime inference with weight sharing for BERT large (SQuAD) using 4 cores per instance with batch size 1 ( for precisions: fp32 and bfloat16) to compute latency for weight sharing. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32 and bfloat16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32 and bfloat16). |
+| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for BERT large (SQuAD) using 1 instance per socket with batch size 128 (for precisions: fp32, bfloat16 and fp16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
+| `accuracy.sh` | Measures BERT large (SQuAD) inference accuracy for the specified precision (fp32, bfloat16 and fp16). |
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -89,7 +89,7 @@ If you run on Windows, please use a browser to download and extract the checkpoi
 
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
 
-* FP32:
+* FP32 and FP16 (scripts use Auto-Mixed Precision to convert from FP32 to FP16):
   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/fp32_bert_squad.pb
   PRETRAINED_MODEL=$(pwd)/fp32_bert_squad.pb
 
@@ -111,7 +111,7 @@ Set environment variables to specify the dataset directory, precision to run, pa
 cd models
 
 # Set the required environment vars:
-export PRECISION=<specify the precision to run: fp32 and bfloat16>
+export PRECISION=<specify the precision to run: fp32, bfloat16 or fp16>
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
 export PRETRAINED_MODEL=<path to the downloaded pre-trained model>
@@ -122,6 +122,8 @@ export BATCH_SIZE=<customized batch size value>
 Run the script:
 ./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/<script_name.sh>
 ```
+
+* Use `--amp` flag to run with grappler Auto-Mixed Precision pass with FP16 precision: `./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/<script_name.sh> --amp`. By default, BERT-Large-SQuAD FP16 inference runs with Keras Mixed-Precision policy. For more information on grappler Auto-Mixed Precision, please see [https://www.intel.com/content/www/us/en/developer/articles/guide/getting-started-with-automixedprecisionmkl.html](https://www.intel.com/content/www/us/en/developer/articles/guide/getting-started-with-automixedprecisionmkl.html).
 
 ### Run on Windows
 The snippet below shows how to run a quickstart script on Windows systems:
@@ -150,11 +152,12 @@ set BATCH_SIZE=<customized batch size value>
 # Run a script for your desired usage:
 # Only the following scripts run on windows: `inference.sh`, `accuracy.sh`, or `profile.sh`
 bash quickstart\language_modeling\tensorflow\bert_large\inference\cpu\fp32\<script name>.sh
+```
 
 <!--- 90. Resource Links-->
 ## Additional Resources
 
-* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [BFloat16](bfloat16/Advanced.md) for calling the `launch_benchmark.py` script directly.
+* To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [BFloat16](bfloat16/Advanced.md) [FP16](fp16/Advanced.md) for calling the `launch_benchmark.py` script directly.
 * To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
   workload container:<br />
   [https://software.intel.com/content/www/us/en/develop/articles/containers/bert-large-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/bert-large-fp32-inference-tensorflow-container.html).

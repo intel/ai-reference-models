@@ -201,6 +201,8 @@ flags.DEFINE_bool("weight_sharing", False,
                   "Simulate weight sharing across multiple instances.")
 flags.DEFINE_integer("num_cores_per_socket", None,
                      "Number of cores per socket.")
+flags.DEFINE_bool("amp", False,
+                  "Use grappler Auto-Mixed Precision")
 
 class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
   def __init__(self):
@@ -710,8 +712,6 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
             segment_ids=segment_ids,
             use_one_hot_embeddings=use_one_hot_embeddings,
             frozen_graph=frozen_graph)
-      start_logits = tf.cast(start_logits, tf.float32)
-      end_logits = tf.cast(end_logits, tf.float32)
     else :
         (start_logits, end_logits) = create_model_top(
             bert_config=bert_config,
@@ -721,6 +721,10 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
             segment_ids=segment_ids,
             use_one_hot_embeddings=use_one_hot_embeddings,
             frozen_graph=frozen_graph)
+    
+        if bert_config.precision == "fp16":
+          start_logits = tf.cast(start_logits, tf.float32)
+          end_logits = tf.cast(end_logits, tf.float32)
 
     tvars = tf.compat.v1.trainable_variables()
 
@@ -1317,6 +1321,17 @@ def do_benchmark():
   config = tf.compat.v1.ConfigProto(
       intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads)
+  if FLAGS.precision == "fp16":
+    if FLAGS.amp:
+      print("Using grappler AMP")
+      config.graph_options.rewrite_options.auto_mixed_precision = (
+                rewriter_config_pb2.RewriterConfig.ON)
+    else:
+      from tensorflow.keras import mixed_precision
+      policy = mixed_precision.Policy('mixed_float16')
+      mixed_precision.set_global_policy(policy)
+      print('Compute dtype: %s' % policy.compute_dtype)
+      print('Variable dtype: %s' % policy.variable_dtype)
   graph_def = tf.compat.v1.GraphDef()
   with open(FLAGS.input_graph, "rb") as f:
     graph_def.ParseFromString(f.read())
@@ -1368,17 +1383,15 @@ def main(_):
     tpu_cluster_resolver = tf.distribute.cluster_resolver.TPUClusterResolver(
         FLAGS.tpu_name, zone=FLAGS.tpu_zone, project=FLAGS.gcp_project)
 
-  if bert_config.precision == 'bfloat16':
-    #graph_options = tf.compat.v1.GraphOptions(
-    #    rewrite_options=rewriter_config_pb2.RewriterConfig(
-    #        convert_to_bfloat16=rewriter_config_pb2.RewriterConfig.ON))
-    graph_options = None
-  else:
-    graph_options = None
-  session_config = tf.compat.v1.ConfigProto(graph_options=graph_options,
+  print("Running with " + bert_config.precision + " precision")
+
+  session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
       intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
       allow_soft_placement=True)
+  if bert_config.precision == "fp16":
+      session_config.graph_options.rewrite_options.auto_mixed_precision = (
+              rewriter_config_pb2.RewriterConfig.ON)
 
   is_per_host = tf.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
   run_config = tf.compat.v1.estimator.tpu.RunConfig(

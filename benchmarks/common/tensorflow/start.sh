@@ -544,6 +544,9 @@ function bert_options() {
   if [[ -n "${OPTIMIZED_SOFTMAX}" && ${OPTIMIZED_SOFTMAX} != "" ]]; then
     CMD=" ${CMD} --optimized-softmax=${OPTIMIZED_SOFTMAX}"
   fi
+  if [[ -n "${AMP}" && ${AMP} != "" ]]; then
+    CMD=" ${CMD} --amp=${AMP}"
+  fi
 
   if [[ -n "${MPI_WORKERS_SYNC_GRADIENTS}" && ${MPI_WORKERS_SYNC_GRADIENTS} != "" ]]; then
     CMD=" ${CMD} --mpi_workers_sync_gradients=${MPI_WORKERS_SYNC_GRADIENTS}"
@@ -1414,7 +1417,7 @@ function bert_base() {
 # BERT Large model
 function bert_large() {
     # Change if to support fp32
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ]; then
+    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "fp16" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       bert_options
       CMD=${CMD} run_model

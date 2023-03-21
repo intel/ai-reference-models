@@ -68,8 +68,10 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "-p", "--precision",
-            help="Specify the model precision to use: fp32, int8, or bfloat16",
-            required=required_arg, choices=["fp32", "int8", "bfloat16"],
+            help="Specify the model precision to use: fp32, int8, bfloat16 \
+            or fp16",
+            required=required_arg,
+            choices=["fp32", "int8", "bfloat16", "fp16"],
             dest="precision")
 
         self._common_arg_parser.add_argument(
@@ -226,6 +228,13 @@ class BaseBenchmarkUtil(object):
             "--experimental-gelu",
             help="use tf.nn.gelu as opposed to basic math ops",
             dest="experimental_gelu", choices=["True", "False"],
+            default=False)
+
+        self._common_arg_parser.add_argument(
+            "--amp",
+            help="use grappler auto-mixed precision as opposed to \
+            keras mixed precision",
+            dest="amp", choices=["True", "False"],
             default=False)
 
         # Note this can't be a normal boolean flag, because we need to know when the user
