@@ -1458,7 +1458,7 @@ function distilbert_base() {
 
 # vision-transformer base model
 function vision_transformer() {
-    if [ ${PRECISION} == "fp32" ]; then
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
       CMD="${CMD} $(add_arg "--steps" ${STEPS})"

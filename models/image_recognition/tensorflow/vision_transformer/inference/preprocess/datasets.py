@@ -41,7 +41,7 @@ import os
 
 import tensorflow as tf
 
-import preprocessing
+from inference.preprocess import preprocessing
 
 IMAGENET_NUM_TRAIN_IMAGES = 1281167
 IMAGENET_NUM_VAL_IMAGES = 50000

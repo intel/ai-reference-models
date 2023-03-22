@@ -25,6 +25,7 @@ import tensorflow as tf
 from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
 from tensorflow.python.framework import dtypes
 from tensorflow.core.protobuf import saved_model_pb2
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 from inference.preprocess import datasets
 import numpy as np
@@ -96,7 +97,7 @@ class eval_classifier_optimized_graph:
   def run(self):
     """run benchmark with optimized graph"""
 
-    print("Run inference in FP32 precision.")
+    print("Run inference in BF16 precision.")
 
     data_config = tf.compat.v1.ConfigProto()
     data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
@@ -107,6 +108,7 @@ class eval_classifier_optimized_graph:
     infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
     infer_config.use_per_session_threads = 1
+    infer_config.graph_options.rewrite_options.auto_mixed_precision_onednn_bfloat16 = rewriter_config_pb2.RewriterConfig.ON
 
     data_graph = tf.Graph()
     with data_graph.as_default():

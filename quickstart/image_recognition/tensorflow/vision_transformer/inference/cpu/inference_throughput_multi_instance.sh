@@ -16,6 +16,7 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+CORES_PER_INSTANCE="socket"
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -27,12 +28,12 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32."
+  echo "Please set PRECISION to fp32 or bfloat16."
   exit 1
 fi
-if [[ $PRECISION != "fp32" ]]; then
+if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions is: fp32"
+  echo "Supported precisions is: fp32, bfloat16"
   exit 1
 fi
 
@@ -57,7 +58,7 @@ fi
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"1"}"
+BATCH_SIZE="${BATCH_SIZE:-"32"}"
 
 if [ -z "${STEPS}" ]; then
   STEPS="steps=100"
@@ -73,6 +74,10 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
+# Get number of cores per socket line from lscpu
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -84,8 +89,17 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
+  --num-intra-threads=${cores_per_socket} \
+  --num-inter-threads=1 \
+  --numa-cores-per-instance=${CORES_PER_INSTANCE} \
   $@ \
   -- \
   $WARMUP_STEPS \
   $STEPS \
 
+if [[ $? == 0 ]]; then
+  grep "Throughput: " ${OUTPUT_DIR}/vision_transformer_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log | sed -e "s/.*://;s/ms//" | awk ' {sum+=$1;} END{print sum} '
+  exit 0
+else
+  exit 1
+fi

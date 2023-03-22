@@ -16,7 +16,7 @@ ImageNet dataset in the TF records format.
 Set the `DATASET_DIR` to point to this directory when running Vision Transformer.
 
 ```
-Download Frozen graph:
+Download Frozen graph for both FP32 and BF16:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/vision_transformer_fp32_saved_model.pb
 
 ```
@@ -30,15 +30,24 @@ cd models
 
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 export DATASET_DIR=<path to the ImageNet TF records>
-export PRECISION=<set the precision to "fp32">
+export PRECISION=<set the precision to "fp32" or "bfloat16">
 export OUTPUT_DIR=<path to the directory where log files and checkpoints will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
 ```
 
 ### Inference
+
+#### Throughput
+Default Batch Size 32
 ```
-./quickstart/image_recognition/tensorflow/vision_transformer/inference/cpu/inference.sh
+./quickstart/image_recognition/tensorflow/vision_transformer/inference/cpu/inference_throughput_multi_instance.sh
+```
+
+#### Latency
+Default Batch Size 1
+```
+./quickstart/image_recognition/tensorflow/vision_transformer/inference/cpu/inference_realtime_multi_instance.sh
 ```
 
 ### Accuracy

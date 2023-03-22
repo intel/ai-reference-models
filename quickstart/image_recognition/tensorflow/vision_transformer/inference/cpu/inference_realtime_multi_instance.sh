@@ -16,6 +16,7 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+CORES_PER_INSTANCE=4
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
@@ -36,12 +37,12 @@ if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ]; then
   exit 1
 fi
 
+# Use synthetic data (no --data-location arg) if no DATASET_DIR is set
+dataset_arg="--data-location=${DATASET_DIR}"
 if [ -z "${DATASET_DIR}" ]; then
-  echo "The required environment variable DATASET_DIR has not been set"
-  exit 1
-fi
-
-if [ ! -d "${DATASET_DIR}" ]; then
+  echo "Using synthetic data, since the DATASET_DIR environment variable is not set."
+  dataset_arg=""
+elif [ ! -d "${DATASET_DIR}" ]; then
   echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
   exit 1
 fi
@@ -57,7 +58,25 @@ fi
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"100"}"
+BATCH_SIZE="${BATCH_SIZE:-"1"}"
+
+if [ -z "${STEPS}" ]; then
+  STEPS="steps=100"
+else
+  STEPS="steps=$STEPS"
+fi
+echo "STEPS: $STEPS"
+
+if [ -z "${WARMUP_STEPS}" ]; then
+  WARMUP_STEPS="warmup_steps=50"
+else
+  WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
+fi
+echo "WARMUP_STEPS: $WARMUP_STEPS"
+
+# Get number of cores per socket line from lscpu
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
@@ -67,15 +86,19 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --mode=${MODE} \
   --framework tensorflow \
   --in-graph ${PRETRAINED_MODEL} \
-  --data-location=${DATASET_DIR} \
+  ${dataset_arg} \
   --output-dir ${OUTPUT_DIR} \
   --batch-size ${BATCH_SIZE} \
-  --accuracy-only \
-  $@ 2>&1 | tee ${OUTPUT_DIR}/vision_transformer_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log
+  --num-intra-threads=${cores_per_socket} \
+  --num-inter-threads=1 \
+  --numa-cores-per-instance=${CORES_PER_INSTANCE} \
+  $@ \
+  -- \
+  $WARMUP_STEPS \
+  $STEPS \
 
 if [[ $? == 0 ]]; then
-  echo "Accuracy summary:"
-  cat ${OUTPUT_DIR}/vision_transformer_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Processed 50000 images. (Top1 accuracy, Top5 accuracy)" | sed -e "s/.* = //"
+  grep "Throughput: " ${OUTPUT_DIR}/vision_transformer_${PRECISION}_inference_bs1_cores${CORES_PER_INSTANCE}_all_instances.log | sed -e "s/.*://;s/ms//" | awk ' {sum+=$1;} END{print sum} '
   exit 0
 else
   exit 1
