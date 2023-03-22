@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018-2019 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ class BaseBenchmarkUtil(object):
 
         self._common_arg_parser.add_argument(
             "-p", "--precision",
-            help="Specify the model precision to use: fp32, int8, bfloat16, or fp16",
+            help="Specify the model precision to use: fp32, int8, bfloat16 or fp16",
             required=required_arg, choices=["fp32", "int8", "bfloat16", "fp16"],
             dest="precision")
 

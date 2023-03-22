@@ -1,3 +1,22 @@
+#
+# -*- coding: utf-8 -*-
+#
+# Copyright (c) 2023 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+# SPDX-License-Identifier: EPL-2.0
+#
 # Copyright 2017 The TensorFlow Authors. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -240,7 +259,7 @@ def resnet_model_fn(features, labels, mode, model_class,
                     data_format, version, loss_scale, loss_filter_fn=None,
                     dtype=resnet_model.DEFAULT_DTYPE,
                     label_smoothing=0.0, enable_lars=False,
-                    use_bfloat16=False):
+                    use_float16=False, use_bfloat16=False):
   """Shared functionality for different resnet model_fns.
 
   Initializes the ResnetModel representing the model layers
@@ -273,6 +292,7 @@ def resnet_model_fn(features, labels, mode, model_class,
       otherwise. If None, batch_normalization variables will be excluded
       from the loss.
     dtype: the TensorFlow dtype to use for calculations.
+    use_float16: Whether to use fp16 type for calculations.
     use_bfloat16: Whether to use bfloat16 type for calculations.
 
   Returns:
@@ -383,7 +403,14 @@ def resnet_model_fn(features, labels, mode, model_class,
     if is_mpi:
       optimizer = hvd.DistributedOptimizer(optimizer)
 
-    if loss_scale != 1:
+    if use_float16 and loss_scale == 1:
+      optimizer = tf.compat.v1.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
+      tvars = tf.compat.v1.trainable_variables()
+      grads_and_vars = optimizer.compute_gradients(loss, tvars)
+      grads = [grad for grad, var in grads_and_vars]
+      tvars = [var for grad, var in grads_and_vars]
+      minimize_op = optimizer.apply_gradients(zip(grads, tvars), global_step=global_step)
+    elif loss_scale != 1:
       # When computing fp16 gradients, often intermediate tensor values are
       # so small, they underflow to 0. To avoid this, we multiply the loss by
       # loss_scale to make these tensor values loss_scale times bigger.
@@ -487,6 +514,10 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
       allow_soft_placement=True)
   session_config.graph_options.rewrite_options.remapping = (
           rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+  if flags.use_float16:
+    session_config.graph_options.rewrite_options.auto_mixed_precision = (
+              rewriter_config_pb2.RewriterConfig.ON)
+
 
 
   if flags.num_gpus == 0:
@@ -530,6 +561,7 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
           'enable_lars': flags.enable_lars,
           'weight_decay': flags.weight_decay,
           'fine_tune': flags.fine_tune,
+          'use_float16': flags.use_float16,
           'use_bfloat16': flags.use_bfloat16
       })
 
@@ -680,6 +712,11 @@ class ResnetArgParser(argparse.ArgumentParser):
         choices=resnet_size_choices,
         help='[default: %(default)s] The size of the ResNet model to use.',
         metavar='<RS>' if resnet_size_choices is None else None
+    )
+
+    self.add_argument(
+        '--use_float16', action='store_true', default=False,
+        help='Whether to use float16 type for computations.'
     )
 
     self.add_argument(

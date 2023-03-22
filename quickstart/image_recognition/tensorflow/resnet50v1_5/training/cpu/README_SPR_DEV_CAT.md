@@ -18,7 +18,7 @@ docker pull intel/image-recognition:spr-resnet50v1-5-training
    <tbody>
       <tr>
          <td>training.sh</td>
-         <td>Uses mpirun to execute 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16 or bfloat32). Checkpoint files and logs for each instance are saved to the output directory.</td>
+         <td>Uses mpirun to execute 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16 or bfloat32 or fp16). Checkpoint files and logs for each instance are saved to the output directory.</td>
       </tr>
    </tbody>
 </table>
@@ -49,7 +49,7 @@ To run ResNet50 v1.5 training, set environment variables to specify the dataset 
 export BATCH_SIZE=1024
 export DATASET_DIR=<path to the dataset>
 export OUTPUT_DIR=<directory where log files will be written>
-export PRECISION=<specify the precision to run (fp32 or bfloat16 or bfloat32)>
+export PRECISION=<specify the precision to run (fp32 or bfloat16 or bfloat32 or fp16)>
 
 docker run --rm \
   --env BATCH_SIZE=${BATCH_SIZE} \

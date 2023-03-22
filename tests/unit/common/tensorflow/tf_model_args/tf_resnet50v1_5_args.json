@@ -97,6 +97,11 @@
   { "_comment": "resnet50v1_5_int8_multi_instance_online_inference",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=int8 --mode=inference --intelai-models=/workspace/intelai_models --batch-size 1 --numa-cores-per-instance 4 --in-graph=/in_graph/resnet50v1_5_int8_pretrained_model.pb --benchmark-only -- warmup_steps=50 steps=1500",
     "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50v1_5_int8_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=4 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4",
+    "cpuset": "0-111"},
+
+    { "_comment": "resnet50v1_5_fp16_training",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=fp16 --mode=training --intelai-models=/workspace/intelai_models --checkpoint=/workspace/checkpoints --output-dir=/workspace/logs --steps=300 --train_epochs=10 --epochs_between_evals=2",
+    "output": "python /workspace/intelai_models/training/mlperf_resnet/imagenet_main.py 2 --batch_size=64 --max_train_steps=300 --train_epochs=10 --epochs_between_evals=2 --inter_op_parallelism_threads 2 --intra_op_parallelism_threads 56 --version 1 --resnet_size 50 --data_format=channels_last --model_dir=/workspace/checkpoints --use_float16",
     "cpuset": "0-111"}
 ]
 
