@@ -1429,7 +1429,8 @@ function bert_large() {
 
 # distilBERT base model
 function distilbert_base() {
-    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]|| [ ${PRECISION} == "int8" ]; then
+    if ([ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
+       [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp16" ]); then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
       CMD="${CMD} $(add_arg "--steps" ${STEPS})"
