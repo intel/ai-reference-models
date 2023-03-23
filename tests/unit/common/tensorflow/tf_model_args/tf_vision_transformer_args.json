@@ -9,7 +9,7 @@
       "output": "numactl --cpunodebind=0 --membind=0 python ./inference/fp32/eval_image_classifier_inference.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=32 --warmup-steps=10 --steps=50",
       "cpuset": "0-111"},
 
-      { "_comment": "vision_transformer_bf16_accuracy",
+    { "_comment": "vision_transformer_bf16_accuracy",
       "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=vision_transformer --precision=bfloat16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size 100 --socket-id 0 --accuracy-only  --verbose --in-graph=/in_graph/saved_model.pb --accuracy-only --data-location=/dataset",
       "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/bfloat16/eval_image_classifier_inference.py --input-graph=/in_graph/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=100  --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only",
       "cpuset": "0-111"},
@@ -17,6 +17,16 @@
     { "_comment": "vision_transformer_inference_benchmark_bf16",
       "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision bfloat16 --mode inference --model-name vision_transformer --batch-size 32 --in-graph /saved_model.pb --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
       "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/bfloat16/eval_image_classifier_inference.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=32 --warmup-steps=10 --steps=50",
+      "cpuset": "0-111"},
+
+    { "_comment": "vision_transformer_fp16_accuracy",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=vision_transformer --precision=fp16 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size 100 --socket-id 0 --accuracy-only  --verbose --in-graph=/in_graph/saved_model.pb --accuracy-only --data-location=/dataset",
+      "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp16/eval_image_classifier_inference.py --input-graph=/in_graph/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=100  --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only",
+      "cpuset": "0-111"},
+  
+    { "_comment": "vision_transformer_inference_benchmark_fp16",
+      "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp16 --mode inference --model-name vision_transformer --batch-size 32 --in-graph /saved_model.pb --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
+      "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp16/eval_image_classifier_inference.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=32 --warmup-steps=10 --steps=50",
       "cpuset": "0-111"}
   
   ]
