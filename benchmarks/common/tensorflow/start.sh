@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2018-2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -54,7 +54,26 @@ echo "    NUMA_CORES_PER_INSTANCE: ${NUMA_CORES_PER_INSTANCE}"
 echo "    PYTHON_EXE: ${PYTHON_EXE}"
 echo "    PYTHONPATH: ${PYTHONPATH}"
 echo "    DRY_RUN: ${DRY_RUN}"
+echo "    GPU: ${GPU}"
 
+#  Enable GPU Flag
+gpu_arg=""
+is_model_gpu_supported="False"
+if [ ${GPU} == "True" ]; then
+  gpu_arg="--gpu"
+  # Environment variables for GPU
+  export RenderCompressedBuffersEnabled=0
+  export CreateMultipleSubDevices=1
+  export ForceLocalMemoryAccessMode=1
+  export SYCL_PI_LEVEL_ZERO_BATCH_SIZE=1
+else
+  unset RenderCompressedBuffersEnabled
+  unset CreateMultipleSubDevices
+  unset ForceLocalMemoryAccessMode
+  unset ForceNonSystemMemoryPlacement
+  unset TF_ENABLE_LAYOUT_OPT
+  unset SYCL_PI_LEVEL_ZERO_BATCH_SIZE
+fi
 #  inference & training is supported right now
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   echo "${MODE} mode for ${MODEL_NAME} is not supported"
@@ -326,6 +345,10 @@ export PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_COMMON_SOURCE}:${MOUNT_IN
 
 # Common execution command used by all models
 function run_model() {
+  if [ ${is_model_gpu_supported} == "False"  ] && [ ${GPU} == "True" ]; then
+    echo "Runing ${MODEL_NAME} ${MODE} with precision ${PRECISION} does not support --gpu."
+    exit 1
+  fi
   # Navigate to the main benchmark directory before executing the script,
   # since the scripts use the benchmark/common scripts as well.
   cd ${MOUNT_BENCHMARK}
@@ -390,7 +413,8 @@ ${benchmark_only_arg} \
 ${output_results_arg} \
 ${weight_sharing_arg} \
 ${synthetic_data_arg} \
-${verbose_arg}"
+${verbose_arg} \
+${gpu_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
@@ -978,6 +1002,7 @@ function resnet101_inceptionv3() {
 # ResNet50  model
 function resnet50() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
+    is_model_gpu_supported="True"
 
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
@@ -1062,6 +1087,7 @@ function rfcn() {
 
 # SSD-MobileNet model
 function ssd_mobilenet() {
+  is_model_gpu_supported="True"
   if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
     if [ ${BATCH_SIZE} != "-1" ]; then
       echo "Warning: SSD-MobileNet FP32 inference script does not use the batch_size arg"
@@ -1404,7 +1430,21 @@ function wavenet() {
 
 # BERT base
 function bert_base() {
-  if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
+  if [ ${GPU} == "True" ]; then
+    if [ ${MODE} == "inference" ]; then
+      echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+      exit 1
+    elif [ ${MODE} == "training" ]; then
+      if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+        echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+        exit 1
+      fi
+    fi
+    is_model_gpu_supported="True"
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+    bert_options
+    CMD=${CMD} run_model
+  elif [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "bfloat16" ]; then
     export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
     bert_options
     CMD=${CMD} run_model
@@ -1416,10 +1456,57 @@ function bert_base() {
 
 # BERT Large model
 function bert_large() {
-    # Change if to support fp32
-    if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "fp16" ]; then
+    export PYTHONPATH=${PYTHONPATH}:${MOUNT_BENCHMARK}
+    if [ ${GPU} == "True" ]; then
+      if [ ${MODE} == "inference" ]; then
+        if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "fp16" ] && [ ${PRECISION} != "bfloat16" ]; then
+          echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+          exit 1
+        fi
+      elif [ ${MODE} == "training" ]; then
+        if [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ]; then
+          echo "PRECISION=${PRECISION} on GPU not supported for ${MODEL_NAME} ${MODE} in this repo."
+          exit 1
+        fi
+      fi
+      is_model_gpu_supported="True"
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
       bert_options
+      CMD=${CMD} run_model
+    else
+      if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "fp16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+        bert_options
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
+# distilBERT base model
+function distilbert_base() {
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]|| [ ${PRECISION} == "int8" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+
+      if [ -z $MAX_SEQ_LENGTH ]; then
+        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
+      fi
       CMD=${CMD} run_model
     else
       echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."

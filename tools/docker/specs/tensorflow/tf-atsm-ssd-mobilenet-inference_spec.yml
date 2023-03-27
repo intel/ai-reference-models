@@ -1,0 +1,127 @@
+releases:
+  versioned:
+    tag_specs:
+      - "{tensorflow-itex-gpu-base-public}{tf-atsm-ssd-mobilenet-inference}"
+slice_sets:
+  tf-atsm-ssd-mobilenet-inference:
+    - add_to_name: -tf-atsm-ssd-mobilenet-inference
+      dockerfile_exclusive_name: -ssd-mobilenet-inference
+      args:
+        - PACKAGE_NAME=tf-atsm-ssd-mobilenet-inference
+      dockerfile_subdirectory: gpu_model_containers
+      documentation:
+        - docs:
+            - name: Title
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/title.md
+            - name: Description
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/description.md
+            - name: GPU Setup
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/gpu_setup.md
+            - name: Datasets
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/datasets.md
+            - name: Quick Start Scripts
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/quickstart.md
+            - name: Baremetal
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/baremetal.md
+            - name: License
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/license.md
+          name: README.md
+          text_replace:
+            <mode>: inference
+            <model name>: SSD-MobileNet
+            <model-precision-mode>: tf-atsm-ssd-mobilenet-inference
+            <use case>: object_detection
+            <device>: Intel(R) Data Center GPU Flex Series
+            <package name>: tf-atsm-ssd-mobilenet-inference.tar.gz
+            <package dir>: tf-atsm-ssd-mobilenet-inference
+            <package url>: ""
+          uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu
+        - docs:
+            - name: Title
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/title.md
+            - name: Description
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/description.md
+            - name: Model Package
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/package.md
+            - name: Datasets
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/datasets.md
+            - name: Quick Start Scripts
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/quickstart.md
+            - name: Docker
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/docker.md
+            - name: License
+              uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/.docs/license.md
+          name: wrapper_README.md
+          text_replace:
+            <mode>: inference
+            <model name>: SSD-MobileNet
+            <model-precision-mode>: tf-atsm-ssd-mobilenet-inference
+            <use case>: object_detection
+            <device>: Intel(R) Data Center GPU Flex Series
+            <package name>: tf-atsm-ssd-mobilenet-inference.tar.gz
+            <package dir>: tf-atsm-ssd-mobilenet-inference
+            <package url>: ""
+          uri: models/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu
+      downloads:
+        - destination: pretrained_models/ssdmobilenet_int8_pretrained_model_gpu.pb
+          source: https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/ssd_mobilenet_v1_int8_itex.pb
+      files:
+        - destination: benchmarks/common
+          source: benchmarks/common
+        - destination: benchmarks/launch_benchmark.py
+          source: benchmarks/launch_benchmark.py
+        - destination: benchmarks/object_detection/__init__.py
+          source: benchmarks/object_detection/__init__.py
+        - destination: benchmarks/object_detection/tensorflow/__init__.py
+          source: benchmarks/object_detection/tensorflow/__init__.py
+        - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/README.md
+          source: benchmarks/object_detection/tensorflow/ssd-mobilenet/README.md
+        - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/__init__.py
+          source: benchmarks/object_detection/tensorflow/ssd-mobilenet/__init__.py
+        - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
+          source: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
+        - destination: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/int8
+          source: benchmarks/object_detection/tensorflow/ssd-mobilenet/inference/int8
+        - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
+          source: models/object_detection/tensorflow/ssd-mobilenet/inference/__init__.py
+        - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_detection_evaluator.py
+          source: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_detection_evaluator.py
+        - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_label_map.py
+          source: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_label_map.py
+        - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_tools.py
+          source: models/object_detection/tensorflow/ssd-mobilenet/inference/coco_tools.py
+        - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/ssdmobilenet_preprocess.pb
+          source: models/object_detection/tensorflow/ssd-mobilenet/inference/ssdmobilenet_preprocess.pb
+        - destination: models/common
+          source: models/common
+        - destination: models/object_detection/tensorflow/ssd-mobilenet/inference/
+          source: models/object_detection/tensorflow/ssd-mobilenet/inference/
+        - destination: models/object_detection/tensorflow/ssd-mobilenet
+          source: models/object_detection/tensorflow/ssd-mobilenet
+        - destination: quickstart/common
+          source: quickstart/common
+        - destination: quickstart
+          source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/
+      wrapper_package_files:
+        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/wrapper_README.md
+          destination: README.md
+        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/build.sh
+          destination: build.sh
+        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/run.sh
+          destination: run.sh
+        - source: dockerfiles/gpu_model_containers/tf-atsm-ssd-mobilenet-inference.Dockerfile
+          destination: tf-atsm-ssd-mobilenet-inference.Dockerfile
+        - source: output/tf-atsm-ssd-mobilenet-inference.tar.gz
+          destination: model_packages/tf-atsm-ssd-mobilenet-inference.tar.gz
+        - source: ""
+          destination: info.txt
+        - source: third_party
+          destination: licenses/third_party
+        - source: LICENSE
+          destination: licenses/LICENSE
+      partials:
+        - numactl
+        - python-build
+        - object_detection/pip_installs
+        - model_package
+        - entrypoint

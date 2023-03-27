@@ -1,0 +1,66 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{tensorflow-itex-max-series-base-public}{tf-max-series-resnet50v1-5-training}'
+slice_sets:
+  tf-max-series-resnet50v1-5-training:
+  - add_to_name: -tf-max-series-resnet50v1-5-training
+    dockerfile_exclusive_name: -resnet50v1-5-training
+    args:
+    - PACKAGE_NAME=tf-max-series-resnet50v1-5-training
+    dockerfile_subdirectory: gpu_model_containers 
+    files:
+    - destination: benchmarks/common
+      source: benchmarks/common
+    - destination: benchmarks/image_recognition/__init__.py
+      source: benchmarks/image_recognition/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/__init__.py
+      source: benchmarks/image_recognition/tensorflow/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
+    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training
+      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/training
+    - destination: benchmarks/launch_benchmark.py
+      source: benchmarks/launch_benchmark.py
+    - destination: models/common
+      source: models/common
+    - destination: models/image_recognition/tensorflow/resnet50v1_5/training
+      source: models/image_recognition/tensorflow/resnet50v1_5/training
+    - destination: models/image_recognition/tensorflow/resnet50v1_5
+      source: models/image_recognition/tensorflow/resnet50v1_5
+    - destination: quickstart/common
+      source: quickstart/common
+    - destination: quickstart
+      source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu
+    - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/README.md
+      destination: README.md
+    - source: datasets/imagenet
+      destination: datasets/imagenet
+    wrapper_package_files:
+    - source: datasets/imagenet/README.md
+      destination: datasets/imagenet/README.md
+    - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/bfloat16_training_full.sh
+      destination: bfloat16_training_full.sh
+    - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/bfloat16_training_hvd.sh
+      destination: bfloat16_training_hvd.sh
+    - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/build.sh
+      destination: build.sh
+    - source: dockerfiles/gpu_model_containers/tf-max-series-resnet50v1-5-training.Dockerfile
+      destination: tf-max-series-resnet50v1-5-training.Dockerfile
+    - source: output/tf-max-series-resnet50v1-5-training.tar.gz
+      destination: model_packages/tf-max-series-resnet50v1-5-training.tar.gz
+    - source: ""
+      destination: info.txt
+    - source: third_party
+      destination: licenses/third_party
+    - source: LICENSE
+      destination: licenses/LICENSE
+    partials:
+      - intel-mpi-ccl
+      - model_package
+      - entrypoint
+

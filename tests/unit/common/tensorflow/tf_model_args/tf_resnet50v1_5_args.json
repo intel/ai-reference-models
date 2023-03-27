@@ -99,10 +99,40 @@
     "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50v1_5_int8_pretrained_model.pb --num-inter-threads=1 --num-intra-threads=4 --batch-size=1 --warmup-steps=10 --steps=50 --data-num-inter-threads=1 --data-num-intra-threads=4",
     "cpuset": "0-111"},
 
+  { "_comment": "resnet50v1_5_fp32_gpu",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp32 --mode inference --model-name resnet50v1_5 --gpu --batch-size 128 --in-graph /resnet50_v1.pb --intelai-models . --verbose --data-location /dataset_dir --output-dir /output_dir",
+    "output": "python ./inference/fp32/eval_image_classifier_inference.py --input-graph=/resnet50_v1.pb --num-cores=28 --batch-size=128 --warmup-steps=10 --steps=50 --data-location=/dataset_dir"},
+  { "_comment": "resnet50v1_5_fp16_gpu",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp16 --mode inference --model-name resnet50v1_5 --gpu --batch-size 128 --in-graph /resnet50_v1.5_fp16.pb --intelai-models . --verbose --data-location /dataset_dir --output-dir /output_dir",
+    "output": "python ./inference/fp16/eval_image_classifier_inference.py --input-graph=/resnet50_v1.5_fp16.pb --num-cores=28 --batch-size=128 --warmup-steps=10 --steps=50 --data-location=/dataset_dir"},
+  { "_comment": "resnet50v1_5_int8_gpu",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name resnet50v1_5 --gpu --batch-size 128 --in-graph /in_graph/resnet50v1_5_int8_pretrained_model.pb --intelai-models . --verbose --data-location /dataset_dir --output-dir /output_dir",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 python ./inference/int8/eval_image_classifier_inference.py --input-graph=/in_graph/resnet50v1_5_int8_pretrained_model.pb --batch-size=128 --warmup-steps=10 --steps=50 --data-location=/dataset_dir"},
+
+  { "_comment": "resnet50v1_5_fp32_training",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=fp32 --mode=training --gpu --batch-size=256 --intelai-models . --verbose --data-location /dataset_dir --output-dir /output_dir",
+    "output": "python ./training/mlperf_resnet/imagenet_main.py 1 --batch_size=256 --max_train_steps=112590 --train_epochs=72 --epochs_between_evals=1 --num_gpus 1 --stop_threshold 0.75 --version 1 --resnet_size 50 --data_dir=/dataset_dir"},
+  { "_comment": "resnet50v1_5_bf16_training",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=bfloat16 --mode=training --gpu --batch-size=256 --intelai-models . --verbose --data-location /dataset_dir --output-dir /output_dir",
+    "output": "python ./training/mlperf_resnet/imagenet_main.py 1 --batch_size=256 --max_train_steps=112590 --train_epochs=72 --epochs_between_evals=1 --num_gpus 1 --stop_threshold 0.75 --version 1 --resnet_size 50 --data_dir=/dataset_dir --use_bfloat16"},
+
     { "_comment": "resnet50v1_5_fp16_training",
-    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=fp16 --mode=training --intelai-models=/workspace/intelai_models --checkpoint=/workspace/checkpoints --output-dir=/workspace/logs --steps=300 --train_epochs=10 --epochs_between_evals=2",
-    "output": "python /workspace/intelai_models/training/mlperf_resnet/imagenet_main.py 2 --batch_size=64 --max_train_steps=300 --train_epochs=10 --epochs_between_evals=2 --inter_op_parallelism_threads 2 --intra_op_parallelism_threads 56 --version 1 --resnet_size 50 --data_format=channels_last --model_dir=/workspace/checkpoints --use_float16",
+  "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=resnet50v1_5 --precision=fp16 --mode=training --intelai-models=/workspace/intelai_models --checkpoint=/workspace/checkpoints --output-dir=/workspace/logs --steps=300 --train_epochs=10 --epochs_between_evals=2",
+  "output": "python /workspace/intelai_models/training/mlperf_resnet/imagenet_main.py 2 --batch_size=64 --max_train_steps=300 --train_epochs=10 --epochs_between_evals=2 --inter_op_parallelism_threads 2 --intra_op_parallelism_threads 56 --version 1 --resnet_size 50 --data_format=channels_last --model_dir=/workspace/checkpoints --use_float16",
+  "cpuset": "0-111"},
+
+  { "_comment": "resnet50v1_5_fp16_online_inference",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp16 --mode inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --model-name resnet50v1_5 --batch-size=1 --data-location=/dataset --in-graph=resnet50v1_5.pb --steps=1500 --warmup-steps=50",
+    "output": "python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=resnet50v1_5.pb --data-type=fp16 --num-inter-threads=2 --num-intra-threads=56 --num-cores=28 --batch-size=1 --warmup-steps=50 --steps=1500 --data-location=/dataset",
+    "cpuset": "0-111"},
+
+    { "_comment": "resnet50v1_5_fp16_batch_inference",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision fp16 --mode inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --model-name resnet50v1_5 --batch-size=-1 --data-location=/dataset --in-graph=resnet50v1_5.pb --steps=1500 --warmup-steps=50",
+    "output": "python /workspace/intelai_models/inference/eval_image_classifier_inference.py --input-graph=resnet50v1_5.pb --data-type=fp16 --num-inter-threads=2 --num-intra-threads=56 --num-cores=28 --batch-size=128 --warmup-steps=50 --steps=1500 --data-location=/dataset",
+    "cpuset": "0-111"},
+
+    { "_comment": "resnet50v1_5_bfloat16_weight_sharing",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision bfloat16 --weight-sharing --mode inference --model-source-dir=/workspace/models --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --model-name resnet50v1_5 --batch-size=1 --in-graph=resnet50v1_5.pb --num-inter-threads=-1 --num-intra-threads=28 --steps=1500 --warmup-steps=50",
+    "output": "python /workspace/intelai_models/inference/eval_image_classifier_inference_weight_sharing.py --input-graph=resnet50v1_5.pb  --num-inter-threads=-1 --num-intra-threads=28 --num-cores=28 --batch-size=1 --warmup-steps=50 --steps=1500",
     "cpuset": "0-111"}
 ]
-
-

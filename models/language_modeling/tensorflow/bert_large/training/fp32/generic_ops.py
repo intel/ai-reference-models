@@ -21,7 +21,6 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-
 _inprecision = tf.float32
 _rprecision = tf.float32
 _use_experimental_gelu = False
@@ -68,11 +67,16 @@ def softmax(scores, axis=None):
     return r_cast(rval)
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
-    inputs = i_cast(inputs)
-    #lnorm = tf.keras.layers.LayerNormalization(axis=1, center=True, scale=True)
-    lnorm = tf.keras.layers.LayerNormalization()
-    out_tensor = lnorm(inputs)
-    return r_cast(out_tensor)
+    lnorm = tf.keras.layers.LayerNormalization(dtype=get_keras_policy())
+
+    # Try to use ITEX first
+    try:
+      import intel_extension_for_tensorflow as itex
+      lnorm = itex.ops.LayerNormalization(dtype=_rprecision)
+    except ImportError:
+      pass
+
+    return lnorm(inputs)
 
 "Moved from modeling.py"
 def gelu(x):
@@ -87,7 +91,16 @@ def gelu(x):
     `x` with the GELU activation applied.
   """
   if _use_experimental_gelu :
-    return tf.nn.gelu(features=x, approximate=True)
+    gelu_func = tf.nn.gelu
+
+    # Try to use ITXE first.
+    try:
+      import intel_extension_for_tensorflow as itex
+      gelu_func = itex.ops.gelu
+    except ImportError:
+      pass
+
+    return gelu_func(features=x, approximate=True)
   else:
     x = i_cast(x)
     cdf = 0.5 * (1.0 + tf.tanh(

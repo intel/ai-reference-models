@@ -65,7 +65,8 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+        if not self.args.gpu:
+            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         # If weight-sharing flag is ON, then use the weight-sharing script.
         if self.args.weight_sharing and not self.args.accuracy_only:
@@ -73,9 +74,14 @@ class ModelInitializer(BaseModelInitializer):
                 self.args.intelai_models, self.args.mode,
                 "eval_image_classifier_inference_weight_sharing.py")
         else:
-            benchmark_script = os.path.join(
-                self.args.intelai_models, self.args.mode,
-                "eval_image_classifier_inference.py")
+            if self.args.gpu:
+                benchmark_script = os.path.join(
+                    self.args.intelai_models, self.args.mode, self.args.precision,
+                    "eval_image_classifier_inference.py")
+            else:
+                benchmark_script = os.path.join(
+                    self.args.intelai_models, self.args.mode,
+                    "eval_image_classifier_inference.py")
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
@@ -83,15 +89,24 @@ class ModelInitializer(BaseModelInitializer):
         num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
             else self.args.num_cores
 
-        self.benchmark_command = \
-            self.benchmark_command + \
-            " --input-graph=" + self.args.input_graph + \
-            " --num-inter-threads=" + str(self.args.num_inter_threads) + \
-            " --num-intra-threads=" + str(self.args.num_intra_threads) + \
-            " --num-cores=" + str(num_cores) + \
-            " --batch-size=" + str(self.args.batch_size) + \
-            " --warmup-steps=" + str(self.args.warmup_steps) + \
-            " --steps=" + str(self.args.steps)
+        if self.args.gpu:
+            self.benchmark_command = \
+                self.benchmark_command + \
+                " --input-graph=" + self.args.input_graph + \
+                " --num-cores=" + str(num_cores) + \
+                " --batch-size=" + str(self.args.batch_size) + \
+                " --warmup-steps=" + str(self.args.warmup_steps) + \
+                " --steps=" + str(self.args.steps)
+        else:
+            self.benchmark_command = \
+                self.benchmark_command + \
+                " --input-graph=" + self.args.input_graph + \
+                " --num-inter-threads=" + str(self.args.num_inter_threads) + \
+                " --num-intra-threads=" + str(self.args.num_intra_threads) + \
+                " --num-cores=" + str(num_cores) + \
+                " --batch-size=" + str(self.args.batch_size) + \
+                " --warmup-steps=" + str(self.args.warmup_steps) + \
+                " --steps=" + str(self.args.steps)
 
         if self.args.data_num_inter_threads:
             self.benchmark_command += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)

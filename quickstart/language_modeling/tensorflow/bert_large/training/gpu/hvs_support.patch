@@ -1,0 +1,26 @@
+diff --git a/models/language_modeling/tensorflow/bert_large/training/bfloat16/optimization.py b/models/language_modeling/tensorflow/bert_large/training/bfloat16/optimization.py
+index d101ab433..d794ad45d 100644
+--- a/models/language_modeling/tensorflow/bert_large/training/bfloat16/optimization.py
++++ b/models/language_modeling/tensorflow/bert_large/training/bfloat16/optimization.py
+@@ -68,7 +68,7 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
+ 
+   if use_multi_cpu and (accum_steps == 1):
+     import horovod.tensorflow as hvd
+-    optimizer = hvd.DistributedOptimizer(optimizer, sparse_as_dense=True)
++    optimizer = hvd.DistributedOptimizer(optimizer, sparse_as_dense=True, num_groups=1)
+ 
+   if use_tpu:
+     optimizer = tf.compat.v1.tpu.CrossShardOptimizer(optimizer)
+diff --git a/models/language_modeling/tensorflow/bert_large/training/fp32/optimization.py b/models/language_modeling/tensorflow/bert_large/training/fp32/optimization.py
+index 233e1007d..027dd3e00 100644
+--- a/models/language_modeling/tensorflow/bert_large/training/fp32/optimization.py
++++ b/models/language_modeling/tensorflow/bert_large/training/fp32/optimization.py
+@@ -97,7 +97,7 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
+ 
+   if use_multi_cpu and (accum_steps == 1):
+     import horovod.tensorflow as hvd
+-    optimizer = hvd.DistributedOptimizer(optimizer, sparse_as_dense=True)
++    optimizer = hvd.DistributedOptimizer(optimizer, sparse_as_dense=True, num_groups=1)
+ 
+   if use_tpu:
+     optimizer = tf.compat.v1.tpu.CrossShardOptimizer(optimizer)

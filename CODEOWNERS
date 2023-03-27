@@ -8,6 +8,7 @@ datasets @ashahba @claynerobison @dzungductran
 docs @claynerobison @mhbuehler
 k8s  @ashahba @dzungductran
 models @ashraf-bhuiyan @riverliuintel
+models @riverliuintel
 models/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
 quickstart mahathi.vatsal.salopanthula@intel.com
 quickstart/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe

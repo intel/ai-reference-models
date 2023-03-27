@@ -33,7 +33,6 @@ _TENSORS_TO_LOG = dict((x, x) for x in ['learning_rate',
                                         'cross_entropy',
                                         'train_accuracy'])
 
-
 def get_train_hooks(name_list, **kwargs):
   """Factory for getting a list of TensorFlow hooks for training by name.
 

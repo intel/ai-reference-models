@@ -38,7 +38,71 @@ releases:
         tag_specs: []
 
 slice_sets:
+    ubuntu:
+        - add_to_name: ""
+          partials:
+              - ubuntu-base
+          args:
+              - UBUNTU_VERSION=20.04
 
+    tensorflow-itex-gpu-base:
+        - add_to_name: ""
+          dockerfile_exclusive_name: tf-gpu
+          partials:
+              - tensorflow/gpu-base
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+  
+    tensorflow-itex-gpu-base-public:
+        - add_to_name: ""
+          dockerfile_exclusive_name: tf-atsm
+          partials:
+              - tensorflow/gpu-base-public
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+    
+    tensorflow-itex-max-series-base-public:
+        - add_to_name: ""
+          dockerfile_exclusive_name: tf-max-series
+          partials:
+              - tensorflow/max-series-base-public
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+                 
+
+    tensorflow-itex-max-series-base-public:
+        - add_to_name: ""
+          dockerfile_exclusive_name: tf-max-series
+          partials:
+              - tensorflow/max-series-base-public
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+                 
+    tf-ats-gpu:
+        - add_to_name: tf-ats-gpu 
+          args:
+              - PACKAGE_NAME=tf-ats-gpu
+              - DPCPP_COMPILER_BINARIES=l_dpcpp-cpp-compiler_p_2021.4.0.3201_offline.sh
+              - MKL_BINARY=l_onemkl_p_2021.3.0.533_offline.sh
+          partials:
+              - gpu-ats-drivers
+              - mkl
+              - local-compiler-dpcpp-cpp
+              - python3
+              - tensorflow/gpu-tensorflow
+    
     intel-tf:
         - add_to_name: ""
           dockerfile_exclusive_name: "intel-tf"
@@ -57,7 +121,7 @@ slice_sets:
               - openssh-7.6
               - horovod
           args:
-              - PY_VERSION=3.8
+              - PY_VERSION=3.9
 
     image-recognition:
         - add_to_name: "-image-recognition"
@@ -108,7 +172,7 @@ slice_sets:
               - object_detection/pip_installs
               - object_detection/protoc
           args:
-              - PY_VERSION=3.8
+              - PY_VERSION=3.9
           files:
                - source: LICENSE
                  destination: licenses/LICENSE

@@ -25,6 +25,61 @@ import tensorflow as tf
 import generic_ops as bf
 import math
 
+import sys
+from tensorflow.core.protobuf import config_pb2
+from tensorflow.python.training.session_run_hook import SessionRunArgs
+from tensorflow.python.training import training_util
+from tensorflow.python.platform import gfile
+from tensorflow.python.client import timeline
+from datetime import datetime
+
+class LoggerHook(tf.estimator.SessionRunHook):
+  """ Logs runtime. """
+  def __init__(self, batch_size, run_profile):
+    self.batch_size = batch_size
+    self.run_profile = run_profile
+
+  def begin(self):
+    self._step = 0
+    self._total_duration = 0
+    self._warmup = 2
+    self._global_step_tensor = training_util._get_or_create_global_step_read()
+
+  def before_run(self, run_context):
+    self._start_time = datetime.now()
+    opts = config_pb2.RunOptions(trace_level=config_pb2.RunOptions.FULL_TRACE)
+    requests = {"global_step": self._global_step_tensor}
+    if self.run_profile:
+      return SessionRunArgs(requests, options=opts)
+    else:
+      return SessionRunArgs(requests)
+
+  def after_run(self, run_context, run_values):
+    self._step += 1
+    duration = datetime.now() - self._start_time
+    ms = duration.total_seconds() * 1000.00
+    if self._step > self._warmup:
+      self._total_duration += ms
+      if self._step % 1 == 0:
+        print("Current step: %d, time in ms: %.2f" %(self._step, ms))
+    else:
+      print("Warmup step: %d, time in ms: %.2f" %(self._step, ms))
+    sys.stdout.flush()
+    if self._step == 4 and self.run_profile:
+      with gfile.Open('timeline-bert.json', "w") as f:
+        trace = timeline.Timeline(run_values.run_metadata.step_stats)
+        f.write(trace.generate_chrome_trace_format())
+
+  def end(self, run_context):
+    print("self._step: %d" %self._step)
+    print("Total time spent (after warmup): %.2f ms" %(self._total_duration))
+    print("Time spent per iteration (after warmup): %.2f ms" %(self._total_duration/(self._step - self._warmup)))
+    time_takes = self._total_duration / (self._step - self._warmup)
+    if self.batch_size == 1:
+      print("Latency is %.3f ms" % (time_takes))
+    print("Throughput is %.3f samples/sec" % (self.batch_size * 1000 / time_takes))
+    sys.stdout.flush()
+
 global is_mpi
 try:
   import horovod.tensorflow as hvd
@@ -534,6 +589,13 @@ def main(_):
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,
       intra_op_parallelism_threads=FLAGS.intra_op_parallelism_threads,
       allow_soft_placement=True)
+  if is_mpi:
+    gpus = tf.config.experimental.list_physical_devices('XPU')
+    for gpu in gpus:
+      tf.config.experimental.set_memory_growth(gpu, True)
+    if gpus:
+      tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'XPU')
+    session_config.gpu_options.visible_device_list = str(hvd.local_rank())
   run_config = tf.compat.v1.estimator.tpu.RunConfig(
       cluster=tpu_cluster_resolver,
       master=FLAGS.master,
@@ -544,7 +606,7 @@ def main(_):
           iterations_per_loop=FLAGS.iterations_per_loop,
           num_shards=FLAGS.num_tpu_cores,
           per_host_input_for_training=is_per_host),
-      log_step_count_steps=25)
+      log_step_count_steps=1)
 
   if bert_config.precision == "bfloat16" :
     tf.compat.v1.logging.info("INFO: BERT bfloat16 training....!")
@@ -610,6 +672,7 @@ def main(_):
       tf.compat.v1.logging.info("***** Running training with profiler*****")
       hooks.append(tf.compat.v1.train.ProfilerHook(save_steps=3, output_dir=FLAGS.output_dir,
                                                    show_memory=False))
+    hooks.append(LoggerHook(FLAGS.train_batch_size, False))
 
     estimator.train(input_fn=train_input_fn, max_steps=FLAGS.num_train_steps,
                     hooks=hooks)

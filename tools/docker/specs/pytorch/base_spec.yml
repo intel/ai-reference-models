@@ -34,6 +34,39 @@ slice_sets:
       args:
           - UBUNTU_VERSION=20.04
 
+    pytorch-ipex-gpu-base:
+        - add_to_name: ""
+          dockerfile_exclusive_name: pytorch-gpu
+          partials:
+              - pytorch/gpu-base
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    pytorch-ipex-gpu-base-public:
+        - add_to_name: ""
+          dockerfile_exclusive_name: pytorch-atsm
+          partials:
+              - pytorch/gpu-base-public
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
+    pytorch-ipex-max-series-base-public:
+        - add_to_name: ""
+          dockerfile_exclusive_name: pytorch-max-series
+          partials:
+              - pytorch/max-series-base-public
+          files:
+               - source: LICENSE
+                 destination: licenses/LICENSE
+               - source: third_party
+                 destination: licenses/third_party
+
     pytorch:
         - add_to_name: "pytorch"
           partials:

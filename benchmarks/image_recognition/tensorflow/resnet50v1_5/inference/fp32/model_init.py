@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2019 Intel Corporation
+# Copyright (c) 2019-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -65,11 +65,15 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
-        benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode,
-            "eval_image_classifier_inference.py")
+        if self.args.gpu:
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode, self.args.precision,
+                "eval_image_classifier_inference.py")
+        else:
+            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode,
+                "eval_image_classifier_inference.py")
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
@@ -77,15 +81,24 @@ class ModelInitializer(BaseModelInitializer):
         num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 \
             else self.args.num_cores
 
-        self.benchmark_command = \
-            self.benchmark_command + \
-            " --input-graph=" + self.args.input_graph + \
-            " --num-inter-threads=" + str(self.args.num_inter_threads) + \
-            " --num-intra-threads=" + str(self.args.num_intra_threads) + \
-            " --num-cores=" + str(num_cores) + \
-            " --batch-size=" + str(self.args.batch_size) + \
-            " --warmup-steps=" + str(self.args.warmup_steps) + \
-            " --steps=" + str(self.args.steps)
+        if self.args.gpu:
+            self.benchmark_command = \
+                self.benchmark_command + \
+                " --input-graph=" + self.args.input_graph + \
+                " --num-cores=" + str(num_cores) + \
+                " --batch-size=" + str(self.args.batch_size) + \
+                " --warmup-steps=" + str(self.args.warmup_steps) + \
+                " --steps=" + str(self.args.steps)
+        else:
+            self.benchmark_command = \
+                self.benchmark_command + \
+                " --input-graph=" + self.args.input_graph + \
+                " --num-inter-threads=" + str(self.args.num_inter_threads) + \
+                " --num-intra-threads=" + str(self.args.num_intra_threads) + \
+                " --num-cores=" + str(num_cores) + \
+                " --batch-size=" + str(self.args.batch_size) + \
+                " --warmup-steps=" + str(self.args.warmup_steps) + \
+                " --steps=" + str(self.args.steps)
 
         if self.args.data_num_inter_threads:
             self.benchmark_command += " --data-num-inter-threads=" + str(self.args.data_num_inter_threads)

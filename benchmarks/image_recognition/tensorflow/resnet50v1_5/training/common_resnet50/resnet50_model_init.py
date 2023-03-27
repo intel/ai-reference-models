@@ -66,7 +66,8 @@ class ResNet50ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+        if not self.args.gpu:
+            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode,
@@ -84,17 +85,28 @@ class ResNet50ModelInitializer(BaseModelInitializer):
             self.python_exe + " " + benchmark_script
 
         # Model requires random_seed. Just setting it to a random value.
-        random_seed = 2
-        self.benchmark_command = \
-            self.benchmark_command + \
-            " " + str(random_seed) + \
-            " --batch_size=" + str(self.args.batch_size) + \
-            " --max_train_steps=" + str(self.args.steps) + \
-            " --train_epochs=" + str(self.args.trainepochs) + \
-            " --epochs_between_evals=" + str(self.args.epochsbtwevals) + \
-            " --inter_op_parallelism_threads " + str(self.args.num_inter_threads) + \
-            " --intra_op_parallelism_threads " + str(self.args.num_intra_threads) + \
-            " --version 1 --resnet_size 50 --data_format=channels_last"
+        if self.args.gpu:
+            random_seed = 1
+            self.benchmark_command = \
+                self.benchmark_command + \
+                " " + str(random_seed) + \
+                " --batch_size=" + str(self.args.batch_size) + \
+                " --max_train_steps=" + str(self.args.steps) + \
+                " --train_epochs=" + str(self.args.trainepochs) + \
+                " --epochs_between_evals=" + str(self.args.epochsbtwevals) + \
+                " --num_gpus 1 --stop_threshold 0.75 --version 1 --resnet_size 50"
+        else:
+            random_seed = 2
+            self.benchmark_command = \
+                self.benchmark_command + \
+                " " + str(random_seed) + \
+                " --batch_size=" + str(self.args.batch_size) + \
+                " --max_train_steps=" + str(self.args.steps) + \
+                " --train_epochs=" + str(self.args.trainepochs) + \
+                " --epochs_between_evals=" + str(self.args.epochsbtwevals) + \
+                " --inter_op_parallelism_threads " + str(self.args.num_inter_threads) + \
+                " --intra_op_parallelism_threads " + str(self.args.num_intra_threads) + \
+                " --version 1 --resnet_size 50 --data_format=channels_last"
 
         # if the data location and checkpoint directory is not empty, then include the arg
         if self.args.data_location and os.listdir(self.args.data_location):

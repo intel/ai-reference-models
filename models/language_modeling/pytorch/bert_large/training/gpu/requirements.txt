@@ -1,0 +1,25 @@
+# Python dependencies required for development
+astunparse
+batchgenerators>=0.20.0
+expecttest
+future
+medpy
+numpy
+pandas
+psutil
+pyyaml
+requests
+SimpleITK
+scikit-learn
+scipy==1.10.0
+setuptools
+six
+types-dataclasses
+typing_extensions
+dataclasses; python_version<"3.7"
+tensorflow-cpu
+transformers
+tensorboard
+tensorboardX
+absl-py
+gdown

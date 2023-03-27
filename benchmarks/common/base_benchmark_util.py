@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2018-2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -281,6 +281,12 @@ class BaseBenchmarkUtil(object):
             help="Additional command line arguments (prefix flag start with"
                  " '--').")
 
+        # Check if GPU is enabled.
+        self._common_arg_parser.add_argument(
+            "--gpu",
+            help="Run the benchmark script using GPU",
+            dest="gpu", action="store_true")
+
     def _validate_args(self):
         """validate the args and initializes platform_util"""
         # check if socket id is in socket number range
@@ -311,8 +317,9 @@ class BaseBenchmarkUtil(object):
                              format(system_num_cores))
 
         if args.output_results and ((args.model_name != "resnet50" and
-                                    args.model_name != "resnet50v1_5") or args.precision != "fp32"):
-            raise ValueError("--output-results is currently only supported for resnet50 FP32 inference.")
+                                    args.model_name != "resnet50v1_5") or
+                                    (args.precision != "fp32" and args.precision != "fp16")):
+            raise ValueError("--output-results is currently only supported for resnet50 FP32 or FP16 inference.")
         elif args.output_results and (args.mode != "inference" or not args.data_location):
             raise ValueError("--output-results can only be used when running inference with a dataset.")
 
@@ -354,6 +361,14 @@ class BaseBenchmarkUtil(object):
                 print("Note: Socket id {} is specified, but the cpuset has limited this socket to {} cores. "
                       "This is less than the number of cores per socket on the system ({})".
                       format(args.socket_id, cpuset_len_for_socket, self._platform_util.num_cores_per_socket))
+
+        if args.gpu:
+            if args.socket_id != -1:
+                raise ValueError("--socket-id cannot be used with --gpu parameter.")
+            if args.num_intra_threads is not None:
+                raise ValueError("--num-intra-threads cannot be used with --gpu parameter.")
+            if args.num_inter_threads is not None:
+                raise ValueError("--num-inter-threads cannot be used with --gpu parameter.")
 
     def initialize_model(self, args, unknown_args):
         """Create model initializer for the specified model"""

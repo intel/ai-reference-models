@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2018-2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -241,7 +241,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "USE_CASE": str(use_case),
             "VERBOSE": args.verbose,
             "WEIGHT_SHARING": args.weight_sharing,
-            "SYNTHETIC_DATA": args.synthetic_data
+            "SYNTHETIC_DATA": args.synthetic_data,
+            "GPU": str(args.gpu)
         }
 
         # Add custom model args as env vars)
