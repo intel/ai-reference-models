@@ -44,7 +44,7 @@ elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISI
   exit 1
 fi
 
-if [ -z "${BATCH_SIZE}"]; then
+if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="24"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi

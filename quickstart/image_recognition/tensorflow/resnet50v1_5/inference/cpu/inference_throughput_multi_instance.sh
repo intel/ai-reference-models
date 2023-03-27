@@ -50,7 +50,7 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bias_resnet50.pb"
     elif [[ $PRECISION == "bfloat16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bf16_resnet50_v1.pb"
-    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" || $PRECISION == "fp16"]]; then
+    elif [[ $PRECISION == "fp32" || $PRECISION == "bfloat32" || $PRECISION == "fp16" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/resnet50_v1.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."

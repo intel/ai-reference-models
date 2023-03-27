@@ -92,7 +92,7 @@ fi
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
+if [ -z "${BATCH_SIZE}" ]; then
   if [[ $PRECISION == "int8" ]]; then
     BATCH_SIZE="16"
   elif [[ $PRECISION == "bfloat16" ]] || [[ $PRECISION == "fp16" ]]; then

@@ -37,7 +37,7 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-if [-z "${WARMUP_STEPS}" ]; then
+if [ -z "${WARMUP_STEPS}" ]; then
   echo "ENV VAR WARMUP_STEPS is not set"
   exit 1
 fi

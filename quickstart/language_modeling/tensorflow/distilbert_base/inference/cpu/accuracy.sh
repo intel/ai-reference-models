@@ -64,7 +64,7 @@ else
 fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
+if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="56"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
