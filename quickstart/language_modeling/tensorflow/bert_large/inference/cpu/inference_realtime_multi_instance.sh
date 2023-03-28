@@ -63,7 +63,11 @@ for i in "${!input_dirs[@]}"; do
     exit 1
   fi
 done
-num_inter_threads=" --num-inter-threads 3 "
+if [[ $PRECISION == "int8" ]]; then
+    num_inter_threads=" --num-inter-threads 1 "
+else
+    num_inter_threads=" --num-inter-threads 3 "
+fi
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "int8" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/bert_large_int8_pretrained_model.pb"
