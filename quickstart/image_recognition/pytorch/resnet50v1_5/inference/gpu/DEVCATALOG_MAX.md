@@ -2,7 +2,7 @@
 
 ## Description 
 
-This document has instructions for running ResNet50 V1.5 Inference with INT8 precision using Intel Extension for PyTorch on Intel Max Series GPU. 
+This document has instructions for running ResNet50 V1.5 Inference with INT8 precision using Intel® Extension for PyTorch on Intel®Max Series GPU. 
 
 ## Datasets
 
@@ -44,11 +44,13 @@ Requirements:
 ```
 docker pull intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference
 ```
-The ResNet50 v1.5 inference container includes scripts,model and libraries need to run INT8 inference. To run the `inference_block_format.sh`  quickstart script using this container, you'll need to provide volume mounts for the ImageNet dataset. You will need to provide an output directory where log files will be written. 
+The ResNet50 v1.5 inference container includes scripts,model and libraries need to run INT8 inference. To run the `inference_block_format.sh` quickstart script using this container, you'll need to set the environment variable and provide volume mounts for the ImageNet dataset if real dataset is required. Otherwise, the script uses dummy data. You will need to provide an output directory where log files will be written. 
 
 ```
 export DATASET_DIR=${PWD}/imagenet
 export OUTPUT_DIR=${PWD}/logs
+export BATCH_SIZE=${BATCH_SIZE:-1024}
+export NUM_ITERATIONS=${NUM_ITERATIONS:-10}
 
 IMAGE_NAME=intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference
 DOCKER_ARGS="--rm -it"
@@ -66,6 +68,8 @@ docker run \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
+  --env BATCH_SIZE=${BATCH_SIZE} \
+  --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \

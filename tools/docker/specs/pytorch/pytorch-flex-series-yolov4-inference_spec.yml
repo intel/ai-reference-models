@@ -1,0 +1,41 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-ipex-flex-series-base-public}{pytorch-flex-series-yolov4-inference}'
+slice_sets:
+  pytorch-flex-series-yolov4-inference:
+  - add_to_name: -pytorch-flex-series-yolov4-inference
+    dockerfile_exclusive_name: -yolov4-inference
+    args:
+    - PACKAGE_NAME=pytorch-flex-series-yolov4-inference
+    dockerfile_subdirectory: gpu_model_containers
+    downloads: []
+    files:
+    - source: quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md
+      destination: README.md
+    - destination: models/object_detection/pytorch/yolov4/inference/gpu
+      source: models/object_detection/pytorch/yolov4/inference/gpu
+    - destination: quickstart/inference_with_dummy_data.sh
+      source: quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_with_dummy_data.sh
+    wrapper_package_files:
+     - source: quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md
+       destination: README.md
+     - source: quickstart/object_detection/pytorch/yolov4/inference/gpu/build.sh
+       destination: build.sh
+     - source: dockerfiles/gpu_model_containers/pytorch-flex-series-yolov4-inference.Dockerfile
+       destination: pytorch-flex-series-yolov4-inference.Dockerfile
+     - source: output/pytorch-flex-series-yolov4-inference.tar.gz
+       destination: model_packages/pytorch-flex-series-yolov4-inference.tar.gz
+     - source: ""
+       destination: info.txt
+     - source: third_party
+       destination: licenses/third_party
+     - source: LICENSE
+       destination: licenses/LICENSE
+    partials:
+    - numactl
+    - python-build
+    - opencv
+    - object_detection/yolov4/pip_installs
+    - model_package
+    - entrypoint

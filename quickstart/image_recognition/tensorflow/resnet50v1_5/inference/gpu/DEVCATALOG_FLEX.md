@@ -9,7 +9,7 @@ This document has instructions for running ResNet50 v1.5 inference using Intel®
 | Item | Detail |
 | ------ | ------- |
 | Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed: [Download Driver 476.14](https://dgpu-docs.intel.com/releases/stable_476_14_20221021.html)
+| Drivers | GPU-compatible drivers need to be installed: [Download Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04)
 | Software | Docker* Installed |
 
 ## Get Started
@@ -59,7 +59,7 @@ docker run \
   --ipc=host \
   --privileged \
   --env PRECISION=${PRECISION} \
-  --env GPU_TYPE=${GPU_TYPE} \ 
+  --env GPU_TYPE=${GPU_TYPE} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env http_proxy=${http_proxy} \
@@ -75,11 +75,6 @@ docker run \
 ## Documentation and Sources
 
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/dockerfiles/model_containers)
-
-## Summary and Next Steps
-
-Now you are inside container with Python 3.9 and Tensorflow 2.10.0 preinstalled. You can run your own script
-to run on intel GPU. 
 
 ## Support
 Support for Intel® Extension for TensorFlow* is found via the [Intel® AI Analytics Toolkit.](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html#gs.qbretz) Additionally, the Intel® Extension for TensorFlow* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-tensorflow/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.

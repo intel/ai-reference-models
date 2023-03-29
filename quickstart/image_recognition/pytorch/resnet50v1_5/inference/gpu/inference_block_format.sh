@@ -17,7 +17,7 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 NUM_ITERATIONS=${NUM_ITERATIONS-10}
-
+BATCH_SIZE=${BATCH_SIZE-1024}
 
 if [[ -z "${Tile}" ]]; then
     Tile=${Tile-1}
@@ -25,12 +25,11 @@ else
     Tile=${Tile}
 fi
 
+dataset_arg="${DATASET_DIR}"
 if [[ -z "${DATASET_DIR}" ]]; then
-  echo "The required environment variable DATASET_DIR has not been set"
-  exit 1
-fi
-
-if [[ ! -d "${DATASET_DIR}" ]]; then
+  echo "Using Dummy data since environment variable DATASET_DIR has not been set"
+  dataset_arg="--dummy"
+elif [[ ! -d "${DATASET_DIR}" ]]; then
   echo "The DATASET_DIR '${DATASET_DIR}' does not exist"
   exit 1
 fi
@@ -40,15 +39,11 @@ if [[ -z $OUTPUT_DIR ]]; then
   exit 1
 fi
 
-# If batch size env is not mentioned, then the workload will run with the default batch size.
-if [ -z "${BATCH_SIZE}"]; then
-  BATCH_SIZE="1024"
-  echo "Running with default batch size of ${BATCH_SIZE}"
-fi
-
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
+export OverrideDefaultFP64Settings=1 
+export IGC_EnableDPEmulation=1 
 
 resnet50_log_analysis() {
     # $1 : src raw log
@@ -87,7 +82,7 @@ if [[ ${Tile} == "1" ]]; then
         --int8 1 \
         --num-iterations ${NUM_ITERATIONS} \
         --benchmark 1 \
-        ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}//resnet50_int8_inf_block_t0_raw.log
+        ${dataset_arg}  2>&1 | tee ${OUTPUT_DIR}//resnet50_int8_inf_block_t0_raw.log
     resnet50_log_analysis ${OUTPUT_DIR}/resnet50_int8_inf_block_t0_raw.log ${OUTPUT_DIR}/resnet50_int8_inf_block_t0.log inference ${BATCH_SIZE}
 elif [[ ${Tile} == "2" ]]; then
     echo "resnet50 int8 inference block two tile"
@@ -100,7 +95,7 @@ elif [[ ${Tile} == "2" ]]; then
         --int8 1 \
         --num-iterations ${NUM_ITERATIONS} \
         --benchmark 1 \
-        ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}//resnet50_int8_inf_block_t0_raw.log &
+        ${dataset_arg}  2>&1 | tee ${OUTPUT_DIR}//resnet50_int8_inf_block_t0_raw.log &
     ZE_AFFINITY_MASK=0.1 IPEX_XPU_ONEDNN_LAYOUT=1 python -u models/image_recognition/pytorch/resnet50v1_5/inference/gpu/main.py \
         -a resnet50 \
         -b ${BATCH_SIZE} \
@@ -110,7 +105,7 @@ elif [[ ${Tile} == "2" ]]; then
         --int8 1 \
         --num-iterations ${NUM_ITERATIONS} \
         --benchmark 1 \
-        ${DATASET_DIR}  2>&1 | tee ${OUTPUT_DIR}//resnet50_int8_inf_block_t1_raw.log
+        ${dataset_arg}  2>&1 | tee ${OUTPUT_DIR}//resnet50_int8_inf_block_t1_raw.log
     resnet50_log_analysis ${OUTPUT_DIR}/resnet50_int8_inf_block_t0_raw.log ${OUTPUT_DIR}/resnet50_int8_inf_block_t0.log inference ${BATCH_SIZE}
     resnet50_log_analysis ${OUTPUT_DIR}/resnet50_int8_inf_block_t1_raw.log ${OUTPUT_DIR}/resnet50_int8_inf_block_t1.log inference ${BATCH_SIZE}
 else

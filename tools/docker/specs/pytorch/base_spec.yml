@@ -45,11 +45,11 @@ slice_sets:
                - source: third_party
                  destination: licenses/third_party
 
-    pytorch-ipex-gpu-base-public:
+    pytorch-ipex-flex-series-base-public:
         - add_to_name: ""
-          dockerfile_exclusive_name: pytorch-atsm
+          dockerfile_exclusive_name: pytorch-flex-series
           partials:
-              - pytorch/gpu-base-public
+              - pytorch/flex-series-base-public
           files:
                - source: LICENSE
                  destination: licenses/LICENSE

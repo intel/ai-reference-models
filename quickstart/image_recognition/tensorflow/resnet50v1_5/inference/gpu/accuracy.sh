@@ -52,10 +52,12 @@ fi
 
 # Check for GPU type
 if [[ $GPU_TYPE == "flex_series" ]]; then
+  export OverrideDefaultFP64Settings=1 
+  export IGC_EnableDPEmulation=1 
   if [[ $PRECISION == "int8" ]]; then
     WARMUP="-- warmup_steps=5 steps=25"
     if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-      pretrained_model=/workspace/tf-atsm-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
+      pretrained_model=/workspace/tf-flex-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
     else
       pretrained_model=${FROZEN_GRAPH}
     fi

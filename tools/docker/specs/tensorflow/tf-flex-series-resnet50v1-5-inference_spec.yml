@@ -1,16 +1,16 @@
 releases:
   versioned:
     tag_specs:
-      - "{tensorflow-itex-gpu-base-public}{tf-atsm-resnet50v1-5-inference}"
+      - "{tensorflow-itex-flex-series-base-public}{tf-flex-series-resnet50v1-5-inference}"
 slice_sets:
-  tf-atsm-resnet50v1-5-inference:
-    - add_to_name: -tf-atsm-resnet50v1-5-inference
+  tf-flex-series-resnet50v1-5-inference:
+    - add_to_name: -tf-flex-series-resnet50v1-5-inference
       dockerfile_exclusive_name: -resnet50v1-5-inference
       args:
-        - PACKAGE_NAME=tf-atsm-resnet50v1-5-inference
+        - PACKAGE_NAME=tf-flex-series-resnet50v1-5-inference
       dockerfile_subdirectory: gpu_model_containers
       downloads:
-        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50v1_5_int8_h2d_avg_itex.pb
+        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb
           destination: pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
       files:
         - destination: benchmarks/common
@@ -19,8 +19,6 @@ slice_sets:
           source: benchmarks/image_recognition/__init__.py
         - destination: benchmarks/image_recognition/tensorflow/__init__.py
           source: benchmarks/image_recognition/tensorflow/__init__.py
-        - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md
-          source: benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md
         - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
           source: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
         - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/inference/__init__.py
@@ -39,21 +37,17 @@ slice_sets:
           source: quickstart/common
         - destination: quickstart
           source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README.md
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Flex_series.md
           destination: README.md
       wrapper_package_files:
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/wrapper_README.md
-          destination: README.md
         - source: datasets/imagenet/README.md
           destination: datasets/imagenet/README.md
         - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/build.sh
           destination: build.sh
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/run.sh
-          destination: run.sh
-        - source: dockerfiles/gpu_model_containers/tf-atsm-resnet50v1-5-inference.Dockerfile
-          destination: tf-atsm-resnet50v1-5-inference.Dockerfile
-        - source: output/tf-atsm-resnet50v1-5-inference.tar.gz
-          destination: model_packages/tf-atsm-resnet50v1-5-inference.tar.gz
+        - source: dockerfiles/gpu_model_containers/tf-flex-series-resnet50v1-5-inference.Dockerfile
+          destination: tf-flex-series-resnet50v1-5-inference.Dockerfile
+        - source: output/tf-flex-series-resnet50v1-5-inference.tar.gz
+          destination: model_packages/tf-flex-series-resnet50v1-5-inference.tar.gz
         - source: ""
           destination: info.txt
         - source: third_party

@@ -2,14 +2,13 @@
 
 ## Overview
 
-This document has instructions for running SSD-MobileNet inference using
-Intel(R) Extension for TensorFlow* with Intel(R) Data Center GPU Flex Series.
+This document has instructions for running SSD-MobileNet inference using Intel®  Extension for TensorFlow* with Intel® Data Center GPU Flex Series.
 
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
 | Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed:[Download Driver 476.14](https://dgpu-docs.intel.com/releases/stable_476_14_20221021.html)
+| Drivers | GPU-compatible drivers need to be installed:[Download Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04)
 | Software | Docker* Installed |
 
 ## Get Started
@@ -44,8 +43,9 @@ The SSD-MobileNet inference container includes scripts,model and libraries need 
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed coco dataset>
+export BATCH_SIZE=<inference batch size.Default is 1024 for Flex Series 170 and 256 for Flex Series 140>
 IMAGE_NAME=intel/object-detection:tf-flex-gpu-ssd-mobilenet-inference
-DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
+DOCKER_ARGS="--rm -it"
 
 VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
 RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
@@ -53,12 +53,12 @@ RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
 test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
 
 docker run \
-  -v <your-local-dir>:/workspace \
   --group-add ${VIDEO} \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
   --env PRECISION=${PRECISION} \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env http_proxy=${http_proxy} \
@@ -74,11 +74,6 @@ docker run \
 ## Documentation and Sources
 
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/dockerfiles/model_containers)
-
-## Summary and Next Steps
-
-Now you are inside container with Python 3.9 and Tensorflow 2.10.0 preinstalled. You can run your own script
-to run on intel GPU. 
 
 ## Support
 Support for Intel® Extension for TensorFlow* is found via the [Intel® AI Analytics Toolkit.](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html#gs.qbretz) Additionally, the Intel® Extension for TensorFlow* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-tensorflow/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.

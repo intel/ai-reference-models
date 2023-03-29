@@ -16,9 +16,8 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+BATCH_SIZE=${BATCH_SIZE-1024}
 echo 'label='$label
-
-./quickstart/setup.sh
 
 if [[ -z "${DATASET_DIR}" ]]; then
   echo "The required environment variable DATASET_DIR has not been set"
@@ -28,11 +27,14 @@ fi
 # Create the model weights directory, if it doesn't already exist
 mkdir -p $PRETRAINED_MODEL
 
+export OverrideDefaultFP64Settings=1 
+export IGC_EnableDPEmulation=1 
+
 # Download the weights file if it does not already exist
 WEIGHTS_FILE="$PRETRAINED_MODEL/mobilenet-v1-ssd-mp-0_675.pth"
 if [[ ! -f "$WEIGHTS_FILE" ]]; then
   echo "The weights file was not found at $WEIGHTS_FILE, so the file will be downloaded"
-  wget https://storage.googleapis.com/models-hao/mobilenet-v1-ssd-mp-0_675.pth -P $PRETRAINED_MODEL
+  wget https://drive.google.com/uc?id=1pSPLnWGGNs3kV_YSxr4vsmSvDCLpUsEr -O $WEIGHTS_FILE
 else
   echo "The weights file was found at $WEIGHTS_FILE"
 fi
@@ -57,7 +59,7 @@ IPEX_XPU_ONEDNN_LAYOUT=1 python -u ${MODEL_DIR}/models/object_detection/pytorch/
   --trained_model ${WEIGHTS_FILE} \
   --label_file ${label} \
   --dummy 1 \
-  --batch_size 512 \
+  --batch_size ${BATCH_SIZE} \
   --benchmark 1 \
   --num-iterations 500 \
   --int8 2>&1 | tee $OUTPUT_DIR/ssd_mobilenetv1_dummy_data_xpu_inf.log

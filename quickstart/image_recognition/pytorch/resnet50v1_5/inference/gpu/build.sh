@@ -19,11 +19,11 @@ set -e
 GPU_TYPE=$1
 
 PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE:-intel/intel-extension-for-pytorch}
-PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-xpu-max}
 
 if [[ $GPU_TYPE == max-series ]];then
 
     IMAGE_NAME=${IMAGE_NAME:-intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference}
+    PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-xpu-max}
     docker build \
     --build-arg PACKAGE_DIR=model_packages \
     --build-arg PACKAGE_NAME=pytorch-max-series-resnet50v1-5-inference \
@@ -37,9 +37,10 @@ if [[ $GPU_TYPE == max-series ]];then
     -f pytorch-max-series-resnet50v1-5-inference.Dockerfile .
 elif [[ $GPU_TYPE == flex-series ]];then
     IMAGE_NAME=${IMAGE_NAME:-intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference}
+    PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-xpu-flex}
     docker build \
     --build-arg PACKAGE_DIR=model_packages \
-    --build-arg PACKAGE_NAME=pytorch-atsm-resnet50v1-5-inference \
+    --build-arg PACKAGE_NAME=pytorch-flex-series-resnet50v1-5-inference \
     --build-arg MODEL_WORKSPACE=/workspace \
     --build-arg http_proxy=$http_proxy \
     --build-arg https_proxy=$https_proxy \
@@ -47,7 +48,7 @@ elif [[ $GPU_TYPE == flex-series ]];then
     --build-arg PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE} \
     --build-arg PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG} \
     -t $IMAGE_NAME \
-    -f pytorch-atsm-resnet50v1-5-inference.Dockerfile .
+    -f pytorch-flex-series-resnet50v1-5-inference.Dockerfile .
 else
     echo "Only flex-series or max-series GPU platforms supported"
     exit 1

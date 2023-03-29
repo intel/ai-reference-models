@@ -19,9 +19,9 @@ set -e
 GPU_TYPE=$1
 
 TENSORFLOW_BASE_IMAGE=${TENSORFLOW_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-TENSORFLOW_BASE_TAG=${TENSORFLOW_BASE_TAG:-gpu-max}
 if [[ $GPU_TYPE == max-series ]];then
     IMAGE_NAME=${IMAGE_NAME:-intel/image-recognition:tf-max-gpu-resnet50v1-5-inference}
+    TENSORFLOW_BASE_TAG=${TENSORFLOW_BASE_TAG:-gpu-max}
     docker build \
     --build-arg PACKAGE_DIR=model_packages \
     --build-arg PACKAGE_NAME=tf-max-series-resnet50v1-5-inference \
@@ -36,9 +36,10 @@ if [[ $GPU_TYPE == max-series ]];then
 
 elif [[ $GPU_TYPE == flex-series ]];then
     IMAGE_NAME=${IMAGE_NAME:-intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference}
+    TENSORFLOW_BASE_TAG=${TENSORFLOW_BASE_TAG:-gpu-flex}
     docker build \
     --build-arg PACKAGE_DIR=model_packages \
-    --build-arg PACKAGE_NAME=tf-atsm-resnet50v1-5-inference \
+    --build-arg PACKAGE_NAME=tf-flex-series-resnet50v1-5-inference \
     --build-arg MODEL_WORKSPACE=/workspace \
     --build-arg http_proxy=$http_proxy \
     --build-arg https_proxy=$https_proxy \
@@ -46,7 +47,7 @@ elif [[ $GPU_TYPE == flex-series ]];then
     --build-arg TENSORFLOW_BASE_IMAGE=${TENSORFLOW_BASE_IMAGE} \
     --build-arg TENSORFLOW_BASE_TAG=${TENSORFLOW_BASE_TAG} \
     -t $IMAGE_NAME \
-    -f tf-atsm-resnet50v1-5-inference.Dockerfile .
+    -f tf-flex-series-resnet50v1-5-inference.Dockerfile .
 
 else
     echo "Provide GPU_TYPE option.Only flex-series or max-series GPU platforms supported"

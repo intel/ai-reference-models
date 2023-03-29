@@ -3,13 +3,13 @@
 
 ## Overview
 
-This document has instructions for running ResNet50v1.5 inference using Intel(R) Extension for PyTorch with GPU.
+This document has instructions for running ResNet50v1.5 inference using Intel® Extension for PyTorch on Intel® Flex Series GPU.
 
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
 | Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed: [Download Driver 476.14](https://dgpu-docs.intel.com/releases/stable_476_14_20221021.html)
+| Drivers | GPU-compatible drivers need to be installed: [Download Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04)
 | Software | Docker* Installed |
 
 ## Get Started
@@ -18,9 +18,7 @@ This document has instructions for running ResNet50v1.5 inference using Intel(R)
 
 The [ImageNet](http://www.image-net.org/) validation dataset is used.
 
-Download and extract the ImageNet2012 dataset from http://www.image-net.org/,
-then move validation images to labeled subfolders, using
-[the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
+Download and extract the ImageNet2012 dataset from http://www.image-net.org/, then move validation images to labeled subfolders, using [the valprep.sh shell script](https://raw.githubusercontent.com/soumith/imagenetloader.torch/master/valprep.sh)
 
 A after running the data prep script, your folder structure should look something like this:
 
@@ -36,8 +34,7 @@ imagenet
     │   └── ...
     └── ...
 ```
-The folder that contains the `val` directory should be set as the
-`DATASET_DIR`
+The folder that contains the `val` directory should be set as the`DATASET_DIR`
 (for example: `export DATASET_DIR=/home/<user>/imagenet`).
 
 ## Quick Start Scripts
@@ -54,15 +51,16 @@ The folder that contains the `val` directory should be set as the
 docker pull intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference
 ```
 ### Run Docker Image
-The ResNet50 v1-5 inference container includes scripts,model and libraries need to run int8 inference. To run the `inference_block_format.sh` quickstart script using this container, you'll need to provide volume mounts for the ImageNet dataset. You will need to provide an output directory where log files will be written. 
+The ResNet50 v1-5 inference container includes scripts,model and libraries need to run int8 inference. To run the `inference_block_format.sh` quickstart script using this container, you'll need to set the environment variable and provide volume mounts for the ImageNet dataset if real dataset is required. Otherwise, the script uses dummy data. You will need to provide an output directory where log files will be written. 
 
 ```
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 export SCRIPT=quickstart/inference_block_format.sh 
-
-DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
+export BATCH_SIZE=<set batch size. Default is 1024>
+export NUM_ITERATIONS=<set number of iterations. Default is 10>
+DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference
 
 
@@ -72,11 +70,12 @@ RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
 test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
 
 docker run \
-  -v <your-local-dir>:/workspace \
   --group-add ${VIDEO} \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
+  --env BATCH_SIZE=${BATCH_SIZE} \
+  --env NUM_ITERATIONS=$NUM_ITERATIONS \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \

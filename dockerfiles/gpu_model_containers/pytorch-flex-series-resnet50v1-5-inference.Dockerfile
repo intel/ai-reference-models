@@ -20,13 +20,13 @@
 # for more information.
 
 ARG PYTORCH_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYTORCH_BASE_TAG="gpu"
+ARG PYTORCH_BASE_TAG="xpu-flex"
 
 FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="pytorch-atsm-resnet50v1-5-inference"
+ARG PACKAGE_NAME="pytorch-flex-series-resnet50v1-5-inference"
 
 ARG MODEL_WORKSPACE
 
@@ -52,7 +52,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y gosu
 
 RUN echo '#!/bin/bash\n\
-[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh --config=$HOME/cfg.txt\n\
+[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh\n\
 USER_ID=$USER_ID\n\
 USER_NAME=$USER_NAME\n\
 GROUP_ID=$GROUP_ID\n\

@@ -19,22 +19,20 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG PYTORCH_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYTORCH_BASE_TAG="gpu"
+ARG TENSORFLOW_BASE_IMAGE="intel/intel-extension-for-tensorflow"
+ARG TENSORFLOW_BASE_TAG="gpu-flex"
 
-FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
+FROM ${TENSORFLOW_BASE_IMAGE}:${TENSORFLOW_BASE_TAG}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
-ARG PY_VERSION=3.9
+ARG PY_VERSION=3.10
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
     build-essential \
     python${PY_VERSION}-dev
-
-RUN pip install opencv-python
 
 # Note pycocotools has to be install after the other requirements
 RUN pip install \
@@ -49,7 +47,7 @@ RUN pip install \
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="pytorch-atsm-ssd-mobilenet-inference"
+ARG PACKAGE_NAME="tf-flex-series-ssd-mobilenet-inference"
 
 ARG MODEL_WORKSPACE
 
@@ -75,7 +73,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y gosu
 
 RUN echo '#!/bin/bash\n\
-[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh --config=$HOME/cfg.txt\n\
+[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh\n\
 USER_ID=$USER_ID\n\
 USER_NAME=$USER_NAME\n\
 GROUP_ID=$GROUP_ID\n\

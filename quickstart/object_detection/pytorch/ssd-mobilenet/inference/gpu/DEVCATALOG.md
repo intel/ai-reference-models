@@ -2,14 +2,13 @@
 
 ## Overview
 
-This document has instructions for running SSD-Mobilenetv1 inference using
-Intel(R) Extension for PyTorch with GPU.
+This document has instructions for running SSD-Mobilenetv1 inference using Intel® Extension for PyTorch on Intel® Flex Series GPU.
 
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
 | Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed: [Download Driver 476.14](https://dgpu-docs.intel.com/releases/stable_476_14_20221021.html)
+| Drivers | GPU-compatible drivers need to be installed: [Download Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04)
 | Software | Docker* Installed |
 
 ## Download Datasets
@@ -57,7 +56,7 @@ You are required to create the model folder and set environment `PRETRAINED_MODE
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_with_dummy_data.sh` | Inference with dummy data, batch size 512, for int8 blocked channel first. |
+| `inference_with_dummy_data.sh` | Inference with dummy data, for int8 blocked channel first. |
 
 ## Run Using Docker
 
@@ -67,7 +66,7 @@ You are required to create the model folder and set environment `PRETRAINED_MODE
 docker pull intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference
 ```
 ### Run Docker Image
-The SSD-MobileNet inference container includes scripts,model and libraries need to run int8 inference. To run the `inference_with_dummy_data.sh` quickstart script using this container, you'll need to provide volume mounts for the VOC2007 dataset. You will need to provide an output directory where log files will be written.
+The SSD-MobileNet inference container includes scripts,model and libraries need to run int8 inference. To run the `inference_with_dummy_data.sh` quickstart script using this container,you will need to provide an output directory where log files will be written.The script by default runs inference on dummy data. The script also performs online INT8 calibration for which the VOC dataset is required to be provided. 
 
 ```
 export PRECISION=int8
@@ -75,21 +74,23 @@ export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed voc2007 dataset>
 export PRETRAINED_MODEL=<path to the pretrained model folder. The code downloads the model if this folder is empty>
 export SCRIPT=quickstart/inference_with_dummy_data.sh
-export label=/workspace/pytorch-atsm-ssd-mobilenet-inference/labels/voc-model-labels.txt
+export BATCH_SIZE=<inference batch size.Default is 1024 for flex-series 170 and 256 for flex-series 140 >
+export label=/workspace/pytorch-flex-series-ssd-mobilenet-inference/labels/voc-model-labels.txt
 
-DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
+DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference 
+
 VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
 RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
 
 test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
 
 docker run \
-  -v <your-local-dir>:/workspace \
   --group-add ${VIDEO} \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
+  --env BATCH_SIZE=${BATCH_SIZE} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \

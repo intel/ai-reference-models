@@ -8,35 +8,44 @@ This document has instructions for running ResNet50 v1.5 inference using
 Intel® Extension for TensorFlow with Intel® Data Center GPU Flex Series.
 
 <!--- 20. GPU Setup -->
-## Requirements:
-- Intel GPU Drivers: Intel® Data Center GPU Flex Series [419.40](https://dgpu-docs.intel.com/releases/stable_419_40_20220914.html)
+## Hardware Requirements:
+- Intel® Data Center GPU Flex Series
+
+## Software Requirements:
+- Intel GPU Drivers: Intel® Data Center GPU Flex Series [Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html)
 
   |Release|Intel GPU|Install Intel GPU Driver|
     |-|-|-|
-    |v1.0.0|Intel® Data Center GPU Flex Series| Refer to the [Installation Guides](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-focal-dc.html) for latest driver installation. If install the verified Intel® Data Center GPU Flex Series [419.40](https://dgpu-docs.intel.com/releases/stable_419_40_20220914.html), please append the specific version after components, such as `apt-get install intel-opencl-icd=22.28.23726.1+i419~u20.04`|
+    |v1.0.0|Intel® Data Center GPU Flex Series| Refer to the [Installation Guides](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04) for latest driver installation.|
 
-- Intel® oneAPI Base Toolkit 2022.3: Need to install components of Intel® oneAPI Base Toolkit
+- Python 3.7-3.10
+- pip 19.0 or later (requires manylinux2014 support)
+
+- Intel® oneAPI Base Toolkit 2023.0.0: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
+  - Intel® oneAPI Threading Building Blocks (oneTBB)
   - Intel® oneAPI Math Kernel Library (oneMKL)
-  * Download and install the verified DPC++ compiler and oneMKL in Ubuntu 20.04.
+  * Download and install the verified DPC++ compiler, oneTBB and oneMKL.0
 
     ```bash
-    $ wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18852/l_BaseKit_p_2022.3.0.8767_offline.sh
-    # 4 components are necessary: DPC++/C++ Compiler, DPC++ Libiary, Threading Building Blocks and oneMKL
-    $ sh ./l_BaseKit_p_2022.3.0.8767_offline.sh
+    $ wget https://registrationcenter-download.intel.com/akdlm/irc_nas/19079/l_BaseKit_p_2023.0.0.25537_offline.sh
+    # 4 components are necessary: DPC++/C++ Compiler, DPC++ Libiary, oneTBB and oneMKL
+    $ sudo sh ./l_BaseKit_p_2023.0.0.25537_offline.sh
     ```
-    For any more details, please follow the procedure in https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit.html.
+    For any more details on instructions on how to download and install the base-kit, please follow the procedure in https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux&distributions=offline.
 
   - Set environment variables
-    Default installation location {ONEAPI_ROOT} is /opt/intel/oneapi for root account, ${HOME}/intel/oneapi for other accounts
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
-    source {ONEAPI_ROOT}/setvars.sh
+    source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
+    source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
+    source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
     ```
 
 <!--- 30. Datasets -->
 ## Datasets
 
-Download and preprocess the ImageNet dataset using the [instructions here](/datasets/imagenet/README.md).
+Download and preprocess the ImageNet dataset using the [instructions here](https://github.com/IntelAI/models/blob/master/datasets/imagenet/README.md).
 After running the conversion script you should have a directory with the
 ImageNet dataset in the TF records format.
 
@@ -47,9 +56,9 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| [`online_inference.sh`](online_inference.sh) | Runs online inference for int8 precision |
-| [`batch_inference.sh`](batch_inference.sh)| Runs batch inference for int8 precision |
-| [`accuracy.sh`](accuracy.sh) | Measures the model accuracy for int8 precision |
+| `online_inference` | Runs online inference for int8 precision |
+| `batch_inference` | Runs batch inference for int8 precision |
+| `accuracy` | Measures the model accuracy for int8 precision |
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -61,10 +70,10 @@ Install the following pre-requisites:
   ```
 * Install TensorFlow and Intel® Extension for TensorFlow (ITEX):
 
-  Intel® Extension for TensorFlow requires stock TensorFlow v2.10.0 to be installed.
+  Intel® Extension for TensorFlow requires stock TensorFlow v2.11.0 to be installed.
   
   ```bash
-  pip install tensorflow==2.10.0
+  pip install tensorflow==2.11.0
   pip install --upgrade intel-extension-for-tensorflow[gpu]
   ```
    To verify that TensorFlow and ITEX are correctly installed:

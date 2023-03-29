@@ -20,14 +20,14 @@
 # for more information.
 
 ARG PYTORCH_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYTORCH_BASE_TAG="gpu"
+ARG PYTORCH_BASE_TAG="xpu-flex"
 
 FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
-ARG PY_VERSION=3.9
+ARG PY_VERSION=3.10
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
@@ -44,12 +44,17 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy>=1.17.4 \
-        'pillow>=9.3.0' && \
-    pip install pycocotools
+        'pillow>=9.3.0'
+
+RUN pip install tqdm==4.43.0 \
+    easydict==1.9 \
+    scikit-image \
+    pycocotools \
+    opencv-python-headless
 
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="pytorch-atsm-yolov4-inference"
+ARG PACKAGE_NAME="pytorch-flex-series-yolov4-inference"
 
 ARG MODEL_WORKSPACE
 
@@ -75,7 +80,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y gosu
 
 RUN echo '#!/bin/bash\n\
-[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh --config=$HOME/cfg.txt\n\
+[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh\n\
 USER_ID=$USER_ID\n\
 USER_NAME=$USER_NAME\n\
 GROUP_ID=$GROUP_ID\n\

@@ -18,19 +18,12 @@
 set -e
 
 PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE:-intel/intel-extension-for-pytorch}
-PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-gpu}
-IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-atsm-yolov4-inference}
-
-if [ "$(docker images -q ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG})" == "" ]; then
-  echo "The Intel(R) Extension for PyTorch container (${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}) was not found."
-  echo "This container is required, as it is used as the base for building the YOLOv4 inference container."
-  echo "Please download the IPEX container package and build the image and then retry this build."
-  exit 1
-fi
+PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-xpu-flex}
+IMAGE_NAME=${IMAGE_NAME:-intel/object-detection:pytorch-flex-gpu-yolov4-inference}
 
 docker build \
     --build-arg PACKAGE_DIR=model_packages \
-    --build-arg PACKAGE_NAME=pytorch-atsm-yolov4-inference \
+    --build-arg PACKAGE_NAME=pytorch-flex-series-yolov4-inference \
     --build-arg MODEL_WORKSPACE=/workspace \
     --build-arg http_proxy=$http_proxy \
     --build-arg https_proxy=$https_proxy \
@@ -38,4 +31,4 @@ docker build \
     --build-arg PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE} \
     --build-arg PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG} \
     -t $IMAGE_NAME \
-    -f pytorch-atsm-yolov4-inference.Dockerfile .
+    -f pytorch-flex-series-yolov4-inference.Dockerfile .

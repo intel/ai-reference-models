@@ -4,7 +4,7 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running BERT Large inference using
+This document has instructions for running BERT Large training using
 Intel-optimized PyTorch with Intel(R) Data Center GPU Max Series.
 
 <!--- 20. GPU Setup -->
@@ -99,7 +99,7 @@ Install the following pre-requisites:
   # Navigate to the model zoo repo
   cd models
   # Install model specific dependencies:
-  ./quickstart/language_modeling/pytorch/bert_large/inference/gpu/setup.sh
+  ./quickstart/language_modeling/pytorch/bert_large/training/gpu/setup.sh
   ```
 
 See the [datasets section](#datasets) of this document for instructions on

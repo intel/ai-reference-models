@@ -6,5 +6,10 @@ RUN pip install \
         lxml \
         matplotlib \
         numpy>=1.17.4 \
-        'pillow>=9.3.0' && \
-    pip install pycocotools
+        'pillow>=9.3.0'
+
+RUN pip install tqdm==4.43.0 \
+    easydict==1.9 \
+    scikit-image \
+    pycocotools \
+    opencv-python-headless

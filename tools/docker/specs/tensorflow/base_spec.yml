@@ -56,11 +56,11 @@ slice_sets:
                - source: third_party
                  destination: licenses/third_party
   
-    tensorflow-itex-gpu-base-public:
+    tensorflow-itex-flex-series-base-public:
         - add_to_name: ""
-          dockerfile_exclusive_name: tf-atsm
+          dockerfile_exclusive_name: tf-flex-series
           partials:
-              - tensorflow/gpu-base-public
+              - tensorflow/flex-series-base-public
           files:
                - source: LICENSE
                  destination: licenses/LICENSE
