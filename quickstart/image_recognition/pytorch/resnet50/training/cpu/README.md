@@ -115,6 +115,12 @@ bash training.sh
 # Run the distributed training quickstart script
 cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
 bash training_dist.sh
+
+# Run the training single socket throughput script
+cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
+export BATCH_SIZE=102
+export TRAINING_EPOCHS=1
+bash training_single_socket.sh
 ```
 
 <!--- 80. License -->

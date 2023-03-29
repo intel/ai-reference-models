@@ -101,6 +101,10 @@ parser.add_argument('--zero-init-residual', action='store_true', default=False,
                     help='Initialize scale params in BN3 of a residual block to zeros instead ones. '
                          'Improves accuracy by 0.2~0.3 percent according to https://arxiv.org/abs/1706.02677'
                          'Used by Nvidia, but not part of MLPerf reference ')
+parser.add_argument('-i', '--iterations', default=-1, type=int, metavar='N',
+                    help='number of total iterations to run')
+parser.add_argument('--train-no-eval', action='store_true', default=False,
+                    help='only train, but not evaluate model on validation set')
 # Evaluation args
 parser.add_argument('--target-acc', default=76, type=float, help='Target validation accuracy')
 
@@ -268,23 +272,24 @@ def main_worker(args):
         print("time_to_train(s): ", time_to_train)
 
         # evaluate on validation set
-        acc1 = validate(val_loader, model, criterion, epoch, args)
+        if not args.train_no_eval:
+            acc1 = validate(val_loader, model, criterion, epoch, args)
 
-        # remember best acc@1 and save checkpoint
-        is_best = acc1 > best_acc1
-        best_acc1 = max(acc1, best_acc1)
+            # remember best acc@1 and save checkpoint
+            is_best = acc1 > best_acc1
+            best_acc1 = max(acc1, best_acc1)
 
-        if args.rank == 0:
-            save_checkpoint({
-                'epoch': epoch + 1,
-                'arch': args.arch,
-                'state_dict': model.state_dict(),
-                'best_acc1': best_acc1,
-                'optimizer' : optimizer.state_dict(),
-            }, is_best)
- 
-        if best_acc1 > args.target_acc:
-            break
+            if args.rank == 0:
+                save_checkpoint({
+                    'epoch': epoch + 1,
+                    'arch': args.arch,
+                    'state_dict': model.state_dict(),
+                    'best_acc1': best_acc1,
+                    'optimizer' : optimizer.state_dict(),
+                }, is_best)
+
+            if best_acc1 > args.target_acc:
+                break
 
     print("final time_to_train(s): ", time_to_train)
 
@@ -351,6 +356,9 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
 
         if i % args.print_freq == 0:
             progress.display(i)
+
+        if args.iterations > 0 and i + 1 == args.iterations:
+            break
 
         start = time.time()
 
