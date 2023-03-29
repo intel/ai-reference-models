@@ -67,7 +67,7 @@ def softmax(scores, axis=None):
     return r_cast(rval)
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
-    lnorm = tf.keras.layers.LayerNormalization(dtype=get_keras_policy())
+    lnorm = tf.keras.layers.LayerNormalization()
 
     # Try to use ITEX first
     try:
