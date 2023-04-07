@@ -141,6 +141,7 @@ def unpack_batch(b):
     return b[0], b[1], b[2], b[3], torch.ones(b[3].size()), None
 
 def load_data(buffer_num, is_bf16):
+    reset = False
     with torch.autograd.profiler.record_function('load_data'):
         for d in range(buffer_num):
             # (X, lS_i, T) = next(data_iter)
@@ -148,10 +149,12 @@ def load_data(buffer_num, is_bf16):
                 Batch = next(data_iter)
             except:
                 print("epoch ended, reset data_iter")
+                reset = True
                 data_iter._reset(train_ld)
             X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
             X = X.bfloat16() if is_bf16 else X
             data_buffer[d] = (X, lS_o, lS_i, T, W, CBPP)
+    return reset
 
 class AlltoallOutputs():
     def __init__(self):
@@ -1679,7 +1682,11 @@ def run():
 
                     if ext_dist.my_size == 1:
                         buffer_num = buffer_num if (nbatches - j) > buffer_num else (nbatches - j)
-                        load_data(buffer_num, args.bf16)
+                        next_epoch = load_data(buffer_num, args.bf16)
+                        if next_epoch:
+                            k += 1
+                            if k >= args.nepochs:
+                                break
 
                 k += 1  # nepochs
         else:
