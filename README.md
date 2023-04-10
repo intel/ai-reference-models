@@ -34,6 +34,7 @@ and a list of models that are supported on Windows, see the
 
 Instructions available to run on [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx).
 
+For best performance on Intel® Data Center GPU Flex and Max Series, please check the [list of supported workloads](#intel-data-center-gpu-workloads). It provides instructions to run inference and training using [Intel(R) Extension for PyTorch](https://github.com/intel/intel-extension-for-pytorch) or [Intel(R) Extension for TensorFlow](https://github.com/intel/intel-extension-for-tensorflow).
 
 ### Image Recognition
 
@@ -82,10 +83,10 @@ Instructions available to run on [Sapphire Rapids](https://www.intel.com/content
 
 | Model                                        | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | -------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [BERT](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/inference/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
-| [BERT](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/training/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#fine-tuning-with-bert-using-squad-data) and [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
-| [BERT](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README_SPR_Baremetal.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
-| [BERT](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Training | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README_SPR_Baremetal.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/inference/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large ](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/bert_large/training/README.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#fine-tuning-with-bert-using-squad-data) and [MRPC](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#classification-training-with-bert) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Inference | [FP32 BFloat16 Int8 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/inference/cpu/README_SPR_Baremetal.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx) | Tensorflow | Training | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/tensorflow/bert_large/training/cpu/README_SPR_Baremetal.md) | [SQuAD](https://github.com/IntelAI/models/tree/master/datasets/bert_data/README.md#inference) |
 |[DistilBERT base](https://arxiv.org/abs/1910.01108)| Tensorflow | Inference | [FP32 BFloat16 Int8 FP16](/benchmarks/language_modeling/tensorflow/distilbert_base/inference/README.md) | [SST-2](/benchmarks/language_modeling/tensorflow/distilbert_base/inference/README.md#dataset) |
 | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | PyTorch | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) | [BERT Base SQuAD1.1](https://huggingface.co/csarron/bert-base-uncased-squad-v1) |
 | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | [FP32 Int8 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) | BERT Large SQuAD1.1 |
@@ -165,6 +166,24 @@ Instructions available to run on [Sapphire Rapids](https://www.intel.com/content
 
 
 *Means the model belongs to [MLPerf](https://mlperf.org/) models and will be supported long-term.
+
+
+## Intel® Data Center GPU Workloads
+| Model                             | Framework  | Mode      | GPU Type | Model Documentation |
+| ----------------------------------| ---------- | ----------| -------- | ------------------- |
+| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Inference | Flex Series | [Int8](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Flex_series.md) |
+| [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | Flex Series |[Int8](/quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Flex_Series.md) |
+| [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)| TensorFlow | Inference | Flex Series| [Int8](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/README.md) |
+| [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Flex Series | [Int8](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md) |
+| [Yolo V4](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Flex Series | [Int8](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md) |
+| [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Inference | Max Series | [Int8 FP32 FP16](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Max_Series.md) |
+| [ResNet 50 v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Training | Max Series | [BFloat16](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/README.md) |
+| [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | Max Series |[Int8](/quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Max_Series.md) |
+| [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Training | Max Series |[BFloat16](/quickstart/image_recognition/pytorch/resnet50v1_5/training/gpu/README.md) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Inference | Max Series | [FP16](/quickstart/language_modeling/pytorch/bert_large/inference/gpu/README.md) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | PyTorch | Training  | Max Series | [BFloat16](/quickstart/language_modeling/pytorch/bert_large/training/gpu/README.md) |
+|[BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Inference | Max Series | [FP32 FP16](/quickstart/language_modeling/tensorflow/bert_large/inference/gpu/README.md) |
+| [BERT large](https://arxiv.org/pdf/1810.04805.pdf) | TensorFlow | Training | Max Series | [BFloat16](/quickstart/language_modeling/tensorflow/bert_large/training/gpu/README.md) |
 
 ## How to Contribute
 If you would like to add a new benchmarking script, please use [this guide](/Contribute.md).
