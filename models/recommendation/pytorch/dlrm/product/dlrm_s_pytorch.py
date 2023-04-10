@@ -1682,7 +1682,7 @@ def run():
 
                     if ext_dist.my_size == 1:
                         buffer_num = buffer_num if (nbatches - j) > buffer_num else (nbatches - j)
-                        next_epoch = load_data(buffer_num, args.bf16)
+                        next_epoch = buffer_num == 0 or load_data(buffer_num, args.bf16)
                         if next_epoch:
                             k += 1
                             if k >= args.nepochs:
