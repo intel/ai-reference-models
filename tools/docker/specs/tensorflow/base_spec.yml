@@ -169,7 +169,7 @@ slice_sets:
               - common
               - python-build
               - tensorflow/model-source
-              - object_detection/pip_installs
+              - object_detection/ssd-mobilenet/pip_installs
               - object_detection/protoc
           args:
               - PY_VERSION=3.9

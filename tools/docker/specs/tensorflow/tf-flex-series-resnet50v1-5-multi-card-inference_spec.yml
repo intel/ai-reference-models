@@ -1,13 +1,13 @@
 releases:
   versioned:
     tag_specs:
-      - "{tensorflow-itex-flex-series-base-public}{tf-flex-series-resnet50v1-5-inference}"
+      - "{tensorflow-itex-flex-series-base-public}{tf-flex-series-resnet50v1-5-multi-card-inference}"
 slice_sets:
-  tf-flex-series-resnet50v1-5-inference:
-    - add_to_name: -tf-flex-series-resnet50v1-5-inference
-      dockerfile_exclusive_name: -resnet50v1-5-inference
+  tf-flex-series-resnet50v1-5-multi-card-inference:
+    - add_to_name: -tf-flex-series-resnet50v1-5-multi-card-inference
+      dockerfile_exclusive_name: -resnet50v1-5-multi-card-inference
       args:
-        - PACKAGE_NAME=tf-flex-series-resnet50v1-5-inference
+        - PACKAGE_NAME=tf-flex-series-resnet50v1-5-multi-card-inference
       dockerfile_subdirectory: gpu_model_containers
       downloads:
         - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb
@@ -33,25 +33,23 @@ slice_sets:
           source: models/image_recognition/tensorflow/resnet50v1_5/inference
         - destination: models/image_recognition/tensorflow/resnet50v1_5
           source: models/image_recognition/tensorflow/resnet50v1_5
+        - destination: quickstart/flex_multi_card_online_inference.sh
+          source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/flex_multi_card_online_inference.sh
+        - destination: quickstart/flex_multi_card_batch_inference.sh
+          source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/flex_multi_card_batch_inference.sh
         - destination: quickstart/common
           source: quickstart/common
         - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Flex_series.md
           destination: README.md
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/batch_inference.sh
-          destination: quickstart/batch_inference.sh
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/online_inference.sh
-          destination: quickstart/online_inference.sh
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/accuracy.sh
-          destination: quickstart/accuracy.sh
       wrapper_package_files:
         - source: datasets/imagenet/README.md
           destination: datasets/imagenet/README.md
-        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/build.sh
+        - source: quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/build_multi_card.sh
           destination: build.sh
-        - source: dockerfiles/gpu_model_containers/tf-flex-series-resnet50v1-5-inference.Dockerfile
-          destination: tf-flex-series-resnet50v1-5-inference.Dockerfile
-        - source: output/tf-flex-series-resnet50v1-5-inference.tar.gz
-          destination: model_packages/tf-flex-series-resnet50v1-5-inference.tar.gz
+        - source: dockerfiles/gpu_model_containers/tf-flex-series-resnet50v1-5-multi-card-inference.Dockerfile
+          destination: tf-flex-series-resnet50v1-5-multi-card-inference.Dockerfile
+        - source: output/tf-flex-series-resnet50v1-5-multi-card-inference.tar.gz
+          destination: model_packages/tf-flex-series-resnet50v1-5-multi-card-inference.tar.gz
         - source: ""
           destination: info.txt
         - source: third_party
@@ -59,5 +57,8 @@ slice_sets:
         - source: LICENSE
           destination: licenses/LICENSE
       partials:
+        - parallel
+        - pciutils
+        - numactl
         - model_package
         - entrypoint

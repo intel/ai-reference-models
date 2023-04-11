@@ -1,13 +1,13 @@
 releases:
   versioned:
     tag_specs:
-      - "{tensorflow-itex-flex-series-base-public}{tf-flex-series-ssd-mobilenet-inference}"
+      - "{tensorflow-itex-flex-series-base-public}{tf-flex-series-ssd-mobilenet-multi-card-inference}"
 slice_sets:
-  tf-flex-series-ssd-mobilenet-inference:
-    - add_to_name: -tf-flex-series-ssd-mobilenet-inference
-      dockerfile_exclusive_name: -ssd-mobilenet-inference
+  tf-flex-series-ssd-mobilenet-multi-card-inference:
+    - add_to_name: -tf-flex-series-ssd-mobilenet-multi-card-inference
+      dockerfile_exclusive_name: -ssd-mobilenet-multi-card-inference
       args:
-        - PACKAGE_NAME=tf-flex-series-ssd-mobilenet-inference
+        - PACKAGE_NAME=tf-flex-series-ssd-mobilenet-multi-card-inference
       dockerfile_subdirectory: gpu_model_containers
       downloads:
         - destination: pretrained_models/ssdmobilenet_int8_pretrained_model_gpu.pb
@@ -47,19 +47,17 @@ slice_sets:
           source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/
         - destination: quickstart/common
           source: quickstart/common
-        - destination: quickstart/batch_inference.sh
-          source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/batch_inference.sh
-        - destination: quickstart/online_inference.sh
-          source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/online_inference.sh
-        - destination: quickstart/accuracy.sh
-          source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/accuracy.sh
+        - destination: quickstart/flex_multi_card_batch_inference.sh
+          source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/flex_multi_card_batch_inference.sh
+        - destination: quickstart/flex_multi_card_online_inference.sh
+          source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/flex_multi_card_online_inference.sh
       wrapper_package_files:
-        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/build.sh
+        - source: quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/build_multi_card.sh
           destination: build.sh
-        - source: dockerfiles/gpu_model_containers/tf-flex-series-ssd-mobilenet-inference.Dockerfile
-          destination: tf-flex-series-ssd-mobilenet-inference.Dockerfile
-        - source: output/tf-flex-series-ssd-mobilenet-inference.tar.gz
-          destination: model_packages/tf-flex-series-ssd-mobilenet-inference.tar.gz
+        - source: dockerfiles/gpu_model_containers/tf-flex-series-ssd-mobilenet-multi-card-inference.Dockerfile
+          destination: tf-flex-series-ssd-mobilenet-multi-card-inference.Dockerfile
+        - source: output/tf-flex-series-ssd-mobilenet-multi-card-inference.tar.gz
+          destination: model_packages/tf-flex-series-ssd-mobilenet-multi-card-inference.tar.gz
         - source: ""
           destination: info.txt
         - source: third_party
@@ -67,6 +65,8 @@ slice_sets:
         - source: LICENSE
           destination: licenses/LICENSE
       partials:
+        - parallel
+        - pciutils
         - numactl
         - python-build
         - object_detection/ssd-mobilenet/pip_installs
