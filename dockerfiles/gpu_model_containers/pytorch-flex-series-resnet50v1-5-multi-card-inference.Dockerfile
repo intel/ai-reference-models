@@ -1,4 +1,4 @@
-# Copyright (c) 2020-2021 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,39 +24,17 @@ ARG PYTORCH_BASE_TAG="xpu-flex"
 
 FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
 
+
+RUN apt-get update && \
+    apt-get install -y parallel
+RUN apt-get install -y pciutils
+
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
-ARG PY_VERSION=3.10
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing \
-    build-essential \
-    python${PY_VERSION}-dev
-
-RUN pip install opencv-python
-
-# Note pycocotools has to be install after the other requirements
-RUN pip install \
-        Cython \
-        contextlib2 \
-        jupyter \
-        lxml \
-        matplotlib \
-        numpy>=1.17.4 \
-        'pillow>=9.3.0'  \
-        pycocotools \
-        opencv-python-headless \
-        pandas \
-        'pillow>=9.3.0'  \
-        pycocotools \
-        opencv-python-headless \
-        pandas
-
-
 ARG PACKAGE_DIR=model_packages
 
-ARG PACKAGE_NAME="pytorch-flex-series-ssd-mobilenet-inference"
+ARG PACKAGE_NAME="pytorch-flex-series-resnet50v1-5-multi-card-inference"
 
 ARG MODEL_WORKSPACE
 

@@ -49,9 +49,8 @@ The ResNet50 v1.5 inference container includes scripts,model and libraries need 
 ```
 export DATASET_DIR=${PWD}/imagenet
 export OUTPUT_DIR=${PWD}/logs
-export BATCH_SIZE=${BATCH_SIZE:-1024}
-export NUM_ITERATIONS=${NUM_ITERATIONS:-10}
-
+export BATCH_SIZE=<export batch size,default is 1024>
+export NUM_ITERATIONS=<export number of iterations,default is 10>
 IMAGE_NAME=intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference
 DOCKER_ARGS="--rm -it"
 
@@ -68,6 +67,8 @@ docker run \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
+  --env BATCH_SIZE=${BATCH_SIZE} \
+  --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env DATASET_DIR=${DATASET_DIR} \

@@ -52,14 +52,14 @@ The folder should be set as the `DATASET_DIR`
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_with_dummy_data.sh` | Inference with dummy data, for int8 blocked channel first. |
-
+| `flex_multi_card_batch_inference.sh` | Inference with dummy data,for int8 and given batch size blocked channel first. |
+| `flex_multi_card_online_inference.sh` | Online Inference with dummy data,for int8 blocked channel first.| 
 ## Run Using Docker
 
 ### Set up Docker Image
 
 ```
-docker pull intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference
+docker pull intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-multi-card-inference
 ```
 ### Run Docker Image
 The SSD-MobileNet inference container includes scripts,model and libraries need to run int8 inference. To run the `flex_multi_card_batch_inference.sh` quickstart script using this container,you will need to provide an output directory where log files will be written.The script by default runs inference on dummy data. The script also performs online INT8 calibration for which the VOC2007 dataset is required to be provided. The pre-trained model will be downloaded by the script.
@@ -68,13 +68,13 @@ The SSD-MobileNet inference container includes scripts,model and libraries need 
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed voc2007 dataset>
-export PRETRAINED_MODEL=<path to the pretrained model folder. The code downloads the model if this folder is empty>
-export SCRIPT=quickstart/inference_with_dummy_data.sh
-export BATCH_SIZE=<inference batch size.Default is 1024 for flex-series 170 and 256 for flex-series 140 >
-export label=/workspace/pytorch-flex-series-ssd-mobilenet-inference/labels/voc-model-labels.txt
+export SCRIPT=quickstart/flex_multi_card_batch_inference.sh
+export BATCH_SIZE=<enter batch size. Default is 256>
+export NUM_ITERATIONS=<enter number of iterations. Default is 500>
+export label=/workspace/pytorch-flex-series-ssd-mobilenet-multi-card-inference/labels/voc-model-labels.txt
 
 DOCKER_ARGS="--rm -it"
-IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference 
+IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-multi-card-inference
 
 VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
 RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
@@ -86,6 +86,7 @@ docker run \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
+  --cap-add=SYS_NICE \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env PRECISION=${PRECISION} \

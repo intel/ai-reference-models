@@ -27,7 +27,7 @@ You need to download pretrained weights from: yolov4.pth(https://pan.baidu.com/s
 ### Set up Docker Image
 
 ```
-docker pull intel/object-detection:pytorch-flex-gpu-yolov4-inference
+docker pull intel/object-detection:pytorch-flex-gpu-yolov4-multi-card-inference
 ```
 ### Run Docker Image
 The Yolov4 inference container includes scripts,model and libraries need to run int8 inference. To run the `inference_with_dummy_data.sh` quickstart script using this container, the script uses dummy data. The script also performs online INT8 Calibration on the provided pre-trained model.You will need to provide an output directory where log files will be written. 
@@ -35,12 +35,12 @@ The Yolov4 inference container includes scripts,model and libraries need to run 
 ```
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
-export SCRIPT=quickstart/inference_with_dummy_data.sh
+export SCRIPT=quickstart/flex_multi_card_batch_inference.sh
 export PRETRAINED_MODEL=<path to downloaded yolov4 model>
-export BATCH_SIZE=<inference batch size,default is 64>
-export NUM_ITERATIONS=<number of iterations,default is 500>
-IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-yolov4-inference
+export BATCH_SIZE=<enter batch size. Default is 64>
+export NUM_ITERATIONS=<enter number of iterations. Default is 500>
 
+IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-yolov4-multi-card-inference
 DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
 VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
 RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
@@ -52,8 +52,9 @@ docker run \
   ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
-  --env ${BATCH_SIZE}=${BATCH_SIZE} \
-  --env {NUM_ITERATIONS}=${NUM_ITERATIONS} \
+  --cap-add=SYS_NICE \
+  --env BATCH_SIZE=${BATCH_SIZE} \
+  --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env PRETRAINED_MODEL=${PRETRAINED_MODEL} \
