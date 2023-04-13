@@ -6,3 +6,4 @@ lxml
 jupyter
 matplotlib
 pycocotools
+protobuf==3.20.3
