@@ -5,3 +5,4 @@ docx2txt
 openpyxl
 pillow
 scikit-learn-intelex
+python-dotenv

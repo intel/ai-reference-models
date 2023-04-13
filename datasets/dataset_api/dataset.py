@@ -17,11 +17,12 @@
 #
 
 import os
+from dotenv import load_dotenv
 
-os.system("source ~/.bashrc")
-user_input = os.environ.get("USER_CONSENT")
+load_dotenv()
+USER_CONSENT = os.getenv('USER_CONSENT')
 
-if user_input == "y":
+if USER_CONSENT == "y":
     import json
     import argparse
     from dataset_api.download import download_dataset

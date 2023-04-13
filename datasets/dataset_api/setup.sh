@@ -22,7 +22,8 @@ terms_and_conditions=`cat terms_and_conditions.txt`
 echo "$terms_and_conditions"
 
 read -p "Do you agree to the terms and conditions? (y/n) " yn
-echo 'export USER_CONSENT='$yn >> ~/.bashrc
+echo 'unset -f USER_CONSENT' > .env
+echo 'USER_CONSENT='$yn > .env
 
 case $yn in
         [yY] ) echo Terms and conditions agreed;
