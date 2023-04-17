@@ -34,16 +34,6 @@ OUTPUTS = 'softmax_tensor'
 
 RESNET_IMAGE_SIZE = 224
 
-import os
-if os.environ['PRECISION']=='fp16':
-  tf_dtype=tf.float16
-  tf_py_frame_dtype=dtypes.float16
-elif os.environ['PRECISION']=='bfloat16':
-  tf_dtype=tf.bfloat16
-  tf_py_frame_dtype=dtypes.bfloat16
-else:
-  tf_dtype=tf.float32
-  tf_py_frame_dtype=dtypes.float32
 
 class eval_classifier_optimized_graph:
   """Evaluate image classifier with optimized TensorFlow graph"""
@@ -171,7 +161,7 @@ class eval_classifier_optimized_graph:
       else:
         print("Inference with dummy data.")
         input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
-        images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf_dtype, name='synthetic_images')
+        images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
 
     infer_graph = tf.Graph()
     with infer_graph.as_default():
@@ -264,11 +254,11 @@ class eval_classifier_optimized_graph:
 
         with tf.Graph().as_default() as accu_graph:
           accuracy1 = tf.reduce_sum(
-            input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions, dtype=tf.float32),
+            input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
                                    targets=tf.constant(np_labels), k=1), tf.float32))
 
           accuracy5 = tf.reduce_sum(
-            input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions, dtype=tf.float32),
+            input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
                                    targets=tf.constant(np_labels), k=5), tf.float32))
           with tf.compat.v1.Session(config=infer_config) as accu_sess:
             np_accuracy1, np_accuracy5 = accu_sess.run([accuracy1, accuracy5])
@@ -283,6 +273,7 @@ class eval_classifier_optimized_graph:
 
   def validate_args(self):
     """validate the arguments"""
+
     if not self.args.data_location:
       if self.args.accuracy_only:
         raise ValueError("You must use real data for accuracy measurement.")

@@ -66,12 +66,15 @@ class ResNet50ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path, kmp_blocktime=str(self.args.kmp_blocktime))
 
-        if not self.args.gpu:
+        if self.args.gpu:
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode, "gpu",
+                "mlperf_resnet/imagenet_main.py")
+        else:
             set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
-        benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode,
-            "mlperf_resnet/imagenet_main.py")
+            benchmark_script = os.path.join(
+                self.args.intelai_models, self.args.mode, "cpu",
+                "mlperf_resnet/imagenet_main.py")
 
         # We need to change directory to model source to avoid python
         # module name conflicts.
