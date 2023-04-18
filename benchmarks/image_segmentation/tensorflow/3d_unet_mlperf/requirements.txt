@@ -3,7 +3,7 @@ nilearn==0.7.1
 tables==3.6.1
 nibabel==3.2.1
 SimpleITK==2.0.2
-nnunet==1.7.0
+nnunet
 torch==1.13.1
 tqdm
 dicom2nifti
