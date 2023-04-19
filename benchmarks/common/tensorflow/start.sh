@@ -1578,6 +1578,43 @@ function vision_transformer() {
     fi
 }
 
+# mmoe base model
+function mmoe() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+        CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+        if [ ${NUM_INTER_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+        fi
+
+        if [ ${NUM_INTRA_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        fi
+
+        if [ -z ${STEPS} ]; then
+          CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        fi
+
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    elif [ ${MODE} == "training" ]; then
+      if [ ${PRECISION} == "fp32" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+        CMD="${CMD} $(add_arg "--train-epochs" ${TRAIN_EPOCHS})"
+        CMD="${CMD} $(add_arg "--model_dir" ${CHECKPOINT_DIRECTORY})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
 
 # Wide & Deep model
 function wide_deep() {
@@ -1723,7 +1760,9 @@ elif [ ${MODEL_NAME} == "dien" ]; then
 elif [ ${MODEL_NAME} == "distilbert_base" ]; then
   distilbert_base 
 elif [ ${MODEL_NAME} == "vision_transformer" ]; then
-  vision_transformer 
+  vision_transformer
+elif [ ${MODEL_NAME} == "mmoe" ]; then
+  mmoe
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
