@@ -151,6 +151,7 @@ def load_data(buffer_num, is_bf16):
                 print("epoch ended, reset data_iter")
                 reset = True
                 data_iter._reset(train_ld)
+                Batch = next(data_iter)
             X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
             X = X.bfloat16() if is_bf16 else X
             data_buffer[d] = (X, lS_o, lS_i, T, W, CBPP)
