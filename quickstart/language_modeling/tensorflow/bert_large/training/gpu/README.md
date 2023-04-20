@@ -8,44 +8,22 @@ This document has instructions for running BERT Large training using
 Intel-optimized TensorFlow with Intel® Data Center GPU Max Series.
 
 <!--- 20. GPU Setup -->
-## Hardware Requirements:
-- Intel® Data Center GPU Max Series, Driver Version: [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html)
-
 ## Software Requirements:
 - Intel® Data Center GPU Max Series
-- Intel GPU Drivers: Intel® Data Center GPU Max Series [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html)
-- Intel® oneAPI Base Toolkit 2023.0
-- TensorFlow 2.11.0 or 2.10.0
-- Python 3.7-3.10
-- pip 19.0 or later (requires manylinux2014 support)
+- Follow [instructions](https://intel.github.io/intel-extension-for-tensorflow/latest/get_started.html) to install the latest ITEX version and other prerequisites.
 
-  |Release|Intel GPU|Install Intel GPU Driver|
-    |-|-|-|
-    |v1.1.0|Intel® Data Center GPU Max Series|  Refer to the [Installation Guides](https://dgpu-docs.intel.com/installation-guides/index.html#intel-data-center-gpu-max-series) for latest driver installation. If install the verified Intel® Data Center GPU Max Series/Intel® Data Center GPU Flex Series [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html), please append the specific version after components.|
-
-- Intel® oneAPI Base Toolkit 2023.0.0: Need to install components of Intel® oneAPI Base Toolkit
+- Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
   - Intel® oneAPI Threading Building Blocks (oneTBB)
   - Intel® oneAPI Math Kernel Library (oneMKL)
-  - Intel® oneAPI Collective Communications Library (oneCCL), required by Intel® Optimization for Horovod* only
-  * Download and install the verified DPC++ compiler, oneTBB and oneMKL.
-    
-    ```bash
-    $ wget https://registrationcenter-download.intel.com/akdlm/irc_nas/19079/l_BaseKit_p_2023.0.0.25537_offline.sh
-    # 4 components are necessary: DPC++/C++ Compiler, DPC++ Libiary, oneTBB and oneMKL
-    # if you want to run distributed training with Intel® Optimization for Horovod*, oneCCL is needed too(Intel® oneAPI MPI Library will be installed automatically as its dependency)
-    $ sudo sh ./l_BaseKit_p_2023.0.0.25537_offline.sh
-    ```
-    For any more details on instructions on how to download and install the base-kit, please follow the procedure in https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux&distributions=offline.
+  - Follow [instructions](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux&distributions=offline) to download and install the latest oneAPI Base Toolkit.
 
-  - Set environment variables
+  - Set environment variables for Intel® oneAPI Base Toolkit: 
     Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
     source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
     source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
     source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
-
-    # oneCCL (and Intel® oneAPI MPI Library as its dependency), required by Intel® Optimization for Horovod* only
     source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
     source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
     ```
@@ -78,23 +56,6 @@ Install the following pre-requisites:
   ```bash
   virtualenv -p python <virtualenv_name>
   source <virtualenv_name>/bin/activate
-  ```
-* Install TensorFlow and Intel® Extension for TensorFlow (ITEX):
-
-  The Intel® Extension for TensorFlow* requires stock TensorFlow, and the version should be == 2.11.0 or 2.10.0.
-
-  On Linux, it is often necessary to first update pip to a version that supports manylinux2014 wheels.
-  ```bash
-  pip install --upgrade pip
-  ```
-  
-  ```bash
-  pip install tensorflow==2.11.0
-  pip install --upgrade intel-extension-for-tensorflow[gpu]
-  ```
-   To verify that TensorFlow and ITEX are correctly installed:
-  ```
-  python -c "import intel_extension_for_tensorflow as itex; print(itex.__version__)"
   ```
 * Clone the Model Zoo repository:
   ```bash
