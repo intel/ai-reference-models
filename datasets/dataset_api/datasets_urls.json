@@ -14,7 +14,8 @@
                 "url": "https://wiki.cancerimagingarchive.net/download/attachments/109379611/Radiology_hand_drawn_segmentations_v2.csv?api=v2"}]
     },
     "dureader-vis":{
-        "urls": [{"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_1.tar.gz"},
+        "urls": [{"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_docvqa.tar.gz"},
+                {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_1.tar.gz"},
                 {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_2.tar.gz"},
                 {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_3.tar.gz"},
                 {"url": "https://dataset-bj.cdn.bcebos.com/qianyan/dureader_vis_images_part_4.tar.gz"},
@@ -28,5 +29,9 @@
     "msmarco":{
         "urls": [{"url": "https://msmarco.blob.core.windows.net/msmarco/train_v2.1.json.gz"},
                 {"url": "https://msmarco.blob.core.windows.net/msmarco/dev_v2.1.json.gz"}]
+    },
+    "mvtec-ad":{
+        "urls": [{"file_name": "mvtec_anomaly_detection.tar.xz",
+                "url": "https://www.mydrive.ch/shares/38536/3830184030e49fe74747669442f0f282/download/420938113-1629952094/mvtec_anomaly_detection.tar.xz"}]
     }
 }

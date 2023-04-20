@@ -53,6 +53,23 @@ def preprocess_dataset(dataset_name, dataset_directory):
         _launch_command(["python", nlp_data_script])
         _launch_command(["python", vision_data_script])
 
+    elif dataset_name == "mvtec-ad":
+        raw_datset = os.path.join( dataset_directory, "mvtec_anomaly_detection.tar.xz")
+        if os.path.exists(raw_datset):
+            # extract dataset files
+            subprocess.run(["tar", "-xf", raw_datset, "--directory", dataset_directory])
+        elif not os.listdir(dataset_directory):
+            print("\nError: No datasets found in {}.\n".format(dataset_directory))
+            sys.exit("\nPlease use --download flag to download the raw dataset prior to preprocessing.\n")
+
+        mvtec_scripts = os.path.join(scripts_path, dataset_name)
+        csv_generator_script = "python " + os.path.join(mvtec_scripts, 'csv_generator_mvtec.py') + \
+                " --path " + dataset_directory
+        # Run dataset preprocessing scripts
+        os.system(csv_generator_script)
+    else:
+        sys.exit("\nError: Preprocessing is not currently supported for {} dataset.\n".format(dataset_name))
+
 def _launch_command(run_cmd):
     """runs command that runs the dataset script on bare metal and exits on ctrl c"""
     p = subprocess.Popen(run_cmd, preexec_fn=os.setsid)

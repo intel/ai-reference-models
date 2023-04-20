@@ -17,8 +17,7 @@
 #
 
 import os
-import sys
-import requests
+import subprocess
 import json
 from tqdm import tqdm
 
@@ -41,26 +40,17 @@ def download_dataset(dataset_name, dataset_directory):
     # Get the URL for the dataset
     dataset_url = dataset_urls[dataset_name]
     for url in dataset_url['urls']:
-        response = requests.get(url['url'])
-
-        if response.status_code == 200:
-            # Check if the key 'file_name' exists in the JSON file
-            if 'file_name' in url:
-                filename = url['file_name']
-            else:
-                filename = url['url'].split('/')[-1]
-
-            destination_file_path = os.path.join(dataset_directory, filename)
-            if os.path.exists(destination_file_path):
-                print("\nFile already exists in {}.".format(destination_file_path))
-                print("Please delete it and try again!.\n")
-            else:
-                # Create a progress bar object and iterate over the range
-                my_range = range(100)
-                for i in tqdm(my_range, desc="Downloading", unit="item"):
-                    # Download the file if it does not exist in the desired dataset directory
-                    with open(destination_file_path, 'wb') as f:
-                        f.write(response.content)
-                print(f"{filename} downloaded successfully in {dataset_directory}")
+        # Check if the key 'file_name' exists in the JSON file
+        if 'file_name' in url:
+            filename = url['file_name']
         else:
-            sys.exit("\nError while downloading {}. Status code: {}".format(filename, response.status_code))
+            filename = url['url'].split('/')[-1]
+
+        destination_file_path = os.path.join(dataset_directory, filename)
+        if os.path.exists(destination_file_path):
+            print("\nFile already exists in {}.".format(destination_file_path))
+            print("Please delete it and try again!.\n")
+        else:
+            # Download the file if it does not exist in the desired dataset directory
+            subprocess.run(["wget", url['url'], "-O", destination_file_path])
+            print("\n{} downloaded successfully in {}\n".format(filename, dataset_directory))
