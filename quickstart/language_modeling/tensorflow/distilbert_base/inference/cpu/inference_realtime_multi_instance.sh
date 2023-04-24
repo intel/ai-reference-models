@@ -85,7 +85,7 @@ _command python benchmarks/launch_benchmark.py \
          $@
 
 if [[ $? == 0 ]]; then
-  grep "Latency: " ${OUTPUT_DIR}/distilbert_base_${PRECISION}_inference_bs1_cores${CORES_PER_INSTANCE}_all_instances.log | sed -e "s/.*://;s/ms//" | awk ' {sum+=$1;} END{print sum} '
+  grep "Throughput: " ${OUTPUT_DIR}/distilbert_base_${PRECISION}_inference_bs1_cores${CORES_PER_INSTANCE}_all_instances.log | sed -e "s/.*://;s/ms//" | awk ' {sum+=$1;} END{print sum} '
   exit 0
 else
   exit 1

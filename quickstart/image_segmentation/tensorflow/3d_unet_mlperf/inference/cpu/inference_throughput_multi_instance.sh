@@ -98,7 +98,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 
 if [[ $? == 0 ]]; then
   echo "Throughput samples/sec:"
-  cat ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep "Throughput:.*samples/sec" | sed -e s"/.*://;s/samples\/sec//"
+  cat ${OUTPUT_DIR}/3d_unet_mlperf_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep "Throughput:.*samples/sec" | sed -e s"/.*://;s/samples\/sec//" | awk ' {sum+=$1;} END{print sum} '
   exit 0
 else
   exit 1
