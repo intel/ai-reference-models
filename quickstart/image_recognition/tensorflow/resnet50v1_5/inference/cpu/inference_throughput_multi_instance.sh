@@ -84,11 +84,11 @@ cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-if [[ $PRECISION == "fp32" ]]; then
+if [[ $PRECISION == "bfloat16" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"80"}"
-elif [[ $PRECISION == "bfloat16" || $PRECISION == "fp16" ]]; then
+elif [[ $PRECISION == "fp16" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"256"}"
-elif [[ $PRECISION == "int8" ]]; then
+elif [[ $PRECISION == "int8" || $PRECISION == "fp32" ]]; then
   BATCH_SIZE="${BATCH_SIZE:-"116"}"
 fi
 
