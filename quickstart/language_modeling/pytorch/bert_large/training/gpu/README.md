@@ -8,43 +8,22 @@ This document has instructions for running BERT Large training using
 Intel-optimized PyTorch with Intel(R) Data Center GPU Max Series.
 
 <!--- 20. GPU Setup -->
-## Hardware Requirements:
-- Intel® Data Center GPU Max Series, Driver Version: [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html)
-
 ## Software Requirements:
 - Intel® Data Center GPU Max Series
-- Intel GPU Drivers: Intel® Data Center GPU Max Series [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html)
-- Intel® oneAPI Base Toolkit 2023.0
-- Python 3.7-3.10
-- pip 19.0 or later (requires manylinux2014 support)
+- Follow [instructions](https://intel.github.io/intel-extension-for-pytorch/xpu/latest/tutorials/installation.html) to install the latest IPEX version and other prerequisites.
 
-  |Release|Intel GPU|Install Intel GPU Driver|
-    |-|-|-|
-    |v1.1.0|Intel® Data Center GPU Max Series|  Refer to the [Installation Guides](https://dgpu-docs.intel.com/installation-guides/index.html#intel-data-center-gpu-max-series) for latest driver installation. If install the verified Intel® Data Center GPU Max Series/Intel® Data Center GPU Flex Series [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html), please append the specific version after components.|
-
-- Intel® oneAPI Base Toolkit 2023.0.0: Need to install components of Intel® oneAPI Base Toolkit
+- Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
   - Intel® oneAPI Threading Building Blocks (oneTBB)
   - Intel® oneAPI Math Kernel Library (oneMKL)
-  - Intel® oneAPI Collective Communications Library (oneCCL), required by Intel® Optimization for Horovod* only
-  * Download and install the verified DPC++ compiler, oneTBB and oneMKL.
-    
-    ```bash
-    $ wget https://registrationcenter-download.intel.com/akdlm/irc_nas/19079/l_BaseKit_p_2023.0.0.25537_offline.sh
-    # 4 components are necessary: DPC++/C++ Compiler, DPC++ Libiary, oneTBB and oneMKL
-    # if you want to run distributed training with Intel® Optimization for Horovod*, oneCCL is needed too(Intel® oneAPI MPI Library will be installed automatically as its dependency)
-    $ sudo sh ./l_BaseKit_p_2023.0.0.25537_offline.sh
-    ```
-    For any more details on instructions on how to download and install the base-kit, please follow the procedure in https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux&distributions=offline.
+  - Follow [instructions](https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit-download.html?operatingsystem=linux&distributions=offline) to download and install the latest oneAPI Base Toolkit.
 
-  - Set environment variables
-    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account,`${HOME}/intel/oneapi` for other accounts
+  - Set environment variables for Intel® oneAPI Base Toolkit: 
+    Default installation location `{ONEAPI_ROOT}` is `/opt/intel/oneapi` for root account, `${HOME}/intel/oneapi` for other accounts
     ```bash
     source {ONEAPI_ROOT}/compiler/latest/env/vars.sh
     source {ONEAPI_ROOT}/mkl/latest/env/vars.sh
     source {ONEAPI_ROOT}/tbb/latest/env/vars.sh
-
-    # oneCCL (and Intel® oneAPI MPI Library as its dependency), required by Intel® Optimization for Horovod* only
     source {ONEAPI_ROOT}/mpi/latest/env/vars.sh
     source {ONEAPI_ROOT}/ccl/latest/env/vars.sh
     ```
@@ -76,20 +55,6 @@ Install the following pre-requisites:
   virtualenv -p python <virtualenv_name>
   source <virtualenv_name>/bin/activate
   ```
-* Install PyTorch and Intel® Extension for PyTorch for GPU (IPEX):
-  ```bash
-  python -m pip install torch==1.13.0a0 -f https://developer.intel.com/ipex-whl-stable-xpu
-  python -m pip install intel_extension_for_pytorch==1.13.10+xpu -f https://developer.intel.com/ipex-whl-stable-xpu
-
-  # To run `ddp_bf16_training_plain_format.sh` oneccl_bind_pt is also needed:
-  python -m pip install oneccl_bind_pt==1.13.100+gpu -f https://developer.intel.com/ipex-whl-stable-xpu
-  ```
-  To verify that PyTorch and IPEX are correctly installed:
-  ```bash
-  python -c "import torch;print(torch.device('xpu'))"  # Sample output: "xpu"
-  python -c "import intel_extension_for_pytorch as ipex;print(ipex.xpu.is_available())"  #Sample output True
-  python -c "import intel_extension_for_pytorch as ipex;print(ipex.xpu.has_onemkl())"  # Sample output: True
-  ```
 * Clone the Model Zoo repository:
   ```bash
   git clone https://github.com/IntelAI/models.git
@@ -99,7 +64,8 @@ Install the following pre-requisites:
   # Navigate to the model zoo repo
   cd models
   # Install model specific dependencies:
-  ./quickstart/language_modeling/pytorch/bert_large/training/gpu/setup.sh
+  python -m pip install 'batchgenerators>=0.20.0' 'scipy==1.6.2' medpy pandas SimpleITK sklearn tensorboard
+  ./quickstart/language_modeling/tensorflow/bert_large/training/gpu/setup.sh
   ```
 
 See the [datasets section](#datasets) of this document for instructions on
