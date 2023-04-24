@@ -1,0 +1,11 @@
+[
+  { "_comment": "mmoe_fp32_accuracy",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=mmoe --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size 256 --socket-id 0 --accuracy-only  --verbose --in-graph=/in_graph/saved_model.pb --accuracy-only --data-location=/dataset",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/eval_census_income_dataset.py --input-graph=/in_graph/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=256  --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only",
+    "cpuset": "0-111"},
+
+  { "_comment": "mmoe_inference_benchmark_fp32",
+    "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name mmoe --batch-size 256 --in-graph /saved_model.pb --intelai-models . --socket-id 0 --verbose",
+    "output": "numactl --cpunodebind=0 --membind=0 python ./inference/fp32/eval_census_income_dataset.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=256 --warmup-steps=10 --steps=50",
+    "cpuset": "0-111"}  
+]
