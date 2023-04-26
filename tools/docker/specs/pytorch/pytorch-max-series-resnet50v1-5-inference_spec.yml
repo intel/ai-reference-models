@@ -11,14 +11,12 @@ slice_sets:
     dockerfile_subdirectory: gpu_model_containers
     downloads: []
     files:
-    - source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README.md
+    - source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Max_Series.md
       destination: README.md
     - destination: models/image_recognition/pytorch/resnet50v1_5/inference/gpu
       source: models/image_recognition/pytorch/resnet50v1_5/inference/gpu
     - destination: quickstart/inference_block_format.sh
       source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh
-    - destination: quickstart/setup.sh
-      source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/setup.sh
     wrapper_package_files:
      - source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/build.sh
        destination: build.sh

@@ -19,8 +19,6 @@ slice_sets:
       source: quickstart/language_modeling/pytorch/bert_large/training/gpu/bf16_training_plain_format.sh
     - destination: quickstart/ddp_bf16_training_plain_format.sh
       source: quickstart/language_modeling/pytorch/bert_large/training/gpu/ddp_bf16_training_plain_format.sh
-    - source: quickstart/common/pytorch/gpu/setvars.sh
-      destination: quickstart/setvars.sh
     wrapper_package_files:
      - source: quickstart/language_modeling/pytorch/bert_large/training/gpu/build.sh
        destination: build.sh

@@ -47,6 +47,7 @@ docker pull intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference
 The ResNet50 v1.5 inference container includes scripts,model and libraries need to run INT8 inference. To run the `inference_block_format.sh` quickstart script using this container, you'll need to set the environment variable and provide volume mounts for the ImageNet dataset if real dataset is required. Otherwise, the script uses dummy data. You will need to provide an output directory where log files will be written. 
 
 ```
+export PRECISION=<export precision>
 export DATASET_DIR=${PWD}/imagenet
 export OUTPUT_DIR=${PWD}/logs
 export BATCH_SIZE=<export batch size,default is 1024>

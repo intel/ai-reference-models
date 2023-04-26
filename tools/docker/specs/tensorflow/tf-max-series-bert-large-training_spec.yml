@@ -13,8 +13,6 @@ slice_sets:
     files:
     - destination: benchmarks/common
       source: benchmarks/common
-    - destination: benchmarks/language_modeling/tensorflow/bert_large/README.md
-      source: benchmarks/language_modeling/tensorflow/bert_large/README.md
     - destination: benchmarks/__init__.py
       source: benchmarks/__init__.py
     - destination: benchmarks/language_modeling/__init__.py

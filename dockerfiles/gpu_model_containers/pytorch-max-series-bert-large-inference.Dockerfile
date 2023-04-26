@@ -24,7 +24,6 @@ ARG PYTORCH_BASE_TAG="xpu-max"
 
 FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
 
-
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="pytorch-max-series-bert-large-inference"

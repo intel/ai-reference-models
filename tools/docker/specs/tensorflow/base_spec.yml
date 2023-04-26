@@ -90,19 +90,6 @@ slice_sets:
                - source: third_party
                  destination: licenses/third_party
                  
-    tf-ats-gpu:
-        - add_to_name: tf-ats-gpu 
-          args:
-              - PACKAGE_NAME=tf-ats-gpu
-              - DPCPP_COMPILER_BINARIES=l_dpcpp-cpp-compiler_p_2021.4.0.3201_offline.sh
-              - MKL_BINARY=l_onemkl_p_2021.3.0.533_offline.sh
-          partials:
-              - gpu-ats-drivers
-              - mkl
-              - local-compiler-dpcpp-cpp
-              - python3
-              - tensorflow/gpu-tensorflow
-    
     intel-tf:
         - add_to_name: ""
           dockerfile_exclusive_name: "intel-tf"

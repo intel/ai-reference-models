@@ -23,6 +23,7 @@ ARG TENSORFLOW_BASE_IMAGE="intel/intel-extension-for-tensorflow"
 ARG TENSORFLOW_BASE_TAG="gpu-max"
 
 FROM ${TENSORFLOW_BASE_IMAGE}:${TENSORFLOW_BASE_TAG}
+
 ARG PACKAGE_DIR=model_packages
 
 ARG PACKAGE_NAME="tf-max-series-bert-large-inference"

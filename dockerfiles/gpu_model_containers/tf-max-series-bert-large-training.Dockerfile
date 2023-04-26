@@ -23,14 +23,15 @@ ARG TENSORFLOW_BASE_IMAGE="intel/intel-extension-for-tensorflow"
 ARG TENSORFLOW_BASE_TAG="gpu-max"
 
 FROM ${TENSORFLOW_BASE_IMAGE}:${TENSORFLOW_BASE_TAG}
+
 RUN curl -fsSL https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB | apt-key add -
 RUN echo "deb [trusted=yes] https://apt.repos.intel.com/oneapi all main " > /etc/apt/sources.list.d/oneAPI.list
 
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
-    intel-oneapi-mpi-devel \
-    intel-oneapi-ccl \
+    intel-oneapi-mpi-devel=2021.8.0-25329 \
+    intel-oneapi-ccl=2021.8.0-25371 \
     && \
   rm -rf /var/lib/apt/lists/*
 
@@ -54,6 +55,7 @@ ARG PACKAGE_NAME="tf-max-series-bert-large-training"
 ARG MODEL_WORKSPACE
 
 RUN git apply ${MODEL_WORKSPACE}/${PACKAGE_NAME}/quickstart/hvs_support.patch
+
 ENV USER_ID=0
 
 ENV USER_NAME=root

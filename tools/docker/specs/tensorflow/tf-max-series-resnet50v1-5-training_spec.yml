@@ -16,8 +16,6 @@ slice_sets:
       source: benchmarks/image_recognition/__init__.py
     - destination: benchmarks/image_recognition/tensorflow/__init__.py
       source: benchmarks/image_recognition/tensorflow/__init__.py
-    - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md
-      source: benchmarks/image_recognition/tensorflow/resnet50v1_5/README.md
     - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
       source: benchmarks/image_recognition/tensorflow/resnet50v1_5/__init__.py
     - destination: benchmarks/image_recognition/tensorflow/resnet50v1_5/training/__init__.py
@@ -34,8 +32,10 @@ slice_sets:
       source: models/image_recognition/tensorflow/resnet50v1_5
     - destination: quickstart/common
       source: quickstart/common
-    - destination: quickstart
-      source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu
+    - destination: quickstart/bfloat16_training.sh
+      source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/bfloat16_training_full.sh
+    - destination: quickstart/bfloat16_training_hvd.sh
+      source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/bfloat16_training_hvd.sh
     - source: quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/README.md
       destination: README.md
     - source: datasets/imagenet

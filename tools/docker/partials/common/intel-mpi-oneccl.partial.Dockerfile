@@ -5,7 +5,7 @@ RUN echo "deb [trusted=yes] https://apt.repos.intel.com/oneapi all main " > /etc
 RUN apt-get update && \
   DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
     ca-certificates \
-    intel-oneapi-mpi-devel \
-    intel-oneapi-ccl \
+    intel-oneapi-mpi-devel=2021.8.0-25329 \
+    intel-oneapi-ccl=2021.8.0-25371 \
     && \
   rm -rf /var/lib/apt/lists/*

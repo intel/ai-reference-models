@@ -17,16 +17,8 @@ slice_sets:
       source: models/language_modeling/pytorch/bert_large/inference/gpu
     - source: models/language_modeling/pytorch/bert_large/inference/gpu/requirements.txt
       destination: requirements.txt
-    - destination: quickstart/fp16_inference_block_format.sh
-      source: quickstart/language_modeling/pytorch/bert_large/inference/gpu/fp16_inference_block_format.sh
     - destination: quickstart/fp16_inference_plain_format.sh
       source: quickstart/language_modeling/pytorch/bert_large/inference/gpu/fp16_inference_plain_format.sh
-    - destination: quickstart/fp32_fine_tuning_accuracy.sh
-      source: quickstart/language_modeling/pytorch/bert_large/inference/gpu/fp32_fine_tuning_accuracy.sh
-    - destination: quickstart/fp32_inference.sh
-      source: quickstart/language_modeling/pytorch/bert_large/inference/gpu/fp32_inference.sh
-    - source: quickstart/common/pytorch/gpu/setvars.sh
-      destination: quickstart/setvars.sh
     wrapper_package_files:
      - source: quickstart/language_modeling/pytorch/bert_large/inference/gpu/build.sh
        destination: build.sh

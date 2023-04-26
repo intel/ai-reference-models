@@ -33,8 +33,10 @@ slice_sets:
       source: models/language_modeling/tensorflow/bert_large/inference
     - destination: quickstart/common
       source: quickstart/common
-    - destination: quickstart
-      source: quickstart/language_modeling/tensorflow/bert_large/inference/gpu
+    - destination: quickstart/accuracy.sh
+      source: quickstart/language_modeling/tensorflow/bert_large/inference/gpu/accuracy.sh
+    - source: quickstart/language_modeling/tensorflow/bert_large/inference/gpu/benchmark.sh
+      destination: quickstart/benchmark.sh
     - source: quickstart/language_modeling/tensorflow/bert_large/inference/gpu/README.md
       destination: README.md
     wrapper_package_files:
