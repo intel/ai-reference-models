@@ -40,4 +40,5 @@ esac
 done
 
 # Install dependencies only if terms and conditions were agreed.
+apt-get install -y wget
 pip install -r requirements.txt

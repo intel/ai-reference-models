@@ -5,4 +5,3 @@ openpyxl
 pillow
 scikit-learn-intelex
 python-dotenv
-wget

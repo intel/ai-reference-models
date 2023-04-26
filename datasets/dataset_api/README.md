@@ -7,7 +7,7 @@ models/datasets/dataset_api/
 ├── dataset_urls.json
 ├── README.md
 ├── scripts
-├── setup.py
+├── setup.sh
 └── dataset_api/
     ├── __init__.py
     ├── download.py
@@ -22,7 +22,7 @@ virtualenv -p python3 venv
 . venv/bin/activate
 
 cd models/datasets/dataset_api
-# Install dependencies 
+# Install dependencies, some dependencies might require root privilages.
 ./setup.sh
 ```
 
@@ -52,7 +52,7 @@ from dataset_api.download import download_dataset
 from dataset_api.preprocess import preprocess_dataset
 
 # Download the datasets
-download_dataset('brca')
+download_dataset('brca', <path to the raw dataset directory>)
 
 # Preprocess the datasets
 preprocess_dataset('brca', <path to the raw dataset directory>)

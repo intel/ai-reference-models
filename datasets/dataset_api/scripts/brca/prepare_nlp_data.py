@@ -203,21 +203,25 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--medical_reports_folder",
+        type=str,
         help="Location of medical reports for cases",
         default=os.path.join(root_folder, "Medical reports for cases .zip"),
     )  
     parser.add_argument(
         "--manual_annotations_file",
+        type=str,
         help="Location of manual annotations file",
         default=os.path.join(root_folder, "Radiology manual annotations.xlsx"),
     )
     parser.add_argument(
         "--output_annotations_folder",
+        type=str,
         help="Location of output annotation folder",
         default=os.path.join(root_folder, "annotation"),
     )
     parser.add_argument(
         "--output_annotations_file",
+        type=str,
         help="Name of the output annotation file",
         default=os.path.join(root_folder, "annotation", "annotation.csv"),
     )
@@ -228,5 +232,4 @@ if __name__ == "__main__":
         params.medical_reports_folder,
         params.manual_annotations_file,
         params.output_annotations_folder,
-        params.output_annotations_file,
-    )
+        params.output_annotations_file)

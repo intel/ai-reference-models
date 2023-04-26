@@ -17,6 +17,7 @@
 #
 
 #
+# SPDX-License-Identifier: BSD-3-Clause
 
 import os
 import pandas as pd
@@ -189,7 +190,7 @@ def segment_images(segmentation_path,cesm_only = True):
                     if (bottom - top) < new_height:
                         top, bottom = max(0, (top+bottom)//2 - new_height//2), min(height,  (top+bottom)//2 + new_height//2)
                     """
-
+                    #print((left, top, right, bottom))
                     im = im.crop((left, top, right, bottom))
                     im.save(new_file)
                 elif(x["name"] == "ellipse"):
@@ -224,16 +225,19 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--radiology_annotations_file",
+        type=str,
         help="Location of manual annotations file",
         default=os.path.join(root_folder, "Radiology manual annotations.xlsx"),
     )
     parser.add_argument(
         "--image_folder",
+        type=str,
         help="Location of image folder",
-        default=os.path.join(root_folder, "PKG - CDD-CESM/CDD-CESM"),
+        default=os.path.join(root_folder, "CDD-CESM"),
     )
     parser.add_argument(
         "--segmentation_path",
+        type=str,
         help="Location of segmentation path",
         default=os.path.join(root_folder, "Radiology_hand_drawn_segmentations_v2.csv"),
     )
@@ -243,11 +247,4 @@ if __name__ == "__main__":
     prepare_vision_data(
         params.image_folder,
         params.radiology_annotations_file,
-        params.segmentation_path
-    )
-	#Create Train and Test Split
-    data_dir = path.join(root_folder, "train_test_split_images")
-    os.makedirs(data_dir, exist_ok=True)
-    infolder = path.join(root_folder, "segmented_images")
-    create_data_split(infolder, data_dir)
-    print("Done creating the data split............")
+        params.segmentation_path)
