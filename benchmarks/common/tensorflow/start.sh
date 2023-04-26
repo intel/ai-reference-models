@@ -921,6 +921,27 @@ function mobilenet_v1() {
   fi
 }
 
+# mobilenet_v2 model
+function mobilenet_v2() {
+  if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ]; then
+    CMD="${CMD} $(add_arg "--input_height" ${INPUT_HEIGHT}) $(add_arg "--input_width" ${INPUT_WIDTH}) \
+    $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) \
+    $(add_arg "--input_layer" ${INPUT_LAYER}) $(add_arg "--output_layer" ${OUTPUT_LAYER})"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  elif [ ${PRECISION} == "int8" ]; then
+    CMD="${CMD} $(add_arg "--input_height" ${INPUT_HEIGHT}) $(add_arg "--input_width" ${INPUT_WIDTH}) \
+    $(add_arg "--warmup_steps" ${WARMUP_STEPS}) $(add_arg "--steps" ${STEPS}) \
+    $(add_arg "--input_layer" ${INPUT_LAYER}) $(add_arg "--output_layer" ${OUTPUT_LAYER}) \
+    $(add_calibration_arg)"
+
+    PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
+  else
+    echo "PRECISION=${PRECISION} is not supported for ${MODEL_NAME}"
+    exit 1
+  fi
+}
+
 # MTCC model
 function mtcc() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -1727,6 +1748,8 @@ elif [ ${MODEL_NAME} == "maskrcnn" ]; then
   maskrcnn
 elif [ ${MODEL_NAME} == "mobilenet_v1" ]; then
   mobilenet_v1
+elif [ ${MODEL_NAME} == "mobilenet_v2" ]; then
+  mobilenet_v2
 elif [ ${MODEL_NAME} == "resnet101" ]; then
   resnet101_inceptionv3
 elif [ ${MODEL_NAME} == "resnet50" ]; then
