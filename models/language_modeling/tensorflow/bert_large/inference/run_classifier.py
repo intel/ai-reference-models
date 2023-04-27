@@ -173,8 +173,10 @@ class LoggerHook(tf.estimator.SessionRunHook):
     ms = duration.total_seconds() * 1000.00
     if self._step > self._warmup:
       self._total_duration += ms
-      if self._step % 100 == 0:
-        print("Current step: %d, time in ms: %.2f" %(self._step, ms))
+      #if self._step % 100 == 0:
+      print("Current step: %d, time in ms: %.2f" %(self._step, ms))
+      time_takes = self._total_duration / (self._step - self._warmup)
+      print("Throughput is %.2f samples/s" % (self.batch_size * 1000 / time_takes))
     else:
       print("Warmup step: %d, time in ms: %.2f" %(self._step, ms))
 
@@ -1057,13 +1059,13 @@ def main(_):
   if FLAGS.do_predict:
     predict_examples = processor.get_test_examples(FLAGS.data_dir)
     num_actual_predict_examples = len(predict_examples)
-    if FLAGS.use_tpu:
+    #if FLAGS.use_tpu:
       # TPU requires a fixed batch size for all batches, therefore the number
       # of examples must be a multiple of the batch size, or else examples
       # will get dropped. So we pad with fake examples which are ignored
       # later on.
-      while len(predict_examples) % FLAGS.predict_batch_size != 0:
-        predict_examples.append(PaddingInputExample())
+    while len(predict_examples) % FLAGS.predict_batch_size != 0:
+      predict_examples.append(PaddingInputExample())
 
     predict_file = os.path.join(FLAGS.output_dir, "predict.tf_record")
     file_based_convert_examples_to_features(predict_examples, label_list,

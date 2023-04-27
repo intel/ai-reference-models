@@ -91,16 +91,16 @@ ${PYTHON} export_classifier.py \
           --experimental_gelu=True # Disable this flag if your TenorFlow doesn't support
 ```
 
-## Inference
+## Evaluation
 
-To run inference with frozen graph, we first switch to a different inference output dir as below,
+To run evaluation with frozen graph, we first switch to a different evaluation output dir as below,
 
 ``` shell
 OUTPUT_DIR=${${WORKSPACE}/output/classifier_frozen}
 FROZEN_DIR=${${WORKSPACE}/output/classifier/frozen}
 ```
 
-Now we can run the inference. It supports two precisions too. For example, the fp32 mode inference should be as below,
+Now we can run the evaluation. It supports two precisions too. For example, the fp32 mode evaluation should be as below,
 
 ``` shell
 ${PYTHON} launch_benchmark.py \
@@ -125,4 +125,34 @@ ${PYTHON} launch_benchmark.py \
         profile=False \
         num-intra-threads=24 \
         num-inter-threads=1
+```
+
+## Inference
+
+To run inference with frozen graph, we first switch to a different inference output dir as below,
+
+``` shell
+OUTPUT_DIR=${${WORKSPACE}/output/classifier_frozen}
+FROZEN_DIR=${${WORKSPACE}/output/classifier/frozen}
+```
+
+Now we can run the inference. It supports two precisions too. For example, the fp32 mode inference should be as below,
+
+``` shell
+cd models/models/language_modeling/tensorflow/bert_large/inference
+${PYTHON} run_classifier.py \
+        --precision=fp32 \
+        --predict_batch_size=128 \
+        --output_dir=${OUTPUT_DIR} \
+        --frozen_graph_path=${FROZEN_DIR}/frozen_graph.pb \
+        --task_name=MRPC \
+        --do_train=False \
+        --do_predict=True \
+        --data_dir=$GLUE_DIR/MRPC \
+        --vocab_file=$BERT_BASE_DIR/vocab.txt \
+        --bert_config_file=$BERT_BASE_DIR/bert_config.json \
+        --max-seq-length=128 \
+        --do_lower_case=True \
+        --mode=benchmark \
+        --experimental_gelu=False
 ```
