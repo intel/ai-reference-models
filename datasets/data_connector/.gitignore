@@ -1,0 +1,20 @@
+# Distributions
+*.whl
+*.tar.gz
+
+# Metadata
+*.egg-info
+
+# Cache
+__pycache__/
+
+# Envs
+.venv
+
+# Folders
+local_channel/
+dist/
+inspect_package-conda/
+inspect_package-pip/
+conda_package/
+build/
