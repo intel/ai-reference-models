@@ -111,10 +111,10 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   conda install intel-openmp
   ```
 
-* Set ENV to use AMX if you are using SPR
-  ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
-  ```
+* Set ENV to use fp16 AMX if you are using a supported platform
+```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+```
 * Set ENV to use multi-nodes distributed training (no need for single-node multi-sockets)
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes. 
@@ -136,6 +136,11 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 | FP32        | bash run_ddp_bert_pretrain_phase1.sh fp32 | bash run_ddp_bert_pretrain_phase2.sh fp32 |
 | BF32        | bash run_ddp_bert_pretrain_phase1.sh bf32 | bash run_ddp_bert_pretrain_phase2.sh bf32 |
 | BF16        | bash run_ddp_bert_pretrain_phase1.sh bf16 | bash run_ddp_bert_pretrain_phase2.sh bf16 |
+
+## Quick Start Script for fast_bert with TPP optimization 
+|  DataType   | pre-train  |  finetune|
+| ----------- | ----------- | ----------- |
+| BF16        |bash sh run_fast_bert_pretrain_8_node.sh | bash sh fast_bert_squad_finetune.sh --use_tpp --tpp_bf16 --unpad |
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and

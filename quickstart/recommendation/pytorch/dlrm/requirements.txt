@@ -1,5 +1,6 @@
 future
 numpy
 torch
+wheel==0.38.0 # Included this to avoid a vulnerability
 scikit-learn
 tqdm

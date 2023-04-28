@@ -15,7 +15,27 @@ docker pull intel/object-detection:pytorch-spr-maskrcnn-training
 **Note:** The `avx-fp32` precision runs the same scripts as `fp32`, except that the `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
 ## Datasets
-Mask RCNN training uses the COCO training dataset. Use the [instructions](https://github.com/IntelAI/models/tree/master/datasets/coco/README_train.md) to download and preprocess the dataset.
+Download and extract the 2017 training/validation images and annotations from the [COCO dataset website](https://cocodataset.org/#download) to a `coco` folder and unzip the files. After extracting the zip files, your dataset directory structure should look something like this:
+```
+coco
+├── annotations
+│   ├── captions_train2017.json
+│   ├── captions_val2017.json
+│   ├── instances_train2017.json
+│   ├── instances_val2017.json
+│   ├── person_keypoints_train2017.json
+│   └── person_keypoints_val2017.json
+├── train2017
+│   ├── 000000454854.jpg
+│   ├── 000000137045.jpg
+│   ├── 000000129582.jpg
+│   └── ...
+└── val2017
+    ├── 000000000139.jpg
+    ├── 000000000285.jpg
+    ├── 000000000632.jpg
+    └── ...
+```
 
 ## Docker Run
 (Optional) Export related proxy into docker environment.

@@ -1,2 +1,2 @@
 <!--- 0. Title -->
-# TensorFlow <model name> <mode>
+# <model name> <mode>

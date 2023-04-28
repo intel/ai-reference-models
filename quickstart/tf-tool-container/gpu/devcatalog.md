@@ -21,7 +21,7 @@ This document has instruction for running Tensorflow using Intel GPU in containe
 #### Running container:
 
 Run following commands to start TF GPU  tools container. You can use `-v` option to mount your
-local directory into container.
+local directory into container. 
 
 ```
 IMAGE_NAME=intel/intel-extension-for-tensorflow:gpu-flex
@@ -77,7 +77,7 @@ incarnation: 17448926295332318308
 physical_device_desc: "device: 1, name: INTEL_XPU, pci bus id: <undefined>"
 xla_global_id: -1
 ]
-```
+``` 
 ## Documentation and Sources
 
 [GitHub* Repository](https://github.com/intel/intel-extension-for-tensorflow/tree/main/docker)
@@ -85,7 +85,7 @@ xla_global_id: -1
 ## Summary and Next Steps
 
 Now you are inside container with Python 3.9 and Tensorflow 2.10.0 preinstalled. You can run your own script
-to run on intel GPU.
+to run on intel GPU. 
 
 ## Support
 Support for Intel® Extension for TensorFlow* is found via the [Intel® AI Analytics Toolkit.](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html#gs.qbretz) Additionally, the Intel® Extension for TensorFlow* team tracks both bugs and enhancement requests using [GitHub issues](https://github.com/intel/intel-extension-for-tensorflow/issues). Before submitting a suggestion or bug report, please search the GitHub issues to see if your issue has already been reported.

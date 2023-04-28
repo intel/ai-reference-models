@@ -41,11 +41,11 @@ slice_sets:
         - destination: quickstart/common
           source: quickstart/common
       downloads:
-        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/transformer_mlperf/bfloat16/transformer_mlperf_bf16.pb
+        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
           destination: pretrained_model/transformer_mlperf_bf16.pb
-        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/transformer_mlperf/fp32/transformer_mlperf_fp32.pb
+        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_fp32.pb
           destination: pretrained_model/transformer_mlperf_fp32.pb
-        - source: https://ubit-artifactory-or.intel.com/artifactory/cicd-or-local/model-zoo/spr/2022/tensorflow/ww18/tf_dataset/pre-trained-models/transformer_mlperf/int8/transformer_mlperf_int8.pb
+        - source: https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
           destination: pretrained_model/transformer_mlperf_int8.pb
       wrapper_package_files:
         - source: output/tf-spr-transformer-mlperf-inference.tar.gz

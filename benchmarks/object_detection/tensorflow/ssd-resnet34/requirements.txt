@@ -7,7 +7,6 @@ matplotlib
 pycocotools
 tensorflow-addons
 opencv-python
-horovod==0.25.0
 notebook>=6.1.5
 tf_slim
 

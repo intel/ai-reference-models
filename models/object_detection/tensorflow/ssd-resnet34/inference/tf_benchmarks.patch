@@ -694,3 +694,24 @@ index b4fe986..887f1da 100644
 -        tf.cast(tf.not_equal(matches, -1), tf.float32))
 +        input_tensor=tf.cast(tf.not_equal(matches, -1), tf.float32))
      return encoded_classes, encoded_boxes, num_matched_boxes
+diff --git a/scripts/tf_cnn_benchmarks/variable_mgr_util.py b/scripts/tf_cnn_benchmarks/variable_mgr_util.py
+index 9b063de..767add7 100644
+--- a/scripts/tf_cnn_benchmarks/variable_mgr_util.py
++++ b/scripts/tf_cnn_benchmarks/variable_mgr_util.py
+@@ -28,6 +28,7 @@ from tensorflow.python.framework import ops
+ from tensorflow.python.ops import data_flow_ops
+ from tensorflow.python.ops import gradients_util
+ 
++from tensorflow.python.framework import tensor_conversion_registry
+ 
+ PS_SHADOW_VAR_PREFIX = 'ps_var'
+ 
+@@ -309,7 +310,7 @@ class StagedModelVariable(object):
+       return self._value()
+ 
+ 
+-ops.register_tensor_conversion_function(
++tensor_conversion_registry.register_tensor_conversion_function(
+     StagedModelVariable, StagedModelVariable._TensorConversionFunction)  # pylint: disable=protected-access
+ 
+ 

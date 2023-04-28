@@ -1,0 +1,10 @@
+azure/.env
+.env
+config.json
+*.json
+gcp_client_secrets.json
+src/
+credit_defaults_model/
+mlruns/
+src.
+dependencies/

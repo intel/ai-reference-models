@@ -11,7 +11,7 @@ The [pretrained-model](https://huggingface.co/distilbert-base-uncased-finetuned-
 We use a part of Stanford Sentiment Treebank corpus for our task. Specifically, the validation split present in the SST2 dataset in the hugging face [repository](https://huggingface.co/datasets/sst2). It contains 872 labeled English sentences. Instructions to get the frozen graph and dataset are given below:
 
 ```
-Download Frozen graph:
+Download Frozen graph (FP32 - The FP32 frozen graph should used for FP32, BFloat16 and FP16):
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/distilbert_frozen_graph_fp32_final.pb
 
 Download Frozen graph for INT8:
@@ -30,57 +30,40 @@ python download_dataset.py --path_to_save_dataset <enter path to save dataset>
 ```
 cd to the directory: <model_zoo_dir>/models/language_modeling/tensorflow/distilbert_base/inference
 pip install -r requirements.txt
+
+Set the required Environment variables:
+
+export BATCH_SIZE=<set to required batch size>
+export IN_GRAPH=<path to downloaded frozen graph>
+export PRECISION=<set precision fp32, fp16, bfloat16 or int8>
+export DATASET_DIR=<path to the downloaded dataset directory>
+export WARMUP_STEPS=<set to required warmup steps>
+export OUTPUT_DIR=<directory to store log files of the run>
 ```
 
-### Run command
-
-Use <model_zoo_dir>/benchmarks/launch_benchmark.py to run inference for distilbert
-
-FP32:
+Use quickstart scripts for running the model
 
 ```
-python launch_benchmark.py 
---model_name distilbert_base \
---mode inference \
---framework tensorflow \
---precision fp32 \
---batch_size 32 \ 
---benchmark-only \
---in-graph <path to frozen graph (.pb)> \
---data-location <path to the saved dataset> \
---warmup-steps=20
+cd <model_dir>
 ```
-
-BFLOAT16:
+Accuracy
 
 ```
-python launch_benchmark.py 
---model_name distilbert_base \
---mode inference \
---framework tensorflow \
---precision bfloat16 \
---batch_size 32 \ 
---benchmark-only \
---in-graph <path to frozen graph (.pb)>
---data-location <path to the saved dataset>
---warmup-steps=20
+./quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/accuracy.sh
 ```
 
-INT8:
+Throuhgput:
+
+(runs with a batch size of 56)
 
 ```
-python launch_benchmark.py 
---model_name distilbert_base \
---mode inference \
---framework tensorflow \
---precision int8 \
---batch_size 32 \ 
---benchmark-only \
---in-graph [path to frozen graph (.pb)]
---data-location [path to the saved dataset]
---warmup-steps=20
+./quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_realtime_multi_instance.sh
 ```
 
-Other options: \
-`--accuracy-only` to get accuracy as well
-`--max-seq-length=128` uses 128 by default
+Latency:
+
+(runs with a batch size of 1)
+
+```
+./quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_throughput_multi_instance.sh
+```

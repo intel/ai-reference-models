@@ -44,7 +44,7 @@ docker pull intel/intel-optimized-tensorflow-serving:latest
 
 * Login into your machine via SSH and clone the [Tensorflow Serving](https://github.com/tensorflow/serving/) repository and save the path of this cloned directory (Also, adding it to `.bashrc` ) for ease of use for the remainder of this tutorial. 
 	```
-	git clone https://github.com/tensorflow/serving.git
+	git clone https://github.com/ashahba/serving.git // Revert to Upstream once intel-openmp changes are merged
 	export TF_SERVING_ROOT=$(pwd)/serving
 	echo "export TF_SERVING_ROOT=$(pwd)/serving" >> ~/.bashrc
 	```
@@ -56,15 +56,13 @@ If you pulled the image and cloned the repository, you can move on to step 2. Al
     **NOTE**: It is recommended that you build an official release version using `--build-arg TF_SERVING_VERSION_GIT_BRANCH="<release_number>"`, but if you wish to build the (unstable) head of master, omit the build argument and master will be used by default.
 	
 	```bash
-    export TF_SERVING_VERSION_GIT_BRANCH="2.6.0"
-    export TF_SERVING_VERSION_GIT_COMMIT="HEAD"
-    export TF_SERVING_BUILD_IMAGE="intel/intel-optimized-tensorflow-serving:${TF_SERVING_VERSION_GIT_BRANCH}"
+	export TF_SERVING_VERSION_GIT_BRANCH="ashahba/intel-openmp" // Revert to Upstream once intel-openmp changes are merged
+	export TF_SERVING_VERSION_GIT_COMMIT="HEAD"
+	export TF_SERVING_BUILD_IMAGE="intel/intel-optimized-tensorflow-serving:${TF_SERVING_VERSION_GIT_BRANCH}"
 
 	cd $TF_SERVING_ROOT/tensorflow_serving/tools/docker/
-    git checkout ${TF_SERVING_VERSION_GIT_BRANCH}
-    # This is because the fix PR is only going to be merged into r2.5.
-    # Please see: https://github.com/tensorflow/serving/pull/1895 is not merged into r2.5 yet.
-    git pull origin pull/1895/head
+	git checkout ${TF_SERVING_VERSION_GIT_BRANCH}
+	git pull origin
 
 	docker build \
         -f Dockerfile.devel-mkl \
@@ -92,11 +90,11 @@ If you pulled the image and cloned the repository, you can move on to step 2. Al
 * Once you built both the images, you should be able to list them using command `docker images`
 	```
 	docker images
-	REPOSITORY                                 TAG                 IMAGE ID            CREATED             SIZE
-	intel/intel-optimized-tensorflow-serving   2.6.0               d33c8d849aa3        7 minutes ago       325MB
-	intel/intel-optimized-tensorflow-serving   2.6.0-devel         a2e69840d5cc        8 minutes ago       6.58GB
-	ubuntu                                     18.04               20bb25d32758        13 days ago         87.5MB
-	hello-world                                latest              fce289e99eb9        5 weeks ago         1.84kB
+	REPOSITORY                                 TAG                         IMAGE ID            CREATED             SIZE
+	intel/intel-optimized-tensorflow-serving   ashahba/intel-openmp        d33c8d849aa3        7 minutes ago       325MB
+	intel/intel-optimized-tensorflow-serving   ashahba/intel-openmp-devel  a2e69840d5cc        8 minutes ago       6.58GB
+	ubuntu                                     20.04                       20bb25d32758        13 days ago         87.5MB
+	hello-world                                latest                      fce289e99eb9        5 weeks ago         1.84kB
 	```
 	
 ### Step 2: Verify the Docker image by serving a simple model - half_plus_two

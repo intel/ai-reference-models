@@ -91,10 +91,7 @@ class SSD(nn.Module):
 
         if self.is_test:
             confidences = F.softmax(confidences, dim=2)
-            boxes = box_utils.convert_locations_to_boxes(
-                locations, self.priors, self.config.center_variance, self.config.size_variance
-            )
-            boxes = box_utils.center_form_to_corner_form(boxes)
+            boxes = torch.xpu.locations_to_boxes(locations, self.priors, self.config.center_variance, self.config.size_variance);
             return confidences, boxes
         else:
             return confidences, locations

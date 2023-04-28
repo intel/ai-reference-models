@@ -1,0 +1,15 @@
+azureml>=0.2.7
+azure-ai-ml>=1.4.0
+azure-storage-blob>=12.14.1
+azure-identity>=1.12.0
+azure-core>=1.26.3
+azureml-core>=1.49.0
+boto3>=1.26.65
+google-api-core>=2.11.0
+google-auth>=2.16.2
+google-auth-oauthlib>=1.0.0
+google-cloud-bigquery>=3.7.0
+google-cloud-storage>=2.7.0
+packaging<22.0,>=20.0
+python-dotenv>=1.0.0
+
