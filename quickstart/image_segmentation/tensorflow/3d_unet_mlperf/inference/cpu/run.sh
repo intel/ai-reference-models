@@ -57,7 +57,7 @@ docker run --rm \
   ${dataset_env} \
   ${batch_size_env} \
   --env PRECISION=${PRECISION} \
-  --env OUTPUT_DIR=${OUTPUT_DIR} \ 
+  --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \

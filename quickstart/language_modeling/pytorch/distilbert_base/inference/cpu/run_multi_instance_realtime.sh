@@ -35,6 +35,11 @@ then
 elif [[ "$1" == "fp32" ]]
 then
     echo "### running fp32 mode"
+elif [[ "$1" == "fp16" ]]
+then
+    precision=fp16
+    ARGS="$ARGS --fp16_cpu"
+    echo "### running fp16 mode"
 elif [[ "$1" == "bf32" ]]
 then
     precision="bf32"
@@ -112,5 +117,20 @@ sum = sum / i * INSTANCES_PER_SOCKET;
         printf("%.2f", sum);
 }')
 
+p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
+BEGIN {
+    sum = 0;
+    i = 0;
+    }
+    {
+        sum = sum + $1;
+        i++;
+    }
+END   {
+    sum = sum / i;
+    printf("%.3f ms", sum);
+}')
+
 echo $INSTANCES_PER_SOCKET
 echo ""distilbert-base";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
+echo ""distilbert-base";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log

@@ -24,12 +24,14 @@ echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
 if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-  pretrained_model=/workspace/tf-atsm-ssd-mobilenet-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
+  pretrained_model=/workspace/tf-flex-series-ssd-mobilenet-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
 else
   pretrained_model=${FROZEN_GRAPH}
 fi
 
 export TF_NUM_INTEROP_THREADS=1
+export OverrideDefaultFP64Settings=1 
+export IGC_EnableDPEmulation=1 
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
@@ -53,7 +55,7 @@ WARMUP=""
 if [[ $PRECISION == "int8" ]]; then
   WARMUP="-- warmup_steps=5 steps=20"
   else
-  echo "ATS-M GPU SUPPORTS ONLY INT8 PRECISION"
+  echo "Flex series GPU SUPPORTS ONLY INT8 PRECISION"
   exit 1
 fi
 
@@ -61,7 +63,6 @@ source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --in-graph ${pretrained_model} \
     --output-dir ${OUTPUT_DIR} \
-    ${DATASET_OPTION} \
     --model-name ssd-mobilenet \
     --framework tensorflow \
     --precision ${PRECISION} \

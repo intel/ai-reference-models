@@ -31,18 +31,21 @@ IOMP should be installed in your conda env from the [General setup](#general-set
     export LD_PRELOAD=path/lib/libiomp5.so:$LD_PRELOAD
 ```
 
-* Set ENV to use AMX if you are using SPR
+* Set ENV to use fp16 AMX if you are using a supported platform
 
 ```bash
-    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX
+    export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
 ```
 
 * Set ENV to use multi-node distributed training (no need for single-node multi-sockets)
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
 ```bash
+    export BATCH_SIZE=#global batch_size (for lars optimizer convergency test, the number should be 3264)
     export NNODES=#your_node_number
-    export HOSTFILE=your_ip_list_file #one ip per line
+    export HOSTFILE=#your_ip_list_file #one ip per line
+    export TRAINING_EPOCHS=36 #(optional, this numeber is for lars optimizer convergency test)
+    export MASTER_ADDR=#your_master_addr
 ```
 
 ## Datasets
@@ -82,8 +85,8 @@ The folder that contains the `val` and `train` directories should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, or fp16). |
-| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, or fp16). |
+| `training.sh` | Trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
+| `training_dist.sh` | Distributed trains using one node for one epoch for the specified precision (fp32, avx-fp32, bf16, bf32 or fp16). |
 
 ## Run the model
 
@@ -112,6 +115,12 @@ bash training.sh
 # Run the distributed training quickstart script
 cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
 bash training_dist.sh
+
+# Run the training single socket throughput script
+cd ${MODEL_DIR}/quickstart/image_recognition/pytorch/resnet50/training/cpu
+export BATCH_SIZE=102
+export TRAINING_EPOCHS=1
+bash training_single_socket.sh
 ```
 
 <!--- 80. License -->

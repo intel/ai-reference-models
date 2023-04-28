@@ -16,6 +16,7 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
+BATCH_SIZE=${BATCH_SIZE-64}
 
 if [[ -z "${PRETRAINED_MODEL}" ]]; then
   echo "The required environment variable PRETRAINED_MODEL has not been set."
@@ -23,15 +24,18 @@ if [[ -z "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
+export OverrideDefaultFP64Settings=1 
+export IGC_EnableDPEmulation=1 
+
 echo "YOLOv4 dummy data int8 inference block nchw"
 IPEX_XPU_ONEDNN_LAYOUT=1 python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
-  80 \
-  ${PRETRAINED_MODEL} \
-  416 \
-  416 \
-  ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/data/coco.names \
-  int8 \
-  1 \
-  64 \
-  1 \
-  500 2>&1 | tee $OUTPUT_DIR/YOLOv4_dummy_data_xpu_inf.log
+  -n 80 \
+  --weight ${PRETRAINED_MODEL} \
+  -e 416 \
+  -w 416 \
+  -name ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/data/coco.names \
+  -d int8 \
+  --dummy 1 \
+  -b ${BATCH_SIZE} \
+  --benchmark 1 \
+  --iter 500 2>&1 | tee $OUTPUT_DIR/YOLOv4_dummy_data_xpu_inf.log

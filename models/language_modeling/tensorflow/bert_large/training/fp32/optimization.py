@@ -86,13 +86,25 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
   # It is recommended that you use this optimizer for fine tuning, since this
   # is how the model was trained (note that the Adam m/v variables are NOT
   # loaded from init_checkpoint.)
-  optimizer = AdamWeightDecayOptimizer(
-      learning_rate=learning_rate,
-      weight_decay_rate=0.01,
-      beta_1=0.9,
-      beta_2=0.999,
-      epsilon=1e-6,
-      exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+  use_itex_optimizer = False
+  try:
+    import intel_extension_for_tensorflow as itex
+    optimizer = itex.ops.AdamWithWeightDecayOptimizer(
+        learning_rate=learning_rate,
+        weight_decay_rate=0.01,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-6,
+        exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
+    use_itex_optimizer = True
+  except:
+    optimizer = AdamWeightDecayOptimizer(
+        learning_rate=learning_rate,
+        weight_decay_rate=0.01,
+        beta_1=0.9,
+        beta_2=0.999,
+        epsilon=1e-6,
+        exclude_from_weight_decay=["LayerNorm", "layer_norm", "bias"])
 
   if use_multi_cpu and (accum_steps == 1):
     import horovod.tensorflow as hvd
@@ -172,9 +184,10 @@ def create_optimizer(loss, init_lr, num_train_steps, num_warmup_steps, accum_ste
     # Normally the global step update is done inside of `apply_gradients`.
     # However, `AdamWeightDecayOptimizer` doesn't do this. But if you use
     # a different optimizer, you should probably take this line out.
-    new_global_step = global_step + 1
-    new_global_step = tf.identity(new_global_step, name='global_step_update')
-    train_op = tf.group(train_op, [global_step.assign(new_global_step)])
+    if not use_itex_optimizer:
+      new_global_step = global_step + 1
+      new_global_step = tf.identity(new_global_step, name='global_step_update')
+      train_op = tf.group(train_op, [global_step.assign(new_global_step)])
 
   return train_op
 

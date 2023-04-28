@@ -37,9 +37,12 @@ class ModelInitializer(BaseModelInitializer):
         # Set KMP env vars, if they haven't already been set
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
-
-        benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
-                                        self.args.precision, "infer_detections.py")
+        if self.args.gpu:
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode, "gpu",
+                                            self.args.precision, "infer_detections.py")
+        else:
+            benchmark_script = os.path.join(self.args.intelai_models, self.args.mode,
+                                            self.args.precision, "infer_detections.py")
         self.command_prefix = self.get_command_prefix(self.args.socket_id) \
             + "{} {}".format(self.python_exe, benchmark_script)
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
@@ -58,7 +61,8 @@ class ModelInitializer(BaseModelInitializer):
         else:
             # Did not support multi-batch accuracy check.
             self.command_prefix += " -b {0}".format(self.args.batch_size)
-            self.command_prefix += " --benchmark"
+            if self.args.gpu:
+                self.command_prefix += " --benchmark"
 
     def run(self):
         self.run_command(self.command_prefix)

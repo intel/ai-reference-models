@@ -46,7 +46,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>contextlib2
         <li>cpio
         <li>Cython
-        <li>horovod
+        <li>horovod>=0.27.0
         <li>jupyter
         <li>lxml
         <li>matplotlib
@@ -73,7 +73,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>contextlib2
         <li>cpio
         <li>Cython
-        <li>horovod
+        <li>horovod>=0.27.0
         <li>jupyter
         <li>lxml
         <li>matplotlib

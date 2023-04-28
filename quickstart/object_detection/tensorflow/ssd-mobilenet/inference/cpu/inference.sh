@@ -73,7 +73,6 @@ if [ -z "${BATCH_SIZE}"]; then
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
-_ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name ssd-mobilenet \
   --precision ${PRECISION} \
@@ -85,9 +84,3 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --benchmark-only \
   $@
 
-if [[ $? == 0 ]]; then
-  echo "Summary total samples/sec:"
-  grep 'Total samples/sec' ${OUTPUT_DIR}/ssd-mobilenet_${PRECISION}_inference_bs${BATCH_SIZE}_cores${CORES_PER_INSTANCE}_all_instances.log  | awk -F' ' '{sum+=$3;} END{print sum} '
-else
-  exit 1
-fi

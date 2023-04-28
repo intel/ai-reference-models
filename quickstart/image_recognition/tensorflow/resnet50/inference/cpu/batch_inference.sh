@@ -76,8 +76,7 @@ fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
-         $ARGS \
-	 --model-name=resnet50 \
+         --model-name=resnet50 \
          --precision ${PRECISION} \
          --mode=inference \
          --framework tensorflow \
@@ -86,4 +85,5 @@ _command python benchmarks/launch_benchmark.py \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=${BATCH_SIZE} \
          --socket-id 0 \
-         $@
+         $@ \
+         $ARGS

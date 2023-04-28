@@ -26,7 +26,7 @@ Set the `DATASET_DIR` to point to this directory when running ResNet50 v1.5.
 | [`training_1_epoch.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training_1_epoch.sh) | Executes a test run that trains the model for 1 epoch and saves checkpoint files to an output directory. |
 | [`training_full.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/training_full.sh) | Trains the model using the full dataset and runs until convergence (90 epochs) and saves checkpoint files to an output directory. Note that this will take a considerable amount of time. |
 | [`multi_instance_training_demo.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training_demo.sh) | Uses mpirun to execute 2 processes with 1 process per socket with a batch size of 256 for 50 steps. |
-| [`multi_instance_training.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh) | Uses mpirun to execute 1 processes with 1 process per socket with a batch size of 1024 for the specified precision (fp32 or bfloat16). Checkpoint files and logs for each instance are saved to the output directory.|
+| [`multi_instance_training.sh`](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/cpu/multi_instance_training.sh) | Uses mpirun to execute 1 processes with 1 process per socket with a batch size of 1024 for the specified precision (fp32, bfloat16 or fp16). Checkpoint files and logs for each instance are saved to the output directory.|
 
 ## Docker
 
@@ -38,7 +38,7 @@ checkpoint files will be written.
 
 ```
 DATASET_DIR=<path to the preprocessed imagenet dataset>
-PRECISION=<set the precision to "fp32" or "bfloat16">
+PRECISION=<set the precision to "fp32", "bfloat16" or "fp16">
 OUTPUT_DIR=<directory where log files will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>

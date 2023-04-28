@@ -244,18 +244,19 @@ index 1157849c9..0bdd947a9 100644
                          continue
                      # Don't consider answers with a length that is either < 0 or > max_answer_length.
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index f59cec776..b2dc9bfc4 100755
+index f59cec776..accd1c4bd 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
-@@ -2208,9 +2208,15 @@ class Trainer:
+@@ -2208,9 +2208,16 @@ class Trainer:
          all_labels = None
          # Will be useful when we have an iterable dataset so don't know its length.
  
-+        start_time = time.time()
 +        # record iteration start time
 +        iter_num = 0
++        warm_up_num = 10
 +        # record iteration number
          observed_num_examples = 0
++        total_time = 0
          # Main evaluation loop
          for step, inputs in enumerate(dataloader):
 +            iter_num = iter_num + 1
@@ -263,12 +264,22 @@ index f59cec776..b2dc9bfc4 100755
              # Update the observed num examples
              observed_batch_size = find_batch_size(inputs)
              if observed_batch_size is not None:
-@@ -2253,6 +2259,10 @@ class Trainer:
+@@ -2220,7 +2227,10 @@ class Trainer:
+                     batch_size = observed_batch_size
+ 
+             # Prediction step
++            start_time = time.time()
+             loss, logits, labels = self.prediction_step(model, inputs, prediction_loss_only, ignore_keys=ignore_keys)
++            if iter_num > warm_up_num:
++                total_time += time.time() - start_time
+ 
+             # Update containers on host
+             if loss is not None:
+@@ -2253,6 +2263,9 @@ class Trainer:
                  # Set back to None to begin a new accumulation
                  losses_host, preds_host, labels_host = None, None, None
  
-+        total_iter_time = time.time() - start_time
-+        throughput = self.args.eval_batch_size * iter_num / total_iter_time
++        throughput = self.args.eval_batch_size * (iter_num - warm_up_num) / total_time
 +        print("Throughput: {:.3f} sentence/s".format(throughput))
 +
          if self.args.past_index and hasattr(self, "_past"):

@@ -86,7 +86,7 @@ python ${MULTI_INSTANCE_ARGS} \
   --jit \
   -j 0 \
   -p 100 \
-  --max_iterations 1000 \
+  --max_iterations 5000 \
   $ARGS 
 
 wait

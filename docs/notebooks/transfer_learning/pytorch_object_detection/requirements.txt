@@ -11,5 +11,6 @@ psutil==5.9.3
 pycocotools==2.0.5
 tensorflow-addons==0.18.0
 torchvision==0.14.1 # fixed for Snyk scans to avoid vulnerability
+wheel==0.38.0 # Included this to avoid a vulnerability
 tqdm==4.64.1
 urllib3==1.26.12
