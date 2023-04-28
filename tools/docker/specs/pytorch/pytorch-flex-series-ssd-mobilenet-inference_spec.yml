@@ -1,0 +1,43 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-ipex-flex-series-base-public}{pytorch-flex-series-ssd-mobilenet-inference}'
+slice_sets:
+  pytorch-flex-series-ssd-mobilenet-inference:
+  - add_to_name: pytorch-flex-series-ssd-mobilenet-inference
+    dockerfile_exclusive_name: -ssd-mobilenet-inference
+    args:
+    - PACKAGE_NAME=pytorch-flex-series-ssd-mobilenet-inference
+    dockerfile_subdirectory: gpu_model_containers
+    downloads:
+    - destination: labels/voc-model-labels.txt
+      source: https://drive.google.com/uc?id=1q1sXhKIxniInw3WASnEDKYMqPMuiDDvc
+    files:
+    - source: quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md
+      destination: README.md
+    - destination: models/object_detection/pytorch/ssd-mobilenet/inference/gpu
+      source: models/object_detection/pytorch/ssd-mobilenet/inference/gpu
+    - destination: quickstart/inference_with_dummy_data.sh
+      source: quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/inference_with_dummy_data.sh
+    wrapper_package_files:
+     - source: quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md
+       destination: README.md
+     - source: quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/build.sh
+       destination: build.sh
+     - source: dockerfiles/gpu_model_containers/pytorch-flex-series-ssd-mobilenet-inference.Dockerfile
+       destination: pytorch-flex-series-ssd-mobilenet-inference.Dockerfile
+     - source: output/pytorch-flex-series-ssd-mobilenet-inference.tar.gz
+       destination: model_packages/pytorch-flex-series-ssd-mobilenet-inference.tar.gz
+     - source: ""
+       destination: info.txt
+     - source: third_party
+       destination: licenses/third_party
+     - source: LICENSE
+       destination: licenses/LICENSE
+    partials:
+    - numactl
+    - python-build
+    - opencv
+    - object_detection/ssd-mobilenet/pip_installs
+    - model_package
+    - entrypoint

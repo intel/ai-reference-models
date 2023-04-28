@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -108,7 +108,8 @@ class ModelInitializer(BaseModelInitializer):
         config_file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json")
         self.set_kmp_vars(config_file_path)
 
-        set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
+        if not self.args.gpu:
+            set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         run_script = "run_squad.py"
         if self.args.train_option == "Pretraining":
@@ -196,7 +197,7 @@ class ModelInitializer(BaseModelInitializer):
 
         if os.environ["MPI_NUM_PROCESSES"] == "None":
             self.benchmark_command = self.benchmark_command + self.python_exe + " " + benchmark_script + "\n"
-        else:
+        elif not self.args.gpu:
             numa_cmd = " -np 1 numactl -N {} -m {} "
             self.benchmark_command = self.benchmark_command + numa_cmd.format(0, 0) + os.environ["PYTHON_EXE"] + " " \
                 + benchmark_script
@@ -215,7 +216,7 @@ class ModelInitializer(BaseModelInitializer):
     def run(self):
         if self.benchmark_command:
             print("----------------------------Run command-------------------------------------")
-            print(self.benchmark_command)
+            print(self.benchmark_command, flush=True)
             print("------------------------------------------------------------------------")
             self.run_command(self.benchmark_command)
             if self.args.output_results:

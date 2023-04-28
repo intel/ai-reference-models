@@ -10,6 +10,7 @@ RUN apt-get update && \
     apt-get install --no-install-recommends --fix-missing -y gosu
 
 RUN echo '#!/bin/bash\n\
+[ -f /opt/intel/oneapi/setvars.sh ] && . /opt/intel/oneapi/setvars.sh\n\
 USER_ID=$USER_ID\n\
 USER_NAME=$USER_NAME\n\
 GROUP_ID=$GROUP_ID\n\

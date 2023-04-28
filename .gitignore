@@ -17,3 +17,4 @@ tools/docker/models*
 .ipynb_checkpoints
 nc_workspace
 benchmarks/horovod
+data_connector/credentials.json

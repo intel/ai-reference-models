@@ -152,6 +152,8 @@ def input_fn(data_file, num_epochs, shuffle, batch_size):
 data_file = args.data_location
 no_of_test_samples = sum(1 for _ in tf.compat.v1.python_io.tf_record_iterator(data_file))
 no_of_batches = math.ceil(float(no_of_test_samples)/batch_size)
+tf.config.threading.set_inter_op_parallelism_threads(args.num_inter_threads)
+tf.config.threading.set_intra_op_parallelism_threads(args.num_intra_threads)
 with graph.as_default():
     tf.import_graph_def(graph_def)
     res_dataset = input_fn(data_file, 1, False, batch_size)

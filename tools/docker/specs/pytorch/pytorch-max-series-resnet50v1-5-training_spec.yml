@@ -1,0 +1,41 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-ipex-max-series-base-public}{pytorch-max-series-resnet50v1-5-training}'
+slice_sets:
+  pytorch-max-series-resnet50v1-5-training:
+  - add_to_name: pytorch-max-series-resnet50v1-5-training
+    dockerfile_exclusive_name: -resnet50v1-5-training
+    args:
+    - PACKAGE_NAME=pytorch-max-series-resnet50v1-5-training
+    dockerfile_subdirectory: gpu_model_containers
+    downloads: []
+    files:
+    - source: quickstart/image_recognition/pytorch/resnet50v1_5/training/gpu/README.md
+      destination: README.md
+    - destination: models/image_recognition/pytorch/resnet50v1_5/training/gpu
+      source: models/image_recognition/pytorch/resnet50v1_5/training/gpu
+    - destination: quickstart/training_plain_format.sh
+      source: quickstart/image_recognition/pytorch/resnet50v1_5/training/gpu/training_plain_format.sh
+    - destination: quickstart/ddp_training_plain_format_nchw.sh
+      source: quickstart/image_recognition/pytorch/resnet50v1_5/training/gpu/ddp_training_plain_format_nchw.sh
+    - destination: quickstart/setup.sh
+      source: quickstart/image_recognition/pytorch/resnet50v1_5/training/gpu/setup.sh
+    wrapper_package_files:
+     - source: quickstart/image_recognition/pytorch/resnet50v1_5/training/gpu/build.sh
+       destination: build.sh
+     - source: dockerfiles/gpu_model_containers/pytorch-max-series-resnet50v1-5-training.Dockerfile
+       destination: pytorch-max-series-resnet50v1-5-training.Dockerfile
+     - source: output/pytorch-max-series-resnet50v1-5-training.tar.gz
+       destination: model_packages/pytorch-max-series-resnet50v1-5-training.tar.gz
+     - source: ""
+       destination: info.txt
+     - source: third_party
+       destination: licenses/third_party
+     - source: LICENSE
+       destination: licenses/LICENSE
+    partials:
+    - intel-mpi-ccl
+    - model_package 
+    - entrypoint
+    

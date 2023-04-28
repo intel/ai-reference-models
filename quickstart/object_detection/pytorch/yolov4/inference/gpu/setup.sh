@@ -19,7 +19,8 @@
 pip install matplotlib==2.2.3
 pip install tqdm==4.43.0
 pip install easydict==1.9
-pip install Pillow==9.3.0
+pip install Pillow>=9.3.0
 pip install scikit-image
 pip install opencv-python-headless
 pip install pycocotools
+

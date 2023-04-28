@@ -11,9 +11,7 @@ class Timer(object):
 
     @property
     def average_time(self):
-        timeBuff_output = np.asarray(self.timeBuff)
-        p99 = np.percentile(timeBuff_output, 99)
-        return self.total_time / self.calls if self.calls > 0 else 0.0, p99
+        return self.total_time / self.calls if self.calls > 0 else 0.0
 
     def tic(self):
         # using time.time instead of time.clock because time time.clock

@@ -1,5 +1,5 @@
 # Install Intel® Extension for PyTorch
-pip install intel-extension-for-pytorch==1.13.0
+pip install intel-extension-for-pytorch==2.0.0
 
 ## The following components are required by some PyTorch workloads. Only build them if indicated in the documentation for that workload. 
 
@@ -19,7 +19,7 @@ pip install intel-extension-for-pytorch==1.13.0
     export work_space=/home/sdp  (you can get the summary.log in this path where the models performance and accuracy write) 
     
     # Install torch,torchvision
-    python -m pip install torch==0.13.0 torchvision==0.14.0
+    python -m pip install torch==2.0.0 torchvision==0.15.1
     
 ### Install jemalloc
     Install jemalloc either using conda or from source

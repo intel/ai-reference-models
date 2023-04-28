@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2018-2019 Intel Corporation
+# Copyright (c) 2018-2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -160,7 +160,7 @@ if [[ ${NOINSTALL} != "True" ]]; then
       export HOROVOD_WITHOUT_PYTORCH=1
       export HOROVOD_WITHOUT_MXNET=1
       export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=35b27e9
+      export HOROVOD_VERSION=b1d0ce8
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -239,7 +239,16 @@ if [[ ${NOINSTALL} != "True" ]]; then
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
-      python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      # TODO: Once this PR https://github.com/horovod/horovod/pull/3864 is merged, we can install horovod as before.
+      # python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+      git clone https://github.com/horovod/horovod.git
+      cd horovod
+      git reset --hard ${HOROVOD_VERSION}
+      git submodule update --init --recursive
+      git fetch origin pull/3864/head:ashahba/issue-3861-fix
+      git checkout ashahba/issue-3861-fix
+      python3 -m pip install --no-cache-dir -v -e .
+
       horovodrun --check-build
     fi
   fi
@@ -558,6 +567,9 @@ function bert_options() {
   fi
   if [[ -n "${OPTIMIZED_SOFTMAX}" && ${OPTIMIZED_SOFTMAX} != "" ]]; then
     CMD=" ${CMD} --optimized-softmax=${OPTIMIZED_SOFTMAX}"
+  fi
+  if [[ -n "${AMP}" && ${AMP} != "" ]]; then
+    CMD=" ${CMD} --amp=${AMP}"
   fi
 
   if [[ -n "${MPI_WORKERS_SYNC_GRADIENTS}" && ${MPI_WORKERS_SYNC_GRADIENTS} != "" ]]; then
@@ -991,7 +1003,11 @@ function resnet101_inceptionv3() {
 function resnet50() {
     export PYTHONPATH=${PYTHONPATH}:$(pwd):${MOUNT_BENCHMARK}
     is_model_gpu_supported="True"
-
+    if [ ${GPU} == "True" ]; then
+      PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/gpu
+    else
+      PYTHONPATH=${PYTHONPATH}:${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}/cpu
+    fi
     # For accuracy, dataset location is required.
     if [ "${DATASET_LOCATION_VOL}" == "None" ] && [ ${ACCURACY_ONLY} == "True" ]; then
       echo "No Data directory specified, accuracy will not be calculated."
@@ -1002,10 +1018,6 @@ function resnet50() {
         CMD="${CMD} $(add_steps_args) $(add_calibration_arg)"
         PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     elif [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
-        if  [ ${PRECISION} == "fp16" ] && [ ${GPU} == "False" ]; then
-          echo "PRECISION=${PRECISION} is not supported without --gpu."
-          exit 1
-        fi
       CMD="${CMD} $(add_steps_args)"
       PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
     else
@@ -1187,7 +1199,7 @@ function ssd-resnet34() {
           $(add_arg "--num_warmup_batches" ${NUM_WARMUP_BATCHES})"
           local old_pythonpath=${PYTHONPATH}
           export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
-          export PYTHONPATH=${PYTHONPATH}:${TF_MODELS_DIR}:${TF_MODELS_DIR}/research:"/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}/research:"/tmp/benchmark_ssd_resnet34/scripts/tf_cnn_benchmarks"
           CMD=${CMD} run_model
           PYTHONPATH=${old_pythonpath}
         else
@@ -1466,8 +1478,7 @@ function bert_large() {
       bert_options
       CMD=${CMD} run_model
     else
-      # Change if to support fp32
-      if [ ${PRECISION} == "fp32" ]  || [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "bfloat16" ]; then
+      if [ ${PRECISION} == "fp32" ]  || [ $PRECISION == "int8" ] || [ $PRECISION == "bfloat16" ] || [ $PRECISION == "fp16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
         bert_options
         CMD=${CMD} run_model
@@ -1507,6 +1518,35 @@ function distilbert_base() {
     fi
 }
 
+# distilBERT base model
+function distilbert_base() {
+    if ([ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
+       [ ${PRECISION} == "int8" ] || [ ${PRECISION} == "fp16" ]); then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+
+      if [ -z $MAX_SEQ_LENGTH ]; then
+        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
+      fi
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
 
 # Wide & Deep model
 function wide_deep() {
@@ -1650,7 +1690,7 @@ elif [ ${MODEL_NAME} == "bert_large" ]; then
 elif [ ${MODEL_NAME} == "dien" ]; then
   dien
 elif [ ${MODEL_NAME} == "distilbert_base" ]; then
-  distilbert_base 
+  distilbert_base  
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

@@ -78,7 +78,7 @@ CORES_PER_INSTANCE=4
 INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
 weight_sharing=true
-if [ -z "${WEIGHT_SHAREING}" ]; then
+if [ -z "${WEIGHT_SHARING}" ]; then
   weight_sharing=false
 else
   echo "### Running the test with runtime extension."

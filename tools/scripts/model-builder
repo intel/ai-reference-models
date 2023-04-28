@@ -783,6 +783,7 @@ _model_builder.init_spec()
   _model_builder._echo_command ${_asm_new_spec} \
       --arg http_proxy=${http_proxy} \
       --arg https_proxy=${https_proxy} \
+      --arg no_proxy=${no_proxy} \
       --spec_dir=${_spec_dir_mounted}/${_current_framework} \
       --generate_new_spec=${_new_model} \
       --framework=${_current_framework} \
@@ -905,6 +906,7 @@ _model_builder.build()
     _model_builder._echo_command ${_asm_images} \
       --arg http_proxy=${http_proxy} \
       --arg https_proxy=${https_proxy} \
+      --arg no_proxy=${no_proxy} \
       --arg PACKAGE_DIR=${_model_package_folder} \
       --arg MODEL_WORKSPACE=${MODEL_WORKSPACE} \
       --spec_dir=${_spec_dir_mounted}/${_current_framework} \
@@ -1848,6 +1850,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.build \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
+          --arg no_proxy=${no_proxy} \
           --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
@@ -1860,6 +1863,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.generate_documentation \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
+          --arg no_proxy=${no_proxy} \
           --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
@@ -1872,7 +1876,8 @@ _model_builder.run_test_suite()
           _model_builder._tests.generate_dockerfile \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
+          --arg no_proxy=${no_proxy} \
+	      --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1886,7 +1891,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.generate_deployment \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
-          --spec_dir=./specs/${_current_framework} \
+          --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \
           ${_args[@]} \
@@ -1898,6 +1903,7 @@ _model_builder.run_test_suite()
           _model_builder._tests.package \
           --arg http_proxy=${http_proxy} \
           --arg https_proxy=${https_proxy} \
+          --arg no_proxy=${no_proxy} \
           --spec_dir=${_spec_dir_mounted}/${_current_framework} \
           --framework ${_current_framework} \
           ${_release_args[@]} \

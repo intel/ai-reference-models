@@ -33,6 +33,8 @@ def set_global_precision(dt):
   global _keras_policy
   if dt == tf.bfloat16:
     _keras_policy=tf.keras.mixed_precision.Policy("mixed_bfloat16")
+  elif dt == tf.float16:
+    _keras_policy=tf.keras.mixed_precision.Policy("mixed_float16")
 
   # Set basic API precision
   set_rprecision(dt)
@@ -62,7 +64,7 @@ def multiply(x,y):
     return tf.multiply(x,y)
 
 def mzip(x,y):
-    if x.dtype== tf.bfloat16:
+    if x.dtype== tf.bfloat16 or x.dtype == tf.float16:
       x = r_cast(x)
       y = r_cast(y)
     return zip(x,y)

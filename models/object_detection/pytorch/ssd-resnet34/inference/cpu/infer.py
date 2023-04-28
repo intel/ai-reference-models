@@ -662,7 +662,10 @@ def main():
 
     print(args)
     if not os.path.isdir('./models'):
-        os.mkdir('./models')
+        try:
+            os.mkdir('./models')
+        except OSError as e:
+            print(e)
 
     if args.seed is not None:
         print("Using seed = {}".format(args.seed))

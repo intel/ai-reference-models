@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright (c) 2021 Intel Corporation
+# Copyright (c) 2023 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,15 +37,15 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, bfloat32 or bfloat16."
+  echo "Please set PRECISION to fp32, bfloat32, bfloat16 or fp16."
   exit 1
-elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ]; then
+elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISION} != "bfloat32" ] && [ ${PRECISION} != "fp16" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, bfloat32 and bfloat16"
+  echo "Supported precisions are: fp32, bfloat32, bfloat16 and fp16"
   exit 1
 fi
 
-if [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]]; then
+if [[ $PRECISION == "fp32" ]] || [[ $PRECISION == "bfloat32" ]] || [[ $PRECISION == "fp16" ]]; then
   # If batch size env is not mentioned, then the workload will run with the default batch size.
   if [ -z "${BATCH_SIZE}"]; then
     BATCH_SIZE="32"
@@ -59,7 +59,7 @@ elif [[ $PRECISION == "bfloat16" ]]; then
   fi
 else
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions are: fp32, bfloat32 and bfloat16"
+  echo "Supported precisions are: fp32, bfloat32, bfloat16 and fp16"
   exit 1
 fi
 

@@ -72,7 +72,7 @@ def convert2cpu_long(gpu_matrix):
 
 
 
-def do_detect(model, img, conf_thresh, nms_thresh, use_cuda=0, iteration=0, dummy=0, batch_size=1, width=0, height=0, data_type="", benchmark=0):
+def do_detect(model, img, conf_thresh, nms_thresh, iteration=0, dummy=0, batch_size=1, width=0, height=0, data_type="", benchmark=0):
     model.eval()
     t0 = time.time()
     if dummy == 0:
@@ -83,9 +83,6 @@ def do_detect(model, img, conf_thresh, nms_thresh, use_cuda=0, iteration=0, dumm
         else:
             print("unknow image type")
             exit(-1)
-
-        if use_cuda:
-            img = img.cuda()
     else:
         img = torch.randn(batch_size, 3, width, height, requires_grad=True)
 

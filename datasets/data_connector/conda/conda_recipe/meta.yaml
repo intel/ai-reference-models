@@ -1,0 +1,57 @@
+package:
+  name: data_connector
+  version: 1.0.0
+
+source:
+  path: ../../
+  
+build:
+  number: 0
+  string: py3.10
+  # include_recipe: False
+  script: |
+    echo "script start"
+    # {{ PYTHON }} -m pip install azureml-core --no-deps
+    {{ PYTHON }} -m pip install . -vv
+    echo "script end"
+
+requirements:
+  build:
+    - python >=3.8,<3.11
+    - setuptools
+    - pip
+  run:
+    - python >=3.8,<3.11
+    - packaging >=23.0
+    - azure-ai-ml >=2023.03.01 # ==1.4.0 PyPI version, not in conda-forge, only in microsoft channel
+    - azure-storage-blob >=2.1.0 # 12.14.1
+    - azure-identity >=2023.03.01 # 1.12.0
+    - azure-core >=2023.03.01 # 1.26.3
+    # - azureml-core>=1.49.0 # not found in conda
+    - boto3 >=1.26.102
+    - google-auth >=2.17.0
+    - google-api-core >=2.11.0
+    - google-auth-oauthlib >=1.0.0
+    - google-cloud-bigquery >=3.9.0
+    - google-cloud-storage >=2.8.0
+    - python-dotenv >=1.0.0
+
+# test:
+#   imports:
+#     - data_connector
+
+about:
+  license: APACHE
+  about_license_url: https://www.apache.org/licenses/LICENSE-2.0.html
+  license_file: LICENSE
+  summary: "Data connector is a tool to connect to AzureML, Azure blob, GCP storage, GCP Big Query and AWS storage S3. The goal is provide all cloud managers in one place and provide documentation for a an easy integration."
+  # readme: docs/README.md # Not supported
+  # home: "https://github.com/repo" # Public repo is needed
+
+extra:
+  recipe-maintainers:
+    - Jose de Jesus Herrera Ledon <jesus.herrera.ledon@intel.com>
+    - Alberto Gallegos Muro <alberto.gallegos.muro@intel.com>
+    - Felipe Leza Alvarez <felipe.leza.alvarez@intel.com>
+    - Miguel Pineda Juarez <miguel.pineda.juarez@intel.com>
+    - Gerardo Dominguez Aldama <gerardo.dominguez.aldama@intel.com>

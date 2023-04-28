@@ -2649,7 +2649,7 @@ index b934976..f3ac9bb 100644
      return (inputs, boxes, classes, nboxes)
  
 diff --git a/scripts/tf_cnn_benchmarks/preprocessing.py b/scripts/tf_cnn_benchmarks/preprocessing.py
-index a6ceb7c..79691ff 100644
+index a6ceb7c..33e7c22 100644
 --- a/scripts/tf_cnn_benchmarks/preprocessing.py
 +++ b/scripts/tf_cnn_benchmarks/preprocessing.py
 @@ -25,8 +25,9 @@ from six.moves import xrange  # pylint: disable=redefined-builtin
@@ -3686,10 +3686,18 @@ index 354d38f..ae80649 100644
      return params
  
 diff --git a/scripts/tf_cnn_benchmarks/variable_mgr_util.py b/scripts/tf_cnn_benchmarks/variable_mgr_util.py
-index 9b063de..e3b1600 100644
+index 9b063de..d77e43f 100644
 --- a/scripts/tf_cnn_benchmarks/variable_mgr_util.py
 +++ b/scripts/tf_cnn_benchmarks/variable_mgr_util.py
-@@ -82,13 +82,13 @@ def get_loss_scale_update_op(loss_scale, loss_scale_normal_steps,
+@@ -28,6 +28,7 @@ from tensorflow.python.framework import ops
+ from tensorflow.python.ops import data_flow_ops
+ from tensorflow.python.ops import gradients_util
+ 
++from tensorflow.python.framework import tensor_conversion_registry
+ 
+ PS_SHADOW_VAR_PREFIX = 'ps_var'
+ 
+@@ -82,13 +83,13 @@ def get_loss_scale_update_op(loss_scale, loss_scale_normal_steps,
  
    def increase_loss_scale_func():
      return tf.group(
@@ -3708,7 +3716,7 @@ index 9b063de..e3b1600 100644
  
  
  def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
-@@ -119,8 +119,8 @@ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
+@@ -119,8 +120,8 @@ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
      def update_op_if_nan_or_inf():
        """Update loss_scale and discard gradients if nans/infs occurred."""
        return tf.group(
@@ -3719,7 +3727,7 @@ index 9b063de..e3b1600 100644
  
      # Otherwise, apply gradients, and update loss_scale and
      # loss_scale_normal_steps.
-@@ -134,9 +134,9 @@ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
+@@ -134,9 +135,9 @@ def append_gradients_with_loss_scale(training_ops, get_apply_gradients_ops_func,
      # TODO(tanmingxing): Add support for independent and distributed all_reduce.
      assert grad_has_inf_nan is not None
      update_op = tf.cond(
@@ -3732,7 +3740,7 @@ index 9b063de..e3b1600 100644
          name='cond_if_grad_has_inf_nan'
      )
      training_ops.append(update_op)
-@@ -198,11 +198,11 @@ class OverrideToLocalVariableIfNotPsVar(object):
+@@ -198,11 +199,11 @@ class OverrideToLocalVariableIfNotPsVar(object):
      if 'collections' in kwargs:
        collections = kwargs['collections']
      if not collections:
@@ -3747,7 +3755,16 @@ index 9b063de..e3b1600 100644
      kwargs['collections'] = list(collections)
      return getter(name, *args, **kwargs)
  
-@@ -384,7 +384,7 @@ class StagedVariableGetter(object):
+@@ -309,7 +310,7 @@ class StagedModelVariable(object):
+       return self._value()
+ 
+ 
+-ops.register_tensor_conversion_function(
++tensor_conversion_registry.register_tensor_conversion_function(
+     StagedModelVariable, StagedModelVariable._TensorConversionFunction)  # pylint: disable=protected-access
+ 
+ 
+@@ -384,7 +385,7 @@ class StagedVariableGetter(object):
        Return the set of trainable variables on the specified device.
      """
      del abs_device_num
@@ -3756,7 +3773,7 @@ index 9b063de..e3b1600 100644
      if writable:
        return params_refs
      params = []
-@@ -425,7 +425,7 @@ def aggregate_gradients_using_copy_with_device_selection(
+@@ -425,7 +426,7 @@ def aggregate_gradients_using_copy_with_device_selection(
        agg_grads.append(grad_and_var)
        has_nan_or_inf_list.append(has_nan_or_inf)
    if check_inf_nan:
@@ -3765,7 +3782,7 @@ index 9b063de..e3b1600 100644
    else:
      return agg_grads, None
  
-@@ -464,7 +464,7 @@ def aggregate_gradients_using_copy_with_variable_colocation(
+@@ -464,7 +465,7 @@ def aggregate_gradients_using_copy_with_variable_colocation(
        has_nan_or_inf_list.append(has_nan_or_inf)
  
    if check_inf_nan:
@@ -3774,7 +3791,7 @@ index 9b063de..e3b1600 100644
    else:
      return agg_grads, None
  
-@@ -495,7 +495,7 @@ def aggregate_gradients_using_copy(tower_grads, use_mean, check_inf_nan):
+@@ -495,7 +496,7 @@ def aggregate_gradients_using_copy(tower_grads, use_mean, check_inf_nan):
      has_nan_or_inf_list.append(has_nan_or_inf)
  
    if check_inf_nan:
@@ -3783,7 +3800,7 @@ index 9b063de..e3b1600 100644
    else:
      return agg_grads, None
  
-@@ -531,8 +531,8 @@ def aggregate_single_gradient_using_copy(grad_and_vars, use_mean,
+@@ -531,8 +532,8 @@ def aggregate_single_gradient_using_copy(grad_and_vars, use_mean,
  
    v = grad_and_vars[0][1]
    if check_inf_nan:

@@ -106,8 +106,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.predict_file and not os.path.isabs(self.args.predict_file):
             self.args.predict_file = os.path.join(self.args.data_location, self.args.predict_file)
 
-        if self.args.init_checkpoint and not os.path.isabs(self.args.init_checkpoint):
-            self.args.init_checkpoint = os.path.join(self.args.checkpoint, self.args.init_checkpoint)
+        if not self.args.gpu:
+            if self.args.init_checkpoint and not os.path.isabs(self.args.init_checkpoint):
+                self.args.init_checkpoint = os.path.join(self.args.checkpoint, self.args.init_checkpoint)
 
         # set default inter/intra threads
         self.set_num_inter_intra_threads()
@@ -121,17 +122,29 @@ class ModelInitializer(BaseModelInitializer):
         model_script = os.path.join(
             self.args.intelai_models, self.args.mode, "run_squad.py")
 
-        model_args = " --init_checkpoint=" + str(self.args.init_checkpoint) + \
-                     " --vocab_file=" + str(self.args.vocab_file) + \
-                     " --bert_config_file=" + str(self.args.bert_config_file) + \
-                     " --predict_file=" + str(self.args.predict_file) + \
-                     " --precision=" + str(self.args.precision) + \
-                     " --output_dir=" + str(self.args.output_dir) + \
-                     " --predict_batch_size=" + str(self.args.batch_size) + \
-                     " --experimental_gelu=" + str(self.args.experimental_gelu) + \
-                     " --optimized_softmax=" + str(self.args.optimized_softmax) + \
-                     " --input_graph=" + str(self.args.input_graph) + \
-                     " --do_predict=True "
+        if self.args.gpu:
+            model_args = " --vocab_file=" + str(self.args.vocab_file) + \
+                         " --bert_config_file=" + str(self.args.bert_config_file) + \
+                         " --predict_file=" + str(self.args.predict_file) + \
+                         " --precision=" + str(self.args.precision) + \
+                         " --output_dir=" + str(self.args.output_dir) + \
+                         " --predict_batch_size=" + str(self.args.batch_size) + \
+                         " --experimental_gelu=" + str(self.args.experimental_gelu) + \
+                         " --optimized_softmax=" + str(self.args.optimized_softmax) + \
+                         " --input_graph=" + str(self.args.input_graph) + \
+                         " --do_predict=True "
+        else:
+            model_args = " --init_checkpoint=" + str(self.args.init_checkpoint) + \
+                         " --vocab_file=" + str(self.args.vocab_file) + \
+                         " --bert_config_file=" + str(self.args.bert_config_file) + \
+                         " --predict_file=" + str(self.args.predict_file) + \
+                         " --precision=" + str(self.args.precision) + \
+                         " --output_dir=" + str(self.args.output_dir) + \
+                         " --predict_batch_size=" + str(self.args.batch_size) + \
+                         " --experimental_gelu=" + str(self.args.experimental_gelu) + \
+                         " --optimized_softmax=" + str(self.args.optimized_softmax) + \
+                         " --input_graph=" + str(self.args.input_graph) + \
+                         " --do_predict=True "
 
         if self.args.accuracy_only:
             model_args += " --mode=accuracy"
@@ -160,10 +173,11 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.steps:
             model_args += " --steps=" + str(self.args.steps)
 
-        if self.args.weight_sharing:
-            model_args += " --weight_sharing"
-
         model_args += " --num_cores_per_socket=" + str(platform_util.num_cores_per_socket)
+
+        if not self.args.gpu:
+            if self.args.weight_sharing:
+                model_args += " --weight_sharing"
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + model_script + model_args

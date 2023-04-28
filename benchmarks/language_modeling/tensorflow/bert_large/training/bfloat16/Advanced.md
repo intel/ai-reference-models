@@ -1,10 +1,10 @@
 <!--- 0. Title -->
 <!-- This document is auto-generated using markdown fragments and the model-builder -->
 <!-- To make changes to this doc, please change the fragments instead of modifying this doc directly -->
-# BERT Large BFloat16 training - Advanced Instructions
+# BERT Large Bfloat16 training - Advanced Instructions
 
 <!-- 10. Description -->
-This document has advanced instructions for running BERT Large BFloat16
+This document has advanced instructions for running BERT Large Bfloat16
 training, which provides more control over the individual parameters that
 are used. For more information on using [`/benchmarks/launch_benchmark.py`](/benchmarks/launch_benchmark.py),
 see the [launch benchmark documentation](/docs/general/tensorflow/LaunchBenchmark.md).

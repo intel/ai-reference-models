@@ -16,21 +16,17 @@
 #
 
 set -e
+GPU_TYPE=$1
 
-PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE:-model-zoo}
-PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-pytorch-ipex-gpu}
-IMAGE_NAME=${IMAGE_NAME:-model-zoo:pytorch-gpu-resnet50v1-5-inference}
+PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE:-intel/intel-extension-for-pytorch}
 
-if [ "$(docker images -q ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG})" == "" ]; then
-  echo "The Intel(R) Extension for PyTorch container (${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}) was not found."
-  echo "This container is required, as it is used as the base for building the ResNet50v1.5 inference container."
-  echo "Please download the IPEX container package and build the image and then retry this build."
-  exit 1
-fi
+if [[ $GPU_TYPE == max-series ]];then
 
-docker build \
+    IMAGE_NAME=${IMAGE_NAME:-intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference}
+    PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-xpu-max}
+    docker build \
     --build-arg PACKAGE_DIR=model_packages \
-    --build-arg PACKAGE_NAME=pytorch-gpu-resnet50v1-5-inference \
+    --build-arg PACKAGE_NAME=pytorch-max-series-resnet50v1-5-inference \
     --build-arg MODEL_WORKSPACE=/workspace \
     --build-arg http_proxy=$http_proxy \
     --build-arg https_proxy=$https_proxy \
@@ -38,4 +34,22 @@ docker build \
     --build-arg PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE} \
     --build-arg PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG} \
     -t $IMAGE_NAME \
-    -f pytorch-gpu-resnet50v1-5-inference.Dockerfile .
+    -f pytorch-max-series-resnet50v1-5-inference.Dockerfile .
+elif [[ $GPU_TYPE == flex-series ]];then
+    IMAGE_NAME=${IMAGE_NAME:-intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference}
+    PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG:-xpu-flex}
+    docker build \
+    --build-arg PACKAGE_DIR=model_packages \
+    --build-arg PACKAGE_NAME=pytorch-flex-series-resnet50v1-5-inference \
+    --build-arg MODEL_WORKSPACE=/workspace \
+    --build-arg http_proxy=$http_proxy \
+    --build-arg https_proxy=$https_proxy \
+    --build-arg no_proxy=$no_proxy \
+    --build-arg PYTORCH_BASE_IMAGE=${PYTORCH_BASE_IMAGE} \
+    --build-arg PYTORCH_BASE_TAG=${PYTORCH_BASE_TAG} \
+    -t $IMAGE_NAME \
+    -f pytorch-flex-series-resnet50v1-5-inference.Dockerfile .
+else
+    echo "Only flex-series or max-series GPU platforms supported"
+    exit 1
+fi

@@ -1,3 +1,4 @@
+import argparse
 import torch
 import intel_extension_for_pytorch
 from torch import nn
@@ -16,6 +17,29 @@ import math
 torch._C._jit_set_profiling_mode(False)
 torch._C._jit_set_profiling_executor(False)
 
+parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
+parser.add_argument('-n', '--n_classes', required=True, type=int, help='n_classes')
+parser.add_argument('--weight', help='destination of weightfiles')
+parser.add_argument('-i', '--image', help='The address where the picture is stored')
+parser.add_argument('-e', '--height', required=True, type=int, help='Image height')
+parser.add_argument('-w', '--width', required=True,  type=int, help='Image width')
+parser.add_argument('-name', help='namefile lable_path')
+parser.add_argument('-d', '--datatype', default='fp32', choices=['int8', 'bf16', 'fp16', 'fp32', 'tp32'], 
+                    help='datatype select')
+parser.add_argument("--dummy",  default=0, type=int, help='use dummy data for '
+                    'benchmark training or val')
+parser.add_argument('--benchmark', default=0, type=int, help='for int8 benchmark '
+                    'performance, move H2D out of E2E time')
+parser.add_argument('-b', '--batch-size', default=1, type=int,
+                    metavar='N',
+                    help='mini-batch size (default: 1), this is the total '
+                         'batch size of all GPUs on the current node when '
+                         'using Data Parallel or Distributed Data Parallel')
+parser.add_argument('--iter', default=2, type=int, help='iteration number, default:2')
+parser.add_argument("--save", help='Path to save entile model')
+parser.add_argument("--load", help='Path to load entile model')
+parser.add_argument('--jit', default=-1, type=int,choices=[-1, 0, 1],
+                     help='Select run with jit or impe path, 0 : impe, 1 : jit')
 class Mish(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -472,63 +496,34 @@ class Yolov4(nn.Module):
 
 
 if __name__ == "__main__":
+    import argparse
     import sys
     import cv2
+    args = parser.parse_args()
+    n_classes = args.n_classes
+    weightfile = args.weight
+    imgfile = args.image
+    height = args.height
+    width = args.width
     namesfile = None
-    data_type = 'FP32'
-    dummy = 0
-    batch_size = 1
-    benchmark = 0
-    if len(sys.argv) == 6:
-        n_classes = int(sys.argv[1])
-        weightfile = sys.argv[2]
-        imgfile = sys.argv[3]
-        height = int(sys.argv[4])
-        width = int(sys.argv[5])
-    elif len(sys.argv) == 7:
-        n_classes = int(sys.argv[1])
-        weightfile = sys.argv[2]
-        imgfile = sys.argv[3]
-        height = int(sys.argv[4])
-        width = int(sys.argv[5])
-        namesfile = str(sys.argv[6])
-    elif len(sys.argv) == 8:
-        n_classes = int(sys.argv[1])
-        weightfile = sys.argv[2]
-        imgfile = sys.argv[3]
-        height = int(sys.argv[4])
-        width = int(sys.argv[5])
-        namesfile = str(sys.argv[6])
-        data_type = str(sys.argv[7])
-    elif len(sys.argv) == 11:
-        n_classes = int(sys.argv[1])
-        weightfile = sys.argv[2]
-        height = int(sys.argv[3])
-        width = int(sys.argv[4])
-        namesfile = str(sys.argv[5])
-        data_type = str(sys.argv[6])
-        dummy = int(sys.argv[7])
-        batch_size = int(sys.argv[8])
-        benchmark = int(sys.argv[9])
-        infer_iters = int(sys.argv[10])
-    else:
-        print('Usage: ')
-        print('  python models.py num_classes weightfile imgfile namefile')
+    if args.name:
+        namesfile = args.name
+    data_type = args.datatype
+    dummy = args.dummy
+    benchmark = args.benchmark
+    batch_size = args.batch_size
+    infer_iters = args.iter
 
-    model = Yolov4(yolov4conv137weight=None, n_classes=n_classes, inference=True, benchmark=True)
-
-    pretrained_dict = torch.load(weightfile, map_location=torch.device('xpu'))
-    model.load_state_dict(pretrained_dict)
-
-    use_cuda = False
-    if use_cuda:
-        model.cuda()
 
     import os
     if dummy == 1 :
         img = cv2.imread(os.path.join(os.getcwd(), "models/object_detection/pytorch/yolov4/inference/gpu/data/000000581918.jpg"))
     else:
         img = cv2.imread(imgfile)
+
+    if data_type == "int8" and args.jit == 0:
+        print("int8 not support impe path")
+        sys.exit(1)
 
     # Inference input size is 416*416 does not mean training size is the same
     # Training size could be 608*608 or even other sizes
@@ -538,53 +533,73 @@ if __name__ == "__main__":
     sized = cv2.resize(img, (width, height))
     sized = cv2.cvtColor(sized, cv2.COLOR_BGR2RGB)
 
-    ##Enable JIT for fusion pattern
-    print("JIT running ... ")
-    img_jit = sized
-    if type(img_jit) == np.ndarray and len(img_jit.shape) == 3:  # cv2 image
-        img_jit = torch.from_numpy(img_jit.transpose(2, 0, 1)).float().div(255.0).unsqueeze(0)
-    elif type(img_jit) == np.ndarray and len(img_jit.shape) == 4:
-        img_jit = torch.from_numpy(img_jit.transpose(0, 3, 1, 2)).float().div(255.0)
-    else:
-        print("unknow image type")
-        exit(-1)
-    img_jit = torch.autograd.Variable(img_jit)
-
-    model.eval()
-
-    ##This is workaourd for pytorch JIT Trace, will remove it after PYTORCHDGQ-458 is fixed. 
-    model = model.to('xpu')
-
-    if data_type in ("fp16", "int8"):
-        img_jit = img_jit.to('xpu')
-        if data_type == "fp16":
-            img_jit = img_jit.half()
-        if benchmark == 1:
-            modelJit = torch.jit.trace(model, img_jit, check_trace=False)
+    if args.load:
+        load_path = args.load
+        if args.jit == -1:
+            if data_type in ("fp16", "int8"):
+                model = torch.jit.load(load_path)
+            if data_type == "fp32":
+                model = torch.load(load_path)
+        elif args.jit == 0:
+            model = torch.load(load_path)
+        elif args.jit == 1:
+            model = torch.jit.load(load_path)
         else:
-            modelJit = torch.jit.trace(model, img_jit)
-        model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(modelJit._c))
+            print("invalid argument")
+            sys.exit(1)
+    else:
+        model = Yolov4(yolov4conv137weight=None, n_classes=n_classes, inference=True, benchmark=benchmark)
+        model.eval()
 
-    if data_type == 'int8':
-        ##Do calibration for INT8
-        print("Calibration for INT8 ... ")
-        with torch.no_grad():
-            qconfig_s8 = torch.quantization.QConfig(
-                activation=torch.quantization.observer.MinMaxObserver.with_args(
-                    qscheme=torch.per_tensor_symmetric,
-                    reduce_range=False,
-                    dtype=torch.qint8
-                ),
-                weight=torch.quantization.default_weight_observer
-            )
-            model = prepare_jit(model, {'': qconfig_s8}, True)
+        model = model.to('xpu')
+        pretrained_dict = torch.load(weightfile, map_location=torch.device('xpu'))
+        model.load_state_dict(pretrained_dict)
 
-            model(img_jit)
+        if args.jit == 1 or (args.jit == -1 and (data_type in ("fp16", "int8"))):
+            print("JIT running ... ")
+            img_jit = sized
+            if type(img_jit) == np.ndarray and len(img_jit.shape) == 3:  # cv2 image
+                img_jit = torch.from_numpy(img_jit.transpose(2, 0, 1)).float().div(255.0).unsqueeze(0)
+            elif type(img_jit) == np.ndarray and len(img_jit.shape) == 4:
+                img_jit = torch.from_numpy(img_jit.transpose(0, 3, 1, 2)).float().div(255.0)
+            else:
+                print("unknow image type")
+                exit(-1)
+            img_jit = torch.autograd.Variable(img_jit)
+            img_jit = img_jit.to('xpu')
 
-            model = convert_jit(model, True)
-            # print(model.graph_for(img_jit))
+            if data_type == "fp16":
+                img_jit = img_jit.half()
+            if benchmark == 1:
+                modelJit = torch.jit.trace(model, img_jit, check_trace=False)
+            else:
+                modelJit = torch.jit.trace(model, img_jit)
+            model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(modelJit._c))
+
+            if data_type == 'int8':
+                print("Calibration for INT8 ... ")
+                with torch.no_grad():
+                    qconfig_s8 = torch.quantization.QConfig(
+                        activation=torch.quantization.observer.MinMaxObserver.with_args(
+                            qscheme=torch.per_tensor_symmetric,
+                            reduce_range=False,
+                            dtype=torch.qint8
+                        ),
+                        weight=torch.quantization.default_weight_observer
+                    )
+                    model = prepare_jit(model, {'': qconfig_s8}, True)
+
+                    model(img_jit)
+
+                    model = convert_jit(model, True)
+                    # print(model.graph_for(img_jit))
     from tool.utils import load_class_names, plot_boxes_cv2
     from tool.torch_utils import do_detect
+
+    if args.jit == 0:
+        if data_type == 'fp16':
+            model = model.half()
+
 
     total_latency = 0
     perf_start_iter = 1
@@ -594,7 +609,7 @@ if __name__ == "__main__":
                         # Because the first iteration is usually longer
         with torch.inference_mode():
             print("Iteration: ",i)
-            boxes, latency = do_detect(model, sized, 0.4, 0.6, use_cuda, i, dummy, batch_size, width, height, data_type, benchmark)
+            boxes, latency = do_detect(model, sized, 0.4, 0.6, i, dummy, batch_size, width, height, data_type, benchmark)
 
             if i >= perf_start_iter:
                 total_latency += latency
@@ -611,3 +626,15 @@ if __name__ == "__main__":
 
         class_names = load_class_names(namesfile)
         plot_boxes_cv2(img, boxes[0], 'predictions.jpg', class_names)
+    
+    if args.save:
+        store_path = args.save
+        if args.jit == -1:
+            if data_type in ("fp16", "int8"):
+                torch.jit.save(model, store_path)
+            if data_type == "fp32":
+                torch.save(model, store_path)
+        elif args.jit == 0:
+            torch.save(model, store_path)
+        else:
+            torch.jit.save(model, store_path)

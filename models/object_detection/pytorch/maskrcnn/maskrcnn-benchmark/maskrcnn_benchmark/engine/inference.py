@@ -37,9 +37,10 @@ import numpy as np
 # from maskrcnn_benchmark.engine.utils_vis import draw, make_dot
 
 
-def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=False, bf32=False, jit=False, iterations=-1, iter_warmup=-1, enable_profiling=False):
+def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, p99_timer=None, bf16=False, bf32=False, jit=False, iterations=-1, iter_warmup=-1, enable_profiling=False):
     model.eval()
     results_dict = {}
+    timeBuff = []
     cpu_device = torch.device("cpu")
     steps_per_epoch = len(data_loader)
     iter_warmup = max(0, iter_warmup)
@@ -84,12 +85,14 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
                             images = images.to(torch.bfloat16)
                         if timer and epoch * steps_per_epoch + i >= iter_warmup:
                             timer.tic()
+                            p99_timer.tic()
                         if bbox_aug:
                             output = im_detect_bbox_aug(model, images, device)
                         else:
                             output = model(images)
                         if timer and epoch * steps_per_epoch + i >= iter_warmup:
                             timer.toc()
+                            timeBuff.append(p99_timer.toc())
                         output = [o.to(cpu_device) for o in output]
                         results_dict.update(
                             {img_id: result for img_id, result in zip(image_ids, output)}
@@ -97,7 +100,7 @@ def compute_on_dataset(model, data_loader, device, bbox_aug, timer=None, bf16=Fa
                         pbar.update(1)
         if enable_profiling:
             print(prof.key_averages().table(sort_by="self_cpu_time_total"))
-    return results_dict
+    return results_dict, timeBuff
 
 
 def _accumulate_predictions_from_multiple_gpus(predictions_per_gpu):
@@ -149,16 +152,19 @@ def inference(
     logger.info("Start evaluation on {} dataset({} images).".format(dataset_name, len(dataset)))
     total_timer = Timer()
     inference_timer = Timer()
+    p99 = Timer()
     total_timer.tic()
-    predictions = compute_on_dataset(model, data_loader, device, bbox_aug, inference_timer, bf16, bf32, jit, iterations, iter_warmup, enable_profiling)
+    predictions, timeBuff = compute_on_dataset(model, data_loader, device, bbox_aug, inference_timer, p99, bf16, bf32, jit, iterations, iter_warmup, enable_profiling)
     # wait for all processes to complete before measuring the time
     synchronize()
-    total_time, p99 = total_timer.toc()
+    total_time = total_timer.toc()
     total_time_str = get_time_str(total_time)
 
     if iterations == -1:
         iterations = len(data_loader)
 
+    timeBuff_output = np.asarray(timeBuff)
+    p99 = np.percentile(timeBuff_output, 99)
     logger.info('P99 Latency {:.2f} ms'.format(p99*1000))
     logger.info(
         "Total run time: {} ({} s / iter per device, on {} devices)".format(

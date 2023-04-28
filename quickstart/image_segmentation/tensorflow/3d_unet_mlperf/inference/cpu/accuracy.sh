@@ -49,7 +49,7 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
     if [[ $PRECISION == "bfloat16" || $PRECISION == "fp32" ]]; then
         PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_dynamic_ndhwc.pb"
     elif [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_fused_pad_int8.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_new_int8_bf16.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
         echo "Supported precisions are: int8, fp32, bfloat32 and bfloat16"

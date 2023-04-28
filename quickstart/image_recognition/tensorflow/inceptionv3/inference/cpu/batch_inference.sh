@@ -77,7 +77,6 @@ fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python benchmarks/launch_benchmark.py \
-         $ARGS \
          --model-name=inceptionv3 \
          --precision ${PRECISION} \
          --mode=inference \
@@ -87,4 +86,5 @@ _command python benchmarks/launch_benchmark.py \
          --output-dir ${OUTPUT_DIR} \
          --batch-size=${BATCH_SIZE} \
          --socket-id 0 \
-         $@
+         $@ \
+         $ARGS

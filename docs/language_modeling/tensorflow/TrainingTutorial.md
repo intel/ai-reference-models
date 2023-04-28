@@ -178,6 +178,7 @@ An execution with these parameters produces results in line with below scores:
 ```
 BF16: {"exact_match": 86.77388836329234, "f1": 92.98642358746287}
 FP32: {"exact_match": 86.72658467360453, "f1": 92.98046893150796}
+FP16: {"exact_match": 87.21854304635761, "f1": 93.35325056750564}
 ```
 
 Please refer to google docs for SQuAD specific arguments.

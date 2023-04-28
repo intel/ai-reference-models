@@ -38,7 +38,7 @@ if [ -z "${PRETRAINED_MODEL}" ]; then
             export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="Mul"
         fi
     elif [[ $PRECISION == "int8" ]]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_fused_pad_int8.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/3dunet_new_int8_bf16.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
         echo "Supported precisions are: int8, fp32 and bfloat16"

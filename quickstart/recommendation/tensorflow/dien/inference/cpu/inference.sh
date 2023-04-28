@@ -43,7 +43,7 @@ fi
 
 if [ -z "${PRETRAINED_MODEL}" ]; then
     if [ $PRECISION == "fp32" ]; then
-        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_static_rnn_graph.pb"
+        PRETRAINED_MODEL="${MODEL_DIR}/pretrained_model/dien_fp32_static_mklgrus.pb"
     else
         echo "The specified precision '${PRECISION}' is unsupported."
         echo "Supported precision is fp32"

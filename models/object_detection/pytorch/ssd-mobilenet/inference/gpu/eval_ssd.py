@@ -69,6 +69,10 @@ parser.add_argument('--image_size', default=300, type=int,
 parser.add_argument('--benchmark', default=0, type=int, help='for benchmark performance, move H2D out of end2end calculation')
 parser.add_argument('--profile_iter', default=5, type=int, help='profile iter')
 parser.add_argument('--num-iterations', default=100, type=int, help='iterations for benchmark test')
+parser.add_argument("--save", help='Path to save entile model')
+parser.add_argument("--load", help='Path to load entile model')
+parser.add_argument('--jit', default=-1, type=int,choices=[-1, 0, 1],
+                     help='Select run with jit or impe path, 0 : impe, 1 : jit')
 args = parser.parse_args()
 
 if args.use_xpu:
@@ -247,58 +251,89 @@ if __name__ == '__main__':
 
     true_case_stat, all_gb_boxes, all_difficult_cases = group_annotation_by_class(
         dataset)
-    if args.net == 'vgg16-ssd':
-        net = create_vgg_ssd(len(class_names), is_test=True)
-    elif args.net == 'mb1-ssd':
-        net = create_mobilenetv1_ssd(
-            len(class_names), is_test=True, device=DEVICE)
-    elif args.net == 'mb1-ssd-lite':
-        net = create_mobilenetv1_ssd_lite(len(class_names), is_test=True)
-    elif args.net == 'sq-ssd-lite':
-        net = create_squeezenet_ssd_lite(len(class_names), is_test=True)
-    elif args.net == 'mb2-ssd-lite':
-        net = create_mobilenetv2_ssd_lite(
-            len(class_names),
-            width_mult=args.mb2_width_mult,
-            is_test=True)
-    else:
-        logging.fatal(
-            "The net type is wrong. \
-             It should be one of vgg16-ssd, mb1-ssd and mb1-ssd-lite.")
-        parser.print_help(sys.stderr)
-        sys.exit(1)
 
-    timer.start("Load Model")
-    net.load(args.trained_model)
+    if args.int8 and args.jit == 0:
+        print("int8 not support impe path")
+        sys.exit(1) 
 
-    # convert the model to half exclude BatchNorm2d layer
-    # typeFlag 0 Float; typeFlag 1 Half; typeFlag 2 BFloat16
-    typeFlag = 0
-    if args.fp16 or args.bf16:
-        if args.fp16:
-            net.half()
-            typeFlag = 1
+    if args.load:
+        if os.path.isfile(args.load):
+            load_path = args.load
+            typeFlag = 1 if args.fp16 else 0
+            typeFlag = 2 if args.bf16 else typeFlag
+            channelsFlag = 1 if args.channels_last else 0
+            timer.start("Load Model")
+            if args.jit == -1:
+                if args.int8 or args.fp16:
+                    net = torch.jit.load(load_path)
+                else:
+                    net = torch.load(load_path)
+                    print("Running on", str(net.device))
+            elif args.jit == 0:
+                net = torch.load(load_path)
+                print("Running on", str(net.device))
+            else:
+                net = torch.jit.load(load_path)
+            print(f'It took {timer.end("Load Model")} seconds to load the model.')
         else:
-            net.bfloat16()
-            typeFlag = 2
-        for layer in net.modules():
-            if isinstance(layer, nn.BatchNorm2d):
-                layer.float()
+            print("=> no saved model found at '{}'".format(args.load))
+    else:
+        if args.net == 'vgg16-ssd':
+            net = create_vgg_ssd(len(class_names), is_test=True)
+        elif args.net == 'mb1-ssd':
+            net = create_mobilenetv1_ssd(
+                len(class_names), is_test=True, device=DEVICE)
+        elif args.net == 'mb1-ssd-lite':
+            net = create_mobilenetv1_ssd_lite(len(class_names), is_test=True)
+        elif args.net == 'sq-ssd-lite':
+            net = create_squeezenet_ssd_lite(len(class_names), is_test=True)
+        elif args.net == 'mb2-ssd-lite':
+            net = create_mobilenetv2_ssd_lite(
+                len(class_names),
+                width_mult=args.mb2_width_mult,
+                is_test=True)
+        else:
+            logging.fatal(
+                "The net type is wrong. \
+                It should be one of vgg16-ssd, mb1-ssd and mb1-ssd-lite.")
+            parser.print_help(sys.stderr)
+            sys.exit(1)
 
-    net = net.to(DEVICE)
+        timer.start("Load Model")
+        net.load(args.trained_model)
 
-    if args.fp16 or args.int8:
-        net = jit(net, dataset)
-    if args.int8:
-        net = calib(net, dataset)
+        # convert the model to half exclude BatchNorm2d layer
+        # typeFlag 0 Float; typeFlag 1 Half; typeFlag 2 BFloat16
+        typeFlag = 0
+        if args.fp16 or args.bf16:
+            if args.fp16:
+                net.half()
+                typeFlag = 1
+            else:
+                net.bfloat16()
+                typeFlag = 2
+            for layer in net.modules():
+                if isinstance(layer, nn.BatchNorm2d):
+                    layer.float()
 
-    channelsFlag = 0
-    # channelsFlag 0 NCHW; channelsFlag 1 NHWC
-    if args.channels_last:
-        net = net.to(memory_format=torch.channels_last)
-        channelsFlag = 1
-    print("Running on", DEVICE)
-    print(f'It took {timer.end("Load Model")} seconds to load the model.')
+        net = net.to(DEVICE)
+
+        if args.jit == -1:
+            if args.fp16 or args.int8:
+                net = jit(net, dataset)
+        elif args.jit == 1:
+            net = jit(net, dataset)
+            
+        if args.int8:
+            net = calib(net, dataset)
+
+        channelsFlag = 0
+        # channelsFlag 0 NCHW; channelsFlag 1 NHWC
+        if args.channels_last:
+            net = net.to(memory_format=torch.channels_last)
+            channelsFlag = 1
+        print("Running on", DEVICE)
+        print(f'It took {timer.end("Load Model")} seconds to load the model.')
     if args.net == 'vgg16-ssd':
         predictor = create_vgg_ssd_predictor(
             net, nms_method=args.nms_method, device=DEVICE)
@@ -317,7 +352,7 @@ if __name__ == '__main__':
     else:
         logging.fatal(
             "The net type is wrong. \
-             It should be one of vgg16-ssd, mb1-ssd and mb1-ssd-lite.")
+            It should be one of vgg16-ssd, mb1-ssd and mb1-ssd-lite.")
         parser.print_help(sys.stderr)
         sys.exit(1)
 
@@ -347,6 +382,17 @@ if __name__ == '__main__':
             boxes + 1.0  # matlab's indexes start from 1
         ], dim=1))
 
+    if args.save:
+        store_path = args.save
+        if args.jit == -1:
+            if args.int8 or args.fp16:
+                torch.jit.save(net, store_path)
+            else:
+                torch.save(net, store_path)
+        elif args.jit == 0:
+            torch.save(net, store_path)
+        else:
+            torch.jit.save(net, store_path)          
     if args.dummy > 0:
         sys.exit(0)
 

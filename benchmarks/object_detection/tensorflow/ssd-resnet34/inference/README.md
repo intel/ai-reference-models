@@ -61,7 +61,6 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>wget
         <li>Cython
         <li>contextlib2
-        <li>horovod==0.24.3
         <li>jupyter
         <li>lxml
         <li>matplotlib
@@ -88,7 +87,6 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>Cython
         <li>contextlib2
-        <li>horovod==0.24.3
         <li>jupyter
         <li>lxml
         <li>matplotlib

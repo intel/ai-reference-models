@@ -77,6 +77,9 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 from torch.utils import ThroughputBenchmark
 
+from lars import *
+from lars_utils import *
+
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
     and callable(models.__dict__[name]))
@@ -99,6 +102,8 @@ parser.add_argument('-j', '--workers', default=4, type=int, metavar='N',
                     help='number of data loading workers (default: 4)')
 parser.add_argument('--epochs', default=90, type=int, metavar='N',
                     help='number of total epochs to run')
+parser.add_argument('--warmup-epochs', type=float, default=5,
+                        help='number of warmup epochs')
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
 parser.add_argument('-b', '--batch-size', default=256, type=int,
@@ -110,13 +115,27 @@ parser.add_argument('--steps', default=-1, type=int,
                     help='steps for validation')
 parser.add_argument('--training_steps', default=-1, type=int,
                     help='steps for validation')
+parser.add_argument('--base-op', type=str, default='sgd',
+                        help='base optimizer name')
 parser.add_argument('--lr', '--learning-rate', default=0.1, type=float,
                     metavar='LR', help='initial learning rate', dest='lr')
+parser.add_argument('--base-lr', type=float, default=0.0125,
+                        help='learning rate for a single GPU')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
 parser.add_argument('--wd', '--weight-decay', default=1e-4, type=float,
                     metavar='W', help='weight decay (default: 1e-4)',
                     dest='weight_decay')
+parser.add_argument('--epsilon', type=float, default=1e-5,
+                        help='epsilon for optimizer')
+parser.add_argument('--bn-bias-separately', action='store_true', default=True,
+                        help='skip bn and bias')
+parser.add_argument('--label-smoothing', type=float, default=0.1,
+                    help='label smoothing for cross entropy loss')
+parser.add_argument('--zero-init-residual', action='store_true', default=False,
+                    help='Initialize scale params in BN3 of a residual block to zeros instead ones. '
+                         'Improves accuracy by 0.2~0.3 percent according to https://arxiv.org/abs/1706.02677'
+                         'Used by Nvidia, but not part of MLPerf reference ')
 parser.add_argument('-p', '--print-freq', default=10, type=int,
                     metavar='N', help='print frequency (default: 10)')
 parser.add_argument('--resume', default='', type=str, metavar='PATH',
@@ -309,9 +328,16 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.cuda:
         criterion = criterion.cuda(args.gpu)
 
-    optimizer = torch.optim.SGD(model.parameters(), args.lr,
-                                momentum=args.momentum,
-                                weight_decay=args.weight_decay)
+    if args.base_op.lower() == "lars":
+        print("Creating LARS optimizer")
+        optimizer = create_optimizer_lars(model=model, lr=args.base_lr, epsilon=args.epsilon,
+                                          momentum=args.momentum, weight_decay=args.weight_decay,
+                                          bn_bias_separately=args.bn_bias_separately)
+    else:
+        print("Creating SGD optimizer")
+        optimizer = torch.optim.SGD(model.parameters(), args.lr,
+                                    momentum=args.momentum,
+                                    weight_decay=args.weight_decay)
 
     # optionally resume from a checkpoint
     if args.resume:
@@ -329,12 +355,12 @@ def main_worker(gpu, ngpus_per_node, args):
                 # best_acc1 may be from a checkpoint from a different GPU
                 best_acc1 = best_acc1.to(args.gpu)
             if args.distributed and args.dist_backend == 'ccl':
-                corrected_dict = \
-                    { k.replace('module.', '') if k.startswith('module.') else k: v for k, v in checkpoint['state_dict'].items()}
-                model.load_state_dict(corrected_dict)
-            else:
                 model.load_state_dict(checkpoint['state_dict'])
-                optimizer.load_state_dict(checkpoint['optimizer'])
+            else:
+                corrected_dict = \
+                        { k.replace('module.', '') if k.startswith('module.') else k: v for k, v in checkpoint['state_dict'].items()}
+                model.load_state_dict(corrected_dict)
+            optimizer.load_state_dict(checkpoint['optimizer'])
             print("=> loaded checkpoint '{}' (epoch {})"
                   .format(args.resume, checkpoint['epoch']))
         else:
@@ -447,22 +473,23 @@ def main_worker(gpu, ngpus_per_node, args):
         validate(val_loader, model, criterion, args)
         return
 
-    # for bf32 path, calling ipex.optimize to calling ipex conv which enabled bf32 path
-    if args.ipex and args.bf32:
-        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
-        model, optimizer = ipex.optimize(model, dtype=torch.float32,
-                                         optimizer=optimizer, sample_input=sample_input)
-
-    if args.ipex and args.bf16:
-        sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
-        model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer,
-                                         weights_prepack=True, split_master_weight_for_bf16=False, sample_input=sample_input)
-
-
     scaler = None
-    if args.ipex and args.fp16:
-        scaler = torch.cpu.amp.GradScaler()
-        model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, fuse_update_step=False)
+    if not args.distributed:
+        # for bf32 path, calling ipex.optimize to calling ipex conv which enabled bf32 path
+        if args.ipex and args.bf32:
+            sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
+            model, optimizer = ipex.optimize(model, dtype=torch.float32,
+                                            optimizer=optimizer, sample_input=sample_input)
+
+        if args.ipex and args.bf16:
+            sample_input = torch.randn(args.batch_size, 3, 224, 224).contiguous(memory_format=torch.channels_last)
+            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer,
+                                            weights_prepack=True, split_master_weight_for_bf16=False, sample_input=sample_input)
+
+
+        if args.ipex and args.fp16:
+            scaler = torch.cpu.amp.GradScaler()
+            model, optimizer = ipex.optimize(model, optimizer=optimizer, dtype=torch.half, auto_kernel_selection=True, fuse_update_step=False)
 
     # parallelize
     if args.distributed and not args.cuda and args.gpu is None:
@@ -470,10 +497,18 @@ def main_worker(gpu, ngpus_per_node, args):
         device_ids = None
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
     
-    train(train_loader, val_loader, model, criterion, optimizer, args, train_sampler, ngpus_per_node, scaler)
+    num_steps_per_epoch = len(train_loader)
+    if args.base_op.lower() == "lars":
+        print("Creating LR scheduler ")
+        lr_scheduler = MLPerfLRScheduler(optimizer, args.epochs, args.warmup_epochs,
+                                        num_steps_per_epoch, args.base_lr)
+    else:
+        lr_scheduler=None
+    train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, args, train_sampler, ngpus_per_node, scaler)
 
 
-def train(train_loader, val_loader, model, criterion, optimizer, args, train_sampler, ngpus_per_node, scaler):
+def train(train_loader, val_loader, model, criterion, optimizer, lr_scheduler, args, train_sampler, ngpus_per_node, scaler):
+    global best_acc1
     batch_time = AverageMeter('Time', ':6.3f')
     data_time = AverageMeter('Data', ':6.3f')
     losses = AverageMeter('Loss', ':.4e')
@@ -498,7 +533,8 @@ def train(train_loader, val_loader, model, criterion, optimizer, args, train_sam
         
         if args.distributed:
             train_sampler.set_epoch(epoch)
-        adjust_learning_rate(optimizer, epoch, args)
+        if args.base_op.lower() == "sgd":
+            adjust_learning_rate(optimizer, epoch, args)
     
         for i, (images, target) in enumerate(train_loader):
             if args.training_steps > 0 and (epoch - args.start_epoch) * len(train_loader) + i >= args.training_steps:
@@ -538,10 +574,15 @@ def train(train_loader, val_loader, model, criterion, optimizer, args, train_sam
                 optimizer.zero_grad(set_to_none=True)
             if args.ipex and args.fp16:
                 scaler.scale(loss).backward()
+                # TODO check it works for fp16 dtype
+                if lr_scheduler:
+                    lr_scheduler.step()
                 scaler.step(optimizer)
                 scaler.update()
             else:
                 loss.backward()
+                if lr_scheduler:
+                    lr_scheduler.step()
                 optimizer.step()
             # measure elapsed time
             if (epoch - args.start_epoch) * len(train_loader) + i >= args.warmup_iterations:

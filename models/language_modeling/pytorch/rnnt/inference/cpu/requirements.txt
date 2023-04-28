@@ -8,3 +8,4 @@ soundfile
 ipdb
 sox
 tensorboard==2.0.0
+wheel==0.38.0 # Included this to avoid a vulnerability

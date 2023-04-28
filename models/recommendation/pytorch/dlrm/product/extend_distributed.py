@@ -421,6 +421,39 @@ def all_gather(input, lengths, dim=0):
     if not lengths: lengths = [input.size(0)] * my_size
     return AllGather.apply(input, lengths, dim)
 
+def all_gather_validation(input, lengths, dim=0):
+    #print("lengths: ", lengths)
+    if not lengths: lengths = [input.size(0)] * my_size
+
+    global_lengths = lengths
+
+    if not isinstance(global_lengths, (list, tuple)):
+        global_lengths = [global_lengths] * my_size
+    my_rank = dist.get_rank()
+    assert(len(global_lengths) == my_size)
+    assert(global_lengths[my_rank] == input.size(dim))
+    local_start = sum(global_lengths[:my_rank])
+
+    output_size = list(input.size())
+
+    input = input.contiguous()
+    if dim == 0:
+        out_len = sum(global_lengths)
+        output_size[dim] = out_len
+        output = input.new_empty(output_size)
+        gather_list = list(output.split(global_lengths, dim=0))
+    else:
+        gather_list = [torch.empty_like(input) for _ in range(my_size)]
+        gather_list = []
+        for l in global_lengths:
+            output_size[dim] = l
+            gather_list.append(input.new_empty(output_size))
+
+    # if dim != 0:
+    #     output = torch.cat(gather_list, dim=dim)
+    req = dist.all_gather(gather_list, input, async_op=True)
+    return req, output
+
 def barrier():
     if my_size > 1:
         dist.barrier()

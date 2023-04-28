@@ -1,0 +1,45 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-ipex-flex-series-base-public}{pytorch-flex-series-yolov4-multi-card-inference}'
+slice_sets:
+  pytorch-flex-series-yolov4-multi-card-inference:
+  - add_to_name: -pytorch-flex-series-yolov4-multi-card-inference
+    dockerfile_exclusive_name: -yolov4-multi-card-inference
+    args:
+    - PACKAGE_NAME=pytorch-flex-series-yolov4-multi-card-inference
+    dockerfile_subdirectory: gpu_model_containers
+    downloads: []
+    files:
+    - source: quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md
+      destination: README.md
+    - destination: models/object_detection/pytorch/yolov4/inference/gpu
+      source: models/object_detection/pytorch/yolov4/inference/gpu
+    - destination: quickstart/flex_multi_card_batch_inference.sh
+      source: quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_batch_inference.sh
+    - destination: quickstart/flex_multi_card_online_inference.sh
+      source: quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_online_inference.sh
+    wrapper_package_files:
+     - source: quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md
+       destination: README.md
+     - source: quickstart/object_detection/pytorch/yolov4/inference/gpu/build_multi_card.sh
+       destination: build.sh
+     - source: dockerfiles/gpu_model_containers/pytorch-flex-series-yolov4-multi-card-inference.Dockerfile
+       destination: pytorch-flex-series-yolov4-multi-card-inference.Dockerfile
+     - source: output/pytorch-flex-series-yolov4-multi-card-inference.tar.gz
+       destination: model_packages/pytorch-flex-series-yolov4-multi-card-inference.tar.gz
+     - source: ""
+       destination: info.txt
+     - source: third_party
+       destination: licenses/third_party
+     - source: LICENSE
+       destination: licenses/LICENSE
+    partials:
+    - numactl
+    - pciutils
+    - python-build
+    - parallel
+    - opencv
+    - object_detection/yolov4/pip_installs
+    - model_package
+    - entrypoint

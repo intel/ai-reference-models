@@ -1,0 +1,35 @@
+releases:
+  versioned:
+    tag_specs:
+    - '{pytorch-ipex-flex-series-base-public}{pytorch-flex-series-resnet50v1-5-inference}'
+slice_sets:
+  pytorch-flex-series-resnet50v1-5-inference:
+  - add_to_name: pytorch-flex-series-resnet50v1-5-inference
+    dockerfile_exclusive_name: -resnet50v1-5-inference
+    args:
+    - PACKAGE_NAME=pytorch-flex-series-resnet50v1-5-inference
+    dockerfile_subdirectory: gpu_model_containers
+    downloads: []
+    files:
+    - source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Flex_Series.md
+      destination: README.md
+    - destination: models/image_recognition/pytorch/resnet50v1_5/inference/gpu
+      source: models/image_recognition/pytorch/resnet50v1_5/inference/gpu
+    - destination: quickstart/inference_block_format.sh
+      source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh
+    wrapper_package_files:
+     - source: quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/build.sh
+       destination: build.sh
+     - source: dockerfiles/gpu_model_containers/pytorch-flex-series-resnet50v1-5-inference.Dockerfile
+       destination: pytorch-flex-series-resnet50v1-5-inference.Dockerfile
+     - source: output/pytorch-flex-series-resnet50v1-5-inference.tar.gz
+       destination: model_packages/pytorch-flex-series-resnet50v1-5-inference.tar.gz
+     - source: ""
+       destination: info.txt
+     - source: third_party
+       destination: licenses/third_party
+     - source: LICENSE
+       destination: licenses/LICENSE
+    partials:
+    - model_package
+    - entrypoint

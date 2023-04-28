@@ -23,13 +23,15 @@ echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo 'DATASET_DIR='$DATASET_DIR
 
 if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-  pretrained_model=/workspace/tf-atsm-ssd-mobilenet-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
+  pretrained_model=/workspace/tf-flex-series-ssd-mobilenet-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
 else
   pretrained_model=${FROZEN_GRAPH}
 fi
 
 export TF_NUM_INTEROP_THREADS=1
 export DATA_NUM_INTER_THREADS=1
+export OverrideDefaultFP64Settings=1 
+export IGC_EnableDPEmulation=1 
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs

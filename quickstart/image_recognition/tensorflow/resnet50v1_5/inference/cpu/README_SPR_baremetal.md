@@ -52,6 +52,10 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 ## Download the pretrained model
 Download the model pretrained frozen graph from the given link based on the precision of your interest. Please set `PRETRAINED_MODEL` to point to the location of the pretrained model file on your local system.
 ```
+# BFloat16 Pretrained model:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb
+export PRETRAINED_MODEL=$(pwd)/bf16_resnet50_v1.pb
+
 # FP32 and BFloat32 Pretrained model:
 wget https://zenodo.org/record/2535873/files/resnet50_v1.pb
 export PRETRAINED_MODEL=$(pwd)/resnet50_v1.pb
@@ -59,10 +63,6 @@ export PRETRAINED_MODEL=$(pwd)/resnet50_v1.pb
 # Int8 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bias_resnet50.pb
 export PRETRAINED_MODEL=$(pwd)/bias_resnet50.pb
-
-# BFloat16 Pretrained model:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_8/bf16_resnet50_v1.pb
-export PRETRAINED_MODEL=$(pwd)/bf16_resnet50_v1.pb
 ```
 
 ## Run the model

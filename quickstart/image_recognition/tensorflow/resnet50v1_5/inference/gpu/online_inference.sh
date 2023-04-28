@@ -16,18 +16,11 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-BATCH_SIZE=${BATCH_SIZE-1}
 
 echo 'MODEL_DIR='$MODEL_DIR
 echo 'PRECISION='$PRECISION
 echo 'OUTPUT_DIR='$OUTPUT_DIR
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
-
-if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-  pretrained_model=/workspace/tf-atsm-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
-else
-  pretrained_model=${FROZEN_GRAPH}
-fi
+echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
 export TF_NUM_INTEROP_THREADS=1
 
@@ -35,6 +28,7 @@ export TF_NUM_INTEROP_THREADS=1
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
+input_envs[GPU_TYPE]=${GPU_TYPE}
 
 for i in "${!input_envs[@]}"; do
   var_name=$i
@@ -50,11 +44,45 @@ done
 mkdir -p ${OUTPUT_DIR}
 
 WARMUP=""
-if [[ $PRECISION == "int8" ]]; then
-  WARMUP="-- warmup_steps=5 steps=25"
+
+# If batch size env is not mentioned, then the workload will run with the default batch size.
+if [ -z "${BATCH_SIZE}"]; then
+  BATCH_SIZE="1"
+  echo "Running with default batch size of ${BATCH_SIZE}"
+fi
+
+# Check for GPU type
+if [[ $GPU_TYPE == "flex_series" ]]; then
+  export OverrideDefaultFP64Settings=1 
+  export IGC_EnableDPEmulation=1 
+  if [[ $PRECISION == "int8" ]]; then
+    WARMUP="-- warmup_steps=5 steps=25"
+    if [[ ! -f "${FROZEN_GRAPH}" ]]; then
+      pretrained_model=/workspace/tf-flex-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
+    else
+      pretrained_model=${FROZEN_GRAPH}
+    fi
   else 
-  echo "ATS-M GPU SUPPORTS ONLY INT8 PRECISION"
-  exit 1
+    echo "FLEX SERIES GPU SUPPORTS ONLY INT8 PRECISION"
+    exit 1
+  fi
+elif [[ $GPU_TYPE == "max_series" ]]; then
+  if [[ $PRECISION == "int8" || $PRECISION == "fp16" || $PRECISION == "fp32" ]]; then
+    WARMUP="-- warmup_steps=5 steps=20 disable-tcmalloc=True"
+    if [[ ! -f "${FROZEN_GRAPH}" ]]; then
+      pretrained_model=/workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
+    else
+      pretrained_model=${FROZEN_GRAPH}
+    fi
+  else 
+    echo "MAX SERIES GPU SUPPORTS ONLY INT8, FP32 AND FP16 PRECISION"
+    exit 1
+  fi
+fi
+
+if [[ $PRECISION == "fp16" ]]; then
+  export ITEX_AUTO_MIXED_PRECISION=1
+  export ITEX_AUTO_MIXED_PRECISION_DATA_TYPE="FLOAT16"
 fi
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
@@ -64,9 +92,8 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
     --framework tensorflow \
     --precision ${PRECISION} \
     --mode inference \
-    --batch-size 1 \
+    --batch-size ${BATCH_SIZE} \
     --output-dir ${OUTPUT_DIR} \
-    ${DATASET_OPTION} \
     --benchmark-only \
     --gpu \
     $@ \

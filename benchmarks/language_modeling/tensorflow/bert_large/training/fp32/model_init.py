@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2018 Intel Corporation
+# Copyright (c) 2021 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -94,6 +94,8 @@ class ModelInitializer(BaseModelInitializer):
         arg_parser.add_argument('--num-intra-threads', help=' Number of Intra ops threads', type=int,
                                 dest="num_intra_threads", default=self.args.num_inter_threads)
         arg_parser.add_argument('--profile', help=' Enable Tensorflow profiler hook', dest="profile", default="False")
+        arg_parser.add_argument('--optimized_softmax', help='optimized_softmax',
+                                dest="optimized_softmax", default="False")
         arg_parser.add_argument('--experimental-gelu', help=' [Experimental] Use experimental gelu op.',
                                 dest="experimental_gelu", default="False")
         arg_parser.add_argument('--mpi_workers_sync_gradients',
@@ -131,10 +133,14 @@ class ModelInitializer(BaseModelInitializer):
 
         # num_cores = self.platform_util.num_cores_per_socket if self.args.num_cores == -1 else self.args.num_cores
 
-        # data_location =str(self.args.data_location)
+        # data_location = str(self.args.data_location)
         # bert_large_data = data_location + "/wwm_cased_L-24_H-1024_A-16/"
         # bert_squad_data = data_location + "/SQuAD/"
-        # bert_glue_dir   = data_location + "glue/glue_data"
+        # bert_glue_dir = data_location + "glue/glue_data"
+
+        if self.args.gpu and self.args.train_option == "Pretraining":
+            self.args.num_intra_threads = 1
+            self.args.num_inter_threads = 1
 
         eoo = " \\\n"
         self.cmd_args = \
@@ -165,6 +171,10 @@ class ModelInitializer(BaseModelInitializer):
                 " --doc_stride=" + str(self.args.doc_stride)
 
         if self.args.train_option == "Pretraining":
+            # CreateMultipleSubDevices is set by default for GPU, it causes
+            # memory issues, hence removing it for Pretraining.
+            if 'CreateMultipleSubDevices' in os.environ:
+                del os.environ['CreateMultipleSubDevices']
             if self.args.init_checkpoint != '':
                 self.cmd_args = self.cmd_args + \
                     " --init_checkpoint=" + str(self.args.init_checkpoint) + eoo
@@ -172,6 +182,7 @@ class ModelInitializer(BaseModelInitializer):
                 " --input_file=" + str(self.args.input_file) + eoo + \
                 " --do_eval=" + str(self.args.do_eval) + eoo + \
                 " --num_train_steps=" + str(self.args.num_train_steps) + eoo + \
+                " --optimized_softmax=" + str(self.args.optimized_softmax) + eoo + \
                 " --num_warmup_steps=" + str(self.args.warmup_steps) + eoo + \
                 " --max_predictions_per_seq=" + str(self.args.max_predictions)
 
@@ -193,7 +204,7 @@ class ModelInitializer(BaseModelInitializer):
 
         if os.environ["MPI_NUM_PROCESSES"] == "None":
             self.benchmark_command = self.benchmark_command + self.python_exe + " " + benchmark_script + "\n"
-        else:
+        elif not self.args.gpu:
             numa_cmd = " -np 1 numactl -N {} -m {} "
             self.benchmark_command = self.benchmark_command + numa_cmd.format(0, 0) + os.environ["PYTHON_EXE"] + " " \
                 + benchmark_script
@@ -212,7 +223,7 @@ class ModelInitializer(BaseModelInitializer):
     def run(self):
         if self.benchmark_command:
             print("----------------------------Run command-------------------------------------")
-            print(self.benchmark_command)
+            print(self.benchmark_command, flush=True)
             print("------------------------------------------------------------------------")
             self.run_command(self.benchmark_command)
             if self.args.output_results:

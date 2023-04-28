@@ -1,0 +1,6 @@
+prune deprecated
+prune docker
+prune samples
+prune tests
+prune docs
+exclude *.txt __init__.py .gitignore poetry.lock tox.ini MANIFEST.in
