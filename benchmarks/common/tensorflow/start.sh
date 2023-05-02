@@ -568,9 +568,6 @@ function bert_options() {
   if [[ -n "${OPTIMIZED_SOFTMAX}" && ${OPTIMIZED_SOFTMAX} != "" ]]; then
     CMD=" ${CMD} --optimized-softmax=${OPTIMIZED_SOFTMAX}"
   fi
-  if [[ -n "${AMP}" && ${AMP} != "" ]]; then
-    CMD=" ${CMD} --amp=${AMP}"
-  fi
 
   if [[ -n "${MPI_WORKERS_SYNC_GRADIENTS}" && ${MPI_WORKERS_SYNC_GRADIENTS} != "" ]]; then
     CMD=" ${CMD} --mpi_workers_sync_gradients=${MPI_WORKERS_SYNC_GRADIENTS}"

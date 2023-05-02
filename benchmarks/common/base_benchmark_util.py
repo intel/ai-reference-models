@@ -228,13 +228,6 @@ class BaseBenchmarkUtil(object):
             dest="experimental_gelu", choices=["True", "False"],
             default=False)
 
-        self._common_arg_parser.add_argument(
-            "--amp",
-            help="use grappler auto-mixed precision as opposed to \
-            keras mixed precision",
-            dest="amp", choices=["True", "False"],
-            default=False)
-
         # Note this can't be a normal boolean flag, because we need to know when the user
         # does not explicitly set the arg value so that we can apply the appropriate
         # default value, depending on the the precision.
