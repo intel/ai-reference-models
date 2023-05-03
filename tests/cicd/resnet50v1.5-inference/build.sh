@@ -5,9 +5,10 @@ echo "Setup TensorFlow Test Enviroment for ResNet50 v1.5 Inference"
 
 BATCH_SIZE=$1
 PRECISION=$2
-BENCHMARK_TYPE=$3
+SCRIPT=$3
+DATASET=$5
 MODEL_DIR=${MODEL_DIR-"$(pwd)"}
-OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/output/${PRECISION}"}
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/output/resnet50v1.5-inference/${PRECISION}"}
 PRETRAINED_MODEL=${PRETRAINED_MODEL-"/tf_dataset/pre-trained-models/resnet50v1_5/"${PRECISION}"/resnet50_v1.pb"}
 
 # env setup
@@ -34,7 +35,7 @@ fi
 
 # run following script
 cd ../../..
-OUTPUT_DIR=${OUTPUT_DIR} BATCH_SIZE=${BATCH_SIZE} PRECISION=${PRECISION} PRETRAINED_MODEL=${PRETRAINED_MODEL} ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/${BENCHMARK_TYPE}
+OUTPUT_DIR=${OUTPUT_DIR} BATCH_SIZE=${BATCH_SIZE} PRECISION=${PRECISION} PRETRAINED_MODEL=${PRETRAINED_MODEL} DATASET_DIR=${DATASET} ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/${SCRIPT}
 cd -
 
 deactivate

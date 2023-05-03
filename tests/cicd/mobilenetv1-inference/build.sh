@@ -5,9 +5,10 @@ echo "Setup TensorFlow Test Enviroment for MobileNet v1 Inference"
 
 BATCH_SIZE=$1
 PRECISION=$2
-BENCHMARK_TYPE=$3
+SCRIPT=$3
+DATASET=$5
 MODEL_DIR=${MODEL_DIR-"$(pwd)"}
-OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/output/${PRECISION}"}
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/output/mobilenetv1-inference/${PRECISION}"}
 
 echo "Setup TensorFlow Test Enviroment..."
 # env setup
@@ -31,10 +32,10 @@ else
   echo "No pretrained model is available for the specificied precision $2"
 fi
 
-echo "Running MobileNet V1 ${BENCHMARK_TYPE} for ${PRECISION} precision ..."
+echo "Running MobileNet V1 ${SCRIPT} for ${PRECISION} precision ..."
 # run following script
 cd ../../..
-OUTPUT_DIR=${OUTPUT_DIR} PRECISION=${PRECISION} PRETRAINED_MODEL=${PRETRAINED_MODEL} ./quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/$3
+OUTPUT_DIR=${OUTPUT_DIR} PRECISION=${PRECISION} PRETRAINED_MODEL=${PRETRAINED_MODEL} DATASET_DIR=${DATASET} ./quickstart/image_recognition/tensorflow/mobilenet_v1/inference/cpu/$3
 cd -
 
 deactivate
