@@ -82,7 +82,9 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0 --log
   --do_eval \
   --int8_config configure.json \
   --output_dir ${OUTPUT_DIR} \
+  --torch_dtype bfloat16 \
+  --low_cpu_mem_usage
 
 accuracy=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_accuracy" |sed -e 's/.*= //;s/[^0-9.]//g')
 f1=$(cat ${OUTPUT_DIR}/accuracy_log* | grep "eval_f1" |sed -e 's/.*= //;s/[^0-9.]//g')
-echo ""gptj-6b";"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
+echo ""bloom";"accuracy";${precision};${BATCH_SIZE};${accuracy}" | tee -a ${WORK_SPACE}/summary.log
