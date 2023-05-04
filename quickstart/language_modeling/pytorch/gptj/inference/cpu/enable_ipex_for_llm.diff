@@ -1,0 +1,363 @@
+diff --git a/src/transformers/models/bloom/modeling_bloom.py b/src/transformers/models/bloom/modeling_bloom.py
+index e954cfb44..ba74a1d27 100644
+--- a/src/transformers/models/bloom/modeling_bloom.py
++++ b/src/transformers/models/bloom/modeling_bloom.py
+@@ -881,11 +881,11 @@ class BloomForCausalLM(BloomPreTrainedModel):
+     def forward(
+         self,
+         input_ids: Optional[torch.LongTensor] = None,
+-        past_key_values: Optional[Tuple[Tuple[torch.Tensor, torch.Tensor], ...]] = None,
+         attention_mask: Optional[torch.Tensor] = None,
++        labels: Optional[torch.Tensor] = None,
++        past_key_values: Optional[Tuple[Tuple[torch.Tensor, torch.Tensor], ...]] = None,
+         head_mask: Optional[torch.Tensor] = None,
+         inputs_embeds: Optional[torch.Tensor] = None,
+-        labels: Optional[torch.Tensor] = None,
+         use_cache: Optional[bool] = None,
+         output_attentions: Optional[bool] = None,
+         output_hidden_states: Optional[bool] = None,
+diff --git a/src/transformers/models/gptj/modeling_gptj.py b/src/transformers/models/gptj/modeling_gptj.py
+index 1051a298d..7e139a36f 100644
+--- a/src/transformers/models/gptj/modeling_gptj.py
++++ b/src/transformers/models/gptj/modeling_gptj.py
+@@ -169,7 +169,7 @@ class GPTJAttention(nn.Module):
+ 
+         if attention_mask is not None:
+             # Apply the attention mask
+-            attn_weights = attn_weights + attention_mask
++            attn_weights = torch.tensor(attn_weights) + torch.tensor(attention_mask)
+ 
+         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
+         attn_weights = attn_weights.to(value.dtype)
+@@ -829,13 +829,13 @@ class GPTJForCausalLM(GPTJPreTrainedModel):
+     def forward(
+         self,
+         input_ids: Optional[torch.LongTensor] = None,
+-        past_key_values: Optional[Tuple[Tuple[torch.Tensor]]] = None,
+         attention_mask: Optional[torch.FloatTensor] = None,
++        labels: Optional[torch.LongTensor] = None,
++        past_key_values: Optional[Tuple[Tuple[torch.Tensor]]] = None,
+         token_type_ids: Optional[torch.LongTensor] = None,
+         position_ids: Optional[torch.LongTensor] = None,
+         head_mask: Optional[torch.FloatTensor] = None,
+         inputs_embeds: Optional[torch.FloatTensor] = None,
+-        labels: Optional[torch.LongTensor] = None,
+         use_cache: Optional[bool] = None,
+         output_attentions: Optional[bool] = None,
+         output_hidden_states: Optional[bool] = None,
+diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
+index cf71499b0..3f7371361 100755
+--- a/src/transformers/trainer.py
++++ b/src/transformers/trainer.py
+@@ -158,6 +158,9 @@ from .utils import (
+ )
+ from .utils.generic import ContextManagers
+ 
++def trace_handler(prof):
++    print(prof.key_averages().table(
++        sort_by="self_cpu_time_total", row_limit=-1))
+ 
+ _is_native_cpu_amp_available = is_torch_greater_or_equal_than_1_10
+ 
+@@ -609,12 +612,12 @@ class Trainer:
+         if args.fp16 or args.bf16:
+             if args.half_precision_backend == "auto":
+                 if args.device == torch.device("cpu"):
+-                    if args.fp16:
+-                        raise ValueError("Tried to use `fp16` but it is not supported on cpu")
+-                    elif _is_native_cpu_amp_available:
+-                        args.half_precision_backend = "cpu_amp"
+-                    else:
+-                        raise ValueError("Tried to use cpu amp but native cpu amp is not available")
++                    #if args.fp16:
++                    #    raise ValueError("Tried to use `fp16` but it is not supported on cpu")
++                    #elif _is_native_cpu_amp_available:
++                    args.half_precision_backend = "cpu_amp"
++                    #else:
++                    #    raise ValueError("Tried to use cpu amp but native cpu amp is not available")
+                 else:
+                     args.half_precision_backend = "cuda_amp"
+ 
+@@ -645,7 +648,7 @@ class Trainer:
+                         self.scaler = torch.cuda.amp.GradScaler()
+             elif args.half_precision_backend == "cpu_amp":
+                 self.use_cpu_amp = True
+-                self.amp_dtype = torch.bfloat16
++                self.amp_dtype =  torch.float16 if args.fp16 else torch.bfloat16
+             else:
+                 if not is_apex_available():
+                     raise ImportError(
+@@ -1329,9 +1332,38 @@ class Trainer:
+                 return model
+             example_batch = next(iter(dataloader))
+             example_batch = self._prepare_inputs(example_batch)
++            int8_inputs=[]
++            if self.args.int8 or self.args.do_calibration:
++                import intel_extension_for_pytorch as ipex 
++                from intel_extension_for_pytorch.quantization import prepare, convert
++                from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
++                #qconfig = QConfig(activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_affine, dtype=torch.quint8), weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric))
++                qconfig = ipex.quantization.default_static_qconfig
++                if self.args.smooth_quant:
++                    qconfig = ipex.quantization.get_smooth_quant_static_qconfig()
++                ipex.nn.utils._model_convert.replace_dropout_with_identity(model)
++                for key,value in example_batch.items():
++                    int8_inputs.append(value)
++                int8_inputs=tuple(int8_inputs)
++                prepared_model = prepare(model, qconfig, example_inputs=int8_inputs, inplace=False)
++                if self.args.do_calibration:
++                    for step, inputs in enumerate(dataloader):
++                        print("calibration step: {}".format(step))
++                        prepared_model(**inputs)
++                        if step == self.args.calibration_iters -1:
++                            prepared_model.save_qconf_summary(qconf_summary = self.args.int8_config)
++                            exit()
++                else:
++                    prepared_model.load_qconf_summary(qconf_summary = self.args.int8_config)
+             try:
++                if self.args.int8:
++                    model = prepared_model
+                 jit_model = model.eval()
+                 with ContextManagers([self.autocast_smart_context_manager(cache_enabled=False), torch.no_grad()]):
++                    if self.args.int8:
++                        jit_model = convert(jit_model)
++                        if self.args.smooth_quant:
++                            jit_model(*int8_inputs)
+                     if version.parse(version.parse(torch.__version__).base_version) >= version.parse("1.14.0"):
+                         if isinstance(example_batch, dict):
+                             jit_model = torch.jit.trace(jit_model, example_kwarg_inputs=example_batch, strict=False)
+@@ -1372,6 +1404,8 @@ class Trainer:
+         if not training:
+             model.eval()
+             dtype = torch.bfloat16 if not self.is_in_train and self.args.bf16_full_eval else dtype
++            if self.args.bf32:
++                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+             # conv_bn_folding is disabled as it fails in symbolic tracing, resulting in ipex warnings
+             model = ipex.optimize(model, dtype=dtype, level="O1", conv_bn_folding=False, inplace=not self.is_in_train)
+         else:
+@@ -1384,10 +1418,17 @@ class Trainer:
+         return model
+ 
+     def _wrap_model(self, model, training=True, dataloader=None):
+-        if self.args.use_ipex:
+-            dtype = torch.bfloat16 if self.use_cpu_amp else torch.float32
+-            model = self.ipex_optimize_model(model, training, dtype=dtype)
+-
++        if self.args.use_ipex and not self.args.int8 and not self.args.do_calibration:
++                dtype=torch.float32
++                if self.args.bf16:
++                    dtype=torch.bfloat16
++                elif self.args.fp16:
++                    dtype=torch.float16
++                elif self.args.bf32:
++                    dtype=torch.float32
++                model = self.ipex_optimize_model(model, training, dtype=dtype)
++        if self.args.int8 or self.args.do_calibration:
++            self.args.jit_mode_eval = True
+         if is_sagemaker_mp_enabled():
+             # Wrapping the base model twice in a DistributedModel will raise an error.
+             if isinstance(self.model_wrapped, smp.model.DistributedModel):
+@@ -3085,6 +3126,47 @@ class Trainer:
+         self._memory_tracker.stop_and_update_metrics(output.metrics)
+ 
+         return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
++   
++    def benchmark_evaluate(self, model, dataloader):
++        steps_per_epoch = len(dataloader)
++        total_steps = (self.args.perf_run_iters + self.args.perf_begin_iter)
++        test_epoches = int(total_steps / steps_per_epoch)
++        print('Evaluating: Steps per Epoch {} total Steps {}'.format(steps_per_epoch, total_steps))
++        i = 0;
++        timeBuff = []
++        import time
++        # with torch.profiler.profile(
++        #   activities=[
++        #      torch.profiler.ProfilerActivity.CPU],
++        #      schedule=torch.profiler.schedule(
++        #      wait=1,
++        #      warmup=9,
++        #      active=5),
++        #   on_trace_ready=trace_handler
++        # ) as prof:
++        with tqdm(total=total_steps, desc="Evaluating") as pbar:
++            for epoch in range(test_epoches + 1):
++                for it, batch in enumerate(dataloader):
++                    if epoch * steps_per_epoch + it >= total_steps:
++                        timeBuff = np.asarray(timeBuff)
++                        totalTime = np.sum(timeBuff)
++                        p50 = np.percentile(timeBuff, 50) # return 50th percentile, e.g median.
++                        p99 = np.percentile(timeBuff, 99)
++                        print("#############################")
++                        print("#############################")
++                        print('P50 Latency {:.2f} ms'.format(p50*1000))
++                        print('P99 Latency {:.2f} ms'.format(p99*1000))
++                        print('Throughput: {:.2f} sentences/s'.format(self.args.per_device_eval_batch_size*self.args.perf_run_iters/totalTime))
++                        print("#############################")
++                        break
++                    with torch.no_grad():
++                        start = time.time()
++                        outputs = model(**batch)
++                        #prof.step()
++                        end = time.time()
++                        if epoch * steps_per_epoch + it > self.args.perf_begin_iter:
++                            timeBuff.append(end-start)
++                        pbar.update(1)
+ 
+     def evaluation_loop(
+         self,
+@@ -3158,6 +3240,20 @@ class Trainer:
+         all_labels = None
+         all_inputs = None
+         # Will be useful when we have an iterable dataset so don't know its length.
++        if args.benchmark:
++            if self.args.use_share_weight:
++                threads = []
++                import threading
++                num_instances = self.args.total_cores // self.args.cores_per_instance
++                for i in range(0, num_instances):
++                     t = threading.Thread(target=self.benchmark_evaluate, args=(model, dataloader))
++                     threads.append(t)
++                     t.start()
++                for t in threads:
++                    t.join()
++            else:
++                self.benchmark_evaluate(model, dataloader)
++            exit()
+ 
+         observed_num_examples = 0
+         # Main evaluation loop
+diff --git a/src/transformers/training_args.py b/src/transformers/training_args.py
+index 088eb06b7..6c4543baf 100644
+--- a/src/transformers/training_args.py
++++ b/src/transformers/training_args.py
+@@ -777,6 +777,101 @@ class TrainingArguments:
+             )
+         },
+     )
++    bf32: bool = field(
++        default=False,
++        metadata={
++            "help": (
++                "Whether to use bf32 (mixed) precision instead of 32-bit. Requires Ampere or higher NVIDIA"
++                " architecture or using CPU (no_cuda). This is an experimental API and it may change."
++            )
++        },
++    )
++
++    int8: bool = field(
++        default=False,
++        metadata={
++            "help": (
++                "Whether to use int8 (mixed) precision instead of 32-bit"
++            )
++        },
++    )
++    int8_fp32: bool = field(
++        default=False,
++        metadata={
++            "help": (
++                "Whether to use int8_fp32 (mixed) precision instead of 32-bit"
++            )
++        },
++    )
++    use_share_weight: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable weight sharing for real time mode inference"
++        },
++    )
++    total_cores: int = field(
++        default=56,
++        metadata={
++            "help": "Total cores one socket for use_share_weight"
++        },
++    )
++    cores_per_instance: int = field(
++        default=4,
++        metadata={
++            "help": "cores per instance for use_share_weight"
++        },
++    )
++    do_calibration: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable calibration process for ipex int8"
++        },
++    )
++    calibration_iters: int = field(
++        default=200,
++        metadata={
++            "help": "The iterations for calibration"
++        },
++    )
++    smooth_quant: bool = field(
++        default=False,
++        metadata={
++            "help": (
++                "Whether to use smoothQuant for int8 (mixed) precision"
++            )
++        },
++    )
++
++    int8_config:str = field(
++        default="",
++        metadata={
++            "help": "The calibration result for int8 config"
++        }
++    )
++    auto_kernel_selection: bool = field(
++        default=False,
++        metadata={
++            "help": "Enable mkldnn for ipex fp32"
++        },
++    )
++    benchmark: bool = field(
++        default=False,
++        metadata={
++            "help": "doing the customized benchmark process, getting P50, P99, THP"
++        },
++    )
++    perf_run_iters: int = field(
++        default=100,
++        metadata={
++            "help": "The iterations number for benchmark"
++        },
++    )
++    perf_begin_iter: int = field(
++        default=10,
++        metadata={
++            "help": "The iteration to start the benchmark iterations"
++        },
++    )
+     fp16: bool = field(
+         default=False,
+         metadata={"help": "Whether to use fp16 (mixed) precision instead of 32-bit"},
+@@ -1253,17 +1348,17 @@ class TrainingArguments:
+             if version.parse(version.parse(torch.__version__).base_version) == version.parse("2.0.0") and self.fp16:
+                 raise ValueError("--optim adamw_torch_fused with --fp16 requires PyTorch>2.0")
+ 
+-        if (
+-            self.framework == "pt"
+-            and is_torch_available()
+-            and (self.device.type != "cuda")
+-            and (get_xla_device_type(self.device) != "GPU")
+-            and (self.fp16 or self.fp16_full_eval)
+-        ):
+-            raise ValueError(
+-                "FP16 Mixed precision training with AMP or APEX (`--fp16`) and FP16 half precision evaluation"
+-                " (`--fp16_full_eval`) can only be used on CUDA devices."
+-            )
++        #if (
++        #    self.framework == "pt"
++        #    and is_torch_available()
++        #    and (self.device.type != "cuda")
++        #    and (get_xla_device_type(self.device) != "GPU")
++        #    and (self.fp16 or self.fp16_full_eval)
++        #):
++        #    raise ValueError(
++        #        "FP16 Mixed precision training with AMP or APEX (`--fp16`) and FP16 half precision evaluation"
++        #        " (`--fp16_full_eval`) can only be used on CUDA devices."
++        #    )
+ 
+         if (
+             self.framework == "pt"
