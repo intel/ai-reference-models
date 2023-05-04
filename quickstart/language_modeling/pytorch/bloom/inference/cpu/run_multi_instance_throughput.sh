@@ -85,6 +85,9 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --lo
   --per_device_eval_batch_size ${BATCH_SIZE} \
   --do_eval \
   --output_dir ${OUTPUT_DIR} \
+  --torch_dtype bfloat16 \
+  --low_cpu_mem_usage
+
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
@@ -99,4 +102,4 @@ END   {
 sum = sum / i;
 printf("%.3f", sum);
 }')
-echo ""gptj-6b";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
+echo ""bloom";"throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log

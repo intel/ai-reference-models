@@ -45,4 +45,5 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --lo
   --int8_config configure.json \
   --output_dir "./" \
   --calibration_iters 20 \
-
+  --torch_dtype bfloat16 \
+  --low_cpu_mem_usage

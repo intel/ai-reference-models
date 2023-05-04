@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# PyTorch DistilBERT Base inference
+# PyTorch Bloom-176B inference
 
 <!-- 10. Description -->
 ## DescriptiThis document has instructions for running [Bloom-176B inference on CLM task](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py) inference using Intel-optimized PyTorch.
