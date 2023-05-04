@@ -92,6 +92,8 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0 --log
   --per_device_eval_batch_size ${BATCH_SIZE} \
   --do_eval \
   --output_dir ${OUTPUT_DIR} \
+  --torch_dtype bfloat16 \
+  --low_cpu_mem_usage
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
@@ -127,5 +129,6 @@ END   {
 }')
 
 echo $INSTANCES_PER_SOCKET
-echo ""gptj-6b";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
-echo ""gptj-6b";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log
+echo ""bloom";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
+echo ""bloom";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log
+
