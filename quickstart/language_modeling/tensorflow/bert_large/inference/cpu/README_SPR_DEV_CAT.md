@@ -6,7 +6,7 @@ Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-modeling:spr-bert-large-inference
+docker pull intel/language-modeling:tf-spr-bert-large-inference
 ```
 
 <table>
@@ -79,7 +79,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-bert-large-inference \
-  intel/language-modeling:spr-bert-large-inference \
+  intel/language-modeling:tf-spr-bert-large-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

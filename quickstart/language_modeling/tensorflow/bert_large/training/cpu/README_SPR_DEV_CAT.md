@@ -5,7 +5,7 @@ This document has instructions for running BERT Large Pretraining using Intel-op
 
 ## Pull Command
 ```
-docker pull intel/language-modeling:spr-bert-large-pretraining
+docker pull intel/language-modeling:tf-spr-bert-large-pretraining
 ```
 
 <table>
@@ -68,7 +68,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-bert-large-pretraining \
-  intel/language-modeling:spr-bert-large-pretraining \
+  intel/language-modeling:tf-spr-bert-large-pretraining \
   /bin/bash quickstart/pretraining.sh
 ```
 
