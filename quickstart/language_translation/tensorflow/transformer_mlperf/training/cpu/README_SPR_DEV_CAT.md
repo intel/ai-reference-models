@@ -6,7 +6,7 @@ using Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-translation:spr-transformer-mlperf-training
+docker pull intel/language-translation:tf-spr-transformer-mlperf-training
 ```
 
 <table>
@@ -55,7 +55,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-transformer-mlperf-training \
-  intel/language-translation:spr-transformer-mlperf-training \
+  intel/language-translation:tf-spr-transformer-mlperf-training \
   /bin/bash quickstart/training.sh
 ```
 

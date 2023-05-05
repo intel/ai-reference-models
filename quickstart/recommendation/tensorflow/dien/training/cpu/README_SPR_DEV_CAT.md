@@ -5,7 +5,7 @@ This document has instructions for running DIEN training using Intel-optimized T
 
 ## Pull Command
 ```
-docker pull intel/recommendation:spr-dien-training
+docker pull intel/recommendation:tf-spr-dien-training
 ```
 
 <table>
@@ -69,7 +69,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-dien-training \
-  intel/recommendation:spr-dien-training \
+  intel/recommendation:tf-spr-dien-training \
   /bin/bash quickstart/training.sh
 ```
 

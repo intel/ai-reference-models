@@ -6,7 +6,7 @@ Intel-optimized TensorFlow.
 
 ## Pull Command
 ```
-docker pull intel/language-translation:spr-transformer-mlperf-inference
+docker pull intel/language-translation:tf-spr-transformer-mlperf-inference
 ```
 
 <table>
@@ -64,7 +64,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-transformer-mlperf-inference \
-  intel/language-translation:spr-transformer-mlperf-inference \
+  intel/language-translation:tf-spr-transformer-mlperf-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

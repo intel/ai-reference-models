@@ -5,7 +5,7 @@ This document has instructions for running ResNet50 v1.5 inference using Intel-o
 
 ## Pull Command
 ```
-docker pull intel/image-recognition:spr-resnet50v1-5-inference
+docker pull intel/image-recognition:tf-spr-resnet50v1-5-inference
 ```
 
 <table>
@@ -72,7 +72,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-resnet50v1-5-inference \
-  intel/image-recognition:spr-resnet50v1-5-inference \
+  intel/image-recognition:tf-spr-resnet50v1-5-inference \
   /bin/bash quickstart/${SCRIPT}
 ```
 

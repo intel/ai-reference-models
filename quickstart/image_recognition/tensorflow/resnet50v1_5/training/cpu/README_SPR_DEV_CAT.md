@@ -5,7 +5,7 @@ This document has instructions for running ResNet50 v1.5 training using Intel-op
 
 ## Pull Command
 ```
-docker pull intel/image-recognition:spr-resnet50v1-5-training
+docker pull intel/image-recognition:tf-spr-resnet50v1-5-training
 ```
 
 <table>
@@ -61,7 +61,7 @@ docker run --rm \
   --privileged --init -it \
   --shm-size 8G \
   -w /workspace/tf-spr-resnet50v1-5-training \
-  intel/image-recognition:spr-resnet50v1-5-training \
+  intel/image-recognition:tf-spr-resnet50v1-5-training \
   /bin/bash quickstart/training.sh
 ```
 
