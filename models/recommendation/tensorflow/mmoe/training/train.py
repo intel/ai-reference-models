@@ -50,6 +50,17 @@ class TimeHistory(tf.keras.callbacks.Callback):
 
 
 def train_and_eval():
+    print("Training with " + str(args.precision) + " precision and batch size of " + str(args.batch_size))
+
+    if args.precision == "bfloat16":
+        print("Enabling auto-mixed precision for bfloat16")
+        tf.config.optimizer.set_experimental_options({'auto_mixed_precision_onednn_bfloat16': True})
+        print(tf.config.optimizer.get_experimental_options())
+    elif args.precision == "fp16":
+        print("Enabling auto-mixed precision for fp16")
+        tf.config.optimizer.set_experimental_options({'auto_mixed_precision': True})
+        print(tf.config.optimizer.get_experimental_options())
+
     # Read the training data
     column_names = ['age', 'class_worker', 'det_ind_code', 'det_occ_code', 'education', 'wage_per_hour', 'hs_college',
                     'marital_stat', 'major_ind_code', 'major_occ_code', 'race', 'hisp_origin', 'sex', 'union_member',
@@ -84,8 +95,8 @@ def train_and_eval():
         lbe = LabelEncoder()
         data[feat] = lbe.fit_transform(data[feat])
 
-    fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4) for feat in sparse_features]
-    + [DenseFeat(feat, 1, ) for feat in dense_features]
+    fixlen_feature_columns = [SparseFeat(feat, data[feat].max() + 1, embedding_dim=4) for feat in sparse_features] + \
+                             [DenseFeat(feat, 1, ) for feat in dense_features]
 
     dnn_feature_columns = fixlen_feature_columns
     linear_feature_columns = fixlen_feature_columns
@@ -108,10 +119,11 @@ def train_and_eval():
               batch_size=args.batch_size, epochs=args.train_epochs, verbose=2, validation_split=0.2,
               callbacks=[time_callback])
     avg_throughput = sum(time_callback.throughput) / len(time_callback.throughput)
-    print("Average Throughput: " + str(round(avg_throughput, 2)) + " examples/sec")
+    print("Average Throughput: " + str(round(avg_throughput, 2)) + " examples/sec\n")
 
     # Saving the model
-    model.save(args.model_dir)
+    model.save(args.output_dir)
+    print("The trained model is saved at: " + str(args.output_dir) + "\n")
 
     # Running predictions on the validation dataset
     pred_ans = model.predict(val_model_input)
@@ -141,9 +153,15 @@ def get_arg_parser():
         default=256
     )
     arg_parser.add_argument(
-        '-o', '--model-dir',
+        '-p', '--precision',
+        help='Specify the model precision to use: fp32, bfloat16 or fp16',
+        choices=['fp32', 'bfloat16', 'fp16'],
+        dest="precision", required=True
+    )
+    arg_parser.add_argument(
+        '-o', '--output-dir',
         help='Specify the location of the output directory for logs and saved model',
-        dest='model_dir', required=True
+        dest='output_dir', required=True
     )
     return arg_parser
 

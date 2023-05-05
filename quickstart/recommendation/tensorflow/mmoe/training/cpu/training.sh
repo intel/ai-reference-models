@@ -41,9 +41,9 @@ if [ -z "${PRECISION}"]; then
   echo "Running with default precision ${PRECISION}"
 fi
 
-if [[ $PRECISION != "fp32" ]]; then
+if [[ $PRECISION != "fp32" ] || [ $PRECISION != "bfloat16" ] || [ $PRECISION != "fp16" ]]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precision is fp32."
+  echo "Supported precision are: fp32, bfloat16, fp16."
   exit 1
 fi
 
@@ -61,7 +61,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --mode training  \
    --framework tensorflow \
    --batch-size ${BATCH_SIZE} \
-   --data-location $DATASET_DIR \
-   --checkpoint $OUTPUT_DIR \
+   --data-location ${DATASET_DIR} \
+   --checkpoint ${OUTPUT_DIR} \
    $@
 

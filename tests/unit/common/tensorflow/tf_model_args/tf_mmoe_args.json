@@ -7,5 +7,20 @@
   { "_comment": "mmoe_inference_benchmark_fp32",
     "input": "run_tf_benchmark.py --framework tensorflow --use-case recommendation --precision fp32 --mode inference --model-name mmoe --batch-size 256 --in-graph /saved_model.pb --intelai-models . --socket-id 0 --verbose",
     "output": "numactl --cpunodebind=0 --membind=0 python ./inference/fp32/eval_census_income_dataset.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=256 --warmup-steps=10 --steps=50",
-    "cpuset": "0-111"}  
+    "cpuset": "0-111"},
+
+  { "_comment": "mmoe_training_fp32",
+  "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=mmoe --precision=fp32 --mode=training --intelai-models=/workspace/intelai_models --batch-size=256 --output-dir=/workspace/checkpoints --data-location=/dataset --train-epochs=6",
+  "output": "python /workspace/intelai_models/training/train.py --batch-size=256 --precision=fp32 --train-epochs=6 --data-location=/dataset --output-dir=/workspace/checkpoints",
+  "cpuset": "0-111"},
+
+  { "_comment": "mmoe_training_bfloat16",
+  "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=mmoe --precision=bfloat16 --mode=training --intelai-models=/workspace/intelai_models --batch-size=256 --output-dir=/workspace/checkpoints --data-location=/dataset --train-epochs=6",
+  "output": "python /workspace/intelai_models/training/train.py --batch-size=256 --precision=bfloat16 --train-epochs=6 --data-location=/dataset --output-dir=/workspace/checkpoints",
+  "cpuset": "0-111"},
+
+  { "_comment": "mmoe_training_fp16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=recommendation --model-name=mmoe --precision=fp16 --mode=training --intelai-models=/workspace/intelai_models --batch-size=256 --output-dir=/workspace/checkpoints --data-location=/dataset --train-epochs=6",
+    "output": "python /workspace/intelai_models/training/train.py --batch-size=256 --precision=fp16 --train-epochs=6 --data-location=/dataset --output-dir=/workspace/checkpoints",
+    "cpuset": "0-111"}
 ]

@@ -1622,7 +1622,7 @@ function mmoe() {
         exit 1
       fi
     elif [ ${MODE} == "training" ]; then
-      if [ ${PRECISION} == "fp32" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
         CMD="${CMD} $(add_arg "--train-epochs" ${TRAIN_EPOCHS})"
         CMD="${CMD} $(add_arg "--model_dir" ${CHECKPOINT_DIRECTORY})"

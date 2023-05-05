@@ -23,7 +23,7 @@ Install the Intel-optimized TensorFlow along with model dependencies under [requ
 # cd to your model zoo directory
 cd models
 export DATASET_DIR=<path to the test data>
-export PRECISION=<set the precision to "fp32">
+export PRECISION=<set the precision to "fp32" or "bfloat16" or "fp16">
 export OUTPUT_DIR=<path to the directory where log files and checkpoints will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>
