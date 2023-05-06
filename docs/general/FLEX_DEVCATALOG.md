@@ -1,6 +1,6 @@
 # Model Zoo for Intel® Architecture Workloads Optimized for the Intel® Data Center GPU Flex Series
 
-This document provides links to step-by-step instructions on how to leverage Model Zoo docker containers to run optimized open-source Deep Learning inference workloads using Intel® Extension for PyTorch* and Intel® Extension for TensorFlow* on the [Intel® Data Center GPU Flex Series](https://www.intel.com/content/www/us/en/products/docs/discrete-gpus/data-center-gpu/flex-series/overview.html).
+This document provides links to step-by-step instructions on how to leverage Model Zoo docker containers to run optimized open-source Deep Learning inference workloads using Intel® Extension for PyTorch* and Intel® Extension for TensorFlow* on the [Intel® Data Center GPU Flex Series](https://www.intel.com/content/www/us/en/products/details/discrete-gpus/data-center-gpu/flex-series.html).
 
 ## Base Containers
 
