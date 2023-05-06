@@ -9,9 +9,9 @@ docs @claynerobison @mhbuehler
 k8s  @ashahba @dzungductran
 models @ashraf-bhuiyan @riverliuintel
 models @riverliuintel
-models/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
+models/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe @blzheng
 quickstart mahathi.vatsal.salopanthula@intel.com
-quickstart/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe
+quickstart/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe @blzheng
 
 # Order is important. The last matching pattern has the most precedence.
 # So if a pull request only touches javascript files, only these owners
