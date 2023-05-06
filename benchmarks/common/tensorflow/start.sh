@@ -114,6 +114,17 @@ if [[ ${NOINSTALL} != "True" ]]; then
   # set env var before installs so that user interaction is not required
   export DEBIAN_FRONTEND=noninteractive
   # install common dependencies
+
+  # Handle horovod uniformly for all OSs. 
+  # If a diffferent version need to be used for a specific OS
+  # change that variable alone locally in the large if stmts (below)
+  if [[ ${MPI_NUM_PROCESSES} != "None"  && $MODE == "training" ]]; then
+    export HOROVOD_WITHOUT_PYTORCH=1
+    export HOROVOD_WITHOUT_MXNET=1
+    export HOROVOD_WITH_TENSORFLOW=1
+    export HOROVOD_VERSION=39c8f7c
+  fi
+
   if [[ ${OS_PLATFORM} == *"CentOS"* ]] || [[ ${OS_PLATFORM} == *"Red Hat"* ]]; then
     yum update -y
     yum install -y gcc gcc-c++ cmake python3-tkinter libXext libSM
@@ -150,17 +161,11 @@ if [[ ${NOINSTALL} != "True" ]]; then
       fi
     fi
 
-    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+    if [[ ${MPI_NUM_PROCESSES} != "None"  && $MODE == "training" ]]; then
       # Installing OpenMPI
       yum install -y openmpi openmpi-devel openssh openssh-server
       yum clean all
       export PATH="/usr/lib64/openmpi/bin:${PATH}"
-
-      # Install Horovod
-      export HOROVOD_WITHOUT_PYTORCH=1
-      export HOROVOD_WITHOUT_MXNET=1
-      export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=b1d0ce8
 
       # Install GCC 7 from devtoolset-7
       if [[ ${OS_VERSION} =~ "7".* ]]; then
@@ -192,17 +197,11 @@ if [[ ${NOINSTALL} != "True" ]]; then
       zypper clean all
     fi
 
-    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+    if [[ ${MPI_NUM_PROCESSES} != "None"  && $MODE == "training" ]]; then
       ## Installing OpenMPI
       zypper install -y openmpi3 openmpi3-devel openssh openssh-server
       zypper clean all
       export PATH="/usr/lib64/mpi/gcc/openmpi3/bin:${PATH}"
-
-      ## Install Horovod
-      export HOROVOD_WITHOUT_PYTORCH=1
-      export HOROVOD_WITHOUT_MXNET=1
-      export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_VERSION=35b27e9
 
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
@@ -224,30 +223,25 @@ if [[ ${NOINSTALL} != "True" ]]; then
       apt-get install google-perftools -y
     fi
 
-    if [[ ${MPI_NUM_PROCESSES} != "None" ]]; then
+    if [[ ${MPI_NUM_PROCESSES} != "None"  && $MODE == "training" ]]; then
       # Installing OpenMPI
       apt-get install openmpi-bin openmpi-common openssh-client openssh-server libopenmpi-dev -y
-
-      # Install Horovod
-      export HOROVOD_WITHOUT_PYTORCH=1
-      export HOROVOD_WITHOUT_MXNET=1
-      export HOROVOD_WITH_TENSORFLOW=1
-      export HOROVOD_WITH_MPI=1
-      export HOROVOD_VERSION=35b27e9
 
       apt-get update
       # In case installing released versions of Horovod fail,and there is
       # a working commit replace next set of commands with something like:
       apt-get install -y --no-install-recommends --fix-missing cmake git
       # TODO: Once this PR https://github.com/horovod/horovod/pull/3864 is merged, we can install horovod as before.
-      # python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
-      git clone https://github.com/horovod/horovod.git
-      cd horovod
-      git reset --hard ${HOROVOD_VERSION}
-      git submodule update --init --recursive
-      git fetch origin pull/3864/head:ashahba/issue-3861-fix
-      git checkout ashahba/issue-3861-fix
-      python3 -m pip install --no-cache-dir -v -e .
+      python3 -m pip install --no-cache-dir git+https://github.com/horovod/horovod.git@${HOROVOD_VERSION}
+
+      # Will keep this as reference for any future usecase
+      #git clone https://github.com/horovod/horovod.git
+      #cd horovod
+      #git reset --hard ${HOROVOD_VERSION}
+      #git submodule update --init --recursive
+      #git fetch origin pull/3864/head:ashahba/issue-3861-fix
+      #git checkout ashahba/issue-3861-fix
+      #python3 -m pip install --no-cache-dir -v -e .
 
       horovodrun --check-build
     fi
