@@ -1,4 +1,4 @@
-numpy>=1.17.4
+numpy>=1.17.4,<=1.23
 Cython
 contextlib2
 pillow>=9.3.0
