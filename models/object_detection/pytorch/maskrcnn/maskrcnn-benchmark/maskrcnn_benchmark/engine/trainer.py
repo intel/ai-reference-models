@@ -234,4 +234,4 @@ def do_train(
             training_timer.total_time / iterations
         )
     )
-    print("Training throughput: {:.3f} fps".format((iterations * cfg.SOLVER.IMS_PER_BATCH) / (training_timer.total_time)))
+    print("Training throughput: {:.3f} fps".format((iterations * cfg.SOLVER.IMS_PER_BATCH / get_world_size()) / (training_timer.total_time)))
