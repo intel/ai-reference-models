@@ -73,7 +73,7 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 BATCH_SIZE=${BATCH_SIZE:-4}
 
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-PRETRAINED_MODEL=${PRETRAINED_MODEL:-"bigscience/bloom"}
+PRETRAINED_MODEL=${PRETRAINED_MODEL:-"Langboat/bloom-1b4-zh"}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/bloom/run_clm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/throughput_log*
