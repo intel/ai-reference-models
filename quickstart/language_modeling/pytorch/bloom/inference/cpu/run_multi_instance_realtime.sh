@@ -80,7 +80,7 @@ ARGS="$ARGS --use_share_weight --total_cores ${CORES} --cores_per_instance ${OMP
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
 rm -rf ${OUTPUT_DIR}/latency_log*
-PRETRAINED_MODEL=${PRETRAINED_MODEL:-"bigscience/bloom"}
+PRETRAINED_MODEL=${PRETRAINED_MODEL:-"Langboat/bloom-1b4-zh"}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/bloom/run_clm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/accuracy_log*
