@@ -2,7 +2,7 @@
 # PyTorch Bloom-176B inference
 
 <!-- 10. Description -->
-## DescriptiThis document has instructions for running [Bloom-176B inference on CLM task](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py) inference using Intel-optimized PyTorch.
+## DescriptiThis document has instructions for running [Bloom-1b4-zh  inference on CLM task](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py) inference using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -39,7 +39,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 * About the BATCH_SIZE in scripts
   ```
-  Throughput mode is using BATCH_SIZE=[4] by default in script (which could be further tuned according to the testing host); 
+  Throughput mode is using BATCH_SIZE=[56] by default in script (which could be further tuned according to the testing host); 
   Realtime mode is using BATCH_SIZE=[1] by default in script; 
   
 
