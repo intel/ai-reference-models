@@ -3,14 +3,13 @@
 
 # These owners will be the default owners for everything in the repo,
 # but PR owner should be able to assign other contributors when appropriate
-* wafaa.s.taie@intel.com @ashahba @claynerobison 
+* wafaa.s.taie@intel.com @ashahba @claynerobison mahathi.vatsal.salopanthula@intel.com @jitendra42 @lerealno
 datasets @ashahba @claynerobison @dzungductran
 docs @claynerobison @mhbuehler
 k8s  @ashahba @dzungductran
 models @ashraf-bhuiyan @riverliuintel
 models @riverliuintel
 models/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe @blzheng
-quickstart mahathi.vatsal.salopanthula@intel.com
 quickstart/**/pytorch/ @leslie-fang-intel @jiayisunx @zhuhaozhe @blzheng
 
 # Order is important. The last matching pattern has the most precedence.
