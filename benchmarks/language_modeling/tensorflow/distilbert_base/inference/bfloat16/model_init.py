@@ -68,9 +68,12 @@ class ModelInitializer(BaseModelInitializer):
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
+        script_file = "evaluate_distilbert.py"
+        if self.args.weight_sharing and not self.args.accuracy_only:
+            script_file = "evaluate_distilbert_weight_sharing.py"
         benchmark_script = os.path.join(
             self.args.intelai_models, self.args.mode, self.args.precision,
-            "evaluate_distilbert.py")
+            script_file)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
