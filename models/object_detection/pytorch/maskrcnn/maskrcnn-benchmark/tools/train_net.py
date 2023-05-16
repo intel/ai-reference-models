@@ -209,6 +209,22 @@ def main():
             args.world_size = 1
 
     cfg.merge_from_file(args.config_file)
+    if "SOLVER.STEPS_1" in args.opts and \
+        "SOLVER.STEPS_2" in args.opts and \
+        "SOLVER.STEPS" not in args.opts:
+        steps_1_ind = args.opts.index("SOLVER.STEPS_1") + 1
+        steps_2_ind = args.opts.index("SOLVER.STEPS_2") + 1
+        new_steps = ["SOLVER.STEPS", '({},{})'.format(args.opts[steps_1_ind], args.opts[steps_2_ind])]
+        print(f"Combine SOLVER.STEPS_1 and SOLVER.STEPS_2 together to generate {new_steps}")
+        steps_1_key_ind = args.opts.index("SOLVER.STEPS_1")
+        args.opts.pop(steps_1_key_ind)
+        args.opts.pop(steps_1_key_ind)
+        steps_2_key_ind = args.opts.index("SOLVER.STEPS_2")
+        args.opts.pop(steps_2_key_ind)
+        args.opts.pop(steps_2_key_ind)
+        print("Remove SOLVER.STEPS_1 and SOLVER.STEPS_2 from args.opt")
+        args.opts += new_steps
+        print(args.opts)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
