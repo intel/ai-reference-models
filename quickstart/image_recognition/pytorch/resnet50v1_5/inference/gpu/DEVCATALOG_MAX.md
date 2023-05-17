@@ -58,14 +58,8 @@ DOCKER_ARGS="--rm -it"
 SCRIPT=quickstart/inference_block_format.sh
 Tile=2
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env BATCH_SIZE=${BATCH_SIZE} \

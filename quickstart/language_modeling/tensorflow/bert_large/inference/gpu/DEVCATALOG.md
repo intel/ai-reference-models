@@ -54,13 +54,9 @@ SCRIPT=benchmark.sh
 
 FROZEN_GRAPH=/workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
 
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env PRECISION=${PRECISION} \

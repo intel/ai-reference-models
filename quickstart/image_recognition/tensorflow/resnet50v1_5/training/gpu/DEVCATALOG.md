@@ -44,13 +44,8 @@ else
    export Tile=1
 fi
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run --rm \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env OUTPUT_DIR=${OUTPUT_DIR} \

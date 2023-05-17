@@ -57,16 +57,11 @@ export BERT_WEIGHT=$(pwd)/bert_squad_model
 DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
 IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-inference
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 SCRIPT=quickstart/fp16_inference_plain_format.sh
 Tile=2
 
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env DATASET_DIR=${DATASET_DIR} \

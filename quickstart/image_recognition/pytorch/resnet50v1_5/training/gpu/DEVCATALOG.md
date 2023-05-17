@@ -57,6 +57,7 @@ export SCRIPT=quickstart/ddp_training_plain_format_nchw.sh
 export Tile=2
 
 docker run \
+  --privileged \
   --device=/dev/dri \
   --shm-size=10G \
   --privileged \
