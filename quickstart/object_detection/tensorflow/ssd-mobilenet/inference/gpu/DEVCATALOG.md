@@ -47,14 +47,8 @@ export BATCH_SIZE=<inference batch size.Default is 1024 for Flex Series 170 and 
 IMAGE_NAME=intel/object-detection:tf-flex-gpu-ssd-mobilenet-inference
 DOCKER_ARGS="--rm -it"
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env PRECISION=${PRECISION} \

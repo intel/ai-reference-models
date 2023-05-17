@@ -63,17 +63,10 @@ export NUM_ITERATIONS=<set number of iterations. Default is 10>
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference
 
-
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
+  --privileged \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env NUM_ITERATIONS=$NUM_ITERATIONS \
   --env PRECISION=${PRECISION} \

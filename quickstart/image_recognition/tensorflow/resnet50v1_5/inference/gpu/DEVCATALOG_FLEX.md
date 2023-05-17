@@ -48,13 +48,7 @@ export DATASET_DIR=<path to the preprocessed imagenet dataset>
 IMAGE_NAME=intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference
 export GPU_TYPE=flex_series
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
   --privileged \

@@ -71,19 +71,14 @@ export DATASET_DIR=<path to the preprocessed voc2007 dataset>
 export PRETRAINED_MODEL=<path to the pretrained model folder. The code downloads the model if this folder is empty>
 export SCRIPT=quickstart/inference_with_dummy_data.sh
 export BATCH_SIZE=<inference batch size.Default is 1024 for flex-series 170 and 256 for flex-series 140 >
+export NUM_ITERATIONS=<enter number of iterations. Default is 500>
 export label=/workspace/pytorch-flex-series-ssd-mobilenet-inference/labels/voc-model-labels.txt
 
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference 
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env BATCH_SIZE=${BATCH_SIZE} \
