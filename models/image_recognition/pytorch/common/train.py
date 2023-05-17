@@ -24,8 +24,6 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 from torch.utils import ThroughputBenchmark
 
-import oneccl_bindings_for_pytorch
-
 from lars import *
 from lars_utils import *
 
@@ -62,6 +60,8 @@ parser.add_argument('--ipex', action='store_true', default=False,
                     help='use intel pytorch extension')
 parser.add_argument('--bf16', action='store_true', default=False,
                     help='enable ipex bf16 path')
+parser.add_argument('--bf32', action='store_true', default=False,
+                    help='enable ipex bf32 path')
 #Learning Hyperparams 
 parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')  
@@ -148,6 +148,10 @@ def main_worker(args):
     if args.ipex:
         model = model.to(memory_format=torch.channels_last)
 
+    if args.ipex and args.bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        print("using bf32 fmath mode\n")
+
     # Loss function (criterion)
     # Label smoothing supported in Pytorch >= v1.10.0
     if 0 < args.label_smoothing < 1.0:
@@ -175,6 +179,7 @@ def main_worker(args):
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
     # setup distributed training
     if args.distributed:
+        import oneccl_bindings_for_pytorch
         dist.init_process_group(backend=args.dist_backend,
                                 init_method=args.dist_url,
                                 world_size=args.world_size,
@@ -313,8 +318,10 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
     if args.ipex:
         if args.bf16:
             print("running ipex bfloat16 training step\n")
+        elif args.bf32:
+            print("running ipex bfloat32 training step\n")
         else:
-            print("running ipex fp32 training step\n")
+            print("running ipex float32 training step\n")
 
     start = time.time()
     for i, (images, target) in enumerate(train_loader):

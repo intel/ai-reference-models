@@ -73,7 +73,7 @@ elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32 bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, bf32"
     exit 1
 fi
 
