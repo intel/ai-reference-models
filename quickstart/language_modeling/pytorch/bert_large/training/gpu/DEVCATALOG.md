@@ -40,16 +40,11 @@ export PROCESSED_DATASET_DIR=${PWD}
 DOCKER_ARGS="--rm --init -it"
 IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-training
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 SCRIPT=quickstart/ddp_bf16_training_plain_format.sh
 Tile=2
 
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --shm-size=10G \
   --privileged \

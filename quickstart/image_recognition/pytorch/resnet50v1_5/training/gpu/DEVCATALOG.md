@@ -56,13 +56,7 @@ IMAGE_NAME=intel/image-recognition:pytorch-max-gpu-resnet50v1-5-training
 export SCRIPT=quickstart/ddp_training_plain_format_nchw.sh
 export Tile=2
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
   --device=/dev/dri \
   --shm-size=10G \
   --privileged \
