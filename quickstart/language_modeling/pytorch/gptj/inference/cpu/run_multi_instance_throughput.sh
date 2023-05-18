@@ -53,7 +53,7 @@ then
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --mix_bf16 --int8 --int8_config configure.json"
+    ARGS="$ARGS --bf16 --int8 --int8_config configure.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
