@@ -46,7 +46,7 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
 ```bash
-    export BATCH_SIZE=#global batch_size (for lars optimizer convergency test, the number should be 3264)
+    export GLOBAL_BATCH_SIZE=#global batch_size (or export LOCAL_BATCH_SIZE=#local batch_size)(for lars optimizer convergency test, the GLOBAL_BATCH_SIZE should be 3264)
     export NNODES=#your_node_number
     export HOSTFILE=#your_ip_list_file #one ip per line
     export TRAINING_EPOCHS=36 #(optional, this numeber is for lars optimizer convergency test)

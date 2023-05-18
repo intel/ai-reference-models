@@ -45,9 +45,13 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
+if [ -z "${GLOBAL_BATCH_SIZE}" ] && [ -z "${LOCAL_BATCH_SIZE}" ]; then
+  echo "The required environment variable GLOBAL_BATCH_SIZE or LOCAL_BATCH_SIZE has not been set"
+  exit 1
+fi
 
-if [ -z "${BATCH_SIZE}" ]; then
-  echo "The required environment variable BATCH_SIZE has not been set"
+if [ ${GLOBAL_BATCH_SIZE} ] && [ ${LOCAL_BATCH_SIZE} ]; then
+  echo "For the required environment variables GLOBAL_BATCH_SIZE and LOCAL_BATCH_SIZE , set only one of them"
   exit 1
 fi
 
@@ -91,6 +95,10 @@ NNODES=${NNODES:-1}
 HOSTFILE=${HOSTFILE:-./hostfile}
 NUM_RANKS=$(( NNODES * SOCKETS ))
 
+if [ ${LOCAL_BATCH_SIZE} ]; then
+    GLOBAL_BATCH_SIZE=$(( LOCAL_BATCH_SIZE * NNODES * SOCKETS ))
+fi
+
 CORES_PER_INSTANCE=$CORES
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
@@ -132,7 +140,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --warmup-epochs 2  \
     --ipex \
     -j 0 \
-    -b $BATCH_SIZE \
+    -b $GLOBAL_BATCH_SIZE \
     --seed 2020 \
     --dist-backend ccl \
     --base-op=LARS \
@@ -155,4 +163,4 @@ END   {
        printf("%.3f", sum);
 }')
 
-echo "resnet50;"training distributed throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo "resnet50;"training distributed throughput";${PRECISION};${GLOBAL_BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
