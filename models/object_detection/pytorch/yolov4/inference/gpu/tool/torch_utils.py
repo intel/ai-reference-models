@@ -93,20 +93,22 @@ def do_detect(model, img, conf_thresh, nms_thresh, iteration=0, dummy=0, batch_s
         t1 = time.time()
         if benchmark == 0:
             img = img.to("xpu")
-        if data_type == "fp16":
-            img = img.half()
         img = torch.autograd.Variable(img)
         output = model(img)
 
         # sync for time measurement
-        torch.xpu.synchronize()
+        
         if benchmark == 1:
+            torch.xpu.synchronize()
             inf_latency = time.time() - t1
+        else:
+            output = [x.to("cpu") for x in output]
+            torch.xpu.synchronize()
+            inf_latency = time.time() - t1 
+
     ret = None
-    if benchmark == 0:
-        output = [x.to("cpu") for x in output]
+    if benchmark == 0:      
         ret = utils.post_processing(img, conf_thresh, nms_thresh, output)
-        inf_latency = time.time() - t1
 
     process_latency = t1 - t0
     if iteration > 0:

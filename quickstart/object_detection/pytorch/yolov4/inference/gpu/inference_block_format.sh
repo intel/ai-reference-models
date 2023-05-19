@@ -16,7 +16,12 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-BATCH_SIZE=${BATCH_SIZE-64}
+BATCH_SIZE=${BATCH_SIZE-256}
+
+if [[ -z "${DATASET_DIR}" ]]; then
+  echo "Please specify imagenet dataset folder as variable DATASET_DIR"
+  exit 1
+fi
 
 if [[ -z "${PRETRAINED_MODEL}" ]]; then
   echo "The required environment variable PRETRAINED_MODEL has not been set."
@@ -24,12 +29,15 @@ if [[ -z "${PRETRAINED_MODEL}" ]]; then
   exit 1
 fi
 
-export OverrideDefaultFP64Settings=1 
-export IGC_EnableDPEmulation=1 
+if [[ -z $OUTPUT_DIR ]]; then
+  echo "The required environment variable OUTPUT_DIR has not been set"
+  exit 1
+fi
 
-echo "YOLOv4 dummy data int8 inference block nchw"
-IPEX_XPU_ONEDNN_LAYOUT=1 python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
+echo "YOLO(v4) Inference INT8 Block NCHW BS=256"
+python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
   -n 80 \
+  -i ${DATASET_DIR} \
   --weight ${PRETRAINED_MODEL} \
   -e 416 \
   -w 416 \
@@ -38,4 +46,4 @@ IPEX_XPU_ONEDNN_LAYOUT=1 python -u ${MODEL_DIR}/models/object_detection/pytorch/
   --dummy 1 \
   -b ${BATCH_SIZE} \
   --benchmark 1 \
-  --iter 500 2>&1 | tee $OUTPUT_DIR/YOLOv4_dummy_data_xpu_inf.log
+  --iter 500 2>&1 | tee $OUTPUT_DIR/YOLOv4_int8_bs256_inf_block_nchw.log

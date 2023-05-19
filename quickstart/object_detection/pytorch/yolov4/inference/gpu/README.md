@@ -67,7 +67,7 @@ In addition, we should also set the `size` environment to match the size of imag
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_with_dummy_data.sh` | Inference with int8 batch_size64 dummy data |
+| `inference_block_format.sh` | Inference with int8 batch_size256 block format |
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -100,7 +100,7 @@ export PRETRAINED_MODEL=<path to directory where the pretrained weights file was
 export OUTPUT_DIR=<Path to save the output logs>
 
 Run the inference script, only int8 precision is supported:
-./quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_with_dummy_data.sh
+./quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_block_format.sh
 ```
 
 <!--- 80. License -->

@@ -20,7 +20,7 @@ torch._C._jit_set_profiling_executor(False)
 parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('-n', '--n_classes', required=True, type=int, help='n_classes')
 parser.add_argument('--weight', help='destination of weightfiles')
-parser.add_argument('-i', '--image', help='The address where the picture is stored')
+parser.add_argument('-i', '--image', required=True, help='The address where the picture is stored')
 parser.add_argument('-e', '--height', required=True, type=int, help='Image height')
 parser.add_argument('-w', '--width', required=True,  type=int, help='Image width')
 parser.add_argument('-name', help='namefile lable_path')
@@ -508,20 +508,23 @@ if __name__ == "__main__":
     namesfile = None
     if args.name:
         namesfile = args.name
-    data_type = args.datatype
+    dtype_dict = {"fp32": torch.float, "fp16": torch.float16, "bf16": torch.bfloat16}
+    if args.datatype != "int8":
+        if args.datatype not in dtype_dict.keys():
+            print("Invalid data type.")
+            sys.exit(1)
+        data_type = dtype_dict[args.datatype]
+    else:
+        data_type = "int8"
+
     dummy = args.dummy
     benchmark = args.benchmark
     batch_size = args.batch_size
     infer_iters = args.iter
 
+    img = cv2.imread(imgfile)
 
-    import os
-    if dummy == 1 :
-        img = cv2.imread(os.path.join(os.getcwd(), "models/object_detection/pytorch/yolov4/inference/gpu/data/000000581918.jpg"))
-    else:
-        img = cv2.imread(imgfile)
-
-    if data_type == "int8" and args.jit == 0:
+    if args.datatype == "int8" and args.jit == 0:
         print("int8 not support impe path")
         sys.exit(1)
 
@@ -536,9 +539,9 @@ if __name__ == "__main__":
     if args.load:
         load_path = args.load
         if args.jit == -1:
-            if data_type in ("fp16", "int8"):
+            if args.datatype in ("fp16", "int8"):
                 model = torch.jit.load(load_path)
-            if data_type == "fp32":
+            if args.datatype == "fp32":
                 model = torch.load(load_path)
         elif args.jit == 0:
             model = torch.load(load_path)
@@ -555,7 +558,10 @@ if __name__ == "__main__":
         pretrained_dict = torch.load(weightfile, map_location=torch.device('xpu'))
         model.load_state_dict(pretrained_dict)
 
-        if args.jit == 1 or (args.jit == -1 and (data_type in ("fp16", "int8"))):
+        if args.datatype in ["fp32", "fp16"]:
+            model = torch.xpu.optimize(model=model, dtype=data_type)
+
+        if args.jit == 1 or (args.jit == -1 and (args.datatype in ("fp16", "int8"))):
             print("JIT running ... ")
             img_jit = sized
             if type(img_jit) == np.ndarray and len(img_jit.shape) == 3:  # cv2 image
@@ -568,15 +574,16 @@ if __name__ == "__main__":
             img_jit = torch.autograd.Variable(img_jit)
             img_jit = img_jit.to('xpu')
 
-            if data_type == "fp16":
-                img_jit = img_jit.half()
-            if benchmark == 1:
-                modelJit = torch.jit.trace(model, img_jit, check_trace=False)
+            if args.datatype != "int8":
+                with torch.no_grad():
+                    with torch.xpu.amp.autocast(enabled=True, dtype=data_type):
+                        modelJit = torch.jit.trace(model, img_jit)
             else:
                 modelJit = torch.jit.trace(model, img_jit)
+
             model = wrap_cpp_module(torch._C._jit_pass_fold_convbn(modelJit._c))
 
-            if data_type == 'int8':
+            if args.datatype == 'int8':
                 print("Calibration for INT8 ... ")
                 with torch.no_grad():
                     qconfig_s8 = torch.quantization.QConfig(
@@ -596,11 +603,6 @@ if __name__ == "__main__":
     from tool.utils import load_class_names, plot_boxes_cv2
     from tool.torch_utils import do_detect
 
-    if args.jit == 0:
-        if data_type == 'fp16':
-            model = model.half()
-
-
     total_latency = 0
     perf_start_iter = 1
     if (benchmark == 1 and infer_iters >= 500):
@@ -609,7 +611,7 @@ if __name__ == "__main__":
                         # Because the first iteration is usually longer
         with torch.inference_mode():
             print("Iteration: ",i)
-            boxes, latency = do_detect(model, sized, 0.4, 0.6, i, dummy, batch_size, width, height, data_type, benchmark)
+            boxes, latency = do_detect(model, sized, 0.4, 0.6, i, dummy, batch_size, width, height, args.datatype, benchmark)
 
             if i >= perf_start_iter:
                 total_latency += latency
@@ -630,9 +632,9 @@ if __name__ == "__main__":
     if args.save:
         store_path = args.save
         if args.jit == -1:
-            if data_type in ("fp16", "int8"):
+            if args.datatype in ("fp16", "int8"):
                 torch.jit.save(model, store_path)
-            if data_type == "fp32":
+            if args.datatype == "fp32":
                 torch.save(model, store_path)
         elif args.jit == 0:
             torch.save(model, store_path)
