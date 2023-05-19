@@ -19,9 +19,16 @@ MODEL_DIR=${MODEL_DIR-$PWD}
 BATCH_SIZE=${BATCH_SIZE-256}
 
 if [[ -z "${DATASET_DIR}" ]]; then
-  echo "Please specify imagenet dataset folder as variable DATASET_DIR"
+  echo "Please specify coco dataset folder as variable DATASET_DIR"
   exit 1
 fi
+
+if [[ -z "${LABELS_FILE}" ]]; then
+  echo "Please specify coco names dataset file as variable LABELS_FILE"
+  exit 1
+fi
+
+
 
 if [[ -z "${PRETRAINED_MODEL}" ]]; then
   echo "The required environment variable PRETRAINED_MODEL has not been set."
@@ -38,6 +45,7 @@ echo "YOLO(v4) Inference INT8 Block NCHW BS=256"
 python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
   -n 80 \
   -i ${DATASET_DIR} \
+  -l ${LABELS_FILE} \
   --weight ${PRETRAINED_MODEL} \
   -e 416 \
   -w 416 \

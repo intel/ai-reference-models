@@ -62,6 +62,8 @@ variable for YOLOv4 (for example: `export image=/home/<user>/coco/val2017/000000
 In addition, we should also set the `size` environment to match the size of image.
 (for example: `export size=416`)
 
+Download the `coco.names` labels file from [here](https://www.kaggle.com/datasets/valentynsichkar/yolo-coco-data?resource=download) and set `LABELS_FILE` to point to this file location. 
+
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
@@ -96,6 +98,7 @@ Install the following pre-requisites:
 ```
 Set environment variables:
 export DATASET_DIR=<path where yolov4 COCO dataset>
+export LABELS_FILE=<path to coco labels file>
 export PRETRAINED_MODEL=<path to directory where the pretrained weights file was saved>
 export OUTPUT_DIR=<Path to save the output logs>
 

@@ -9,7 +9,7 @@ This document has instructions for running ResNet50 v1.5 inference using Intel®
 | Item | Detail |
 | ------ | ------- |
 | Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed: [Download Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04)
+| Drivers | GPU-compatible drivers need to be installed: [Download Driver 602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
 | Software | Docker* Installed |
 
 ## Get Started
