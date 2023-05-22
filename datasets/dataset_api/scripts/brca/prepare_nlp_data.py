@@ -28,6 +28,30 @@ import shutil
 
 root_folder = os.environ.get('DATASET_DIR')
 
+def remove_item(item, s):  
+    for c in range(s.count(item)):
+        if item in s:
+            str_indx = s.index(item)
+            s = s[:str_indx] + s[str_indx+len(item)+3:]
+            
+    return s
+
+def remove_BIRADS(df):
+    symptoms_list = []
+    for i, s in enumerate(df.symptoms): # [:10]:
+        if '(BIRADS' in s:
+            item = '(BIRADS'  
+            s = remove_item(item, s)
+
+        if '(BIRAD' in s:
+            item = '(BIRAD'
+            s = remove_item(item, s)
+        
+        symptoms_list.append(s)
+
+    df.symptoms = symptoms_list
+    
+    return df
 
 def read_right_and_left(tx):
     tx_right, tx_left = "", ""
@@ -192,8 +216,10 @@ def prepare_data(
     df["Patient_ID"] = [
         "".join([str(df.loc[i, "ID"]), df.loc[i, "Side"]]) for i in df.index
     ]
-    
+
     df = label_correction(df)
+    df = remove_BIRADS(df)
+
     save_annotation_file(df, output_annotations_folder, output_annotations_file)
 
 
@@ -201,12 +227,13 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="This function performs preprocessing steps for Breast Cancer annotation."
     )
+
     parser.add_argument(
         "--medical_reports_folder",
         type=str,
         help="Location of medical reports for cases",
         default=os.path.join(root_folder, "Medical reports for cases .zip"),
-    )  
+    )
     parser.add_argument(
         "--manual_annotations_file",
         type=str,
