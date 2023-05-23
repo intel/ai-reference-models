@@ -66,7 +66,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --log_file_prefix stable_diffusion_${PRECISION}_inference_realtime \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --ipex \
-    --trace \
+    --jit \
     --benchmark \
     $ARGS
 

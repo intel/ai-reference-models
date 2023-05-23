@@ -27,6 +27,8 @@ import torch
 from PIL import Image
 from diffusers import StableDiffusionPipeline
 from torchmetrics.image.fid import FrechetInceptionDistance
+import torchvision.datasets as dset
+import torchvision.transforms as transforms
 
 logging.getLogger().setLevel(logging.INFO)
 
@@ -34,13 +36,13 @@ logging.getLogger().setLevel(logging.INFO)
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name_or_path", type=str, default="CompVis/stable-diffusion-v1-4", help="Model path")
+    parser.add_argument("--dataset_path", type=str, default=None, help="COCO2017 dataset path")
     parser.add_argument("--prompt", type=str, default="a photo of an astronaut riding a horse on mars", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
-    parser.add_argument("--real_images", type=str, default="pt_results", help="Path to real images for FID input")
     parser.add_argument("--seed", type=int, default=2022, help="random seed")
     parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf16, fp16, int8')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
-    parser.add_argument('--trace', action='store_true', default=False, help='jit trace')
+    parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
     parser.add_argument('--compile_inductor', action='store_true', default=False, help='compile with inductor backend')
     parser.add_argument('--calibration', action='store_true', default=False, help='doing calibration step for int8 path')
@@ -79,6 +81,7 @@ def main():
 
     # ipex
     if args.ipex:
+        print("Running IPEX ...")
         import intel_extension_for_pytorch as ipex
         if args.precision == "fp32":
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True)
@@ -90,14 +93,12 @@ def main():
                     pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
                     pipe.unet.load_qconf_summary(qconf_summary=args.configure_dir)
                     pipe.unet = ipex.quantization.convert(pipe.unet)
-                    print("running int8 evalation step\n")
         else:
             raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8")
-        print("Running IPEX ...")
-
 
     # jit trace
-    if args.trace:
+    if args.jit:
+        print("JIT trace ...")
         # from utils_vis import make_dot, draw
         if args.precision == "bf16" or args.precision == "fp16":
             with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
@@ -129,15 +130,22 @@ def main():
     generator = torch.Generator(device="cpu").manual_seed(args.seed)
 
     if args.ipex and args.precision == "int8" and args.calibration:
-        print("runing int8 calibration step\n")
+        print("Running int8 calibration ...")
         qconfig = ipex.quantization.default_static_qconfig
         pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
-        pipe(args.prompt, generator=generator).images
+        cap = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
+                                annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
+                                transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
+        for i, (real_image, prompts) in enumerate(cap):
+            prompt = prompts[0]
+            pipe(prompt, generator=generator).images
+            if i == 9:
+                break
         pipe.unet.save_qconf_summary(args.configure_dir)
-        print(".........calibration step done..........")
 
     # benchmark
     if args.benchmark:
+        print("Running benchmark ...")
         # run model
         start = time.time()
         if args.precision == "bf16" or args.precision == "fp16":
@@ -155,35 +163,40 @@ def main():
             image[0].save(f"{args.output_dir}/{image_name}.png")
         
     if args.accuracy:
+        print("Running accuracy ...")
         # run model
-        images = []
-        for prompt in ["a photo of an astronaut riding a horse on mars", "A high tech solarpunk utopia in the Amazon rainforest"]:
+        cap = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
+                                annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
+                                transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
+        fake_images = []
+        real_images = []
+        for i, (real_image, prompts) in enumerate(cap):
+            prompt = prompts[0]
+            print("prompt: ", prompt)
             if args.precision == "bf16" or args.precision == "fp16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
                     image = pipe(prompt, generator=generator, output_type="numpy").images
             else:
                 with torch.no_grad():
                     image = pipe(prompt, generator=generator, output_type="numpy").images
-            images.append(image[0])
 
             if args.output_dir:
                 if not os.path.exists(args.output_dir):
                     os.mkdir(args.output_dir)
                 image_name = time.strftime("%Y%m%d_%H%M%S")
-                Image.fromarray((image[0] * 255).round().astype("uint8")).save(f"{args.output_dir}/{image_name}.png")
+                Image.fromarray((image[0] * 255).round().astype("uint8")).save(f"{args.output_dir}/fake_image_{image_name}.png")
+                Image.fromarray(real_image.permute(1, 2, 0).numpy()).save(f"{args.output_dir}/real_image_{image_name}.png")
 
-        fake_images = torch.tensor(images)
+            fake_images.append(image[0])
+            real_images.append(real_image.unsqueeze(0) / 255.0)
+
+            if i == 9:
+                break
+
+        real_images = torch.cat(real_images)
+
+        fake_images = torch.tensor(fake_images)
         fake_images = fake_images.permute(0, 3, 1, 2)
-        
-        # load real images
-        dataset_path = args.real_images
-        image_paths = sorted([os.path.join(dataset_path, x) for x in os.listdir(dataset_path)])
-        real_images = [np.array(Image.open(path).convert("RGB")) for path in image_paths]
-        
-        def preprocess_image(image):
-            image = torch.tensor(image).unsqueeze(0)
-            return image.permute(0, 3, 1, 2) / 255.0
-        real_images = torch.cat([preprocess_image(image) for image in real_images])
 
         # compute FID
         fid = FrechetInceptionDistance(normalize=True)
@@ -195,6 +208,7 @@ def main():
 
     # profile
     if args.profile:
+        print("Running profiling ...")
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
             if args.precision == "bf16" or args.precision == "fp16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():

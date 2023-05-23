@@ -23,6 +23,11 @@ if [ ! -e "${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py" 
   exit 1
 fi
 
+if [ ! -d "${DATASET_DIR}" ]; then
+  echo "The DATASET_DIR \${DATASET_DIR} does not exist"
+  exit 1
+fi
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 export KMP_BLOCKTIME=1
@@ -33,6 +38,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --ninstance 1 \
     --node_id=0 \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+    --dataset_path=${DATASET_DIR} \
     --ipex \
     --precision int8 \
     --calibration \

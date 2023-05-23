@@ -23,6 +23,11 @@ if [ ! -e "${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py" 
   exit 1
 fi
 
+if [ ! -d "${DATASET_DIR}" ]; then
+  echo "The DATASET_DIR \${DATASET_DIR} does not exist"
+  exit 1
+fi
+
 if [ ! -d "${OUTPUT_DIR}" ]; then
   echo "The OUTPUT_DIR '${OUTPUT_DIR}' does not exist"
   exit 1
@@ -67,8 +72,9 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --log_path=${OUTPUT_DIR} \
     --log_file_prefix stable_diffusion_${PRECISION}_inference_accuracy \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
+    --dataset_path=${DATASET_DIR} \
     --ipex \
-    --trace \
+    --jit \
     --accuracy \
     --output_dir="${PRECISION}_results" \
     $ARGS
