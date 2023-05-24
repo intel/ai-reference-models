@@ -98,7 +98,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 rm -rf ./resnet50_training_log_*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --ninstances 1 \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     --log_path=${OUTPUT_DIR} \

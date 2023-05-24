@@ -64,7 +64,7 @@ rm -rf ${OUTPUT_DIR}/fasterrcnn_resnet50_fpn_latency_log_${PRECISION}_*
 # check if stoch PYT or IPEX is installed on the system
 pip list | grep intel-extension-for-pytorch
 if [[ "$?" == 0 ]]; then
-  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch --use_default_allocator \
+  IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch --memory-allocator jemalloc \
 	--latency_mode --log_path=${OUTPUT_DIR} \
 	--log_file_prefix="fasterrcnn_resnet50_fpn_latency_log_${PRECISION}""
   ARGS="$ARGS --ipex "

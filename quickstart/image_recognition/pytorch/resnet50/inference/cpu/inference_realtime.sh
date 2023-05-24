@@ -81,7 +81,7 @@ export OMP_NUM_THREADS=$CORES_PER_INSTANCE
 NUMBER_INSTANCE=`expr $CORES / $CORES_PER_INSTANCE`
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --ninstance ${SOCKETS} \
     --log_path=${OUTPUT_DIR} \
     --log_file_prefix="./resnet50_latency_log_${PRECISION}" \

@@ -74,7 +74,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
         TOTAL_CORES=`expr $CORES \* $SOCKETS`
         CORES_PER_INSTANCE=$CORES
         MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch \
-        --use_default_allocator --ninstance ${SOCKETS} \
+        --memory-allocator jemalloc --ninstance ${SOCKETS} \
         --ncore_per_instance ${CORES_PER_INSTANCE} --log_path=${OUTPUT_DIR} \
         --log_file_prefix="./resnext101_throughput_log_${PRECISION}""
 

@@ -80,7 +80,7 @@ oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindin
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     --distributed \
     --nnodes ${NNODES} \

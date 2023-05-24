@@ -82,7 +82,7 @@ if [[ ${PLATFORM} == "linux" ]]; then
 
         NUMBER_INSTANCE=`expr $CORES / $CORES_PER_INSTANCE`
         MULTI_INSTANCE_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-        --use_default_allocator --ninstance ${SOCKETS} --log_path=${OUTPUT_DIR} \
+        --memory-allocator jemalloc --ninstance ${SOCKETS} --log_path=${OUTPUT_DIR} \
         --log_file_prefix="./resnext101_latency_log_${PRECISION}""
 
         # in case IPEX is used, we set ipex arg

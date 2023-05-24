@@ -74,7 +74,7 @@ BATCH_SIZE=100
 rm -rf ${OUTPUT_DIR}/train_ssdresnet34_${PRECISION}_accuracy*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --ninstances 1 \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/training/cpu/train.py \
