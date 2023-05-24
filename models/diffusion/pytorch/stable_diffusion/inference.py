@@ -37,10 +37,10 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name_or_path", type=str, default="CompVis/stable-diffusion-v1-4", help="Model path")
     parser.add_argument("--dataset_path", type=str, default=None, help="COCO2017 dataset path")
-    parser.add_argument("--prompt", type=str, default="a photo of an astronaut riding a horse on mars", help="input text")
+    parser.add_argument("--prompt", type=str, default="A big burly grizzly bear is show with grass in the background.", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
     parser.add_argument("--seed", type=int, default=2022, help="random seed")
-    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf16, fp16, int8')
+    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf16, fp16, int8, int8-bf16')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
     parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
@@ -74,8 +74,10 @@ def main():
         dtype=torch.half
     elif args.precision == "int8":
         print("Running int8 ...")
+    elif args.precision == "int8-bf16":
+        print("Running int8-bf16 ...")
     else:
-        raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8")
+        raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8, int8-bf16")
 
     input = torch.randn(4, 4, 64, 64), torch.tensor(921), torch.randn(4, 77, 768)
 
@@ -87,17 +89,30 @@ def main():
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True)
         elif args.precision == "bf16" or args.precision == "fp16":
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
-        elif args.precision == "int8":
+        elif args.precision == "int8" or args.precision == "int8-bf16":
                 if not args.calibration:
                     qconfig = ipex.quantization.default_static_qconfig
                     pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
                     pipe.unet.load_qconf_summary(qconf_summary=args.configure_dir)
-                    pipe.unet = ipex.quantization.convert(pipe.unet)
+                    if args.precision == "int8":
+                        with torch.no_grad():
+                            pipe.unet = ipex.quantization.convert(pipe.unet)
+                            pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
+                            pipe.unet = torch.jit.freeze(pipe.unet)
+                            pipe.unet(*input)
+                            pipe.unet(*input)
+                    if args.precision == "int8-bf16":
+                        with torch.cpu.amp.autocast(), torch.no_grad():
+                            pipe.unet = ipex.quantization.convert(pipe.unet)
+                            pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
+                            pipe.unet = torch.jit.freeze(pipe.unet)
+                            pipe.unet(*input)
+                            pipe.unet(*input)
         else:
             raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8")
 
     # jit trace
-    if args.jit:
+    if args.jit and args.precision != "int8" and args.precision != "int8-bf16":
         print("JIT trace ...")
         # from utils_vis import make_dot, draw
         if args.precision == "bf16" or args.precision == "fp16":
@@ -212,10 +227,10 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
             if args.precision == "bf16" or args.precision == "fp16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                    images = pipe(args.prompt, generator=generator).images
+                    pipe(args.prompt, generator=generator, num_inference_steps=5).images
             else:
                 with torch.no_grad():
-                    images = pipe(args.prompt, generator=generator).images
+                    pipe(args.prompt, generator=generator, num_inference_steps=5).images
 
         output = p.key_averages().table(sort_by="self_cpu_time_total")
         print(output)

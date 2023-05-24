@@ -33,6 +33,7 @@ bash do_calibration.sh
 | BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 | bash accuracy.sh bf16 |
 | FP16        | bash inference_throughput.sh fp16 | bash inference_realtime.sh fp16 | bash accuracy.sh fp16 |
 | INT8        | bash inference_throughput.sh int8 | bash inference_realtime.sh int8 | bash accuracy.sh int8 |
+| INT8-BF16        | bash inference_throughput.sh int8-bf16 | bash inference_realtime.sh int8-bf16 | bash accuracy.sh int8-bf16 |
 
 ## Run the model
 
