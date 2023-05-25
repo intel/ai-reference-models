@@ -4,7 +4,7 @@
 <!-- 10. Description -->
 
 ### Description
-This document has instructions for running inference using the Multi-gate Mixture of Experts (MMoE) model in FP32 precision. The model is based on this [paper](https://dl.acm.org/doi/pdf/10.1145/3219819.3220007). MMoE is used to model task relationships from the data in order to perform multiple-task learning. Multi-task learning is typically used in recommendation systems.
+This document has instructions for running inference using the Multi-gate Mixture of Experts (MMoE) model. The model is based on this [paper](https://dl.acm.org/doi/pdf/10.1145/3219819.3220007). MMoE is used to model task relationships from the data in order to perform multiple-task learning. Multi-task learning is typically used in recommendation systems.
 
 ### Dataset
 
@@ -21,12 +21,15 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/mmo
 ## Run the model
 
 ### Run on Linux
+
+Install the Intel-optimized TensorFlow along with model dependencies under [requirements.txt](../../../../../models/recommendation/tensorflow/mmoe/inference/requirements.txt).
+
 ```
 # cd to your model zoo directory
 cd models
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 export DATASET_DIR=<path to the test data>
-export PRECISION=<set the precision to "fp32">
+export PRECISION=<set the precision to "fp32" or "bfloat16" or "fp16">
 export OUTPUT_DIR=<path to the directory where log files and checkpoints will be written>
 # For a custom batch size, set env var `BATCH_SIZE` or it will run with a default value.
 export BATCH_SIZE=<customized batch size value>

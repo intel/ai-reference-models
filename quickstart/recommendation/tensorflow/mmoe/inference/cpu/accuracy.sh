@@ -27,12 +27,13 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32."
+  echo "Please set PRECISION to either fp32, bfloat16, or fp16."
   exit 1
 fi
-if [[ $PRECISION != "fp32" ]]; then
+
+if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ] && [ $PRECISION != "fp16" ]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions is: fp32"
+  echo "Supported precisions are: fp32, bfloat16, fp16"
   exit 1
 fi
 
@@ -57,7 +58,7 @@ fi
 MODE="inference"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
-BATCH_SIZE="${BATCH_SIZE:-"200"}"
+BATCH_SIZE="${BATCH_SIZE:-"256"}"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -74,7 +75,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 
 if [[ $? == 0 ]]; then
   echo "Accuracy summary:"
-  cat ${OUTPUT_DIR}/vision_transformer_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Processed 50000 images. (Top1 accuracy, Top5 accuracy)" | sed -e "s/.* = //"
+  cat ${OUTPUT_DIR}/mmoe_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log | grep "Processed 99584 records. (Test Income AUC, Test Marital Status AUC)" | sed -e "s/.* = //"
   exit 0
 else
   exit 1

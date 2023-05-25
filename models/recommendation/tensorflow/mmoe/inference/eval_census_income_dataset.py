@@ -23,6 +23,7 @@ from argparse import ArgumentParser
 
 import tensorflow as tf
 from tensorflow.core.protobuf import saved_model_pb2
+from tensorflow.core.protobuf import rewriter_config_pb2
 
 from sklearn.metrics import roc_auc_score
 from utils import preprocess_data, fetch_batch
@@ -43,6 +44,11 @@ class eval_classifier_optimized_graph:
                                      'it will run with batch size of 256 ',
                                 dest='batch_size', type=int, default=256)
 
+        arg_parser.add_argument("-p", "--precision",
+                                help="Specify the model precision to use: fp32, bfloat16 or fp16",
+                                required=True, choices=["fp32", "bfloat16", "fp16"],
+                                dest="precision")
+
         arg_parser.add_argument('-e', "--num-inter-threads",
                                 help='The number of inter-thread.',
                                 dest='num_inter_threads', type=int, default=0)
@@ -53,7 +59,7 @@ class eval_classifier_optimized_graph:
 
         arg_parser.add_argument('-g', "--input-graph",
                                 help='Specify the input graph for the transform tool',
-                                dest='input_graph')
+                                dest='input_graph', required=True)
 
         arg_parser.add_argument('-d', "--data-location",
                                 help='Specify the location of the data. '
@@ -67,28 +73,29 @@ class eval_classifier_optimized_graph:
 
         arg_parser.add_argument("--warmup-steps", type=int, default=20,
                                 help="number of warmup steps")
+                                
         arg_parser.add_argument("--steps", type=int, default=200,
                                 help="number of steps")
-        arg_parser.add_argument(
-            '--data-num-inter-threads', dest='data_num_inter_threads',
-            help='number threads across operators',
-            type=int, default=16)
-        arg_parser.add_argument(
-            '--data-num-intra-threads', dest='data_num_intra_threads',
-            help='number threads for data layer operator',
-            type=int, default=14)
+
         # parse the arguments
         self.args = arg_parser.parse_args()
         # validate the arguements
         self.validate_args()
 
     def run(self):
-        print("Run inference")
+        print("Running inference with " + str(self.args.precision) + " precision and batch size of " + str(self.args.batch_size))
 
         infer_config = tf.compat.v1.ConfigProto()
         infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
         infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
         infer_config.use_per_session_threads = 1
+
+        if self.args.precision == "bfloat16":
+            print("Enabling auto-mixed precision for bfloat16")
+            infer_config.graph_options.rewrite_options.auto_mixed_precision_onednn_bfloat16 = rewriter_config_pb2.RewriterConfig.ON
+        if self.args.precision == "fp16":
+            print("Enabling auto-mixed precision for fp16")
+            infer_config.graph_options.rewrite_options.auto_mixed_precision = rewriter_config_pb2.RewriterConfig.ON
 
         # Load the frozen model
         sm = saved_model_pb2.SavedModel()
@@ -117,7 +124,7 @@ class eval_classifier_optimized_graph:
             total_run = self.args.steps
             total_time = 0
 
-            while num_remaining_records >= self.args.batch_size and iteration < total_run:
+            while iteration < total_run:
                 iteration += 1
 
                 # Reads and preprocess data
@@ -125,9 +132,6 @@ class eval_classifier_optimized_graph:
                 input_dict = fetch_batch(infer_graph, batch_size=self.args.batch_size, data=test_data,
                                          labels=test_labels)
                 # data_load_time = time.time() - data_load_start
-
-                num_processed_records += self.args.batch_size
-                num_remaining_records -= self.args.batch_size
 
                 start_time = time.time()
                 predictions = infer_sess.run(output_tensor, feed_dict=input_dict)
@@ -148,7 +152,7 @@ class eval_classifier_optimized_graph:
             if (self.args.batch_size == 1):
                 print('Latency: %.3f ms' % (time_average * 1000))
             # print throughput for both batch size 1 and batch_size
-            print('Throughput: %.3f images/sec' % (self.args.batch_size / time_average))
+            print('Throughput: %.3f examples/sec' % (self.args.batch_size / time_average))
         else:  # accuracy check
             total_income_auc, total_marital_stat_auc = 0.0, 0.0
             elapsed_time = 0.0
@@ -156,7 +160,7 @@ class eval_classifier_optimized_graph:
             while num_remaining_records >= self.args.batch_size:
                 # Prepare a batch of data
                 input_dict = fetch_batch(infer_graph, batch_size=self.args.batch_size, data=test_data,
-                                         labels=test_labels, iter=iterations)
+                                         labels=test_labels, i=iterations)
 
                 num_processed_records += self.args.batch_size
                 num_remaining_records -= self.args.batch_size

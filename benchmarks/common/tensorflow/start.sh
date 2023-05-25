@@ -1593,7 +1593,7 @@ function vision_transformer() {
 # mmoe base model
 function mmoe() {
     if [ ${MODE} == "inference" ]; then
-      if [ ${PRECISION} == "fp32" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
         CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
         CMD="${CMD} $(add_arg "--steps" ${STEPS})"
