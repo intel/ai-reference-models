@@ -30,7 +30,7 @@ from tensorflow.core.protobuf import rewriter_config_pb2
 from inference.preprocess import datasets
 import numpy as np
 
-INPUTS = 'inputs'
+INPUTS = 'pixel_values'
 OUTPUTS = 'Identity'
 
 RESNET_IMAGE_SIZE = 224
@@ -121,10 +121,11 @@ class eval_classifier_optimized_graph:
             resize_method='crop')
 
         images, labels = preprocessor.minibatch(dataset, subset='validation')
+        images = tf.transpose(a=images, perm=[0, 3, 1, 2])
 
       else:
         print("Inference with dummy data.")
-        input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
+        input_shape = [self.args.batch_size, 3, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE]
         images = tf.random.uniform(input_shape, 0.0, 255.0, dtype=tf.float32, name='synthetic_images')
 
 
@@ -138,7 +139,7 @@ class eval_classifier_optimized_graph:
 
 
     # Definite input and output Tensors for detection_graph
-    input_tensor = infer_graph.get_tensor_by_name('inputs:0')
+    input_tensor = infer_graph.get_tensor_by_name('pixel_values:0')
     output_tensor = infer_graph.get_tensor_by_name('Identity:0')
 
     data_sess = tf.compat.v1.Session(graph=data_graph,  config=data_config)

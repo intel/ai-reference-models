@@ -5,7 +5,7 @@
 
 ### Description
 This document has instructions for running Vision Transformer inference for FP32. The model based on this [paper](https://arxiv.org/abs/2010.11929). Inference is performed for the task of image recognition. 
-The following TF Hub [pretrained-model](https://tfhub.dev/sayakpaul/vit_b32_classification/1) is used.
+The following Hugging Face [pretrained-model](https://huggingface.co/google/vit-base-patch16-224) is used.
 
 ### Dataset
 
@@ -17,7 +17,7 @@ Set the `DATASET_DIR` to point to this directory when running Vision Transformer
 
 ```
 Download Frozen graph for both FP32, BF16 and FP16:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/vision_transformer_fp32_saved_model.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/HF-ViT-Base16-Img224-frozen.pb
 
 ```
 
