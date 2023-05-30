@@ -155,6 +155,12 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
 | [WaveNet](https://arxiv.org/pdf/1609.03499.pdf) | TensorFlow | Inference | [FP32](/benchmarks/text_to_speech/tensorflow/wavenet/inference/fp32/README.md) |
 
+### Graph Networks
+
+| Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
+| ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
+| [r-GAT](https://arxiv.org/abs/2109.05922) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/graph_networks/tensorflow/rgat/inference/README.md) | [Open Graph Benchmark](https://ogb.stanford.edu/)
+
 ### Shot Boundary Detection
 
 | Model                                             | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
