@@ -32,11 +32,11 @@ from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import ops
 from tensorflow.python.framework import tensor_shape
 from tensorflow.python.ops import array_ops
-from tensorflow.python.ops import array_ops_stack
 from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import rnn_cell_impl
 from tensorflow.python.ops import tensor_array_ops
+from tensorflow.python.ops import array_ops_stack
 from tensorflow.python.ops import variable_scope as vs
 from tensorflow.python.util import nest
 import tensorflow as tf
@@ -597,10 +597,9 @@ def dynamic_rnn(cell, inputs, att_scores=None, sequence_length=None, initial_sta
     def _assert_has_shape(x, shape):
       x_shape = array_ops.shape(x)
       packed_shape = array_ops_stack.stack(shape)
-      return control_flow_ops.Assert(
-          math_ops.reduce_all(math_ops.equal(x_shape, packed_shape)),
-          ["Expected shape for Tensor %s is " % x.name,
-           packed_shape, " but saw shape: ", x_shape])
+      return tf.debugging.assert_equal(x_shape, packed_shape,
+                      message="Tensors not Equal")
+      #math_ops.reduce_all(math_ops.equal(x_shape, packed_shape)),
 
     if sequence_length is not None:
       # Perform some shape validation
@@ -789,14 +788,14 @@ def _dynamic_rnn_loop(cell,
         return (time + 1, output_ta_t, new_state)
 
   if att_scores is not None:  
-      _, output_final_ta, final_state, _ = control_flow_ops.while_loop(
+      _, output_final_ta, final_state, _ =tf.while_loop(
           cond=lambda time, *_: time < time_steps,
           body=_time_step,
           loop_vars=(time, output_ta, state, att_scores),
           parallel_iterations=parallel_iterations,
           swap_memory=swap_memory)
   else:
-      _, output_final_ta, final_state = control_flow_ops.while_loop(
+      _, output_final_ta, final_state = tf.while_loop(
           cond=lambda time, *_: time < time_steps,
           body=_time_step,
           loop_vars=(time, output_ta, state),
@@ -1100,7 +1099,7 @@ def raw_rnn(cell, loop_fn,
       return (next_time, elements_finished, next_input,
               emit_ta, next_state, loop_state)
 
-    returned = control_flow_ops.while_loop(
+    returned = tf.while_loop(
         condition, body, loop_vars=[
             time, elements_finished, next_input,
             emit_ta, state, loop_state],
