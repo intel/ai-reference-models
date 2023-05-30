@@ -1,0 +1,31 @@
+# Distributions
+*.whl
+*.tar.gz
+*.tar.bz2
+
+# Metadata
+*.egg-info
+
+# Cache
+__pycache__/
+
+# Build files
+extracted/
+src/dataset_librarian.egg-info/
+dist/
+
+# conda files
+conda/local_channel/
+conda/extracted/
+conda/pacakges.yaml
+
+# temp files
+tmp/
+
+# key
+src/dataset_librarian/.env
+
+# Outputs
+brca/
+build/
+tabformer/

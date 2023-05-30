@@ -35,6 +35,6 @@ pip install data_connector-1.0.0-py3-none-any.whl
 cd ..
 pip install -r samples\interoperability\requirements.txt
 cd samples\interoperability
-ipython kernel install --user --name=intel_sample_env1
+ipython kernel install --user --name=intel_sample_env
 jupyter notebook Interoperability.ipynb
 

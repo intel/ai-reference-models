@@ -38,5 +38,7 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-where = ["."]  # list of folders that contain the packages (["."] by default)
+where = ["data_connector"]  # list of folders that contain the packages (["."] by default)
+include = ["data_connector*"]
+exclude = ["data_connector.egg-info", "pyproject.toml"]
 namespaces = false

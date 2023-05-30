@@ -1,4 +1,4 @@
-# Data Connector AWS S3 
+# Cloud Data Connector: AWS S3 
 
 Data Connector for AWS S3 allows you to connect to S3 buckets and list contents, download and upload files.
 
@@ -8,7 +8,8 @@ To access S3 buckets, you will need to sign up for an AWS account and create acc
 
 Access keys consist of an access key ID and secret access key, which are used to sign programmatic requests that you make to AWS.
 
-## Hot to get your access key ID and secret access key
+How to get your access key ID and secret access key
+---
 
 1. Open the IAM console at https://console.aws.amazon.com/iam/.
 2. On the navigation menu, choose Users.
@@ -34,46 +35,33 @@ You can add more configuration settings listed [here](https://boto3.amazonaws.co
 You need to import the DataConnector class.
 
 ```python
-from data_connector.aws.connector import Connector
+from data_connector.aws import Connector as aws_connector
 ```
 
 Connector class has the method connect(), it creates an AWS S3 object, by default the function will create a S3 connector using the credentials saved in your environment variables.
 
 ```python
-connector = Connector()
+aws_bucket_connector = aws_connector()
 ```
 
 Call the connect() method, this will return a connection object for S3. 
 
 ```python
-conection_object = connector.connect()
+aws_conection_object = aws_bucket_connector.connect()
 ```
 
+Downloader
+---
 Import the Downloader class and use the connection object returned by connect() function.
 
-```python
-from data_connector.aws.downloader import Downloader
-
-downloader = Downloader(conection_object)
-```
-
-The Downloader class has two methods:
-
-- list_blobs(container_obj): The function to get a list of the objects in a bucket.
-- download(container_obj, data_file, destiny): The function to download a file from a S3 bucket.
-
-A first step with buckets is to list their content using the `list_blobs(container_obj)` method. Specify the next parameter.
-
-- container_obj: The bucket name to list.
 
 ```python
-from data_connector.aws.downloader import Downloader
+from data_connector.aws import Downloader as aws_downloader
 
-downloader = Downloader(conection_object)
-
-list_blobs = downloader.list_blobs('MY_BUCKET_NAME')
-print(list_blobs)
+aws_file_downloader = aws_downloader(aws_conection_object)
 ```
+
+
 
 To download a file use the `download(container_obj, data_file, destiny)` method and specify the next parameters.
 
@@ -82,56 +70,79 @@ To download a file use the `download(container_obj, data_file, destiny)` method 
 - destiny: The path to the file to download to.
 
 ```python
-from data_connector.aws.downloader import Downloader
+from data_connector.aws import Downloader as aws_downloader
 
-downloader = Downloader(conection_object)
+downloader = aws_downloader(aws_conection_object)
 file_name = "path/to_file.csv"
 downloader.download(bucket_name, file_name, 'path/to_destiny.csv')
 ```
+List Blobs
+---
+[Downloader](#downloader) class has two methods:
+- list_blobs(container_obj): The function to get a list of the objects in a bucket.
+- download(container_obj, data_file, destiny): The function to download a file from a S3 bucket.
+
+A first step with buckets is to list their content using the `list_blobs(container_obj)` method. Specify the next parameter.
+
+- container_obj: The bucket name to list.
+
+```python
+from data_connector.aws import Downloader as aws_downloader
+
+aws_bucket_downloader = aws_downloader(aws_conection_object)
+
+list_blobs = aws_bucket_downloader.list_blob(
+    'MY_BUCKET_NAME'
+)
+print(list_blobs)
+```
+
+Upload
+---
 
 You can import an Uploader class and use the upload method to send a file from you local machine to a bucket. You need to add the connector object to Uploader constructor.
 
 ```python
-from data_connector.aws.uploader import Uploader
-from data_connector.aws.connector import Connector
+from data_connector.aws import Uploader as aws_uploader
+from data_connector.aws  import Connector as aws_connector
 
-connector = Connector()
-conection_object = connector.connect()
-uploader = Uploader(conection_object)
+aws_bucket_connector = aws_connector()
+aws_conection_object = aws_bucket_connector.connect()
+aws_bucker_uploader = aws_uploader(aws_conection_object)
 
 ```
 Specify the next parameters in upload function.
 
 - container_obj: The name of the bucket to upload to.
 - data_file: The path to the file to upload.
-- object_name: The name of the file to upload to.
+- object_name: The name of file in cloud bucket
 
 ```python
-from data_connector.aws.uploader import Uploader
-
-uploader = Uploader(conection_object)
-uploader.upload(bucket_name, 'path/to_local_file.csv', 'path/to_object_name.csv')
+aws_bucker_uploader.upload('<bucket_name>', '<path/to_local_file>', '<path/to_object_name>')
 ```
 
+
+Samples
+---
 ### List objects in a bucket
 
 ```python
 # import the dataconnector package
-from data_connector.aws.connector import Connector
-from data_connector.aws.downloader import Downloader
+from data_connector.aws import Connector as aws_connector
+from data_connector.aws import Downloader as aws_downloader
 
 # specify a S3 bucket name
 bucket_name = 'MY_BUCKET_NAME'
 # create a connector
-connector = Connector()
+aws_bucket_connector = aws_connector()
 # connect to aws using default AWS access keys
 # connect() method uses the configurations settings for AWS account
-conection_object = connector.connect()
+aws_conection_object = aws_bucket_connector.connect()
 # list files from bucket
 # create a downloader to list files
-downloader = Downloader(conection_object)
+aws_downloader = aws_downloader(aws_conection_object)
 # use the list_blobs function
-list_blobs = downloader.list_blobs(bucket_name)
+list_blobs = aws_downloader.list_blobs(bucket_name)
 # list_blobs functions returns all objects in bucket
 print(list_blobs)
 
@@ -141,40 +152,40 @@ print(list_blobs)
 
 ```python
 # import the dataconnector package
-from data_connector.aws.connector import Connector
-from data_connector.aws.downloader import Downloader
+from data_connector.aws import Connector as aws_connector
+from data_connector.aws import Downloader as aws_connector
 
 # specify a S3 bucket name
 bucket_name = 'MY_BUCKET_NAME'
 # create a connector
-connector = Connector()
+aws_bucket_connector = aws_connector()
 # connect to aws using default aws access keys
-conection_object = connector.connect()
+aws_conection_object = aws_bucket_connector.connect()
 # download a file from bucket
 # create a Downloader object using a connector object
-downloader = Downloader(conection_object)
+aws_downloader = aws_connector(aws_conection_object)
 # specify the object name to download
 file_name = "path/to_file.csv"
 # download the object
-downloader.download(bucket_name, file_name, 'path/to_destiny.csv')
+aws_downloader.download(bucket_name, file_name, 'path/to_destiny.csv')
 ```
 
 ### Upload a file
 
 ```python
 # import dataconnector package
-from data_connector.aws.connector import Connector
-from data_connector.aws.uploader import Uploader
+from data_connector.aws import Connector as aws_connector
+from data_connector.aws import Uploader as aws_uploader
 
 # specify a S3 bucket name
 bucket_name = 'MY_BUCKET_NAME'
 # create a connector
-connector = Connector()
+aws_bucket_connector = aws_connector()
 # connect to aws using default aws access keys
-conection_object = connector.connect()
+aws_conection_object = aws_bucket_connector.connect()
 # Upload a file
 # create a uploader object using a connection object
-uploader = Uploader(conection_object)
+aws_bucket_uploader = aws_uploader(aws_conection_object)
 # upload a file
-uploader.upload(bucket_name, 'path/to_local_file.csv', 'path/to_object_name.csv')
+aws_bucket_uploader.upload(bucket_name, 'path/to_local_file.csv', 'path/to_object_name.csv')
 ```

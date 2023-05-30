@@ -1,13 +1,27 @@
+# Cloud Data Connector
+
+[![Intel: AI](https://img.shields.io/badge/intel-AI-0071C5)](https://www.intel.com/content/www/us/en/developer/topic-technology/artificial-intelligence/overview.html)
+[![Python](https://img.shields.io/badge/Python-3.8/3.9/3.10-green)](https://www.intel.com/content/www/us/en/developer/topic-technology/artificial-intelligence/overview.html)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![security: bandit](https://img.shields.io/badge/security-bandit-yellow.svg)](https://github.com/PyCQA/bandit)
+[![security: SNYK](https://img.shields.io/badge/Security-SNYK-yellow)](https://github.com/PyCQA/bandit)
+[![security: BDBA](https://img.shields.io/badge/Security-BDBA-yellow)](https://github.com/PyCQA/bandit)
+[![security: Checkmarks](https://img.shields.io/badge/Security-Checkmarks-yellow)](https://github.com/PyCQA/bandit)
+
+
+_____
 ## Overview
 ---
 data_connector is a tool to connect to AzureML, Azure blob, GCP storage, GCP Big Query  and AWS storage S3. 
 The goal is provide all cloud managers in one place and provide documentation for an easy integration.
 
-For more details, visit the [Data Connector](repo link) GitHub repository.
+For more details, visit the [Data Connector](https://github.com/IntelAI/models/tree/master/datasets/data_connector) GitHub repository.
+<br/><br/>
 
 ## Hardware Requirements
 ---
 The hardware should comply with the same requirements that the cloud service.
+<br/><br/>
 
 ## How it Works
 ---
@@ -20,7 +34,7 @@ The package contains the following modules:
 | data_connector.azure |
 
 Each module is capable of connect, download and upload operation to it-s corresponding cloud service.
-
+<br/><br/>
 
 ## Getting Started with data_connector
 ---
@@ -33,23 +47,15 @@ conda activate venv
 
 You can install the package with:
 ```bash
-python -m pip install intel-cloud-data-connector
+python -m pip install cloud-data-connector
 ```
 
-Please follow module specific documentation for use case, hands-examples. This documentation can be found inside the package.
+Please follow module specific documentation for use case, hands-examples.
 1. data_connector/azure/README.md
 2. data_connector/azure/AzureML.md
 3. data_connector/aws/README.md
 4. data_connector/gcp/README.md
-
-<!---
-## Learn More
----
-For more information about data_connector, see these guides and software resources:
-- github/repo/link 
-TODO: Update public repo
--->
-
+<br/><br/>
 
 ## Getting Started with data_connector.azure
 ---
@@ -102,11 +108,7 @@ Data connector provides a tool to connect to Azure ML workspaces and upload conf
 ```
 How to get a [Connection String](https://learn.microsoft.com/en-us/answers/questions/1071173/where-can-i-find-storage-account-connection-string)? 
 
-<!---
-TODO: Update link from public repo
-![Azure Connection String Sample](data_connector/../../../docs/img/connection_string.png)
------
--->
+![Azure Connection String Sample](https://github.com/IntelAI/models/blob/master/datasets/data_connector/docs/img/connection_string.png)
 
 Also you can get connection strings using Azure CLI
 ```bash
@@ -137,12 +139,8 @@ Or just
     downloader = Downloader(connector=connector)
     downloader.download()
 ```
-<!---
-TODO: Update link from public repo
-[See sample](../../samples/azure/blob_sample.py)
------
--->
-
+[See sample Here](https://github.com/IntelAI/models/blob/master/datasets/data_connector/samples/azure/blob_sample.py)
+<br/><br/>
 
 
 ## Getting Started with data_connector.aws
@@ -327,7 +325,7 @@ uploader = Uploader(conection_object)
 # upload a file
 uploader.upload(bucket_name, 'path/to_local_file.csv', 'path/to_object_name.csv')
 ```
-
+<br/><br/>
 
 ## Getting Started with data_connector.gcp
 ---
@@ -420,6 +418,7 @@ For service account:
 python -m samples.gcp.bigquery -p <project_name> -c <credentials_path>
 ```
 User must provide the project name using flag (-p) and the local path to the JSON file with the credentials (-c).
+<br/><br/>
 
 
 ## Support

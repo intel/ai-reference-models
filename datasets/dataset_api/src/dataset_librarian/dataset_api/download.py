@@ -20,11 +20,14 @@ import os
 import subprocess
 import json
 from tqdm import tqdm
+import pkg_resources
 
 
 def download_dataset(dataset_name, dataset_directory):
+    # Get the path to the file relative to the package root
+    datasets = pkg_resources.resource_filename('dataset_librarian', 'datasets_urls.json')
     # Load the JSON file that contains the dataset URLs
-    with open('datasets_urls.json', 'r') as f:
+    with open(datasets, 'r') as f:
         dataset_urls = json.load(f)
 
     # Check if the dataset name is in the JSON file

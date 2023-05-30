@@ -12,9 +12,11 @@ __pycache__/
 .venv
 
 # Folders
-local_channel/
 dist/
 inspect_package-conda/
 inspect_package-pip/
-conda_package/
 build/
+
+# conda
+conda/local_channel/
+conda/extracted

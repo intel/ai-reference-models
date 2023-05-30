@@ -16,18 +16,20 @@
 # limitations under the License.
 #
 cp ../../data_connector/gcp/README.md ./GCP_README.md
-cp ../../data_connector/azure/AzureML.md./AZUREML_README.md
+cp ../../data_connector/azure/AzureML.md ./AZUREML_README.md
 cp ../../data_connector/aws/README.md ./AWS_README.md
 cp ../azure/sample_data/credit_card_clients.xls ./credit_card_clients.xls
 cp ../azure/.env.sample .env.sample
 cp ../azure/config.json.sample config.json.sample
 cp -r ../azure/src src
 cp -r ../azure/dependencies dependencies
+python3 -m pip install --upgrade pip wheel setuptools
 python3 -m pip install virtualenv
 python3 -m pip install ipython==8.12.0
+python3 -m pip install build
 cd ../../../../
 python3 -m virtualenv .venv_intel
-.venv_intel/Scripts/Activate.ps1
+. .venv_intel/bin/activate
 cd datasets/data_connector
 python -m build .
 cd dist/
