@@ -3,13 +3,12 @@ set -e
 
 echo "Setup TensorFlow Test Enviroment for ResNet50 v1.5 Inference"
 
-BATCH_SIZE=$1
-PRECISION=$2
-SCRIPT=$3
-DATASET=$4
+PRECISION=$1
+SCRIPT=$2
+DATASET=$3
 OUTPUT_DIR=${OUTPUT_DIR-"tests/cicd/TensorFlow/output/resnet50v1.5-inference/${PRECISION}"}
-WORKSPACE=$5
-is_lkg_drop=$6
+WORKSPACE=$4
+is_lkg_drop=$5
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
