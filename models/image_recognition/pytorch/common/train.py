@@ -62,6 +62,8 @@ parser.add_argument('--bf16', action='store_true', default=False,
                     help='enable ipex bf16 path')
 parser.add_argument('--bf32', action='store_true', default=False,
                     help='enable ipex bf32 path')
+parser.add_argument('--fp16', action='store_true', default=False,
+                    help='enable ipex fp16 path')
 #Learning Hyperparams 
 parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')  
@@ -144,7 +146,7 @@ def main_worker(args):
     print("=> Creating model '{}'".format(args.arch))
     model = models.__dict__[args.arch](zero_init_residual=args.zero_init_residual)
 
-    # for ipex path, always convert model to channels_last for bf16, fp32.
+    # for ipex path, always convert model to channels_last for bf16, fp16, bf32, fp32.
     if args.ipex:
         model = model.to(memory_format=torch.channels_last)
 
@@ -175,6 +177,8 @@ def main_worker(args):
         print("using ipex to do training.....................")
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+        if args.fp16:
+            model, optimizer = ipex.optimize(model, dtype=torch.half, optimizer=optimizer)
         else:
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
     # setup distributed training
@@ -261,6 +265,11 @@ def main_worker(args):
 
     time_to_train = 0
 
+    if args.fp16:
+        scaler = torch.cpu.amp.GradScaler()
+    else:
+        scaler = None
+
     for epoch in range(args.start_epoch, args.epochs):
         
         if args.distributed:
@@ -271,7 +280,7 @@ def main_worker(args):
             adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
-        epoch_time = train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args)
+        epoch_time = train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args)
         print("epoch: ", epoch, ", train_time(s): ", epoch_time)
         time_to_train += epoch_time
         print("time_to_train(s): ", time_to_train)
@@ -298,7 +307,7 @@ def main_worker(args):
 
     print("final time_to_train(s): ", time_to_train)
 
-def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
+def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args):
 
     epoch_time = 0
 
@@ -320,6 +329,8 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
             print("running ipex bfloat16 training step\n")
         elif args.bf32:
             print("running ipex bfloat32 training step\n")
+        elif args.fp16:
+            print("running ipex float16 training step\n")
         else:
             print("running ipex float32 training step\n")
 
@@ -338,16 +349,27 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
             with torch.cpu.amp.autocast():
                 output = model(images)
             output = output.to(torch.float32)
+        elif args.ipex and args.fp16:
+            with torch.cpu.amp.autocast(dtype=torch.half):
+                output = model(images)
+            output = output.to(torch.float32)
         else:
             output = model(images)
         loss = criterion(output, target)
 
         # compute gradient and do optimizer step
         optimizer.zero_grad()
-        loss.backward()
-        if lr_scheduler: 
-            lr_scheduler.step()
-        optimizer.step()
+        if args.fp16:
+            scaler.scale(loss).backward()
+            if lr_scheduler:
+                lr_scheduler.step()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            if lr_scheduler:
+                lr_scheduler.step()
+            optimizer.step()
 
         # measure elapsed time and reset timer
         t2 = time.time() - start
@@ -415,7 +437,12 @@ def validate(val_loader, model, criterion, epoch, args):
                 images = images.to(torch.bfloat16)
                 with torch.cpu.amp.autocast():
                     output = model(images)
-                output = output.to(torch.float32) 
+                output = output.to(torch.float32)
+            if args.ipex and args.fp16:
+                images = images.to(torch.half)
+                with torch.cpu.amp.autocast(dtype=torch.half):
+                    output = model(images)
+                output = output.to(torch.float32)
             else: 
                 output = model(images) 
 
