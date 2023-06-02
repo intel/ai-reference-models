@@ -1415,6 +1415,38 @@ function transformer_mlperf() {
   fi
 }
 
+# GPT-J base model
+function gpt_j() {
+    if [ ${MODE} == "inference" ]; then
+      if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") || ( ${PRECISION} == "fp16") ]]; then
+        if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
+          echo "Checkpoint directory not found. The script will download the model."
+        else
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+          export HF_HOME=${CHECKPOINT_DIRECTORY}
+          export HUGGINGFACE_HUB_CACHE=${CHECKPOINT_DIRECTORY}
+          export TRANSFORMERS_CACHE=${CHECKPOINT_DIRECTORY}
+        fi
+        
+        if [ ${BENCHMARK_ONLY} == "True" ]; then
+          CMD=" ${CMD} --max_output_tokens=${MAX_OUTPUT_TOKENS}"
+          CMD=" ${CMD} --input_tokens=${INPUT_TOKENS}"
+          if [[ -z "${SKIP_ROWS}" ]]; then
+            SKIP_ROWS=0
+          fi
+          CMD=" ${CMD} --skip_rows=${SKIP_ROWS}"
+        fi
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}."
+        exit 1
+      fi
+    else
+      echo "Only inference use-case is supported for now."
+      exit 1
+    fi
+}
+
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -1802,6 +1834,8 @@ elif [ ${MODEL_NAME} == "vision_transformer" ]; then
   vision_transformer
 elif [ ${MODEL_NAME} == "mmoe" ]; then
   mmoe
+elif [ ${MODEL_NAME} == "gpt_j" ]; then
+  gpt_j
 elif [ ${MODEL_NAME} == "rgat" ]; then
   rgat
 else

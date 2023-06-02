@@ -1,0 +1,93 @@
+diff --git a/src/transformers/generation/tf_utils.py b/src/transformers/generation/tf_utils.py
+index 749c07d54..38900a7fc 100644
+--- a/src/transformers/generation/tf_utils.py
++++ b/src/transformers/generation/tf_utils.py
+@@ -15,6 +15,7 @@
+ # limitations under the License.
+ 
+ import copy
++import time
+ import inspect
+ import warnings
+ from dataclasses import dataclass
+@@ -734,6 +735,7 @@ class TFGenerationMixin:
+ 
+         # 1. Handle `generation_config` and kwargs that might update it, and validate the `.generate()` call
+         self._validate_model_class()
++        self.token_latency = kwargs.pop("token_latency", None)
+ 
+         # priority: `generation_config` argument > `model.generation_config` (the default generation config)
+         if generation_config is None:
+@@ -1873,6 +1875,7 @@ class TFGenerationMixin:
+         ```"""
+ 
+         # 1. init greedy_search values
++        latency_list = []
+         logits_processor = logits_processor if logits_processor is not None else TFLogitsProcessorList()
+         logits_warper = logits_warper if logits_warper is not None else TFLogitsProcessorList()
+ 
+@@ -1921,6 +1924,7 @@ class TFGenerationMixin:
+             return ~tf.reduce_all(finished_sequences)
+ 
+         def sample_body_fn(generated, finished_sequences, cur_len, model_kwargs):
++            tic = time.time()
+             if model_kwargs.get("past_key_values") is None or needs_full_input:
+                 input_ids = generated[:, :cur_len]
+             else:
+@@ -2005,6 +2009,7 @@ class TFGenerationMixin:
+                     # let's throw out `past_key_values` since we don't want `None` tensors
+                     model_kwargs.pop("past_key_values", None)
+ 
++            latency_list.append(time.time() - tic)
+             return generated, finished_sequences, cur_len, model_kwargs
+ 
+         # 5. run generation
+@@ -2012,7 +2017,7 @@ class TFGenerationMixin:
+         generated, finished_sequences, cur_len, model_kwargs = sample_body_fn(
+             generated, finished_sequences, cur_len, model_kwargs
+         )
+-
++        
+         # 2-to-n generation steps can then be run in autoregressive fashion
+         # only in case 1st generation step does NOT yield EOS token though
+         maximum_iterations = max_length - cur_len
+@@ -2021,7 +2026,7 @@ class TFGenerationMixin:
+             sample_body_fn,
+             (generated, finished_sequences, cur_len, model_kwargs),
+             maximum_iterations=maximum_iterations,
+-        )
++        ) 
+ 
+         # 6. prepare outputs
+         if not use_xla:
+@@ -2042,7 +2047,7 @@ class TFGenerationMixin:
+                 cross_attentions = tuple(cross_attentions) if cross_attentions is not None else None
+                 decoder_hidden_states = tuple(decoder_hidden_states) if decoder_hidden_states is not None else None
+ 
+-                return TFSampleEncoderDecoderOutput(
++                output_result = TFSampleEncoderDecoderOutput(
+                     sequences=generated,
+                     scores=scores,
+                     encoder_attentions=encoder_attentions,
+@@ -2052,14 +2057,19 @@ class TFGenerationMixin:
+                     decoder_hidden_states=decoder_hidden_states,
+                 )
+             else:
+-                return TFSampleDecoderOnlyOutput(
++                output_result = TFSampleDecoderOnlyOutput(
+                     sequences=generated,
+                     scores=scores,
+                     attentions=decoder_attentions,
+                     hidden_states=decoder_hidden_states,
+                 )
+         else:
+-            return generated
++            output_result = generated
++        
++        if self.token_latency is not None:
++            return (output_result, latency_list)
++        else:
++            return output_result
+ 
+     @staticmethod
+     def _gather_beams(nested, beam_indices, batch_axis=0):
