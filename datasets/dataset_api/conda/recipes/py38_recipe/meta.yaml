@@ -23,7 +23,7 @@ requirements:
     - pandas
     - tqdm
     - docx2txt
-    - sopenpyxl
+    - openpyxl
     - pillow
     - scikit-learn-intelex
     - python-dotenv
