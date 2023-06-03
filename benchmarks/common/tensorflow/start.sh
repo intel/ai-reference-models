@@ -1592,6 +1592,92 @@ function distilbert_base() {
     fi
 }
 
+function gpt_j_6B() {
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "fp16" ] || 
+       [ ${PRECISION} == "bfloat16" ]; then
+
+      if [[ ${INSTALL_TRANSFORMER_FIX} != "True" ]]; then
+        echo "Information: Installing transformers from Hugging Face...!"
+        echo "python3 -m pip install git+https://github.com/intel-tensorflow/transformers@gptj_add_padding"
+        python3 -m pip install git+https://github.com/intel-tensorflow/transformers@gptj_add_padding
+      fi
+
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [[ ${MODE} == "training" ]]; then
+        if [[ -z "${TRAIN_OPTION}" ]]; then
+          echo "Error: Please specify a train option (GLUE, Lambada)"
+          exit 1
+        fi
+
+        CMD=" ${CMD} --train-option=${TRAIN_OPTION}"
+      fi
+
+      if [[ -z "${CACHE_DIR}" ]]; then
+          echo "Checkpoint directory not found. The script will download the model."
+      else
+          export HF_HOME=${CACHE_DIR}
+          export HUGGINGFACE_HUB_CACHE=${CACHE_DIR}
+          export TRANSFORMERS_CACHE=${CACHE_DIR}
+      fi
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [[ -n "${NUM_TRAIN_EPOCHS}" && ${NUM_TRAIN_EPOCHS} != "" ]]; then
+        CMD=" ${CMD} --num-train-epochs=${NUM_TRAIN_EPOCHS}"
+      fi
+
+      if [[ -n "${LEARNING_RATE}" && ${LEARNING_RATE} != "" ]]; then
+        CMD=" ${CMD} --learning-rate=${LEARNING_RATE}"
+      fi
+
+      if [[ -n "${NUM_TRAIN_STEPS}" && ${NUM_TRAIN_STEPS} != "" ]]; then
+        CMD=" ${CMD} --num-train-steps=${NUM_TRAIN_STEPS}"
+      fi
+
+      if [[ -n "${DO_TRAIN}" && ${DO_TRAIN} != "" ]]; then
+        CMD=" ${CMD} --do-train=${DO_TRAIN}"
+      fi
+
+      if [[ -n "${DO_EVAL}" && ${DO_EVAL} != "" ]]; then
+        CMD=" ${CMD} --do-eval=${DO_EVAL}"
+      fi
+
+      if [[ -n "${TASK_NAME}" && ${TASK_NAME} != "" ]]; then
+        CMD=" ${CMD} --task-name=${TASK_NAME}"
+      fi
+
+      if [[ -n "${CACHE_DIR}" && ${CACHE_DIR} != "" ]]; then
+        CMD=" ${CMD} --cache-dir=${CACHE_DIR}"
+      fi
+
+      if [[ -n "${PROFILE}" && ${PROFILE} != "" ]]; then
+        CMD=" ${CMD} --profile=${PROFILE}"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+
+      if [ -z $MAX_SEQ_LENGTH ]; then
+        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
+      fi
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
+
 # vision-transformer base model
 function vision_transformer() {
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
@@ -1831,7 +1917,9 @@ elif [ ${MODEL_NAME} == "dien" ]; then
 elif [ ${MODEL_NAME} == "distilbert_base" ]; then
   distilbert_base 
 elif [ ${MODEL_NAME} == "vision_transformer" ]; then
-  vision_transformer
+  vision_transformer 
+elif [ ${MODEL_NAME} == "gpt_j_6b" ]; then
+  gpt_j_6B
 elif [ ${MODEL_NAME} == "mmoe" ]; then
   mmoe
 elif [ ${MODEL_NAME} == "gpt_j" ]; then

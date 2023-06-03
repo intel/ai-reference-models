@@ -1,0 +1,2 @@
+intel-tensorflow>=2.5.0   # CPU Version of TensorFlow.
+transformers>=4.29.0
