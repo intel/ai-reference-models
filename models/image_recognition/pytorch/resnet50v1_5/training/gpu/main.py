@@ -451,7 +451,7 @@ def main_worker(ngpus_per_node, args):
                     checkpoint = torch.load(args.resume, map_location=loc)
                 elif args.xpu is not None:
                     # Map model to be loaded to specified single gpu.
-                    loc = 'xpu:{}'.format(args.xpu)
+                    loc = '{}'.format(args.xpu)
                     checkpoint = torch.load(args.resume, map_location=loc)
                 args.start_epoch = checkpoint['epoch']
                 best_acc1 = checkpoint['best_acc1']
