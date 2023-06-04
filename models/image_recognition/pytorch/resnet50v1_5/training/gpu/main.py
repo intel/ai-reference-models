@@ -804,6 +804,9 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
                         % (args.batch_size, throughput / (args.num_iterations - 1), top1.avg, top5.avg))
                     sys.exit(0)
                 elif args.num_iterations == 0 and i == len(val_loader) - 1:
+                    if args.distributed:
+                        top1.all_reduce()
+                        top5.all_reduce()
                     print('Evalution performance: batch size:%d, throughput:%.2f image/sec, Acc@1:%.2f, Acc@5:%.2f'
                         % (args.batch_size, throughput / (len(val_loader) - 2), top1.avg, top5.avg))
                     if args.tensorboard is None:
