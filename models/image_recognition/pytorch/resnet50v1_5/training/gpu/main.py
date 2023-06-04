@@ -443,7 +443,7 @@ def main_worker(ngpus_per_node, args):
         if args.resume:
             if os.path.isfile(args.resume):
                 print("=> loading checkpoint '{}'".format(args.resume))
-                if args.gpu is None or args.xpu is None:
+                if args.gpu is None and args.xpu is None:
                     checkpoint = torch.load(args.resume)
                 elif args.gpu is not None:
                     # Map model to be loaded to specified single gpu.
