@@ -81,15 +81,17 @@ echo "### running with jit mode"
 
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
 CORES=`lscpu | grep Core | awk '{print $4}'`
-ARGS="$ARGS --use_share_weight --total_cores ${CORES} --cores_per_instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
 BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"distilbert-base-uncased-finetuned-sst-2-english"}
+ARGS="$ARGS --use_share_weight --total_cores ${CORES_PER_NUMA} --cores_per_instance ${OMP_NUM_THREADS}"
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/text-classification/run_glue.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+python -m intel_extension_for_pytorch.cpu.launch --ninstances $NUMAS --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --task_name sst2 \

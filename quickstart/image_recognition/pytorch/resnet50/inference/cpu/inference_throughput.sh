@@ -128,8 +128,7 @@ if [ "$weight_sharing" = true ]; then
 else
     python -m intel_extension_for_pytorch.cpu.launch \
 	--memory-allocator jemalloc \
-        --ninstance ${SOCKETS} \
-        --ncore_per_instance ${CORES_PER_INSTANCE} \
+	--throughput_mode \
         --log_path=${OUTPUT_DIR} \
         --log_file_prefix="./resnet50_throughput_log_${PRECISION}" \
         ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
