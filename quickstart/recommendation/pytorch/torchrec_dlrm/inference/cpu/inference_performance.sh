@@ -56,6 +56,7 @@ else
 fi
 
 LOG_0="${LOG}/throughput.log"
+export BATCH_SIZE=16
 python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \
@@ -64,7 +65,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
     --epochs 1 \
     --pin_memory \
     --mmap_mode \
-    --batch_size 16 \
+    --batch_size $BATCH_SIZE \
     --interaction_type=dcn \
     --dcn_num_layers=3 \
     --dcn_low_rank_dim=512 \
@@ -76,5 +77,20 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
     --ipex-optimize \
     --log-freq 10 \
     --inference-only \
-    $ARGS | tee $LOG_0
+    $ARGS 2>&1 | tee $LOG_0
+wait
 
+throughput=$(grep 'Throughput:' ${LOG}/throughput.log |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
+BEGIN {
+        sum = 0;
+        i = 0;
+      }
+      {
+        sum = sum + $1;
+        i++;
+      }
+END   {
+sum = sum / i;
+        printf("%.3f", sum);
+}')
+echo ""dlrm";"throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
