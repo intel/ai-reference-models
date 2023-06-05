@@ -1,13 +1,15 @@
 <!--- 0. Title -->
-# PyTorch Bloom-176B inference
+# PyTorch Bloom 1B4 inference (generation)
 
 <!-- 10. Description -->
-## DescriptiThis document has instructions for running [Bloom-1b4-zh  inference on CLM task](https://github.com/huggingface/transformers/blob/main/examples/pytorch/language-modeling/run_clm.py) inference using Intel-optimized PyTorch.
+## Description
+
+This document has instructions for running [Bloom 1B4](https://huggingface.co/Langboat/bloom-1b4-zh) inference (generation) using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
 ### Prepare model
 ```
@@ -30,6 +32,18 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
   pip install datasets
   ```
+* Set INPUT_TOKEN before running the model
+  ```
+  export INPUT_TOKEN=1024
+  (choice in [32 512 1024])
+  ```
+
+
+* Set OUTPUT_TOKEN before running the model
+  ```
+  export OUTPUT_TOKEN=128 
+  (128 is preferred, while you could set any other length)
+  ```
 
 * Set CORE_PER_INSTANCE before running realtime mode
   ```
@@ -39,16 +53,27 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 * About the BATCH_SIZE in scripts
   ```
-  Throughput mode is using BATCH_SIZE=[56] by default in script (which could be further tuned according to the testing host); 
-  Realtime mode is using BATCH_SIZE=[1] by default in script; 
-  
-
+  using BATCH_SIZE=1 by default in scripts (which could be further tuned according to the testing host); 
+  ```
+* About the BEAM_SIZE in scripts
+  ```
+  using BEAM_SIZE=4 by default
   ```
 
-* Do calibration to get quantization config before running INT8.
+* Do quantization to get INT8 model before running INT8.
   ```
-  bash do_calibration.sh
+  #default using IPEX static quantization
+  bash do_quantization.sh int8-fp32 default  # or use int8-bf16
+
+  #optional using IPEX smoothquant for better accuracy
+  bash do_quantization.sh int8-fp32 sq # or use int8-bf16
   ```
+
+* Set ENV to use fp16 AMX if you are using a supported platform
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  ```
+
 # Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
@@ -73,8 +98,8 @@ git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
 
-# Clone the Transformers repo in the DistilBERT Base inference directory
-cd quickstart/language_modeling/pytorch/bloom/inference/cpu
+# Clone the Transformers repo in the bloom 1b4 inference directory
+cd <clone of the model zoo>/quickstart/language_modeling/pytorch/bloom/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1

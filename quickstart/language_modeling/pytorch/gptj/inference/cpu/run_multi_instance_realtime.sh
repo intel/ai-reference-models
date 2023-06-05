@@ -20,17 +20,20 @@
 ARGS=""
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
-export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
+#export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 
 path="ipex"
-ARGS="$ARGS --use_ipex --benchmark --perf_begin_iter 5 --perf_run_iters 15 "
+ARGS="$ARGS  --benchmark --num-warmup 10 --num-iter 50  --token-latency"
 echo "### running with intel extension for pytorch"
-
+if [ -z "${OUTPUT_DIR}" ]; then
+  echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
+  exit 1
+fi
 precision="fp32"
 if [[ "$1" == "bf16" ]]
 then
     precision="bf16"
-    ARGS="$ARGS --bf16"
+    ARGS="$ARGS --dtype 'bf16' "
     echo "### running bf16 mode"
 elif [[ "$1" == "fp32" ]]
 then
@@ -38,95 +41,66 @@ then
 elif [[ "$1" == "fp16" ]]
 then
     precision=fp16
-    ARGS="$ARGS --fp16"
+    ARGS="$ARGS --dtype 'fp16'"
     echo "### running fp16 mode"
 elif [[ "$1" == "bf32" ]]
 then
     precision="bf32"
-    ARGS="$ARGS --bf32"
+    ARGS="$ARGS --dtype 'bf32'"
     echo "### running bf32 mode"
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --int8 --int8_config configure.json"
+    ARGS="$ARGS --dtype 'int8' --quantized_model_path '${OUTPUT_DIR}/best_model.pt'"
     echo "### running int8-fp32 mode"
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --bf16 --int8 --int8_config configure.json"
+    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --quantized_model_path '${OUTPUT_DIR}/best_model.pt'"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf32, bf16, int8-fp32, int8-bf16"
+    echo "Supported precisions are: fp32, bf32, bf16, fp16, int8-fp32, int8-bf16"
     exit 1
 fi
 
+if [ -z "${OUTPUT_TOKEN}" ]; then
+  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=128"
+  exit 1
+fi
+if [ -z "${INPUT_TOKEN}" ]; then
+  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 512 1024), e.g. export INPUT_TOKEN=1024"
+  exit 1
+fi
 if [ -z "${CORE_PER_INSTANCE}" ]; then
   echo "The required environment variable CORE_PER_INSTANCE has not been set, please set the cores_per_instance before running, e.g. export CORE_PER_INSTANCE=4"
   exit 1
 fi
-if [ -z "${OUTPUT_DIR}" ]; then
-  echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
-  exit 1
-fi
 
 mode="jit"
-ARGS="$ARGS --jit_mode_eval"
+ARGS="$ARGS --jit"
 echo "### running with jit mode"
 
 
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
 CORES=`lscpu | grep Core | awk '{print $4}'`
-ARGS="$ARGS --use_share_weight --total_cores ${CORES} --cores_per_instance ${OMP_NUM_THREADS}"
+ARGS="$ARGS --use-share-weight --ws-total-cores ${CORES} --ws-cores-per-instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
-rm -rf ${OUTPUT_DIR}/latency_log*
-PRETRAINED_MODEL=${PRETRAINED_MODEL:-"EleutherAI/gpt-j-6B"}
-EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/gptj/run_clm.py"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"'EleutherAI/gpt-j-6b'"}
+
+EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/gptj/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
-rm -rf ${OUTPUT_DIR}/accuracy_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="latency_log_${precision}_${mode}" \
+rm -rf ${OUTPUT_DIR}/latency_log*
+python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
-  --model_name_or_path ${PRETRAINED_MODEL} \
-  --dataset_name wikitext \
-  --dataset_config_name wikitext-2-raw-v1 \
-  --per_device_eval_batch_size ${BATCH_SIZE} \
-  --do_eval \
-  --output_dir ${OUTPUT_DIR} \
+  --model-name-or-path   ${FINETUNED_MODEL} \
+  --max-new-tokens ${OUTPUT_TOKEN} \
+  --input-tokens  ${INPUT_TOKEN} \
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
 INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
 INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
-throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
-BEGIN {
-        sum = 0;
-i = 0;
-      }
-      {
-        sum = sum + $1;
-i++;
-      }
-END   {
-sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.2f", sum);
-}')
 
-p99_latency=$(grep 'P99 Latency' ${OUTPUT_DIR}/latency_log* |sed -e 's/.*P99 Latency//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_PER_SOCKET '
-BEGIN {
-    sum = 0;
-    i = 0;
-    }
-    {
-        sum = sum + $1;
-        i++;
-    }
-END   {
-    sum = sum / i;
-    printf("%.3f ms", sum);
-}')
-
-echo $INSTANCES_PER_SOCKET
-echo ""gptj-6b";"latency";${precision};${BATCH_SIZE};${throughput}" | tee -a ${WORK_SPACE}/summary.log
-echo ""gptj-6b";"p99_latency";${precision};${BATCH_SIZE};${p99_latency}" | tee -a ${WORK_SPACE}/summary.log
