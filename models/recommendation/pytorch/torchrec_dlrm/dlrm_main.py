@@ -544,6 +544,7 @@ def _evaluate(
 
     logger.info(f"AUROC over {stage} set: {auroc_result}.")
     logger.info(f"Number of {stage} samples: {num_samples}")
+    logger.info(f"Throughput: {num_samples/total_t} fps")
 
     return auroc_result
 
@@ -606,6 +607,7 @@ def _train(
         else:
             loss.backward()
             opt.step()
+        return next_batch.dense_features.shape[0]
 
     iterator = itertools.islice(iter(train_dataloader), limit_train_batches)
     # Two filler batches are appended to the end of the iterator to keep the pipeline active while the
@@ -626,13 +628,14 @@ def _train(
     is_success = False
     is_first_eval = True
     total_t = 0
+    num_samples = 0
     for it in itertools.count(1):
         try:
             if  print_lr:
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
             t1 = time.time()
-            train_step(train_model, train_optimizer, iterator)
+            num_samples += train_step(train_model, train_optimizer, iterator)
             t2 = time.time()
             total_t += t2 - t1
 
@@ -666,6 +669,7 @@ def _train(
             break
 
     logger.info(f"Total number of iterations: {it - 1}")
+    logger.info(f"Throughput: {num_samples/total_t} fps")
 
     return is_success
 

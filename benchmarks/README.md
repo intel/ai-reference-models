@@ -85,6 +85,7 @@ For information on running more advanced use cases using the workload containers
 | Language Modeling       | [BERT base](https://arxiv.org/pdf/1810.04805.pdf)    | Inference | [FP32 BFloat16](/quickstart/language_modeling/pytorch/bert_base/inference/cpu/README.md) |
 | Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Inference | [FP32 Int8 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/bert_large/inference/cpu/README.md) |
 | Language Modeling       | [BERT large](https://arxiv.org/pdf/1810.04805.pdf)   | Training  | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/bert_large/training/cpu/README.md) |
+| Language Modeling       | [GPT_J_6GB](https://huggingface.co/EleutherAI/gpt_j_6B) | Tensorflow | Training | [FP32 BFloat16 FP16](/benchmarks/language_modeling/tensorflow/gpt_j_6B/training/README.md) |
 | Language Modeling       | [DistilBERT base](https://arxiv.org/abs/1910.01108)  | Inference | [FP32 Int8 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu/README.md) |
 | Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Inference | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/rnnt/inference/cpu/README.md) |
 | Language Modeling       | [RNN-T](https://arxiv.org/abs/2007.15188)            | Training  | [FP32 BFloat16 BFloat32](/quickstart/language_modeling/pytorch/rnnt/training/cpu/README.md) |

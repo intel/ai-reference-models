@@ -77,12 +77,14 @@ if [[ ${PLATFORM} == "linux" ]]; then
     if [[ "$?" == 0 ]]; then
         CORES=`lscpu | grep Core | awk '{print $4}'`
         SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+        NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+        CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
         CORES_PER_INSTANCE=4
         export OMP_NUM_THREADS=$CORES_PER_INSTANCE
 
-        NUMBER_INSTANCE=`expr $CORES / $CORES_PER_INSTANCE`
+	NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
         MULTI_INSTANCE_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-        --memory-allocator jemalloc --ninstance ${SOCKETS} --log_path=${OUTPUT_DIR} \
+        --memory-allocator jemalloc --ninstances $NUMAS --log_path=${OUTPUT_DIR} \
         --log_file_prefix="./resnext101_latency_log_${PRECISION}""
 
         # in case IPEX is used, we set ipex arg

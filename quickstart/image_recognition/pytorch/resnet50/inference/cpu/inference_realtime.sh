@@ -70,6 +70,8 @@ fi
 
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
 
 CORES_PER_INSTANCE=4
 
@@ -78,11 +80,11 @@ export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 export OMP_NUM_THREADS=$CORES_PER_INSTANCE
 
-NUMBER_INSTANCE=`expr $CORES / $CORES_PER_INSTANCE`
+NUMBER_INSTANCE=`expr $CORES_PER_NUMA / $CORES_PER_INSTANCE`
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
-    --ninstance ${SOCKETS} \
+    --ninstances $NUMAS \
     --log_path=${OUTPUT_DIR} \
     --log_file_prefix="./resnet50_latency_log_${PRECISION}" \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/main.py \
