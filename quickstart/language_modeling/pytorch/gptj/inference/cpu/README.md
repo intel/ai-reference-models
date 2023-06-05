@@ -1,9 +1,10 @@
-# PyTorch GPT-J 6B inference
+<!--- 0. Title -->
+# PyTorch GPTJ 6B inference (generation)
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [GPTJ 6B on CLM task](https://github.com/huggingface/transformers/tree/main/examples/pytorch/language-modeling) inference using Intel-optimized PyTorch.
+This document has instructions for running [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) inference (generation) using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -31,6 +32,18 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
   pip install datasets
   ```
+* Set INPUT_TOKEN before running the model
+  ```
+  export INPUT_TOKEN=1024
+  (choice in [32 512 1024])
+  ```
+
+
+* Set OUTPUT_TOKEN before running the model
+  ```
+  export OUTPUT_TOKEN=128 
+  (128 is preferred, while you could set any other length)
+  ```
 
 * Set CORE_PER_INSTANCE before running realtime mode
   ```
@@ -40,14 +53,27 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 * About the BATCH_SIZE in scripts
   ```
-  Throughput mode is using BATCH_SIZE=[4 x core number] by default in script (which could be further tuned according to the testing host); 
-  Realtime mode is using BATCH_SIZE=[1] by default in script; 
+  using BATCH_SIZE=1 by default in scripts (which could be further tuned according to the testing host); 
+  ```
+* About the BEAM_SIZE in scripts
+  ```
+  using BEAM_SIZE=4 by default
   ```
 
-* Do calibration to get quantization config before running INT8.
+* Do quantization to get INT8 model before running INT8.
   ```
-  bash do_calibration.sh
+  #default using IPEX static quantization
+  bash do_quantization.sh int8-fp32 default  # or use int8-bf16
+
+  #optional using IPEX smoothquant for better accuracy
+  bash do_quantization.sh int8-fp32 sq # or use int8-bf16
   ```
+
+* Set ENV to use fp16 AMX if you are using a supported platform
+  ```
+  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  ```
+
 # Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
@@ -71,16 +97,19 @@ Ensure that you have an enviornment variable set to point to an output directory
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
-# Clone the Transformers repo in the GPTJ-6B inference directory
-cd quickstart/language_modeling/pytorch/gptj/inference/cpu
+
+# Clone the Transformers repo in the gptj 6b inference directory
+cd <clone of the model zoo>/quickstart/language_modeling/pytorch/gptj/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
 git apply ../enable_ipex_for_llm.diff
 pip install -e ./
 cd ..
+
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
+
 # Run a quickstart script (for example, FP32 multi-instance realtime inference)
 bash run_multi_instance_realtime.sh fp32
 ```
@@ -88,3 +117,4 @@ bash run_multi_instance_realtime.sh fp32
 <!--- 80. License -->
 ## License
 [LICENSE](https://github.com/IntelAI/models/blob/master/LICENSE)
+
