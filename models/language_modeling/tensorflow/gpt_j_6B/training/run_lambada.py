@@ -246,24 +246,27 @@ class MTFTrainingArguments(TFTrainingArguments):
 
 class PerformanceIndicator(tf.keras.callbacks.Callback):
 
-  def __init__(self, bs):
-     self.start_time=0.0
-     self.end_time = 0.0
-     self.count = 0
-     self.batch_size = bs
+    def __init__(self, bs, blks):
+        self.start_time=0.0
+        self.end_time = 0.0
+        self.count = -1
+        self.batch_size = bs
+        self.block_size = int(blks)
 
-  def on_train_batch_begin(self, batch, logs=None):
-     self.start_time = time.time();
-     self.count = self.count +1
+    def on_train_batch_begin(self, batch, logs=None):
+        self.start_time = time.time();
+        self.count = self.count +1
 
-  def on_train_batch_end(self, batch, logs=None):
-     if self.count < 5:
-       return
-     self.count =0
-     self.end_time = time.time();
-     ex_time = self.end_time - self.start_time
-     tokens_per_second = float(self.batch_size) * 2048.0/float(ex_time)
-     print(" Performance : %.2f" % tokens_per_second," tokens/sec")
+    def on_train_batch_end(self, batch, logs=None):
+        if self.count < 5:
+            return
+        self.count = 0
+        self.end_time = time.time();
+        ex_time = self.end_time - self.start_time
+        ex_per_sec = float(self.batch_size)/float(ex_time)
+        tok_per_sec = ex_per_sec * self.block_size
+        print("\n  Performance : %.2f examples/sec : %.2f tokens processed/sec" % 
+              (ex_per_sec,tok_per_sec))
 
 
 def main():
@@ -635,7 +638,8 @@ def main():
             callbacks = []
 
         if training_args.do_train:
-          callbacks.append(PerformanceIndicator(training_args.per_device_train_batch_size))
+          callbacks.append(PerformanceIndicator(training_args.per_device_train_batch_size,
+                                                block_size))
         if training_args.profile:
           callbacks.append(tf.keras.callbacks.TensorBoard(log_dir=training_args.profile_dir,
                                                           update_freq=5,

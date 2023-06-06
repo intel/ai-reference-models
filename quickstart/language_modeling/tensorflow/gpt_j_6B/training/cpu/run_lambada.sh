@@ -45,7 +45,7 @@ elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISI
 fi
 
 if [ -z "${BATCH_SIZE}" ]; then
-  BATCH_SIZE="32"
+  BATCH_SIZE="16"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
@@ -55,14 +55,13 @@ NUM_INSTANCES="1"
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+_get_socket_cores_lists
+_command numactl -C ${cores_per_socket_arr[0]} python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=gpt_j_6B \
   --precision=${PRECISION} \
   --mode=training \
   --framework=tensorflow \
   --output-dir ${OUTPUT_DIR} \
-  --mpi_num_processes=${NUM_INSTANCES} \
-  --mpi_num_processes_per_socket=1 \
   --batch-size ${BATCH_SIZE} \
   --num-intra-threads ${cores_per_socket} \
   --num-inter-threads 2 \

@@ -20,6 +20,7 @@ import json
 import logging
 import os
 import sys
+import time
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -172,24 +173,27 @@ class DataTrainingArguments:
 
 class PerformanceIndicator(tf.keras.callbacks.Callback):
 
-  def __init__(self, bs):
-     self.start_time=0.0
-     self.end_time = 0.0
-     self.count = 0
-     self.batch_size = bs
+    def __init__(self, bs, sl):
+        self.start_time=0.0
+        self.end_time = 0.0
+        self.count = -1
+        self.batch_size = bs
+        self.seq_len = sl
 
-  def on_train_batch_begin(self, batch, logs=None):
-     self.start_time = time.time();
-     self.count = self.count +1
+    def on_train_batch_begin(self, batch, logs=None):
+        self.start_time = time.time();
+        self.count = self.count +1
 
-  def on_train_batch_end(self, batch, logs=None):
-     if self.count < 5:
-       return
-     self.count =0
-     self.end_time = time.time();
-     ex_time = self.end_time - self.start_time
-     sentence_per_second = float(self.batch_size)/float(ex_time)
-     print(" Performance : %.2f" % sentence_per_second," tasks/sec")
+    def on_train_batch_end(self, batch, logs=None):
+        if self.count < 5:
+            return
+        self.count = 0
+        self.end_time = time.time();
+        ex_time = self.end_time - self.start_time
+        ex_per_sec = float(self.batch_size)/float(ex_time)
+        tok_per_sec = ex_per_sec * self.seq_len
+        print("\n  Performance : %.2f examples/sec : %.2f tokens processed/sec" % 
+              (ex_per_sec,tok_per_sec))
 
 
 @dataclass
@@ -572,6 +576,9 @@ def main():
         else:
             callbacks = []
         # endregion
+        if training_args.do_train:
+            callbacks.append(PerformanceIndicator(training_args.per_device_train_batch_size,
+                                                  data_args.max_seq_length))
         if training_args.do_train and checkpoint and checkpoint_callback :
             callbacks.append(checkpoint_callback)
         if data_args.profile:
