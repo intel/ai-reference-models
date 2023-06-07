@@ -6,7 +6,7 @@ echo "Setup TensorFlow Test Enviroment for ResNet50 v1.5 Inference"
 PRECISION=$1
 SCRIPT=$2
 DATASET=$3
-OUTPUT_DIR=${OUTPUT_DIR-"tests/cicd/TensorFlow/output/resnet50v1.5-inference/${PRECISION}"}
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/TensorFlow/output/resnet50v1.5-inference/${SCRIPT}/${PRECISION}"}
 WORKSPACE=$4
 is_lkg_drop=$5
 
