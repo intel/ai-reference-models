@@ -231,6 +231,7 @@ def run(args: argparse.ArgumentParser):
                                     subgraph_loader,
                                     optimizer,
                                     device,
+                                    amp,
                                     progress_bar=progress_bar,
                                     desc="Warmup",
                                     trim=args.trim,
@@ -268,7 +269,7 @@ def run(args: argparse.ArgumentParser):
                             if args.profile:
                                 with torch_profile():
                                     train(model, subgraph_loader, optimizer,
-                                          device, progress_bar=progress_bar,
+                                          device, amp, progress_bar=progress_bar,
                                           desc="Profile training")
                                 rename_profile_file(model_name, dataset_name,
                                                     str(batch_size),
