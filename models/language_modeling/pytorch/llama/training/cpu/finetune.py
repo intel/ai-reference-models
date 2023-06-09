@@ -45,6 +45,8 @@ def train(
     base_model: str = "",  # the only required argument
     data_path: str = "yahma/alpaca-cleaned",
     output_dir: str = "./lora-alpaca",
+    bf16: bool = False,
+    fp16: bool = False,
     # training hyperparams
     batch_size: int = 128,
     micro_batch_size: int = 16,
@@ -77,6 +79,8 @@ def train(
             f"base_model: {base_model}\n"
             f"data_path: {data_path}\n"
             f"output_dir: {output_dir}\n"
+            f"bf16: {bf16}\n"
+            f"fp16: {fp16}\n"
             f"batch_size: {batch_size}\n"
             f"micro_batch_size: {micro_batch_size}\n"
             f"num_epochs: {num_epochs}\n"
@@ -244,7 +248,8 @@ def train(
             warmup_steps=10,
             num_train_epochs=num_epochs,
             learning_rate=learning_rate,
-            bf16=True,
+            bf16=bf16,
+            fp16_cpu=fp16,
             logging_steps=10,
             optim="adamw_torch",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
