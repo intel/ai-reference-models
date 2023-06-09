@@ -27,7 +27,26 @@ if [ -z "${OUTPUT_DIR}" ]; then
   exit 1
 fi
 
-python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./training_log_${precision}_${mode}"  ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py \
+if [[ "$1" == "bf16" ]]
+then
+    precision="bf16"
+    ARGS="$ARGS --bf16 "
+    echo "### running bf16 mode"
+elif [[ "$1" == "fp32" ]]
+then
+    echo "### running fp32 mode"
+elif [[ "$1" == "fp16" ]]
+then
+    precision=fp16
+    ARGS="$ARGS --fp16 "
+    echo "### running fp16 mode"
+else
+    echo "The specified precision '$1' is unsupported."
+    echo "Supported precisions are: fp32, bf16, fp16"
+    exit 1
+fi
+
+python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./training_log_${precision}_${mode}"  ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
     --base_model 'decapoda-research/llama-7b-hf'\
     --data_path '../../../../../../models/language_modeling/pytorch/llama/training/cpu/alpaca_data.json' \
     --output_dir ${OUTPUT_DIR} \
@@ -42,4 +61,4 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
     --lora_dropout 0.05 \
     --lora_target_modules '[q_proj,v_proj]' \
     --train_on_inputs \
-    --group_by_length
+    --group_by_length \
