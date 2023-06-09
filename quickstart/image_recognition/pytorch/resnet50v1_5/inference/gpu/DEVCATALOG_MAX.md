@@ -64,8 +64,6 @@ docker run \
   --ipc=host \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env NUM_ITERATIONS=${NUM_ITERATIONS} \
-  --env BATCH_SIZE=${BATCH_SIZE} \
-  --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \

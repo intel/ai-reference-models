@@ -47,7 +47,6 @@ docker run \
   --privileged \
   --device=/dev/dri \
   --shm-size=10G \
-  --privileged \
   --ipc host \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PROCESSED_DATASET_DIR=${PROCESSED_DATASET_DIR} \

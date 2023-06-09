@@ -1,0 +1,27 @@
+---
+pytorch-max-gpu-resnet50v1-5-training:
+  image_name: intel/image-recognition:pytorch-max-gpu-resnet50v1-5-training
+  tests:
+  - test_name: ResNet50V1_5 BF16 Training
+    env_vars:
+      SCRIPT: quickstart/training_plain_format.sh
+      Tile: 2
+      DATASET_DIR: /4T-720/dataset/imagenet/full_dataset/imagenet
+      OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-training
+      DOCKER_ARGS: --ipc=host --privileged --shm-size=10G --device=/dev/dri
+    volumes:
+      OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-training
+      DATASET_DIR: /4T-720/dataset/imagenet/full_dataset/imagenet
+      /dev/dri: /dev/dri
+  - test_name: ResNet50V1_5 BF16 DDP Training
+    env_vars:
+      SCRIPT: quickstart/ddp_training_plain_format_nchw.sh
+      Tile: 1
+      DATASET_DIR: /4T-720/dataset/imagenet/full_dataset/imagenet
+      OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-training/ddp
+      
+      DOCKER_ARGS: --ipc=host --privileged --shm-size=10G --device=/dev/dri
+    volumes:
+      OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-training/ddp
+      DATASET_DIR: /4T-720/dataset/imagenet/full_dataset/imagenet
+      /dev/dri: /dev/dri

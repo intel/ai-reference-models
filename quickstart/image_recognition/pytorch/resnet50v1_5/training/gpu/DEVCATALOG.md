@@ -60,7 +60,6 @@ docker run \
   --privileged \
   --device=/dev/dri \
   --shm-size=10G \
-  --privileged \
   --ipc=host \
   --env DATASET_DIR=${DATASET_DIR} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \

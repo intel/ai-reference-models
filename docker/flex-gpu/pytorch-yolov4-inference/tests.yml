@@ -1,0 +1,15 @@
+---
+pytorch-flex-gpu-yolov4-inference:
+  image_name: intel/object-detection:pytorch-flex-gpu-yolov4-inference
+  tests:
+  - test_name: YOLOv4 INT8 inference
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/inference_with_dummy_data.sh
+      BATCH_SIZE: 64
+      NUM_ITERATIONS: 500
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      OUTPUT_DIR: /output/pytorch-flex-gpu-yolov4-inference
+      PRETRAINED_MODEL: /workspace/pytorch-flex-gpu-yolov4-inference/pretrained_model/yolov4.pth
+ 

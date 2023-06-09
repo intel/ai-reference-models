@@ -1,0 +1,122 @@
+---
+tf-max-gpu-resnet50v1-5-inference:
+  image_name: intel/image-recognition:tf-max-gpu-resnet50v1-5-inference
+  tests:
+  - test_name: ResNet50v1_5 INT8 Batch inference
+    env_vars:
+      PRECISION: int8
+      Tile: 2
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+      SCRIPT: quickstart/batch_inference.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/int8
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/int8
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+  - test_name: ResNet50v1_5 INT8 Online inference
+    env_vars:
+      PRECISION: int8
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+      Tile: 1
+      SCRIPT: quickstart/online_inference.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/int8
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/int8
+  - test_name: ResNet50v1_5 INT8 Accuracy inference
+    env_vars:
+      PRECISION: int8
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-int8-gpu.pb
+      Tile: 1
+      SCRIPT: quickstart/accuracy.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/int8
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/int8
+  - test_name: ResNet50v1_5 FP16 Batch inference
+    env_vars:
+      PRECISION: fp16
+      Tile: 2
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp16-gpu.pb
+      SCRIPT: quickstart/batch_inference.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp16
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp16
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+  - test_name: ResNet50v1_5 FP16 Online inference
+    env_vars:
+      PRECISION: fp16
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp16-gpu.pb
+      Tile: 1
+      SCRIPT: quickstart/online_inference.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp16
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp16
+  - test_name: ResNet50v1_5 FP16 Accuracy inference
+    env_vars:
+      PRECISION: fp16
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp16-gpu.pb
+      Tile: 1
+      SCRIPT: quickstart/accuracy.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp16
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp16
+  - test_name: ResNet50v1_5 FP32 Batch inference
+    env_vars:
+      PRECISION: fp32
+      Tile: 2
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp32-gpu.pb
+      SCRIPT: quickstart/batch_inference.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp32
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp32
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+  - test_name: ResNet50v1_5 FP32 Online inference
+    env_vars:
+      PRECISION: fp32
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp32-gpu.pb
+      Tile: 1
+      SCRIPT: quickstart/online_inference.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp32
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp32
+  - test_name: ResNet50v1_5 FP32 Accuracy inference
+    env_vars:
+      PRECISION: fp32
+      GPU_TYPE: max_series
+      FROZEN_GRAPH: /workspace/tf-max-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-fp32-gpu.pb
+      Tile: 1
+      SCRIPT: quickstart/accuracy.sh
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp32
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /home/gta/sramakr1/TF_record
+      OUTPUT_DIR: /output/tf-max-gpu-resnet50v1-5-inference/fp32
+      

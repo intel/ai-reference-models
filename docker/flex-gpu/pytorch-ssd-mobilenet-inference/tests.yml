@@ -1,0 +1,16 @@
+---
+pytorch-flex-gpu-ssd-mobilenet-inference:
+  image_name: intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference
+  tests:
+  - test_name: SSD-MobileNet INT8 inference
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/inference_with_dummy_data.sh
+      BATCH_SIZE: 1024
+      NUM_ITERATIONS: 500
+      label: /workspace/pytorch-flex-series-ssd-mobilenet-inference/labels/voc-model-labels.txt
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /pytorch/VOCDevkit/VOC2007
+      OUTPUT_DIR: /output/flex-gpu-ssd-mobilenet-inference
+
