@@ -27,7 +27,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 |  DataType   | Throughput  |
 | ----------- | ----------- |
 | BF16        | bash run_lora_finetune.sh bf16  |
-
+| FP16        | bash run_lora_finetune.sh fp16  |
+| FP32        | bash run_lora_finetune.sh fp32  |
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
@@ -39,8 +40,17 @@ Ensure that you have an enviornment variable set to point to an output directory
 # Clone the model zoo repo and set the MODEL_DIR
 git clone https://github.com/IntelAI/models.git
 cd models
+
 export MODEL_DIR=$(pwd)
-cd quickstart/language_modeling/pytorch/llama/training/cpu
+cd <clone of the model zoo>/quickstart/language_modeling/pytorch/llama/training/cpu
+pip uninstall transformers
+git clone https://github.com/huggingface/transformers.git
+cd transformers
+git checkout v4.28.1
+git apply ../enable_ipex_for_lora_train.diff
+pip install -e ./
+cd ..
+
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
 
