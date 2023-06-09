@@ -57,8 +57,8 @@ coco
     └── ...
 ```
 The parent of the `annotations`, `train2017`, and `val2017` directory (in this example `coco`)
-is the directory that should be used when setting the `image` environment
-variable for YOLOv4 (for example: `export image=/home/<user>/coco/val2017/000000581781.jpg`).
+is the directory that should be used when setting the `IMAGE_FILE` environment
+variable for YOLOv4 (for example: `export IMAGE_FILE=/home/<user>/coco/val2017/000000581781.jpg`).
 In addition, we should also set the `size` environment to match the size of image.
 (for example: `export size=416`)
 
@@ -97,7 +97,7 @@ Install the following pre-requisites:
 ### Run the model on Baremetal
 ```
 Set environment variables:
-export DATASET_DIR=<path where yolov4 COCO dataset>
+export IMAGE_FILE<path where yolov4 COCO image>
 export LABELS_FILE=<path to coco labels file>
 export PRETRAINED_MODEL=<path to directory where the pretrained weights file was saved>
 export OUTPUT_DIR=<Path to save the output logs>
@@ -110,4 +110,3 @@ Run the inference script, only int8 precision is supported:
 ## License
 
 [LICENSE](/LICENSE)
-

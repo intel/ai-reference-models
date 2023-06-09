@@ -18,8 +18,8 @@
 MODEL_DIR=${MODEL_DIR-$PWD}
 BATCH_SIZE=${BATCH_SIZE-256}
 
-if [[ -z "${DATASET_DIR}" ]]; then
-  echo "Please specify coco dataset folder as variable DATASET_DIR"
+if [[ -z "${IMAGE_FILE}" ]]; then
+  echo "Please specify coco image file variable IMAGE_FILE"
   exit 1
 fi
 
@@ -44,7 +44,7 @@ fi
 echo "YOLO(v4) Inference INT8 Block NCHW BS=256"
 python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
   -n 80 \
-  -i ${DATASET_DIR} \
+  -i ${IMAGE_FILE} \
   -l ${LABELS_FILE} \
   --weight ${PRETRAINED_MODEL} \
   -e 416 \

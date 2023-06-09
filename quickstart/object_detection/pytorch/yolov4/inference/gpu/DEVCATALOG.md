@@ -35,8 +35,8 @@ coco
     ├── 000000000632.jpg
     └── ...
 ```
-The parent of the `annotations`, `train2017`, and `val2017` directory (in this example `coco`) is the directory that should be used when setting the `image` environment
-variable for YOLOv4 (for example: `export image=/home/<user>/coco/val2017/000000581781.jpg`). In addition, we should also set the `size` environment to match the size of image.
+The parent of the `annotations`, `train2017`, and `val2017` directory (in this example `coco`) is the directory that should be used when setting the `IMAGE_FILE` environment
+variable for YOLOv4 (for example: `export IMAGE_FILE=/home/<user>/coco/val2017/000000581781.jpg`). In addition, we should also set the `size` environment to match the size of image.
 (for example: `export size=416`)
 
 Download the `coco.names` labels file from [here](https://www.kaggle.com/datasets/valentynsichkar/yolo-coco-data?resource=download) and set `LABELS_FILE` to point to this file location. 
@@ -65,7 +65,7 @@ export OUTPUT_DIR=<path to output directory>
 export SCRIPT=quickstart/inference_block_format.sh
 export LABELS_FILE=<path to coco names file>
 export PRETRAINED_MODEL=<path to downloaded yolov4 model>
-export DATASET_DIR=<path to coco dataset image>
+export IMAGE_FILE=<path to coco dataset image>
 export BATCH_SIZE=<inference batch size,default is 256>
 export NUM_ITERATIONS=<number of iterations,default is 500>
 IMAGE_NAME=intel/object-detection:pytorch-flex-gpu-yolov4-inference
@@ -80,14 +80,14 @@ docker run \
   --env {NUM_ITERATIONS}=${NUM_ITERATIONS} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env DATASET_DIR=${DATASET_DIR} \
+  --env IMAGE_FILE=${IMAGE_FILE} \
   --env LABELS_FILE=${LABELS_FILE} \
   --env PRETRAINED_MODEL=${PRETRAINED_MODEL} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
   --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
-  --volume ${DATASET_DIR}:${DATASET_DIR} \
+  --volume ${IMAGE_FILE}:${IMAGE_FILE} \
   --volume ${LABELS_FILE}:${LABELS_FILE} \
   --volume ${PRETRAINED_MODEL}:${PRETRAINED_MODEL} \
   ${DOCKER_ARGS} \
