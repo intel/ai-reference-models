@@ -25,7 +25,6 @@ import argparse
 import zipfile
 import shutil
 
-
 root_folder = os.environ.get('DATASET_DIR')
 
 def remove_item(item, s):  

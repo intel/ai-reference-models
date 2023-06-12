@@ -69,6 +69,7 @@ def main():
     parser.add_argument('-d', '--directory', type=str, help='the desired dataset directory location')
     parser.add_argument('--download', action='store_true', help='download the raw dataset')
     parser.add_argument('--preprocess', action='store_true', help='preprocess the dataset')
+    parser.add_argument('--split_ratio', type=float, help="split ratio of the test data", default=0.1)
 
     # Parse the command-line arguments
     args = parser.parse_args()
@@ -79,7 +80,7 @@ def main():
 
     # Preprocess the dataset if the --preprocess flag is true
     if args.preprocess:
-        preprocess_dataset(args.name, args.directory)
+        preprocess_dataset(args.name, args.directory, args.split_ratio)
 
     # List the supported datasets if the --list flag is true
     if args.list:

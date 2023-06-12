@@ -16,6 +16,7 @@
 # limitations under the License.
 #
 
+import os
 import shutil
 import numpy as np
 import argparse
@@ -26,7 +27,7 @@ from typing import List, Tuple
 from sklearn.model_selection import train_test_split
 from pathlib import Path
 
-root_folder = path.dirname(path.abspath(__file__))
+root_folder = os.environ.get('DATASET_DIR')
 
 
 def get_subject_id(image_name):
@@ -175,34 +176,34 @@ if __name__ == "__main__":
         "--annotation_file",
         type=str,
         help="Location of annotation file.",
-        default=path.join(root_folder, "../../../../../data/annotation/annotation.csv")
+        default=os.path.join(root_folder, "annotation", "annotation.csv")
     )
     
     parser.add_argument(
         "--target_annotation_folder",
         type=str,
         help="Location of target annotation folder.",
-        default=path.join(root_folder,"../../../../../data/annotation")
+        default=os.path.join(root_folder, "annotation")
     )
     
     parser.add_argument(
         "--segmented_image_folder",
         type=str,
         help="Location of segmented image folder.",
-        default=path.join(root_folder,"../../../../../data/segmented_images")
+        default=os.path.join(root_folder, "segmented_images")
     )
     
     parser.add_argument(
         "--target_image_folder",
         type=str,
         help="Location of target imagefolder for train and test images.",
-        default=path.join(root_folder,"../../../../../data/train_test_split_images")
+        default=os.path.join(root_folder, "train_test_split_images")
     )
     
     parser.add_argument(
         "--split_ratio",
         type=float,
-        help="split ration of the test data.",
+        help="split ratio of the test data.",
         default=0.1,
     )
 
