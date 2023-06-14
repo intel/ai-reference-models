@@ -11,6 +11,11 @@ This document has instructions for running [Stable Diffusion, which is a text-to
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
+### Install dependencies
+```
+pip install torchmetrics pycocotools transformers==4.28.1
+```
+
 ### install model
 ```
 git clone https://github.com/huggingface/diffusers.git
@@ -47,7 +52,7 @@ Ensure that you have an enviornment variable set to point to an output directory
 git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
-# Clone the Transformers repo in the VIT Base inference directory
+# Install diffusers
 cd quickstart/diffusion/pytorch/stable_diffusion/inference/cpu/
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
