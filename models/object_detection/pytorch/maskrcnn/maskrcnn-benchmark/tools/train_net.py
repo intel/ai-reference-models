@@ -44,6 +44,7 @@ from maskrcnn_benchmark.utils.comm import synchronize, get_rank
 from maskrcnn_benchmark.utils.imports import import_file
 from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir, save_config
+import intel_extension_for_pytorch as ipex
 
 
 def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, iter_warmup=-1):
@@ -54,6 +55,14 @@ def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, i
 
     optimizer = make_optimizer(cfg, model)
     scheduler = make_lr_scheduler(cfg, optimizer)
+
+    if bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True, auto_kernel_selection=True)
+    elif bf16:
+        model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)
+    else:
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True)
 
     if distributed:
         device_ids = None
