@@ -177,7 +177,7 @@ def main_worker(args):
         print("using ipex to do training.....................")
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
-        if args.fp16:
+        elif args.fp16:
             model, optimizer = ipex.optimize(model, dtype=torch.half, optimizer=optimizer)
         else:
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
