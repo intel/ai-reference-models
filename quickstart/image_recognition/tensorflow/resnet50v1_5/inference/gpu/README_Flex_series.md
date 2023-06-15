@@ -56,7 +56,7 @@ Install the following pre-requisites:
   ```
 * Download the frozen graph model file, and set the FROZEN_GRAPH environment variable to point to where it was saved:
   ```bash
-  wget https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50v1_5_int8_h2d_avg_itex.pb
+  wget https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb
   ```
 * Clone the Model Zoo repository:
   ```bash
