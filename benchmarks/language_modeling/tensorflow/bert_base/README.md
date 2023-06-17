@@ -88,7 +88,7 @@ ${PYTHON} export_classifier.py \
           --output_dir=${OUTPUT_DIR} \
           --precision=fp32 \
           --saved_model=true \
-          --experimental_gelu=True # Disable this flag if your TenorFlow doesn't support
+          --experimental_gelu=True # Disable this flag if your TensorFlow doesn't support
 ```
 
 ## Inference

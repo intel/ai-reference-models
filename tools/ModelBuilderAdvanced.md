@@ -98,7 +98,7 @@ For example, [title.md](/tools/docker/docs/title.md) has:
 # <model name> <precision> <mode>
 ```
 
-When the documentation is generated, the text subsitution will happen and
+When the documentation is generated, the text substitution will happen and
 the generated README.md will have the values filled in:
 ```
 <!--- 0. Title -->

@@ -13,7 +13,7 @@ This library adds logging functions that print or save tensor values. Official m
    * ProfilerHook: Writes a timeline json that can be loaded into chrome://tracing.
    * ExamplesPerSecondHook: Logs the number of examples processed per second.
    * LoggingMetricHook: Similar to LoggingTensorHook, except that the tensors are logged in a format defined by our data
-     anaylsis pipeline.
+     analysis pipeline.
 
 
 2. **Benchmarks**

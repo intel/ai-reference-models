@@ -79,7 +79,7 @@ where:
    * $PB_FILE  -- the path of the frozen model generated with the script, or downloaded from the webiste of trained models the Intel published
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
-The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
+The log file is saved to the value of --output-dir. if not value specified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
 With accuracy mode, the official BLEU score will be printed
 
 The performance and accuracy in the the log output when the benchmarking completes should look

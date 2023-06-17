@@ -108,7 +108,7 @@ Now let's test the server by serving a simple oneDNN version of half_plus_two mo
 * Start the container 
     * with `-d`, runs the container as a background process
 	* with `-p`, publish the container’s port 8501 to host's port 8501 where the TF serving listens to REST API requests
-	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
+	* with `--name`, assign a name to the container for accessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `$TEST_DATA/saved_model_half_plus_two_mkl` on the container `/models/half_plus_two`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
 	* with `intel/intel-optimized-tensorflow-serving:latest` docker image
@@ -224,7 +224,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 * Start the container 
     * with `-d`, runs the container as a background process
 	* with `-p`, publish the container’s port 8501 to host's port 8501 where the TF serving listens to REST API requests
-	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
+	* with `--name`, assign a name to the container for accessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
 	* with `intel/intel-optimized-tensorflow-serving:latest` docker image
@@ -264,7 +264,7 @@ curl -s http://download.tensorflow.org/models/official/20181001_resnet/savedmode
 * Start a container 
     * with `-d`, runs the container as a background process
 	* with `-p`, publish the container’s port 8500 to host's port 8500 where the TF serving listens to gRPC requests
-	* with `--name`, assign a name to the container for acessing later for checking status or killing it.
+	* with `--name`, assign a name to the container for accessing later for checking status or killing it.
 	* with `-v`,  mount the host local model directory `/tmp/resnet` on the container `/models/resnet`.
 	* with `-e`, setting an environment variable in the container which is read by TF serving
 	* with `intel/intel-optimized-tensorflow-serving:latest` docker image

@@ -180,7 +180,7 @@ kubectl delete -f <use-case>.yaml
 This pipeline runs the following steps using an Argo workflow:
 1. Train the model on a single node using the `fp32_training_check_accuracy.sh`
    script. This script runs model training for a specified number of steps,
-   exports the saved model, and compares the accuacy against the value
+   exports the saved model, and compares the accuracy against the value
    specified in the `TARGET_ACCURACY` environment variable. If the model's
    accuracy does not meet the target accuracy, this step will be retried
    and continues training based on previous checkpoints in the specified

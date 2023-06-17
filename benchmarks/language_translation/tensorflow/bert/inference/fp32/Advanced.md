@@ -123,7 +123,7 @@ For throughput, recommend batch size is 32 (using `--batch-size 32`).
    I0120 14:15:19.862983 140620068984640 run_classifier.py:970]   loss = 0.51752657
    ```
 
-   Thoughput will be displayed below if batch size is greater than 1:
+   Throughput will be displayed below if batch size is greater than 1:
    ```
    I0120 14:38:12.126959 140150726125376 run_classifier.py:967] ***** Eval results *****
    I0120 14:38:12.127017 140150726125376 run_classifier.py:969]   eval_accuracy = 0.8489583

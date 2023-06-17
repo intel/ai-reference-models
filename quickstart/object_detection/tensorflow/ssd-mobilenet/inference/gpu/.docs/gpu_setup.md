@@ -17,7 +17,7 @@
 
     ```bash
     $ wget https://registrationcenter-download.intel.com/akdlm/irc_nas/18852/l_BaseKit_p_2022.3.0.8767_offline.sh
-    # 4 components are necessary: DPC++/C++ Compiler, DPC++ Libiary, Threading Building Blocks and oneMKL
+    # 4 components are necessary: DPC++/C++ Compiler, DPC++ Library, Threading Building Blocks and oneMKL
     $ sh ./l_BaseKit_p_2022.3.0.8767_offline.sh
     ```
     For any more details, please follow the procedure in https://www.intel.com/content/www/us/en/developer/tools/oneapi/base-toolkit.html.

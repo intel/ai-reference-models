@@ -15,7 +15,7 @@ This code sample is licensed under Apache License 2.0. See
 
 ## Purpose
 
-Demostrate how to quantize a pre-trained model from Model Zoo for Intel(R) Architecture by Intel® Neural Compressor and show the performance gain after quantization.
+Demonstrate how to quantize a pre-trained model from Model Zoo for Intel(R) Architecture by Intel® Neural Compressor and show the performance gain after quantization.
 
 ## Supported AI Frameworks
 

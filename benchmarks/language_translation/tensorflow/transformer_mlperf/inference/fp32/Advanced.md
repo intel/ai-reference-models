@@ -9,7 +9,7 @@ Benchmark suits using Intel-optimized TensorFlow.
 
 Detailed information on mlperf Benchmark can be found in [mlcommons/training](https://github.com/mlcommons/training/tree/v0.5/translation/tensorflow/transformer)
 
-The inference code is based on the trasnformer mlperf evaluation code, but Intel has optimized the inference model by modifying the code of the model, so that it can achieve better performance on Intel CPUs.
+The inference code is based on the transformer mlperf evaluation code, but Intel has optimized the inference model by modifying the code of the model, so that it can achieve better performance on Intel CPUs.
 
 <!--- 30. Datasets -->
 ## Datasets
@@ -78,7 +78,7 @@ where:
    * $PB_FILE  -- the path of the frozen model generated with the script, or downloaded from Intel published trained models websites
    * steps -- the number of batches of data to feed into the model for inference, if the number is greater than available batches in the input data, it will only run number of batches available in the data.
 
-The log file is saved to the value of --output-dir. if not value spacified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
+The log file is saved to the value of --output-dir. if not value specified, the log will be at the models/benchmarks/common/tensorflow/logs in workspace.
 With accuracy mode, the official BLEU score will be printed
 
 The performance and accuracy in the the log output when the benchmarking completes should look

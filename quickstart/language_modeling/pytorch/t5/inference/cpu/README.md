@@ -29,7 +29,7 @@ git clone https://github.com/IntelAI/models.git
 |  backend   | performance  |
 | ----------- | ----------- |
 | IPEX        | bash run_inference.sh ipex |
-| Offical Pytorch        | bash run_inference.sh pytorch | 
+| Official Pytorch        | bash run_inference.sh pytorch | 
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison and Jemalloc.
 

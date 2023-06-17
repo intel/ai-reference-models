@@ -52,7 +52,7 @@ Accuracy
 ./quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/accuracy.sh
 ```
 
-Throuhgput:
+Throughput:
 
 (runs with a batch size of 56)
 

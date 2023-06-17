@@ -379,9 +379,9 @@ def main_worker(gpu, ngpus_per_node, args):
     if args.dummy:
         assert args.evaluate, "please using real dataset if you want run training path"
     if not args.ipex:
-        # for offical pytorch, int8 and jit path is not enabled.
-        assert not args.int8, "int8 path is not enabled for offical pytorch"
-        assert not args.jit, "jit path is not enabled for offical pytorch"
+        # for official pytorch, int8 and jit path is not enabled.
+        assert not args.int8, "int8 path is not enabled for official pytorch"
+        assert not args.jit, "jit path is not enabled for official pytorch"
 
     if not args.dummy:
         # Data loading code
@@ -427,7 +427,7 @@ def main_worker(gpu, ngpus_per_node, args):
         if args.ipex:
             print("using ipex model to do inference\n")
         else:
-            print("using offical pytorch model to do inference\n")
+            print("using official pytorch model to do inference\n")
 
         if args.ipex:
             model.eval()

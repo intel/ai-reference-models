@@ -183,7 +183,7 @@ kubectl apply -f <use-case>.yaml
 ##### Multi-node training output
 
 Viewing the log output of the bert-large-fp32-training-k8s.tar.gz MPIJob is done by viewing the logs of the 
-launcher pod. The launcher pod aggregrates output from the workerpods. 
+launcher pod. The launcher pod aggregates output from the workerpods. 
 This pod is found by filtering the list of pods for the name 'launcher'
 
 ```

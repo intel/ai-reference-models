@@ -13,7 +13,7 @@ flags.DEFINE_string(
 ```
 
 All three arguments are required, but default may be `None`. A common optional argument is
-short_name for defining abreviations. Certain `DEFINE_*` methods will have other required arguments.
+short_name for defining abbreviations. Certain `DEFINE_*` methods will have other required arguments.
 For instance `DEFINE_enum` requires the `enum_values` argument to be specified.
 
 ## Key Flags

@@ -98,7 +98,7 @@ using these steps.
    MODEL_URL=<gcloud url> model-builder init-spec -f <framework> <spec name> <optional use case>
    ```
 
-   > Note that if no `--framework` or `-f` is specifed, the `tensorflow`
+   > Note that if no `--framework` or `-f` is specified, the `tensorflow`
    > framework will be used. The framework specified here will determine
    > which [spec folder](/tools/docker/specs) the yml will be added to
    > (for example: tensorflow, pytorch, or ml).

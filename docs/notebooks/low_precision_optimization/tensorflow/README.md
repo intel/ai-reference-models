@@ -15,7 +15,7 @@ Please refer to the official website for detailed info and news: [https://github
 
 ## Purpose
 
-Demostrate how to quantize a pre-trained model from Model Zoo for Intel(R) Architecture with Intel® Neural Compressor and show the performance gain after quantization.
+Demonstrate how to quantize a pre-trained model from Model Zoo for Intel(R) Architecture with Intel® Neural Compressor and show the performance gain after quantization.
 
 We will learn the acceleration of AI inference by Intel AI technology:
 
@@ -74,7 +74,7 @@ sudo apt-get update && apt-get install -y  build-essential python3-opencv python
 |resnet50_v1.yaml| A default YAML file for Intel® Neural Compressor. No update needed.
 |run_jupyter.sh| A script to start running Jupyter notebook.
 |tf_2012_val | A default folder to save the dataset. Put the TFRecord format dataset files into it.
-|tips.md| An addtional document for some tips on Intel® Neural Compressor usage.
+|tips.md| An additional document for some tips on Intel® Neural Compressor usage.
 |ut.sh| A Unit test script. The dataset should be saved in tf_2012_val folder befure users run the script.
 
 

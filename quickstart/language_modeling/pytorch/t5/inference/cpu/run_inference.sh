@@ -77,7 +77,7 @@ then
     echo "### running ipex optimization path"
 else
     ARGS="$ARGS --do_ipex_optimization 0"
-    echo "### running offical PyTorch path"
+    echo "### running official PyTorch path"
 fi
 
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
