@@ -46,6 +46,7 @@ from torchrec.optim.keyed import CombinedOptimizer, KeyedOptimizerWrapper
 from torchrec.optim.optimizers import in_backward_optimizer_filter
 from tqdm import tqdm
 from jit_trace_able_utils import unpack, SparseArchTraceAbleWrapper
+import intel_extension_for_pytorch as ipex
 
 # OSS import
 try:
@@ -90,6 +91,11 @@ class InteractionType(Enum):
     def __str__(self):
         return self.value
 
+def load_snapshot(model, snapshot_dir):
+    from torchsnapshot import Snapshot
+    snapshot = Snapshot(path=snapshot_dir)
+    snapshot.restore(app_state={"model": model})
+
 def parse_autocast(dtype: str):
     _dtype = None
     autocast = False
@@ -113,7 +119,7 @@ def convert_int8(args, model, dataloader):
         activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
         weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric)
     )
-    batch = dataloader.source.dataset.batch_generator._generate_batch()
+    batch = dataloader.dataset.load_batch()
     batch.sparse_features = unpack(batch.sparse_features)
     model = prepare(
         model,
@@ -122,13 +128,14 @@ def convert_int8(args, model, dataloader):
         inplace=True
     )
     if args.calibration:
-        for _ in range(10):
-            batch = dataloader.source.dataset.batch_generator._generate_batch()
-            batch.sparse_features = unpack(batch.sparse_features)
-            model(batch.dense_features, batch.sparse_features)
-            model.save_qconf_summary(qconf_summary=args.int8_configure_dir)
-            logger.info("calibration done and save to %s", args.int8_configure_dir)
-            exit()
+        # https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorch#calibration-set
+        batch_idx = list(range(128000))
+        batch = dataloader.dataset.load_batch(batch_idx)
+        batch.sparse_features = unpack(batch.sparse_features)
+        model(batch.dense_features, batch.sparse_features)
+        model.save_qconf_summary(qconf_summary=args.int8_configure_dir)
+        logger.info("calibration done and save to %s", args.int8_configure_dir)
+        exit()
     else:
         model.load_qconf_summary(qconf_summary = args.int8_configure_dir)
         convert(model, inplace=True)
@@ -140,7 +147,7 @@ def convert_int8(args, model, dataloader):
         return model
 
 def ipex_optimize(args, model, optimizer, dataloader):
-    example_batch = dataloader.source.dataset.batch_generator._generate_batch()
+    example_batch = dataloader.dataset.load_batch()
     example_batch.sparse_features = unpack(example_batch.sparse_features)
     dense, sparse = example_batch.dense_features, example_batch.sparse_features
     _, dtype = parse_autocast(args.dtype)
@@ -438,11 +445,20 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         help="Whether calibration only for this run.",
     )
     parser.add_argument(
+        "--test_auroc",
+        action="store_true",
+        help="Test auroc.",
+    )    
+    parser.add_argument(
         "--log-freq",
         type=int,
         default=0,
         help="log-freq to print performance statistics.",
     )
+    parser.add_argument(
+        "--snapshot-dir",
+        type=str,
+    )    
     return parser.parse_args(argv)
 
 
@@ -500,6 +516,8 @@ def _evaluate(
     )
     iterator = itertools.chain(iterator, two_filler_batches)
 
+    preds = []
+    labels = []
     auroc = metrics.AUROC(compute_on_step=False, task='binary').to(device)
     total_t = 0
     it = 1
@@ -509,13 +527,18 @@ def _evaluate(
                 while True:
                     try:
                         t1 = time.time()
-                        logits, labels = eval_step(eval_model, iterator)
+                        logits, label = eval_step(eval_model, iterator)
                         t2 = time.time()
                         total_t += t2 - t1
                         if log_freq != 0 and it % log_freq == 0:
-                            logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s")
-                        preds = torch.sigmoid(logits)
-                        auroc(preds, labels)
+                            preds = [torch.cat(preds)]
+                            labels = [torch.cat(labels)]
+                            num_samples = labels[0].shape[0]
+                            auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze())
+                            logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
+                        pred = torch.sigmoid(logits)
+                        preds.append(pred)
+                        labels.append(label)
                         pbar.update(1)
                         it += 1
                     except StopIteration:
@@ -524,29 +547,37 @@ def _evaluate(
         else:
             while True:
                 try:
-                    t1 = time.time()
-                    logits, labels = eval_step(eval_model, iterator)
+                    t1 = time.time()                    
+                    logits, label = eval_step(eval_model, iterator)
                     t2 = time.time()
                     total_t += t2 - t1
                     if log_freq != 0 and it % log_freq == 0:
-                        logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s")
-                    preds = torch.sigmoid(logits)
-                    auroc(preds, labels)
+                        preds = [torch.cat(preds)]
+                        labels = [torch.cat(labels)]
+                        num_samples = labels[0].shape[0]
+                        auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze())
+                        logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
+                    pred = torch.sigmoid(logits)
+                    preds.append(pred)
+                    labels.append(label)
                     pbar.update(1)
                     it += 1
                 except StopIteration:
                     # Dataset traversal complete
                     break
 
-    auroc_result = auroc.compute().item()
-    num_samples = torch.tensor(sum(map(len, auroc.target)), device=device)
-    num_samples = num_samples.item()
+    
+    preds = torch.cat(preds)
+    labels = torch.cat(labels)
+    num_samples = labels.shape[0]
+    auroc = ipex._C.roc_auc_score(labels.float(), preds.squeeze().float())
 
-    logger.info(f"AUROC over {stage} set: {auroc_result}.")
+    logger.info(f"AUROC over {stage} set: {auroc}.")
     logger.info(f"Number of {stage} samples: {num_samples}")
     logger.info(f"Throughput: {num_samples/total_t} fps")
+    logger.info(f"Final AUROC: {auroc} ")
 
-    return auroc_result
+    return auroc
 
 
 def _train(
@@ -713,7 +744,7 @@ def train_val_test(
         test_auroc = _evaluate(
             args.limit_test_batches,
             model.model,
-            test_dataloader,
+            val_dataloader,
             "test",
             0,
             False,
@@ -924,6 +955,9 @@ def main(argv: List[str]) -> None:
         )
 
     train_model = DLRMTrain(dlrm_model)
+    if args.test_auroc:
+        assert args.snapshot_dir
+        load_snapshot(train_model, args.snapshot_dir)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
     # the optimizer update will be applied in the backward pass, in this case through a fused op.
@@ -1024,9 +1058,13 @@ def main(argv: List[str]) -> None:
     #     value=args.lr_decay_steps,
     # )
 
-    train_dataloader = get_dataloader(args, backend, "train")
     val_dataloader = get_dataloader(args, backend, "val")
     test_dataloader = get_dataloader(args, backend, "test")
+
+    if args.inference_only:
+        train_dataloader = None
+    else:
+        train_dataloader = get_dataloader(args, backend, "train")
 
     # logger.event(
     #     key=mllog_constants.TRAIN_SAMPLES,
@@ -1042,9 +1080,10 @@ def main(argv: List[str]) -> None:
             dist_type=args.multi_hot_distribution_type,
         )
         multihot.pause_stats_collection_during_val_and_test(model)
-        train_dataloader = RestartableMap(
-            multihot.convert_to_multi_hot, train_dataloader
-        )
+        if train_dataloader:
+            train_dataloader = RestartableMap(
+                multihot.convert_to_multi_hot, train_dataloader
+            )
         val_dataloader = RestartableMap(multihot.convert_to_multi_hot, val_dataloader)
         test_dataloader = RestartableMap(multihot.convert_to_multi_hot, test_dataloader)
 

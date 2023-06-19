@@ -308,3 +308,11 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
 
     def __len__(self) -> int:
         return self.num_full_batches // self.world_size + (self.last_batch_sizes[0] > 0)
+
+    def load_batch(self, sample_list=None) -> Batch:
+        if sample_list is None:
+            sample_list = list(range(self.batch_size))
+        dense = self.dense_arrs[0][sample_list, :]
+        sparse = [arr[sample_list, :] for arr in self.sparse_arrs[0]]
+        labels = self.labels_arrs[0][sample_list, :]
+        return self._np_arrays_to_batch(dense, sparse, labels)

@@ -40,14 +40,29 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
 
 ## Datasets
+The dataset can be downloaded and preprocessed by following https://github.com/mlcommons/training/tree/master/recommendation_v2/torchrec_dlrm#create-the-synthetic-multi-hot-dataset.
+We also provided a preprocessed scripts based on the instruction above. `preprocess_raw_dataset.sh`.
+After you loading the raw dataset `day_*.gz` and unzip them to RAW_DIR.
+```bash
+export MODEL_DIR=<where you clone this repo>
+export RAW_DIR=<the unziped raw dataset>
+export TEMP_DIR=<where your choose the put the temp file during preprocess>
+export PREPROCESSED_DIR=<where your choose the put the one-hot dataset>
+export MULTI_HOT_DIR=<where your choose the put the multi-hot dataset>
+bash preprocess_raw_dataset.sh
+```
 
-Use random dataset.
+## Pre-Trained checkpoint
+Your can download and unzip checkpoint by following
+https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorch#downloading-model-weights
+
 
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
 | `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, bf32, bf16, or int8). |
+| `test_accuracy.sh` | Run inference to verify auroc for the specified precision (fp32, bf32, bf16, or int8). |
 
 ## Run the model
 
@@ -61,9 +76,16 @@ export OUTPUT_DIR=<specify the log dir to save log>
 # Env vars
 export PRECISION=<specify the precision to run>
 
-# Run a quickstart script (for example, bare metal performance)
+# Run a quickstart script for bare metal performance)
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
 bash inference_performance.sh
+
+
+# Run a quickstart script for accuracy test
+cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
+export DATASET_DIR=<multi-hot dataset dir>
+export WEIGHT_DIR=<offical released checkpoint>
+bash test_accuracy.sh
 ```
 
 <!--- 80. License -->

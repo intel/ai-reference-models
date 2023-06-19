@@ -101,8 +101,8 @@ def _get_in_memory_dataloader(
             stage,
             *stage_files,  # pyre-ignore[6]
             batch_size=batch_size,
-            rank=dist.get_rank(),
-            world_size=dist.get_world_size(),
+            rank=0, #  dist.get_rank(),
+            world_size=1, #  dist.get_world_size(),
             drop_last=args.drop_last_training_batch if stage == "train" else False,
             shuffle_batches=args.shuffle_batches,
             shuffle_training_set=args.shuffle_training_set,
