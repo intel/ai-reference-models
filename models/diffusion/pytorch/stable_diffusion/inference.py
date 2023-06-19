@@ -50,6 +50,11 @@ def parse_args():
     parser.add_argument('--profile', action='store_true', default=False, help='profile')
     parser.add_argument('--benchmark', action='store_true', default=False, help='test performance')
     parser.add_argument('--accuracy', action='store_true', default=False, help='test accuracy')
+    parser.add_argument('-i', '--iterations', default=-1, type=int, help='number of total iterations to run')
+    parser.add_argument('--world-size', default=-1, type=int, help='number of nodes for distributed training')
+    parser.add_argument('--rank', default=-1, type=int, help='node rank for distributed training')
+    parser.add_argument('--dist-url', default='env://', type=str, help='url used to set up distributed training')
+    parser.add_argument('--dist-backend', default='ccl', type=str, help='distributed backend')
 
     args = parser.parse_args()
     return args
@@ -58,6 +63,21 @@ def main():
 
     args = parse_args()
     logging.info(f"Parameters {args}")
+
+    # CCL related
+    os.environ['MASTER_ADDR'] = str(os.environ.get('MASTER_ADDR', '127.0.0.1'))
+    os.environ['MASTER_PORT'] = '29500'
+    os.environ['RANK'] = str(os.environ.get('PMI_RANK', 0))
+    os.environ['WORLD_SIZE'] = str(os.environ.get('PMI_SIZE', 1))
+
+    if args.dist_url == "env://" and args.world_size == -1:
+        args.world_size = int(os.environ["WORLD_SIZE"])
+        print("World size: ", args.world_size)
+
+    args.distributed = args.world_size > 1 
+    if args.distributed:
+        if args.dist_url == "env://" and args.rank == -1:
+            args.rank = int(os.environ["RANK"])
 
     # load model
     pipe = StableDiffusionPipeline.from_pretrained(args.model_name_or_path)
@@ -121,9 +141,6 @@ def main():
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
-                # graph = pipe.unet.graph_for(torch.randn(4, 4, 64, 64), torch.tensor(921), torch.randn(4, 77, 768))
-                # print(graph)
-                # draw(graph).render("stable_diffusion")
 
         else:
             with torch.no_grad():
@@ -131,9 +148,6 @@ def main():
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
-                # graph = pipe.unet.graph_for(torch.randn(4, 4, 64, 64), torch.tensor(921), torch.randn(4, 77, 768))
-                # print(graph)
-                # draw(graph).render("stable_diffusion")
 
     # torch compile with ipex backend
     if args.compile_ipex:
@@ -142,18 +156,39 @@ def main():
     if args.compile_inductor:
         pipe.unet = torch.compile(pipe.unet, backend='inductor')
 
-    generator = torch.Generator(device="cpu").manual_seed(args.seed)
+    if args.distributed:
+        import oneccl_bindings_for_pytorch
+        torch.distributed.init_process_group(backend=args.dist_backend,
+                                init_method=args.dist_url,
+                                world_size=args.world_size,
+                                rank=args.rank)
+        print("Rank and world size: ", torch.distributed.get_rank()," ", torch.distributed.get_world_size())              
+        # print("Create DistributedDataParallel in CPU")
+        # pipe = torch.nn.parallel.DistributedDataParallel(pipe)
+
+    # prepare dataloader
+    val_coco = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
+                                 annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
+                                 transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
+
+    if args.distributed:
+        val_sampler = torch.utils.data.distributed.DistributedSampler(val_coco, shuffle=False)
+    else:
+        val_sampler = None
+
+    val_dataloader = torch.utils.data.DataLoader(val_coco,
+                                                 batch_size=1,
+                                                 shuffle=False,
+                                                 num_workers=0,
+                                                 sampler=val_sampler)
 
     if args.ipex and args.precision == "int8" and args.calibration:
         print("Running int8 calibration ...")
         qconfig = ipex.quantization.default_static_qconfig
         pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
-        cap = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
-                                annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
-                                transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
-        for i, (real_image, prompts) in enumerate(cap):
-            prompt = prompts[0]
-            pipe(prompt, generator=generator).images
+        for i, (real_image, prompts) in enumerate(val_dataloader):
+            prompt = prompts[0][0]
+            pipe(prompt, generator=torch.manual_seed(args.seed)).images
             if i == 9:
                 break
         pipe.unet.save_qconf_summary(args.configure_dir)
@@ -165,61 +200,50 @@ def main():
         start = time.time()
         if args.precision == "bf16" or args.precision == "fp16":
             with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                image = pipe(args.prompt, generator=generator).images
+                output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
         else:
             with torch.no_grad():
-                image = pipe(args.prompt, generator=generator).images
+                output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
         end = time.time()
         print('time per prompt(s): {:.2f}'.format((end - start)))
         if args.output_dir:
             if not os.path.exists(args.output_dir):
                 os.mkdir(args.output_dir)
             image_name = time.strftime("%Y%m%d_%H%M%S")
-            image[0].save(f"{args.output_dir}/{image_name}.png")
-        
+            output[0].save(f"{args.output_dir}/{image_name}.png")
+
     if args.accuracy:
         print("Running accuracy ...")
         # run model
-        cap = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
-                                annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
-                                transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
-        fake_images = []
-        real_images = []
-        for i, (real_image, prompts) in enumerate(cap):
-            prompt = prompts[0]
+        fid = FrechetInceptionDistance(normalize=True)
+        for i, (images, prompts) in enumerate(val_dataloader):
+            prompt = prompts[0][0]
+            real_image = images[0]
             print("prompt: ", prompt)
             if args.precision == "bf16" or args.precision == "fp16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                    image = pipe(prompt, generator=generator, output_type="numpy").images
+                    output = pipe(prompt, generator=torch.manual_seed(args.seed), output_type="numpy").images
             else:
                 with torch.no_grad():
-                    image = pipe(prompt, generator=generator, output_type="numpy").images
+                    output = pipe(prompt, generator=torch.manual_seed(args.seed), output_type="numpy").images
 
             if args.output_dir:
                 if not os.path.exists(args.output_dir):
                     os.mkdir(args.output_dir)
                 image_name = time.strftime("%Y%m%d_%H%M%S")
-                Image.fromarray((image[0] * 255).round().astype("uint8")).save(f"{args.output_dir}/fake_image_{image_name}.png")
+                Image.fromarray((output[0] * 255).round().astype("uint8")).save(f"{args.output_dir}/fake_image_{image_name}.png")
                 Image.fromarray(real_image.permute(1, 2, 0).numpy()).save(f"{args.output_dir}/real_image_{image_name}.png")
 
-            fake_images.append(image[0])
-            real_images.append(real_image.unsqueeze(0) / 255.0)
+            fake_image = torch.tensor(output[0]).unsqueeze(0).permute(0, 3, 1, 2)
+            real_image = real_image.unsqueeze(0) / 255.0
+            
+            fid.update(real_image, real=True)
+            fid.update(fake_image, real=False)
 
-            if i == 9:
+            if args.iterations > 0 and i == args.iterations - 1:
                 break
 
-        real_images = torch.cat(real_images)
-
-        fake_images = torch.tensor(fake_images)
-        fake_images = fake_images.permute(0, 3, 1, 2)
-
-        # compute FID
-        fid = FrechetInceptionDistance(normalize=True)
-        fid.update(real_images, real=True)
-        fid.update(fake_images, real=False)
-
         print(f"FID: {float(fid.compute())}")
-
 
     # profile
     if args.profile:
@@ -227,10 +251,10 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
             if args.precision == "bf16" or args.precision == "fp16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                    pipe(args.prompt, generator=generator, num_inference_steps=5).images
+                    pipe(args.prompt, generator=torch.manual_seed(args.seed), num_inference_steps=5).images
             else:
                 with torch.no_grad():
-                    pipe(args.prompt, generator=generator, num_inference_steps=5).images
+                    pipe(args.prompt, generator=torch.manual_seed(args.seed), num_inference_steps=5).images
 
         output = p.key_averages().table(sort_by="self_cpu_time_total")
         print(output)

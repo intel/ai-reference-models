@@ -69,16 +69,17 @@ rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_accuracy*
 rm -rf ${PRECISION}_results
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --enable_jemalloc \
+    --memory-allocator jemalloc \
     --ninstance 1 \
-    --node_id=0 \
-    --log_path=${OUTPUT_DIR} \
+    --nodes-list=0 \
+    --log-dir=${OUTPUT_DIR} \
     --log_file_prefix stable_diffusion_${PRECISION}_inference_accuracy \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --dataset_path=${DATASET_DIR} \
     --ipex \
     --jit \
     --accuracy \
+    -i=10 \
     --output_dir="${PRECISION}_results" \
     $ARGS
 

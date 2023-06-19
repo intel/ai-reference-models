@@ -58,6 +58,19 @@ else
     exit 1
 fi
 
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+NNODES=${NNODES:-1}
+HOSTFILE=${HOSTFILE:-./hostfile}
+NUM_RANKS=$(( NNODES * SOCKETS ))
+
+if [ ${LOCAL_BATCH_SIZE} ]; then
+    GLOBAL_BATCH_SIZE=$(( LOCAL_BATCH_SIZE * NNODES * SOCKETS ))
+fi
+
+CORES_PER_INSTANCE=$CORES
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 export KMP_BLOCKTIME=1
@@ -65,39 +78,29 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
 
-rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime*
+rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy*
+
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator jemalloc \
-    --latency_mode \
-    --log-dir ${OUTPUT_DIR} \
-    --log_file_prefix stable_diffusion_${PRECISION}_inference_realtime \
+    --distributed \
+    --nnodes ${NNODES} \
+    --hostfile ${HOSTFILE} \
+    --nprocs-per-node ${SOCKETS} \
+    --ncores-per-instance ${CORES_PER_INSTANCE} \
+    --logical-cores-for-ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --dataset_path=${DATASET_DIR} \
+    --dist-backend ccl \
     --ipex \
     --jit \
-    --benchmark \
-    $ARGS
+    --accuracy \
+    $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy.log
 
 # For the summary of results
 wait
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-CORES_PER_INSTANCE=4
-
-INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
-
-throughput=$(grep '50/50' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime* | sed -e 's/[^0-9. ]*//g' | grep -oE "[^ ]+$" |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
-BEGIN {
-        sum = 0;
-i = 0;
-      }
-      {
-        sum = sum + (1 / $1);
-i++;
-      }
-END   {
-sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.2f", sum);
-}')
-echo ""stable_diffusion";"latency";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+accuracy=$(grep 'FID:' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy* |sed -e 's/.*FID//;s/[^0-9.]//g')
+echo ""stable_diffusion";"FID";$1;${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log
