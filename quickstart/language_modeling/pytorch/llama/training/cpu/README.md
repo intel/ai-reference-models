@@ -47,7 +47,8 @@ pip uninstall transformers
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
-git apply ../enable_ipex_for_lora_train.diff
+pip install -r requirements.txt
+git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
 
