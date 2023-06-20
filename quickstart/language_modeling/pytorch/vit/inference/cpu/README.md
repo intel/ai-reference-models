@@ -1,23 +1,24 @@
 <!--- 0. Title -->
-# PyTorch GPTJ 6B inference (generation)
+# PyTorch Vision Transformer (ViT) inference
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [GPTJ 6B](https://huggingface.co/EleutherAI/gpt-j-6b) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [Vision Transformer (ViT) model, which is pre-trained on ImageNet-21k and fine-tuned on ImageNet 2012](https://huggingface.co/google/vit-base-patch16-224) inference using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
 
-Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
+Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and build Pytorch, IPEX, TorchVison Jemalloc and TCMalloc.
 
 ### Prepare model
 ```
-  cd <clone of the model zoo>/quickstart/language_modeling/pytorch/gptj/inference/cpu
+  cd <clone of the model zoo>/quickstart/language_modeling/pytorch/vit/inference/cpu
   git clone https://github.com/huggingface/transformers.git
   cd transformers
   git checkout v4.28.1
   pip install -r requirements.txt
+  pip install -r examples/pytorch/image-classification/requirements.txt
   git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
   pip install -e ./
   cd ..
@@ -33,18 +34,6 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
   pip install datasets
   ```
-* Set INPUT_TOKEN before running the model
-  ```
-  export INPUT_TOKEN=1024
-  (choice in [32 512 1024])
-  ```
-
-
-* Set OUTPUT_TOKEN before running the model
-  ```
-  export OUTPUT_TOKEN=128 
-  (128 is preferred, while you could set any other length)
-  ```
 
 * Set CORE_PER_INSTANCE before running realtime mode
   ```
@@ -54,25 +43,13 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 * About the BATCH_SIZE in scripts
   ```
-  using BATCH_SIZE=1 by default in scripts (which could be further tuned according to the testing host); 
-  ```
-* About the BEAM_SIZE in scripts
-  ```
-  using BEAM_SIZE=4 by default
+  Throughput mode is using BATCH_SIZE=[4 x core number] by default in script (which could be further tuned according to the testing host); 
+  Realtime mode is using BATCH_SIZE=[1] by default in script; 
   ```
 
-* Do quantization to get INT8 model before running INT8.
+* Do calibration to get quantization config before running INT8.
   ```
-  #default using IPEX static quantization
-  bash do_quantization.sh int8-fp32 default  # or use int8-bf16
-
-  #optional using IPEX smoothquant for better accuracy
-  bash do_quantization.sh int8-fp32 sq # or use int8-bf16
-  ```
-
-* Set ENV to use fp16 AMX if you are using a supported platform
-  ```
-  export DNNL_MAX_CPU_ISA=AVX512_CORE_AMX_FP16
+  bash do_calibration.sh
   ```
 
 # Quick Start Scripts
@@ -99,15 +76,25 @@ git clone https://github.com/IntelAI/models.git
 cd models
 export MODEL_DIR=$(pwd)
 
-# Clone the Transformers repo in the gptj 6b inference directory
-cd <clone of the model zoo>/quickstart/language_modeling/pytorch/gptj/inference/cpu
+# Clone the Transformers repo in the VIT Base inference directory
+cd quickstart/language_modeling/pytorch/vit/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
 pip install -r requirements.txt
+pip install -r examples/pytorch/image-classification/requirements.txt
+pip install cchardet 
+pip install scikit-learn
 git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
+
+# Prepare for downloading access
+# On https://huggingface.co/datasets/imagenet-1k, login your account, and click the aggreement and then generating {your huggingface token}
+
+huggingface-cli login
+{your huggingface token}
+
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
