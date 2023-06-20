@@ -78,6 +78,43 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 
 PRECISION=$1
 
+#oneCCL settings
+export CCL_WORKER_COUNT=8
+export CCL_LOG_LEVEL=info
+export CCL_BF16=avx512bf
+export CCL_ATL_TRANSPORT=ofi
+export CCL_MNIC_COUNT=2
+export CCL_MNIC=local
+export CCL_MNIC_NAME=irdma1,irdma5
+export CCL_ALLREDUCE=ring
+export CCL_WORKER_COUNT=8
+
+for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
+  START_CORE=$(( i * CORES ))
+  for (( j = 0; j < $CCL_WORKER_COUNT; j++)); do
+   CCL_WORKER_AFFINITY="${CCL_WORKER_AFFINITY} $((START_CORE + j))"
+  done
+done
+
+export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
+
+
+#DDP settings
+export TORCH_CPP_LOG_LEVEL=INFO
+export TORCH_DISTRIBUTED_DEBUG=INFO
+export MASTER_ADDR=`head -1 hostfile`
+
+# Fabric settings
+export FI_PROVIDER=psm3
+export PSM3_IDENTIFY=1
+export PSM3_ALLOW_ROUTERS=1
+export PSM3_RDMA=1
+export PSM3_PRINT_STATS=0
+export PSM3_RV_MR_CACHE_SIZE=8192
+export PSM3_KASSIST_MODE=none
+#export PSM3_NIC='irdma*
+export FI_PSM3_CONN_TIMEOUT=100
+
 rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy*
 
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")

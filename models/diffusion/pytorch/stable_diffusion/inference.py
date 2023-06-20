@@ -215,6 +215,8 @@ def main():
     if args.accuracy:
         print("Running accuracy ...")
         # run model
+        if args.distributed:
+            torch.distributed.barrier()
         fid = FrechetInceptionDistance(normalize=True)
         for i, (images, prompts) in enumerate(val_dataloader):
             prompt = prompts[0][0]
@@ -243,6 +245,8 @@ def main():
             if args.iterations > 0 and i == args.iterations - 1:
                 break
 
+        if args.distributed:
+            torch.distributed.barrier()
         print(f"FID: {float(fid.compute())}")
 
     # profile

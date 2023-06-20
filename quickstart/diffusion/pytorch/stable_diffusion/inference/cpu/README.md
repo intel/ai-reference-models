@@ -13,7 +13,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 ### Install dependencies
 ```
-pip install torchmetrics pycocotools transformers==4.28.1
+pip install torchmetrics torch-fidelity pycocotools transformers==4.28.1
 ```
 
 ### install model
