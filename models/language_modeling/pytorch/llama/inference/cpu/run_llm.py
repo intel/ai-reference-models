@@ -112,8 +112,9 @@ print("Data type of the model:", user_model.dtype)
 global_past_key_value = None
 if re.search("GPTJ", user_model.config.architectures[0], re.IGNORECASE):
     has_position_id = True
-    beam_idx_tmp=torch.zeros(int(args.batch_size), dtype=torch.int)
-    global_past_key_value = tuple([(torch.zeros([1,int(user_model.config.n_head),1,int(user_model.config.n_embd/user_model.config.n_head)]), torch.zeros([1,int(user_model.config.n_head),1,int(user_model.config.n_embd/user_model.config.n_head)]), beam_idx_tmp) for i in range(user_model.config.n_layer)])
+    # beam_idx_tmp=torch.zeros(int(args.batch_size), dtype=torch.int)
+    # global_past_key_value = tuple([(torch.zeros([1,int(user_model.config.n_head),1,int(user_model.config.n_embd/user_model.config.n_head)]), torch.zeros([1,int(user_model.config.n_head),1,int(user_model.config.n_embd/user_model.config.n_head)]), beam_idx_tmp) for i in range(user_model.config.n_layer)])
+    global_past_key_value = tuple([(torch.zeros([1,int(user_model.config.n_head),1,int(user_model.config.n_embd/user_model.config.n_head)]), torch.zeros([1,int(user_model.config.n_head),1,int(user_model.config.n_embd/user_model.config.n_head)])) for i in range(user_model.config.n_layer)])
 elif re.search("llama", user_model.config.architectures[0], re.IGNORECASE):
     has_position_id = True
     global_past_key_value = tuple([(torch.zeros([1,int(user_model.config.num_attention_heads),1,int(user_model.config.hidden_size/user_model.config.num_attention_heads)]), torch.zeros([1,int(user_model.config.num_attention_heads),1,int(user_model.config.hidden_size/user_model.config.num_attention_heads)])) for i in range(user_model.config.num_hidden_layers)])
@@ -440,7 +441,7 @@ if args.benchmark:
         benchmark_evaluate(*prompt)
 
 if args.accuracy_only:
-    if args.int8 or args.int8_bf16_mixed:
+    if args.dtype is "int8" or args.int8_bf16_mixed:
         user_model = torch.jit.load(
             args.quantized_model_path
         )
