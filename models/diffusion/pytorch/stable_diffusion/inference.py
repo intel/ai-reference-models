@@ -40,7 +40,7 @@ def parse_args():
     parser.add_argument("--prompt", type=str, default="A big burly grizzly bear is show with grass in the background.", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
     parser.add_argument("--seed", type=int, default=2022, help="random seed")
-    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf16, fp16, int8, int8-bf16')
+    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8, int8-bf16')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
     parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
@@ -86,6 +86,9 @@ def main():
     if args.precision == "fp32":
         print("Running fp32 ...")
         dtype=torch.float32
+    elif args.precision == "bf32":
+        print("Running bf32 ...")
+        dtype=torch.float32
     elif args.precision == "bf16":
         print("Running bf16 ...")
         dtype=torch.bfloat16
@@ -107,6 +110,9 @@ def main():
         import intel_extension_for_pytorch as ipex
         if args.precision == "fp32":
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True)
+        elif args.precision == "bf32":
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+            pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True, auto_kernel_selection=True)
         elif args.precision == "bf16" or args.precision == "fp16":
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
         elif args.precision == "int8" or args.precision == "int8-bf16":

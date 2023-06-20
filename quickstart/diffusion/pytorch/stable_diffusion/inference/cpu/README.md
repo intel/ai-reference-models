@@ -36,6 +36,7 @@ bash do_calibration.sh
 | ----------- | ----------- | ----------- | ----------- |
 | FP32        | bash inference_throughput.sh fp32 | bash inference_realtime.sh fp32 | bash accuracy.sh fp32 |
 | BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 | bash accuracy.sh bf16 |
+| BF32        | bash inference_throughput.sh bf32 | bash inference_realtime.sh bf32 | bash accuracy.sh bf32 |
 | FP16        | bash inference_throughput.sh fp16 | bash inference_realtime.sh fp16 | bash accuracy.sh fp16 |
 | INT8        | bash inference_throughput.sh int8 | bash inference_realtime.sh int8 | bash accuracy.sh int8 |
 | INT8-BF16        | bash inference_throughput.sh int8-bf16 | bash inference_realtime.sh int8-bf16 | bash accuracy.sh int8-bf16 |
