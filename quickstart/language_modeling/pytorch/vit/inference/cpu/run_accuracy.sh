@@ -29,7 +29,7 @@ precision="fp32"
 if [[ "$1" == "bf16" ]]
 then
     precision="bf16"
-    ARGS="$ARGS --mix_bf16"
+    ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
 elif [[ "$1" == "fp16" ]]
 then
@@ -52,7 +52,7 @@ then
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --mix_bf16 --int8 --int8_config configure.json"
+    ARGS="$ARGS --bf16 --int8 --int8_config configure.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -61,15 +61,11 @@ else
 fi
 
 mode="jit"
-ARGS="$ARGS --jit_mode"
+ARGS="$ARGS --jit_mode_eval"
 echo "### running with jit mode"
 
 if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
-  exit 1
-fi
-if [ -z "${SEQUENCE_LENGTH}" ]; then
-  echo "The required environment variable SEQUENCE_LENGTH has not been set, please set the seq_length before running"
   exit 1
 fi
 

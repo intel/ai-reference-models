@@ -16,8 +16,10 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   cd <clone of the model zoo>/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
   git clone https://github.com/huggingface/transformers.git
   cd transformers
-  git checkout v4.18.0
-  git apply ../enable_ipex_for_distilbert-base.diff
+  git checkout v4.28.1
+  pip install -r requirements.txt
+  pip install -r ./examples/pytorch/text-classification/requirements.txt
+  git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
   pip install -e ./
   cd ..
  ```
@@ -108,8 +110,10 @@ export MODEL_DIR=$(pwd)
 cd quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.18.0
-git apply ../enable_ipex_for_distilbert-base.diff
+git checkout v4.28.1
+pip install -r requirements.txt
+pip install -r ./examples/pytorch/text-classification/requirements.txt
+git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
 

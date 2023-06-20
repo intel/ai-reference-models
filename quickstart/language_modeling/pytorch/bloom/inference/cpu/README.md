@@ -17,7 +17,8 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   git clone https://github.com/huggingface/transformers.git
   cd transformers
   git checkout v4.28.1
-  git apply ../enable_ipex_for_llm.diff
+  pip install -r requirements.txt
+  git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
   pip install -e ./
   cd ..
  ```
@@ -103,7 +104,8 @@ cd <clone of the model zoo>/quickstart/language_modeling/pytorch/bloom/inference
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
-git apply ../enable_ipex_for_llm.diff
+pip install -r requirements.txt
+git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
 
