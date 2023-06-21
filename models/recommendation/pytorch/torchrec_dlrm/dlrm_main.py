@@ -26,6 +26,7 @@ import argparse
 import itertools
 import os
 import sys
+from torch.profiler import record_function, ProfilerActivity
 from dataclasses import dataclass, field
 from enum import Enum
 from pprint import pprint
@@ -96,6 +97,24 @@ def load_snapshot(model, snapshot_dir):
     snapshot = Snapshot(path=snapshot_dir)
     snapshot.restore(app_state={"model": model})
 
+def trace_handler(prof):
+    print(prof.key_averages().table(sort_by="self_cpu_time_total"))
+    prof.export_chrome_trace(f"{prof._mode}-{prof._dtype}-dlrm_trace_step{prof.step_num}.json")
+
+prof_schedule=torch.profiler.schedule(
+    wait=10,
+    warmup=10,
+    active=1,
+    repeat=10
+)
+
+def fetch_batch(dataloader):
+    try:
+        batch = dataloader.dataset.load_batch()
+    except:
+        batch = dataloader.source.dataset.batch_generator._generate_batch()
+    return batch
+
 def parse_autocast(dtype: str):
     _dtype = None
     autocast = False
@@ -119,7 +138,7 @@ def convert_int8(args, model, dataloader):
         activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
         weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric)
     )
-    batch = dataloader.dataset.load_batch()
+    batch = fetch_batch(dataloader)
     batch.sparse_features = unpack(batch.sparse_features)
     model = prepare(
         model,
@@ -129,6 +148,7 @@ def convert_int8(args, model, dataloader):
     )
     if args.calibration:
         # https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorch#calibration-set
+        assert args.synthetic_multi_hot_criteo_path, "need real dataset to calibrate"
         batch_idx = list(range(128000))
         batch = dataloader.dataset.load_batch(batch_idx)
         batch.sparse_features = unpack(batch.sparse_features)
@@ -140,25 +160,35 @@ def convert_int8(args, model, dataloader):
         model.load_qconf_summary(qconf_summary = args.int8_configure_dir)
         convert(model, inplace=True)
         model.eval()
+        torch._C._jit_set_texpr_fuser_enabled(False)
         model = torch.jit.trace(model, (batch.dense_features, batch.sparse_features), check_trace=True)
         model = torch.jit.freeze(model)
         model(batch.dense_features, batch.sparse_features)
         model(batch.dense_features, batch.sparse_features)
+        print(model.graph_for(batch.dense_features, batch.sparse_features))
         return model
 
 def ipex_optimize(args, model, optimizer, dataloader):
-    example_batch = dataloader.dataset.load_batch()
+    example_batch = fetch_batch(dataloader)
     example_batch.sparse_features = unpack(example_batch.sparse_features)
     dense, sparse = example_batch.dense_features, example_batch.sparse_features
-    _, dtype = parse_autocast(args.dtype)
+    autocast, dtype = parse_autocast(args.dtype)
     import intel_extension_for_pytorch as ipex
     if dtype == torch.int8:
         assert args.inference_only
         model = convert_int8(args, model, dataloader)
     elif args.inference_only:
-        model = ipex.optimize(
-            model=model.eval(), dtype=dtype, sample_input=(dense, sparse), inplace=True
-        )
+        with torch.no_grad():
+            model = ipex.optimize(
+                model=model.eval(), dtype=dtype, sample_input=(dense, sparse), inplace=True
+            )
+            if args.jit:
+                with torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
+                    torch._C._jit_set_texpr_fuser_enabled(False)
+                    model = torch.jit.trace(model, (dense, sparse))
+                    model = torch.jit.freeze(model)
+                    model(dense, sparse)
+                    model(dense, sparse)
     else:
         model, optimizer = ipex.optimize(
             model=model,
@@ -458,7 +488,17 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "--snapshot-dir",
         type=str,
-    )    
+    )
+    parser.add_argument(
+        "--profile",
+        action="store_true",
+        help="Test auroc.",
+    )
+    parser.add_argument(
+        "--jit",
+        action="store_true",
+        help="Test auroc.",
+    )
     return parser.parse_args(argv)
 
 
@@ -472,7 +512,8 @@ def _evaluate(
     print_progress: bool,
     autocast_enabled: bool,
     autocast_dtype: torch.dtype,
-    log_freq: int
+    log_freq: int,
+    enable_torch_profile: bool=False,
 ) -> float:
     """
     Evaluates model. Computes and prints AUROC. Helper function for train_val_test.
@@ -490,10 +531,15 @@ def _evaluate(
         float: auroc result
     """
     def eval_step(model, iter):
-        batch = next(iter)
-        batch.sparse_features = unpack(batch.sparse_features)
-        logits = model(batch.dense_features, batch.sparse_features)
-        return logits, batch.labels
+        with record_function("get batch"):
+            batch = next(iter)
+        with record_function("unpack KeyJaggedTensor"):
+            batch.sparse_features = unpack(batch.sparse_features)
+        with record_function("model forward"):
+            t1 = time.time()
+            logits = model(batch.dense_features, batch.sparse_features)
+            t2 = time.time()
+        return logits, batch.labels, t2 - t1
 
         
     pbar = tqdm(
@@ -521,52 +567,37 @@ def _evaluate(
     auroc = metrics.AUROC(compute_on_step=False, task='binary').to(device)
     total_t = 0
     it = 1
-    with torch.no_grad():
-        if autocast_enabled:
-            with torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype):
-                while True:
-                    try:
-                        t1 = time.time()
-                        logits, label = eval_step(eval_model, iterator)
-                        t2 = time.time()
-                        total_t += t2 - t1
-                        if log_freq != 0 and it % log_freq == 0:
-                            preds = [torch.cat(preds)]
-                            labels = [torch.cat(labels)]
-                            num_samples = labels[0].shape[0]
-                            auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze())
-                            logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
-                        pred = torch.sigmoid(logits)
-                        preds.append(pred)
-                        labels.append(label)
-                        pbar.update(1)
-                        it += 1
-                    except StopIteration:
-                        # Dataset traversal complete
-                        break
-        else:
-            while True:
-                try:
-                    t1 = time.time()                    
-                    logits, label = eval_step(eval_model, iterator)
-                    t2 = time.time()
-                    total_t += t2 - t1
-                    if log_freq != 0 and it % log_freq == 0:
-                        preds = [torch.cat(preds)]
-                        labels = [torch.cat(labels)]
-                        num_samples = labels[0].shape[0]
-                        auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze())
-                        logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
-                    pred = torch.sigmoid(logits)
-                    preds.append(pred)
-                    labels.append(label)
-                    pbar.update(1)
-                    it += 1
-                except StopIteration:
-                    # Dataset traversal complete
-                    break
+    ctx1 = torch.no_grad()
+    ctx2 = torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype)
+    ctx3 = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
+    with ctx1, ctx2:
+        if enable_torch_profile:
+            p = ctx3.__enter__()
+            setattr(p, '_dtype', autocast_dtype)
+            setattr(p, '_mode', 'eval')
+        while True:
+            try:
+                logits, label, fw_t = eval_step(eval_model, iterator)
+                total_t += fw_t
+                if log_freq != 0 and it % log_freq == 0:
+                    preds = [torch.cat(preds)]
+                    labels = [torch.cat(labels)]
+                    num_samples = labels[0].shape[0]
+                    auroc = ipex._C.roc_auc_score(labels[0].float(), preds[0].squeeze().float())
+                    logger.info(f"avg eval time per iter at ITER: {it}, {total_t/it} s, num_samples: {num_samples}, AUROC: {auroc}")
+                pred = torch.sigmoid(logits)
+                preds.append(pred)
+                labels.append(label)
+                pbar.update(1)
+                it += 1
+                if enable_torch_profile:
+                    p.step()
+            except StopIteration:
+                # Dataset traversal complete
+                break
+        if enable_torch_profile:
+            ctx3.__exit__(None, None, None)
 
-    
     preds = torch.cat(preds)
     labels = torch.cat(labels)
     num_samples = labels.shape[0]
@@ -595,7 +626,8 @@ def _train(
     print_progress: bool,
     autocast_enabled: bool,
     autocast_dtype: torch.dtype,
-    log_freq: int
+    log_freq: int,
+    enable_torch_profile: bool=False,
 ) -> bool:
     """
     Trains model for 1 epoch. Helper function for train_val_test.
@@ -621,24 +653,31 @@ def _train(
     if autocast_dtype == torch.float16:
         scaler = torch.cpu.amp.GradScaler()
     def train_step(model, opt, iterator):
-        next_batch = next(iterator)
-        next_batch.sparse_features = unpack(next_batch.sparse_features)
-        opt.zero_grad()
-        if autocast_enabled:
-            with torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype):
+        with record_function("generate batch"):
+            next_batch = next(iterator)
+        with record_function("unpack KeyJaggedTensor"):
+            next_batch.sparse_features = unpack(next_batch.sparse_features)
+        t1 = time.time()
+        with record_function("zero_grad"):
+            opt.zero_grad()
+        with record_function("fw"):
+            if autocast_enabled:
+                with torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype):
+                    losses, _ = model(next_batch)
+                    loss = torch.sum(losses, dim=0)
+            else:
                 losses, _ = model(next_batch)
                 loss = torch.sum(losses, dim=0)
-        else:
-            losses, _ = model(next_batch)
-            loss = torch.sum(losses, dim=0)
-        if autocast_dtype == torch.float16:
-            scaler.scale(loss).backward()
-            scaler.step(opt)
-            scaler.update()
-        else:
-            loss.backward()
-            opt.step()
-        return next_batch.dense_features.shape[0]
+        with record_function("bw"):
+            if autocast_dtype == torch.float16:
+                scaler.scale(loss).backward()
+                scaler.step(opt)
+                scaler.update()
+            else:
+                loss.backward()
+                opt.step()
+        train_t = time.time() - t1
+        return next_batch.dense_features.shape[0], train_t
 
     iterator = itertools.islice(iter(train_dataloader), limit_train_batches)
     # Two filler batches are appended to the end of the iterator to keep the pipeline active while the
@@ -660,15 +699,21 @@ def _train(
     is_first_eval = True
     total_t = 0
     num_samples = 0
+    ctx = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
+    if enable_torch_profile:
+        p = ctx.__enter__()
+        setattr(p, '_dtype', autocast_dtype)
+        setattr(p, '_mode', 'train')
     for it in itertools.count(1):
         try:
             if  print_lr:
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
-            t1 = time.time()
-            num_samples += train_step(train_model, train_optimizer, iterator)
-            t2 = time.time()
-            total_t += t2 - t1
+            samples, train_t = train_step(train_model, train_optimizer, iterator)
+            if enable_torch_profile:
+                p.step()
+            num_samples += samples
+            total_t += train_t
 
             if log_freq != 0 and it % log_freq == 0:
                 logger.info(f"avg training time per iter at ITER: {it}, {total_t/it} s")
@@ -698,6 +743,8 @@ def _train(
         except StopIteration:
             # Dataset traversal complete
             break
+    if enable_torch_profile:
+        ctx.__exit__(None, None, None)
 
     logger.info(f"Total number of iterations: {it - 1}")
     logger.info(f"Throughput: {num_samples/total_t} fps")
@@ -742,7 +789,7 @@ def train_val_test(
 
     if args.inference_only:
         test_auroc = _evaluate(
-            args.limit_test_batches,
+            args.limit_val_batches,
             model.model,
             val_dataloader,
             "test",
@@ -751,7 +798,8 @@ def train_val_test(
             args.print_progress,
             autocast_enabled,
             dtype,
-            args.log_freq
+            args.log_freq,
+            args.profile
         )
         results.test_auroc = test_auroc
         return results
@@ -775,7 +823,8 @@ def train_val_test(
             args.print_progress,
             autocast_enabled,
             dtype,
-            args.log_freq
+            args.log_freq,
+            args.profile
         )
         if args.evaluate_on_epoch_end:
             val_auroc = _evaluate(

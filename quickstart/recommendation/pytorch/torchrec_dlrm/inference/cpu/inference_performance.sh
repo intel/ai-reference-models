@@ -55,9 +55,17 @@ else
     exit 1
 fi
 
+if [ -z "${DATASET_DIR}" ]; then
+  echo "DATASET_DIR are not set, will use dummy generated dataset"
+  ARGS="$ARGS --multi_hot_distribution_type uniform "
+  ARGS="$ARGS --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 "
+else
+  ARGS="$ARGS --synthetic_multi_hot_criteo_path $DATASET_DIR "
+fi
+
 LOG_0="${LOG}/throughput.log"
-export BATCH_SIZE=16
-python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+export BATCH_SIZE=32768
+python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc $MODEL_SCRIPT \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \
     --over_arch_layer_sizes 1024,1024,512,256,1 \
@@ -69,13 +77,10 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
     --interaction_type=dcn \
     --dcn_num_layers=3 \
     --dcn_low_rank_dim=512 \
-    --adagrad \
-    --learning_rate 0.005 \
-    --multi_hot_distribution_type uniform \
-    --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
-    --limit_test_batches 100 \
+    --limit_val_batches 100 \
     --ipex-optimize \
     --log-freq 10 \
+    --jit \
     --inference-only \
     $ARGS 2>&1 | tee $LOG_0
 wait

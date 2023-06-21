@@ -1,9 +1,3 @@
-export MODEL_DIR=/home/haozhe/lz/frameworks.ai.models.intel-models
-export RAW_DIR=/data/dlrm2_weight/dataset
-export TEMP_DIR=/data/dlrm2_weight/dataset
-export PREPROCESSED_DIR=/data/dlrm2_weight/dataset
-export MULTI_HOT_DIR=/data/dlrm2_weight/dataset
-
 MODEL_DIR=${MODEL_DIR-$PWD}
 PREPRECESS_SCRIPT=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/scripts/process_Criteo_1TB_Click_Logs_dataset.sh
 GET_MULTI_HOT_SCRIPTS=${MODEL_DIR}/models/recommendation/pytorch/torchrec_dlrm/scripts/materialize_synthetic_multihot_dataset.py
@@ -48,4 +42,3 @@ python $GET_MULTI_HOT_SCRIPTS \
     --num_embeddings_per_feature 40000000,39060,17295,7424,20265,3,7122,1543,63,40000000,3067956,405282,10,2209,11938,155,4,976,14,40000000,40000000,40000000,590152,12973,108,36 \
     --multi_hot_sizes 3,2,1,2,6,1,1,1,1,7,3,8,1,6,9,5,1,1,1,12,100,27,10,3,1,1 \
     --multi_hot_distribution_type uniform
-
