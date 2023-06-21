@@ -800,6 +800,8 @@ def train_val_test(
     results = TrainValTestResults()
 
     if args.inference_only:
+        # Mlperf is using val set to test auroc
+        # https://github.com/mlcommons/inference/blob/master/recommendation/dlrm_v2/pytorch/python/multihot_criteo.py#L99-L107
         test_auroc = _evaluate(
             args.limit_val_batches,
             model.model,
@@ -1016,7 +1018,7 @@ def main(argv: List[str]) -> None:
         )
 
     train_model = DLRMTrain(dlrm_model)
-    if args.test_auroc:
+    if args.test_auroc or args.calibration:
         assert args.snapshot_dir
         load_snapshot(train_model, args.snapshot_dir)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
@@ -1149,7 +1151,7 @@ def main(argv: List[str]) -> None:
         test_dataloader = RestartableMap(multihot.convert_to_multi_hot, test_dataloader)
 
     if args.ipex_optimize:
-        model.model, optimizer = ipex_optimize(args, model.model, optimizer, val_dataloader)
+        model.model, optimizer = ipex_optimize(args, model.model, optimizer, test_dataloader)
 
     train_val_test(
         args,

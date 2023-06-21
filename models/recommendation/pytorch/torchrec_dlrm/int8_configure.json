@@ -12,7 +12,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.11256388574838638
+                            0.11686475574970245
                         ],
                         "zero_point": [
                             0
@@ -1059,7 +1059,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.07366717606782913
+                            0.07753292471170425
                         ],
                         "zero_point": [
                             0
@@ -1085,7 +1085,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -1095,7 +1095,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.07366717606782913
+                            0.07753292471170425
                         ],
                         "zero_point": [
                             0
@@ -1109,7 +1109,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.07366717606782913
+                            0.07753292471170425
                         ],
                         "zero_point": [
                             0
@@ -1145,7 +1145,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.07366717606782913
+                            0.07753292471170425
                         ],
                         "zero_point": [
                             0
@@ -1680,7 +1680,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.06542473286390305
+                            0.06872659176588058
                         ],
                         "zero_point": [
                             0
@@ -1706,7 +1706,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -1716,7 +1716,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.06542473286390305
+                            0.06872659176588058
                         ],
                         "zero_point": [
                             0
@@ -1730,7 +1730,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.06542473286390305
+                            0.06872659176588058
                         ],
                         "zero_point": [
                             0
@@ -1766,7 +1766,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.06542473286390305
+                            0.06872659176588058
                         ],
                         "zero_point": [
                             0
@@ -2045,7 +2045,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.015196490101516247
+                            0.013298637233674526
                         ],
                         "zero_point": [
                             0
@@ -2071,7 +2071,7 @@
                 }
             },
             "5": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -2081,7 +2081,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.015196490101516247
+                            0.013298637233674526
                         ],
                         "zero_point": [
                             0
@@ -2095,7 +2095,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.011673467233777046
+                            0.012800498865544796
                         ],
                         "zero_point": [
                             0
@@ -2131,7 +2131,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            313721.28125
+                            313720.53125
                         ],
                         "zero_point": [
                             0
@@ -2168,7 +2168,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.005534871481359005
+                            0.005115101579576731
                         ],
                         "zero_point": [
                             0
@@ -2241,7 +2241,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0030716625042259693
+                            0.0032352085690945387
                         ],
                         "zero_point": [
                             0
@@ -2277,7 +2277,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            134.72157287597656
+                            135.24705505371094
                         ],
                         "zero_point": [
                             0
@@ -2387,7 +2387,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0013280219864100218
+                            0.0013334426330402493
                         ],
                         "zero_point": [
                             0
@@ -2460,7 +2460,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0024832608178257942
+                            0.002266877330839634
                         ],
                         "zero_point": [
                             0
@@ -2569,7 +2569,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            55.56078338623047
+                            55.72549057006836
                         ],
                         "zero_point": [
                             0
@@ -2606,7 +2606,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0013754211831837893
+                            0.0013386994833126664
                         ],
                         "zero_point": [
                             0
@@ -2642,7 +2642,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            12.031373023986816
+                            12.078431129455566
                         ],
                         "zero_point": [
                             0
@@ -2715,7 +2715,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            0.3137255012989044
+                            0.33725491166114807
                         ],
                         "zero_point": [
                             0
@@ -2788,7 +2788,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            313724.625
+                            313725.4375
                         ],
                         "zero_point": [
                             0
@@ -2825,7 +2825,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.009485811926424503
+                            0.010618994012475014
                         ],
                         "zero_point": [
                             0
@@ -2861,7 +2861,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            24061.357421875
+                            24062.140625
                         ],
                         "zero_point": [
                             0
@@ -2898,7 +2898,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.007246109191328287
+                            0.00711975758895278
                         ],
                         "zero_point": [
                             0
@@ -2934,7 +2934,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            3178.63525390625
+                            3178.666748046875
                         ],
                         "zero_point": [
                             0
@@ -3372,7 +3372,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            7.262744903564453
+                            7.286274433135986
                         ],
                         "zero_point": [
                             0
@@ -3518,7 +3518,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            313725.1875
+                            313725.0625
                         ],
                         "zero_point": [
                             0
@@ -3628,7 +3628,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.08146394044160843
+                            0.06205710768699646
                         ],
                         "zero_point": [
                             0
@@ -3664,7 +3664,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            313725.3125
+                            313724.8125
                         ],
                         "zero_point": [
                             0
@@ -3737,7 +3737,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            4628.61962890625
+                            4628.58837890625
                         ],
                         "zero_point": [
                             0
@@ -3774,7 +3774,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.022110965102910995
+                            0.014391334727406502
                         ],
                         "zero_point": [
                             0
@@ -3883,7 +3883,7 @@
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
                         "scale": [
-                            0.5098039507865906
+                            0.5176470875740051
                         ],
                         "zero_point": [
                             0
@@ -4029,7 +4029,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.08146394044160843
+                            0.06205710768699646
                         ],
                         "zero_point": [
                             0
@@ -5077,7 +5077,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0329316072165966
+                            0.03353947028517723
                         ],
                         "zero_point": [
                             0
@@ -5113,7 +5113,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.0329316072165966
+                            0.03353947028517723
                         ],
                         "zero_point": [
                             0
@@ -12049,7 +12049,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.14320789277553558
+                            0.140191912651062
                         ],
                         "zero_point": [
                             0
@@ -12085,7 +12085,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.14320789277553558
+                            0.140191912651062
                         ],
                         "zero_point": [
                             0
@@ -12141,7 +12141,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.11990109086036682
+                            0.1279286891222
                         ],
                         "zero_point": [
                             0
@@ -12153,7 +12153,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.08146394044160843
+                            0.06205710768699646
                         ],
                         "zero_point": [
                             0
@@ -12167,7 +12167,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.14235839247703552
+                            0.09613978862762451
                         ],
                         "zero_point": [
                             0
@@ -12203,7 +12203,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.14235839247703552
+                            0.09613978862762451
                         ],
                         "zero_point": [
                             0
@@ -13251,7 +13251,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.024653634056448936
+                            0.025816407054662704
                         ],
                         "zero_point": [
                             0
@@ -13287,7 +13287,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.024653634056448936
+                            0.025816407054662704
                         ],
                         "zero_point": [
                             0
@@ -20223,7 +20223,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.12313761562108994
+                            0.11531474441289902
                         ],
                         "zero_point": [
                             0
@@ -20259,7 +20259,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.12313761562108994
+                            0.11531474441289902
                         ],
                         "zero_point": [
                             0
@@ -20315,7 +20315,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.16960445046424866
+                            0.09065303206443787
                         ],
                         "zero_point": [
                             0
@@ -20327,7 +20327,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.14235839247703552
+                            0.09613978862762451
                         ],
                         "zero_point": [
                             0
@@ -20341,7 +20341,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.3119628429412842
+                            0.14998754858970642
                         ],
                         "zero_point": [
                             0
@@ -20377,7 +20377,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.3119628429412842
+                            0.14998754858970642
                         ],
                         "zero_point": [
                             0
@@ -21425,7 +21425,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.040484558790922165
+                            0.036308687180280685
                         ],
                         "zero_point": [
                             0
@@ -21461,7 +21461,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.040484558790922165
+                            0.036308687180280685
                         ],
                         "zero_point": [
                             0
@@ -28397,7 +28397,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.07045520097017288
+                            0.08183003216981888
                         ],
                         "zero_point": [
                             0
@@ -28433,7 +28433,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.07045520097017288
+                            0.08183003216981888
                         ],
                         "zero_point": [
                             0
@@ -28489,7 +28489,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.12220003455877304
+                            0.12398847192525864
                         ],
                         "zero_point": [
                             0
@@ -28501,7 +28501,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.3119628429412842
+                            0.14998754858970642
                         ],
                         "zero_point": [
                             0
@@ -28515,7 +28515,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.4193236529827118
+                            0.2302219420671463
                         ],
                         "zero_point": [
                             0
@@ -28551,7 +28551,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.4193236529827118
+                            0.2302219420671463
                         ],
                         "zero_point": [
                             0
@@ -30622,7 +30622,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.05327722802758217
+                            0.04475151002407074
                         ],
                         "zero_point": [
                             0
@@ -30648,7 +30648,7 @@
                 }
             },
             "45": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -30658,7 +30658,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.05327722802758217
+                            0.04475151002407074
                         ],
                         "zero_point": [
                             0
@@ -30672,7 +30672,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.05327722802758217
+                            0.04475151002407074
                         ],
                         "zero_point": [
                             0
@@ -30708,7 +30708,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.05327722802758217
+                            0.04475151002407074
                         ],
                         "zero_point": [
                             0
@@ -32779,7 +32779,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.12645719945430756
+                            0.12550783157348633
                         ],
                         "zero_point": [
                             0
@@ -32805,7 +32805,7 @@
                 }
             },
             "47": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -32815,7 +32815,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.12645719945430756
+                            0.12550783157348633
                         ],
                         "zero_point": [
                             0
@@ -32829,7 +32829,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.10729187726974487
+                            0.10667262226343155
                         ],
                         "zero_point": [
                             0
@@ -32865,7 +32865,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.10729187726974487
+                            0.10667262226343155
                         ],
                         "zero_point": [
                             0
@@ -33912,7 +33912,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.04399506375193596
+                            0.050365086644887924
                         ],
                         "zero_point": [
                             0
@@ -33938,7 +33938,7 @@
                 }
             },
             "49": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -33948,7 +33948,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.04399506375193596
+                            0.050365086644887924
                         ],
                         "zero_point": [
                             0
@@ -33962,7 +33962,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.04399506375193596
+                            0.050365086644887924
                         ],
                         "zero_point": [
                             0
@@ -33998,7 +33998,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.04399506375193596
+                            0.050365086644887924
                         ],
                         "zero_point": [
                             0
@@ -34533,7 +34533,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.06010875478386879
+                            0.07166657596826553
                         ],
                         "zero_point": [
                             0
@@ -34559,7 +34559,7 @@
                 }
             },
             "51": {
-                "op_type": "<built-in method relu of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method relu of type object at 0x145596619900>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -34569,7 +34569,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.06010875478386879
+                            0.07166657596826553
                         ],
                         "zero_point": [
                             0
@@ -34583,7 +34583,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.06010875478386879
+                            0.07166657596826553
                         ],
                         "zero_point": [
                             0
@@ -34619,7 +34619,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.06010875478386879
+                            0.07166657596826553
                         ],
                         "zero_point": [
                             0
@@ -35134,7 +35134,7 @@
                 ]
             },
             "26": {
-                "op_type": "<built-in method cat of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method cat of type object at 0x145596619900>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {
@@ -35329,7 +35329,7 @@
                 ]
             },
             "30": {
-                "op_type": "<built-in method cat of type object at 0x14dcd6aec900>",
+                "op_type": "<built-in method cat of type object at 0x145596619900>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {
