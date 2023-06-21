@@ -43,6 +43,9 @@ if [[ $PRECISION == "bf16" ]]; then
 elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
     ARGS="$ARGS --dtype fp32"
+elif [[ $PRECISION == "bf32" ]]; then
+    echo "running bf32 path"
+    ARGS="$ARGS --dtype bf32"
 elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
     ARGS="$ARGS --dtype fp16"
@@ -51,7 +54,7 @@ elif [[ $PRECISION == "int8" ]]; then
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, fp16, bf16"
+    echo "Supported PRECISIONs are: fp32, fp16, bf16, bf32, int8"
     exit 1
 fi
 
@@ -65,7 +68,7 @@ fi
 
 LOG_0="${LOG}/throughput.log"
 export BATCH_SIZE=32768
-python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc $MODEL_SCRIPT \
+python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \
     --over_arch_layer_sizes 1024,1024,512,256,1 \

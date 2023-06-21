@@ -47,7 +47,7 @@ Use random dataset.
 
 | Script name | Description |
 |-------------|-------------|
-| `training_performance.sh` | Run training to verify performance for the specified precision (fp32, bf32, or bf16). |
+| `training_performance.sh` | Run training to verify performance for the specified precision (fp32, bf32, fp16, or bf16). |
 
 ## Run the model
 

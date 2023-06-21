@@ -127,7 +127,7 @@ def parse_autocast(dtype: str):
     elif dtype == 'int8':
         _dtype = torch.int8
     else:
-        assert dtype == 'fp32'
+        assert dtype in ['fp32', 'bf32']
         _dtype = torch.float
     return autocast, _dtype
 
@@ -173,6 +173,7 @@ def ipex_optimize(args, model, optimizer, dataloader):
     example_batch.sparse_features = unpack(example_batch.sparse_features)
     dense, sparse = example_batch.dense_features, example_batch.sparse_features
     autocast, dtype = parse_autocast(args.dtype)
+    auto_kernel_selection = True if args.dtype == 'bf32' else False
     import intel_extension_for_pytorch as ipex
     if dtype == torch.int8:
         assert args.inference_only
@@ -180,8 +181,14 @@ def ipex_optimize(args, model, optimizer, dataloader):
     elif args.inference_only:
         with torch.no_grad():
             model = ipex.optimize(
-                model=model.eval(), dtype=dtype, sample_input=(dense, sparse), inplace=True
+                model=model.eval(),
+                dtype=dtype,
+                sample_input=(dense, sparse),
+                inplace=True,
+                auto_kernel_selection=auto_kernel_selection
             )
+            if args.dtype == 'bf32':
+                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
             if args.jit:
                 with torch.cpu.amp.autocast(enabled=autocast, dtype=dtype):
                     torch._C._jit_set_texpr_fuser_enabled(False)
@@ -195,7 +202,12 @@ def ipex_optimize(args, model, optimizer, dataloader):
             optimizer=optimizer,
             dtype=dtype,
             sample_input=(dense, sparse),
-            inplace=True)
+            inplace=True,
+            auto_kernel_selection=auto_kernel_selection
+        )
+        pass
+    if args.dtype == 'bf32':
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
     return model, optimizer
 
 def parse_args(argv: List[str]) -> argparse.Namespace:
@@ -454,7 +466,7 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
     parser.add_argument(
         "--dtype",
         type=str,
-        choices=["fp32", "bf16", "fp16", "int8"],
+        choices=["fp32", "bf16", "fp16", "int8", "bf32"],
         default=None,
         help="Model dtypes.",
     )

@@ -52,6 +52,9 @@ if [[ $PRECISION == "bf16" ]]; then
 elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
     ARGS="$ARGS --dtype fp32"
+elif [[ $PRECISION == "bf32" ]]; then
+    echo "running bf32 path"
+    ARGS="$ARGS --dtype bf32"
 elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
     ARGS="$ARGS --dtype fp16"
@@ -60,7 +63,7 @@ elif [[ $PRECISION == "int8" ]]; then
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
-    echo "Supported PRECISIONs are: fp32, fp16, bf16, int8"
+    echo "Supported PRECISIONs are: fp32, bf32, fp16, bf16, int8"
     exit 1
 fi
 

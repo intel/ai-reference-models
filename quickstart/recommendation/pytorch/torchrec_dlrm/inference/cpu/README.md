@@ -61,8 +61,8 @@ https://github.com/mlcommons/inference/tree/master/recommendation/dlrm_v2/pytorc
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, bf32, bf16, or int8). |
-| `test_accuracy.sh` | Run inference to verify auroc for the specified precision (fp32, bf32, bf16, or int8). |
+| `inference_performance.sh` | Run inference to verify performance for the specified precision (fp32, bf32, bf16, fp16, or int8). |
+| `test_accuracy.sh` | Run inference to verify auroc for the specified precision (fp32, bf32, bf16, fp16, or int8). |
 
 ## Run the model
 
