@@ -47,7 +47,7 @@ class Downloader(IntDownloader):
             storage_stream_downloader = blob_container_client.download_blob(
                 data_file
             ).readall()
-            with open(destiny, mode="w") as downloaded_blob:
+            with open(destiny, mode="wb") as downloaded_blob:
                 downloaded_blob.write(storage_stream_downloader)
             self.container_client = blob_container_client
             return blob_container_client

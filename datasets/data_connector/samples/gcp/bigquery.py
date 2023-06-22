@@ -22,6 +22,7 @@ from data_connector.gcp.connector import Connector
 from data_connector.gcp.query import Query
 from dotenv import load_dotenv
 from google.cloud import bigquery
+from google.api_core.exceptions import BadRequest
 
 load_dotenv()
 

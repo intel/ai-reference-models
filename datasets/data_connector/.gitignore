@@ -18,5 +18,7 @@ inspect_package-pip/
 build/
 
 # conda
+conda/local-channel/
 conda/local_channel/
-conda/extracted
+conda/extracted/
+conda/build/
