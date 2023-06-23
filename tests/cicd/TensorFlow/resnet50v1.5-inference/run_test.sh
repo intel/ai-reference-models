@@ -1,4 +1,4 @@
- #!/bin/bash
+#!/bin/bash
 set -e
 
 echo "Setup TensorFlow Test Enviroment for ResNet50 v1.5 Inference"

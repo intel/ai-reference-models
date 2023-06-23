@@ -29,5 +29,5 @@ if [[ "${is_lkg_drop}" == "true" ]]; then
 else
   pip install --upgrade pip
   echo "Installing tensorflow"
-  pip install intel-tensorflow==$1
+  pip install tensorflow==$1
 fi
