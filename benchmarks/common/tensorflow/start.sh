@@ -1680,6 +1680,11 @@ function gpt_j_6B() {
 
 # vision-transformer base model
 function vision_transformer() {
+
+    if [ ${MODE} == "training" ]; then
+	CMD="${CMD} $(add_arg "--init-checkpoint" ${INIT_CHECKPOINT})"
+    fi
+	    
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
        [ ${PRECISION} == "fp16" ]; then
       export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
@@ -1696,10 +1701,6 @@ function vision_transformer() {
 
       if [ -z ${STEPS} ]; then
         CMD="${CMD} $(add_arg "--steps" ${STEPS})"
-      fi
-
-      if [ -z $MAX_SEQ_LENGTH ]; then
-        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
       fi
       CMD=${CMD} run_model
     else
