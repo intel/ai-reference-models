@@ -32,6 +32,7 @@ export TF_NUM_INTEROP_THREADS=1
 export DATA_NUM_INTER_THREADS=1
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
+export CFESingleSliceDispatchCCSMode=1
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs

@@ -62,14 +62,15 @@ variable for YOLOv4 (for example: `export IMAGE_FILE=/home/<user>/coco/val2017/0
 In addition, we should also set the `size` environment to match the size of image.
 (for example: `export size=416`)
 
-Download the `coco.names` labels file from [here](https://www.kaggle.com/datasets/valentynsichkar/yolo-coco-data?resource=download) and set `LABELS_FILE` to point to this file location. 
-
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_block_format.sh` | Inference with int8 batch_size256 block format |
+| `inference_block_format.sh` | Inference with int8 batch_size256 block format on Flex series 170 |
+| `flex_multi_card_batch_inference.sh` | Inference with dummy data,for int8 and given batch size blocked channel first on Flex series 140 |
+| `flex_multi_card_online_inference.sh` | Online Inference with dummy data,for int8 blocked channel first on Flex series 140 | 
+
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -98,12 +99,22 @@ Install the following pre-requisites:
 ```
 Set environment variables:
 export IMAGE_FILE<path where yolov4 COCO image>
-export LABELS_FILE=<path to coco labels file>
 export PRETRAINED_MODEL=<path to directory where the pretrained weights file was saved>
 export OUTPUT_DIR=<Path to save the output logs>
 
 Run the inference script, only int8 precision is supported:
 ./quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_block_format.sh
+```
+To execute `flex_multi_card_batch_inference.sh` and `flex_multi_card_online_inference.sh` on Flex series 140, install the following components 
+
+```bash
+apt-get update && \
+apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl 
+```
+Then execute the quickstart scripts.
+```bash
+./quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_batch_inference.sh 
+./quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_online_inference.sh
 ```
 
 <!--- 80. License -->

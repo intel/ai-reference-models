@@ -25,6 +25,10 @@ ARG BASE_TAG="gpu"
 FROM ${BASE_IMAGE}:${BASE_TAG}
 
 RUN apt-get update && \
+    apt-get install -y parallel
+RUN apt-get install -y pciutils
+
+RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
 ARG PY_VERSION=3.10
@@ -58,6 +62,8 @@ COPY quickstart/common quickstart/common
 COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/batch_inference.sh quickstart/batch_inference.sh
 COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/online_inference.sh quickstart/online_inference.sh
 COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/accuracy.sh quickstart/accuracy.sh
+COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/flex_multi_card_batch_inference.sh quickstart/flex_multi_card_batch_inference.sh
+COPY quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/flex_multi_card_online_inference.sh quickstart/flex_multi_card_online_inference.sh
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

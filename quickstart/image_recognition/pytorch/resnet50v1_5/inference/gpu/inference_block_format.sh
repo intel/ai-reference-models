@@ -16,7 +16,7 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-NUM_ITERATIONS=${NUM_ITERATIONS-10}
+NUM_ITERATIONS=${NUM_ITERATIONS-500}
 BATCH_SIZE=${BATCH_SIZE-1024}
 
 if [[ -z "${Tile}" ]]; then
@@ -43,7 +43,12 @@ fi
 mkdir -p $OUTPUT_DIR
 
 export OverrideDefaultFP64Settings=1 
-export IGC_EnableDPEmulation=1 
+export IGC_EnableDPEmulation=1
+export CFESingleSliceDispatchCCSMode=1
+export IPEX_ONEDNN_LAYOUT=1
+export IPEX_LAYOUT_OPT=1
+export IPEX_XPU_ONEDNN_LAYOUT=1
+
 
 resnet50_log_analysis() {
     # $1 : src raw log

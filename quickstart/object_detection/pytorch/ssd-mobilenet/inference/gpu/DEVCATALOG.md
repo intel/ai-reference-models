@@ -52,7 +52,9 @@ The folder should be set as the `DATASET_DIR`
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_with_dummy_data.sh` | Inference with dummy data, for int8 blocked channel first. |
+| `inference_with_dummy_data.sh` | Inference with dummy data, for int8 blocked channel first on Flex series 170 |
+| `flex_multi_card_batch_inference.sh` | Inference with dummy data,for int8 and given batch size blocked channel first on Flex series 140 |
+| `flex_multi_card_online_inference.sh` | Online Inference with dummy data,for int8 blocked channel first on Flex series 140 | 
 
 ## Run Using Docker
 
@@ -64,14 +66,16 @@ docker pull intel/object-detection:pytorch-flex-gpu-ssd-mobilenet-inference
 ### Run Docker Image
 The SSD-MobileNet inference container includes scripts,model and libraries need to run int8 inference. To run the `flex_multi_card_batch_inference.sh` quickstart script using this container,you will need to provide an output directory where log files will be written.The script by default runs inference on dummy data. The script also performs online INT8 calibration for which the VOC2007 dataset is required to be provided. The pre-trained model will be downloaded by the script.
 
+**Note:** The Default batch size for Flex series 140 is 256 for batch inference and 1024 for Flex series 170. Additionally, add `--cap-add=SYS_NICE` to the `docker run` command for executing `flex_multi_card_online_inference.sh` and `flex_multi_card_batch_inference.sh` on Flex series 140.
+
 ```
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed voc2007 dataset>
 export PRETRAINED_MODEL=<path to the pretrained model folder. The code downloads the model if this folder is empty>
 export SCRIPT=quickstart/inference_with_dummy_data.sh
-export BATCH_SIZE=<inference batch size.Default is 1024 for flex-series 170 and 256 for flex-series 140 >
-export NUM_ITERATIONS=<enter number of iterations. Default is 500>
+export BATCH_SIZE=<inference batch size>
+export NUM_ITERATIONS=<enter number of iterations>
 export label=/workspace/pytorch-flex-series-ssd-mobilenet-inference/labels/voc-model-labels.txt
 
 DOCKER_ARGS="--rm -it"

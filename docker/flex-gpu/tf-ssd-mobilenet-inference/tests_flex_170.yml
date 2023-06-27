@@ -7,6 +7,8 @@ tf-flex-gpu-ssd-mobilenet-inference:
       PRECISION: int8
       SCRIPT: quickstart/batch_inference.sh
       BATCH_SIZE: 1024
+      DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
+      OUTPUT_DIR: /output/tf-flex-gpu-ssd-mobilenet-inference
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
       DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
@@ -15,6 +17,8 @@ tf-flex-gpu-ssd-mobilenet-inference:
     env_vars:
       PRECISION: int8
       SCRIPT: quickstart/online_inference.sh
+      DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
+      OUTPUT_DIR: /output/tf-flex-gpu-ssd-mobilenet-inference
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
       DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
@@ -23,8 +27,9 @@ tf-flex-gpu-ssd-mobilenet-inference:
     env_vars:
       PRECISION: int8
       SCRIPT: quickstart/accuracy.sh
+      DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
+      OUTPUT_DIR: /output/tf-flex-gpu-ssd-mobilenet-inference
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
       DATASET_DIR: /tf_dataset/dataset/SSDMobilenet
       OUTPUT_DIR: /output/tf-flex-gpu-ssd-mobilenet-inference
-

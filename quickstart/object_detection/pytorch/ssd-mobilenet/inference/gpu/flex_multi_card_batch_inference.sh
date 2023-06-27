@@ -16,7 +16,7 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-BATCH_SIZE=${BATCH_SIZE-1024}
+BATCH_SIZE=${BATCH_SIZE-256}
 NUM_ITERATIONS=${NUM_ITERATIONS:-500}
 
 echo 'label='$label
@@ -35,13 +35,15 @@ calculate_throughput() {
   fps=$(grep -rnw [$i] $file_loc | grep 'Inference time' | tail -400 | awk -v batch_size="$batch_size" -F' ' '{sum+=$NF;} END{print batch_size/(sum/400)} ')
   echo 'FPS: '$fps | tee -a $file_loc
   done
+  total_fps=$(cat $file_loc | grep FPS | awk '{print $2}' | awk '{ sum_total += $1 } END { print sum_total }' )
+  echo 'Total FPS: '$total_fps | tee -a $file_loc
 }
 # Create the model weights directory, if it doesn't already exist
 mkdir -p ${MODEL_DIR}/PRETRAINED_MODEL
 
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
-export SYCL_DEVICE_FILTER={level_zero:gpu:0}
+
 export CFESingleSliceDispatchCCSMode=1
 export IPEX_ONEDNN_LAYOUT=1
 export IPEX_LAYOUT_OPT=1

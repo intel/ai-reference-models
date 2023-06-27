@@ -25,6 +25,10 @@ ARG PYTORCH_BASE_TAG="xpu-flex"
 FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
 
 RUN apt-get update && \
+    apt-get install -y parallel
+RUN apt-get install -y pciutils
+
+RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl
 
 ARG PY_VERSION=3.10
@@ -58,6 +62,8 @@ WORKDIR /workspace/pytorch-flex-series-yolov4-inference
 COPY quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md README.md
 COPY models/object_detection/pytorch/yolov4/inference/gpu models/object_detection/pytorch/yolov4/inference/gpu
 COPY quickstart/object_detection/pytorch/yolov4/inference/gpu/inference_block_format.sh quickstart/inference_block_format.sh
+COPY quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_batch_inference.sh quickstart/flex_multi_card_batch_inference.sh
+COPY quickstart/object_detection/pytorch/yolov4/inference/gpu/flex_multi_card_online_inference.sh quickstart/flex_multi_card_online_inference.sh
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

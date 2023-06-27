@@ -41,7 +41,9 @@ The folder that contains the `val` directory should be set as the`DATASET_DIR`
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_block_format.sh` | Runs ResNet50 inference (block format) for the specified precision (int8) |
+| `inference_block_format.sh` | Runs ResNet50 inference (block format) for the specified precision (int8) on Flex series 170 |
+| `flex_multi_card_batch_inference.sh` | Runs ResNet50 inference (block format) for the specified precision (int8) and batch size on Flex series 140 |
+| `flex_multi_card_online_inference.sh` | Runs Online ResNet50 inference (block format) for the specified precision (int8) on Flex series 140 | 
 
 ## Run Using Docker
 
@@ -53,13 +55,14 @@ docker pull intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference
 ### Run Docker Image
 The ResNet50 v1-5 inference container includes scripts,model and libraries need to run int8 inference. To run the `inference_block_format.sh` quickstart script using this container, you'll need to set the environment variable and provide volume mounts for the ImageNet dataset if real dataset is required. Otherwise, the script uses dummy data. You will need to provide an output directory where log files will be written. 
 
+**Note:** The Default batch size for Flex series 140 is 256 for batch inference and 1024 for Flex series 170. Additionally, add `--cap-add=SYS_NICE` to the `docker run` command for executing `flex_multi_card_online_inference.sh` and `flex_multi_card_batch_inference.sh` on Flex series 140.
 ```
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 export SCRIPT=quickstart/inference_block_format.sh 
-export BATCH_SIZE=<set batch size. Default is 1024>
-export NUM_ITERATIONS=<set number of iterations. Default is 10>
+export BATCH_SIZE=<set batch size>
+export NUM_ITERATIONS=<set number of iterations>
 DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference
 
@@ -68,7 +71,7 @@ docker run \
   --ipc=host \
   --privileged \
   --env BATCH_SIZE=${BATCH_SIZE} \
-  --env NUM_ITERATIONS=$NUM_ITERATIONS \
+  --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \

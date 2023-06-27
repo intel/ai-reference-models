@@ -8,9 +8,10 @@ pytorch-flex-gpu-ssd-mobilenet-inference:
       SCRIPT: quickstart/inference_with_dummy_data.sh
       BATCH_SIZE: 1024
       NUM_ITERATIONS: 500
+      DATASET_DIR: /pytorch/VOCDevkit/VOC2007
+      OUTPUT_DIR: /output/flex-gpu-ssd-mobilenet-inference
       label: /workspace/pytorch-flex-series-ssd-mobilenet-inference/labels/voc-model-labels.txt
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
       DATASET_DIR: /pytorch/VOCDevkit/VOC2007
       OUTPUT_DIR: /output/flex-gpu-ssd-mobilenet-inference
-

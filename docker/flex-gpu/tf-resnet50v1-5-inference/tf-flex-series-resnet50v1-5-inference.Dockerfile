@@ -26,6 +26,13 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/tf-flex-series-resnet50v1-5-inference
 
+RUN apt-get update && \
+    apt-get install -y parallel
+RUN apt-get install -y pciutils
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing numactl
+
 ARG MODEL_URL
 
 RUN mkdir -p pretrained_models && \ 
@@ -45,6 +52,8 @@ COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_F
 COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/batch_inference.sh quickstart/batch_inference.sh
 COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/online_inference.sh  quickstart/online_inference.sh
 COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/accuracy.sh quickstart/accuracy.sh
+COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/flex_multi_card_batch_inference.sh quickstart/flex_multi_card_batch_inference.sh
+COPY quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/flex_multi_card_online_inference.sh quickstart/flex_multi_card_online_inference.sh
 
 COPY LICENSE license/LICENSE
 COPY third_party license/third_party

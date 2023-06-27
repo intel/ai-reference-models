@@ -6,9 +6,9 @@ pytorch-flex-gpu-resnet50v1-5-inference:
     env_vars:
       SCRIPT: quickstart/inference_block_format.sh
       BATCH_SIZE: 1024
-      NUM_ITERATIONS: 10
+      NUM_ITERATIONS: 500
       PRECISION: int8
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+      OUTPUT_DIR: /workspace/pytorch-flex-gpu-resnet50v1-5-inference
     volumes:
-      OUTPUT_DIR: /home/gta/jpatil/models/docker/logs
-
+      OUTPUT_DIR: /workspace/pytorch-flex-gpu-resnet50v1-5-inference

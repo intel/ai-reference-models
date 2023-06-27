@@ -7,6 +7,8 @@ tf-flex-gpu-resnet50v1-5-inference:
       PRECISION: int8
       GPU_TYPE: flex_series
       SCRIPT: quickstart/batch_inference.sh
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
       OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
@@ -17,6 +19,8 @@ tf-flex-gpu-resnet50v1-5-inference:
       GPU_TYPE: flex_series
       SCRIPT: quickstart/online_inference.sh
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
     volumes:
       DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
       OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
@@ -26,7 +30,8 @@ tf-flex-gpu-resnet50v1-5-inference:
       GPU_TYPE: flex_series
       SCRIPT: quickstart/accuracy.sh
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
     volumes:
       DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
       OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
-

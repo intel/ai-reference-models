@@ -84,3 +84,6 @@ RUN cd ${TF_MODELS_DIR}/research && \
         unzip \
         wget && \
     apt-get autoremove -y
+
+COPY LICENSE license/LICENSE
+COPY third_party license/third_party

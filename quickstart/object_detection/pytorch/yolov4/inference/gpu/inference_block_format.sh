@@ -17,17 +17,22 @@
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 BATCH_SIZE=${BATCH_SIZE-256}
+NUM_ITERATIONS=${NUM_ITERATIONS-500}
 
 if [[ -z "${IMAGE_FILE}" ]]; then
   echo "Please specify coco image file variable IMAGE_FILE"
   exit 1
 fi
 
-if [[ -z "${LABELS_FILE}" ]]; then
-  echo "Please specify coco names dataset file as variable LABELS_FILE"
-  exit 1
-fi
+# if [[ -z "${LABELS_FILE}" ]]; then
+#   echo "Please specify coco names dataset file as variable LABELS_FILE"
+#   exit 1
+# fi
 
+export CFESingleSliceDispatchCCSMode=1
+export IPEX_ONEDNN_LAYOUT=1
+export IPEX_LAYOUT_OPT=1
+export IPEX_XPU_ONEDNN_LAYOUT=1
 
 
 if [[ -z "${PRETRAINED_MODEL}" ]]; then
@@ -45,13 +50,11 @@ echo "YOLO(v4) Inference INT8 Block NCHW BS=256"
 python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
   -n 80 \
   -i ${IMAGE_FILE} \
-  -l ${LABELS_FILE} \
   --weight ${PRETRAINED_MODEL} \
   -e 416 \
   -w 416 \
-  -name ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/data/coco.names \
   -d int8 \
   --dummy 1 \
   -b ${BATCH_SIZE} \
   --benchmark 1 \
-  --iter 500 2>&1 | tee $OUTPUT_DIR/YOLOv4_int8_bs256_inf_block_nchw.log
+  --iter ${NUM_ITERATIONS} 2>&1 | tee $OUTPUT_DIR/YOLOv4_int8_bs256_inf_block_nchw.log

@@ -19,7 +19,7 @@
 #
 
 import os
-
+import argparse
 from common.base_model_init import BaseModelInitializer, set_env_var
 
 
@@ -27,9 +27,22 @@ class ModelInitializer(BaseModelInitializer):
     # SSD-MobileNet Int8 inference model initialization
     args = None
     custom_args = []
+    def parse_args(self):
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--warmup-steps", dest="warmup_steps",
+            help="number of warmup steps",
+            type=int, default=10)
+        parser.add_argument(
+            "--steps", dest="steps",
+            help="number of steps",
+            type=int, default=50)
+        self.args = parser.parse_args(self.custom_args,
+                                      namespace=self.args)
 
     def __init__(self, args, custom_args=[], platform_util=None):
         super(ModelInitializer, self).__init__(args, custom_args, platform_util)
+        self.parse_args()
         # Set the num_inter_threads and num_intra_threads
         # if user did not provide then default value based on platform will be set
         self.set_num_inter_intra_threads(self.args.num_inter_threads,
@@ -48,8 +61,8 @@ class ModelInitializer(BaseModelInitializer):
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
         self.command_prefix += " -g {0}".format(self.args.input_graph)
-        self.command_prefix += " -i 1000"
-        self.command_prefix += " -w 200"
+        self.command_prefix += " -i {0}".format(self.args.steps)
+        self.command_prefix += " -w {0}".format(self.args.warmup_steps)
         self.command_prefix += " -a {0}".format(self.args.num_intra_threads)
         self.command_prefix += " -e {0}".format(self.args.num_inter_threads)
         if self.args.data_location:
@@ -65,4 +78,5 @@ class ModelInitializer(BaseModelInitializer):
                 self.command_prefix += " --benchmark"
 
     def run(self):
+        
         self.run_command(self.command_prefix)

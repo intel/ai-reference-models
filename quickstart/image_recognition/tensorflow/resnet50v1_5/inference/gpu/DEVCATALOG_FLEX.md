@@ -26,10 +26,11 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `online_inference` | Runs online inference for int8 precision |
-| `batch_inference` | Runs batch inference for int8 precision |
-| `accuracy` | Measures the model accuracy for int8 precision |
-
+| `online_inference` | Runs online inference for int8 precision on Flex series 170 |
+| `batch_inference` | Runs batch inference for int8 precision on Flex series 170 |
+| `accuracy` | Measures the model accuracy for int8 precision on Flex series 170 |
+| `flex_multi_card_online_inference` | Runs online inference for int8 precision on Flex series 140 |
+| `flex_multi_card_batch_inference` | Runs batch inference for int8 precision on Flex series 140 |
 
 ## Run Using Docker
 
@@ -41,6 +42,8 @@ docker pull intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference
 
 ### Run Docker Image
 The ResNet50 v1-5 inference container includes scripts,model and libraries need to run int8 inference. To run one of the inference quickstart scripts using this container, you'll need to provide volume mounts for the ImageNet dataset for running `accuracy.sh` script. For `online_inference.sh` and `batch_inference.sh` dummy dataset will be used. You will need to provide an output directory where log files will be written. 
+
+**Note:** The Default batch size for Flex series 140 is 256 for batch inference and 1024 for Flex series 170. Additionally, add `--cap-add=SYS_NICE` to the `docker run` command for executing `flex_multi_card_online_inference.sh` and `flex_multi_card_batch_inference.sh` on Flex series 140.
 ```
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
