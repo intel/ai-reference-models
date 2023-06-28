@@ -6,12 +6,12 @@ pytorch-max-gpu-bert-large-inference:
     env_vars:
       SCRIPT: quickstart/fp16_inference_plain_format.sh
       Tile: 2
-      DATASET_DIR: /4T-720/dataset/bert/squad_data
-      BERT_WEIGHT: /home/gta/sramakr1/bert_squad_model
+      DATASET_DIR: /pytorch/squad_data
+      BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint 
       OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-inference
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
       OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-inference
-      DATASET_DIR: /4T-720/dataset/bert/squad_data
-      BERT_WEIGHT: /home/gta/sramakr1/bert_squad_model
+      DATASET_DIR: /pytorch/squad_data
+      BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint 
       

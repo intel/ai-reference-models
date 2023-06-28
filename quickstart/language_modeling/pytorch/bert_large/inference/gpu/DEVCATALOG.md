@@ -24,10 +24,14 @@ The setup assumes the dataset is downloaded to the current directory.
 Download the `config.json` and fine tuned model from huggingface and set the `BERT_WEIGHT` environment variable to point to the directory that has both files:
 
 ```
-mkdir bert_squad_model
-wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-config.json -O bert_squad_model/config.json
-wget https://cdn.huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad-pytorch_model.bin  -O bert_squad_model/pytorch_model.bin
-BERT_WEIGHT=$(pwd)/bert_squad_model
+mkdir squad_large_finetuned_checkpoint
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/config.json -O squad_large_finetuned_checkpoint/config.json
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/pytorch_model.bin  -O squad_large_finetuned_checkpoint/pytorch_model.bin
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/tokenizer.json -O squad_large_finetuned_checkpoint/tokenizer.json
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/tokenizer_config.json -O squad_large_finetuned_checkpoint/tokenizer_config.json
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/vocab.txt -O squad_large_finetuned_checkpoint/vocab.txt
+
+BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
 ```
 
 ## Quick Start Scripts
@@ -52,9 +56,9 @@ The BERT Large inference container includes scripts,models,libraries needed to r
 ```
 export DATASET_DIR=<path to dataset>
 export OUTPUT_DIR=<path to output log files>
-export BERT_WEIGHT=$(pwd)/bert_squad_model
+export BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
 
-DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
+DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-inference
 
 SCRIPT=quickstart/fp16_inference_plain_format.sh

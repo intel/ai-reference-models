@@ -6,26 +6,26 @@ pytorch-max-gpu-bert-large-training:
     env_vars:
       SCRIPT: quickstart/bf16_training_plain_format.sh
       Tile: 2
-      DATASET_DIR: /4T-720/dataset
-      PROCESSED_DATASET_DIR: /4T-720/dataset
+      DATASET_DIR: /pytorch/dataset
+      PROCESSED_DATASET_DIR: /pytorch/dataset
       OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-training
       DOCKER_ARGS: --ipc=host --privileged --shm-size=10G --device=/dev/dri
     volumes:
       OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-training
-      DATASET_DIR: /4T-720/dataset
-      PROCESSED_DATASET_DIR: /4T-720/dataset
+      DATASET_DIR: /pytorch/dataset
+      PROCESSED_DATASET_DIR: /pytorch/dataset
       /dev/dri: /dev/dri
   - test_name: BERT Large BF16 DDP Training
     env_vars:
       SCRIPT: quickstart/ddp_bf16_training_plain_format.sh
       Tile: 1
       OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-training/ddp
-      DATASET_DIR: /4T-720/dataset
-      PROCESSED_DATASET_DIR: /4T-720/dataset
+      DATASET_DIR: /pytorch/dataset
+      PROCESSED_DATASET_DIR: /pytorch/dataset
       DOCKER_ARGS: --ipc=host --privileged --shm-size=10G --device=/dev/dri
     volumes:
       OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-training/ddp
-      PROCESSED_DATASET_DIR: /4T-720/dataset
-      DATASET_DIR: /4T-720/dataset
+      PROCESSED_DATASET_DIR: /pytorch/dataset
+      DATASET_DIR: /pytorch/dataset
       /dev/dri: /dev/dri
       
