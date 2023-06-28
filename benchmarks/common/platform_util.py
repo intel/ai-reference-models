@@ -270,7 +270,7 @@ class PlatformUtil:
 
         core_list_per_node = {}
         online_cpus_list = ""
-        
+
         # parse it
         for line in cpu_info:
             #      NUMA_NODES_STR_       = "NUMA node(s)"

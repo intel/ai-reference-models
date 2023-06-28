@@ -27,6 +27,7 @@ class ModelInitializer(BaseModelInitializer):
     # SSD-MobileNet Int8 inference model initialization
     args = None
     custom_args = []
+
     def parse_args(self):
         parser = argparse.ArgumentParser()
         parser.add_argument(
@@ -78,5 +79,4 @@ class ModelInitializer(BaseModelInitializer):
                 self.command_prefix += " --benchmark"
 
     def run(self):
-        
         self.run_command(self.command_prefix)
