@@ -29,6 +29,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 | BF16        | bash run_lora_finetune.sh bf16  |
 | FP16        | bash run_lora_finetune.sh fp16  |
 | FP32        | bash run_lora_finetune.sh fp32  |
+| BF32        | bash run_lora_finetune.sh bf32  |
 ## Run the model
 
 Follow the instructions above to setup your bare metal environment, download and
@@ -47,7 +48,6 @@ pip uninstall transformers
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
-pip install -r requirements.txt
 git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..

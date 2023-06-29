@@ -4,7 +4,7 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [Bloom 1B4](https://huggingface.co/Langboat/bloom-1b4-zh) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [Bloom 176B](https://huggingface.co/bigscience/bloom) inference (generation) using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -35,27 +35,22 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   ```
 * Set INPUT_TOKEN before running the model
   ```
-  export INPUT_TOKEN=1024
-  (choice in [32 512 1024])
+  export INPUT_TOKEN=32
+  (choice in [32 64 128 256 512 1024 2016], we prefer to benchmark on 32 and 2016)
   ```
-
 
 * Set OUTPUT_TOKEN before running the model
   ```
-  export OUTPUT_TOKEN=128 
-  (128 is preferred, while you could set any other length)
-  ```
-
-* Set CORE_PER_INSTANCE before running realtime mode
-  ```
-  export CORE_PER_INSTANCE=4
-  (4cores per instance setting is preferred, while you could set any other config like 1core per instance)
+  export OUTPUT_TOKEN=32 
+  (32 is preferred, while you could set any other length)
   ```
 
 * About the BATCH_SIZE in scripts
   ```
-  using BATCH_SIZE=1 by default in scripts (which could be further tuned according to the testing host); 
+  using BATCH_SIZE=1 for realtime mode
+  using BATCH_SIZE=N for throughput mode (N could be further tuned according to the testing host, by default using 1); 
   ```
+
 * About the BEAM_SIZE in scripts
   ```
   using BEAM_SIZE=4 by default
