@@ -40,9 +40,14 @@ then
     precision=fp16
     ARGS="$ARGS --fp16 "
     echo "### running fp16 mode"
+elif [[ "$1" == "bf32" ]]
+then
+    precision=bf32
+    ARGS="$ARGS --bf32 "
+    echo "### running bf32 mode"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, bf16, fp16"
+    echo "Supported precisions are: fp32, bf32, bf16, fp16"
     exit 1
 fi
 
