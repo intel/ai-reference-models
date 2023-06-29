@@ -65,11 +65,11 @@ else
 fi
 
 if [ -z "${OUTPUT_TOKEN}" ]; then
-  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=128"
+  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=32"
   exit 1
 fi
 if [ -z "${INPUT_TOKEN}" ]; then
-  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 512 1024), e.g. export INPUT_TOKEN=1024"
+  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
   exit 1
 fi
 
@@ -83,7 +83,7 @@ echo "### running with jit mode"
 CORES=`lscpu | grep Core | awk '{print $4}'`
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'Langboat/bloom-1b4-zh'"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"'bigscience/bloom'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/bloom/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
@@ -93,6 +93,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
   -m ${FINETUNED_MODEL} \
   --max-new-tokens ${OUTPUT_TOKEN} \
   --input-tokens  ${INPUT_TOKEN} \
+  --batch-size $BATCH_SIZE 
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`

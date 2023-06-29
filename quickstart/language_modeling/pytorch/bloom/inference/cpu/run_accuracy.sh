@@ -72,7 +72,7 @@ ARGS="$ARGS --jit"
 echo "### running with jit mode"
 
 
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'Langboat/bloom-1b4-zh'"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"'bigscience/bloom'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/bloom/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}

@@ -65,15 +65,11 @@ else
 fi
 
 if [ -z "${OUTPUT_TOKEN}" ]; then
-  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=128"
+  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=32"
   exit 1
 fi
 if [ -z "${INPUT_TOKEN}" ]; then
-  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 512 1024), e.g. export INPUT_TOKEN=1024"
-  exit 1
-fi
-if [ -z "${CORE_PER_INSTANCE}" ]; then
-  echo "The required environment variable CORE_PER_INSTANCE has not been set, please set the cores_per_instance before running, e.g. export CORE_PER_INSTANCE=4"
+  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
   exit 1
 fi
 
@@ -84,7 +80,7 @@ echo "### running with jit mode"
 
 export OMP_NUM_THREADS=${CORE_PER_INSTANCE}
 CORES=`lscpu | grep Core | awk '{print $4}'`
-ARGS="$ARGS --use-share-weight --ws-total-cores ${CORES} --ws-cores-per-instance ${OMP_NUM_THREADS}"
+# ARGS="$ARGS --use-share-weight --ws-total-cores ${CORES} --ws-cores-per-instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
 FINETUNED_MODEL=${FINETUNED_MODEL:-"'decapoda-research/llama-7b-hf'"}
@@ -97,6 +93,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
   --model-name-or-path   ${FINETUNED_MODEL} \
   --max-new-tokens ${OUTPUT_TOKEN} \
   --input-tokens  ${INPUT_TOKEN} \
+  --batch-size $BATCH_SIZE 
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`

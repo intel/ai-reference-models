@@ -65,11 +65,11 @@ else
 fi
 
 if [ -z "${OUTPUT_TOKEN}" ]; then
-  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=128"
+  echo "The required environment variable OUTPUT_TOKEN has not been set, please set before running, e.g. export OUTPUT_TOKEN=32"
   exit 1
 fi
 if [ -z "${INPUT_TOKEN}" ]; then
-  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 512 1024), e.g. export INPUT_TOKEN=1024"
+  echo "The required environment variable INPUT_TOKEN has not been set, please set before running (choice in 32 64 128 512 1024 2016 ), e.g. export INPUT_TOKEN=1024"
   exit 1
 fi
 
@@ -93,6 +93,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
   -m ${FINETUNED_MODEL} \
   --max-new-tokens ${OUTPUT_TOKEN} \
   --input-tokens  ${INPUT_TOKEN} \
+  --batch-size $BATCH_SIZE 
 
 CORES_PER_INSTANCE=${OMP_NUM_THREADS}
 TOTAL_CORES=`expr $CORES \* $SOCKETS`
