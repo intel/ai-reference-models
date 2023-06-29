@@ -292,10 +292,10 @@ index fc9411e95..ce73205cd 100644
  
              # Evaluate
 diff --git a/examples/pytorch/image-classification/run_image_classification.py b/examples/pytorch/image-classification/run_image_classification.py
-index e2ce9f1c5..b003bdbdb 100644
+index e2ce9f1c5..2a7fc1201 100644
 --- a/examples/pytorch/image-classification/run_image_classification.py
 +++ b/examples/pytorch/image-classification/run_image_classification.py
-@@ -275,12 +275,14 @@ def main():
+@@ -275,6 +275,7 @@ def main():
          id2label=id2label,
          finetuning_task="image-classification",
          cache_dir=model_args.cache_dir,
@@ -303,13 +303,6 @@ index e2ce9f1c5..b003bdbdb 100644
          revision=model_args.model_revision,
          use_auth_token=True if model_args.use_auth_token else None,
      )
-     model = AutoModelForImageClassification.from_pretrained(
-         model_args.model_name_or_path,
-         from_tf=bool(".ckpt" in model_args.model_name_or_path),
-+        ignore_mismatched_sizes=True,
-         config=config,
-         cache_dir=model_args.cache_dir,
-         revision=model_args.model_revision,
 diff --git a/examples/pytorch/question-answering/run_qa.py b/examples/pytorch/question-answering/run_qa.py
 index 9dc3b2c81..0c21b2dd9 100755
 --- a/examples/pytorch/question-answering/run_qa.py
@@ -897,7 +890,7 @@ index 474b92f72..98aab97f0 100644
          output_hidden_states: Optional[bool] = None,
          interpolate_pos_encoding: Optional[bool] = None,
 diff --git a/src/transformers/trainer.py b/src/transformers/trainer.py
-index cf71499b0..46b9ed1c3 100755
+index cf71499b0..8f61f9619 100755
 --- a/src/transformers/trainer.py
 +++ b/src/transformers/trainer.py
 @@ -158,6 +158,9 @@ from .utils import (
@@ -985,21 +978,26 @@ index cf71499b0..46b9ed1c3 100755
                      if version.parse(version.parse(torch.__version__).base_version) >= version.parse("1.14.0"):
                          if isinstance(example_batch, dict):
                              jit_model = torch.jit.trace(jit_model, example_kwarg_inputs=example_batch, strict=False)
-@@ -1372,22 +1404,35 @@ class Trainer:
+@@ -1372,22 +1404,39 @@ class Trainer:
          if not training:
              model.eval()
              dtype = torch.bfloat16 if not self.is_in_train and self.args.bf16_full_eval else dtype
 +            if self.args.bf32:
 +                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
              # conv_bn_folding is disabled as it fails in symbolic tracing, resulting in ipex warnings
-             model = ipex.optimize(model, dtype=dtype, level="O1", conv_bn_folding=False, inplace=not self.is_in_train)
+-            model = ipex.optimize(model, dtype=dtype, level="O1", conv_bn_folding=False, inplace=not self.is_in_train)
++            model = ipex.optimize(model, dtype=dtype, level="O1", conv_bn_folding=False, inplace=not self.is_in_train, auto_kernel_selection=True if self.args.bf32 else False)
          else:
              if not model.training:
                  model.train()
 -            model, self.optimizer = ipex.optimize(
 -                model, dtype=dtype, optimizer=self.optimizer, inplace=True, level="O1"
 -            )
-+            if self.args.fp16_cpu:
++
++            if self.args.bf32:
++                ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
++                model, self.optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=self.optimizer, auto_kernel_selection=True, inplace=True)
++            elif self.args.fp16_cpu:
 +                self.fp16_scaler = torch.cpu.amp.GradScaler()
 +                model, self.optimizer = ipex.optimize(model, optimizer=self.optimizer, dtype=torch.half, level='O0', weights_prepack=True, inplace=True)
 +            else:
@@ -1028,7 +1026,7 @@ index cf71499b0..46b9ed1c3 100755
          if is_sagemaker_mp_enabled():
              # Wrapping the base model twice in a DistributedModel will raise an error.
              if isinstance(self.model_wrapped, smp.model.DistributedModel):
-@@ -1993,7 +2038,11 @@ class Trainer:
+@@ -1993,7 +2042,11 @@ class Trainer:
                          scale_after = self.scaler.get_scale()
                          optimizer_was_run = scale_before <= scale_after
                      else:
@@ -1041,7 +1039,7 @@ index cf71499b0..46b9ed1c3 100755
  
                      if optimizer_was_run and not self.deepspeed:
                          self.lr_scheduler.step()
-@@ -2714,7 +2763,10 @@ class Trainer:
+@@ -2714,7 +2767,10 @@ class Trainer:
              # loss gets scaled under gradient_accumulation_steps in deepspeed
              loss = self.deepspeed.backward(loss)
          else:
@@ -1053,7 +1051,7 @@ index cf71499b0..46b9ed1c3 100755
  
          return loss.detach()
  
-@@ -3085,6 +3137,47 @@ class Trainer:
+@@ -3085,6 +3141,47 @@ class Trainer:
          self._memory_tracker.stop_and_update_metrics(output.metrics)
  
          return PredictionOutput(predictions=output.predictions, label_ids=output.label_ids, metrics=output.metrics)
@@ -1101,7 +1099,7 @@ index cf71499b0..46b9ed1c3 100755
  
      def evaluation_loop(
          self,
-@@ -3158,6 +3251,20 @@ class Trainer:
+@@ -3158,6 +3255,20 @@ class Trainer:
          all_labels = None
          all_inputs = None
          # Will be useful when we have an iterable dataset so don't know its length.
