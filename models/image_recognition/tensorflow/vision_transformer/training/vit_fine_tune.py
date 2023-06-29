@@ -299,7 +299,7 @@ elif args.precision == 'fp16':
     tf.config.optimizer.set_experimental_options({'auto_mixed_precision':True})
 
 optimizer = tf.keras.optimizers.SGD(scheduled_lrs, momentum=0.9, clipnorm=1.0)
-loss = tf.keras.losses.SparseCategoricalCrossentropy()
+loss = tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True)
 model.compile(loss=loss, optimizer=optimizer, metrics=["accuracy"])
 
 class TimeHistory(tf.keras.callbacks.Callback):
