@@ -1,8 +1,8 @@
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 689febe3..9058a286 100644
+index 7347d70c..c255c9e7 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-@@ -170,6 +170,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -178,6 +178,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          )
          self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
          self.register_to_config(requires_safety_checker=requires_safety_checker)
@@ -11,7 +11,7 @@ index 689febe3..9058a286 100644
  
      def enable_vae_slicing(self):
          r"""
-@@ -611,8 +613,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -619,8 +621,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
              (nsfw) content, according to the `safety_checker`.
          """
          # 0. Default height and width to unet
@@ -22,7 +22,7 @@ index 689febe3..9058a286 100644
  
          # 1. Check inputs. Raise error if not correct
          self.check_inputs(
-@@ -627,7 +629,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -635,7 +637,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          else:
              batch_size = prompt_embeds.shape[0]
  
@@ -31,7 +31,7 @@ index 689febe3..9058a286 100644
          # here `guidance_scale` is defined analog to the guidance weight `w` of equation (2)
          # of the Imagen paper: https://arxiv.org/pdf/2205.11487.pdf . `guidance_scale = 1`
          # corresponds to doing no classifier free guidance.
-@@ -649,7 +651,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -657,7 +659,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          timesteps = self.scheduler.timesteps
  
          # 5. Prepare latent variables
@@ -40,7 +40,7 @@ index 689febe3..9058a286 100644
          latents = self.prepare_latents(
              batch_size * num_images_per_prompt,
              num_channels_latents,
-@@ -676,9 +678,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -684,9 +686,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
                  noise_pred = self.unet(
                      latent_model_input,
                      t,
@@ -52,3 +52,15 @@ index 689febe3..9058a286 100644
  
                  # perform guidance
                  if do_classifier_free_guidance:
+@@ -701,7 +702,10 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+                     progress_bar.update()
+                     if callback is not None and i % callback_steps == 0:
+                         callback(i, t, latents)
+-
++            # Disable pbar to avoid final pbar output.
++            progress_bar.disable = True
++            throughput = progress_bar.format_dict["rate"]
++            print(f"\nThroughput: {throughput} fps")
+         if output_type == "latent":
+             image = latents
+             has_nsfw_concept = None
