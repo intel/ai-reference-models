@@ -21,6 +21,7 @@ from argparse import ArgumentParser
 
 import tensorflow as tf
 import tensorflow_gnn as tfgnn
+from tensorflow.python.platform import tf_logging
 
 from utils import generate_dataset
 
@@ -32,9 +33,11 @@ class TimeHistory(tf.keras.callbacks.Callback):
         self.batch_size = batch_size
 
     def on_predict_batch_begin(self, batch, logs={}):
+        tf_logging.warn('\n---> Start iteration {0}'.format(str(batch)))
         self.epoch_time_start = time.time()
 
     def on_predict_batch_end(self, batch, logs={}):
+        tf_logging.warn('\n---> Stop iteration {0}'.format(str(batch)))
         total_time = time.time() - self.epoch_time_start
         self.times.append(total_time)
         self.throughput.append(self.batch_size / total_time)
