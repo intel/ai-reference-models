@@ -39,6 +39,7 @@ from tensorflow.python.training import session_run_hook
 from tensorflow.python.ops import state_ops
 from tensorflow.python.training.basic_session_run_hooks import StopAtStepHook, ProfilerHook
 from tensorflow.python import ops
+from tensorflow.python.platform import tf_logging
 from absl import app
 #from absl import flags
 from absl import logging
@@ -1306,7 +1307,9 @@ def do_benchmark():
       _ = sess.run(outputs, feed_dict=feed_dict)
     t1 = time.time()
     for step in range(FLAGS.steps):
+      tf_logging.warn('\n---> Thread {0}: Start iteration {1}'.format(tid + 1, str(step)))
       _ = sess.run(outputs, feed_dict=feed_dict)
+      tf_logging.warn('\n---> Thread {0}: Stop iteration {1}'.format(tid + 1, str(step)))
     t2 = time.time()
     throughput_list[tid] = FLAGS.predict_batch_size * FLAGS.steps / (t2 - t1)
     print('Thread {0} has throughput {1}'.format(tid + 1, throughput_list[tid]))
