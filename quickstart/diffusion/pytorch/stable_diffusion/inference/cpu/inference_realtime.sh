@@ -90,17 +90,17 @@ CORES_PER_INSTANCE=4
 
 INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET=`expr $CORES / $CORES_PER_INSTANCE`
 
-throughput=$(grep '50/50' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime* | sed -e 's/[^0-9. ]*//g' | grep -oE "[^ ]+$" |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_realtime* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk -v INSTANCES_PER_SOCKET=$INSTANCES_THROUGHPUT_BENCHMARK_PER_SOCKET '
 BEGIN {
         sum = 0;
-i = 0;
+        i = 0;
       }
       {
-        sum = sum + (1 / $1);
-i++;
+        sum = sum + $1;
+        i++;
       }
 END   {
-sum = sum / i * INSTANCES_PER_SOCKET;
-        printf("%.2f", sum);
+        sum = sum / i * INSTANCES_PER_SOCKET;
+        printf("%.3f", sum);
 }')
 echo ""stable_diffusion";"latency";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

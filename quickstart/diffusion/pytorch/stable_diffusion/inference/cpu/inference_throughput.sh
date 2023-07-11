@@ -85,17 +85,17 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-throughput=$(grep '50/50' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_throughput* | sed -e 's/[^0-9. ]*//g' | grep -oE "[^ ]+$" |awk '
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_inference_throughput* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
         sum = 0;
-i = 0;
+        i = 0;
       }
       {
         sum = sum + $1;
-i++;
+        i++;
       }
 END   {
-sum = sum / i;
+        sum = sum / i;
         printf("%.3f", sum);
 }')
 echo ""stable_diffusion";"throughput";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
