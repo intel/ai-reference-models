@@ -162,7 +162,7 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 
 | Model                                           | Framework  | Mode      | Model Documentation | Benchmark/Test Dataset |
 | ----------------------------------------------- | ---------- | ----------| ------------------- | ---------------------- |
-| [GraphSAGE](https://arxiv.org/pdf/1706.02216.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/graph_networks/tensorflow/graphsage/inference/README.md) | [Protein Protein Interaction dataset] (https://github.com/IntelAI/models/tree/master/benchmarks/graph_networks/tensorflow/graphsage/inference) |
+| [GraphSAGE](https://arxiv.org/pdf/1706.02216.pdf) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/graph_networks/tensorflow/graphsage/inference/README.md) | [Protein Protein Interaction](http://snap.stanford.edu/graphsage) |
 | [r-GAT](https://arxiv.org/abs/2109.05922) | TensorFlow | Inference | [FP32 BFloat16 FP16](/benchmarks/graph_networks/tensorflow/rgat/inference/README.md) | [Open Graph Benchmark](https://ogb.stanford.edu/)
 
 ### Shot Boundary Detection
