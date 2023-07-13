@@ -25,6 +25,7 @@ import tensorflow as tf
 from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
 from tensorflow.python.framework import dtypes
 from tensorflow.core.protobuf import saved_model_pb2
+from tensorflow.python.platform import tf_logging
 
 from inference.preprocess import datasets
 import numpy as np
@@ -164,9 +165,11 @@ class eval_classifier_optimized_graph:
         num_processed_images += self.args.batch_size
         num_remaining_images -= self.args.batch_size
 
+        tf_logging.warn('---> Start iteration{0}'.format(str(iteration)))
         start_time = time.time()
         predictions = infer_sess.run(output_tensor, feed_dict={input_tensor: image_np})
         time_consume = time.time() - start_time
+        tf_logging.warn('---> Stop iteration{0}'.format(str(iteration)))
 
         # only add data loading time for real data, not for dummy data
         if self.args.data_location:
