@@ -52,6 +52,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   Realtime mode is using BATCH_SIZE=[1] by default in script; 
   
   Note: If you would have a SPR-56C host, BATCH_SIZE=205 is perferred for INT8-BF16 Throughput mode and BATCH_SIZE=198 is perferred for BF16 Throughput mode.
+  Customized BATCH_SIZE is supposed to be no larger than dataset size 872.
   ```
 
 * Do calibration to get quantization config before running INT8 (Default attached is produced with sequence length 128).
