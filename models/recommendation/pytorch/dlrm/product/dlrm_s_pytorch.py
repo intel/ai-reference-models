@@ -1183,6 +1183,7 @@ def run():
     )
     # training
     parser.add_argument("--mini-batch-size", type=int, default=1)
+    parser.add_argument("--local-batch-size", type=int, default=1)
     parser.add_argument("--nepochs", type=int, default=1)
     parser.add_argument("--learning-rate", type=float, default=0.01)
     parser.add_argument("--print-precision", type=int, default=5)
@@ -1230,9 +1231,10 @@ def run():
     global nbatches
     global nbatches_test
     args = parser.parse_args()
-    print(args)
-    ext_dist.init_distributed(backend=args.dist_backend)
     
+    print(args)
+    ext_dist.init_distributed(backend=args.dist_backend):WSGIRequestHandler(request, client_address, server)
+    args.mini_batch_size = args.local_batch_size * ext_dist.my_size
 
     ### some basic setup ###
     np.random.seed(args.numpy_rand_seed)
