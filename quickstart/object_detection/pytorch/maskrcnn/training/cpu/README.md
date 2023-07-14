@@ -100,7 +100,7 @@ bash training.sh fp32
 
 # Run distributed training script (for example, FP32 distributed training)
 cd ${MODEL_DIR}/quickstart/object_detection/pytorch/maskrcnn/training/cpu/
-export GLOBAL_BATCH_SIZE=#global batch_size (or export LOCAL_BATCH_SIZE=#local batch_size)
+export LOCAL_BATCH_SIZE=#local batch_size
 bash training_multinode.sh fp32
 ```
 
