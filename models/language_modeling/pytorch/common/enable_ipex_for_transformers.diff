@@ -827,9 +827,18 @@ index 84db89e0f..3c4138e33 100755
          output_hidden_states: Optional[bool] = None,
          return_dict: Optional[bool] = None,
 diff --git a/src/transformers/models/gptj/modeling_gptj.py b/src/transformers/models/gptj/modeling_gptj.py
-index 1051a298d..9c79af5a2 100644
+index 1051a298d..256ff6671 100644
 --- a/src/transformers/models/gptj/modeling_gptj.py
 +++ b/src/transformers/models/gptj/modeling_gptj.py
+@@ -169,7 +169,7 @@ class GPTJAttention(nn.Module):
+ 
+         if attention_mask is not None:
+             # Apply the attention mask
+-            attn_weights = attn_weights + attention_mask
++            attn_weights = torch.tensor(attn_weights) + torch.tensor(attention_mask)
+ 
+         attn_weights = nn.functional.softmax(attn_weights, dim=-1)
+         attn_weights = attn_weights.to(value.dtype)
 @@ -829,10 +829,10 @@ class GPTJForCausalLM(GPTJPreTrainedModel):
      def forward(
          self,
