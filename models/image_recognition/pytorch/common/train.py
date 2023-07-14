@@ -83,10 +83,10 @@ parser.add_argument('--warmup-epochs', type=float, default=5,
                         help='number of warmup epochs')                     
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--local-batch-size', default=256, type=int,
                     metavar='N',
-                    help='mini-batch size (default: 256), this is the total '
-                         'batch size of all GPUs on the current node when '
+                    help='mini-batch size (default: 256), this is the local '
+                         'batch size of single GPU on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
@@ -188,10 +188,9 @@ def main_worker(args):
                                 init_method=args.dist_url,
                                 world_size=args.world_size,
                                 rank=args.rank)
-        print("Rank and world size: ", dist.get_rank()," ", dist.get_world_size())            
-
-        args.batch_size = int( args.batch_size / args.world_size)
-        print("Using local batch size: ", args.batch_size)    
+        print("Rank and world size: ", dist.get_rank()," ", dist.get_world_size())
+        print("Using local batch size: ", args.local_batch_size)
+        print("Using global batch size: ", int(args.local_batch_size * args.world_size))
         print("Create DistributedDataParallel in CPU")
         model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=False, broadcast_buffers=False,
                                                                  gradient_as_bucket_view=True, bucket_cap_mb=50)
@@ -232,7 +231,7 @@ def main_worker(args):
         train_sampler = None
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+        train_dataset, batch_size=args.local_batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
     # Validation loader
@@ -251,7 +250,7 @@ def main_worker(args):
         val_sampler = None 
 
     val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=args.batch_size, shuffle=False,
+        val_dataset, batch_size=args.local_batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True, sampler=val_sampler)
 
     num_steps_per_epoch = len(train_loader)
@@ -391,7 +390,7 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler
 
         start = time.time()
 
-    batch_size = args.batch_size
+    batch_size = args.local_batch_size
     perf = batch_size / (batch_time.avg - data_time.avg)
     print("Training throughput: {:.3f} fps".format(perf))
 
@@ -468,9 +467,9 @@ def validate(val_loader, model, criterion, epoch, args):
     top1_accuracy =  top1_count.tolist()*(100.0/50000)  
     print("Validation top1 accuracy after epoch {epoch}: {top1} ".format(epoch=epoch, top1=top1_accuracy))
 
-    # batch_size = args.batch_size
-    # latency = batch_time.avg / batch_size * 1000
-    # perf = batch_size / batch_time.avg
+    # batch_size = args.local_batch_size
+    # latency = batch_time.avg / local_batch_size * 1000
+    # perf = local_batch_size / batch_time.avg
 
     # print('inference latency %.3f ms'%latency)
     # print("Throughput: {:.3f} fps".format(perf))
