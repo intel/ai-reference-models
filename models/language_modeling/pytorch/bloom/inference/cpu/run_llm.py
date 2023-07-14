@@ -324,7 +324,7 @@ if args.ipex_static_quantize or args.ipex_smooth_quant:
     from intel_extension_for_pytorch.quantization import prepare, convert
     qconfig = ipex.quantization.default_static_qconfig
     if args.ipex_smooth_quant:
-        qconfig = ipex.quantization.get_smooth_quant_static_qconfig()
+        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping()
     prepared_model = prepare(user_model.eval(), qconfig, example_inputs=example_inputs)
     with torch.no_grad():
         for i, (
