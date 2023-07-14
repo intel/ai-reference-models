@@ -35,11 +35,11 @@ logging.getLogger().setLevel(logging.INFO)
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_name_or_path", type=str, default="CompVis/stable-diffusion-v1-4", help="Model path")
+    parser.add_argument("--model_name_or_path", type=str, default="runwayml/stable-diffusion-v1-5", help="Model path")
     parser.add_argument("--dataset_path", type=str, default=None, help="COCO2017 dataset path")
     parser.add_argument("--prompt", type=str, default="A big burly grizzly bear is show with grass in the background.", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
-    parser.add_argument("--seed", type=int, default=2022, help="random seed")
+    parser.add_argument("--seed", type=int, default=0, help="random seed")
     parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8, int8-bf16')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
     parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
