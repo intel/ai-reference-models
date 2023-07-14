@@ -180,6 +180,8 @@ def main():
                         help='number of total iterations to run')
     parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
                         help='number of warm-up iterations to run')
+    parser.add_argument('-b', '--local-batch-size', default=1, type=int, metavar='N',
+                        help='local batch size')
     parser.add_argument("--world-size", default=1, type=int, help='world size')
     parser.add_argument("--master-addr", default='127.0.0.1', type=str, help='Master Addr')
     parser.add_argument("--port", default='29500', type=str, help='Port')
@@ -189,6 +191,7 @@ def main():
     args = parser.parse_args()
 
     args.distributed = False
+    batch_size = args.local_batch_size
     if torch.distributed.is_available() and int(os.environ.get('PMI_SIZE', '0')) > 1:
         print('Distributed training with DDP')
         os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
@@ -216,8 +219,14 @@ def main():
             print("Torch distributed is not initialized.")
             args.rank = 0
             args.world_size = 1
+        batch_size = args.local_batch_size * args.world_size
+        print("Rank and world size: ", args.rank," ", args.world_size)
+        print("Using local batch size: ", args.local_batch_size)
+        print("Using global batch size: ", batch_size)
 
     cfg.merge_from_file(args.config_file)
+    args.opts.append("SOLVER.IMS_PER_BATCH")
+    args.opts.append(batch_size)
     if "SOLVER.STEPS_1" in args.opts and \
         "SOLVER.STEPS_2" in args.opts and \
         "SOLVER.STEPS" not in args.opts:

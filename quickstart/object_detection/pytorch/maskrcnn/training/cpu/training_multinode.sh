@@ -28,13 +28,8 @@ if [ ! -d "${DATASET_DIR}/coco" ]; then
   exit 1
 fi
 
-if [ -z "${GLOBAL_BATCH_SIZE}" ] && [ -z "${LOCAL_BATCH_SIZE}" ]; then
-  echo "The required environment variable GLOBAL_BATCH_SIZE or LOCAL_BATCH_SIZE has not been set"
-  exit 1
-fi
-
-if [ ${GLOBAL_BATCH_SIZE} ] && [ ${LOCAL_BATCH_SIZE} ]; then
-  echo "For the required environment variables GLOBAL_BATCH_SIZE and LOCAL_BATCH_SIZE , set only one of them"
+if [ -z "${LOCAL_BATCH_SIZE}" ]; then
+  echo "The required environment variable LOCAL_BATCH_SIZE has not been set"
   exit 1
 fi
 
@@ -85,10 +80,6 @@ PRECISION=$1
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-if [ ${LOCAL_BATCH_SIZE} ]; then
-    GLOBAL_BATCH_SIZE=$(( LOCAL_BATCH_SIZE * NNODES * SOCKETS ))
-fi
-
 rm -rf ${OUTPUT_DIR}/distributed_throughput_log_${PRECISION}*
 
 python -m intel_extension_for_pytorch.cpu.launch \
@@ -102,10 +93,10 @@ python -m intel_extension_for_pytorch.cpu.launch \
     $ARGS \
     --iter-warmup 10 \
     -i 20 \
+    -b ${LOCAL_BATCH_SIZE} \
     --config-file "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
     --skip-test \
     --backend ccl \
-    SOLVER.IMS_PER_BATCH ${GLOBAL_BATCH_SIZE} \
     SOLVER.MAX_ITER 720000 \
     SOLVER.STEPS '"(60000, 80000)"' \
     SOLVER.BASE_LR 0.0025 \
@@ -127,5 +118,5 @@ END   {
         sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""maskrcnn";"training distributed throughput";${PRECISION};${GLOBAL_BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""maskrcnn";"training distributed throughput";${PRECISION};${LOCAL_BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
 
