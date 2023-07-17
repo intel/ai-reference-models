@@ -1233,7 +1233,7 @@ def run():
     args = parser.parse_args()
     
     print(args)
-    ext_dist.init_distributed(backend=args.dist_backend):WSGIRequestHandler(request, client_address, server)
+    ext_dist.init_distributed(backend=args.dist_backend)
     args.mini_batch_size = args.local_batch_size * ext_dist.my_size
 
     ### some basic setup ###
