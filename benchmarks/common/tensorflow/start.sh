@@ -1753,6 +1753,9 @@ function rgat() {
       if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
         export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
 
+        # Installing tensorflow_gnn from it's main branch
+        python3 -m pip install git+https://github.com/tensorflow/gnn.git@main
+
         if [ ${NUM_INTER_THREADS} != "None" ]; then
           CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
         fi
