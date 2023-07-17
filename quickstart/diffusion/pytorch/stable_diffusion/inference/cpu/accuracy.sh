@@ -46,9 +46,11 @@ elif [ "$1" == "fp16" ]; then
     echo "### running fp16 datatype"
 elif [ "$1" == "int8" ]; then
     ARGS="$ARGS --precision=int8"
+    ARGS="$ARGS --configure-file configure.json"
     echo "### running int8 datatype"
 elif [ "$1" == "int8-bf16" ]; then
     ARGS="$ARGS --precision=int8-bf16"
+    ARGS="$ARGS --configure-file configure.json"
     echo "### running int8-bf16 datatype"
 elif [ "$1" == "bf32" ]; then
     ARGS="$ARGS --precision=bf32"

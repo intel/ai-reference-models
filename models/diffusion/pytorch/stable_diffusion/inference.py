@@ -46,7 +46,7 @@ def parse_args():
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
     parser.add_argument('--compile_inductor', action='store_true', default=False, help='compile with inductor backend')
     parser.add_argument('--calibration', action='store_true', default=False, help='doing calibration step for int8 path')
-    parser.add_argument('--configure-dir', default='configure.json', type=str, metavar='PATH', help = 'path to int8 configures, default file name is configure.json')
+    parser.add_argument('--configure-file', default='configure.json', type=str, metavar='PATH', help = 'path to int8 configures, default file name is configure.json')
     parser.add_argument('--profile', action='store_true', default=False, help='profile')
     parser.add_argument('--benchmark', action='store_true', default=False, help='test performance')
     parser.add_argument('--accuracy', action='store_true', default=False, help='test accuracy')
@@ -119,7 +119,7 @@ def main():
                 if not args.calibration:
                     qconfig = ipex.quantization.default_static_qconfig
                     pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
-                    pipe.unet.load_qconf_summary(qconf_summary=args.configure_dir)
+                    pipe.unet.load_qconf_summary(qconf_summary=args.configure_file)
                     if args.precision == "int8":
                         with torch.no_grad():
                             pipe.unet = ipex.quantization.convert(pipe.unet)
@@ -197,7 +197,7 @@ def main():
             pipe(prompt, generator=torch.manual_seed(args.seed)).images
             if i == 9:
                 break
-        pipe.unet.save_qconf_summary(args.configure_dir)
+        pipe.unet.save_qconf_summary(args.configure_file)
 
     # benchmark
     if args.benchmark:
