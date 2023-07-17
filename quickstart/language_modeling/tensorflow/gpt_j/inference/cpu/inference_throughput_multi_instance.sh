@@ -48,18 +48,38 @@ elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISI
   exit 1
 fi
 
+RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]//g')
+RAMG=$((RAM / 1024 / 1024))
+NUMNUMA=$(lscpu |grep 'NUMA node(s):' |sed 's/[^0-9]//g')
+MEMPERNUMA=$((RAM / 1024 / 1024 / NUMNUMA))
+
+# By default we choose the maximum batch size 
+# that the host system memory allows for the LLM. 
+
 if [ -z "${BATCH_SIZE}" ]; then
-  BATCH_SIZE="100"
+  if [ "${PRECISION}" == "fp32" ]; then
+    if [[ $MEMPERNUMA -lt 249 ]]; then
+      BATCH_SIZE="107"
+    else
+      BATCH_SIZE="214"
+    fi
+  else
+    if [[ $MEMPERNUMA -lt 249 ]]; then
+      BATCH_SIZE="214"
+    else
+      BATCH_SIZE="428"
+    fi
+  fi
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
 if [ -z "${MAX_OUTPUT_TOKENS}" ]; then
-  MAX_OUTPUT_TOKENS="128"
+  MAX_OUTPUT_TOKENS="32"
   echo "Running with default max output token size of ${MAX_OUTPUT_TOKENS}"
 fi
 
 if [ -z "${INPUT_TOKENS}" ]; then
-  INPUT_TOKENS="1000"
+  INPUT_TOKENS="32"
   echo "Running with default input token size of ${INPUT_TOKENS}"
 fi
 
@@ -88,7 +108,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
   echo "Throughput summary:"
-  grep "Inference throughput" ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
+  grep "Inference generation throughput" ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
   exit 0
 else
   exit 1

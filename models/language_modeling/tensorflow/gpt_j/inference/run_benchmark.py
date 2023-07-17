@@ -58,7 +58,7 @@ from transformers import (
     set_seed,
 )
 from transformers.utils.versions import require_version
-
+from tensorflow.python.platform import tf_logging
 
 logger = logging.getLogger(__name__)
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/tensorflow/language-modeling/requirements.txt")
@@ -145,7 +145,6 @@ class DataTrainingArguments:
         metadata={"help": "The number of processes to use for the preprocessing."},
     )
     
-
 def main():
     parser = HfArgumentParser((ModelArguments, DataTrainingArguments, TFTrainingArguments))
     model_args, data_args, run_args = parser.parse_args_into_dataclasses()
@@ -168,8 +167,7 @@ def main():
             cache_dir=model_args.checkpoint,
             use_auth_token=None,
         )
-        
-    
+
     config = AutoConfig.from_pretrained(model_args.model_name_or_path)
     tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path)
     column_names = raw_datasets["test"].column_names
@@ -179,17 +177,15 @@ def main():
 
     mydata = tokenizer(raw_datasets["test"][text_column_name], padding='max_length', truncation=True, max_length=model_args.input_tokens, return_tensors="tf").input_ids
     if model_args.skip_rows:
-        mydata = mydata[::100]
-    else:
-        mydata = mydata[::10]
+        mydata = mydata[::5]
     print(mydata.shape)
     
     model = TFAutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config)
     model.compile()
 
-    generate_kwargs = dict(do_sample=True, top_k=4, eos_token_id=model.config.eos_token_id)
+    generate_kwargs = dict(do_sample=False, num_beams=4, eos_token_id=model.config.eos_token_id)
     generate_kwargs["token_latency"] = True
-
+    
     total_time = 0.0
     tmpval = mydata.shape[0] // model_args.batch_size
     num_iter =  tmpval if tmpval * model_args.batch_size == mydata.shape[0] else tmpval + 1
@@ -198,43 +194,57 @@ def main():
     num_warmup = num_warmup if num_warmup * model_args.batch_size == (model_args.warmup * mydata.shape[0]) else num_warmup + 1
 
     total_list = []
+    tgen = 0
+    wgen = 0
+    fgen = 0
+
+    gen = tf.function(lambda x: model.generate(x, max_new_tokens=model_args.max_output_tokens, **generate_kwargs))
 
     for i in range(num_iter):
+        tf_logging.warn('---> Start iteration {0}'.format(str(i+1)))
         tic = time.time()
-        output = model.generate(
-            mydata[i*model_args.batch_size: (i+1)*model_args.batch_size], max_new_tokens=32, **generate_kwargs
-        )
-        gen_ids = output[0]
-        gen_text = tokenizer.batch_decode(gen_ids, skip_special_tokens=True)
+        output = gen(mydata[i*model_args.batch_size: (i+1)*model_args.batch_size])
         toc = time.time()
+        print(toc - tic)
+        print(np.diff(output[1]), np.sum(np.diff(output[1])))
+        decoded = tokenizer.batch_decode(output[0], skip_special_tokens=True)
+        print(decoded)
+        tf_logging.warn('---> Stop iteration {0}'.format(str(i+1)))
+        gen_ids = output[0]
         if i >= num_warmup:
             total_time += toc - tic
-            total_list.append(output[1])
+            wgen += (gen_ids.shape[1] - model_args.input_tokens) * gen_ids.shape[0]
+            tgen += (gen_ids.shape[1] - model_args.input_tokens - 1) * gen_ids.shape[0]
+            fgen += gen_ids.shape[0]
+            total_list.append(np.diff(output[1]))
         print("{} / {} Done".format(min(mydata.shape[0], (i+1)*model_args.batch_size), mydata.shape[0]))
 
-    
-
     print("\n", "-" * 10, "Summary:", "-" * 10)
-    latency = total_time / (num_iter - num_warmup)
+    tpi = total_time / (num_iter - num_warmup)
 
     first_latency = np.mean([x[0] for x in total_list])
+    first_total = np.sum([x[0] for x in total_list])
     average_2n = list(chain(*[x[1:] for x in total_list]))
     average_2n.sort()
-    average_2n_latency = np.mean(average_2n)
+    rt = np.sum(average_2n)
+    average_2n_latency = rt / tgen
 
     if model_args.batch_size == 1:
-        print("Inference latency: %.3f sec." % latency)
+        print("Inference latency: %.3f sec." % tpi)
         print("First token average latency: %.3f sec." % first_latency)
         print("Rest tokens average latency: %.3f sec." % average_2n_latency)
     else:
-        print("Average time spent per iteration (batch size = %i): %.3f sec." % (model_args.batch_size, latency))
+        print("Average time spent per iteration (batch size = %i): %.3f sec." % (model_args.batch_size, tpi))
         print("Average time spent to process the first token (batch size = %i): %.3f sec." % (model_args.batch_size, first_latency))
         print("Average time spent to process the rest tokens (batch size = %i): %.3f sec." % (model_args.batch_size, average_2n_latency))
     print("\n\n")
-    tokens_processed = mydata.shape[1] * mydata.shape[0]
-
-    throughput = tokens_processed / total_time
-    print("Inference throughput (tokens / sec): %.3f" % throughput)
+    
+    throughput = tgen / rt
+    tpwhole = wgen / total_time
+    tpfirst = fgen / first_total
+    print("Inference generation throughput (first token) (tokens / sec): %.3f" % tpfirst)
+    print("Inference generation throughput (2 to rest) (tokens / sec): %.3f" % throughput)
+    print("Inference generation throughput (tokens / sec): %.3f" % tpwhole)
 
 if __name__ == "__main__":
     main()

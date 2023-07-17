@@ -15,7 +15,7 @@ We use the EleutherAI's LAMBADA dataset to perform inference using the GPT-J mod
 
 For inferece, set the `CHECKPOINT_DIR` to point to the directory where the model and data exist or where they need to be downloaded and stored.
 
-By default, the script uses an input token size of 1000 and an output token size of 128. These values can be changed by setting the `INPUT_TOKENS` and `MAX_OUTPUT_TOKENS` flags respectively. 
+By default, the script uses an input token size of 32 and an output token size of 32. These values can be changed by setting the `INPUT_TOKENS` and `MAX_OUTPUT_TOKENS` flags respectively. 
 
 <!--- 40. Quick Start Scripts -->
 ## Quick Start Scripts
@@ -23,9 +23,11 @@ By default, the script uses an input token size of 1000 and an output token size
 | Script name | Description |
 |-------------|-------------|
 | `inference.sh` | Runs realtime inference using a custom `batch_size` for the specified precision (fp32, bfloat16 or fp16). To run inference for throughtput, set `BATCH_SIZE` environment variable. |
-| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for GPT-J using 14 cores per instance with batch size 1 ( for precisions: fp32, bfloat16 and fp16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
-| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for GPT-J using 1 instance per socket with batch size 100 (for precisions: fp32, bfloat16 and fp16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
-| `accuracy.sh` | Measures GPT-J inference perplexity for the specified precision (fp32, bfloat16 and fp16). |
+| `inference_realtime_multi_instance.sh` | Runs multi instance realtime inference for GPT-J using an 1 instance per socket (default) with batch size 1 ( for precisions: fp32, bfloat16 and fp16) to compute latency. Waits for all instances to complete, then prints a summarized throughput value. |
+| `inference_throughput_multi_instance.sh` | Runs multi instance batch inference for GPT-J using 1 instance per socket with batch size 214 (for precisions: fp32) and batch size 428 (for precisions: bfloat16 and fp16) to compute throughput. Waits for all instances to complete, then prints a summarized throughput value. |
+| `accuracy.sh` | Measures GPT-J inference perplexity and accuracy for the specified precision (fp32, bfloat16 and fp16). |
+
+The quickstart scripts allow choosing to run more than 1 instance per socket for the realtime case. Since due to memory constraints, the standard 4 cores per instance configuration is not feasible, the quickstart script calculates the maximum number of instances that can run on the host system in parallel, creates them and binds them with appropriate numa cores.
 
 ## Run the model
 

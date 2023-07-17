@@ -52,12 +52,12 @@ if [ -z "${BATCH_SIZE}" ]; then
 fi
 
 if [ -z "${MAX_OUTPUT_TOKENS}" ]; then
-  MAX_OUTPUT_TOKENS="128"
+  MAX_OUTPUT_TOKENS="32"
   echo "Running with default max output token size of ${MAX_OUTPUT_TOKENS}"
 fi
 
 if [ -z "${INPUT_TOKENS}" ]; then
-  INPUT_TOKENS="1000"
+  INPUT_TOKENS="32"
   echo "Running with default input token size of ${INPUT_TOKENS}"
 fi
 

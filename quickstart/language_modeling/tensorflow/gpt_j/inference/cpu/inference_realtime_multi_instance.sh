@@ -14,8 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
-CORES_PER_INSTANCE="14"
+CORES_PER_INSTANCE="socket"
 
 MODEL_DIR=${MODEL_DIR-$PWD}
 
@@ -48,26 +47,49 @@ elif [ ${PRECISION} != "fp32" ] && [ ${PRECISION} != "bfloat16" ] && [ ${PRECISI
   exit 1
 fi
 
+RAM=$(grep MemTotal /proc/meminfo | sed 's/[^0-9]//g')
+INST=$((RAM / 1024 / 1024 / 62))
+
 if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="1"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
 if [ -z "${MAX_OUTPUT_TOKENS}" ]; then
-  MAX_OUTPUT_TOKENS="128"
+  MAX_OUTPUT_TOKENS="32"
   echo "Running with default max output token size of ${MAX_OUTPUT_TOKENS}"
 fi
 
 if [ -z "${INPUT_TOKENS}" ]; then
-  INPUT_TOKENS="1000"
+  INPUT_TOKENS="32"
   echo "Running with default input token size of ${INPUT_TOKENS}"
 fi
 
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cpus=$(lscpu |grep 'CPU(s):' | head -1 | sed 's/[^0-9]//g')
+tpc=$(lscpu |grep 'Thread(s) per core:' |sed 's/[^0-9]//g')
 export OMP_NUM_THREADS=${cores_per_socket}
 
 source "${MODEL_DIR}/quickstart/language_modeling/tensorflow/gpt_j/inference/cpu/apply.sh"
 source "${MODEL_DIR}/quickstart/common/utils.sh"
+
+cores=$((cpus / tpc))
+cpi=$((cores / INST))
+
+res=$((cores_per_socket%cpi))
+
+# If not running per socket, we choose the maximum 
+# no. of instances that the host system memory allows. 
+
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  while [ $res -ne 0 ];
+  do
+    ((cpi++))
+    res=$((cores_per_socket%cpi))
+  done
+
+  CORES_PER_INSTANCE=$cpi
+fi
 
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --model-name=gpt_j \
@@ -89,7 +111,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
   echo "Throughput summary:"
-  grep "Inference throughput" ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
+  grep "Inference generation throughput" ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
   exit 0
 else
   exit 1

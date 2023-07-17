@@ -45,6 +45,7 @@ import datasets
 import tensorflow as tf
 from datasets import load_dataset
 from sklearn.model_selection import train_test_split
+from collections import defaultdict
 
 import transformers
 from transformers import (
@@ -160,56 +161,15 @@ def main():
     column_names = raw_datasets["test"].column_names
     text_column_name = "text" if "text" in column_names else column_names[0]
 
-    def tokenize_function(examples):
-        return tokenizer(examples[text_column_name])
+    mydata = tokenizer(raw_datasets["test"][text_column_name], return_tensors="np").input_ids
 
-    tokenized_datasets = raw_datasets.map(
-        tokenize_function,
-        batched=True,
-        num_proc=data_args.preprocessing_num_workers,
-        remove_columns=column_names,
-        load_from_cache_file=True,
-        desc="Running tokenizer on dataset",
-    )
+    marg = {}
+    stacked = np.concatenate(mydata)
+    unique, counts = np.unique(stacked, return_counts=True)
+    counts = counts / np.sum(counts)
 
-    print("Tokenized Dataset:")
-    print(tokenized_datasets["test"])
-    L = []
-    for x in tokenized_datasets["test"]:
-        L.append(len(x['input_ids']))
-    
-    print("MAX = ", np.max(np.array(L)) )
-
-    block_size = tokenizer.model_max_length
-    if block_size > 1024:
-        logger.warning(
-                f"The tokenizer picked seems to have a very large `model_max_length` ({tokenizer.model_max_length}). "
-                "Picking 1024 instead. You can change that default value by passing --block_size xxx."
-            )
-        block_size = 1024
-
-    def group_texts(examples):
-        concatenated_examples = {k: list(chain(*examples[k])) for k in examples.keys()}
-        total_length = len(concatenated_examples[list(examples.keys())[0]])
-        if total_length >= block_size:
-            total_length = (total_length // block_size) * block_size
-        result = {
-            k: [t[i : i + block_size] for i in range(0, total_length, block_size)]
-            for k, t in concatenated_examples.items()
-        }
-        result["labels"] = result["input_ids"].copy()
-        return result
-
-    
-    lm_datasets = tokenized_datasets.map(
-        group_texts,
-        batched=True,
-        num_proc=data_args.preprocessing_num_workers,
-        load_from_cache_file=True,
-        desc=f"Grouping texts in chunks of {block_size}",
-    )
-
-    eval_dataset = lm_datasets["test"]
+    marg = dict(zip(unique, counts))
+    marg = defaultdict(lambda: 0, marg)
 
     with run_args.strategy.scope():
         model = TFAutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config)
@@ -222,26 +182,29 @@ def main():
         if len(tokenizer) > embedding_size:
             model.resize_token_embeddings(len(tokenizer))
         
-        num_replicas = run_args.strategy.num_replicas_in_sync
         options = tf.data.Options()
         options.experimental_distribute.auto_shard_policy = tf.data.experimental.AutoShardPolicy.OFF
 
-        tf_eval_dataset = model.prepare_tf_dataset(
-            eval_dataset,
-            shuffle=False,
-            batch_size=num_replicas * run_args.per_device_eval_batch_size,
-            drop_remainder=True,
-        ).with_options(options)
+        generate_kwargs = dict(do_sample=False, return_dict_in_generate=True, output_scores=True, eos_token_id=model.config.eos_token_id)
         
         model.compile(jit_compile=run_args.xla)
         start_time = time.time()
-        h = model.evaluate(tf_eval_dataset)
+        tot = 0
+        sc = 0
+        for x in mydata:
+            gen = model.generate([x[:-1]], max_new_tokens = 1, **generate_kwargs)
+            dd = tf.nn.log_softmax(gen["scores"][0][0])
+            sc += dd[x[-1]].numpy()
+            if x[-1] == gen.sequences[0][-1].numpy():
+                tot+=1
+        sc = -1*sc
+        sc = sc / mydata.shape[0]
+        acc = tot / mydata.shape[0]
 
         print("Time taken {}".format(time.time() - start_time))
-        print("Loss = {}".format(h))
-        print("Perplexity = {}".format(math.exp(h)))
-        print("Batch Size = {}".format(num_replicas * run_args.per_device_eval_batch_size))
-        
+        print("Loss = {}".format(sc))
+        print("Accuracy = {}".format(acc))
+        print("Perplexity = {}".format(math.exp(sc)))
     
 
 if __name__ == "__main__":

@@ -127,7 +127,7 @@ class ModelInitializer(BaseModelInitializer):
             self.benchmark_command += " --checkpoint=" + \
                                       self.args.checkpoint
 
-        if self.args.output_dir and os.listdir(self.args.output_dir):
+        if self.args.output_dir:
             self.benchmark_command += " --output_dir=" + \
                                       self.args.output_dir
 
