@@ -33,7 +33,7 @@ conda activate venv
 
 You can install the package with:
 ```bash
-python -m pip install intel-cloud-data-connector
+python -m pip install cloud-data-connector
 ```
 
 Please follow module specific documentation for use case, hands-examples. This documentation can be found inside the package.
