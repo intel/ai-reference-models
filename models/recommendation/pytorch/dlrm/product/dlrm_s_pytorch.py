@@ -1182,7 +1182,7 @@ def run():
                         with more than 24 CPU cores and at least 1 TB of memory.",
     )
     # training
-    parser.add_argument("--mini-batch-size", type=int, default=1)
+    parser.add_argument("--mini-batch-size", type=int, default=-1)
     parser.add_argument("--local-batch-size", type=int, default=1)
     parser.add_argument("--nepochs", type=int, default=1)
     parser.add_argument("--learning-rate", type=float, default=0.01)
@@ -1234,7 +1234,8 @@ def run():
     
     print(args)
     ext_dist.init_distributed(backend=args.dist_backend)
-    args.mini_batch_size = args.local_batch_size * ext_dist.my_size
+    if args.mini_batch_size < 0:
+        args.mini_batch_size = args.local_batch_size * ext_dist.my_size
 
     ### some basic setup ###
     np.random.seed(args.numpy_rand_seed)
