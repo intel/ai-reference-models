@@ -58,6 +58,13 @@ if [[ $PRECISION != "fp32" ]] && [[ $PRECISION != "bfloat16" ]] && [[ $PRECISION
   exit 1
 fi
 
+# If steps env is not mentioned, then the workload will run with the default steps.
+if [ -z "${STEPS}"]; then
+  STEPS="10000"
+  echo "Running with default no. of steps : ${STEPS}"
+fi
+
+
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
   BATCH_SIZE="512"
@@ -72,6 +79,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --mode training  \
    --framework tensorflow \
    --batch-size ${BATCH_SIZE} \
+   --steps=${STEPS} \
    --data-location $DATASET_DIR \
    --checkpoint $OUTPUT_DIR \
    $@ \

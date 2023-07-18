@@ -306,6 +306,7 @@ class TimeHistory(tf.keras.callbacks.Callback):
     def on_train_begin(self, logs={}):
         self.times = []
         self.throughput = []
+        print("<========= TRAINING START ========>")
 
     def on_batch_begin(self, batch, logs={}):
         self.epoch_time_start = time.time()
@@ -315,6 +316,12 @@ class TimeHistory(tf.keras.callbacks.Callback):
         self.times.append(total_time)
         self.throughput.append(BATCH_SIZE/total_time)
 
+    def on_train_end(self, logs={}):
+        print("<========= TRAINING END =========>")
+
+    def on_epoch_begin(self, epoch, logs={}):
+        print("Start epoch {} of training".format(epoch))
+
 time_callback = TimeHistory()
 
 hist = model.fit(
@@ -323,12 +330,10 @@ hist = model.fit(
     validation_data=val_ds, callbacks=[time_callback]).history
 
 
-# Evaluate the model
-test_loss, test_acc = model.evaluate(test_ds)
-print('Imagenet Validation set : Test accuracy:', test_acc)
-
-
 avg_throughput = sum(time_callback.throughput)/len(time_callback.throughput)
 print("Avg Throughput: " + str(avg_throughput) + " imgs/sec")
-export_path = args.model_dir
-model.save(export_path)
+
+# Evaluate the model
+print("Evaluating trained model for accuracy with test data")
+test_loss, test_acc = model.evaluate(test_ds)
+print('Imagenet Validation set : Test accuracy:', test_acc)
