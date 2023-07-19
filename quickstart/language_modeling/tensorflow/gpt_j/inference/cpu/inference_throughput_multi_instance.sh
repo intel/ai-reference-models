@@ -108,7 +108,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
   echo "Throughput summary:"
-  grep "Inference generation throughput" ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
+  grep "Inference generation throughput (tokens / sec)" ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | awk ' {sum+=$(NF);} END{print sum} '
   exit 0
 else
   exit 1

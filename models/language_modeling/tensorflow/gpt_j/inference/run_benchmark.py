@@ -61,7 +61,7 @@ from transformers.utils.versions import require_version
 from tensorflow.python.platform import tf_logging
 
 logger = logging.getLogger(__name__)
-require_version("datasets>=1.8.0", "To fix: pip install -r examples/tensorflow/language-modeling/requirements.txt")
+require_version("datasets>=1.8.0", "To fix: pip install -r benchmarks/language_modeling/tensorflow/gpt_j/requirements.txt")
 MODEL_CONFIG_CLASSES = list(TF_MODEL_FOR_CAUSAL_LM_MAPPING.keys())
 MODEL_TYPES = tuple(conf.model_type for conf in MODEL_CONFIG_CLASSES)
 
@@ -226,6 +226,8 @@ def main():
     first_total = np.sum([x[0] for x in total_list])
     average_2n = list(chain(*[x[1:] for x in total_list]))
     average_2n.sort()
+
+    average_2n_batch = np.mean(average_2n)
     rt = np.sum(average_2n)
     average_2n_latency = rt / tgen
 
@@ -236,7 +238,7 @@ def main():
     else:
         print("Average time spent per iteration (batch size = %i): %.3f sec." % (model_args.batch_size, tpi))
         print("Average time spent to process the first token (batch size = %i): %.3f sec." % (model_args.batch_size, first_latency))
-        print("Average time spent to process the rest tokens (batch size = %i): %.3f sec." % (model_args.batch_size, average_2n_latency))
+        print("Average time spent to process the rest tokens (batch size = %i): %.3f sec." % (model_args.batch_size, average_2n_batch))
     print("\n\n")
     
     throughput = tgen / rt
@@ -244,6 +246,7 @@ def main():
     tpfirst = fgen / first_total
     print("Inference generation throughput (first token) (tokens / sec): %.3f" % tpfirst)
     print("Inference generation throughput (2 to rest) (tokens / sec): %.3f" % throughput)
+    print("\n")
     print("Inference generation throughput (tokens / sec): %.3f" % tpwhole)
 
 if __name__ == "__main__":
