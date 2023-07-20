@@ -1,7 +1,7 @@
 #
 # -*- coding: utf-8 -*-
 #
-# Copyright (c) 2023 Intel Corporation
+# Copyright (c) 2022 Intel Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 #
 
 '''Distilbert base inference, implementation adapted from Hugging Face Library https://huggingface.co/'''
+
 import time
 import numpy as np
 import tensorflow as tf
@@ -26,8 +27,7 @@ from argparse import ArgumentParser
 from transformers import AutoTokenizer
 from datasets import load_from_disk
 
-MAX_STEPS = 872
-MAX_WARMUP_STEPS = 22
+DATASET_LEN = 872
 
 class distilbert_base_inference:
 
@@ -60,7 +60,7 @@ class distilbert_base_inference:
         arg_parser.add_argument("--max-seq-length", type=int, default=128,
                                 help="maximum total sequence length after Tokenization",
                                 dest="max_seq_length")
-        arg_parser.add_argument("--steps", type=int, default=850,
+        arg_parser.add_argument("--steps", type=int, default=50,
                                 help="number of steps")
         arg_parser.add_argument("--data-location", type=str,
                                 help="path to saved dataset",
@@ -69,23 +69,14 @@ class distilbert_base_inference:
                                 type= int,
                                 default=32,
                                 dest= "batch_size")
+        arg_parser.add_argument('-p', "--precision", type=str, default='fp32',
+                                help="precision/datatype")
         arg_parser.add_argument("--accuracy-only", action="store_true", default=None)
         arg_parser.add_argument("--benchmark-only", action="store_true", default=None)
         self.args = arg_parser.parse_args()
         self.validate_args()
 
     def validate_args(self):
-        if self.args.warmup_steps > MAX_WARMUP_STEPS:
-            print("Warmup steps greater than max possible value of 22." + \
-                  " Setting to max value of ", MAX_WARMUP_STEPS)
-            self.args.warmup_steps = MAX_WARMUP_STEPS
-        if self.args.accuracy_only:
-            self.args.steps = MAX_STEPS
-        elif self.args.benchmark_only:
-            if self.args.steps > (MAX_STEPS - MAX_WARMUP_STEPS):
-                print("Steps greater than max possible value of {}.".format(MAX_STEPS - MAX_WARMUP_STEPS))
-                print("Setting to max value of {}".format(MAX_STEPS - MAX_WARMUP_STEPS))
-                self.args.steps = MAX_STEPS - MAX_WARMUP_STEPS
         if not self.args.data_location:
             raise SystemExit("Missing dataset path")
 
@@ -123,7 +114,7 @@ class distilbert_base_inference:
         if idx is None:
             start_idx = batch_id * self.args.batch_size
             if batch_id == n_batches - 1:
-                end_idx = self.args.steps
+                end_idx = DATASET_LEN
             else:
                 end_idx = start_idx + self.args.batch_size
             input_ids = np.array(self.dataset['input_ids'])[start_idx:end_idx, :]
@@ -166,53 +157,59 @@ class distilbert_base_inference:
         config = tf.compat.v1.ConfigProto()
         config.intra_op_parallelism_threads=self.args.num_intra_threads
         config.inter_op_parallelism_threads=self.args.num_inter_threads
-        config.graph_options.rewrite_options.auto_mixed_precision = rewriter_config_pb2.RewriterConfig.ON
+        if self.args.precision == "bfloat16":
+            config.graph_options.rewrite_options.auto_mixed_precision_onednn_bfloat16 = rewriter_config_pb2.RewriterConfig.ON
+        elif self.args.precision == "fp16":
+            config.graph_options.rewrite_options.auto_mixed_precision = rewriter_config_pb2.RewriterConfig.ON
 
         # Load the frozen model
-        sm = saved_model_pb2.SavedModel()
-        with tf.io.gfile.GFile(self.args.input_graph, "rb") as f:
-            sm.ParseFromString(f.read())
-        g_def = sm.meta_graphs[0].graph_def
-        with tf.Graph().as_default() as graph:
-            tf.import_graph_def(g_def, name='')
+        if self.args.precision == "int8":
+            graph = tf.Graph()
+            with graph.as_default():
+                graph_def = tf.compat.v1.GraphDef()
+                with open(self.args.input_graph, "rb") as f:
+                    graph_def.ParseFromString(f.read())
+                tf.import_graph_def(graph_def, name="")
+        else:
+            sm = saved_model_pb2.SavedModel()
+            with tf.io.gfile.GFile(self.args.input_graph, "rb") as f:
+                sm.ParseFromString(f.read())
+            g_def = sm.meta_graphs[0].graph_def
+            with tf.Graph().as_default() as graph:
+                tf.import_graph_def(g_def, name='')
 
         # Define the session
         output = graph.get_tensor_by_name('Identity:0')
         sess =  tf.compat.v1.Session(graph=graph, config=config)
-        n_batch = int(self.args.steps / self.args.batch_size)
-        if self.args.steps % self.args.batch_size != 0:
+        n_batch = int(DATASET_LEN / self.args.batch_size)
+        if DATASET_LEN % self.args.batch_size != 0:
             n_batch += 1
 
         # Warm up
         total_time = 0
+        feed_dict, _ = self.create_feed_dict_and_labels(1,1)
         print("Started warmup for {} steps...".format(self.args.warmup_steps))
-        start_step_idx = MAX_STEPS - MAX_WARMUP_STEPS
-        for step in range(start_step_idx, start_step_idx + self.args.warmup_steps):
-            feed_dict, _ = self.create_feed_dict_and_labels(idx= step)
-            _ = sess.run(output, feed_dict= feed_dict)
+        for _ in range(self.args.warmup_steps):
+            _ = sess.run(output, feed_dict=feed_dict)
         print("Warmup completed.")
 
         # Inference
-        print("Starting inference for {} steps...".format(self.args.steps))
+        print("Starting inference for SST2 Validation dataset...")
         total_correct_predictions = 0
         for batch_id in range(n_batch):
             feed_dict, labels = self.create_feed_dict_and_labels(batch_id, n_batch)
             start_time = time.time()
             pred = sess.run(output, feed_dict=feed_dict)
             run_time = time.time() - start_time
-            if self.args.accuracy_only:
-                total_correct_predictions += self.get_correct_predictions(pred, labels)
+            total_correct_predictions += self.get_correct_predictions(pred, labels)
             total_time += run_time
-        time_per_batch = total_time / float(self.args.steps / self.args.batch_size)
+        time_per_batch = total_time / float(DATASET_LEN / self.args.batch_size)
 
-        if self.args.accuracy_only:
-            accuracy = total_correct_predictions / self.args.steps
-            print('Accuracy: {:.4f}'.format(accuracy))
-        if self.args.benchmark_only:
-            if self.args.batch_size == 1:
-                print('Latency: {:.4f} ms'.format(time_per_batch * 1000))
-            print('Throughput: {:.4f} sentences/sec'.format(self.args.batch_size / time_per_batch))
+        accuracy = total_correct_predictions / DATASET_LEN
+        print('Accuracy: {:.4f}'.format(accuracy))
+        print('Throughput: {:.4f} sentences/sec'.format(self.args.batch_size / time_per_batch))
 
 if __name__=="__main__":
     distilbert_ob = distilbert_base_inference()
     distilbert_ob.run()
+

@@ -38,8 +38,13 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${WARMUP_STEPS}" ]; then
-  echo "ENV VAR WARMUP_STEPS is not set"
-  exit 1
+  echo "Setting WARMUP_STEPS to 10"
+  WARMUP_STEPS="10"
+fi
+
+if [ -z "${STEPS}" ]; then
+  echo "Setting STEPS to 50"
+  STEPS=50
 fi
 
 if [ -z "${PRECISION}" ]; then
@@ -82,6 +87,7 @@ _command python benchmarks/launch_benchmark.py \
          --num-inter-threads=1 \
          --numa-cores-per-instance=${CORES_PER_INSTANCE} \
          --warmup-steps=${WARMUP_STEPS} \
+         --steps=${STEPS} \
          $@
 
 if [[ $? == 0 ]]; then

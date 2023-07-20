@@ -47,11 +47,16 @@ if [ ! -d "${DATASET_DIR}" ]; then
 fi
 
 if [ -z "${WARMUP_STEPS}" ]; then
-  WARMUP_STEPS="warmup_steps=20"
+  WARMUP_STEPS="warmup_steps=10"
 else
   WARMUP_STEPS="warmup_steps=$WARMUP_STEPS"
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
+
+if [ -z "${STEPS}" ]; then
+  echo "Setting STEPS to 50"
+  STEPS=50
+fi
 
 if [ ! -z "${IN_GRAPH}" ]; then
     if [ ! -f ${IN_GRAPH} ]; then
@@ -91,6 +96,7 @@ _command numactl --localalloc --physcpubind=${cores_per_socket_arr[0]} python ${
   --num-intra-threads ${cores_per_socket} \
   --num-inter-threads -1 \
   --weight-sharing \
+  --steps=${STEPS} \
   $@ \
   -- \
   $WARMUP_STEPS >> ${OUTPUT_DIR}/distilbert_base_${PRECISION}_bs1_Latency_inference_instance_0.log 2>&1 & \
@@ -106,6 +112,7 @@ numactl --localalloc --physcpubind=${cores_per_socket_arr[1]} python ${MODEL_DIR
   --num-intra-threads ${cores_per_socket} \
   --num-inter-threads -1 \
   --weight-sharing \
+  --steps=${STEPS} \
   $@ \
   -- \
   $WARMUP_STEPS >> ${OUTPUT_DIR}/distilbert_base_${PRECISION}_bs1_Latency_inference_instance_1.log 2>&1 & \
