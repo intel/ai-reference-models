@@ -86,6 +86,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
     --nproc_per_node ${SOCKETS} \
+    --logical_core_for_ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/training/cpu/train.py \
     --epochs 5 \
     --warmup-factor 0 \
