@@ -192,7 +192,7 @@ def main_worker(args):
         print("Using local batch size: ", args.local_batch_size)
         print("Using global batch size: ", int(args.local_batch_size * args.world_size))
         print("Create DistributedDataParallel in CPU")
-        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=False, broadcast_buffers=False,
+        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True, broadcast_buffers=False,
                                                                  gradient_as_bucket_view=True, bucket_cap_mb=50)
 
     # optionally resume from a checkpoint
