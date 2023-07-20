@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# PyTorch Bloom 1B4 inference (generation)
+# PyTorch Bloom 176B inference (generation)
 
 <!-- 10. Description -->
 ## Description
