@@ -1,0 +1,28 @@
+---
+tf-flex-gpu-resnet50v1-5-inference:
+  image_name: intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference
+  tests:
+  - test_name: ResNet50v1_5 INT8 batch inference on Flex 140
+    env_vars:
+      PRECISION: int8
+      GPU_TYPE: flex_series
+      BATCH_SIZE: 256
+      SCRIPT: quickstart/flex_multi_card_batch_inference.sh
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
+      DOCKER_ARGS: --cap-add=SYS_NICE --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
+  - test_name: ResNet50v1_5 INT8 online inference on Flex 140
+    env_vars:
+      PRECISION: int8
+      GPU_TYPE: flex_series
+      BATCH_SIZE: 1
+      SCRIPT: quickstart/flex_multi_card_online_inference.sh
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference
+      DOCKER_ARGS: --cap-add=SYS_NICE --ipc=host --privileged --device=/dev/dri
+    volumes:
+      DATASET_DIR: /tf_dataset/dataset/TF_Imagenet_FullData
+      OUTPUT_DIR: /output/tf-flex-gpu-resnet50v1-5-inference

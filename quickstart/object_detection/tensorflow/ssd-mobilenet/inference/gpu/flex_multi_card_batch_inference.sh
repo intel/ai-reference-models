@@ -24,7 +24,7 @@ echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
 if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-  pretrained_model=/workspace/tf-flex-series-ssd-mobilenet-multi-card-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
+  pretrained_model=/workspace/tf-flex-series-ssd-mobilenet-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
 else
   pretrained_model=${FROZEN_GRAPH}
 fi
@@ -32,12 +32,8 @@ fi
 export TF_NUM_INTEROP_THREADS=1
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
-
 export CFESingleSliceDispatchCCSMode=1
-export ITEX_AUTO_MIXED_PRECISION_INFERLIST_REMOVE=Mul,AddV2,ReadDiv,Sub,Sigmoid
-export ITEX_AUTO_MIXED_PRECISION_DENYLIST_REMOVE=Exp
-export ITEX_AUTO_MIXED_PRECISION_ALLOWLIST_ADD=Mul,AddV2,ReadDiv,Sub,Sigmoid,Tile,ConcatV2,Reshape,Transpose,Pack,Unpack,Squeeze,Slice,Exp,_ITEXFusedBinary
-export ITEX_AUTO_MIXED_PRECISION=1
+
 
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
@@ -69,24 +65,28 @@ device_id=$( lspci | grep -i display | sed -n '1p' | awk '{print $7}' )
 num_devs=$(lspci | grep -i display | awk '{print $7}' | wc -l)
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 
+mac_0=`sudo lspci | grep Dis| head -n 1| awk '{print $1}'`
+node_0=`sudo lspci -s $mac_0 -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`
+mac_1=`sudo lspci | grep Dis| tail -n 1| awk '{print $1}'`
+node_1=`sudo lspci -s $mac_1 -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`
+
+j=$node_0
 if [[ ${device_id} == "56c1" ]]; then
     for i in $( eval echo {0..$((num_devs-1))} )
     do
-    str+=("ZE_AFFINITY_MASK="${i}" python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${pretrained_model} \
-    --output-dir ${OUTPUT_DIR} \
-    --model-name ssd-mobilenet \
-    --framework tensorflow \
-    --precision ${PRECISION} \
-    --mode inference \
-    --benchmark-only \
-    --batch-size=${BATCH_SIZE} \
-    --gpu \
-    $@ \
-    ${WARMPUP} ")
+    str+=("ZE_AFFINITY_MASK="${i}" numactl -N "${j}" -l python -u models/object_detection/tensorflow/ssd-mobilenet/inference/gpu/int8/infer_detections.py \
+      --input-graph ${pretrained_model} \
+      --batch-size ${BATCH_SIZE} \
+      --iter 5000 \
+      --warmup_iter 5 \
+      --benchmark ")
+    j=$node_1
     done
     # int8 uses a different python script
     echo "ssd-mobilenet int8 inference block on Flex series 140"
     parallel --lb -d, --tagstring "[{#}]" ::: \
     "${str[@]}" 2>&1 | tee ${OUTPUT_DIR}//ssd-mobilenet_${PRECISION}_inf_c0_c1_${BATCH_SIZE}.log
+    file_loc=${OUTPUT_DIR}//ssd-mobilenet_${PRECISION}_inf_c0_c1_${BATCH_SIZE}.log
+    total_fps=$( cat $file_loc | grep 'Total samples/sec' | awk '{print $4}' | awk '{ sum_total += $1 } END { print sum_total }' )
+    echo 'Total FPS: '$total_fps | tee -a $file_loc
 fi

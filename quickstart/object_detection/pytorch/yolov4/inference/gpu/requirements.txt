@@ -1,7 +1,0 @@
-matplotlib==2.2.3
-tqdm==4.43.0
-easydict==1.9
-Pillow>=9.3.0
-scikit-image
-opencv_python
-pycocotools

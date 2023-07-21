@@ -1,0 +1,15 @@
+---
+pytorch-max-gpu-resnet50v1-5-inference:
+  image_name: intel/image-recognition:pytorch-max-gpu-resnet50v1-5-inference
+  tests:
+  - test_name: ResNet50V1_5 INT8 block Dummy inference
+    env_vars:
+      SCRIPT: quickstart/inference_block_format.sh
+      Tile: 2
+      BATCH_SIZE: 1024
+      NUM_ITERATIONS: 10
+      PRECISION: int8
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+      OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-max-gpu-resnet50v1-5-inference

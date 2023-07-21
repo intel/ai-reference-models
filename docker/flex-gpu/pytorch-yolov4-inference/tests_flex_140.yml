@@ -1,0 +1,32 @@
+---
+pytorch-flex-gpu-yolov4-inference:
+  image_name: intel/object-detection:pytorch-flex-gpu-yolov4-inference
+  tests:
+  - test_name: YOLOv4 INT8 batch inference on Flex 140
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/flex_multi_card_batch_inference.sh 
+      BATCH_SIZE: 64
+      NUM_ITERATIONS: 500
+      IMAGE_FILE: /pytorch/yolov4/image/000000581918.jpg
+      OUTPUT_DIR: /output/pytorch-flex-gpu-yolov4-inference
+      PRETRAINED_MODEL: /pytorch/yolov4/model/yolov4.pth
+      DOCKER_ARGS: --cap-add=SYS_NICE --ipc=host --privileged --device=/dev/dri
+    volumes:
+      IMAGE_FILE: /pytorch/yolov4/image/000000581918.jpg
+      OUTPUT_DIR: /output/pytorch-flex-gpu-yolov4-inference
+      PRETRAINED_MODEL: /pytorch/yolov4/model/yolov4.pth
+  - test_name: YOLOv4 INT8 online inference on Flex 140
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/flex_multi_card_online_inference.sh 
+      BATCH_SIZE: 1
+      IMAGE_FILE: /pytorch/yolov4/image/000000581918.jpg
+      OUTPUT_DIR: /output/pytorch-flex-gpu-yolov4-inference
+      PRETRAINED_MODEL: /pytorch/yolov4/model/yolov4.pth
+      NUM_ITERATIONS: 5000
+      DOCKER_ARGS: --cap-add=SYS_NICE --ipc=host --privileged --device=/dev/dri
+    volumes:
+      IMAGE_FILE: /pytorch/yolov4/image/000000581918.jpg
+      OUTPUT_DIR: /output/pytorch-flex-gpu-yolov4-inference
+      PRETRAINED_MODEL: /pytorch/yolov4/model/yolov4.pth

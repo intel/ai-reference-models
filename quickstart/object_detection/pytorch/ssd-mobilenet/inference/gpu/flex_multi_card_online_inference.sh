@@ -30,8 +30,10 @@ mkdir -p ${MODEL_DIR}/PRETRAINED_MODEL
 
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
-export SYCL_DEVICE_FILTER={level_zero:gpu:0}
+
 export CFESingleSliceDispatchCCSMode=1
+export IPEX_ONEDNN_LAYOUT=1
+export IPEX_LAYOUT_OPT=1
 export IPEX_XPU_ONEDNN_LAYOUT=1
 
 # Download the weights file if it does not already exist
@@ -57,6 +59,8 @@ calculate_throughput() {
   fps=$(grep -rnw [$i] $file_loc | grep 'Inference time' | tail -4900 | awk -v batch_size="$batch_size" -F' ' '{sum+=$NF;} END{print batch_size/(sum/4900)} ')
   echo 'FPS: '$fps | tee -a $file_loc
   done
+  total_fps=$(cat $file_loc | grep FPS | awk '{print $2}' | awk '{ sum_total += $1 } END { print sum_total }' )
+  echo 'Total FPS: '$total_fps | tee -a $file_loc
 }
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
@@ -64,7 +68,7 @@ mkdir -p $OUTPUT_DIR
 declare -a str
 device_id=$( lspci | grep -i display | sed -n '1p' | awk '{print $7}' )
 num_devs=$(lspci | grep -i display | awk '{print $7}' | wc -l)
-num_threads=4
+num_threads=1
 k=0
 if [[ ${device_id} == "56c1" ]]; then
     for i in $( eval echo {0..$((num_devs-1))} )

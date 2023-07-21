@@ -62,6 +62,8 @@ flags.DEFINE_string(
 flags.DEFINE_string(
     'raw_data_dir', None, 'Directory path for raw Imagenet dataset. '
     'Should have train and validation subdirectories inside it.')
+flags.DEFINE_string(
+    'dataset_option', "Training", 'Option to pre-process entire dataset or just the validation dataset.')
 
 FLAGS = flags.FLAGS
 
@@ -405,6 +407,32 @@ def convert_to_tf_records(raw_data_dir):
 
   return training_records, validation_records
 
+def convert_val_data_to_tf_records(raw_data_dir):
+  """Convert the Imagenet dataset into TF-Record dumps."""
+
+  # Shuffle training records to ensure we are distributing classes
+  # across the batches.
+
+  # Glob all the validation files
+  validation_files = sorted(tf.gfile.Glob(
+      os.path.join(raw_data_dir, VALIDATION_DIRECTORY, '*.JPEG')))
+
+  # Get validation file synset labels from labels.txt
+  validation_synsets = tf.gfile.FastGFile(
+      os.path.join(raw_data_dir, LABELS_FILE), 'r').read().splitlines()
+
+  # Create unique ids for all synsets
+  labels = {v: k + 1 for k, v in enumerate(
+      sorted(set(validation_synsets)))}
+
+  # Create validation data
+  logging.info('Processing the validation data.')
+  validation_records = _process_dataset(
+      validation_files, validation_synsets, labels,
+      os.path.join(FLAGS.local_scratch_dir, VALIDATION_DIRECTORY),
+      VALIDATION_DIRECTORY, VALIDATION_SHARDS)
+
+  return validation_records
 
 def main(argv):  # pylint: disable=unused-argument
   logging.set_verbosity(logging.INFO)
@@ -420,7 +448,10 @@ def main(argv):  # pylint: disable=unused-argument
         'the .tar files manually and provide the `raw_data_dir`.')
 
   # Convert the raw data into tf-records
-  training_records, validation_records = convert_to_tf_records(raw_data_dir)
+  if FLAGS.dataset_option == "training":
+    training_records, validation_records = convert_to_tf_records(raw_data_dir)
+  else:
+    validation_records = convert_val_data_to_tf_records(raw_data_dir)
 
 
 if __name__ == '__main__':

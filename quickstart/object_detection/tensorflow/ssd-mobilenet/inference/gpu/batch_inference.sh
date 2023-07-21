@@ -21,7 +21,7 @@ BATCH_SIZE=${BATCH_SIZE-1024}
 echo 'MODEL_DIR='$MODEL_DIR
 echo 'PRECISION='$PRECISION
 echo 'OUTPUT_DIR='$OUTPUT_DIR
-echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+# echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 
 if [[ ! -f "${FROZEN_GRAPH}" ]]; then
   pretrained_model=/workspace/tf-flex-series-ssd-mobilenet-inference/pretrained_models/ssdmobilenet_${PRECISION}_pretrained_model_gpu.pb
@@ -29,7 +29,6 @@ else
   pretrained_model=${FROZEN_GRAPH}
 fi
 
-export TF_NUM_INTEROP_THREADS=1
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
 
@@ -53,22 +52,40 @@ mkdir -p ${OUTPUT_DIR}
 
 WARMUP=""
 if [[ $PRECISION == "int8" ]]; then
-  WARMUP="-- warmup_steps=5 steps=20"
+  WARMUP="-- warmup_steps=5 steps=500"
   else
   echo "Flex series GPU SUPPORTS ONLY INT8 PRECISION"
   exit 1
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${pretrained_model} \
-    --output-dir ${OUTPUT_DIR} \
-    --model-name ssd-mobilenet \
-    --framework tensorflow \
-    --precision ${PRECISION} \
-    --mode inference \
-    --benchmark-only \
-    --batch-size=${BATCH_SIZE} \
-    --gpu \
-    $@ \
-    ${WARMPUP} 
+if [[ $BATCH_SIZE == "1024" ]]; then
+  export CFESingleSliceDispatchCCSMode=1
+  export TF_NUM_INTEROP_THREADS=1
+  export ITEX_AUTO_MIXED_PRECISION=1
+else
+  export CFESingleSliceDispatchCCSMode=1
+  export TF_NUM_INTEROP_THREADS=1
+fi
+
+# source "${MODEL_DIR}/quickstart/common/utils.sh"
+mac=`lspci | grep Dis| head -n 1| awk '{print $1}'`
+node=`lspci -s $mac -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`  
+numactl -N $node -l python -u models/object_detection/tensorflow/ssd-mobilenet/inference/gpu/int8/infer_detections.py \
+      --input-graph ${pretrained_model} \
+      --batch-size ${BATCH_SIZE} \
+      --iter 500 \
+      --warmup_iter 5 \
+      --benchmark 
+
+# _command numactl -N $node -l python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
+#     --in-graph ${pretrained_model} \
+#     --output-dir ${OUTPUT_DIR} \
+#     --model-name ssd-mobilenet \
+#     --framework tensorflow \
+#     --precision ${PRECISION} \
+#     --mode inference \
+#     --benchmark-only \
+#     --batch-size=${BATCH_SIZE} \
+#     --gpu \
+#     $@ \
+#     ${WARMUP} 

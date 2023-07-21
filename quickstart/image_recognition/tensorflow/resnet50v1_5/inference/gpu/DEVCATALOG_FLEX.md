@@ -9,7 +9,7 @@ This document has instructions for running ResNet50 v1.5 inference using Intel®
 | Item | Detail |
 | ------ | ------- |
 | Host machine  | Intel® Data Center GPU Flex Series  |
-| Drivers | GPU-compatible drivers need to be installed: [Download Driver 555](https://dgpu-docs.intel.com/releases/stable_555_20230124.html#ubuntu-22-04)
+| Drivers | GPU-compatible drivers need to be installed: [Download Driver 602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
 | Software | Docker* Installed |
 
 ## Get Started
@@ -26,10 +26,11 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `online_inference` | Runs online inference for int8 precision |
-| `batch_inference` | Runs batch inference for int8 precision |
-| `accuracy` | Measures the model accuracy for int8 precision |
-
+| `online_inference` | Runs online inference for int8 precision on Flex series 170 |
+| `batch_inference` | Runs batch inference for int8 precision on Flex series 170 |
+| `accuracy` | Measures the model accuracy for int8 precision on Flex series 170 |
+| `flex_multi_card_online_inference` | Runs online inference for int8 precision on Flex series 140 |
+| `flex_multi_card_batch_inference` | Runs batch inference for int8 precision on Flex series 140 |
 
 ## Run Using Docker
 
@@ -41,6 +42,8 @@ docker pull intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference
 
 ### Run Docker Image
 The ResNet50 v1-5 inference container includes scripts,model and libraries need to run int8 inference. To run one of the inference quickstart scripts using this container, you'll need to provide volume mounts for the ImageNet dataset for running `accuracy.sh` script. For `online_inference.sh` and `batch_inference.sh` dummy dataset will be used. You will need to provide an output directory where log files will be written. 
+
+**Note:** The Default batch size for Flex series 140 is 256 for batch inference and 1024 for Flex series 170. Additionally, add `--cap-add=SYS_NICE` to the `docker run` command for executing `flex_multi_card_online_inference.sh` and `flex_multi_card_batch_inference.sh` on Flex series 140.
 ```
 export PRECISION=int8
 export OUTPUT_DIR=<path to output directory>
@@ -48,13 +51,7 @@ export DATASET_DIR=<path to the preprocessed imagenet dataset>
 IMAGE_NAME=intel/image-recognition:tf-flex-gpu-resnet50v1-5-inference
 export GPU_TYPE=flex_series
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
   --device=/dev/dri \
   --ipc=host \
   --privileged \

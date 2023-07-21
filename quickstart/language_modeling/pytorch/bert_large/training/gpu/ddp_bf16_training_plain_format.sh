@@ -31,7 +31,10 @@ fi
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
-export LD_PRELOAD=/opt/intel/oneapi/lib/intel64/libmpi.so
+source $(python -c "import oneccl_bindings_for_pytorch as torch_ccl;print(torch_ccl.cwd)")/env/setvars.sh
+export LD_PRELOAD=$(python -c "import oneccl_bindings_for_pytorch as torch_ccl;print(torch_ccl.cwd)")/lib/libmpi.so
+export ONECCL_BINDINGS_FOR_PYTORCH_ENV_VERBOSE=1
+
 
 bert_log_analysis() {
     # $1 : src raw log

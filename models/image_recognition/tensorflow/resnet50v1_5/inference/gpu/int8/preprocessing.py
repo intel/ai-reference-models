@@ -132,7 +132,6 @@ class RecordInputImagePreprocessor(object):
     image = tf.image.decode_jpeg(
       image_buffer, channels=3, fancy_upscaling=False, dct_method='INTEGER_FAST')
     image = eval_image(image, self.height, self.width, self.resize_method)
-    image, _ , _ = tf.quantization.quantize(image, -123.68, 151.06, tf.qint8)
     return (image, label_index, filename)
 
   def minibatch(self, dataset, subset, cache_data=False):

@@ -53,6 +53,8 @@ fi
 if [[ $GPU_TYPE == "flex_series" ]]; then
   export OverrideDefaultFP64Settings=1 
   export IGC_EnableDPEmulation=1 
+  export TF_NUM_INTEROP_THREADS=1
+  export CFESingleSliceDispatchCCSMode=1
   if [[ $PRECISION == "int8" ]]; then
     echo "Precision is $PRECISION"
     if [[ ! -f "${FROZEN_GRAPH}" ]]; then
@@ -60,7 +62,7 @@ if [[ $GPU_TYPE == "flex_series" ]]; then
     else
       pretrained_model=${FROZEN_GRAPH}
     fi
-    WARMUP="-- warmup_steps=5 steps=25"
+    # WARMUP="-- warmup_steps=10 steps=500"
   else 
     echo "FLEX SERIES GPU SUPPORTS ONLY INT8 PRECISION"
     exit 1
@@ -91,21 +93,29 @@ else
     Tile=${Tile}
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
+# source "${MODEL_DIR}/quickstart/common/utils.sh"
 if [[ ${Tile} == "1" ]]; then
     echo "resnet50 v1.5 int8 inference"
-         python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=${PRECISION} \
-         --mode=inference \
-         --framework tensorflow \
-         --in-graph ${pretrained_model} \
-         --output-dir ${OUTPUT_DIR} \
-         --batch-size=${BATCH_SIZE} \
-         --benchmark-only \
-         --gpu \
-         $@ \
-         ${WARMUP} 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_t0_raw.log
+         mac=`lspci | grep Dis| head -n 1| awk '{print $1}'`
+         node=`lspci -s $mac -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`
+         numactl -N $node -l python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
+         --input-graph=${pretrained_model} \
+         --warmup-steps=10 \
+         --steps=500 \
+         --batch-size=1024 \
+         --benchmark 
+        #  numactl -N $node -l python benchmarks/launch_benchmark.py \
+        #  --model-name=resnet50v1_5 \
+        #  --precision=${PRECISION} \
+        #  --mode=inference \
+        #  --framework tensorflow \
+        #  --in-graph ${pretrained_model} \
+        #  --output-dir ${OUTPUT_DIR} \
+        #  --batch-size=${BATCH_SIZE} \
+        #  --benchmark-only \
+        #  --gpu \
+        #  $@ \
+        #  ${WARMUP} 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_t0_raw.log
 
 elif [[ ${Tile} == "2" ]]; then
         echo "resnet50 v1.5 int8 two-tile inference"

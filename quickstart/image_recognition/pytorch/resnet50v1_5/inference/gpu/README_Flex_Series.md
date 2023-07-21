@@ -60,7 +60,9 @@ The folder that contains the `val` directory should be set as the
 
 | Script name | Description |
 |-------------|-------------|
-| inference_block_format.sh | Runs ResNet50 inference (block format) for the int8 precision |
+| `inference_block_format.sh` | Runs ResNet50 inference (block format) for the specified precision (int8) on Flex series 170 |
+| `flex_multi_card_batch_inference.sh` | Runs ResNet50 inference (block format) for the specified precision (int8) and batch size on Flex series 140|
+| `flex_multi_card_online_inference.sh` | Runs Online ResNet50 inference (block format) for the specified precision (int8) on Flex series 140| 
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -98,9 +100,19 @@ export BATCH_SIZE=<Set batch_size else it will run with default batch>
 # Run a quickstart script
 ./quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh
 ```
+To execute `flex_multi_card_batch_inference.sh` and `flex_multi_card_online_inference.sh` on Flex series 140, install the following components 
+
+```bash
+apt-get update && \
+apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl 
+```
+Then execute the quickstart scripts. For batch inference, the default batch size for Flex 140 is 256.
+```bash
+./quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/flex_multi_card_batch_inference.sh 
+./quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/flex_multi_card_online_inference.sh
+```
 
 <!--- 80. License -->
 ## License
 
 [LICENSE](/LICENSE)
-

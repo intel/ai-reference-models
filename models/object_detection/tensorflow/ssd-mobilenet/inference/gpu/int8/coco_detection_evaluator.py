@@ -17,8 +17,8 @@
 #
 #
 
-from inference import coco_tools
-from inference import coco_label_map
+import coco_tools
+import coco_label_map
 
 class CocoDetectionEvaluator:
     """Class to evaluate COCO detection metrics."""

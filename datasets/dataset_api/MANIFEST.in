@@ -1,0 +1,6 @@
+prune dist
+prune extracted
+prune conda
+exclude MANIFEST.in \
+        requirements.txt \
+        .gitignore \

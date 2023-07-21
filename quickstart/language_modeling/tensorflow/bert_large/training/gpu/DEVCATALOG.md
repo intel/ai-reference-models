@@ -18,7 +18,7 @@ Download and extract the bert large uncased (whole word masking) pre-trained mod
 ## Docker
 Requirements:
 * Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html#ubuntu-22-04)
+* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
 * Docker
 
 ## Docker pull Command
@@ -41,13 +41,8 @@ else
    export Tile=1
 fi
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env BERT_LARGE_DIR=${BERT_LARGE_DIR} \

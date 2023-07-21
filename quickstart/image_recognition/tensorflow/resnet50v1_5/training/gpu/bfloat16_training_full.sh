@@ -53,7 +53,7 @@ if [ -z "${BATCH_SIZE}"]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
-export PYTHONPATH=$(pwd)/models/image_recognition/tensorflow/resnet50v1_5/training
+export PYTHONPATH=$(pwd)/models/image_recognition/tensorflow/resnet50v1_5/training/gpu
 
 if [[ ${Tile} == "1" ]]; then
     echo "resnet50 v1.5 bf16 training"

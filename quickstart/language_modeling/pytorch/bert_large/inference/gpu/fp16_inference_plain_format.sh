@@ -36,6 +36,16 @@ if [[ ! -d "${DATASET_DIR}" ]]; then
   exit 1
 fi
 
+if [[ -z "${BERT_WEIGHT}" ]]; then
+  echo "The required environment variable BERT_WEIGHT has not been set"
+  exit 1
+fi
+
+if [[ ! -d "${BERT_WEIGHT}" ]]; then
+  echo "The DATASET_DIR '${BERT_WEIGHT}' does not exist"
+  exit 1
+fi
+
 if [[ -z $OUTPUT_DIR ]]; then
   echo "The required environment variable OUTPUT_DIR has not been set"
   exit 1

@@ -41,7 +41,10 @@ fi
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
-export LD_PRELOAD=/opt/intel/oneapi/lib/intel64/libmpi.so
+source $(python -c "import oneccl_bindings_for_pytorch as torch_ccl;print(torch_ccl.cwd)")/env/setvars.sh
+export LD_PRELOAD=$(python -c "import oneccl_bindings_for_pytorch as torch_ccl;print(torch_ccl.cwd)")/lib/libmpi.so
+export ONECCL_BINDINGS_FOR_PYTORCH_ENV_VERBOSE=1
+
 
 echo "explicit scaling hvd_resnet50 bf16 training plain nhwc bs16 perf 1c2t"
 cd ${MODEL_DIR}/models/image_recognition/pytorch/resnet50v1_5/training/gpu

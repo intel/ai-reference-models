@@ -26,8 +26,6 @@ from tensorflow.python.framework import dtypes
 import time
 from tensorflow.python.client import timeline
 from argparse import ArgumentParser
-from coco_detection_evaluator import CocoDetectionEvaluator
-from coco_label_map import category_map
 
 from optimize_for_benchmark import optimize_for_benchmark
 
@@ -104,16 +102,6 @@ class model_infer:
                             help='Specify the input graph.',
                             dest='input_graph')
 
-    arg_parser.add_argument('-d', "--data-location",
-                            help='Specify the location of the data. '
-                                 'If this parameter is not specified, '
-                                 'the benchmark will use random/dummy data.',
-                            dest="data_location", default=None)
-
-    arg_parser.add_argument('-r', "--accuracy-only",
-                            help='For accuracy measurement only.',
-                            dest='accuracy_only', action='store_true')
-
     arg_parser.add_argument('-i', "--iter",
                             help='For accuracy measurement only.',
                             dest='total_iter', default=1000, type=int)
@@ -129,8 +117,8 @@ class model_infer:
     self.args = arg_parser.parse_args()
 
     self.config = tf.compat.v1.ConfigProto()
-    self.config.intra_op_parallelism_threads = self.args.num_intra_threads
-    self.config.inter_op_parallelism_threads = self.args.num_inter_threads
+    # self.config.intra_op_parallelism_threads = self.args.num_intra_threads
+    # self.config.inter_op_parallelism_threads = self.args.num_inter_threads
     self.config.use_per_session_threads = 1
 
     self.load_graph()
@@ -143,8 +131,6 @@ class model_infer:
     self.input_tensor = self.infer_graph.get_tensor_by_name(input_layer + ":0")
     if not self.args.benchmark: 
       self.output_tensors = [self.infer_graph.get_tensor_by_name(x + ":0") for x in output_layers]
-
-    self.category_map_reverse = {v : k for k, v in category_map.items()}
 
   def build_data_sess(self):
     data_graph = tf.Graph()
@@ -188,17 +174,11 @@ class model_infer:
         tf.import_graph_def(graph_def, name='')  
 
   def run_benchmark(self):
-    if self.args.data_location:
-      print("Inference with real data.")
-    else:
-      print("Inference with dummy data.")
+    print("Inference with dummy data.")
           
     with tf.compat.v1.Session(graph=self.infer_graph, config=self.config) as sess:
-      
-      if self.args.data_location:
-        self.build_data_sess()
-      else:
-        input_images = sess.run(tf.random.truncated_normal(
+
+      input_images = sess.run(tf.random.truncated_normal(
           [self.args.batch_size, IMAGE_SIZE, IMAGE_SIZE, 3],
           dtype=tf.float32,
           stddev=10,
@@ -212,16 +192,11 @@ class model_infer:
       print('warm up iteration is {0}'.format(str(warmup_iter)))
       for step in range(total_iter):
         start_time = time.time()
-        if self.args.data_location:
-          input_images = self.data_sess.run([self.input_images])
-          input_images = input_images[0]
-          input_images = self.pre_sess.run(self.pre_output, {self.pre_input: input_images})
-
         if self.args.benchmark:
             _ = sess.run(self.output_tensors)
         else:
             _ = sess.run(self.output_tensors, {self.input_tensor: input_images})
-            
+
         end_time = time.time()
         duration = end_time - start_time
         if (step + 1) % 10 == 0:
@@ -258,38 +233,7 @@ class model_infer:
 
     return images, bbox, label, image_id
 
-  def accuracy_check(self):
-    print("Inference for accuracy check.")
-    self.build_data_sess()
-    evaluator = CocoDetectionEvaluator()
-    with tf.compat.v1.Session(graph=self.infer_graph, config=self.config) as sess:
-      iter = 0
-      while True:
-        print('Run {0} iter'.format(iter))
-        iter += 1
-        input_images, bbox, label, image_id = self.data_sess.run([self.input_images, self.bbox, self.label, self.image_id])
-        ground_truth = {}
-        ground_truth['boxes'] = np.asarray(bbox[0])
-        label = [x if type(x) == 'str' else x.decode('utf-8') for x in label[0]]
-        ground_truth['classes'] = np.asarray([self.category_map_reverse[x] for x in label])
-        image_id = image_id[0] if type(image_id[0]) == 'str' else image_id[0].decode('utf-8')
-        evaluator.add_single_ground_truth_image_info(image_id, ground_truth)
-        input_images = self.pre_sess.run(self.pre_output, {self.pre_input: input_images})
-        num, boxes, scores, labels = sess.run(self.output_tensors, {self.input_tensor: input_images})
-        detection = {}
-        num = int(num[0])
-        detection['boxes'] = np.asarray(boxes[0])[0:num]
-        detection['scores'] = np.asarray(scores[0])[0:num]
-        detection['classes'] = np.asarray(labels[0])[0:num]
-        evaluator.add_single_detected_image_info(image_id, detection)
-        if iter * self.args.batch_size >= COCO_NUM_VAL_IMAGES:
-          evaluator.evaluate()
-          break
-
   def run(self):
-    if self.args.accuracy_only:
-      self.accuracy_check()
-    else:
       self.run_benchmark()
 
 

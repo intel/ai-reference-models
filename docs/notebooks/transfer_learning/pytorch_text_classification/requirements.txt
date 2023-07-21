@@ -7,5 +7,5 @@ psutil==5.9.3
 scikit-learn==1.1.2
 torch==1.13.1 # fixed for Snyk scans to avoid vulnerability
 wheel==0.38.0 # Included this to avoid a vulnerability
-transformers==4.23.1
+transformers==4.30.0 # fixed for Snyk scans to avoid vulnerability
 wget==3.2

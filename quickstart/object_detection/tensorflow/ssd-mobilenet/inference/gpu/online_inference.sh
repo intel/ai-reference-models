@@ -38,6 +38,9 @@ declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
 
+export CFESingleSliceDispatchCCSMode=1
+export TF_NUM_INTEROP_THREADS=1
+
 for i in "${!input_envs[@]}"; do
   var_name=$i
   env_param=${input_envs[$i]}
@@ -53,22 +56,19 @@ mkdir -p ${OUTPUT_DIR}
 
 WARMUP=""
 if [[ $PRECISION == "int8" ]]; then
-  WARMUP="-- warmup_steps=5 steps=20"
+  WARMUP="-- warmup-steps=10 --steps=5000"
   else
   echo "Flex series GPU SUPPORTS ONLY INT8 PRECISION"
   exit 1
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${pretrained_model} \
-    --output-dir ${OUTPUT_DIR} \
-    --model-name ssd-mobilenet \
-    --framework tensorflow \
-    --precision ${PRECISION} \
-    --mode inference \
-    --benchmark-only \
-    --batch-size 1 \
-    --gpu \
-    $@ \
-    ${WARMPUP}
+# source "${MODEL_DIR}/quickstart/common/utils.sh"
+mac=`lspci | grep Dis| head -n 1| awk '{print $1}'`
+node=`lspci -s $mac -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`  
+numactl -N $node -l python -u models/object_detection/tensorflow/ssd-mobilenet/inference/gpu/int8/infer_detections.py \
+      --input-graph ${pretrained_model} \
+      --batch-size ${BATCH_SIZE} \
+      --iter 5000 \
+      --warmup_iter 10 \
+      --benchmark
+

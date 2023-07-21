@@ -71,7 +71,10 @@ The folder should be set as the `DATASET_DIR`
 
 | Script name | Description |
 |-------------|-------------|
-| `inference_with_dummy_data.sh` | Inference with dummy data, batch size 512, for int8 blocked channel first. |
+| `inference_with_dummy_data.sh` | Inference with dummy data, for int8 blocked channel first on Flex series 170 |
+| `flex_multi_card_batch_inference.sh` | Inference with dummy data,for int8 and given batch size blocked channel first on Flex series 140 |
+| `flex_multi_card_online_inference.sh` | Online Inference with dummy data,for int8 blocked channel first on Flex series 140 | 
+
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -110,9 +113,19 @@ export label=<path to label.txt file>
 Run the inference script, only int8 precision is supported:
 ./quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/inference_with_dummy_data.sh
 ```
+To execute `flex_multi_card_batch_inference.sh` and `flex_multi_card_online_inference.sh` on Flex series 140, install the following components 
+
+```bash
+apt-get update && \
+apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl 
+```
+Then execute the quickstart scripts. For batch inference, the default batch size for Flex 140 is 256.
+```bash
+./quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/flex_multi_card_batch_inference.sh 
+./quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/flex_multi_card_online_inference.sh
+```
 
 <!--- 80. License -->
 ## License
 
 [LICENSE](/LICENSE)
-

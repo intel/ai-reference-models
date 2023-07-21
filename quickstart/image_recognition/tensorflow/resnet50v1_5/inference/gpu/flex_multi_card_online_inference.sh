@@ -53,14 +53,18 @@ fi
 
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
+export TF_NUM_INTEROP_THREADS=1
+export CFESingleSliceDispatchCCSMode=1
+export ITEX_LIMIT_MEMORY_SIZE_IN_MB=1024
+
 if [[ $PRECISION == "int8" ]]; then
     echo "Precision is $PRECISION"
     if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-      pretrained_model=/workspace/tf-flex-series-resnet50v1-5-multi-card-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
+      pretrained_model=/workspace/tf-flex-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
     else
       pretrained_model=${FROZEN_GRAPH}
     fi
-    WARMUP="-- warmup_steps=10 steps=5000"
+    # WARMUP="-- warmup_steps=10 steps=5000"
   else 
     echo "FLEX SERIES GPU SUPPORTS ONLY INT8 PRECISION"
     exit 1
@@ -69,26 +73,20 @@ fi
 declare -a str
 device_id=$( lspci | grep -i display | sed -n '1p' | awk '{print $7}' )
 num_devs=$(lspci | grep -i display | awk '{print $7}' | wc -l)
-num_threads=4
+num_threads=1
 k=0
-source "${MODEL_DIR}/quickstart/common/utils.sh"
+# source "${MODEL_DIR}/quickstart/common/utils.sh"
 if [[ ${device_id} == "56c1" ]]; then
     for i in $( eval echo {0..$((num_devs-1))} )
     do
     for j in $( eval echo {1..$num_threads} )
     do
-    str+=("ZE_AFFINITY_MASK="${i}" numactl -C ${k} -l python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${pretrained_model} \
-    --model-name resnet50v1_5 \
-    --framework tensorflow \
-    --precision ${PRECISION} \
-    --mode inference \
-    --batch-size ${BATCH_SIZE} \
-    --output-dir ${OUTPUT_DIR} \
-    --benchmark-only \
-    --gpu \
-    $@ \
-    ${WARMUP} ")
+    str+=("ZE_AFFINITY_MASK="${i}" numactl -C ${k} -l python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
+          --input-graph ${pretrained_model} \
+          --warmup-steps 10 \
+          --steps 5000 \
+          --batch-size ${BATCH_SIZE} \
+          --benchmark ")
     ((k=k+1))
     done
     done
@@ -96,4 +94,7 @@ if [[ ${device_id} == "56c1" ]]; then
     echo "resnet50 int8 inference block on Flex series 140"
     parallel --lb -d, --tagstring "[{#}]" ::: \
     "${str[@]}" 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_block_c0_c1_${BATCH_SIZE}.log
+    file_loc=${OUTPUT_DIR}//resnet50_${PRECISION}_inf_block_c0_c1_${BATCH_SIZE}.log
+    total_throughput=$( cat $file_loc | grep Throughput | awk '{print $3}' |  awk '{ sum_total += $1 } END { print sum_total }' )
+    echo 'Total Throughput in images/sec: '$total_throughput | tee -a $file_loc
 fi

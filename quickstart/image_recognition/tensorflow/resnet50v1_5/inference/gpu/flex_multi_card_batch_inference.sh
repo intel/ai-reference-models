@@ -46,20 +46,22 @@ mkdir -p ${OUTPUT_DIR}
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}" ]; then
-  BATCH_SIZE="1024"
+  BATCH_SIZE="256"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
+export TF_NUM_INTEROP_THREADS=1
+export CFESingleSliceDispatchCCSMode=1
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
 if [[ $PRECISION == "int8" ]]; then
     echo "Precision is $PRECISION"
     if [[ ! -f "${FROZEN_GRAPH}" ]]; then
-      pretrained_model=/workspace/tf-flex-series-resnet50v1-5-multi-card-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
+      pretrained_model=/workspace/tf-flex-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
     else
       pretrained_model=${FROZEN_GRAPH}
     fi
-    WARMUP="-- warmup_steps=10 steps=5000"
+    # WARMUP="-- warmup_steps=10 steps=5000"
   else 
     echo "FLEX SERIES GPU SUPPORTS ONLY INT8 PRECISION"
     exit 1
@@ -68,26 +70,35 @@ fi
 declare -a str
 device_id=$( lspci | grep -i display | sed -n '1p' | awk '{print $7}' )
 num_devs=$(lspci | grep -i display | awk '{print $7}' | wc -l)
-source "${MODEL_DIR}/quickstart/common/utils.sh"
+# source "${MODEL_DIR}/quickstart/common/utils.sh"
 
 if [[ ${device_id} == "56c1" ]]; then
     for i in $( eval echo {0..$((num_devs-1))} )
     do
-        str+=("ZE_AFFINITY_MASK="${i}" python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=${PRECISION} \
-         --mode=inference \
-         --framework tensorflow \
-         --in-graph ${pretrained_model} \
-         --output-dir ${OUTPUT_DIR} \
-         --batch-size=${BATCH_SIZE} \
-         --benchmark-only \
-         --gpu \
-         $@ \
-         ${WARMUP} ")
+      str+=("ZE_AFFINITY_MASK="${i}" python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
+            --input-graph ${pretrained_model} \
+            --warmup-steps 10 \
+            --steps 5000 \
+            --batch-size ${BATCH_SIZE} \
+            --benchmark ")
+        # str+=("ZE_AFFINITY_MASK="${i}" python benchmarks/launch_benchmark.py \
+        #  --model-name=resnet50v1_5 \
+        #  --precision=${PRECISION} \
+        #  --mode=inference \
+        #  --framework tensorflow \
+        #  --in-graph ${pretrained_model} \
+        #  --output-dir ${OUTPUT_DIR} \
+        #  --batch-size=${BATCH_SIZE} \
+        #  --benchmark-only \
+        #  --gpu \
+        #  $@ \
+        #  ${WARMUP} ")
     done
     # int8 uses a different python script
     echo "resnet50 int8 inference block on Flex series 140"
     parallel --lb -d, --tagstring "[{#}]" ::: \
     "${str[@]}" 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_c0_c1_${BATCH_SIZE}.log
+    file_loc=${OUTPUT_DIR}//resnet50_${PRECISION}_inf_c0_c1_${BATCH_SIZE}.log
+    total_throughput=$( cat $file_loc | grep Throughput | awk '{print $3}' |  awk '{ sum_total += $1 } END { print sum_total }' )
+    echo 'Total Throughput in images/sec: '$total_throughput | tee -a $file_loc
 fi

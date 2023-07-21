@@ -32,8 +32,18 @@ mkdir -p ${MODEL_DIR}/PRETRAINED_MODEL
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
 
-export OverrideDefaultFP64Settings=1 
-export IGC_EnableDPEmulation=1 
+export CFESingleSliceDispatchCCSMode=1
+export IPEX_ONEDNN_LAYOUT=1
+export IPEX_LAYOUT_OPT=1
+export IPEX_XPU_ONEDNN_LAYOUT=1
+
+
+calculate_throughput() {
+  file_loc=$1
+  batch_size=$2
+  fps=$(cat $file_loc | grep 'Inference time' | awk '{print $3}' | tail -400 | awk -v batch_size="$batch_size" -F' ' '{sum+=$NF;} END{print batch_size/(sum/400)} ')
+  echo 'FPS: '$fps | tee -a $file_loc
+}
 
 # Download the weights file if it does not already exist
 WEIGHTS_FILE="${MODEL_DIR}/PRETRAINED_MODEL/mobilenet-v1-ssd-mp-0_675.pth"
@@ -62,4 +72,5 @@ IPEX_XPU_ONEDNN_LAYOUT=1 python -u ${MODEL_DIR}/models/object_detection/pytorch/
   --batch_size ${BATCH_SIZE} \
   --benchmark 1 \
   --num-iterations ${NUM_ITERATIONS} \
-  --int8 2>&1 | tee $OUTPUT_DIR/ssd_mobilenetv1_dummy_data_xpu_inf.log
+  --int8 2>&1 | tee $OUTPUT_DIR/ssd_mobilenetv1_dummy_data_xpu_${BATCH_SIZE}.log
+calculate_throughput $OUTPUT_DIR/ssd_mobilenetv1_dummy_data_xpu_${BATCH_SIZE}.log ${BATCH_SIZE}
