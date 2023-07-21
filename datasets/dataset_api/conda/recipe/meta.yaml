@@ -1,0 +1,47 @@
+{% set name = "dataset_librarian" %}
+{% set version = "1.0.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dataset_librarian-{{ version }}.tar.gz
+  sha256: 9e78e2b33c4e33d446210fcee4116fc7d479a7f1c902fea9459a16f11feeb884
+
+build:
+  noarch: python
+  script: {{ PYTHON }} -m pip install . -vv
+  number: 0
+
+requirements:
+  host:
+    - python >=3.8,<3.10
+    - setuptools >=61.0
+    - setuptools-scm
+    - pip
+  run:
+    - python >=3.8,<3.10
+    - pandas
+    - tqdm
+    - docx2txt
+    - openpyxl
+    - pillow
+    - scikit-learn-intelex
+    - python-dotenv
+    - wget
+
+test:
+  imports:
+    - dataset_librarian
+
+about:
+  summary: Dataset librarian is a tool to download and apply the preprocessing needed for the list of supported datasets
+  license: 'APACHE'
+  about_license_url: https://www.apache.org/licenses/LICENSE-2.0.html
+  home: "https://github.com/IntelAI/models/tree/master/datasets/dataset_api"
+
+extra:
+  recipe-maintainers:
+    - Taie, Wafaa S <wafaa.s.taie@intel.com>
+    - Miguel Pineda Juarez <miguel.pineda.juarez@intel.com>

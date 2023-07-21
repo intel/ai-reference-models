@@ -104,28 +104,28 @@ if test -z $dataset || ! test -d $dataset ; then
   dataset=$DATASET_DIR
 fi
 
-if [ "$MODEL" == "bert_base" ] ; then
-  if test -d ./squad_base_finetuned_checkpoint ; then
-    :
-  else
-    ./download_squad_base_fine_tuned_model.sh
-  fi
-  model_path=./squad_base_finetuned_checkpoint
-elif [ "$MODEL" == "bert_large" ] ; then
-  if test -d ./squad_large_finetuned_checkpoint ; then
-    :
-  else
-    ./download_squad_large_fine_tuned_model.sh
-  fi
-  model_path=./squad_large_finetuned_checkpoint 
-else
-  echo "The modle (${MODEL}) does not exist."
-  exit
-fi
+# if [ "$MODEL" == "bert_base" ] ; then
+#   if test -d ./squad_base_finetuned_checkpoint ; then
+#     :
+#   else
+#     ./download_squad_base_fine_tuned_model.sh
+#   fi
+#   model_path=./squad_base_finetuned_checkpoint
+# elif [ "$MODEL" == "bert_large" ] ; then
+#   if test -d ./squad_large_finetuned_checkpoint ; then
+#     :
+#   else
+#     ./download_squad_large_fine_tuned_model.sh
+#   fi
+#   model_path=./squad_large_finetuned_checkpoint 
+# else
+#   echo "The modle (${MODEL}) does not exist."
+#   exit
+# fi
 
 $NUMA_RAGS $GDB_ARGS python -u run_squad.py \
   --model_type bert \
-  --model_name_or_path $model_path \
+  --model_name_or_path ${BERT_WEIGHT} \
   --do_eval \
   --do_lower_case \
   --do_jit \

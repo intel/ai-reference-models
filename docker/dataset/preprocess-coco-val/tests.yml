@@ -1,0 +1,14 @@
+---
+preprocess-coco-val:
+  image_name: intel/object-detection:tf-1.15.2-preprocess-coco-val
+  tests:
+  - test_name: COCO Dataset TF Preprocess
+    env_vars:
+      OUTPUT_DIR: /tf_dataset/coco_raw
+      VAL_IMAGE_DIR: /tf_dataset/dataset/coco_raw/val2017
+      ANNOTATIONS_DIR: /tf_dataset/dataset/coco_raw/annotations
+      TF_REPO_BRANCH: 7a9934df2afdf95be9405b4e9f1f2480d748dc40
+      SCRIPT: scripts/preprocess_coco_val.sh
+      DOCKER_ARGS: "--privileged"
+    volumes:
+      DATASET_DIR: /tf_dataset/dataset/coco_raw

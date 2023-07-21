@@ -24,10 +24,14 @@ The setup assumes the dataset is downloaded to the current directory.
 Download the `config.json` and fine tuned model from huggingface and set the `BERT_WEIGHT` environment variable to point to the directory that has both files:
 
 ```
-mkdir bert_squad_model
-wget https://s3.amazonaws.com/models.huggingface.co/bert/bert-large-uncased-whole-word-masking-finetuned-squad-config.json -O bert_squad_model/config.json
-wget https://cdn.huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad-pytorch_model.bin  -O bert_squad_model/pytorch_model.bin
-BERT_WEIGHT=$(pwd)/bert_squad_model
+mkdir squad_large_finetuned_checkpoint
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/config.json -O squad_large_finetuned_checkpoint/config.json
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/pytorch_model.bin  -O squad_large_finetuned_checkpoint/pytorch_model.bin
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/tokenizer.json -O squad_large_finetuned_checkpoint/tokenizer.json
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/tokenizer_config.json -O squad_large_finetuned_checkpoint/tokenizer_config.json
+wget -c https://huggingface.co/bert-large-uncased-whole-word-masking-finetuned-squad/resolve/main/vocab.txt -O squad_large_finetuned_checkpoint/vocab.txt
+
+BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
 ```
 
 ## Quick Start Scripts
@@ -38,7 +42,7 @@ BERT_WEIGHT=$(pwd)/bert_squad_model
 
 Requirements:
 * Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html#ubuntu-22-04)
+* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
 * Docker
 
 ## Docker pull Command
@@ -52,21 +56,16 @@ The BERT Large inference container includes scripts,models,libraries needed to r
 ```
 export DATASET_DIR=<path to dataset>
 export OUTPUT_DIR=<path to output log files>
-export BERT_WEIGHT=$(pwd)/bert_squad_model
+export BERT_WEIGHT=$(pwd)/squad_large_finetuned_checkpoint
 
-DOCKER_ARGS=${DOCKER_ARGS:---rm -it}
+DOCKER_ARGS="--rm -it"
 IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-inference
-
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
 
 SCRIPT=quickstart/fp16_inference_plain_format.sh
 Tile=2
 
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --ipc=host \
   --env DATASET_DIR=${DATASET_DIR} \

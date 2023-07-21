@@ -35,7 +35,7 @@ export IPEX_XPU_ONEDNN_LAYOUT=1
 declare -a str
 device_id=$( lspci | grep -i display | sed -n '1p' | awk '{print $7}' )
 num_devs=$(lspci | grep -i display | awk '{print $7}' | wc -l)
-num_threads=2
+num_threads=1
 k=0
 
 if [[ ${device_id} == "56c1" ]]; then
@@ -45,10 +45,10 @@ if [[ ${device_id} == "56c1" ]]; then
     do
     str+=("ZE_AFFINITY_MASK="${i}" numactl -C ${k} -l  python -u ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/models.py \
           -n 80 \
+          -i ${IMAGE_FILE} \
           --weight ${PRETRAINED_MODEL} \
           -e 416 \
           -w 416 \
-          -name ${MODEL_DIR}/models/object_detection/pytorch/yolov4/inference/gpu/data/coco.names \
           -d int8 \
           --dummy 1 \
           -b ${BATCH_SIZE} \
@@ -61,4 +61,7 @@ if [[ ${device_id} == "56c1" ]]; then
 echo "YOLOv4 dummy data int8 inference block nchw on Flex Series 140"
 parallel --lb -d, --tagstring "[{#}]" ::: \
 "${str[@]}" 2>&1 | tee $OUTPUT_DIR/YOLOv4_dummy_data_xpu_inf_c0_c1_${BATCH_SIZE}.log
+file_loc=$OUTPUT_DIR/YOLOv4_dummy_data_xpu_inf_c0_c1_${BATCH_SIZE}.log
+total_fps=$( cat $file_loc | grep FPS | awk '{print $4}' | awk '{ sum_total += $1 } END { print sum_total }' )
+echo 'Total FPS: '$total_fps | tee -a $file_loc
 fi

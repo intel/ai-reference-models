@@ -16,8 +16,8 @@
 #
 
 MODEL_DIR=${MODEL_DIR-$PWD}
-NUM_ITERATIONS=${NUM_ITERATIONS-10}
-BATCH_SIZE=${BATCH_SIZE-1024}
+NUM_ITERATIONS=${NUM_ITERATIONS-500}
+BATCH_SIZE=${BATCH_SIZE-256}
 
 dataset_arg="${DATASET_DIR}"
 if [[ -z "${DATASET_DIR}" ]]; then
@@ -39,7 +39,6 @@ mkdir -p $OUTPUT_DIR
 export OverrideDefaultFP64Settings=1 
 export IGC_EnableDPEmulation=1 
 
-export SYCL_DEVICE_FILTER={level_zero:gpu:0}
 export CFESingleSliceDispatchCCSMode=1
 export IPEX_ONEDNN_LAYOUT=1
 export IPEX_LAYOUT_OPT=1
@@ -58,4 +57,7 @@ if [[ ${device_id} == "56c1" ]]; then
     echo "resnet50 int8 inference block on Flex series 140"
     parallel --lb -d, --tagstring "[{#}]" ::: \
     "${str[@]}" 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_block_c0_c1_${BATCH_SIZE}.log
+    file_loc=${OUTPUT_DIR}//resnet50_${PRECISION}_inf_block_c0_c1_${BATCH_SIZE}.log
+    total_throughput=$( cat $file_loc | grep throughput | awk '{print $7}' | cut -d':' -f2 | awk '{ sum_total += $1 } END { print sum_total }' )
+    echo 'Total Throughput in images/sec: '$total_throughput | tee -a $file_loc
 fi

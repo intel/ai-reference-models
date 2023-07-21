@@ -35,11 +35,12 @@ logging in.
    ```
 
 3. Download and run the [imagenet_to_tfrecords.sh](imagenet_to_tfrecords.sh) script and pass
-   arguments for the directory with the ImageNet tar files that were downloaded
+   arguments for the directory with the ImageNet tar files that were downloaded. To pre-process the entire dataset, pass `training` flag to the following script. To pre-process only the validation dataset, pass `inference` flag to the following script as shown below. 
    in step 1 (e.g. `/home/<user>/imagenet_raw_data`).
-   ```
+
+   ```bash
    wget https://raw.githubusercontent.com/IntelAI/models/master/datasets/imagenet/imagenet_to_tfrecords.sh
-   ./imagenet_to_tfrecords.sh <IMAGENET DIR>
+   ./imagenet_to_tfrecords.sh <IMAGENET DIR> inference
    ```
    The `imagenet_to_tfrecords.sh` script extracts the ImageNet tar files, downloads and
    then runs the [`imagenet_to_gcs.py`](imagenet_to_gcs.py) script to convert the

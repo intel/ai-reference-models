@@ -11,12 +11,12 @@
 
   { "_comment": "ssd_mobilenet_int8_accuracy",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-mobilenet --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=0 --output-dir=/workspace/benchmarks/common/tensorflow/logs --accuracy-only --verbose --model-source-dir=/workspace/models --in-graph=/in_graph/ssdmobilenet_int8_pretrained_model.pb --data-location=/dataset",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py -g /in_graph/ssdmobilenet_int8_pretrained_model.pb -i 1000 -w 200 -a 28 -e 1 -d /dataset -r",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py -g /in_graph/ssdmobilenet_int8_pretrained_model.pb -i 50 -w 10 -a 28 -e 1 -d /dataset -r",
     "cpuset": "0-111"},
 
   { "_comment": "ssd_mobilenet_int8",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=ssd-mobilenet --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size=1 --socket-id 0 --data-location=/dataset --verbose --in-graph=/in_graph/ssdmobilenet_int8_pretrained_model.pb --benchmark-only --in-graph=/in_graph/ssdmobilenet_int8_pretrained_model.pb",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py -g /in_graph/ssdmobilenet_int8_pretrained_model.pb -i 1000 -w 200 -a 28 -e 1 -d /dataset -b 1",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/infer_detections.py -g /in_graph/ssdmobilenet_int8_pretrained_model.pb -i 50 -w 10 -a 28 -e 1 -d /dataset -b 1",
     "cpuset": "0-111"},
 
   { "_comment": "ssd_mobilenet_bfloat16_inference",

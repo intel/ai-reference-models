@@ -55,8 +55,11 @@ fi
 if [[ $GPU_TYPE == "flex_series" ]]; then
   export OverrideDefaultFP64Settings=1 
   export IGC_EnableDPEmulation=1 
+  export TF_NUM_INTEROP_THREADS=1
+  export CFESingleSliceDispatchCCSMode=1
+
   if [[ $PRECISION == "int8" ]]; then
-    WARMUP="-- warmup_steps=5 steps=25"
+    # WARMUP="-- warmup-steps=10 steps=5000"
     if [[ ! -f "${FROZEN_GRAPH}" ]]; then
       pretrained_model=/workspace/tf-flex-series-resnet50v1-5-inference/pretrained_models/resnet50v1_5-frozen_graph-${PRECISION}-gpu.pb
     else
@@ -85,16 +88,12 @@ if [[ $PRECISION == "fp16" ]]; then
   export ITEX_AUTO_MIXED_PRECISION_DATA_TYPE="FLOAT16"
 fi
 
-source "${MODEL_DIR}/quickstart/common/utils.sh"
-_command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
-    --in-graph ${pretrained_model} \
-    --model-name resnet50v1_5 \
-    --framework tensorflow \
-    --precision ${PRECISION} \
-    --mode inference \
-    --batch-size ${BATCH_SIZE} \
-    --output-dir ${OUTPUT_DIR} \
-    --benchmark-only \
-    --gpu \
-    $@ \
-    ${WARMUP}
+# source "${MODEL_DIR}/quickstart/common/utils.sh"
+mac=`lspci | grep Dis| head -n 1| awk '{print $1}'`
+node=`lspci -s $mac -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`
+numactl -N $node -l python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
+         --input-graph=${pretrained_model} \
+         --warmup-steps=10 \
+         --steps=5000 \
+         --batch-size=1 \
+         --benchmark 
