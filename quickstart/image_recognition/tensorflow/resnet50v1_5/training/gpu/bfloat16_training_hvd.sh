@@ -46,7 +46,7 @@ if [[ $PRECISION != "bfloat16" ]]; then
   exit 1
 fi
 
-export PYTHONPATH=$(pwd)/models/image_recognition/tensorflow/resnet50v1_5/training
+export PYTHONPATH=$(pwd)/models/image_recognition/tensorflow/resnet50v1_5/training/gpu
 export NUMBER_OF_PROCESS=2
 export PROCESS_PER_NODE=2
 
@@ -59,7 +59,7 @@ fi
 source "$(dirname $0)/common/utils.sh"
 _command mpirun -np $NUMBER_OF_PROCESS -ppn $PROCESS_PER_NODE --prepend-rank \
           python $PYTHONPATH/mlperf_resnet/imagenet_main.py 2 \
-          --max_train_steps=100 --train_epochs=1 --epochs_between_evals=1 \
+          --max_train_steps=1000 --train_epochs=1 --epochs_between_evals=1 \
           --inter_op_parallelism_threads 1 --intra_op_parallelism_threads 28  \
           --version 1 --resnet_size 50 \
           --data_dir=${DATASET_DIR} \

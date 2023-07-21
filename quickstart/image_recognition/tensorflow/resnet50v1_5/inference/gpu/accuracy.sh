@@ -54,6 +54,9 @@ fi
 if [[ $GPU_TYPE == "flex_series" ]]; then
   export OverrideDefaultFP64Settings=1 
   export IGC_EnableDPEmulation=1 
+  export TF_NUM_INTEROP_THREADS=1
+  export CFESingleSliceDispatchCCSMode=1
+
   if [[ $PRECISION == "int8" ]]; then
     WARMUP="-- warmup_steps=5 steps=25"
     if [[ ! -f "${FROZEN_GRAPH}" ]]; then

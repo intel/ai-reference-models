@@ -23,7 +23,7 @@ The script assumes the `PROCESSED_DATASET_DIR` to be the current working directo
 ## Docker
 Requirements:
 * Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [540](https://dgpu-docs.intel.com/releases/stable_540_20221205.html#ubuntu-22-04)
+* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
 * Docker
 
 ## Docker pull Command
@@ -40,19 +40,13 @@ export PROCESSED_DATASET_DIR=${PWD}
 DOCKER_ARGS="--rm --init -it"
 IMAGE_NAME=intel/language-modeling:pytorch-max-gpu-bert-large-training
 
-VIDEO=$(getent group video | sed -E 's,^video:[^:]*:([^:]*):.*$,\1,')
-RENDER=$(getent group render | sed -E 's,^render:[^:]*:([^:]*):.*$,\1,')
-test -z "$RENDER" || RENDER_GROUP="--group-add ${RENDER}"
-
 SCRIPT=quickstart/ddp_bf16_training_plain_format.sh
 Tile=2
 
 docker run \
-  --group-add ${VIDEO} \
-  ${RENDER_GROUP} \
+  --privileged \
   --device=/dev/dri \
   --shm-size=10G \
-  --privileged \
   --ipc host \
   --env DATASET_DIR=${DATASET_DIR} \
   --env PROCESSED_DATASET_DIR=${PROCESSED_DATASET_DIR} \

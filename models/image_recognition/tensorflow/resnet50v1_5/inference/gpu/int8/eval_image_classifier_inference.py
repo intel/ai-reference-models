@@ -15,9 +15,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-# SPDX-License-Identifier: EPL-2.0
-#
 
+#
+import os
 import time
 import sys
 from argparse import ArgumentParser
@@ -99,6 +99,10 @@ class eval_classifier_optimized_graph:
       '--num-cores', dest='num_cores',
       help='number of cores',
       type=int, default=28)
+    arg_parser.add_argument(
+      '--dtype',
+      help='data type, only support float32/bfloat16/float16/tensorfloat32/int8',
+      type=str, default="float32")  
 
     arg_parser.add_argument("--benchmark",
                             help='Run in benchmark mode.',
@@ -107,6 +111,20 @@ class eval_classifier_optimized_graph:
     self.args = arg_parser.parse_args()
     # validate the arguements
     self.validate_args()
+    if self.args.dtype == "float16":
+      os.environ['ITEX_AUTO_MIXED_PRECISION'] = '1'
+      os.environ['ITEX_AUTO_MIXED_PRECISION_DATA_TYPE'] = 'FLOAT16'
+    elif self.args.dtype == "bfloat16":
+      os.environ['ITEX_AUTO_MIXED_PRECISION'] = '1'
+      os.environ['ITEX_AUTO_MIXED_PRECISION_DATA_TYPE'] = 'BFLOAT16'
+    elif self.args.dtype == "tensorfloat32":
+      os.environ['ITEX_FP32_MATH_MODE'] = 'TF32'
+    elif self.args.dtype == "float32":
+      print("using default data type: float32")
+    elif self.args.dtype == "int8":
+      print("using default data type: int8")
+    else:
+      print("Unknown Datatype")     
 
   def write_results_output(self, predictions, filenames, labels):
     # If a results_file_path is provided, write the predictions to the file
@@ -165,9 +183,10 @@ class eval_classifier_optimized_graph:
 
       output_graph = optimize_for_inference(graph_def, [INPUTS], 
                               [OUTPUTS], dtypes.float32.as_datatype_enum, False)
-      input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
-      dummy_input = np.random.randn(*input_shape)
-      output_graph = optimize_for_benchmark(output_graph, tf.float32, dummy_input)
+      if self.args.benchmark:
+        input_shape = [self.args.batch_size, RESNET_IMAGE_SIZE, RESNET_IMAGE_SIZE, 3]
+        dummy_input = np.random.randn(*input_shape)
+        output_graph = optimize_for_benchmark(output_graph, tf.float32, dummy_input)
 
       tf.import_graph_def(output_graph, name='')
 
@@ -180,7 +199,7 @@ class eval_classifier_optimized_graph:
 
     num_processed_images = 0
     num_remaining_images = dataset.num_examples_per_epoch(subset=subset) - num_processed_images \
-        if self.args.data_location else datasets.IMAGENET_NUM_VAL_IMAGES
+        if self.args.data_location else self.args.batch_size * self.args.steps
 
     if (not self.args.accuracy_only):
       iteration = 0
@@ -204,7 +223,10 @@ class eval_classifier_optimized_graph:
         num_remaining_images -= self.args.batch_size
 
         start_time = time.time()
-        predictions = infer_sess.run(output_tensor)
+        if self.args.benchmark:
+          predictions = infer_sess.run(output_tensor)
+        else:
+          predictions = infer_sess.run(output_tensor, feed_dict={input_tensor: image_np})
         time_consume = time.time() - start_time
 
         # Write out the file name, expected label, and top prediction
@@ -215,6 +237,7 @@ class eval_classifier_optimized_graph:
           time_consume += data_load_time
 
         print('Iteration %d: %.6f sec' % (iteration, time_consume))
+        sys.stdout.flush()
         if iteration > warm_up_iteration:
           total_time += time_consume
 
@@ -226,6 +249,7 @@ class eval_classifier_optimized_graph:
         print('Latency: %.3f ms' % (time_average * 1000))
       # print throughput for both batch size 1 and 128
       print('Throughput: %.3f images/sec' % (self.args.batch_size / time_average))
+      sys.stdout.flush()
 
     else: # accuracy check
       total_accuracy1, total_accuracy5 = (0.0, 0.0)
@@ -256,7 +280,7 @@ class eval_classifier_optimized_graph:
 
           accuracy5 = tf.reduce_sum(
             input_tensor=tf.cast(tf.nn.in_top_k(predictions=tf.constant(predictions),
-                targets=tf.constant(np_labels), k=5), tf.float32))
+                                   targets=tf.constant(np_labels), k=5), tf.float32))
           with tf.compat.v1.Session() as accu_sess:
             np_accuracy1, np_accuracy5 = accu_sess.run([accuracy1, accuracy5])
 

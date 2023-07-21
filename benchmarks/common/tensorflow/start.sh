@@ -1112,7 +1112,7 @@ function ssd_mobilenet() {
       python3 -m pip install $line
     done
   fi
-
+  CMD="${CMD} $(add_steps_args)"
   PYTHONPATH=${PYTHONPATH} CMD=${CMD} run_model
 }
 
