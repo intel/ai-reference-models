@@ -176,9 +176,18 @@ class PerformanceIndicator(tf.keras.callbacks.Callback):
     def __init__(self, bs, sl):
         self.start_time=0.0
         self.end_time = 0.0
-        self.count = -1
         self.batch_size = bs
         self.seq_len = sl
+
+    def on_train_begin(self, logs=None):
+        print("<============= TRAINING START ============>")
+
+    def on_epoch_begin(self, epoch, logs=None):
+        self.count=-1
+        print(" Start epoch {} of training".format(epoch))
+
+    def on_train_end(self, logs=None):
+        print("<============= TRAINING END ============>")
 
     def on_train_batch_begin(self, batch, logs=None):
         self.start_time = time.time();
@@ -643,7 +652,7 @@ def main():
                 print(f"Evaluation metrics ({task}):")
                 print(eval_metrics)
                 if training_args.output_dir is not None:
-                    output_eval_file = os.path.join(training_args.output_dir, "all_results.json")
+                    output_eval_file = os.path.join(os.getcwd(), "all_results.json")
                     with open(output_eval_file, "w") as writer:
                         writer.write(json.dumps(eval_metrics))
 
@@ -683,7 +692,7 @@ def main():
                 else:
                     predictions_to_write = np.argmax(test_predictions["logits"], axis=1)
 
-                output_predict_file = os.path.join(training_args.output_dir, f"predict_results_{task}.txt")
+                output_predict_file = os.path.join(os.getcwd(), f"predict_results_{task}.txt")
                 with open(output_predict_file, "w") as writer:
                     logger.info(f"***** Writing prediction results for {task} *****")
                     writer.write("index\tprediction\n")

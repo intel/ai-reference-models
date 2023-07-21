@@ -253,6 +253,16 @@ class PerformanceIndicator(tf.keras.callbacks.Callback):
         self.batch_size = bs
         self.block_size = int(blks)
 
+    def on_train_begin(self, logs=None):
+        print("<============= TRAINING START ============>")
+
+    def on_epoch_begin(self, epoch, logs=None):
+        self.count=-1
+        print(" Start epoch {} of training".format(epoch))
+
+    def on_train_end(self, logs=None):
+        print("<============= TRAINING END ============>")
+
     def on_train_batch_begin(self, batch, logs=None):
         self.start_time = time.time();
         self.count = self.count +1

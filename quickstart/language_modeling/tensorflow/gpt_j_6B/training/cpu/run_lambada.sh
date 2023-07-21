@@ -71,10 +71,10 @@ _command numactl -C ${cores_per_socket_arr[0]} python ${MODEL_DIR}/benchmarks/la
   do-predict=True do-train=True do-eval=True profile=False \
   learning-rate=2e-5 num-train-epochs=3 \
   cache-dir=${DATASET_DIR} output-dir=${OUTPUT_DIR} \
-  warmup-steps=3 2>&1 | tee ${OUTPUT_DIR}/bert_large_squad_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
+  warmup-steps=3 2>&1 | tee ${OUTPUT_DIR}/gpt_j_6B_lambada_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log
 
 if [[ $? == 0 ]]; then
-  cat ${OUTPUT_DIR}/bert_large_squad_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log | grep "INFO:tensorflow:examples/sec:" | tail -n 2 | sed -e "s/.*: //"
+  cat ${OUTPUT_DIR}/gpt_j_6B_lambada_${PRECISION}_training_bs${BATCH_SIZE}_all_instances.log | grep "INFO:tensorflow:examples/sec:" | tail -n 2 | sed -e "s/.*: //"
   exit 0
 else
   exit 1
