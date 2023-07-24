@@ -102,8 +102,8 @@ class distilbert_base_inference:
 
     def create_feed_dict_and_labels_benchmarking(self):
         ''' Return the input dictionary for the given batch '''
-        start_idx = np.random.randint(0, DATASET_LEN - self.batch_size + 1)
-        end_idx = start_idx + self.batch_size
+        start_idx = np.random.randint(0, DATASET_LEN - self.args.batch_size + 1)
+        end_idx = start_idx + self.args.batch_size
         input_ids = np.array(self.dataset['input_ids'])[start_idx:end_idx, :]
         attention_mask = np.array(self.dataset['attention_mask'])[start_idx:end_idx,:]
         feed_dict = { 'input_ids:0': input_ids, 'attention_mask:0': attention_mask, }

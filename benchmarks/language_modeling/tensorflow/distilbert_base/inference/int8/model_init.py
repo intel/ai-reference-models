@@ -69,7 +69,7 @@ class ModelInitializer(BaseModelInitializer):
 
         if self.args.accuracy_only:
             script_file = "evaluate_distilbert.py"
-        elif self.args.benchmark_only:
+        elif self.args.benchmark_only and not self.args.weight_sharing:
             script_file = "benchmark_distilbert.py"
         elif self.args.weight_sharing:
             script_file = "evaluate_distilbert_weight_sharing.py"
