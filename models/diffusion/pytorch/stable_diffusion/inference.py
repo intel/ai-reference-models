@@ -102,7 +102,7 @@ def main():
     else:
         raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8, int8-bf16")
 
-    input = torch.randn(4, 4, 64, 64), torch.tensor(921), torch.randn(4, 77, 768)
+    input = torch.randn(2, 4, 64, 64), torch.tensor(921), torch.randn(2, 77, 768)
 
     # ipex
     if args.ipex:
@@ -261,10 +261,10 @@ def main():
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
             if args.precision == "bf16" or args.precision == "fp16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                    pipe(args.prompt, generator=torch.manual_seed(args.seed), num_inference_steps=5).images
+                    pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
             else:
                 with torch.no_grad():
-                    pipe(args.prompt, generator=torch.manual_seed(args.seed), num_inference_steps=5).images
+                    pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
 
         output = p.key_averages().table(sort_by="self_cpu_time_total")
         print(output)
