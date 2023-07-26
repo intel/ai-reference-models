@@ -42,5 +42,5 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --ipex \
     --precision int8 \
     --calibration \
-    --configure-dir configure.json \
+    --configure-file configure.json \
 

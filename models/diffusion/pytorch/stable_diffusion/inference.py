@@ -172,21 +172,22 @@ def main():
         # print("Create DistributedDataParallel in CPU")
         # pipe = torch.nn.parallel.DistributedDataParallel(pipe)
 
-    # prepare dataloader
-    val_coco = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
-                                 annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
-                                 transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
+    if not args.benchmark:
+        # prepare dataloader
+        val_coco = dset.CocoCaptions(root = '{}/val2017'.format(args.dataset_path),
+                                    annFile = '{}/annotations/captions_val2017.json'.format(args.dataset_path),
+                                    transform=transforms.Compose([transforms.Resize((512, 512)), transforms.PILToTensor(), ]))
 
-    if args.distributed:
-        val_sampler = torch.utils.data.distributed.DistributedSampler(val_coco, shuffle=False)
-    else:
-        val_sampler = None
+        if args.distributed:
+            val_sampler = torch.utils.data.distributed.DistributedSampler(val_coco, shuffle=False)
+        else:
+            val_sampler = None
 
-    val_dataloader = torch.utils.data.DataLoader(val_coco,
-                                                 batch_size=1,
-                                                 shuffle=False,
-                                                 num_workers=0,
-                                                 sampler=val_sampler)
+        val_dataloader = torch.utils.data.DataLoader(val_coco,
+                                                    batch_size=1,
+                                                    shuffle=False,
+                                                    num_workers=0,
+                                                    sampler=val_sampler)
 
     if args.ipex and args.precision == "int8" and args.calibration:
         print("Running int8 calibration ...")
