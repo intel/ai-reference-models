@@ -1,8 +1,8 @@
 numpy>=1.20,<=1.23
 nilearn==0.7.1
-tables==3.6.1
+tables==3.7.0
 nibabel==3.2.1
-SimpleITK==2.0.2
+SimpleITK==2.2.0
 nnunet
 torch==1.13.1
 tqdm
