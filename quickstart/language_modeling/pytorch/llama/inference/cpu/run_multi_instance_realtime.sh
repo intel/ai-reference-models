@@ -83,7 +83,7 @@ CORES=`lscpu | grep Core | awk '{print $4}'`
 # ARGS="$ARGS --use-share-weight --ws-total-cores ${CORES} --ws-cores-per-instance ${OMP_NUM_THREADS}"
 SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCH_SIZE=${BATCH_SIZE:-1}
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'decapoda-research/llama-7b-hf'"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
