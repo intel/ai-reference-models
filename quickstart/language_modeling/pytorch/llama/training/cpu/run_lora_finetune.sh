@@ -52,7 +52,7 @@ else
 fi
 
 python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./training_log_${precision}_${mode}"  ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
-    --base_model 'decapoda-research/llama-7b-hf'\
+    --base_model 'meta-llama/Llama-2-7b-hf'\
     --data_path '../../../../../../models/language_modeling/pytorch/llama/training/cpu/alpaca_data.json' \
     --output_dir ${OUTPUT_DIR} \
     --batch_size 32 \
