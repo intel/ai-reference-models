@@ -72,7 +72,7 @@ ARGS="$ARGS --jit"
 echo "### running with jit mode"
 
 
-FINETUNED_MODEL=${FINETUNED_MODEL:-"'decapoda-research/llama-7b-hf'"}
+FINETUNED_MODEL=${FINETUNED_MODEL:-"'meta-llama/Llama-2-7b-hf'"}
 
 EVAL_SCRIPT=${EVAL_SCRIPT:-"../../../../../../models/language_modeling/pytorch/llama/inference/cpu/run_llm.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}

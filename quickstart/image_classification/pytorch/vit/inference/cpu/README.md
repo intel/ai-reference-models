@@ -13,7 +13,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Conda and buil
 
 ### Prepare model
 ```
-  cd <clone of the model zoo>/quickstart/language_modeling/pytorch/vit/inference/cpu
+  cd <clone of the model zoo>/quickstart/image_classification/pytorch/vit/inference/cpu
   git clone https://github.com/huggingface/transformers.git
   cd transformers
   git checkout v4.28.1
@@ -76,7 +76,7 @@ cd models
 export MODEL_DIR=$(pwd)
 
 # Clone the Transformers repo in the VIT Base inference directory
-cd quickstart/language_modeling/pytorch/vit/inference/cpu
+cd quickstart/image_classification/pytorch/vit/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
 git checkout v4.28.1
