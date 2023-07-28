@@ -1,10 +1,10 @@
 <!--- 0. Title -->
-# PyTorch LLAMA 7B inference (generation)
+# PyTorch LLaMA2 7B inference (generation)
 
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [LLAMA 7B](https://huggingface.co/decapoda-research/llama-7b-hf) inference (generation) using Intel-optimized PyTorch.
+This document has instructions for running [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) inference (generation) using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
@@ -101,6 +101,13 @@ git checkout v4.28.1
 git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
+
+#[optional] you may need to get access to llama2 weights from HF
+Apply the access in this page [LLaMA2 7B](https://huggingface.co/meta-llama/Llama-2-7b-hf) with your huggingface account
+
+huggingface-cli login
+{your huggingface token}
+
 
 # Env vars
 export OUTPUT_DIR=<path to an output directory>
