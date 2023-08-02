@@ -109,12 +109,18 @@ def main():
         print("Running IPEX ...")
         import intel_extension_for_pytorch as ipex
         if args.precision == "fp32":
+            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), inplace=True)
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True)
+            pipe.vae = ipex.optimize(pipe.vae.eval(), inplace=True)
         elif args.precision == "bf32":
             ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), inplace=True, auto_kernel_selection=True)
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True, auto_kernel_selection=True)
+            pipe.vae = ipex.optimize(pipe.vae.eval(), inplace=True, auto_kernel_selection=True)
         elif args.precision == "bf16" or args.precision == "fp16":
+            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, inplace=True)
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
+            pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, inplace=True)
         elif args.precision == "int8" or args.precision == "int8-bf16":
                 if not args.calibration:
                     qconfig = ipex.quantization.default_static_qconfig
