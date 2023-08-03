@@ -195,6 +195,8 @@ flags.DEFINE_bool(
     "[Optional] If true, use experimental gelu op in model."
     "           Be careful this flag will crash model with incompatible TF.")
 
+flags.DEFINE_bool("gpu", False, "Run the benchmark script using GPU")
+
 
 def model_fn_builder(bert_config, init_checkpoint, learning_rate,
                      num_train_steps, num_warmup_steps, accum_steps, use_tpu,
@@ -265,7 +267,7 @@ def model_fn_builder(bert_config, init_checkpoint, learning_rate,
     output_spec = None
     if mode == tf.estimator.ModeKeys.TRAIN:
       train_op = optimization.create_optimizer(
-          total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps, use_tpu, is_mpi)
+          total_loss, learning_rate, num_train_steps, num_warmup_steps, accum_steps, use_tpu, is_mpi, use_gpu=FLAGS.gpu)
 
       log_hook = bf.logTheLossHook(total_loss, FLAGS.accum_steps*3)
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(

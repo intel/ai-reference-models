@@ -158,7 +158,8 @@ class ModelInitializer(BaseModelInitializer):
             " --profile=" + str(self.args.profile) + eoo + \
             " --do_lower_case=" + str(self.args.do_lower_case) + eoo + \
             " --experimental_gelu=" + str(self.args.experimental_gelu) + eoo + \
-            " --mpi_workers_sync_gradients=" + str(self.args.mpi_workers_sync_gradients) + eoo
+            " --mpi_workers_sync_gradients=" + str(self.args.mpi_workers_sync_gradients) + eoo + \
+            " --gpu=" + str(self.args.gpu) + eoo
 
         if self.args.train_option == "SQuAD":
             self.cmd_args = self.cmd_args + \

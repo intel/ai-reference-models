@@ -33,6 +33,8 @@ flags.DEFINE_string(
     "bert_hub_module_handle", None,
     "Handle for the BERT TF-Hub module.")
 
+flags.DEFINE_bool("gpu", False, "Run the benchmark script using GPU")
+
 
 def create_model(is_training, input_ids, input_mask, segment_ids, labels,
                  num_labels, bert_hub_module_handle):
@@ -109,7 +111,7 @@ def model_fn_builder(num_labels, learning_rate, num_train_steps,
     output_spec = None
     if mode == tf.estimator.ModeKeys.TRAIN:
       train_op = optimization.create_optimizer(
-          total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu)
+          total_loss, learning_rate, num_train_steps, num_warmup_steps, use_tpu, use_gpu=FLAGS.gpu)
 
       output_spec = tf.compat.v1.estimator.tpu.TPUEstimatorSpec(
           mode=mode,
