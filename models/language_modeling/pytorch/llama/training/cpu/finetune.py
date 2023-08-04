@@ -50,6 +50,7 @@ def train(
     bf32: bool = False,
     # training hyperparams
     batch_size: int = 128,
+    max_steps: int = -1,
     micro_batch_size: int = 16,
     num_epochs: int = 3,
     learning_rate: float = 3e-4,
@@ -84,6 +85,7 @@ def train(
             f"fp16: {fp16}\n"
             f"bf32: {bf32}\n"
             f"batch_size: {batch_size}\n"
+            f"max_steps: {max_steps}\n"
             f"micro_batch_size: {micro_batch_size}\n"
             f"num_epochs: {num_epochs}\n"
             f"learning_rate: {learning_rate}\n"
@@ -268,7 +270,8 @@ def train(
             run_name=wandb_run_name if use_wandb else None,
             no_cuda=True,
             use_ipex=True,
-            max_steps=50,
+            max_steps=max_steps,
+            xpu_backend="ccl",
         ),
         data_collator=transformers.DataCollatorForSeq2Seq(
             tokenizer, pad_to_multiple_of=8, return_tensors="pt", padding=True
