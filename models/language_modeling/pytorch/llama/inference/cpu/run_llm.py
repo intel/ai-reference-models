@@ -426,7 +426,7 @@ if args.benchmark:
     if args.token_latency:
         generate_kwargs["token_latency"] = True
     prompt = [prompt] * args.batch_size
-    benchmark_warmup(*prompt)
+    benchmark_warmup(prompt)
     if args.use_share_weight and args.device == "cpu":
         threads = []
         import threading
@@ -438,10 +438,10 @@ if args.benchmark:
         for t in threads:
             t.join()
     else:
-        benchmark_evaluate(*prompt)
+        benchmark_evaluate(prompt)
 
 if args.accuracy_only:
-    if args.dtype is "int8" or args.int8_bf16_mixed:
+    if args.dtype == "int8" or args.int8_bf16_mixed:
         user_model = torch.jit.load(
             args.quantized_model_path
         )

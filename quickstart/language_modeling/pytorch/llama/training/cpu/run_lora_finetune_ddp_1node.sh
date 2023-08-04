@@ -50,8 +50,17 @@ else
     echo "Supported precisions are: fp32, bf32, bf16, fp16"
     exit 1
 fi
+NNODES=${NNODES:-4}
+NP=`expr $NNODES \* 2`
+export PSM3_NIC_SPEED=100000
+#!/bin/bash
+#please set your bert_env name first
+torch_ccl_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))" 2> /dev/null)
+if test -f $torch_ccl_path/env/setvars.sh ; then
+          source $torch_ccl_path/env/setvars.sh
+fi
 
-python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./training_log_${precision}_${mode}"  ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
+python -m intel_extension_for_pytorch.cpu.launch --distributed --enable_tcmalloc  ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
     --base_model 'meta-llama/Llama-2-7b-hf'\
     --data_path '../../../../../../models/language_modeling/pytorch/llama/training/cpu/alpaca_data.json' \
     --output_dir ${OUTPUT_DIR} \
@@ -68,3 +77,5 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
     --train_on_inputs \
     --group_by_length \
     --max_steps 50 
+
+
