@@ -85,7 +85,7 @@ FINETUNED_MODEL=${FINETUNED_MODEL:-"google/vit-base-patch16-224"}
 EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/image-classification/run_image_classification.py"}
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 rm -rf ${OUTPUT_DIR}/latency_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
+python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./latency_log_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --do_eval \

@@ -50,8 +50,41 @@ else
     echo "Supported precisions are: fp32, bf32, bf16, fp16"
     exit 1
 fi
+NNODES=${NNODES:-4}
+NP=`expr $NNODES \* 2`
+export PSM3_NIC_SPEED=100000
+#!/bin/bash
+#please set your bert_env name first
+torch_ccl_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))" 2> /dev/null)
+if test -f $torch_ccl_path/env/setvars.sh ; then
+          source $torch_ccl_path/env/setvars.sh
+fi
 
-python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcmalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./training_log_${precision}_${mode}"  ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
+# env parameters
+export KMP_AFFINITY=compact,1,granularity=fine
+export KMP_BLOCKTIME=1
+export LD_PRELOAD=${CONDA_PREFIX}/lib/libjemalloc.so:${CONDA_PREFIX}/lib/libiomp5.so
+
+export CCL_MNIC_NAME=irdma-cvl01tf2,irdma-cvl11tf2
+export CCL_MNIC=local
+export CCL_MNIC_COUNT=2
+#export PSM3_NIC='+(irdma-cvl01tf2|irdma-cvl11tf2)'
+
+export FI_PROVIDER=psm3
+export CCL_ALLREDUCE=ring
+export PSM3_IDENTIFY=1
+export PSM3_ALLOW_ROUTERS=1
+export PSM3_RDMA=1
+export PSM3_RV_MR_CACHE_SIZE=8192
+#export FI_PROVIDER_PATH=/usr/lib64/libfabric
+export OFI_PROVIDER=psm3
+export CCL_ATL_TRANSPORT=mpi
+export CCL_WORKER_COUNT=$NNODES
+export I_MPI_DEBUG=5
+
+
+
+bash ./run_dist_ht.sh -np $NP -ppn 2 -f ./hostfile python ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
     --base_model 'meta-llama/Llama-2-7b-hf'\
     --data_path '../../../../../../models/language_modeling/pytorch/llama/training/cpu/alpaca_data.json' \
     --output_dir ${OUTPUT_DIR} \
@@ -68,3 +101,5 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
     --train_on_inputs \
     --group_by_length \
     --max_steps 50 
+
+
