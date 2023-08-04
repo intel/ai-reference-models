@@ -98,10 +98,10 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 rm -rf ./resnet50_training_log_*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --memory-allocator jemalloc \
+    --memory-allocator tcmalloc \
     --ninstances 1 \
-    --ncore_per_instance ${CORES_PER_INSTANCE} \
-    --log_path=${OUTPUT_DIR} \
+    --ncores_per_instance ${CORES_PER_INSTANCE} \
+    --log_dir=${OUTPUT_DIR} \
     --log_file_prefix="./resnet50_training_log_${PRECISION}" \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
     $ARGS \

@@ -164,7 +164,7 @@ def main_worker(args):
     # Optimizer
     if args.base_op.lower() == "lars":
         print("Creating LARS optimizer")
-        optimizer = create_optimizer_lars(model=model, lr=args.base_lr, epsilon=args.epsilon,
+        optimizer = ipex.optim._lars.create_optimizer_lars(model=model, lr=args.base_lr, epsilon=args.epsilon,
                                           momentum=args.momentum, weight_decay=args.weight_decay,
                                           bn_bias_separately=args.bn_bias_separately)
     else:                 
@@ -176,7 +176,7 @@ def main_worker(args):
     if args.ipex:
         print("using ipex to do training.....................")
         if args.bf16:
-            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+            model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer, split_master_weight_for_bf16=False)
         elif args.fp16:
             model, optimizer = ipex.optimize(model, dtype=torch.half, optimizer=optimizer)
         else:
