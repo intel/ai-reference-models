@@ -29,6 +29,8 @@ from tensorflow.core.protobuf import rewriter_config_pb2
 import datasets
 import numpy as np
 
+from tensorflow.python.platform import tf_logging
+
 INPUTS = 'input_tensor'
 OUTPUTS = 'softmax_tensor'
 
@@ -206,9 +208,11 @@ class eval_classifier_optimized_graph:
         num_processed_images += self.args.batch_size
         num_remaining_images -= self.args.batch_size
 
+        tf_logging.warn('\n---> Start iteration {0}'.format(str(iteration)))
         start_time = time.time()
         predictions = infer_sess.run(output_tensor, feed_dict={input_tensor: image_np})
         time_consume = time.time() - start_time
+        tf_logging.warn('\n---> Stop iteration {0}'.format(str(iteration)))
 
         # Write out the file name, expected label, and top prediction
         self.write_results_output(predictions, tf_filenames, np_labels)

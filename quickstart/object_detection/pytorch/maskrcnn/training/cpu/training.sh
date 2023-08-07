@@ -79,9 +79,9 @@ python -m intel_extension_for_pytorch.cpu.launch \
     $ARGS \
     --iter-warmup 10 \
     -i 20 \
+    -b ${BATCH_SIZE} \
     --config-file "${MODEL_DIR}/models/object_detection/pytorch/maskrcnn/maskrcnn-benchmark/configs/e2e_mask_rcnn_R_50_FPN_1x_coco2017_tra.yaml" \
     --skip-test \
-    SOLVER.IMS_PER_BATCH ${BATCH_SIZE} \
     SOLVER.MAX_ITER 720000 \
     SOLVER.STEPS '"(480000, 640000)"' \
     SOLVER.BASE_LR 0.0025 \

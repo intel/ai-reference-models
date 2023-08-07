@@ -228,7 +228,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
                 batch_size,
                 ipex
             )
-            logp = self._joint_step_batch(f, g, log_normalize=False)
+            logp = self._joint_step_batch(f, g, ipex, log_normalize=False)
 
             # get index k, of max prob
             v, k = logp.max(1)
@@ -310,7 +310,7 @@ class RNNTGreedyDecoder(TransducerDecoder):
                 batch_size,
                 ipex
             )
-            logp = self._joint_step_batch(f, g, log_normalize=False)
+            logp = self._joint_step_batch(f, g, ipex, log_normalize=False)
 
             # get index k, of max prob
             v, k = logp.max(1)
@@ -361,8 +361,12 @@ class RNNTGreedyDecoder(TransducerDecoder):
             result = self._model.predict_batch_origin(label, hidden, batch_size)
         return result
 
-    def _joint_step_batch(self, enc, pred, log_normalize=False):
-        logits = self._model.joint_inference(enc, pred)
+    def _joint_step_batch(self, enc, pred, ipex, log_normalize=False):
+        if ipex:
+            logits = self._model.joint_inference(enc, pred)
+        else:
+            logits = self._model.joint(enc, pred)
+            logits = logits[:, 0, 0, :]
         # In inference, logits is 3d: (B, T=1, H)
         if not log_normalize:
             return logits

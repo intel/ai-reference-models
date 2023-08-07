@@ -20,7 +20,7 @@ instead of docker.
 <!-- 55. Docker arg -->
 Any of the `launch_benchmark.py` commands below can be run on bare metal by
 removing the `--docker-image` arg. Ensure that you have all of the
-[required prerequisites installed](README.md#run-the-model) in your environment
+[required prerequisites installed](/benchmarks/image_recognition/tensorflow/resnet50v1_5/training/README.md#run-the-model) in your environment
 before running without the docker container.
 
 If you are new to docker and are running into issues with the container,

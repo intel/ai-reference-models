@@ -51,7 +51,7 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
         parser.add_argument('--num_intra_threads', type=int, default=-1, help='number of intra-threads')
         parser.add_argument('--epochs', dest="epochs", type=int, default=60,
                             help='number of training epochs. Pass 0 to train based on number of train_steps instead of number of epochs')  # noqa: E501
-        parser.add_argument('--save_model_steps', dest="save_model_steps", type=int, default=10000,
+        parser.add_argument('--save_model_steps', dest="save_model_steps", type=int, default=500,
                             help='number of steps at which the model is periodically saved.')
         parser.add_argument('--timeline', dest="timeline", default=None, help='Trace filename for timeline')
 
@@ -120,7 +120,19 @@ class SSDResnet34ModelInitializer(BaseModelInitializer):
                 cmd_args += " --train_dir={}".format(self.args.checkpoint)
         else:
             # convergence training arguments
-            cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model, 'model.ckpt-28152'))
+            checkpoints_found = False
+            for f in os.listdir(self.args.checkpoint):
+                if "model.ckpt" in f:
+                    checkpoints_found = True
+                    break
+            if checkpoints_found:
+                if (self.args.backbone_model is not None):
+                    print("Warning: Ignoring backbone_model since checkpoint directory is not empty. "
+                          "Model will try to restore checkpoints from {}.".format(self.args.checkpoint), flush=True)
+            else:
+                cmd_args += " --backbone_model_path={0}".format(os.path.join(self.args.backbone_model,
+                                                                             'model.ckpt-28152'))
+
             cmd_args += " --optimizer=momentum"
             cmd_args += " --weight_decay={0}".format(self.args.weight_decay)
             cmd_args += " --momentum=0.9"

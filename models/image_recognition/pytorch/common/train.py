@@ -24,8 +24,6 @@ import torchvision.datasets as datasets
 import torchvision.models as models
 from torch.utils import ThroughputBenchmark
 
-import oneccl_bindings_for_pytorch
-
 from lars import *
 from lars_utils import *
 
@@ -62,6 +60,10 @@ parser.add_argument('--ipex', action='store_true', default=False,
                     help='use intel pytorch extension')
 parser.add_argument('--bf16', action='store_true', default=False,
                     help='enable ipex bf16 path')
+parser.add_argument('--bf32', action='store_true', default=False,
+                    help='enable ipex bf32 path')
+parser.add_argument('--fp16', action='store_true', default=False,
+                    help='enable ipex fp16 path')
 #Learning Hyperparams 
 parser.add_argument('--seed', default=None, type=int,
                     help='seed for initializing training. ')  
@@ -81,10 +83,10 @@ parser.add_argument('--warmup-epochs', type=float, default=5,
                         help='number of warmup epochs')                     
 parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                     help='manual epoch number (useful on restarts)')
-parser.add_argument('-b', '--batch-size', default=256, type=int,
+parser.add_argument('-b', '--local-batch-size', default=256, type=int,
                     metavar='N',
-                    help='mini-batch size (default: 256), this is the total '
-                         'batch size of all GPUs on the current node when '
+                    help='mini-batch size (default: 256), this is the local '
+                         'batch size of single GPU on the current node when '
                          'using Data Parallel or Distributed Data Parallel')
 parser.add_argument('--momentum', default=0.9, type=float, metavar='M',
                     help='momentum')
@@ -144,9 +146,13 @@ def main_worker(args):
     print("=> Creating model '{}'".format(args.arch))
     model = models.__dict__[args.arch](zero_init_residual=args.zero_init_residual)
 
-    # for ipex path, always convert model to channels_last for bf16, fp32.
+    # for ipex path, always convert model to channels_last for bf16, fp16, bf32, fp32.
     if args.ipex:
         model = model.to(memory_format=torch.channels_last)
+
+    if args.ipex and args.bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        print("using bf32 fmath mode\n")
 
     # Loss function (criterion)
     # Label smoothing supported in Pytorch >= v1.10.0
@@ -171,20 +177,22 @@ def main_worker(args):
         print("using ipex to do training.....................")
         if args.bf16:
             model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer)
+        elif args.fp16:
+            model, optimizer = ipex.optimize(model, dtype=torch.half, optimizer=optimizer)
         else:
             model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer)
     # setup distributed training
     if args.distributed:
+        import oneccl_bindings_for_pytorch
         dist.init_process_group(backend=args.dist_backend,
                                 init_method=args.dist_url,
                                 world_size=args.world_size,
                                 rank=args.rank)
-        print("Rank and world size: ", dist.get_rank()," ", dist.get_world_size())            
-
-        args.batch_size = int( args.batch_size / args.world_size)
-        print("Using local batch size: ", args.batch_size)    
+        print("Rank and world size: ", dist.get_rank()," ", dist.get_world_size())
+        print("Using local batch size: ", args.local_batch_size)
+        print("Using global batch size: ", int(args.local_batch_size * args.world_size))
         print("Create DistributedDataParallel in CPU")
-        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=False, broadcast_buffers=False,
+        model = torch.nn.parallel.DistributedDataParallel(model, find_unused_parameters=True, broadcast_buffers=False,
                                                                  gradient_as_bucket_view=True, bucket_cap_mb=50)
 
     # optionally resume from a checkpoint
@@ -223,7 +231,7 @@ def main_worker(args):
         train_sampler = None
 
     train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+        train_dataset, batch_size=args.local_batch_size, shuffle=(train_sampler is None),
         num_workers=args.workers, pin_memory=True, sampler=train_sampler)
 
     # Validation loader
@@ -242,7 +250,7 @@ def main_worker(args):
         val_sampler = None 
 
     val_loader = torch.utils.data.DataLoader(
-        val_dataset, batch_size=args.batch_size, shuffle=False,
+        val_dataset, batch_size=args.local_batch_size, shuffle=False,
         num_workers=args.workers, pin_memory=True, sampler=val_sampler)
 
     num_steps_per_epoch = len(train_loader)
@@ -256,6 +264,11 @@ def main_worker(args):
 
     time_to_train = 0
 
+    if args.fp16:
+        scaler = torch.cpu.amp.GradScaler()
+    else:
+        scaler = None
+
     for epoch in range(args.start_epoch, args.epochs):
         
         if args.distributed:
@@ -266,7 +279,7 @@ def main_worker(args):
             adjust_learning_rate(optimizer, epoch, args)
 
         # train for one epoch
-        epoch_time = train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args)
+        epoch_time = train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args)
         print("epoch: ", epoch, ", train_time(s): ", epoch_time)
         time_to_train += epoch_time
         print("time_to_train(s): ", time_to_train)
@@ -293,7 +306,7 @@ def main_worker(args):
 
     print("final time_to_train(s): ", time_to_train)
 
-def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
+def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args):
 
     epoch_time = 0
 
@@ -313,8 +326,12 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
     if args.ipex:
         if args.bf16:
             print("running ipex bfloat16 training step\n")
+        elif args.bf32:
+            print("running ipex bfloat32 training step\n")
+        elif args.fp16:
+            print("running ipex float16 training step\n")
         else:
-            print("running ipex fp32 training step\n")
+            print("running ipex float32 training step\n")
 
     start = time.time()
     for i, (images, target) in enumerate(train_loader):
@@ -331,16 +348,27 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
             with torch.cpu.amp.autocast():
                 output = model(images)
             output = output.to(torch.float32)
+        elif args.ipex and args.fp16:
+            with torch.cpu.amp.autocast(dtype=torch.half):
+                output = model(images)
+            output = output.to(torch.float32)
         else:
             output = model(images)
         loss = criterion(output, target)
 
         # compute gradient and do optimizer step
         optimizer.zero_grad()
-        loss.backward()
-        if lr_scheduler: 
-            lr_scheduler.step()
-        optimizer.step()
+        if args.fp16:
+            scaler.scale(loss).backward()
+            if lr_scheduler:
+                lr_scheduler.step()
+            scaler.step(optimizer)
+            scaler.update()
+        else:
+            loss.backward()
+            if lr_scheduler:
+                lr_scheduler.step()
+            optimizer.step()
 
         # measure elapsed time and reset timer
         t2 = time.time() - start
@@ -362,7 +390,7 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, args):
 
         start = time.time()
 
-    batch_size = args.batch_size
+    batch_size = args.local_batch_size
     perf = batch_size / (batch_time.avg - data_time.avg)
     print("Training throughput: {:.3f} fps".format(perf))
 
@@ -408,7 +436,12 @@ def validate(val_loader, model, criterion, epoch, args):
                 images = images.to(torch.bfloat16)
                 with torch.cpu.amp.autocast():
                     output = model(images)
-                output = output.to(torch.float32) 
+                output = output.to(torch.float32)
+            if args.ipex and args.fp16:
+                images = images.to(torch.half)
+                with torch.cpu.amp.autocast(dtype=torch.half):
+                    output = model(images)
+                output = output.to(torch.float32)
             else: 
                 output = model(images) 
 
@@ -434,9 +467,9 @@ def validate(val_loader, model, criterion, epoch, args):
     top1_accuracy =  top1_count.tolist()*(100.0/50000)  
     print("Validation top1 accuracy after epoch {epoch}: {top1} ".format(epoch=epoch, top1=top1_accuracy))
 
-    # batch_size = args.batch_size
-    # latency = batch_time.avg / batch_size * 1000
-    # perf = batch_size / batch_time.avg
+    # batch_size = args.local_batch_size
+    # latency = batch_time.avg / local_batch_size * 1000
+    # perf = local_batch_size / batch_time.avg
 
     # print('inference latency %.3f ms'%latency)
     # print("Throughput: {:.3f} fps".format(perf))

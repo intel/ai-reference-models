@@ -62,7 +62,7 @@ MULTI_INSTANCE_ARGS=""
 if [[ ${PLATFORM} == "linux" ]]; then
     pip list | grep intel-extension-for-pytorch
     if [[ "$?" == 0 ]]; then
-        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch --use_default_allocator --latency_mode --log_path=${OUTPUT_DIR} --log_file_prefix="resnet101_latency_log_${PRECISION}""
+        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch --memory-allocator jemalloc --latency_mode --log_path=${OUTPUT_DIR} --log_file_prefix="resnet101_latency_log_${PRECISION}""
         # in case IPEX is used, we set ipex arg
         ARGS="${ARGS} --ipex"
         echo "Running using ${ARGS} args ..."

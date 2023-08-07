@@ -32,7 +32,7 @@ NUMA_NODES_STR_ = "NUMA node(s)"
 CPU_SOCKETS_STR_ = "Socket(s)"
 CORES_PER_SOCKET_STR_ = "Core(s) per socket"
 THREADS_PER_CORE_STR_ = "Thread(s) per core"
-LOGICAL_CPUS_STR_ = "CPU(s)"
+LOGICAL_CPUS_STR_ = "CPU(s):"
 NUMA_NODE_CPU_RANGE_STR_ = "NUMA node{} CPU(s):"
 ONLINE_CPUS_LIST = "On-line CPU(s) list:"
 
