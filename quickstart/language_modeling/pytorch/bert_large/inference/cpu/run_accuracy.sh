@@ -49,6 +49,11 @@ elif [[ "$1" == "fp32" || "$1" == "avx-fp32" ]]
 then
     precision=fp32
     echo "### running fp32 mode"
+elif [[ "$1" == "int8-fp32" ]]
+then
+    precision=int8
+    ARGS="$ARGS --int8_fp32"
+    echo "### running int8-fp32 mode"
 fi
 
 rm -f ${OUTPUT_DIR}/accuracy_log*

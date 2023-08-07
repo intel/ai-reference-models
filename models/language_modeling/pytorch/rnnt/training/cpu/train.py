@@ -322,9 +322,9 @@ def train(
 
         print_once("Done in {0}".format(time.time() - start_time))
         if args.num_steps is not None:
-            total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
+            total_samples = (args.num_steps - args.warmup - start_step) * args.local_batch_size
         else:
-            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size * args.world_size) / args.world_size
+            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.local_batch_size * args.world_size) / args.world_size
         print("total samples tested: ", total_samples)
         print("Model training time:", total_time, "s")
         perf = total_samples / total_time
@@ -411,9 +411,9 @@ def train(
                 break
         print_once("Done in {0}".format(time.time() - start_time))
         if args.num_steps is not None:
-            total_samples = (args.num_steps - args.warmup - start_step) * args.batch_size
+            total_samples = (args.num_steps - args.warmup - start_step) * args.local_batch_size
         else:
-            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.batch_size * args.world_size) / args.world_size
+            total_samples = (len(data_layer) * (args.num_epochs - args.start_epoch) - args.warmup * args.local_batch_size * args.world_size) / args.world_size
         print("total samples tested: ", total_samples)
         print("Model training time:", total_time, "s")
         perf = total_samples / total_time
@@ -489,8 +489,8 @@ def main(args):
 
     if args.gradient_accumulation_steps < 1:
         raise ValueError('Invalid gradient accumulation steps parameter {}'.format(args.gradient_accumulation_steps))
-    if args.batch_size % args.gradient_accumulation_steps != 0:
-        raise ValueError('gradient accumulation step {} is not divisible by batch size {}'.format(args.gradient_accumulation_steps, args.batch_size))
+    if args.local_batch_size % args.gradient_accumulation_steps != 0:
+        raise ValueError('gradient accumulation step {} is not divisible by batch size {}'.format(args.gradient_accumulation_steps, args.local_batch_size))
 
 
     preprocessor = preprocessing.AudioPreprocessing(**featurizer_config)
@@ -524,7 +524,7 @@ def main(args):
                                     perturb_config=perturb_config,
                                     manifest_filepath=train_manifest,
                                     labels=dataset_vocab,
-                                    batch_size=args.batch_size // args.gradient_accumulation_steps,
+                                    batch_size=args.local_batch_size // args.gradient_accumulation_steps,
                                     multi_gpu=multi_gpu,
                                     pad_to_max=args.pad_to_max,
                                     sampler=sampler_type,
@@ -577,9 +577,9 @@ def main(args):
 
     N = len(data_layer)
     if sampler_type == 'default':
-        args.step_per_epoch = math.ceil(N / (args.batch_size * (1 if not torch.distributed.is_initialized() else torch.distributed.get_world_size())))
+        args.step_per_epoch = math.ceil(N / (args.local_batch_size * (1 if not torch.distributed.is_initialized() else torch.distributed.get_world_size())))
     elif sampler_type == 'bucket':
-        args.step_per_epoch = int(len(data_layer.sampler) / args.batch_size )
+        args.step_per_epoch = int(len(data_layer.sampler) / args.local_batch_size )
 
     print_once('-----------------')
     print_once('Have {0} examples to train on.'.format(N))
@@ -622,7 +622,7 @@ def main(args):
 
     if args.world_size > 1:
         device_ids = None
-        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids)
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=device_ids, find_unused_parameters=True)
 
     print_once(model)
     print_once("# parameters: {}".format(sum(p.numel() for p in model.parameters())))
@@ -652,6 +652,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description='RNNT Training Reference')
     parser.add_argument("--local_rank", default=None, type=int)
     parser.add_argument("--batch_size", default=16, type=int, help='data batch size')
+    parser.add_argument("--local_batch_size", default=16, type=int, help='data local batch size')
     parser.add_argument("--eval_batch_size", default=1, type=int, help='eval data batch size')
     parser.add_argument("--num_epochs", default=10, type=int, help='number of training epochs. if number of steps if specified will overwrite this')
     parser.add_argument("--num_steps", default=None, type=int, help='if specified overwrites num_epochs and will only train for this number of iterations')

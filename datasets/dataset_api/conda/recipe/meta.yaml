@@ -1,5 +1,5 @@
 {% set name = "dataset_librarian" %}
-{% set version = "1.0.0" %}
+{% set version = "1.0.2" %}
 
 package:
   name: {{ name|lower }}
@@ -7,7 +7,7 @@ package:
 
 source:
   url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/dataset_librarian-{{ version }}.tar.gz
-  sha256: 9e78e2b33c4e33d446210fcee4116fc7d479a7f1c902fea9459a16f11feeb884
+  sha256: 06c30f838ca668d7b3eaab51eed8e0d364adb8433210016eb7c0ae993c7ef040
 
 build:
   noarch: python
@@ -16,12 +16,12 @@ build:
 
 requirements:
   host:
-    - python >=3.8,<3.10
+    - python >=3.9,<3.11
     - setuptools >=61.0
     - setuptools-scm
     - pip
   run:
-    - python >=3.8,<3.10
+    - python >=3.9,<3.11
     - pandas
     - tqdm
     - docx2txt

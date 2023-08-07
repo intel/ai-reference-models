@@ -42,7 +42,7 @@ NUM_GPUS=${10:-0}
 PRECISION=${11:-"fp32"}
 EPOCHS=${12:-1}
 SEED=${13:-2021}
-BATCH_SIZE=${14:-32}
+BATCH_SIZE=${14:-64}
 EVAL_BATCH_SIZE=${15:-2}
 LEARNING_RATE=${16:-"0.001"}
 LEARNING_RATE_WARMUP=${17:-"8000"}
@@ -52,6 +52,7 @@ SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 NNODES=${NNODES:-1}
 HOSTFILE=${HOSTFILE:-"${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu/hostfile"}
 NUM_RANKS=$(( NNODES * SOCKETS ))
+LOCAL_BATCH_SIZE=$(( BATCH_SIZE / NUM_RANKS))
 
 if [[ $1 == "avx-fp32" ]]; then
     unset DNNL_MAX_CPU_ISA
@@ -91,6 +92,7 @@ else
 fi
 
 CMD=" --batch_size=$BATCH_SIZE"
+CMD+=" --local_batch_size=$LOCAL_BATCH_SIZE"
 CMD+=" --eval_batch_size=$EVAL_BATCH_SIZE"
 CMD+=" --num_epochs=$EPOCHS"
 CMD+=" --output_dir=$RESULT_DIR"
@@ -152,4 +154,4 @@ END   {
         sum = sum / i;
         printf("%.3f", sum);
 }')
-echo ""RNN-T";"training distributed throughput";${precision};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo ""RNN-T";"training distributed throughput";${precision};${LOCAL_BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

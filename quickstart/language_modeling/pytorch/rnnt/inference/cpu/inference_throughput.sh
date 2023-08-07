@@ -63,7 +63,7 @@ PRECISION=$1
 rm -rf ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_throughput*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --throughput_mode \
     --log_path ${OUTPUT_DIR} \
     --log_file_prefix rnnt_${PRECISION}_inference_throughput \

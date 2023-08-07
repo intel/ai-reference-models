@@ -63,6 +63,11 @@ else
     exit 1
 fi
 
+if [ -z "${WARMUP_STEPS}" ]; then
+  echo "Setting WARMUP_STEPS to 10"
+  WARMUP_STEPS="10"
+fi
+
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="56"
@@ -82,6 +87,6 @@ _command python benchmarks/launch_benchmark.py \
          --output-dir=${OUTPUT_DIR} \
          --num-intra-threads=${cores_per_socket} \
          --num-inter-threads=1 \
-         --warmup-steps=20 \
+         --warmup-steps=${WARMUP_STEPS} \
          $@
 

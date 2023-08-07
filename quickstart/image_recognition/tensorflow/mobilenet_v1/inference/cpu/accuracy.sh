@@ -97,4 +97,4 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --accuracy-only \
   $@ \
   -- input_height=224 input_width=224 \
-  input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1"
+  input_layer="input" output_layer="MobilenetV1/Predictions/Reshape_1" 2>&1 | tee ${OUTPUT_DIR}/mobilenet_v1_${PRECISION}_${MODE}_bs${BATCH_SIZE}_accuracy.log

@@ -126,7 +126,6 @@ if [ "$weight_sharing" = true ]; then
 else
     BATCH_SIZE=112
     python -m intel_extension_for_pytorch.cpu.launch \
-        --use_default_allocator \
         --throughput_mode \
         ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
         --data ${DATASET_DIR}/coco \

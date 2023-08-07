@@ -54,7 +54,7 @@ pip install intel-extension-for-pytorch==2.0.0
 ### Build torch-ccl 
     cd ..
     git clone https://github.com/intel-innersource/frameworks.ai.pytorch.torch-ccl.git
-    cd frameworks.ai.pytorch.torch-ccl && git checkout ccl_torch_1.13
+    cd frameworks.ai.pytorch.torch-ccl && git checkout public_master
     git submodule sync 
     git submodule update --init --recursive
     python setup.py install 

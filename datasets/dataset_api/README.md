@@ -9,7 +9,7 @@ For more information check the [dataset-librarian PyPI package](https://pypi.org
 ## Datasets
 | Dataset name | Description | Download | Preprocessing | command |
 | ------------ | ----------- | -------- | --------------| ------- |
-| `brca` | [Breast Cancer dataset](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=109379611#10937961150f24f71b869471e8366180549549d75) that contains categorized contrast enhanced mammography data and radiologists’ notes. | supported | **A prerequisite:** Use a browser, download [the Low Energy and Subtracted images](https://faspex.cancerimagingarchive.net/aspera/faspex/external_deliveries/260?passcode=5335d2514638afdaf03237780dcdfec29edf4238#), then provide the path to the directory that contains the downloaded images using `--directory` argument. | `python -m dataset_librarian.dataset -n brca --download --preprocess -d <path to the dataset directory>` |
+| `brca` | [Breast Cancer dataset](https://wiki.cancerimagingarchive.net/pages/viewpage.action?pageId=109379611#10937961150f24f71b869471e8366180549549d75) that contains categorized contrast enhanced mammography data and radiologists’ notes. | supported | **A prerequisite:** Use a browser, download [the Low Energy and Subtracted images](https://faspex.cancerimagingarchive.net/aspera/faspex/external_deliveries/260?passcode=5335d2514638afdaf03237780dcdfec29edf4238#), then provide the path to the directory that contains the downloaded images using `--directory` argument. | `python -m dataset_librarian.dataset -n brca --download --preprocess -d <path to the dataset directory> --split_ratio 0.1` |
 | `tabformer` | [Credit card data](https://ibm.ent.box.com/v/tabformer-data/folder/130748337023) for TabFormer | supported | not supported | `python -m dataset_librarian.dataset -n tabformer --download` |
 | `dureader-vis` | [DuReader-vis](https://github.com/baidu/DuReader/tree/master/DuReader-vis) for document automation. Chinese Open-domain Document Visual Question Answering (Open-Domain DocVQA) dataset, containing about 15K question-answering pairs and 158K document images from the Baidu search engine. | supported | not supported  | `python -m dataset_librarian.dataset -n dureader-vis --download` |
 | `msmarco` | [MS MARCO](https://microsoft.github.io/msmarco/)  is a collection of datasets focused on deep learning in search | supported | not supported | `python -m dataset_librarian.dataset -n msmarco --download` |
@@ -24,6 +24,7 @@ For more information check the [dataset-librarian PyPI package](https://pypi.org
 | --directory (-d) | directory location where the raw dataset will be saved on your system. It's also where the preprocessed dataset files will be written. If not set, a directory with the dataset name will be created. |
 | --download | download the dataset specified. |
 | --preprocess | preprocess the dataset if supported. |
+| --split_ratio | split ratio of the test data, the default value is 0.1. |
 
 
 ## Python API

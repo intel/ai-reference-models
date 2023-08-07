@@ -50,7 +50,7 @@ class ModelInitializer(BaseModelInitializer):
                                 type=int, default=10,
                                 help="number of warmup steps")
         arg_parser.add_argument("--steps", dest='steps',
-                                type=int, default=850,
+                                type=int, default=50,
                                 help="number of steps")
         arg_parser.add_argument("--max-seq-length", type=int, default=128,
                                 help="maximum total sequence length after Tokenization",
@@ -67,9 +67,12 @@ class ModelInitializer(BaseModelInitializer):
 
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
 
+        if self.args.accuracy_only:
+            script_file = "evaluate_distilbert.py"
+        elif self.args.benchmark_only:
+            script_file = "benchmark_distilbert.py"
         benchmark_script = os.path.join(
-            self.args.intelai_models, self.args.mode, self.args.precision,
-            "evaluate_distilbert.py")
+            self.args.intelai_models, self.args.mode, script_file)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \
             self.python_exe + " " + benchmark_script
@@ -77,7 +80,8 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_command = \
             self.benchmark_command + " --batch-size=" + str(self.args.batch_size) + \
             " --in-graph=" + self.args.input_graph + \
-            " --warmup-steps=" + str(self.args.warmup_steps)
+            " --warmup-steps=" + str(self.args.warmup_steps) + \
+            " --precision=" + str(self.args.precision)
         if self.args.steps:
             self.benchmark_command += " --steps=" + str(self.args.steps)
         if self.args.num_inter_threads:

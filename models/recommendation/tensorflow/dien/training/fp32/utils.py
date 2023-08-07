@@ -34,9 +34,9 @@ class _Linear(object):
                kernel_initializer=None):
     self._build_bias = build_bias
 
-    if args is None or (nest.is_sequence(args) and not args):
+    if args is None or (type(args) is list and not args):
       raise ValueError("`args` must be specified")
-    if not nest.is_sequence(args):
+    if not type(args) is list :   #nest.is_sequence(args):
       args = [args]
       self._is_sequence = False
     else:

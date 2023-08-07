@@ -100,12 +100,12 @@ class eval_classifier_optimized_graph:
     data_config = tf.compat.v1.ConfigProto()
     data_config.intra_op_parallelism_threads = self.args.data_num_intra_threads
     data_config.inter_op_parallelism_threads = self.args.data_num_inter_threads
-    data_config.use_per_session_threads = 1
+    data_config.use_per_session_threads = 0
 
     infer_config = tf.compat.v1.ConfigProto()
     infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
-    infer_config.use_per_session_threads = 1
+    infer_config.use_per_session_threads = 0
 
     data_graph = tf.Graph()
     with data_graph.as_default():
@@ -162,10 +162,6 @@ class eval_classifier_optimized_graph:
         start_time = time.time()
         infer_sess.run([output_tensor], feed_dict={input_tensor: image_np})
         time_consume = time.time() - start_time
-
-        # only add data loading time for real data, not for dummy data
-        if self.args.data_location:
-          time_consume += data_load_time
 
         print('Iteration %d: %.6f sec' % (iteration, time_consume))
         if iteration > warm_up_iteration:

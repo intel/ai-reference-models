@@ -66,7 +66,7 @@ BATCH_SIZE=16
 rm -rf ${OUTPUT_DIR}/accuracy_log*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     ${MODEL_DIR}/models/object_detection/pytorch/ssd-resnet34/inference/cpu/infer.py \
     --data ${DATASET_DIR}/coco \
     --device 0 \

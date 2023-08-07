@@ -67,3 +67,9 @@ Latency:
 ```
 ./quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_throughput_multi_instance.sh
 ```
+
+Weight-sharing:
+
+```
+./quickstart/language_modeling/tensorflow/distilbert_base/inference/cpu/inference_realtime_weight_sharing.sh
+```

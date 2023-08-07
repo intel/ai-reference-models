@@ -7,12 +7,12 @@
                 "fqn": "pre_classifier",
                 "input_tensor_infos": [
                     {
-                        "id": 194,
+                        "id": 200,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.025485552847385406
+                            0.025485554710030556
                         ],
                         "zero_point": [
                             146
@@ -1567,7 +1567,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 195,
+                        "id": 201,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
@@ -1602,7 +1602,7 @@
                 "fqn": null,
                 "input_tensor_infos": [
                     {
-                        "id": 195,
+                        "id": 201,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -1617,11 +1617,11 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 196,
+                        "id": 202,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.008879013359546661
+                            0.008879014290869236
                         ],
                         "zero_point": [
                             0
@@ -1652,12 +1652,12 @@
                 "fqn": "classifier",
                 "input_tensor_infos": [
                     {
-                        "id": 197,
+                        "id": 203,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.008879013359546661
+                            0.008879014290869236
                         ],
                         "zero_point": [
                             0
@@ -1680,7 +1680,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 198,
+                        "id": 204,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -1710,7 +1710,7 @@
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 193,
+                        "id": 199,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -1719,7 +1719,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 194,
+                        "id": 200,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -1730,14 +1730,14 @@
                 "fqn": "dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 196,
+                        "id": 202,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 197,
+                        "id": 203,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -1748,7 +1748,7 @@
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 198,
+                        "id": 204,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -1757,7 +1757,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 199,
+                        "id": 205,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -1768,7 +1768,7 @@
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 200,
+                        "id": 206,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64"
                     },
@@ -1776,7 +1776,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 201,
+                        "id": 207,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64"
                     }
@@ -1787,19 +1787,19 @@
                 "fqn": null,
                 "input_tensor_infos": [
                     {
-                        "id": 199,
+                        "id": 205,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 201,
+                        "id": 207,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 202,
+                        "id": 208,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -1808,12 +1808,12 @@
         },
         "layer_output_infos": [
             {
-                "id": 202,
+                "id": 208,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             },
             {
-                "id": 198,
+                "id": 204,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -1837,7 +1837,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 193,
+                "id": 199,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -1904,19 +1904,6 @@
         },
         "nonq_op_infos": {
             "0": {
-                "op_type": "<method 'size' of 'torch._C._TensorBase' objects>",
-                "fqn": "distilbert.embeddings",
-                "input_tensor_infos": [
-                    {
-                        "id": 0,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64"
-                    },
-                    {}
-                ],
-                "output_tensor_infos": []
-            },
-            "1": {
                 "op_type": "<class 'torch.nn.modules.sparse.Embedding'>",
                 "fqn": "distilbert.embeddings.word_embeddings",
                 "input_tensor_infos": [
@@ -1933,6 +1920,19 @@
                         "inf_dtype": "torch.float32"
                     }
                 ]
+            },
+            "1": {
+                "op_type": "<method 'size' of 'torch._C._TensorBase' objects>",
+                "fqn": "distilbert.embeddings",
+                "input_tensor_infos": [
+                    {
+                        "id": 1,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    },
+                    {}
+                ],
+                "output_tensor_infos": []
             },
             "2": {
                 "op_type": "<class 'torch.nn.modules.sparse.Embedding'>",
@@ -2002,7 +2002,7 @@
         "nonq_op_infos": {},
         "layer_output_infos": [
             {
-                "id": 193,
+                "id": 199,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -2021,7 +2021,7 @@
                 "fqn": "distilbert.transformer.layer.0",
                 "input_tensor_infos": [
                     {
-                        "id": 30,
+                        "id": 31,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -2048,7 +2048,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 31,
+                        "id": 32,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -2077,19 +2077,19 @@
                 "fqn": "distilbert.transformer.layer.0",
                 "input_tensor_infos": [
                     {
-                        "id": 36,
+                        "id": 37,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.3182624876499176
+                            0.31826239824295044
                         ],
                         "zero_point": [
                             214
                         ]
                     },
                     {
-                        "id": 32,
+                        "id": 33,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -2104,7 +2104,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 37,
+                        "id": 38,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -2134,14 +2134,14 @@
                 "fqn": "distilbert.transformer.layer.0.sa_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 31,
+                        "id": 32,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 32,
+                        "id": 33,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -2152,14 +2152,14 @@
                 "fqn": "distilbert.transformer.layer.0.output_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 37,
+                        "id": 38,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -2168,7 +2168,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 38,
+                "id": 39,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.quint8"
             }
@@ -6944,7 +6944,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
@@ -7000,12 +7000,12 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 25,
+                        "id": 26,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -7032,7 +7032,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 26,
+                        "id": 27,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -7061,7 +7061,7 @@
                 "fqn": "distilbert.transformer.layer.0.attention.out_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 29,
+                        "id": 30,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -8621,7 +8621,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 30,
+                        "id": 31,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -8914,20 +8914,6 @@
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
-                    {}
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 23,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "14": {
-                "op_type": "<function softmax at 0x7fe730db65f0>",
-                "fqn": "distilbert.transformer.layer.0.attention",
-                "input_tensor_infos": [
                     {
                         "id": 23,
                         "orig_dtype": "torch.float32",
@@ -8942,9 +8928,9 @@
                     }
                 ]
             },
-            "15": {
-                "op_type": "<class 'torch.nn.modules.linear.Identity'>",
-                "fqn": "distilbert.transformer.layer.0.attention.dropout",
+            "14": {
+                "op_type": "<function softmax at 0x7fb5dc102790>",
+                "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
                     {
                         "id": 24,
@@ -8956,6 +8942,24 @@
                     {
                         "id": 25,
                         "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ]
+            },
+            "15": {
+                "op_type": "<class 'torch.nn.modules.linear.Identity'>",
+                "fqn": "distilbert.transformer.layer.0.attention.dropout",
+                "input_tensor_infos": [
+                    {
+                        "id": 25,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 26,
+                        "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
                 ]
@@ -8965,7 +8969,7 @@
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 26,
+                        "id": 27,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -8974,7 +8978,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 27,
+                        "id": 28,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -8985,14 +8989,14 @@
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 27,
+                        "id": 28,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 28,
+                        "id": 29,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -9003,7 +9007,7 @@
                 "fqn": "distilbert.transformer.layer.0.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 28,
+                        "id": 29,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -9013,7 +9017,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 29,
+                        "id": 30,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -9022,7 +9026,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 30,
+                "id": 31,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -9036,7 +9040,7 @@
                 "fqn": "distilbert.transformer.layer.0.ffn.lin1",
                 "input_tensor_infos": [
                     {
-                        "id": 32,
+                        "id": 33,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -15204,7 +15208,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 33,
+                        "id": 34,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -15233,12 +15237,12 @@
                 "fqn": "distilbert.transformer.layer.0.ffn.lin2",
                 "input_tensor_infos": [
                     {
-                        "id": 34,
+                        "id": 35,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.07182128727436066
+                            0.07182127982378006
                         ],
                         "zero_point": [
                             2
@@ -16793,7 +16797,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 35,
+                        "id": 36,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -16823,14 +16827,14 @@
                 "fqn": "distilbert.transformer.layer.0.ffn.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 35,
+                        "id": 36,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 36,
+                        "id": 37,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -16839,7 +16843,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 36,
+                "id": 37,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -16853,104 +16857,14 @@
                 "fqn": "distilbert.transformer.layer.0.ffn.activation",
                 "input_tensor_infos": [
                     {
-                        "id": 33,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
                         "id": 34,
                         "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8"
-                    }
-                ]
-            },
-            "1": {
-                "op_type": "<built-in function gelu>",
-                "fqn": "distilbert.transformer.layer.0.ffn.activation",
-                "input_tensor_infos": [
-                    {
-                        "id": 64,
-                        "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 65,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8"
-                    }
-                ]
-            },
-            "2": {
-                "op_type": "<built-in function gelu>",
-                "fqn": "distilbert.transformer.layer.0.ffn.activation",
-                "input_tensor_infos": [
-                    {
-                        "id": 95,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 96,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8"
-                    }
-                ]
-            },
-            "3": {
-                "op_type": "<built-in function gelu>",
-                "fqn": "distilbert.transformer.layer.0.ffn.activation",
-                "input_tensor_infos": [
-                    {
-                        "id": 126,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 127,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8"
-                    }
-                ]
-            },
-            "4": {
-                "op_type": "<built-in function gelu>",
-                "fqn": "distilbert.transformer.layer.0.ffn.activation",
-                "input_tensor_infos": [
-                    {
-                        "id": 157,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 158,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8"
-                    }
-                ]
-            },
-            "5": {
-                "op_type": "<built-in function gelu>",
-                "fqn": "distilbert.transformer.layer.0.ffn.activation",
-                "input_tensor_infos": [
-                    {
-                        "id": 188,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 189,
+                        "id": 35,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -16959,32 +16873,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 34,
-                "orig_dtype": "torch.float32",
-                "inf_dtype": "torch.quint8"
-            },
-            {
-                "id": 65,
-                "orig_dtype": "torch.float32",
-                "inf_dtype": "torch.quint8"
-            },
-            {
-                "id": 96,
-                "orig_dtype": "torch.float32",
-                "inf_dtype": "torch.quint8"
-            },
-            {
-                "id": 127,
-                "orig_dtype": "torch.float32",
-                "inf_dtype": "torch.quint8"
-            },
-            {
-                "id": 158,
-                "orig_dtype": "torch.float32",
-                "inf_dtype": "torch.quint8"
-            },
-            {
-                "id": 189,
+                "id": 35,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.quint8"
             }
@@ -16998,7 +16887,7 @@
                 "fqn": "distilbert.transformer.layer.1",
                 "input_tensor_infos": [
                     {
-                        "id": 61,
+                        "id": 63,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -17010,12 +16899,12 @@
                         ]
                     },
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233867585659
+                            0.0508233904838562
                         ],
                         "zero_point": [
                             191
@@ -17025,7 +16914,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 62,
+                        "id": 64,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -17054,19 +16943,19 @@
                 "fqn": "distilbert.transformer.layer.1",
                 "input_tensor_infos": [
                     {
-                        "id": 67,
+                        "id": 69,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.76535564661026
+                            0.7653557062149048
                         ],
                         "zero_point": [
                             249
                         ]
                     },
                     {
-                        "id": 63,
+                        "id": 65,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -17081,7 +16970,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 68,
+                        "id": 70,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -17111,14 +17000,14 @@
                 "fqn": "distilbert.transformer.layer.1.sa_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 62,
+                        "id": 64,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 63,
+                        "id": 65,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -17129,14 +17018,14 @@
                 "fqn": "distilbert.transformer.layer.1.output_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 68,
+                        "id": 70,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -17145,7 +17034,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 69,
+                "id": 71,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.quint8"
             }
@@ -17159,12 +17048,12 @@
                 "fqn": "distilbert.transformer.layer.1.attention.q_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233867585659
+                            0.0508233904838562
                         ],
                         "zero_point": [
                             191
@@ -18719,7 +18608,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 39,
+                        "id": 40,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -18748,12 +18637,12 @@
                 "fqn": "distilbert.transformer.layer.1.attention.k_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233867585659
+                            0.0508233904838562
                         ],
                         "zero_point": [
                             191
@@ -20308,7 +20197,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 42,
+                        "id": 43,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -20337,12 +20226,12 @@
                 "fqn": "distilbert.transformer.layer.1.attention.v_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.0508233867585659
+                            0.0508233904838562
                         ],
                         "zero_point": [
                             191
@@ -21897,7 +21786,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 45,
+                        "id": 46,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -21921,24 +21810,24 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 48,
+                        "id": 49,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.009408143348991871
+                            0.009408144280314445
                         ],
                         "zero_point": [
                             131
                         ]
                     },
                     {
-                        "id": 49,
+                        "id": 50,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -21953,7 +21842,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 50,
+                        "id": 51,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -21977,12 +21866,12 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 56,
+                        "id": 58,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -21994,12 +21883,12 @@
                         ]
                     },
                     {
-                        "id": 47,
+                        "id": 48,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03892306983470917
+                            0.03892306238412857
                         ],
                         "zero_point": [
                             111
@@ -22009,7 +21898,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 57,
+                        "id": 59,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -22038,12 +21927,12 @@
                 "fqn": "distilbert.transformer.layer.1.attention.out_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 60,
+                        "id": 62,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.030531669035553932
+                            0.030531667172908783
                         ],
                         "zero_point": [
                             116
@@ -23598,7 +23487,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 61,
+                        "id": 63,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23628,7 +23517,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -23640,7 +23529,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 38,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     },
@@ -23653,7 +23542,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 39,
+                        "id": 40,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23664,7 +23553,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 40,
+                        "id": 41,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23675,7 +23564,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 40,
+                        "id": 41,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23684,7 +23573,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 41,
+                        "id": 42,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23695,7 +23584,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 42,
+                        "id": 43,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23706,7 +23595,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 43,
+                        "id": 44,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23717,7 +23606,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 43,
+                        "id": 44,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23726,7 +23615,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 44,
+                        "id": 45,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23737,7 +23626,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 45,
+                        "id": 46,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23748,7 +23637,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 46,
+                        "id": 47,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23759,30 +23648,11 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 46,
+                        "id": 47,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {},
-                    {}
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 47,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8"
-                    }
-                ]
-            },
-            "8": {
-                "op_type": "<method 'div' of 'torch._C._TensorBase' objects>",
-                "fqn": "distilbert.transformer.layer.1.attention",
-                "input_tensor_infos": [
-                    {
-                        "id": 41,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
                     {}
                 ],
                 "output_tensor_infos": [
@@ -23793,12 +23663,31 @@
                     }
                 ]
             },
+            "8": {
+                "op_type": "<method 'div' of 'torch._C._TensorBase' objects>",
+                "fqn": "distilbert.transformer.layer.1.attention",
+                "input_tensor_infos": [
+                    {
+                        "id": 42,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    },
+                    {}
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 49,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8"
+                    }
+                ]
+            },
             "9": {
                 "op_type": "<method 'transpose' of 'torch._C._TensorBase' objects>",
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 44,
+                        "id": 45,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23807,7 +23696,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 49,
+                        "id": 50,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -23826,7 +23715,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 51,
+                        "id": 52,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -23837,7 +23726,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 51,
+                        "id": 52,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
@@ -23848,7 +23737,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 52,
+                        "id": 53,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -23859,19 +23748,19 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 52,
+                        "id": 53,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
                     {
-                        "id": 50,
+                        "id": 51,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 53,
+                        "id": 54,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -23882,47 +23771,15 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 50,
+                        "id": 51,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 53,
+                        "id": 54,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
-                    {}
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 54,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "14": {
-                "op_type": "<function softmax at 0x7fe730db65f0>",
-                "fqn": "distilbert.transformer.layer.1.attention",
-                "input_tensor_infos": [
-                    {
-                        "id": 54,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 55,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "15": {
-                "op_type": "<class 'torch.nn.modules.linear.Identity'>",
-                "fqn": "distilbert.transformer.layer.1.attention.dropout",
-                "input_tensor_infos": [
                     {
                         "id": 55,
                         "orig_dtype": "torch.float32",
@@ -23933,6 +23790,42 @@
                     {
                         "id": 56,
                         "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ]
+            },
+            "14": {
+                "op_type": "<function softmax at 0x7fb5dc102790>",
+                "fqn": "distilbert.transformer.layer.1.attention",
+                "input_tensor_infos": [
+                    {
+                        "id": 56,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 57,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ]
+            },
+            "15": {
+                "op_type": "<class 'torch.nn.modules.linear.Identity'>",
+                "fqn": "distilbert.transformer.layer.1.attention.dropout",
+                "input_tensor_infos": [
+                    {
+                        "id": 57,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 58,
+                        "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
                 ]
@@ -23942,7 +23835,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 57,
+                        "id": 59,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23951,7 +23844,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 58,
+                        "id": 60,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23962,14 +23855,14 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 58,
+                        "id": 60,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 59,
+                        "id": 61,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -23980,7 +23873,7 @@
                 "fqn": "distilbert.transformer.layer.1.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 59,
+                        "id": 61,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -23990,7 +23883,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 60,
+                        "id": 62,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -23999,7 +23892,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 61,
+                "id": 63,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -24013,7 +23906,7 @@
                 "fqn": "distilbert.transformer.layer.1.ffn.lin1",
                 "input_tensor_infos": [
                     {
-                        "id": 63,
+                        "id": 65,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -30181,7 +30074,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 64,
+                        "id": 66,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -30210,12 +30103,12 @@
                 "fqn": "distilbert.transformer.layer.1.ffn.lin2",
                 "input_tensor_infos": [
                     {
-                        "id": 65,
+                        "id": 67,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.1447792649269104
+                            0.1447792798280716
                         ],
                         "zero_point": [
                             1
@@ -31770,7 +31663,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 66,
+                        "id": 68,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -31800,6 +31693,36 @@
                 "fqn": "distilbert.transformer.layer.1.ffn.dropout",
                 "input_tensor_infos": [
                     {
+                        "id": 68,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 69,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ]
+            }
+        },
+        "layer_output_infos": [
+            {
+                "id": 69,
+                "orig_dtype": "torch.float32",
+                "inf_dtype": "torch.float32"
+            }
+        ]
+    },
+    "distilbert:transformer:layer:1:ffn:activation": {
+        "q_op_infos": {},
+        "nonq_op_infos": {
+            "0": {
+                "op_type": "<built-in function gelu>",
+                "fqn": "distilbert.transformer.layer.1.ffn.activation",
+                "input_tensor_infos": [
+                    {
                         "id": 66,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
@@ -31809,7 +31732,7 @@
                     {
                         "id": 67,
                         "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
+                        "inf_dtype": "torch.quint8"
                     }
                 ]
             }
@@ -31818,7 +31741,7 @@
             {
                 "id": 67,
                 "orig_dtype": "torch.float32",
-                "inf_dtype": "torch.float32"
+                "inf_dtype": "torch.quint8"
             }
         ]
     },
@@ -31830,19 +31753,19 @@
                 "fqn": "distilbert.transformer.layer.2",
                 "input_tensor_infos": [
                     {
-                        "id": 92,
+                        "id": 95,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.04398574307560921
+                            0.0439857542514801
                         ],
                         "zero_point": [
                             139
                         ]
                     },
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -31857,7 +31780,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 93,
+                        "id": 96,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -31886,24 +31809,24 @@
                 "fqn": "distilbert.transformer.layer.2",
                 "input_tensor_infos": [
                     {
-                        "id": 98,
+                        "id": 101,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.998383104801178
+                            0.9983832240104675
                         ],
                         "zero_point": [
                             251
                         ]
                     },
                     {
-                        "id": 94,
+                        "id": 97,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.4346037805080414
+                            0.434603750705719
                         ],
                         "zero_point": [
                             244
@@ -31913,7 +31836,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 99,
+                        "id": 102,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -31943,14 +31866,14 @@
                 "fqn": "distilbert.transformer.layer.2.sa_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 93,
+                        "id": 96,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 94,
+                        "id": 97,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -31961,14 +31884,14 @@
                 "fqn": "distilbert.transformer.layer.2.output_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 99,
+                        "id": 102,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -31977,7 +31900,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 100,
+                "id": 103,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.quint8"
             }
@@ -31991,7 +31914,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention.q_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -33551,7 +33474,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 70,
+                        "id": 72,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -33580,7 +33503,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention.k_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -35140,7 +35063,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 73,
+                        "id": 75,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -35169,7 +35092,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention.v_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -36729,7 +36652,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 76,
+                        "id": 78,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -36753,12 +36676,12 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 79,
+                        "id": 81,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -36770,7 +36693,7 @@
                         ]
                     },
                     {
-                        "id": 80,
+                        "id": 82,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -36785,7 +36708,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 81,
+                        "id": 83,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -36809,12 +36732,12 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 87,
+                        "id": 90,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -36826,12 +36749,12 @@
                         ]
                     },
                     {
-                        "id": 78,
+                        "id": 80,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.04678582400083542
+                            0.04678581655025482
                         ],
                         "zero_point": [
                             134
@@ -36841,7 +36764,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 88,
+                        "id": 91,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -36870,12 +36793,12 @@
                 "fqn": "distilbert.transformer.layer.2.attention.out_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 91,
+                        "id": 94,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03622317314147949
+                            0.0362231619656086
                         ],
                         "zero_point": [
                             139
@@ -38430,7 +38353,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 92,
+                        "id": 95,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38460,7 +38383,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -38472,7 +38395,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 71,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     },
@@ -38485,7 +38408,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 70,
+                        "id": 72,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38496,7 +38419,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 71,
+                        "id": 73,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38507,7 +38430,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 71,
+                        "id": 73,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38516,7 +38439,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 72,
+                        "id": 74,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38527,7 +38450,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 73,
+                        "id": 75,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38538,7 +38461,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 74,
+                        "id": 76,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38549,7 +38472,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 74,
+                        "id": 76,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38558,7 +38481,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 75,
+                        "id": 77,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38569,7 +38492,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 76,
+                        "id": 78,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38580,7 +38503,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 77,
+                        "id": 79,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38591,7 +38514,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 77,
+                        "id": 79,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38600,7 +38523,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 78,
+                        "id": 80,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -38611,7 +38534,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 72,
+                        "id": 74,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38619,7 +38542,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 79,
+                        "id": 81,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -38630,7 +38553,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 75,
+                        "id": 77,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38639,7 +38562,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 80,
+                        "id": 82,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -38658,7 +38581,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 82,
+                        "id": 84,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -38669,7 +38592,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 82,
+                        "id": 84,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
@@ -38680,7 +38603,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 83,
+                        "id": 85,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -38691,19 +38614,19 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 83,
+                        "id": 85,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
                     {
-                        "id": 81,
+                        "id": 83,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 84,
+                        "id": 86,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -38714,38 +38637,42 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 81,
+                        "id": 83,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 84,
+                        "id": 86,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
-                    {}
+                    {
+                        "id": 87,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 85,
+                        "id": 88,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7fe730db65f0>",
+                "op_type": "<function softmax at 0x7fb5dc102790>",
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 85,
+                        "id": 88,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 86,
+                        "id": 89,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38756,14 +38683,14 @@
                 "fqn": "distilbert.transformer.layer.2.attention.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 86,
+                        "id": 89,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 87,
+                        "id": 90,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -38774,7 +38701,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 88,
+                        "id": 91,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38783,7 +38710,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 89,
+                        "id": 92,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38794,14 +38721,14 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 89,
+                        "id": 92,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 90,
+                        "id": 93,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -38812,7 +38739,7 @@
                 "fqn": "distilbert.transformer.layer.2.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 90,
+                        "id": 93,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -38822,7 +38749,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 91,
+                        "id": 94,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -38831,7 +38758,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 92,
+                "id": 95,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -38845,12 +38772,12 @@
                 "fqn": "distilbert.transformer.layer.2.ffn.lin1",
                 "input_tensor_infos": [
                     {
-                        "id": 94,
+                        "id": 97,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.4346037805080414
+                            0.434603750705719
                         ],
                         "zero_point": [
                             244
@@ -45013,7 +44940,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 95,
+                        "id": 98,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -45042,12 +44969,12 @@
                 "fqn": "distilbert.transformer.layer.2.ffn.lin2",
                 "input_tensor_infos": [
                     {
-                        "id": 96,
+                        "id": 99,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.09822208434343338
+                            0.09822209924459457
                         ],
                         "zero_point": [
                             2
@@ -46602,7 +46529,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 97,
+                        "id": 100,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -46632,14 +46559,14 @@
                 "fqn": "distilbert.transformer.layer.2.ffn.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 97,
+                        "id": 100,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 98,
+                        "id": 101,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -46648,9 +46575,39 @@
         },
         "layer_output_infos": [
             {
-                "id": 98,
+                "id": 101,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
+            }
+        ]
+    },
+    "distilbert:transformer:layer:2:ffn:activation": {
+        "q_op_infos": {},
+        "nonq_op_infos": {
+            "0": {
+                "op_type": "<built-in function gelu>",
+                "fqn": "distilbert.transformer.layer.2.ffn.activation",
+                "input_tensor_infos": [
+                    {
+                        "id": 98,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 99,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8"
+                    }
+                ]
+            }
+        },
+        "layer_output_infos": [
+            {
+                "id": 99,
+                "orig_dtype": "torch.float32",
+                "inf_dtype": "torch.quint8"
             }
         ]
     },
@@ -46662,7 +46619,7 @@
                 "fqn": "distilbert.transformer.layer.3",
                 "input_tensor_infos": [
                     {
-                        "id": 123,
+                        "id": 127,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -46674,7 +46631,7 @@
                         ]
                     },
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -46689,7 +46646,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 124,
+                        "id": 128,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -46718,19 +46675,19 @@
                 "fqn": "distilbert.transformer.layer.3",
                 "input_tensor_infos": [
                     {
-                        "id": 129,
+                        "id": 133,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.08726979792118073
+                            0.08726980537176132
                         ],
                         "zero_point": [
                             148
                         ]
                     },
                     {
-                        "id": 125,
+                        "id": 129,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -46745,7 +46702,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 130,
+                        "id": 134,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -46775,14 +46732,14 @@
                 "fqn": "distilbert.transformer.layer.3.sa_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 124,
+                        "id": 128,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 125,
+                        "id": 129,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -46793,14 +46750,14 @@
                 "fqn": "distilbert.transformer.layer.3.output_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 130,
+                        "id": 134,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -46809,7 +46766,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 131,
+                "id": 135,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.quint8"
             }
@@ -46823,7 +46780,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention.q_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -48383,7 +48340,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 101,
+                        "id": 104,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -48412,7 +48369,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention.k_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -49972,7 +49929,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 104,
+                        "id": 107,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -50001,7 +49958,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention.v_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -51561,7 +51518,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 107,
+                        "id": 110,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -51585,29 +51542,29 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 110,
+                        "id": 113,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.007643359247595072
+                            0.007643361110240221
                         ],
                         "zero_point": [
                             138
                         ]
                     },
                     {
-                        "id": 111,
+                        "id": 114,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.06173744052648544
+                            0.06173744425177574
                         ],
                         "zero_point": [
                             127
@@ -51617,7 +51574,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 112,
+                        "id": 115,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -51641,12 +51598,12 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 118,
+                        "id": 122,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -51658,7 +51615,7 @@
                         ]
                     },
                     {
-                        "id": 109,
+                        "id": 112,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -51673,7 +51630,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 119,
+                        "id": 123,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -51702,12 +51659,12 @@
                 "fqn": "distilbert.transformer.layer.3.attention.out_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 122,
+                        "id": 126,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.04299403354525566
+                            0.04299405217170715
                         ],
                         "zero_point": [
                             125
@@ -53262,7 +53219,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 123,
+                        "id": 127,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -53292,7 +53249,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -53304,7 +53261,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 100,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     },
@@ -53313,48 +53270,6 @@
                 "output_tensor_infos": []
             },
             "2": {
-                "op_type": "<method 'view' of 'torch._C._TensorBase' objects>",
-                "fqn": "distilbert.transformer.layer.3.attention",
-                "input_tensor_infos": [
-                    {
-                        "id": 101,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {},
-                    {},
-                    {},
-                    {}
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 102,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "3": {
-                "op_type": "<method 'transpose' of 'torch._C._TensorBase' objects>",
-                "fqn": "distilbert.transformer.layer.3.attention",
-                "input_tensor_infos": [
-                    {
-                        "id": 102,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {},
-                    {}
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 103,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "4": {
                 "op_type": "<method 'view' of 'torch._C._TensorBase' objects>",
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
@@ -53376,7 +53291,7 @@
                     }
                 ]
             },
-            "5": {
+            "3": {
                 "op_type": "<method 'transpose' of 'torch._C._TensorBase' objects>",
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
@@ -53396,7 +53311,7 @@
                     }
                 ]
             },
-            "6": {
+            "4": {
                 "op_type": "<method 'view' of 'torch._C._TensorBase' objects>",
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
@@ -53418,7 +53333,7 @@
                     }
                 ]
             },
-            "7": {
+            "5": {
                 "op_type": "<method 'transpose' of 'torch._C._TensorBase' objects>",
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
@@ -53434,6 +53349,48 @@
                     {
                         "id": 109,
                         "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ]
+            },
+            "6": {
+                "op_type": "<method 'view' of 'torch._C._TensorBase' objects>",
+                "fqn": "distilbert.transformer.layer.3.attention",
+                "input_tensor_infos": [
+                    {
+                        "id": 110,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    },
+                    {},
+                    {},
+                    {},
+                    {}
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 111,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ]
+            },
+            "7": {
+                "op_type": "<method 'transpose' of 'torch._C._TensorBase' objects>",
+                "fqn": "distilbert.transformer.layer.3.attention",
+                "input_tensor_infos": [
+                    {
+                        "id": 111,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    },
+                    {},
+                    {}
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 112,
+                        "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
                 ]
@@ -53443,7 +53400,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 103,
+                        "id": 106,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -53451,7 +53408,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 110,
+                        "id": 113,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -53462,7 +53419,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 106,
+                        "id": 109,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -53471,7 +53428,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 111,
+                        "id": 114,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -53490,7 +53447,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 113,
+                        "id": 116,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -53501,7 +53458,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 113,
+                        "id": 116,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
@@ -53512,7 +53469,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 114,
+                        "id": 117,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -53523,19 +53480,19 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 114,
+                        "id": 117,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
                     {
-                        "id": 112,
+                        "id": 115,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 115,
+                        "id": 118,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -53546,38 +53503,42 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 112,
+                        "id": 115,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 115,
+                        "id": 118,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
-                    {}
+                    {
+                        "id": 119,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 116,
+                        "id": 120,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7fe730db65f0>",
+                "op_type": "<function softmax at 0x7fb5dc102790>",
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 116,
+                        "id": 120,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 117,
+                        "id": 121,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -53588,14 +53549,14 @@
                 "fqn": "distilbert.transformer.layer.3.attention.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 117,
+                        "id": 121,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 118,
+                        "id": 122,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -53606,7 +53567,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 119,
+                        "id": 123,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -53615,7 +53576,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 120,
+                        "id": 124,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -53626,14 +53587,14 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 120,
+                        "id": 124,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 121,
+                        "id": 125,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -53644,7 +53605,7 @@
                 "fqn": "distilbert.transformer.layer.3.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 121,
+                        "id": 125,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -53654,7 +53615,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 122,
+                        "id": 126,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -53663,7 +53624,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 123,
+                "id": 127,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -53677,7 +53638,7 @@
                 "fqn": "distilbert.transformer.layer.3.ffn.lin1",
                 "input_tensor_infos": [
                     {
-                        "id": 125,
+                        "id": 129,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -59845,7 +59806,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 126,
+                        "id": 130,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -59874,12 +59835,12 @@
                 "fqn": "distilbert.transformer.layer.3.ffn.lin2",
                 "input_tensor_infos": [
                     {
-                        "id": 127,
+                        "id": 131,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.027507109567523003
+                            0.027507111430168152
                         ],
                         "zero_point": [
                             6
@@ -61434,7 +61395,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 128,
+                        "id": 132,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -61464,14 +61425,14 @@
                 "fqn": "distilbert.transformer.layer.3.ffn.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 128,
+                        "id": 132,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 129,
+                        "id": 133,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -61480,9 +61441,39 @@
         },
         "layer_output_infos": [
             {
-                "id": 129,
+                "id": 133,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
+            }
+        ]
+    },
+    "distilbert:transformer:layer:3:ffn:activation": {
+        "q_op_infos": {},
+        "nonq_op_infos": {
+            "0": {
+                "op_type": "<built-in function gelu>",
+                "fqn": "distilbert.transformer.layer.3.ffn.activation",
+                "input_tensor_infos": [
+                    {
+                        "id": 130,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 131,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8"
+                    }
+                ]
+            }
+        },
+        "layer_output_infos": [
+            {
+                "id": 131,
+                "orig_dtype": "torch.float32",
+                "inf_dtype": "torch.quint8"
             }
         ]
     },
@@ -61494,19 +61485,19 @@
                 "fqn": "distilbert.transformer.layer.4",
                 "input_tensor_infos": [
                     {
-                        "id": 154,
+                        "id": 159,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.061989400535821915
+                            0.06198941171169281
                         ],
                         "zero_point": [
                             150
                         ]
                     },
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -61521,7 +61512,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 155,
+                        "id": 160,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -61550,7 +61541,7 @@
                 "fqn": "distilbert.transformer.layer.4",
                 "input_tensor_infos": [
                     {
-                        "id": 160,
+                        "id": 165,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -61562,7 +61553,7 @@
                         ]
                     },
                     {
-                        "id": 156,
+                        "id": 161,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -61577,7 +61568,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 161,
+                        "id": 166,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -61607,14 +61598,14 @@
                 "fqn": "distilbert.transformer.layer.4.sa_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 155,
+                        "id": 160,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 156,
+                        "id": 161,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -61625,14 +61616,14 @@
                 "fqn": "distilbert.transformer.layer.4.output_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 161,
+                        "id": 166,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -61641,7 +61632,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 162,
+                "id": 167,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.quint8"
             }
@@ -61655,7 +61646,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention.q_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -63215,7 +63206,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 132,
+                        "id": 136,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -63244,7 +63235,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention.k_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -64804,7 +64795,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 135,
+                        "id": 139,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -64833,7 +64824,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention.v_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -66393,7 +66384,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 138,
+                        "id": 142,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -66417,24 +66408,24 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 141,
+                        "id": 145,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.007776917889714241
+                            0.0077769155614078045
                         ],
                         "zero_point": [
                             132
                         ]
                     },
                     {
-                        "id": 142,
+                        "id": 146,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -66449,7 +66440,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 143,
+                        "id": 147,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -66473,12 +66464,12 @@
                 }
             },
             "4": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 149,
+                        "id": 154,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -66490,12 +66481,12 @@
                         ]
                     },
                     {
-                        "id": 140,
+                        "id": 144,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.04719216749072075
+                            0.047192152589559555
                         ],
                         "zero_point": [
                             126
@@ -66505,7 +66496,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 150,
+                        "id": 155,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -66534,12 +66525,12 @@
                 "fqn": "distilbert.transformer.layer.4.attention.out_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 153,
+                        "id": 158,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.039437610656023026
+                            0.03943760693073273
                         ],
                         "zero_point": [
                             132
@@ -68094,7 +68085,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 154,
+                        "id": 159,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68124,7 +68115,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -68136,7 +68127,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 131,
+                        "id": 135,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     },
@@ -68149,7 +68140,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 132,
+                        "id": 136,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68160,7 +68151,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 133,
+                        "id": 137,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68171,7 +68162,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 133,
+                        "id": 137,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68180,7 +68171,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 134,
+                        "id": 138,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68191,7 +68182,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 135,
+                        "id": 139,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68202,7 +68193,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 136,
+                        "id": 140,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68213,7 +68204,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 136,
+                        "id": 140,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68222,7 +68213,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 137,
+                        "id": 141,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68233,7 +68224,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 138,
+                        "id": 142,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68244,7 +68235,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 139,
+                        "id": 143,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68255,7 +68246,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 139,
+                        "id": 143,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68264,7 +68255,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 140,
+                        "id": 144,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -68275,7 +68266,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 134,
+                        "id": 138,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68283,7 +68274,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 141,
+                        "id": 145,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -68294,7 +68285,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 137,
+                        "id": 141,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68303,7 +68294,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 142,
+                        "id": 146,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -68322,7 +68313,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 144,
+                        "id": 148,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -68333,7 +68324,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 144,
+                        "id": 148,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
@@ -68344,7 +68335,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 145,
+                        "id": 149,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -68355,19 +68346,19 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 145,
+                        "id": 149,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
                     {
-                        "id": 143,
+                        "id": 147,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 146,
+                        "id": 150,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -68378,38 +68369,42 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 143,
+                        "id": 147,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 146,
+                        "id": 150,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
-                    {}
+                    {
+                        "id": 151,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 147,
+                        "id": 152,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7fe730db65f0>",
+                "op_type": "<function softmax at 0x7fb5dc102790>",
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 147,
+                        "id": 152,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 148,
+                        "id": 153,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68420,14 +68415,14 @@
                 "fqn": "distilbert.transformer.layer.4.attention.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 148,
+                        "id": 153,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 149,
+                        "id": 154,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -68438,7 +68433,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 150,
+                        "id": 155,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68447,7 +68442,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 151,
+                        "id": 156,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68458,14 +68453,14 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 151,
+                        "id": 156,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 152,
+                        "id": 157,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -68476,7 +68471,7 @@
                 "fqn": "distilbert.transformer.layer.4.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 152,
+                        "id": 157,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -68486,7 +68481,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 153,
+                        "id": 158,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -68495,7 +68490,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 154,
+                "id": 159,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -68509,7 +68504,7 @@
                 "fqn": "distilbert.transformer.layer.4.ffn.lin1",
                 "input_tensor_infos": [
                     {
-                        "id": 156,
+                        "id": 161,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -74677,7 +74672,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 157,
+                        "id": 162,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -74706,7 +74701,7 @@
                 "fqn": "distilbert.transformer.layer.4.ffn.lin2",
                 "input_tensor_infos": [
                     {
-                        "id": 158,
+                        "id": 163,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -76266,7 +76261,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 159,
+                        "id": 164,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -76296,14 +76291,14 @@
                 "fqn": "distilbert.transformer.layer.4.ffn.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 159,
+                        "id": 164,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 160,
+                        "id": 165,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -76312,9 +76307,39 @@
         },
         "layer_output_infos": [
             {
-                "id": 160,
+                "id": 165,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
+            }
+        ]
+    },
+    "distilbert:transformer:layer:4:ffn:activation": {
+        "q_op_infos": {},
+        "nonq_op_infos": {
+            "0": {
+                "op_type": "<built-in function gelu>",
+                "fqn": "distilbert.transformer.layer.4.ffn.activation",
+                "input_tensor_infos": [
+                    {
+                        "id": 162,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 163,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8"
+                    }
+                ]
+            }
+        },
+        "layer_output_infos": [
+            {
+                "id": 163,
+                "orig_dtype": "torch.float32",
+                "inf_dtype": "torch.quint8"
             }
         ]
     },
@@ -76326,19 +76351,19 @@
                 "fqn": "distilbert.transformer.layer.5",
                 "input_tensor_infos": [
                     {
-                        "id": 185,
+                        "id": 191,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.09456484764814377
+                            0.09456482529640198
                         ],
                         "zero_point": [
                             137
                         ]
                     },
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -76353,7 +76378,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 186,
+                        "id": 192,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -76382,19 +76407,19 @@
                 "fqn": "distilbert.transformer.layer.5",
                 "input_tensor_infos": [
                     {
-                        "id": 191,
+                        "id": 197,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.04283904284238815
+                            0.04283904656767845
                         ],
                         "zero_point": [
                             154
                         ]
                     },
                     {
-                        "id": 187,
+                        "id": 193,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -76409,7 +76434,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 192,
+                        "id": 198,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -76439,14 +76464,14 @@
                 "fqn": "distilbert.transformer.layer.5.sa_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 186,
+                        "id": 192,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 187,
+                        "id": 193,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -76457,14 +76482,14 @@
                 "fqn": "distilbert.transformer.layer.5.output_layer_norm",
                 "input_tensor_infos": [
                     {
-                        "id": 192,
+                        "id": 198,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 193,
+                        "id": 199,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -76473,7 +76498,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 193,
+                "id": 199,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -76487,7 +76512,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention.q_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -78047,7 +78072,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 163,
+                        "id": 168,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -78076,7 +78101,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention.k_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -79636,7 +79661,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 166,
+                        "id": 171,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -79665,7 +79690,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention.v_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -81225,62 +81250,6 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 169,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "activation_observer": {
-                    "name": "MinMaxObserver",
-                    "dtype": "torch.quint8",
-                    "qscheme": "torch.per_tensor_affine",
-                    "reduce_range": false,
-                    "quant_min": 0,
-                    "quant_max": 255
-                },
-                "weight_observer": {
-                    "name": "PerChannelMinMaxObserver",
-                    "ch_axis": 0,
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_channel_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                }
-            },
-            "3": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
-                "op_type_is_module": false,
-                "fqn": "distilbert.transformer.layer.5.attention",
-                "input_tensor_infos": [
-                    {
-                        "id": 172,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8",
-                        "force_dtype": "torch.quint8",
-                        "scale": [
-                            0.006569200661033392
-                        ],
-                        "zero_point": [
-                            130
-                        ]
-                    },
-                    {
-                        "id": 173,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.quint8",
-                        "force_dtype": "torch.quint8",
-                        "scale": [
-                            0.05540752783417702
-                        ],
-                        "zero_point": [
-                            132
-                        ]
-                    }
-                ],
-                "weight_tensor_infos": [],
-                "output_tensor_infos": [
-                    {
                         "id": 174,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
@@ -81304,13 +81273,69 @@
                     "quant_max": 127
                 }
             },
-            "4": {
-                "op_type": "<built-in method matmul of type object at 0x7fe658108200>",
+            "3": {
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
                 "op_type_is_module": false,
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 180,
+                        "id": 177,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8",
+                        "force_dtype": "torch.quint8",
+                        "scale": [
+                            0.006569200195372105
+                        ],
+                        "zero_point": [
+                            130
+                        ]
+                    },
+                    {
+                        "id": 178,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8",
+                        "force_dtype": "torch.quint8",
+                        "scale": [
+                            0.05540752410888672
+                        ],
+                        "zero_point": [
+                            132
+                        ]
+                    }
+                ],
+                "weight_tensor_infos": [],
+                "output_tensor_infos": [
+                    {
+                        "id": 179,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "activation_observer": {
+                    "name": "MinMaxObserver",
+                    "dtype": "torch.quint8",
+                    "qscheme": "torch.per_tensor_affine",
+                    "reduce_range": false,
+                    "quant_min": 0,
+                    "quant_max": 255
+                },
+                "weight_observer": {
+                    "name": "PerChannelMinMaxObserver",
+                    "ch_axis": 0,
+                    "dtype": "torch.qint8",
+                    "qscheme": "torch.per_channel_symmetric",
+                    "reduce_range": false,
+                    "quant_min": -128,
+                    "quant_max": 127
+                }
+            },
+            "4": {
+                "op_type": "<built-in method matmul of type object at 0x7fb59440e700>",
+                "op_type_is_module": false,
+                "fqn": "distilbert.transformer.layer.5.attention",
+                "input_tensor_infos": [
+                    {
+                        "id": 186,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -81322,12 +81347,12 @@
                         ]
                     },
                     {
-                        "id": 171,
+                        "id": 176,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.057793982326984406
+                            0.057793986052274704
                         ],
                         "zero_point": [
                             124
@@ -81337,7 +81362,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 181,
+                        "id": 187,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -81366,12 +81391,12 @@
                 "fqn": "distilbert.transformer.layer.5.attention.out_lin",
                 "input_tensor_infos": [
                     {
-                        "id": 184,
+                        "id": 190,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
                         "scale": [
-                            0.03462732955813408
+                            0.03462733328342438
                         ],
                         "zero_point": [
                             111
@@ -82926,7 +82951,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 185,
+                        "id": 191,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -82956,7 +82981,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -82968,7 +82993,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 162,
+                        "id": 167,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     },
@@ -82981,7 +83006,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 163,
+                        "id": 168,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -82992,7 +83017,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 164,
+                        "id": 169,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83003,7 +83028,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 164,
+                        "id": 169,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83012,7 +83037,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 165,
+                        "id": 170,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83023,7 +83048,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 166,
+                        "id": 171,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83034,7 +83059,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 167,
+                        "id": 172,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83045,7 +83070,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 167,
+                        "id": 172,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83054,7 +83079,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 168,
+                        "id": 173,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83065,7 +83090,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 169,
+                        "id": 174,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83076,7 +83101,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 170,
+                        "id": 175,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83087,7 +83112,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 170,
+                        "id": 175,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83096,7 +83121,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 171,
+                        "id": 176,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -83107,7 +83132,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 165,
+                        "id": 170,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83115,7 +83140,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 172,
+                        "id": 177,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -83126,7 +83151,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 168,
+                        "id": 173,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83135,7 +83160,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 173,
+                        "id": 178,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -83154,7 +83179,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 175,
+                        "id": 180,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -83165,7 +83190,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 175,
+                        "id": 180,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
@@ -83176,7 +83201,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 176,
+                        "id": 181,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -83187,19 +83212,19 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 176,
+                        "id": 181,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
                     {
-                        "id": 174,
+                        "id": 179,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 177,
+                        "id": 182,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     }
@@ -83210,38 +83235,42 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 174,
+                        "id": 179,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 177,
+                        "id": 182,
                         "orig_dtype": "torch.bool",
                         "inf_dtype": "torch.bool"
                     },
-                    {}
+                    {
+                        "id": 183,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 178,
+                        "id": 184,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
             "14": {
-                "op_type": "<function softmax at 0x7fe730db65f0>",
+                "op_type": "<function softmax at 0x7fb5dc102790>",
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 178,
+                        "id": 184,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 179,
+                        "id": 185,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83252,14 +83281,14 @@
                 "fqn": "distilbert.transformer.layer.5.attention.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 179,
+                        "id": 185,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 180,
+                        "id": 186,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -83270,7 +83299,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 181,
+                        "id": 187,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83279,7 +83308,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 182,
+                        "id": 188,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83290,14 +83319,14 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 182,
+                        "id": 188,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 183,
+                        "id": 189,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -83308,7 +83337,7 @@
                 "fqn": "distilbert.transformer.layer.5.attention",
                 "input_tensor_infos": [
                     {
-                        "id": 183,
+                        "id": 189,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
@@ -83318,7 +83347,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 184,
+                        "id": 190,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8"
                     }
@@ -83327,7 +83356,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 185,
+                "id": 191,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }
@@ -83341,7 +83370,7 @@
                 "fqn": "distilbert.transformer.layer.5.ffn.lin1",
                 "input_tensor_infos": [
                     {
-                        "id": 187,
+                        "id": 193,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -89509,7 +89538,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 188,
+                        "id": 194,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -89538,7 +89567,7 @@
                 "fqn": "distilbert.transformer.layer.5.ffn.lin2",
                 "input_tensor_infos": [
                     {
-                        "id": 189,
+                        "id": 195,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.quint8",
                         "force_dtype": "torch.quint8",
@@ -91098,7 +91127,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 190,
+                        "id": 196,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -91128,14 +91157,14 @@
                 "fqn": "distilbert.transformer.layer.5.ffn.dropout",
                 "input_tensor_infos": [
                     {
-                        "id": 190,
+                        "id": 196,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 191,
+                        "id": 197,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -91144,9 +91173,39 @@
         },
         "layer_output_infos": [
             {
-                "id": 191,
+                "id": 197,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
+            }
+        ]
+    },
+    "distilbert:transformer:layer:5:ffn:activation": {
+        "q_op_infos": {},
+        "nonq_op_infos": {
+            "0": {
+                "op_type": "<built-in function gelu>",
+                "fqn": "distilbert.transformer.layer.5.ffn.activation",
+                "input_tensor_infos": [
+                    {
+                        "id": 194,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "output_tensor_infos": [
+                    {
+                        "id": 195,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.quint8"
+                    }
+                ]
+            }
+        },
+        "layer_output_infos": [
+            {
+                "id": 195,
+                "orig_dtype": "torch.float32",
+                "inf_dtype": "torch.quint8"
             }
         ]
     }

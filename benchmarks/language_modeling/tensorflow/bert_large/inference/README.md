@@ -123,8 +123,6 @@ Run the script:
 ./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/<script_name.sh>
 ```
 
-* Use `--amp` flag to run with grappler Auto-Mixed Precision pass with FP16 precision: `./quickstart/language_modeling/tensorflow/bert_large/inference/cpu/<script_name.sh> --amp`. By default, BERT-Large-SQuAD FP16 inference runs with Keras Mixed-Precision policy. For more information on grappler Auto-Mixed Precision, please see [https://www.intel.com/content/www/us/en/developer/articles/guide/getting-started-with-automixedprecisionmkl.html](https://www.intel.com/content/www/us/en/developer/articles/guide/getting-started-with-automixedprecisionmkl.html).
-
 ### Run on Windows
 The snippet below shows how to run a quickstart script on Windows systems:
 

@@ -69,7 +69,7 @@ class BertConfig(object):
         `BertModel`.
       initializer_range: The stdev of the truncated_normal_initializer for
         initializing all weight matrices.
-      precision: To enable fp32, bfloat16 or fp16 based training
+      precision: To enable fp32 or bfloat16 based training
     """
     self.vocab_size = vocab_size
     self.hidden_size = hidden_size
@@ -168,11 +168,6 @@ class BertModel(object):
       if config.new_bf16_scope :
         self.bf16_scope = True
 
-    self.f16_scope = False
-    if config.precision == "fp16":
-      bf.set_global_precision(tf.float16)
-      self.f16_scope = True
-
     bf.set_global_flags(optimized_softmax=config.optimized_softmax,
                         experimental_gelu=config.experimental_gelu)
 
@@ -225,7 +220,7 @@ class BertModel(object):
 
         # Run the stacked transformer.
         # `sequence_output` shape = [batch_size, seq_length, hidden_size].
-        # Cast is used to cover bfloat16 and fp16
+        # Cast is used to cover bfloat16
         input_tensor=bf.r_cast(self.embedding_output)
         self.all_encoder_layers = transformer_model(
             input_tensor=input_tensor,
@@ -258,11 +253,11 @@ class BertModel(object):
 
   def get_pooled_output(self):
     """ 
-      In bfloat16 (and fp16) enabled execution, with only model covered in
-      bfloat16 (and fp16) scope, return the output in float32. Other cases
+      In bfloat16 enabled execution, with only model covered in
+      bfloat16 scope, return the output in float32. Other cases
       return as is
     """
-    if self.bf16_scope == True or self.f16_scope == True:
+    if self.bf16_scope == True:
       return  tf.cast(self.pooled_output, tf.float32)
     else :
       return self.pooled_output
@@ -274,11 +269,11 @@ class BertModel(object):
       float Tensor of shape [batch_size, seq_length, hidden_size] corresponding
       to the final hidden of the transformer encoder.
 
-      In bfloat16 (and fp16) enabled execution, with only model covered in
-      bfloat16 (and fp16) scope, return the output in float32. Other cases
+      In bfloat16 enabled execution, with only model covered in
+      bfloat16 scope, return the output in float32. Other cases
       return as is
     """
-    if self.bf16_scope == True or self.f16_scope == True:
+    if self.bf16_scope == True:
       return  tf.cast(self.sequence_output, tf.float32)
     else :
       return self.sequence_output
@@ -295,13 +290,13 @@ class BertModel(object):
       embeddings with the positional embeddings and the token type embeddings,
       then performing layer normalization. This is the input to the transformer.
     """
-    if self.bf16_scope == True or self.f16_scope == True:
+    if self.bf16_scope == True:
       return (self.embedding_output) 
     else :
       return bf.r_cast(self.embedding_output)
 
   def get_embedding_table(self):
-    if self.bf16_scope == True or self.f16_scope == True:
+    if self.bf16_scope == True:
       return (self.embedding_table) 
     else :
       return bf.r_cast(self.embedding_table)

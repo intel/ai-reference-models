@@ -76,31 +76,9 @@ class ModelInitializer(BaseModelInitializer):
             raise ValueError("Custom parameters are missing...")
 
     def run_perf_command(self):
-        # Get the command previx, but numactl is added later in run_perf_command()
         command = []
+        command.append(self.get_command_prefix(self.args.socket_id))
         set_env_var("OMP_NUM_THREADS", self.args.num_intra_threads)
-
-        num_numas = self.platform_util.num_numa_nodes
-        if self.args.socket_id != -1 and num_numas > 0:
-            command.append("numactl")
-            if self.args.socket_id:
-                socket_id = self.args.socket_id
-            else:
-                socket_id = "0"
-
-            if self.args.num_cores != -1:
-                command.append("-C")
-                cpuid = "+0"
-                i = 1
-                while i < self.args.num_cores:
-                    cpuid += ',' + str(i)
-                    i += i
-                command.append(cpuid)
-
-            command.append("-N")
-            command.append("{}".format(socket_id))
-            command.append("-m")
-            command.append("{}".format(socket_id))
 
         command += (self.python_exe, self.benchmark_script)
         command += ("-m", self.args.model_source_dir)

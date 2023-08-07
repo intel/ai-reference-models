@@ -36,6 +36,7 @@ from tensorflow.python.ops import control_flow_ops
 from tensorflow.python.ops import math_ops
 from tensorflow.python.ops import rnn_cell_impl
 from tensorflow.python.ops import tensor_array_ops
+from tensorflow.python.ops import array_ops_stack
 from tensorflow.python.ops import variable_scope as vs
 from tensorflow.python.util import nest
 import tensorflow as tf
@@ -301,12 +302,12 @@ def _reverse_seq(input_seq, lengths):
       input_.set_shape(input_shape)
 
     # Join into (time, batch_size, depth)
-    s_joined = array_ops.stack(sequence)
+    s_joined = array_ops_stack.stack(sequence)
 
     # Reverse along dimension 0
     s_reversed = array_ops.reverse_sequence(s_joined, lengths, 0, 1)
     # Split again into list
-    result = array_ops.unstack(s_reversed)
+    result = array_ops_stack.unstack(s_reversed)
     for r, flat_result in zip(result, flat_results):
       r.set_shape(input_shape)
       flat_result.append(r)
@@ -595,11 +596,10 @@ def dynamic_rnn(cell, inputs, att_scores=None, sequence_length=None, initial_sta
 
     def _assert_has_shape(x, shape):
       x_shape = array_ops.shape(x)
-      packed_shape = array_ops.stack(shape)
-      return control_flow_ops.Assert(
-          math_ops.reduce_all(math_ops.equal(x_shape, packed_shape)),
-          ["Expected shape for Tensor %s is " % x.name,
-           packed_shape, " but saw shape: ", x_shape])
+      packed_shape = array_ops_stack.stack(shape)
+      return tf.debugging.assert_equal(x_shape, packed_shape,
+                      message="Tensors not Equal")
+      #math_ops.reduce_all(math_ops.equal(x_shape, packed_shape)),
 
     if sequence_length is not None:
       # Perform some shape validation
@@ -709,7 +709,7 @@ def _dynamic_rnn_loop(cell,
   def _create_zero_arrays(size):
     size = _concat(batch_size, size)
     return array_ops.zeros(
-        array_ops.stack(size), _infer_state_dtype(dtype, state))
+        array_ops_stack.stack(size), _infer_state_dtype(dtype, state))
 
   flat_zero_output = tuple(_create_zero_arrays(output)
                            for output in flat_output_size)
@@ -788,14 +788,14 @@ def _dynamic_rnn_loop(cell,
         return (time + 1, output_ta_t, new_state)
 
   if att_scores is not None:  
-      _, output_final_ta, final_state, _ = control_flow_ops.while_loop(
+      _, output_final_ta, final_state, _ =tf.while_loop(
           cond=lambda time, *_: time < time_steps,
           body=_time_step,
           loop_vars=(time, output_ta, state, att_scores),
           parallel_iterations=parallel_iterations,
           swap_memory=swap_memory)
   else:
-      _, output_final_ta, final_state = control_flow_ops.while_loop(
+      _, output_final_ta, final_state = tf.while_loop(
           cond=lambda time, *_: time < time_steps,
           body=_time_step,
           loop_vars=(time, output_ta, state),
@@ -1099,7 +1099,7 @@ def raw_rnn(cell, loop_fn,
       return (next_time, elements_finished, next_input,
               emit_ta, next_state, loop_state)
 
-    returned = control_flow_ops.while_loop(
+    returned = tf.while_loop(
         condition, body, loop_vars=[
             time, elements_finished, next_input,
             emit_ta, state, loop_state],
@@ -1241,7 +1241,7 @@ def static_rnn(cell,
         # convert int to TensorShape if necessary
         size = _concat(batch_size, output_size)
         output = array_ops.zeros(
-            array_ops.stack(size), _infer_state_dtype(dtype, state))
+            array_ops_stack.stack(size), _infer_state_dtype(dtype, state))
         shape = _concat(fixed_batch_size.value, output_size, static=True)
         output.set_shape(tensor_shape.TensorShape(shape))
         return output

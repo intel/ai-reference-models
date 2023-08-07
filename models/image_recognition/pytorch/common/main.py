@@ -79,6 +79,7 @@ from torch.utils import ThroughputBenchmark
 
 from lars import *
 from lars_utils import *
+import resnext_wsl
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
@@ -267,10 +268,16 @@ def main_worker(gpu, ngpus_per_node, args):
         # create model
         if args.pretrained:
             print("=> using pre-trained model '{}'".format(args.arch))
-            model = models.__dict__[args.arch](pretrained=True)
+            if args.arch == "resnext101_32x16d_wsl":
+                model = resnext_wsl.__dict__[args.arch](pretrained=True)
+            else:
+                model = models.__dict__[args.arch](pretrained=True)
         else:
             print("=> creating model '{}'".format(args.arch))
-            model = models.__dict__[args.arch]()
+            if args.arch == "resnext101_32x16d_wsl":
+                model = resnext_wsl.__dict__[args.arch]()
+            else:
+                model = models.__dict__[args.arch]()
 
 
     if args.ipex:

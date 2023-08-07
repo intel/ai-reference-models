@@ -324,8 +324,6 @@ def train_schedule(
   #profile file will be saved in in profile_dir
   #Creating hooks for printing Examples per Second, used with estimator.train
   training_batch_size = estimator.params.batch_size
-  if FLAGS.batch_size != -1:
-    training_batch_size = FLAGS.batch_size
   train_hooks = hooks_helper.get_train_hooks(
       ["ExamplesPerSecondHook"],
       model_dir=FLAGS.model_dir,
@@ -429,6 +427,8 @@ def main(_):
   params.repeat_dataset = single_iteration_train_epochs
   params.horovod = is_mpi 
   params.static_batch = FLAGS.static_batch
+  if FLAGS.batch_size != -1:
+    params.batch_size = FLAGS.batch_size
   # Add inter_op and intra_op parallelism thread
   session_config = tf.compat.v1.ConfigProto(
       inter_op_parallelism_threads=FLAGS.inter_op_parallelism_threads,

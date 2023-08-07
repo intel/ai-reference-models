@@ -159,8 +159,8 @@ export MODEL_DIR=$(pwd)
 cd quickstart/language_modeling/pytorch/bert_large/training/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.18.0
-git apply ../enable_optmization.diff
+git checkout v4.28.1
+git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
 

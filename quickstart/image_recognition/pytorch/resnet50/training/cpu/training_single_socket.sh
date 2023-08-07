@@ -53,7 +53,7 @@ fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, bf16, bf32, or fp16."
   exit 1
 fi
 
@@ -79,7 +79,7 @@ elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32 bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, bf32, fp16"
     exit 1
 fi
 
@@ -98,7 +98,7 @@ export KMP_AFFINITY=granularity=fine,compact,1,0
 rm -rf ./resnet50_training_log_*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --ninstances 1 \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     --log_path=${OUTPUT_DIR} \

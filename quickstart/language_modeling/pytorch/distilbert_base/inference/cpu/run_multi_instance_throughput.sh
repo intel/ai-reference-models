@@ -30,7 +30,7 @@ precision="fp32"
 if [[ "$1" == "bf16" ]]
 then
     precision="bf16"
-    ARGS="$ARGS --mix_bf16"
+    ARGS="$ARGS --bf16"
     echo "### running bf16 mode"
 elif [[ "$1" == "fp16" ]]
 then
@@ -53,7 +53,7 @@ then
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --mix_bf16 --int8 --int8_config configure.json"
+    ARGS="$ARGS --bf16 --int8 --int8_config configure.json"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -62,7 +62,7 @@ else
 fi
 
 mode="jit"
-ARGS="$ARGS --jit_mode"
+ARGS="$ARGS --jit_mode_eval"
 echo "### running with jit mode"
 
 if [ -z "${OUTPUT_DIR}" ]; then
@@ -82,7 +82,7 @@ EVAL_SCRIPT=${EVAL_SCRIPT:-"./transformers/examples/pytorch/text-classification/
 WORK_SPACE=${WORK_SPACE:-${OUTPUT_DIR}}
 
 rm -rf ${OUTPUT_DIR}/throughput_log*
-python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
+python -m intel_extension_for_pytorch.cpu.launch --throughput_mode  --enable_jemalloc --log_path=${OUTPUT_DIR} --log_file_prefix="./throughput_log_${path}_${precision}_${mode}" \
   ${EVAL_SCRIPT} $ARGS \
   --model_name_or_path   ${FINETUNED_MODEL} \
   --task_name sst2 \
@@ -90,6 +90,7 @@ python -m intel_extension_for_pytorch.cpu.launch --ninstance 1 --node_id 0  --en
   --max_seq_length ${SEQUENCE_LENGTH} \
   --output_dir ./tmp \
   --per_device_eval_batch_size $BATCH_SIZE \
+  --dataloader_drop_last \
 
 throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/throughput_log* |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {

@@ -43,4 +43,4 @@ python ${MULTI_INSTANCE_ARGS} \
     --evaluate \
     ${ARGS} \
     --batch-size 128 \
-    --dummy
+    --dummy 2>&1 | tee ${OUTPUT_DIR}/fp32_batch_inference.log

@@ -33,8 +33,11 @@ pip install librosa sox
 yum install -y libsndfile
 
 # warp-transducer:
+cd ${MODEL_DIR}/quickstart/language_modeling/pytorch/rnnt/training/cpu
 git clone https://github.com/HawkAaron/warp-transducer
 cd warp-transducer
+git checkout master
+git apply ../enable_warprnnt_c++17.diff
 mkdir build; cd build
 cmake .. 
 make 

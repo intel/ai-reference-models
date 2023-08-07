@@ -136,7 +136,7 @@ def process_record_dataset(dataset, is_training, batch_size, shuffle_buffer,
   return dataset
 
 
-def get_synth_input_fn(height, width, num_channels, num_classes, use_bfloat16):
+def get_synth_input_fn(height, width, num_channels, num_classes):
   """Returns an input function that returns a dataset with zeroes.
 
   This is useful in debugging input pipeline performance, as it removes all
@@ -154,11 +154,8 @@ def get_synth_input_fn(height, width, num_channels, num_classes, use_bfloat16):
     that can be used for iteration.
   """
   def input_fn(is_training, data_dir, batch_size, *args, **kwargs):  # pylint: disable=unused-argument
-    if use_bfloat16:
-      images = tf.zeros((batch_size, height, width, num_channels), tf.bfloat16)
-    else:
-      images = tf.zeros((batch_size, height, width, num_channels), tf.float32)
-    labels = tf.zeros((batch_size), tf.int32)
+    images = tf.zeros((batch_size, height, width, num_channels), tf.float32)
+    labels = tf.zeros((batch_size, num_classes), tf.int32)
     return tf.data.Dataset.from_tensors((images, labels)).repeat()
 
   return input_fn
@@ -199,11 +196,11 @@ def learning_rate_with_decay(
 
   def learning_rate_fn(global_step):
     lr = tf.compat.v1.train.piecewise_constant(global_step, boundaries, vals)
-    warmup_steps = batches_per_epoch * 5
-    global_step_f32 = tf.cast(global_step, tf.float32)
+    warmup_steps = int(batches_per_epoch * 5)
     warmup_lr = (
-        initial_learning_rate * global_step_f32 / warmup_steps)
-    return tf.cond(pred=global_step_f32 < warmup_steps, true_fn=lambda: warmup_lr, false_fn=lambda: lr)
+        initial_learning_rate * tf.cast(global_step, tf.float32) / tf.cast(
+        warmup_steps, tf.float32))
+    return tf.cond(pred=global_step < warmup_steps, true_fn=lambda: warmup_lr, false_fn=lambda: lr)
 
   def poly_rate_fn(global_step):
     """Handles linear scaling rule, gradual warmup, and LR decay.
@@ -303,14 +300,16 @@ def resnet_model_fn(features, labels, mode, model_class,
     current mode.
   """
 
-  # Generate a summary node for the images, this API does not support bf16
-  if not use_bfloat16:
-   tf.compat.v1.summary.image('images', features, max_outputs=6)
+  # Generate a summary node for the images
+  tf.compat.v1.summary.image('images', features, max_outputs=6)
+
+  # Checks that features/images have same data type being used for calculations.
+  assert features.dtype == dtype
 
   if use_bfloat16 == True:
     dtype = tf.bfloat16
-  else:
-    features = tf.cast(features, dtype)
+
+  features = tf.cast(features, dtype)
 
   model = model_class(resnet_size, data_format, version=version, dtype=dtype)
 
@@ -402,7 +401,7 @@ def resnet_model_fn(features, labels, mode, model_class,
           momentum=momentum
       )
     if is_mpi:
-      optimizer = hvd.DistributedOptimizer(optimizer, num_groups=1)
+      optimizer = hvd.DistributedOptimizer(optimizer)
 
     if use_float16 and loss_scale == 1:
       optimizer = tf.compat.v1.train.experimental.enable_mixed_precision_graph_rewrite(optimizer)
@@ -415,7 +414,7 @@ def resnet_model_fn(features, labels, mode, model_class,
       # When computing fp16 gradients, often intermediate tensor values are
       # so small, they underflow to 0. To avoid this, we multiply the loss by
       # loss_scale to make these tensor values loss_scale times bigger.
-      scaled_grad_vars = optimizer.compute_gradients(loss * loss_scale, gate_gradients=tf.compat.v1.train.Optimizer.GATE_NONE)
+      scaled_grad_vars = optimizer.compute_gradients(loss * loss_scale)
 
       # Once the gradient computation is complete we can scale the gradients
       # back to the correct scale before passing them to the optimizer.
@@ -423,7 +422,7 @@ def resnet_model_fn(features, labels, mode, model_class,
                             for grad, var in scaled_grad_vars]
       minimize_op = optimizer.apply_gradients(unscaled_grad_vars, global_step)
     else:
-      minimize_op = optimizer.minimize(loss, global_step, gate_gradients=tf.compat.v1.train.Optimizer.GATE_NONE)
+      minimize_op = optimizer.minimize(loss, global_step)
 
     update_ops = tf.compat.v1.get_collection(tf.compat.v1.GraphKeys.UPDATE_OPS)
     train_op = tf.group(minimize_op, update_ops, num_examples_metric[1])
@@ -515,23 +514,25 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
       allow_soft_placement=True)
   session_config.graph_options.rewrite_options.remapping = (
           rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
-  if is_mpi:
-    gpus = tf.config.experimental.list_physical_devices('XPU')
-    for gpu in gpus:
-        tf.config.experimental.set_memory_growth(gpu, True)
-    if gpus:
-        tf.config.experimental.set_visible_devices(gpus[hvd.local_rank()], 'XPU')
-    session_config.gpu_options.visible_device_list = str(hvd.local_rank())
   if flags.use_float16:
     session_config.graph_options.rewrite_options.auto_mixed_precision = (
               rewriter_config_pb2.RewriterConfig.ON)
 
+
+
   if flags.num_gpus == 0:
     distribution = tf.distribute.OneDeviceStrategy('device:CPU:0')
+  elif flags.num_gpus == 1:
+    distribution = tf.distribute.OneDeviceStrategy('device:GPU:0')
+  else:
+    distribution = tf.distribute.MirroredStrategy(
+        num_gpus=flags.num_gpus
+    )
 
   mlperf_log.resnet_print(key=mlperf_log.RUN_SET_RANDOM_SEED, value=seed)
-  run_config = tf.estimator.RunConfig(session_config=session_config,
-                                      log_step_count_steps=1, # output logs more frequently
+  run_config = tf.estimator.RunConfig(train_distribute=distribution,
+                                      session_config=session_config,
+                                      log_step_count_steps=10, # output logs more frequently
                                       tf_random_seed=seed)
 
   mlperf_log.resnet_print(key=mlperf_log.INPUT_BATCH_SIZE,
@@ -628,7 +629,6 @@ def resnet_main(seed, flags, model_function, input_function, shape=None):
           batch_size=per_device_batch_size(flags.batch_size, flags.num_gpus),
           num_epochs=flags.epochs_between_evals,
           num_gpus=flags.num_gpus,
-          datasets_num_private_threads=flags.intra_op_parallelism_threads,
           dtype=flags.dtype
       )
     if is_mpi:

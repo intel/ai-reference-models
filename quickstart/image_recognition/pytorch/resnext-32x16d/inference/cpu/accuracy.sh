@@ -89,7 +89,7 @@ MULTI_INSTANCE_ARGS=""
 if [[ ${PLATFORM} == "linux" ]]; then
     pip list | grep intel-extension-for-pytorch
     if [[ "$?" == 0 ]]; then
-        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch --use_default_allocator"
+        MULTI_INSTANCE_ARGS=" -m intel_extension_for_pytorch.cpu.launch --memory-allocator jemalloc"
         # in case IPEX is used, we set ipex arg
         if [[ $PRECISION == "int8" || $PRECISION == "avx-int8" ]]; then
             ARGS="${ARGS} --ipex"

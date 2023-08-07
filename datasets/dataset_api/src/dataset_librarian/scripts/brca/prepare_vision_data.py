@@ -25,7 +25,6 @@ import argparse
 import shutil
 from os import path
 from PIL import Image, ImageDraw
-from create_data_split import create_data_split
 import json
 
 root_folder = os.environ.get('DATASET_DIR')

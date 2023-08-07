@@ -105,7 +105,7 @@ fi
 pip list | grep intel-extension-for-pytorch
 if [[ "$?" == 0 ]]; then
   IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-	  --use_default_allocator \
+	  --memory-allocator jemalloc \
 	  --ninstances 1 \
     --ncore_per_instance ${CORES_PER_INSTANCE} \
     --log_path=${OUTPUT_DIR} \

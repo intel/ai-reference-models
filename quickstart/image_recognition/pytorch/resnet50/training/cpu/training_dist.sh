@@ -45,15 +45,14 @@ if [ ! -d "${DATASET_DIR}" ]; then
   exit 1
 fi
 
-
-if [ -z "${BATCH_SIZE}" ]; then
-  echo "The required environment variable BATCH_SIZE has not been set"
+if [ -z "${LOCAL_BATCH_SIZE}" ]; then
+  echo "The required environment variable LOCAL_BATCH_SIZE has not been set"
   exit 1
 fi
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, avx-fp32, or bf16."
+  echo "Please set PRECISION to fp32, avx-fp32, bf16, bf32, or fp16."
   exit 1
 fi
 
@@ -72,11 +71,17 @@ fi
 if [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
+elif [[ $PRECISION == "bf32" ]]; then
+    ARGS="$ARGS --bf32"
+    echo "running bf32 path"
+elif [[ $PRECISION == "fp16" ]]; then
+    ARGS="$ARGS --fp16"
+    echo "running fp16 path"
 elif [[ $PRECISION == "fp32" || $PRECISION == "avx-fp32" ]]; then
     echo "running fp32 path"
 else
     echo "The specified precision '${PRECISION}' is unsupported."
-    echo "Supported precisions are: fp32, avx-fp32 bf16"
+    echo "Supported precisions are: fp32, avx-fp32, bf16, bf32, fp16"
     exit 1
 fi
 
@@ -87,6 +92,7 @@ TOTAL_CORES=`expr $CORES \* $SOCKETS`
 NNODES=${NNODES:-1}
 HOSTFILE=${HOSTFILE:-./hostfile}
 NUM_RANKS=$(( NNODES * SOCKETS ))
+
 
 CORES_PER_INSTANCE=$CORES
 
@@ -116,7 +122,7 @@ oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindin
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
@@ -129,7 +135,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --warmup-epochs 2  \
     --ipex \
     -j 0 \
-    -b $BATCH_SIZE \
+    -b $LOCAL_BATCH_SIZE \
     --seed 2020 \
     --dist-backend ccl \
     --base-op=LARS \
@@ -152,4 +158,4 @@ END   {
        printf("%.3f", sum);
 }')
 
-echo "resnet50;"training distributed throughput";${PRECISION};${BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log
+echo "resnet50;"training distributed throughput";${PRECISION};${LOCAL_BATCH_SIZE};${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

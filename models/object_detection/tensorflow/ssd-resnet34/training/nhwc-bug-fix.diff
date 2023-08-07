@@ -1,13 +1,70 @@
 diff --git a/scripts/tf_cnn_benchmarks/models/ssd_model.py b/scripts/tf_cnn_benchmarks/models/ssd_model.py
-index f3ac9bb..9ae7215 100644
+index f3ac9bb..65f5795 100644
 --- a/scripts/tf_cnn_benchmarks/models/ssd_model.py
 +++ b/scripts/tf_cnn_benchmarks/models/ssd_model.py
-@@ -230,7 +230,7 @@ class SSD300Model(model_lib.CNNModel):
+@@ -230,25 +230,46 @@ class SSD300Model(model_lib.CNNModel):
        l = cnn.conv(nd * 4, 3, 3, 1, 1, input_layer=ac,
                     num_channels_in=oc, activation=None, use_batch_norm=False,
                     kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
 -      scale = l.get_shape()[-1]
-+      scale = l.get_shape()[2] if cnn.channel_pos == 'channels_last' else l.get_shape()[-1]
-       # shape = [batch_size, nd * 4, scale, scale]
-       l = tf.reshape(l, [self.batch_size, nd, 4, scale, scale])
-       # shape = [batch_size, nd, 4, scale, scale]
+-      # shape = [batch_size, nd * 4, scale, scale]
+-      l = tf.reshape(l, [self.batch_size, nd, 4, scale, scale])
+-      # shape = [batch_size, nd, 4, scale, scale]
+-      l = tf.transpose(a=l, perm=[0, 1, 3, 4, 2])
+-      # shape = [batch_size, nd, scale, scale, 4]
+-      self.loc.append(tf.reshape(l, [self.batch_size, -1, 4]))
+-      # shape = [batch_size, nd * scale * scale, 4]
+-
+-      c = cnn.conv(nd * self.label_num, 3, 3, 1, 1, input_layer=ac,
+-                   num_channels_in=oc, activation=None, use_batch_norm=False,
+-                   kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
+-      # shape = [batch_size, nd * label_num, scale, scale]
+-      c = tf.reshape(c, [self.batch_size, nd, self.label_num, scale, scale])
+-      # shape = [batch_size, nd, label_num, scale, scale]
+-      c = tf.transpose(a=c, perm=[0, 1, 3, 4, 2])
+-      # shape = [batch_size, nd, scale, scale, label_num]
+-      self.conf.append(tf.reshape(c, [self.batch_size, -1, self.label_num]))
+-      # shape = [batch_size, nd * scale * scale, label_num]
++      if cnn.channel_pos != 'channels_last':
++        scale = l.get_shape()[-1]
++        # shape = [batch_size, nd * 4, scale, scale]
++        l = tf.reshape(l, [self.batch_size, nd, 4, scale, scale])
++        # shape = [batch_size, nd, 4, scale, scale]
++        l = tf.transpose(a=l, perm=[0, 1, 3, 4, 2])
++        # shape = [batch_size, nd, scale, scale, 4]
++        self.loc.append(tf.reshape(l, [self.batch_size, -1, 4]))
++        # shape = [batch_size, nd * scale * scale, 4]
++
++        c = cnn.conv(nd * self.label_num, 3, 3, 1, 1, input_layer=ac,
++                    num_channels_in=oc, activation=None, use_batch_norm=False,
++                    kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
++        # shape = [batch_size, nd * label_num, scale, scale]
++        c = tf.reshape(c, [self.batch_size, nd, self.label_num, scale, scale])
++        # shape = [batch_size, nd, label_num, scale, scale]
++        c = tf.transpose(a=c, perm=[0, 1, 3, 4, 2])
++        # shape = [batch_size, nd, scale, scale, label_num]
++        self.conf.append(tf.reshape(c, [self.batch_size, -1, self.label_num]))
++        # shape = [batch_size, nd * scale * scale, label_num]
++      else:
++        scale = l.get_shape()[2]
++        # shape = [batch_size, scale, scale, nd * 4]
++        l = tf.reshape(l, [self.batch_size, scale, scale, nd, 4])
++        # shape = [batch_size, scale, scale, nd, 4]
++        l = tf.transpose(a=l, perm=[0, 3, 1, 2, 4])
++        # shape = [batch_size, nd, scale, scale, 4]
++        self.loc.append(tf.reshape(l, [self.batch_size, -1, 4]))
++        # shape = [batch_size, nd * scale * scale, 4]
++
++        c = cnn.conv(nd * self.label_num, 3, 3, 1, 1, input_layer=ac,
++                    num_channels_in=oc, activation=None, use_batch_norm=False,
++                    kernel_initializer=tf.compat.v1.keras.initializers.VarianceScaling(scale=1.0, mode="fan_avg", distribution="uniform"))
++        # shape = [batch_size, scale, scale, nd * label_num]
++        c = tf.reshape(c, [self.batch_size, scale, scale, nd, self.label_num])
++        # shape = [batch_size, scale, scale, nd, label_num]
++        c = tf.transpose(a=c, perm=[0, 3, 1, 2, 4])
++        # shape = [batch_size, nd, scale, scale, label_num]
++        self.conf.append(tf.reshape(c, [self.batch_size, -1, self.label_num]))
++        # shape = [batch_size, nd * scale * scale, label_num]
+
+     # Shape of locs: [batch_size, NUM_SSD_BOXES, 4]
+     # Shape of confs: [batch_size, NUM_SSD_BOXES, label_num]

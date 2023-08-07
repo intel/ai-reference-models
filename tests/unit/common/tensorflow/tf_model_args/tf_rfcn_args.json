@@ -6,12 +6,12 @@
 
   { "_comment": "rfcn_fp32",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --socket-id 0 --verbose --in-graph=/in_graph/rfcn_resnet101_fp32_coco_pretrained_model.pb --data-location=/dataset --benchmark-only --number_of_steps=500",
-    "output": "numactl -N 0 -m 0 python /workspace/intelai_models/inference/fp32/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_fp32_coco_pretrained_model.pb -x 500 -d /dataset --num-inter-threads 1 --num-intra-threads 28",
+    "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp32/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_fp32_coco_pretrained_model.pb -x 500 -d /dataset --num-inter-threads 1 --num-intra-threads 28",
     "cpuset": "0-111"},
 
   { "_comment": "rfcn_fp32_with_optional_args",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=fp32 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size=-1 --socket-id=1 --verbose --in-graph=/in_graph/rfcn_resnet101_fp32_coco_pretrained_model.pb --data-location=/dataset --benchmark-only --num-cores=8 --visualize",
-    "output": "numactl -C +0,1,2,4 -N 1 -m 1 python /workspace/intelai_models/inference/fp32/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_fp32_coco_pretrained_model.pb --num-intra-threads 8 --num-inter-threads 1 - v -d /dataset",
+    "output": "numactl -C0-7,56-63 --membind=0 python /workspace/intelai_models/inference/fp32/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_fp32_coco_pretrained_model.pb --num-intra-threads 8 --num-inter-threads 1 - v -d /dataset",
     "cpuset": "0-111"},
 
   { "_comment": "rfcn_int8_accuracy",
@@ -21,11 +21,11 @@
 
   { "_comment": "rfcn_int8",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=-1 --socket-id 0 --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset --benchmark-only --number_of_steps=500",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl -N 0 -m 0 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb -x 500 -d /dataset --num-inter-threads 1 --num-intra-threads 28",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb -x 500 -d /dataset --num-inter-threads 1 --num-intra-threads 28",
     "cpuset": "0-111"},
 
   { "_comment": "rfcn_int8_with_optional_args",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case=object_detection --model-name=rfcn --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size=-1 --socket-id 1 --verbose --in-graph=/in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --data-location=/dataset --benchmark-only --num-cores=8 --print_accuracy --evaluate_tensor=Tensor --visualize",
-    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6  numactl -N 0 -m 0 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --num-intra-threads 28 --num-inter-threads 1 -x 500 -d /dataset LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6  numactl -C +0,1,2,4 -N 1 -m 1 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --num-intra-threads 8 --num-inter-threads 1 - v -d /dataset -e Tensor - p",
+    "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6  numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --num-intra-threads 28 --num-inter-threads 1 -x 500 -d /dataset LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6  numactl -C0-7,56-63 --membind=0 python /workspace/intelai_models/inference/int8/run_rfcn_inference.py -m /workspace/models -g /in_graph/rfcn_resnet101_int8_coco_pretrained_model.pb --num-intra-threads 8 --num-inter-threads 1 - v -d /dataset -e Tensor - p",
     "cpuset": "0-111"}
 ]

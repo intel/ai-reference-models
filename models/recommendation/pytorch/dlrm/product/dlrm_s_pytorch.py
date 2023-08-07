@@ -151,6 +151,7 @@ def load_data(buffer_num, is_bf16):
                 print("epoch ended, reset data_iter")
                 reset = True
                 data_iter._reset(train_ld)
+                Batch = next(data_iter)
             X, lS_o, lS_i, T, W, CBPP = unpack_batch(Batch)
             X = X.bfloat16() if is_bf16 else X
             data_buffer[d] = (X, lS_o, lS_i, T, W, CBPP)
@@ -1181,7 +1182,8 @@ def run():
                         with more than 24 CPU cores and at least 1 TB of memory.",
     )
     # training
-    parser.add_argument("--mini-batch-size", type=int, default=1)
+    parser.add_argument("--mini-batch-size", type=int, default=-1)
+    parser.add_argument("--local-batch-size", type=int, default=1)
     parser.add_argument("--nepochs", type=int, default=1)
     parser.add_argument("--learning-rate", type=float, default=0.01)
     parser.add_argument("--print-precision", type=int, default=5)
@@ -1229,9 +1231,11 @@ def run():
     global nbatches
     global nbatches_test
     args = parser.parse_args()
+    
     print(args)
     ext_dist.init_distributed(backend=args.dist_backend)
-    
+    if args.mini_batch_size < 0:
+        args.mini_batch_size = args.local_batch_size * ext_dist.my_size
 
     ### some basic setup ###
     np.random.seed(args.numpy_rand_seed)
@@ -1480,8 +1484,8 @@ def run():
                 dlrm.bot_l[i + 1] = torch.nn.Identity()
 
         if ext_dist.my_size > 1:
-            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l, gradient_as_bucket_view=True, broadcast_buffers=False)
-            dlrm.top_l = ext_dist.DDP(dlrm.top_l, gradient_as_bucket_view=True, broadcast_buffers=False)
+            dlrm.bot_l = ext_dist.DDP(dlrm.bot_l, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
+            dlrm.top_l = ext_dist.DDP(dlrm.top_l, gradient_as_bucket_view=True, broadcast_buffers=False, find_unused_parameters=True)
             dlrm.emb_dense = ext_dist.DDP(dlrm.emb_dense, gradient_as_bucket_view=True, broadcast_buffers=False)
     training_record = [0, 0]
     def update_training_performance(time, iters, training_record=training_record):
