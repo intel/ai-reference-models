@@ -30,7 +30,7 @@ all: venv lint unit_test
 $(ACTIVATE):
 	@echo "Updating virtualenv dependencies in: $(VIRTUALENV_DIR)..."
 	@test -d $(VIRTUALENV_DIR) || $(VIRTUALENV_EXE) $(VIRTUALENV_DIR)
-	@. $(ACTIVATE) && python -m pip install -r requirements-test.txt
+	@. $(ACTIVATE) && python -m pip install -r requirements.txt
 	@touch $(ACTIVATE)
 
 venv: $(ACTIVATE)

@@ -23,7 +23,7 @@ import signal
 import subprocess
 import pkg_resources
 
-def preprocess_dataset(dataset_name, dataset_directory):
+def preprocess_dataset(dataset_name, dataset_directory, split_ratio):
     # Get the path to the file relative to the package root
     datasets = pkg_resources.resource_filename('dataset_librarian', 'datasets_urls.json')
     # Load the JSON file that contains the dataset URLs
@@ -52,9 +52,15 @@ def preprocess_dataset(dataset_name, dataset_directory):
         brca_scripts = os.path.join(scripts_path, dataset_name)
         nlp_data_script = os.path.join(brca_scripts, 'prepare_nlp_data.py')
         vision_data_script = os.path.join(brca_scripts, 'prepare_vision_data.py')
+        nlp_split_data = os.path.join(brca_scripts, 'create_data_split.py')
+        vision_split_data = os.path.join(brca_scripts, 'create_data_split.py')
         # Run dataset preprocessing scripts
         _launch_command(["python", nlp_data_script])
         _launch_command(["python", vision_data_script])
+
+        # Split the pre-processed data:
+        _launch_command(["python", nlp_split_data, "--split_ratio", str(split_ratio)])
+        _launch_command(["python", vision_split_data, "--split_ratio", str(split_ratio)])
 
     elif dataset_name == "mvtec-ad":
         raw_datset = os.path.join( dataset_directory, "mvtec_anomaly_detection.tar.xz")

@@ -75,8 +75,6 @@ class ModelInitializer(BaseModelInitializer):
             "--experimental-gelu", dest="experimental_gelu", default="False")
         arg_parser.add_argument(
             "--optimized-softmax", dest="optimized_softmax", default="True")
-        arg_parser.add_argument(
-            "--amp", dest="amp", default="False")
         arg_parser.add_argument("--warmup-steps", dest='warmup_steps',
                                 type=int, default=10,
                                 help="number of warmup steps")
@@ -141,7 +139,6 @@ class ModelInitializer(BaseModelInitializer):
                          " --predict_batch_size=" + str(self.args.batch_size) + \
                          " --experimental_gelu=" + str(self.args.experimental_gelu) + \
                          " --optimized_softmax=" + str(self.args.optimized_softmax) + \
-                         " --amp=" + str(self.args.amp) + \
                          " --do_predict=True "
 
         if self.args.input_graph:

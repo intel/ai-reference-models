@@ -16,8 +16,9 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   cd <clone of the model zoo>/quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
   git clone https://github.com/huggingface/transformers.git
   cd transformers
-  git checkout v4.18.0
-  git apply ../enable_ipex_for_distilbert-base.diff
+  git checkout v4.28.1
+  pip install -r ./examples/pytorch/text-classification/requirements.txt
+  git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
   pip install -e ./
   cd ..
  ```
@@ -51,6 +52,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   Realtime mode is using BATCH_SIZE=[1] by default in script; 
   
   Note: If you would have a SPR-56C host, BATCH_SIZE=205 is perferred for INT8-BF16 Throughput mode and BATCH_SIZE=198 is perferred for BF16 Throughput mode.
+  Customized BATCH_SIZE is supposed to be no larger than dataset size 872.
   ```
 
 * Do calibration to get quantization config before running INT8 (Default attached is produced with sequence length 128).
@@ -108,8 +110,9 @@ export MODEL_DIR=$(pwd)
 cd quickstart/language_modeling/pytorch/distilbert_base/inference/cpu
 git clone https://github.com/huggingface/transformers.git
 cd transformers
-git checkout v4.18.0
-git apply ../enable_ipex_for_distilbert-base.diff
+git checkout v4.28.1
+pip install -r ./examples/pytorch/text-classification/requirements.txt
+git apply ../../../../../../../models/language_modeling/pytorch/common/enable_ipex_for_transformers.diff
 pip install -e ./
 cd ..
 

@@ -13,6 +13,11 @@ Intel-optimized PyTorch.
 
 Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and build Pytorch, IPEX, TorchVison, Torch-CCL and Tcmalloc.
 
+* Install dependencies
+```
+conda install -c conda-forge accimage
+```
+
 ### Model Specific Setup
 
 * Set Jemalloc Preload for better performance
@@ -41,7 +46,7 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 
   In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes.
 ```bash
-    export BATCH_SIZE=#global batch_size (for lars optimizer convergency test, the number should be 3264)
+    export LOCAL_BATCH_SIZE=#local batch_size(for lars optimizer convergency test, the GLOBAL_BATCH_SIZE should be 3264)
     export NNODES=#your_node_number
     export HOSTFILE=#your_ip_list_file #one ip per line
     export TRAINING_EPOCHS=36 #(optional, this numeber is for lars optimizer convergency test)
@@ -105,7 +110,7 @@ export MODEL_DIR=$(pwd)
 # Env vars
 export DATASET_DIR=<path_to_Imagenet_Dataset>
 export OUTPUT_DIR=<Where_to_save_log>
-export PRECISION=<precision to run (fp32, avx-fp32, bf16, or bf32)>
+export PRECISION=<precision to run (fp32, avx-fp32, bf16, bf32, or fp16)>
 export TRAINING_EPOCHS=<epoch_number(90 or other number)>
 
 # Run the training quickstart script

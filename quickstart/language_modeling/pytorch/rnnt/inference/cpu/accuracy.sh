@@ -63,7 +63,7 @@ PRECISION=$1
 rm -rf ${OUTPUT_DIR}/rnnt_${PRECISION}_inference_accuracy*
 
 python -m intel_extension_for_pytorch.cpu.launch \
-    --use_default_allocator \
+    --memory-allocator jemalloc \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py \
     --dataset_dir ${DATASET_DIR}/dataset/LibriSpeech/ \
     --val_manifest ${DATASET_DIR}/dataset/LibriSpeech/librispeech-dev-clean-wav.json \

@@ -42,7 +42,7 @@ from tensorflow.python.data.experimental import parallel_interleave
 from tensorflow.python.data.experimental import map_and_batch
 from tensorflow.python.platform import gfile
 
-
+@tf.function
 def parse_example_proto(example_serialized):
   """Parses an Example proto containing a training example of an image.
   """
@@ -66,7 +66,7 @@ def parse_example_proto(example_serialized):
 
   return features['image/encoded'], label
 
-
+@tf.function
 def eval_image(image, height, width, resize_method,
                central_fraction=0.875, scope=None):
 
@@ -121,6 +121,7 @@ class RecordInputImagePreprocessor(object):
     self.num_cores = num_cores
     self.resize_method = resize_method
 
+  @tf.function
   def parse_and_preprocess(self, value):
     # parse
     image_buffer, label_index = parse_example_proto(value)
@@ -131,6 +132,7 @@ class RecordInputImagePreprocessor(object):
 
     return (image, label_index)
 
+  @tf.function
   def minibatch(self, dataset, subset, cache_data=False):
 
     with tf.compat.v1.name_scope('batch_processing'):
@@ -164,8 +166,8 @@ class RecordInputImagePreprocessor(object):
 
       ds = ds.prefetch(buffer_size=tf.data.experimental.AUTOTUNE)  # this number can be tuned
 
-      ds_iterator = tf.compat.v1.data.make_one_shot_iterator(ds)
-      images, labels = ds_iterator.get_next()
+      ds_iterator = iter(ds)
+      images, labels = next(ds_iterator)
       # reshape
       labels = tf.reshape(labels, [self.batch_size])
 

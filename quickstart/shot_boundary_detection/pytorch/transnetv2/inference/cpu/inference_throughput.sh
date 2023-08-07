@@ -67,7 +67,7 @@ IPEX_ARGS=""
 pip list | grep intel-extension-for-pytorch
 if [[ "$?" == 0 ]]; then
   IPEX_ARGS="-m intel_extension_for_pytorch.cpu.launch \
-  --use_default_allocator \
+  --memory-allocator jemalloc \
   --throughput_mode \
   --log_path=${OUTPUT_DIR} \
   --log_file_prefix="transnetv2_throughput_log_${PRECISION}""

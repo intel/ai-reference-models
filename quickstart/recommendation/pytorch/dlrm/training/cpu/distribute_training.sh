@@ -90,6 +90,8 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export FI_PROVIDER_PATH=/usr/lib64/libfabric
 export CCL_MNIC_NAME=irdma-cvl01tf2,irdma-cvl02tf2,irdma-cvl11tf2,irdma-cvl12tf2
 export CCL_MNIC_COUNT=2
+LOCAL_BATCH_SIZE=$((BATCHSIZE / NODE))
+LOCAL_BATCH_SIZE=$((LOCAL_BATCH_SIZE / 2))
 
 LOG_0="${LOG}/socket.log"
 python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count 8 --distributed --hostfile hostfile1 --nnodes $NODE \
@@ -101,7 +103,7 @@ $MODEL_SCRIPT \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=${seed_num} --print-auc --mlperf-auc-threshold=0.8025 \
   --lr-num-warmup-steps=8000   --lr-decay-start-step=70000 --lr-num-decay-steps=30000\
-  --mini-batch-size=${BATCHSIZE} --print-freq=1024 --print-time --ipex-interaction \
+  --local-batch-size=${LOCAL_BATCH_SIZE} --print-freq=1024 --print-time --ipex-interaction \
   --test-mini-batch-size=65536 --ipex-merged-emb --should-test --test-freq 6400\
   $ARGS |tee $LOG_0
 wait

@@ -75,11 +75,6 @@ if [ -z "${BATCH_SIZE}"]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
-if [ $PRECISION == "bfloat16" ]; then
-  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_INFERLIST_REMOVE="BiasAdd"
-  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_DENYLIST_REMOVE="Softmax"
-  export TF_AUTO_MIXED_PRECISION_GRAPH_REWRITE_ALLOWLIST_ADD="BiasAdd|Softmax"
-fi
 if [ $PRECISION == "bfloat32" ]; then
   export ONEDNN_DEFAULT_FPMATH_MODE="BF16"
   export PRECISION="fp32"

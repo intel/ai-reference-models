@@ -1,0 +1,21 @@
+[
+  { "_comment": "mobilenet_v2_fp32_benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=mobilenet_v2 --precision=fp32 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/output --num-train-steps=1 --benchmark-only --verbose --in-graph=/graph/mobilenet_v2_1.4_224_frozen.pb --disable-tcmalloc=True --input_height=224 --input_width=224 --warmup_steps=500 --steps=1000 --input_layer=input --output_layer=MobilenetV2/Predictions/Reshape_1 ",
+    "output": "python /workspace/intelai_models/inference/fp32/benchmark.py --precision=fp32 --batch_size=1 --num_intra_threads=56 --num_inter_threads=2 --input_graph=/graph/mobilenet_v2_1.4_224_frozen.pb --input_height=224 --input_width=224 --warmup_steps=500 --steps=1000 --input_layer=input --output_layer=MobilenetV2/Predictions/Reshape_1",
+    "cpuset": "0-111"},
+  
+  {
+    "_comment": "mobilenet_v2_bfloat16_benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=mobilenet_v2 --precision=bfloat16 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/output --num-train-steps=1 --benchmark-only --verbose --in-graph=/graph/mobilenet_v2_1.4_224_frozen.pb --disable-tcmalloc=True --input_height=224 --input_width=224 --warmup_steps=500 --steps=1000 --input_layer=input --output_layer=MobilenetV2/Predictions/Reshape_1",
+    "output": "python /workspace/intelai_models/inference/bfloat16/benchmark.py --precision=bfloat16 --batch_size=1 --num_intra_threads=56 --num_inter_threads=2 --input_graph=/graph/mobilenet_v2_1.4_224_frozen.pb --input_height=224 --input_width=224 --warmup_steps=500 --steps=1000 --input_layer=input --output_layer=MobilenetV2/Predictions/Reshape_1",
+    "cpuset": "0-111"},
+  
+  {
+    "_comment": "mobilenet_v2_int8_benchmark",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=mobilenet_v2 --precision=int8 --mode=inference --benchmark-dir=/workspace/benchmarks --intelai-models=/workspace/intelai_models --num-cores=-1 --batch-size=1 --socket-id=-1 --output-dir=/workspace/output --num-train-steps=1 --benchmark-only --verbose --in-graph=/graph/mobilenet_v2_int8_pretrained.pb --disable-tcmalloc=False --input_height=224 --input_width=224 --warmup_steps=500 --steps=1000 --input_layer=input --output_layer=MobilenetV2/Predictions/Reshape_1",
+    "output": "python /workspace/intelai_models/inference/int8/benchmark.py --precision=int8 --batch_size=1 --num_intra_threads=56 --num_inter_threads=2 --input_graph=/graph/mobilenet_v2_int8_pretrained.pb --input_height=224 --input_width=224 --warmup_steps=500 --steps=1000 --input_layer=input --output_layer=MobilenetV2/Predictions/Reshape_1",
+    "cpuset": "0-111"}
+
+]
+
+

@@ -3,7 +3,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from intel_extension_for_pytorch.nn.modules._roi_align import RoIAlign as ROIAlign
+from intel_extension_for_pytorch.cpu.nn._roi_align import RoIAlign as ROIAlign
 
 from .utils import cat
 

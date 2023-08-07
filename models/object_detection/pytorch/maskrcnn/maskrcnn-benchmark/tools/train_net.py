@@ -44,6 +44,7 @@ from maskrcnn_benchmark.utils.comm import synchronize, get_rank
 from maskrcnn_benchmark.utils.imports import import_file
 from maskrcnn_benchmark.utils.logger import setup_logger
 from maskrcnn_benchmark.utils.miscellaneous import mkdir, save_config
+import intel_extension_for_pytorch as ipex
 
 
 def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, iter_warmup=-1):
@@ -54,6 +55,14 @@ def train(cfg, local_rank, distributed, bf16=False, bf32=False, iterations=-1, i
 
     optimizer = make_optimizer(cfg, model)
     scheduler = make_lr_scheduler(cfg, optimizer)
+
+    if bf32:
+        ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True, auto_kernel_selection=True)
+    elif bf16:
+        model, optimizer = ipex.optimize(model, dtype=torch.bfloat16, optimizer=optimizer, inplace=True)
+    else:
+        model, optimizer = ipex.optimize(model, dtype=torch.float32, optimizer=optimizer, inplace=True)
 
     if distributed:
         device_ids = None
@@ -171,6 +180,8 @@ def main():
                         help='number of total iterations to run')
     parser.add_argument('--iter-warmup', default=-1, type=int, metavar='N',
                         help='number of warm-up iterations to run')
+    parser.add_argument('-b', '--local-batch-size', default=1, type=int, metavar='N',
+                        help='local batch size')
     parser.add_argument("--world-size", default=1, type=int, help='world size')
     parser.add_argument("--master-addr", default='127.0.0.1', type=str, help='Master Addr')
     parser.add_argument("--port", default='29500', type=str, help='Port')
@@ -180,6 +191,7 @@ def main():
     args = parser.parse_args()
 
     args.distributed = False
+    batch_size = args.local_batch_size
     if torch.distributed.is_available() and int(os.environ.get('PMI_SIZE', '0')) > 1:
         print('Distributed training with DDP')
         os.environ['RANK'] = os.environ.get('PMI_RANK', '0')
@@ -207,8 +219,30 @@ def main():
             print("Torch distributed is not initialized.")
             args.rank = 0
             args.world_size = 1
+        batch_size = args.local_batch_size * args.world_size
+        print("Rank and world size: ", args.rank," ", args.world_size)
+        print("Using local batch size: ", args.local_batch_size)
+        print("Using global batch size: ", batch_size)
 
     cfg.merge_from_file(args.config_file)
+    args.opts.append("SOLVER.IMS_PER_BATCH")
+    args.opts.append(batch_size)
+    if "SOLVER.STEPS_1" in args.opts and \
+        "SOLVER.STEPS_2" in args.opts and \
+        "SOLVER.STEPS" not in args.opts:
+        steps_1_ind = args.opts.index("SOLVER.STEPS_1") + 1
+        steps_2_ind = args.opts.index("SOLVER.STEPS_2") + 1
+        new_steps = ["SOLVER.STEPS", '({},{})'.format(args.opts[steps_1_ind], args.opts[steps_2_ind])]
+        print(f"Combine SOLVER.STEPS_1 and SOLVER.STEPS_2 together to generate {new_steps}")
+        steps_1_key_ind = args.opts.index("SOLVER.STEPS_1")
+        args.opts.pop(steps_1_key_ind)
+        args.opts.pop(steps_1_key_ind)
+        steps_2_key_ind = args.opts.index("SOLVER.STEPS_2")
+        args.opts.pop(steps_2_key_ind)
+        args.opts.pop(steps_2_key_ind)
+        print("Remove SOLVER.STEPS_1 and SOLVER.STEPS_2 from args.opt")
+        args.opts += new_steps
+        print(args.opts)
     cfg.merge_from_list(args.opts)
     cfg.freeze()
 
