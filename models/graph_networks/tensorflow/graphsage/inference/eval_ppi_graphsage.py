@@ -22,9 +22,10 @@ from argparse import ArgumentParser
 import tensorflow as tf
 from tensorflow.python.platform import tf_logging
 import numpy as np
-
+from tensorflow.core.protobuf import rewriter_config_pb2
 import utils
 import dataloader
+import os
 
 np.random.seed(123)
 
@@ -99,9 +100,7 @@ class eval_graphsage:
                 context_pairs = context_pairs)
         
         graph_def = tf.compat.v1.get_default_graph().as_graph_def()
-        #with tf.io.gfile.GFile('./frozen_model_ppi/frozen_model.pb', 'rb') as f:
-        print(self.args.pretrained_model)
-        with tf.io.gfile.GFile(self.args.pretrained_model + './frozen_model.pb', 'rb') as f:
+        with tf.io.gfile.GFile(os.path.join(self.args.pretrained_model + 'graphsage_frozen_model.pb'), 'rb') as f:
             graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
         
@@ -109,21 +108,19 @@ class eval_graphsage:
         with tf.Graph().as_default() as graph:
             tf.import_graph_def(graph_def, name='')
 
-        sess = tf.compat.v1.Session(graph=graph)
         infer_config = tf.compat.v1.ConfigProto()
-        infer_config.intra_op_parallelism_threads = 54
-        infer_config.inter_op_parallelism_threads = 2
+        infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
+        infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
         infer_config.use_per_session_threads = 1
         
         if self.args.precision == "bfloat16":
             print("Enabling auto-mixed precision for bfloat16")
-            tf.config.optimizer.set_experimental_options({'auto_mixed_precision_onednn_bfloat16': True})
-            print(tf.config.optimizer.get_experimental_options())
+            infer_config.graph_options.rewrite_options.auto_mixed_precision_onednn_bfloat16 = rewriter_config_pb2.RewriterConfig.ON
         elif self.args.precision == "fp16":
             print("Enabling auto-mixed precision for fp16")
-            tf.config.optimizer.set_experimental_options({'auto_mixed_precision': True})
-            print(tf.config.optimizer.get_experimental_options())
+            infer_config.graph_options.rewrite_options.auto_mixed_precision = rewriter_config_pb2.RewriterConfig.ON
 
+        sess = tf.compat.v1.Session(config=infer_config, graph=graph)
         output_tensor = sess.graph.get_tensor_by_name('Sigmoid:0')
 
         total_time = 0
