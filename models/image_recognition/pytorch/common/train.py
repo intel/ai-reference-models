@@ -103,6 +103,8 @@ parser.add_argument('--zero-init-residual', action='store_true', default=False,
                     help='Initialize scale params in BN3 of a residual block to zeros instead ones. '
                          'Improves accuracy by 0.2~0.3 percent according to https://arxiv.org/abs/1706.02677'
                          'Used by Nvidia, but not part of MLPerf reference ')
+parser.add_argument('--warmup-iterations', default=-1, type=int, metavar='N',
+                    help='number of total warmup iterations to run')
 parser.add_argument('-i', '--iterations', default=-1, type=int, metavar='N',
                     help='number of total iterations to run')
 parser.add_argument('--train-no-eval', action='store_true', default=False,
@@ -309,6 +311,8 @@ def main_worker(args):
 def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args):
 
     epoch_time = 0
+    total_time = 0
+    compute_time = 0
 
     batch_time = AverageMeter('Time', ':6.3f')      # Track total time = data-load + compute
     data_time = AverageMeter('Data', ':6.3f')       # Track data-load time
@@ -335,6 +339,9 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler
 
     start = time.time()
     for i, (images, target) in enumerate(train_loader):
+
+        if args.distributed:
+            dist.barrier()
 
         if args.ipex:
             images = images.contiguous(memory_format=torch.channels_last)
@@ -374,6 +381,9 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler
         t2 = time.time() - start
         batch_time.update(t2)
         epoch_time += t2 - t1
+        if args.iterations + args.warmup_iterations > 0 and i + 1 > args.warmup_iterations:
+            total_time += t2
+            compute_time += t2 - t1
 
         # measure accuracy and record loss
         acc, counts = accuracy(output, target, topk=(1, 5))
@@ -385,14 +395,17 @@ def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler
         if i % args.print_freq == 0:
             progress.display(i)
 
-        if args.iterations > 0 and i + 1 == args.iterations:
+        if args.iterations + args.warmup_iterations > 0 and i + 1 == args.iterations + args.warmup_iterations:
             break
 
         start = time.time()
 
     batch_size = args.local_batch_size
-    perf = batch_size / (batch_time.avg - data_time.avg)
-    print("Training throughput: {:.3f} fps".format(perf))
+    if args.iterations + args.warmup_iterations > 0:
+        perf = batch_size * args.iterations / compute_time
+        print("Training throughput(compute): {:.3f} fps".format(perf))
+        perf2 = batch_size * args.iterations / total_time
+        print("Training throughput(dataload+compute): {:.3f} fps".format(perf2))
 
     return epoch_time
 

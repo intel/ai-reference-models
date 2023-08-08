@@ -144,7 +144,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
 # For the summary of results
 wait
 
-throughput=$(grep 'Training throughput:' ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Training throughput(compute):' ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}.log |sed -e 's/.*Training throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
        sum = 0;
 i = 0;

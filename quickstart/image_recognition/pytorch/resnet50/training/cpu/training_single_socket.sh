@@ -115,13 +115,14 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --base-op=LARS \
     --base-lr 10.5 \
     --weight-decay 0.00005 \
+    --warmup-iterations 20 \
     -i 200 \
     --train-no-eval
 
 # For the summary of results
 wait
 
-throughput=$(grep 'Training throughput:'  ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}_* |sed -e 's/.*throughput//;s/[^0-9.]//g' |awk '
+throughput=$(grep 'Training throughput(compute):'  ${OUTPUT_DIR}/resnet50_training_log_${PRECISION}_* |sed -e 's/.*throughput//;s/[^0-9.]//g' |awk '
 BEGIN {
     sum = 0;
     i = 0;
