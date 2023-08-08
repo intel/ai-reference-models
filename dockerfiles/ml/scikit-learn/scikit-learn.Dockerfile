@@ -54,9 +54,8 @@ RUN conda install -y -q \
 
 ENV PYTHONSTARTUP=${HOME}/.patch_sklearn.py
 
+RUN python -m sklearnex.glob patch_sklearn
+
 RUN echo \
-'from sklearnex import patch_sklearn\n\
-from sklearnex import unpatch_sklearn\n\
-patch_sklearn()\n\
-print("To disable Intel(R) Extension for Scikit-learn*, you can run: unpatch_sklearn()")\n' \
+'print("To disable Intel(R) Extension for Scikit-learn*, you can run: unpatch_sklearn()")\n' \
 >> ${PYTHONSTARTUP}
