@@ -1085,7 +1085,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -1706,7 +1706,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -2071,7 +2071,7 @@
                 }
             },
             "5": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -2123,7 +2123,7 @@
             "6": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_0",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_0",
                 "input_tensor_infos": [
                     {
                         "id": 7,
@@ -2196,10 +2196,10 @@
             "7": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_1",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_1",
                 "input_tensor_infos": [
                     {
-                        "id": 11,
+                        "id": 10,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2211,7 +2211,7 @@
                         ]
                     },
                     {
-                        "id": 12,
+                        "id": 11,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2237,7 +2237,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 13,
+                        "id": 12,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2269,10 +2269,10 @@
             "8": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_2",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_2",
                 "input_tensor_infos": [
                     {
-                        "id": 15,
+                        "id": 13,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2284,7 +2284,7 @@
                         ]
                     },
                     {
-                        "id": 16,
+                        "id": 14,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2310,7 +2310,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 17,
+                        "id": 15,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2342,10 +2342,10 @@
             "9": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_3",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_3",
                 "input_tensor_infos": [
                     {
-                        "id": 19,
+                        "id": 16,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2357,7 +2357,7 @@
                         ]
                     },
                     {
-                        "id": 20,
+                        "id": 17,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2383,7 +2383,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 21,
+                        "id": 18,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2415,10 +2415,10 @@
             "10": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_4",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_4",
                 "input_tensor_infos": [
                     {
-                        "id": 23,
+                        "id": 19,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2430,7 +2430,7 @@
                         ]
                     },
                     {
-                        "id": 24,
+                        "id": 20,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2456,7 +2456,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 25,
+                        "id": 21,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2488,10 +2488,10 @@
             "11": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_5",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_5",
                 "input_tensor_infos": [
                     {
-                        "id": 27,
+                        "id": 22,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2503,7 +2503,7 @@
                         ]
                     },
                     {
-                        "id": 28,
+                        "id": 23,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2529,7 +2529,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 29,
+                        "id": 24,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2561,10 +2561,10 @@
             "12": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_6",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_6",
                 "input_tensor_infos": [
                     {
-                        "id": 31,
+                        "id": 25,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2576,7 +2576,7 @@
                         ]
                     },
                     {
-                        "id": 32,
+                        "id": 26,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2602,7 +2602,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 33,
+                        "id": 27,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2634,10 +2634,10 @@
             "13": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_7",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_7",
                 "input_tensor_infos": [
                     {
-                        "id": 35,
+                        "id": 28,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2649,7 +2649,7 @@
                         ]
                     },
                     {
-                        "id": 36,
+                        "id": 29,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2675,7 +2675,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 37,
+                        "id": 30,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2707,10 +2707,10 @@
             "14": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_8",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_8",
                 "input_tensor_infos": [
                     {
-                        "id": 39,
+                        "id": 31,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2722,7 +2722,7 @@
                         ]
                     },
                     {
-                        "id": 40,
+                        "id": 32,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2748,7 +2748,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 41,
+                        "id": 33,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2780,10 +2780,10 @@
             "15": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_9",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_9",
                 "input_tensor_infos": [
                     {
-                        "id": 43,
+                        "id": 34,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2795,7 +2795,7 @@
                         ]
                     },
                     {
-                        "id": 44,
+                        "id": 35,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2821,7 +2821,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 45,
+                        "id": 36,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2853,10 +2853,10 @@
             "16": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_10",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_10",
                 "input_tensor_infos": [
                     {
-                        "id": 47,
+                        "id": 37,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2868,7 +2868,7 @@
                         ]
                     },
                     {
-                        "id": 48,
+                        "id": 38,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2894,7 +2894,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 49,
+                        "id": 39,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2926,10 +2926,10 @@
             "17": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_11",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_11",
                 "input_tensor_infos": [
                     {
-                        "id": 51,
+                        "id": 40,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2941,7 +2941,7 @@
                         ]
                     },
                     {
-                        "id": 52,
+                        "id": 41,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -2967,7 +2967,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 53,
+                        "id": 42,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -2999,10 +2999,10 @@
             "18": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_12",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_12",
                 "input_tensor_infos": [
                     {
-                        "id": 55,
+                        "id": 43,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3014,7 +3014,7 @@
                         ]
                     },
                     {
-                        "id": 56,
+                        "id": 44,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3040,7 +3040,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 57,
+                        "id": 45,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3072,10 +3072,10 @@
             "19": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_13",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_13",
                 "input_tensor_infos": [
                     {
-                        "id": 59,
+                        "id": 46,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3087,7 +3087,7 @@
                         ]
                     },
                     {
-                        "id": 60,
+                        "id": 47,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3113,7 +3113,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 61,
+                        "id": 48,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3145,10 +3145,10 @@
             "20": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_14",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_14",
                 "input_tensor_infos": [
                     {
-                        "id": 63,
+                        "id": 49,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3160,7 +3160,7 @@
                         ]
                     },
                     {
-                        "id": 64,
+                        "id": 50,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3186,7 +3186,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 65,
+                        "id": 51,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3218,10 +3218,10 @@
             "21": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_15",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_15",
                 "input_tensor_infos": [
                     {
-                        "id": 67,
+                        "id": 52,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3233,7 +3233,7 @@
                         ]
                     },
                     {
-                        "id": 68,
+                        "id": 53,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3259,7 +3259,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 69,
+                        "id": 54,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3291,10 +3291,10 @@
             "22": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_16",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_16",
                 "input_tensor_infos": [
                     {
-                        "id": 71,
+                        "id": 55,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3306,7 +3306,7 @@
                         ]
                     },
                     {
-                        "id": 72,
+                        "id": 56,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3332,7 +3332,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 73,
+                        "id": 57,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3364,10 +3364,10 @@
             "23": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_17",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_17",
                 "input_tensor_infos": [
                     {
-                        "id": 75,
+                        "id": 58,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3379,7 +3379,7 @@
                         ]
                     },
                     {
-                        "id": 76,
+                        "id": 59,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3405,7 +3405,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 77,
+                        "id": 60,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3437,10 +3437,10 @@
             "24": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_18",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_18",
                 "input_tensor_infos": [
                     {
-                        "id": 79,
+                        "id": 61,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3452,7 +3452,7 @@
                         ]
                     },
                     {
-                        "id": 80,
+                        "id": 62,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3478,7 +3478,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 81,
+                        "id": 63,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3510,10 +3510,10 @@
             "25": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_19",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_19",
                 "input_tensor_infos": [
                     {
-                        "id": 83,
+                        "id": 64,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3525,7 +3525,7 @@
                         ]
                     },
                     {
-                        "id": 84,
+                        "id": 65,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3551,7 +3551,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 85,
+                        "id": 66,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3583,10 +3583,10 @@
             "26": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_20",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_20",
                 "input_tensor_infos": [
                     {
-                        "id": 87,
+                        "id": 67,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3598,7 +3598,7 @@
                         ]
                     },
                     {
-                        "id": 88,
+                        "id": 68,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3624,7 +3624,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 89,
+                        "id": 69,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3656,10 +3656,10 @@
             "27": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_21",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_21",
                 "input_tensor_infos": [
                     {
-                        "id": 91,
+                        "id": 70,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3671,7 +3671,7 @@
                         ]
                     },
                     {
-                        "id": 92,
+                        "id": 71,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3697,7 +3697,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 93,
+                        "id": 72,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3729,10 +3729,10 @@
             "28": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_22",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_22",
                 "input_tensor_infos": [
                     {
-                        "id": 95,
+                        "id": 73,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3744,7 +3744,7 @@
                         ]
                     },
                     {
-                        "id": 96,
+                        "id": 74,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3770,7 +3770,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 97,
+                        "id": 75,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3802,10 +3802,10 @@
             "29": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_23",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_23",
                 "input_tensor_infos": [
                     {
-                        "id": 99,
+                        "id": 76,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3817,7 +3817,7 @@
                         ]
                     },
                     {
-                        "id": 100,
+                        "id": 77,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3843,7 +3843,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 101,
+                        "id": 78,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3875,10 +3875,10 @@
             "30": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_24",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_24",
                 "input_tensor_infos": [
                     {
-                        "id": 103,
+                        "id": 79,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3890,7 +3890,7 @@
                         ]
                     },
                     {
-                        "id": 104,
+                        "id": 80,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3916,7 +3916,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 105,
+                        "id": 81,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -3948,10 +3948,10 @@
             "31": {
                 "op_type": "<class 'torch.nn.modules.sparse.EmbeddingBag'>",
                 "op_type_is_module": true,
-                "fqn": "sparse_arch.sparse_arch.embedding_bag_collection.embedding_bags.t_cat_25",
+                "fqn": "sparse_arch.embedding_bag_collection.embedding_bags.t_cat_25",
                 "input_tensor_infos": [
                     {
-                        "id": 107,
+                        "id": 82,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3963,7 +3963,7 @@
                         ]
                     },
                     {
-                        "id": 108,
+                        "id": 83,
                         "orig_dtype": "torch.int64",
                         "inf_dtype": "torch.int64",
                         "force_dtype": "torch.int64",
@@ -3989,7 +3989,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 109,
+                        "id": 84,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -4019,12 +4019,12 @@
                 }
             },
             "32": {
-                "op_type": "<built-in function linear>",
-                "op_type_is_module": false,
-                "fqn": "",
+                "op_type": "<class 'torch.nn.modules.linear.Linear'>",
+                "op_type_is_module": true,
+                "fqn": "inter_arch.V_linears.0",
                 "input_tensor_infos": [
                     {
-                        "id": 115,
+                        "id": 85,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
@@ -4034,12 +4034,12 @@
                         "zero_point": [
                             0
                         ]
-                    },
+                    }
+                ],
+                "weight_tensor_infos": [
                     {
-                        "id": 116,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
-                        "force_dtype": "torch.qint8",
                         "scale": [
                             0.0007224899018183351,
                             0.0007444857037626207,
@@ -5070,10 +5070,9 @@
                         ]
                     }
                 ],
-                "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 117,
+                        "id": 86,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -5103,12 +5102,12 @@
                 }
             },
             "33": {
-                "op_type": "<built-in function linear>",
-                "op_type_is_module": false,
-                "fqn": "",
+                "op_type": "<class 'torch.nn.modules.linear.Linear'>",
+                "op_type_is_module": true,
+                "fqn": "inter_arch.W_linears.0",
                 "input_tensor_infos": [
                     {
-                        "id": 117,
+                        "id": 86,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -5118,12 +5117,12 @@
                         "zero_point": [
                             0
                         ]
-                    },
+                    }
+                ],
+                "weight_tensor_infos": [
                     {
-                        "id": 118,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
-                        "force_dtype": "torch.qint8",
                         "scale": [
                             0.0009473703685216606,
                             0.0010398119920864701,
@@ -12042,18 +12041,11 @@
                         ]
                     }
                 ],
-                "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 119,
+                        "id": 87,
                         "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "scale": [
-                            0.140191912651062
-                        ],
-                        "zero_point": [
-                            0
-                        ]
+                        "inf_dtype": "torch.float32"
                     }
                 ],
                 "activation_observer": {
@@ -12080,24 +12072,24 @@
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 119,
+                        "id": 88,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.140191912651062
+                            0.1279286891222
                         ],
                         "zero_point": [
                             0
                         ]
                     },
                     {
-                        "id": 120,
+                        "id": 85,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.0008639167062938213
+                            0.06205710768699646
                         ],
                         "zero_point": [
                             0
@@ -12107,9 +12099,15 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 121,
+                        "id": 89,
                         "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
+                        "inf_dtype": "torch.float32",
+                        "scale": [
+                            0.09613978862762451
+                        ],
+                        "zero_point": [
+                            0
+                        ]
                     }
                 ],
                 "activation_observer": {
@@ -12131,74 +12129,12 @@
                 }
             },
             "35": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
-                "op_type_is_module": false,
-                "fqn": "",
+                "op_type": "<class 'torch.nn.modules.linear.Linear'>",
+                "op_type_is_module": true,
+                "fqn": "inter_arch.V_linears.1",
                 "input_tensor_infos": [
                     {
-                        "id": 122,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.1279286891222
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    },
-                    {
-                        "id": 115,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.06205710768699646
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "weight_tensor_infos": [],
-                "output_tensor_infos": [
-                    {
-                        "id": 123,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "scale": [
-                            0.09613978862762451
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "activation_observer": {
-                    "name": "MinMaxObserver",
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_tensor_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                },
-                "weight_observer": {
-                    "name": "PerChannelMinMaxObserver",
-                    "ch_axis": 0,
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_channel_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                }
-            },
-            "36": {
-                "op_type": "<built-in function linear>",
-                "op_type_is_module": false,
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 123,
+                        "id": 89,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
@@ -12208,12 +12144,12 @@
                         "zero_point": [
                             0
                         ]
-                    },
+                    }
+                ],
+                "weight_tensor_infos": [
                     {
-                        "id": 124,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
-                        "force_dtype": "torch.qint8",
                         "scale": [
                             0.001063563278876245,
                             0.000840360764414072,
@@ -13244,10 +13180,9 @@
                         ]
                     }
                 ],
-                "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 125,
+                        "id": 90,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -13276,13 +13211,13 @@
                     "quant_max": 127
                 }
             },
-            "37": {
-                "op_type": "<built-in function linear>",
-                "op_type_is_module": false,
-                "fqn": "",
+            "36": {
+                "op_type": "<class 'torch.nn.modules.linear.Linear'>",
+                "op_type_is_module": true,
+                "fqn": "inter_arch.W_linears.1",
                 "input_tensor_infos": [
                     {
-                        "id": 125,
+                        "id": 90,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -13292,12 +13227,12 @@
                         "zero_point": [
                             0
                         ]
-                    },
+                    }
+                ],
+                "weight_tensor_infos": [
                     {
-                        "id": 126,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
-                        "force_dtype": "torch.qint8",
                         "scale": [
                             0.0010001382324844599,
                             0.0008801991934888065,
@@ -20216,14 +20151,69 @@
                         ]
                     }
                 ],
+                "output_tensor_infos": [
+                    {
+                        "id": 91,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32"
+                    }
+                ],
+                "activation_observer": {
+                    "name": "MinMaxObserver",
+                    "dtype": "torch.qint8",
+                    "qscheme": "torch.per_tensor_symmetric",
+                    "reduce_range": false,
+                    "quant_min": -128,
+                    "quant_max": 127
+                },
+                "weight_observer": {
+                    "name": "PerChannelMinMaxObserver",
+                    "ch_axis": 0,
+                    "dtype": "torch.qint8",
+                    "qscheme": "torch.per_channel_symmetric",
+                    "reduce_range": false,
+                    "quant_min": -128,
+                    "quant_max": 127
+                }
+            },
+            "37": {
+                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
+                "op_type_is_module": false,
+                "fqn": "",
+                "input_tensor_infos": [
+                    {
+                        "id": 92,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32",
+                        "force_dtype": "torch.float32",
+                        "scale": [
+                            0.09065301716327667
+                        ],
+                        "zero_point": [
+                            0
+                        ]
+                    },
+                    {
+                        "id": 89,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.float32",
+                        "force_dtype": "torch.float32",
+                        "scale": [
+                            0.09613978862762451
+                        ],
+                        "zero_point": [
+                            0
+                        ]
+                    }
+                ],
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 127,
+                        "id": 93,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.11531474441289902
+                            0.14998754858970642
                         ],
                         "zero_point": [
                             0
@@ -20249,130 +20239,12 @@
                 }
             },
             "38": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
-                "op_type_is_module": false,
-                "fqn": "",
+                "op_type": "<class 'torch.nn.modules.linear.Linear'>",
+                "op_type_is_module": true,
+                "fqn": "inter_arch.V_linears.2",
                 "input_tensor_infos": [
                     {
-                        "id": 127,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.11531474441289902
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    },
-                    {
-                        "id": 128,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.000952372676692903
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "weight_tensor_infos": [],
-                "output_tensor_infos": [
-                    {
-                        "id": 129,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "activation_observer": {
-                    "name": "MinMaxObserver",
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_tensor_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                },
-                "weight_observer": {
-                    "name": "PerChannelMinMaxObserver",
-                    "ch_axis": 0,
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_channel_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                }
-            },
-            "39": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
-                "op_type_is_module": false,
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 130,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.09065303206443787
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    },
-                    {
-                        "id": 123,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.09613978862762451
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "weight_tensor_infos": [],
-                "output_tensor_infos": [
-                    {
-                        "id": 131,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "scale": [
-                            0.14998754858970642
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "activation_observer": {
-                    "name": "MinMaxObserver",
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_tensor_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                },
-                "weight_observer": {
-                    "name": "PerChannelMinMaxObserver",
-                    "ch_axis": 0,
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_channel_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                }
-            },
-            "40": {
-                "op_type": "<built-in function linear>",
-                "op_type_is_module": false,
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 131,
+                        "id": 93,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
@@ -20382,12 +20254,12 @@
                         "zero_point": [
                             0
                         ]
-                    },
+                    }
+                ],
+                "weight_tensor_infos": [
                     {
-                        "id": 132,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
-                        "force_dtype": "torch.qint8",
                         "scale": [
                             0.0009660659707151353,
                             0.0011442751856520772,
@@ -21418,14 +21290,13 @@
                         ]
                     }
                 ],
-                "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 133,
+                        "id": 94,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.036308687180280685
+                            0.03630867972970009
                         ],
                         "zero_point": [
                             0
@@ -21450,28 +21321,28 @@
                     "quant_max": 127
                 }
             },
-            "41": {
-                "op_type": "<built-in function linear>",
-                "op_type_is_module": false,
-                "fqn": "",
+            "39": {
+                "op_type": "<class 'torch.nn.modules.linear.Linear'>",
+                "op_type_is_module": true,
+                "fqn": "inter_arch.W_linears.2",
                 "input_tensor_infos": [
                     {
-                        "id": 133,
+                        "id": 94,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.036308687180280685
+                            0.03630867972970009
                         ],
                         "zero_point": [
                             0
                         ]
-                    },
+                    }
+                ],
+                "weight_tensor_infos": [
                     {
-                        "id": 134,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
-                        "force_dtype": "torch.qint8",
                         "scale": [
                             0.0009873901726678014,
                             0.0008334061712957919,
@@ -28390,72 +28261,9 @@
                         ]
                     }
                 ],
-                "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 135,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "scale": [
-                            0.08183003216981888
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "activation_observer": {
-                    "name": "MinMaxObserver",
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_tensor_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                },
-                "weight_observer": {
-                    "name": "PerChannelMinMaxObserver",
-                    "ch_axis": 0,
-                    "dtype": "torch.qint8",
-                    "qscheme": "torch.per_channel_symmetric",
-                    "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
-                }
-            },
-            "42": {
-                "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
-                "op_type_is_module": false,
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 135,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.08183003216981888
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    },
-                    {
-                        "id": 136,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32",
-                        "force_dtype": "torch.float32",
-                        "scale": [
-                            0.0005412970203906298
-                        ],
-                        "zero_point": [
-                            0
-                        ]
-                    }
-                ],
-                "weight_tensor_infos": [],
-                "output_tensor_infos": [
-                    {
-                        "id": 137,
+                        "id": 95,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -28478,13 +28286,13 @@
                     "quant_max": 127
                 }
             },
-            "43": {
+            "40": {
                 "op_type": "<method 'add' of 'torch._C._TensorBase' objects>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 138,
+                        "id": 96,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -28496,7 +28304,7 @@
                         ]
                     },
                     {
-                        "id": 131,
+                        "id": 93,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -28511,7 +28319,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 139,
+                        "id": 97,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -28540,13 +28348,13 @@
                     "quant_max": 127
                 }
             },
-            "44": {
+            "41": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
                 "fqn": "over_arch.model.0._mlp.0._linear",
                 "input_tensor_infos": [
                     {
-                        "id": 139,
+                        "id": 97,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -30618,7 +30426,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 140,
+                        "id": 98,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
@@ -30647,13 +30455,13 @@
                     "quant_max": 127
                 }
             },
-            "45": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+            "42": {
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 140,
+                        "id": 98,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -30668,7 +30476,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 141,
+                        "id": 99,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -30697,13 +30505,13 @@
                     "quant_max": 127
                 }
             },
-            "46": {
+            "43": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
                 "fqn": "over_arch.model.0._mlp.1._linear",
                 "input_tensor_infos": [
                     {
-                        "id": 141,
+                        "id": 99,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -32775,7 +32583,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 142,
+                        "id": 100,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
@@ -32804,13 +32612,13 @@
                     "quant_max": 127
                 }
             },
-            "47": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+            "44": {
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 142,
+                        "id": 100,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -32825,7 +32633,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 143,
+                        "id": 101,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -32854,13 +32662,13 @@
                     "quant_max": 127
                 }
             },
-            "48": {
+            "45": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
                 "fqn": "over_arch.model.0._mlp.2._linear",
                 "input_tensor_infos": [
                     {
-                        "id": 143,
+                        "id": 101,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -33908,7 +33716,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 144,
+                        "id": 102,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
@@ -33937,13 +33745,13 @@
                     "quant_max": 127
                 }
             },
-            "49": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+            "46": {
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 144,
+                        "id": 102,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -33958,7 +33766,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 145,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -33987,13 +33795,13 @@
                     "quant_max": 127
                 }
             },
-            "50": {
+            "47": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
                 "fqn": "over_arch.model.0._mlp.3._linear",
                 "input_tensor_infos": [
                     {
-                        "id": 145,
+                        "id": 103,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -34529,7 +34337,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 146,
+                        "id": 104,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
@@ -34558,13 +34366,13 @@
                     "quant_max": 127
                 }
             },
-            "51": {
-                "op_type": "<built-in method relu of type object at 0x145596619900>",
+            "48": {
+                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 146,
+                        "id": 104,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
@@ -34579,7 +34387,7 @@
                 "weight_tensor_infos": [],
                 "output_tensor_infos": [
                     {
-                        "id": 147,
+                        "id": 105,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
@@ -34608,13 +34416,13 @@
                     "quant_max": 127
                 }
             },
-            "52": {
+            "49": {
                 "op_type": "<class 'torch.nn.modules.linear.Linear'>",
                 "op_type_is_module": true,
                 "fqn": "over_arch.model.1",
                 "input_tensor_infos": [
                     {
-                        "id": 147,
+                        "id": 105,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
@@ -34640,7 +34448,7 @@
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 148,
+                        "id": 106,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -34666,651 +34474,7 @@
         },
         "nonq_op_infos": {
             "0": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 9,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 10,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "1": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 13,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 14,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "2": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 17,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 18,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "3": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 21,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 22,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "4": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 25,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 26,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "5": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 29,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 30,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "6": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 33,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 34,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "7": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 37,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 38,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "8": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 41,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 42,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "9": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 45,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 46,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "10": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 49,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 50,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "11": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 53,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 54,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "12": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 57,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 58,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "13": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 61,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 62,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "14": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 65,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 66,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "15": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 69,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 70,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "16": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 73,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 74,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "17": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 77,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 78,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "18": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 81,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 82,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "19": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 85,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 86,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "20": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 89,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 90,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "21": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 93,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 94,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "22": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 97,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 98,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "23": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 101,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 102,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "24": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 105,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 106,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "25": {
-                "op_type": "<method 'float' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 109,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.qint8"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 110,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "26": {
-                "op_type": "<built-in method cat of type object at 0x145596619900>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 10,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 14,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 18,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 22,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 26,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 30,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 34,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 38,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 42,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 46,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 50,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 54,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 58,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 62,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 66,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 70,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 74,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 78,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 82,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 86,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 90,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 94,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 98,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 102,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 106,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {
-                        "id": 110,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 111,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "27": {
-                "op_type": "<method 'numel' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 8,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64"
-                    }
-                ],
-                "output_tensor_infos": []
-            },
-            "28": {
-                "op_type": "<method 'reshape' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 111,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    },
-                    {},
-                    {},
-                    {}
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 112,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "29": {
-                "op_type": "<method 'unsqueeze' of 'torch._C._TensorBase' objects>",
+                "op_type": "<built-in method cat of type object at 0x14d299067fa0>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {
@@ -35318,123 +34482,209 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
-                    {}
-                ],
-                "output_tensor_infos": [
                     {
-                        "id": 113,
+                        "id": 9,
                         "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "30": {
-                "op_type": "<built-in method cat of type object at 0x145596619900>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 113,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
+                        "inf_dtype": "torch.qint8"
                     },
                     {
-                        "id": 112,
+                        "id": 12,
                         "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ],
-                "output_tensor_infos": [
-                    {
-                        "id": 114,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
-                    }
-                ]
-            },
-            "31": {
-                "op_type": "<method 'reshape' of 'torch._C._TensorBase' objects>",
-                "fqn": "",
-                "input_tensor_infos": [
-                    {
-                        "id": 114,
-                        "orig_dtype": "torch.float32",
-                        "inf_dtype": "torch.float32"
+                        "inf_dtype": "torch.qint8"
                     },
-                    {},
-                    {}
+                    {
+                        "id": 15,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 18,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 21,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 24,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 27,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 30,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 33,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 36,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 39,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 42,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 45,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 48,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 51,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 54,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 57,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 60,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 63,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 66,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 69,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 72,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 75,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 78,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 81,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    },
+                    {
+                        "id": 84,
+                        "orig_dtype": "torch.float32",
+                        "inf_dtype": "torch.qint8"
+                    }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 115,
+                        "id": 85,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
-            "32": {
+            "1": {
                 "op_type": "<method 'mul' of 'torch._C._TensorBase' objects>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 115,
+                        "id": 85,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 121,
+                        "id": 87,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 122,
+                        "id": 88,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
-            "33": {
+            "2": {
                 "op_type": "<method 'mul' of 'torch._C._TensorBase' objects>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 115,
+                        "id": 85,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 129,
+                        "id": 91,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 130,
+                        "id": 92,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ]
             },
-            "34": {
+            "3": {
                 "op_type": "<method 'mul' of 'torch._C._TensorBase' objects>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {
-                        "id": 115,
+                        "id": 85,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     },
                     {
-                        "id": 137,
+                        "id": 95,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
                 ],
                 "output_tensor_infos": [
                     {
-                        "id": 138,
+                        "id": 96,
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32"
                     }
@@ -35443,7 +34693,7 @@
         },
         "layer_output_infos": [
             {
-                "id": 148,
+                "id": 106,
                 "orig_dtype": "torch.float32",
                 "inf_dtype": "torch.float32"
             }

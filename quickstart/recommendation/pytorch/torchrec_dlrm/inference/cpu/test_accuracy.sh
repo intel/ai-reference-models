@@ -44,6 +44,7 @@ fi
 mkdir -p ${OUTPUT_DIR}
 LOG=${OUTPUT_DIR}/dlrm_inference_accuarcy_log/${PRECISION}
 rm -rf ${LOG}
+mkdir -p ${LOG}
 
 ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
@@ -67,9 +68,16 @@ else
     exit 1
 fi
 
+LOG_0="${LOG}/acc.log"
 export BATCH_SIZE=65536
+
+if [[ $PLOTMEM == "true" ]]; then
+pip install memory_profiler
+export mrun_cmd="mprof run --python -o ${MEMLOG}"
+fi
+
 # Do not need to use launcher to bind memory for accuracy test
-python $MODEL_SCRIPT \
+$mrun_cmd python $MODEL_SCRIPT \
     --snapshot-dir $WEIGHT_DIR \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \
@@ -86,7 +94,11 @@ python $MODEL_SCRIPT \
     --inference-only \
     --synthetic_multi_hot_criteo_path $DATASET_DIR \
     --test_auroc \
-    $ARGS 2>&1 | tee $LOG
+    $ARGS 2>&1 | tee $LOG_0
 
-accuracy=$(grep 'Final AUROC:' $LOG |sed -e 's/.*Final AUROC//;s/[^0-9.]//g')
+if [[ $PLOTMEM == "true" ]]; then
+mprof plot ${MEMLOG} -o ${MEMPIC}
+fi
+
+accuracy=$(grep 'Final AUROC:' $LOG_0 |sed -e 's/.*Final AUROC//;s/[^0-9.]//g')
 echo ""dlrm-v2";"auc";${PRECISION};${BATCH_SIZE};${accuracy}" | tee -a ${OUTPUT_DIR}/summary.log

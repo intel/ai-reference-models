@@ -108,6 +108,11 @@ prof_schedule=torch.profiler.schedule(
     repeat=10
 )
 
+def print_memory(stage):
+    import os
+    import psutil
+    print(time.time(), stage, psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024)
+
 def fetch_batch(dataloader):
     try:
         batch = dataloader.dataset.load_batch()
@@ -185,7 +190,9 @@ def ipex_optimize(args, model, optimizer, dataloader):
                 dtype=dtype,
                 sample_input=(dense, sparse),
                 inplace=True,
-                auto_kernel_selection=auto_kernel_selection
+                auto_kernel_selection=auto_kernel_selection,
+                linear_bn_folding=False,
+                conv_bn_folding=False
             )
             if args.dtype == 'bf32':
                 ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
@@ -203,7 +210,9 @@ def ipex_optimize(args, model, optimizer, dataloader):
             dtype=dtype,
             sample_input=(dense, sparse),
             inplace=True,
-            auto_kernel_selection=auto_kernel_selection
+            auto_kernel_selection=auto_kernel_selection,
+            linear_bn_folding=False,
+            conv_bn_folding=False
         )
         pass
     if args.dtype == 'bf32':
@@ -511,21 +520,20 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_true",
         help="Test auroc.",
     )
+    parser.add_argument(
+        "--benchmark",
+        action="store_true",
+        help="use same samples to benchmark",
+    )
     return parser.parse_args(argv)
 
 
 def _evaluate(
-    limit_batches: Optional[int],
     eval_model,
     eval_dataloader: DataLoader,
     stage: str,
     epoch_num: float,
-    log_eval_samples: bool,
-    print_progress: bool,
-    autocast_enabled: bool,
-    autocast_dtype: torch.dtype,
-    log_freq: int,
-    enable_torch_profile: bool=False,
+    args,
 ) -> float:
     """
     Evaluates model. Computes and prints AUROC. Helper function for train_val_test.
@@ -536,17 +544,34 @@ def _evaluate(
         eval_dataloader (DataLoader): Dataloader for either the validation set or test set.
         stage (str): "val" or "test".
         epoch_num (float): Iterations passed as epoch fraction (for logging purposes).
-        log_eval_samples (bool): Whether to print mllog with the number of samples.
         print_progress (bool): Whether to print tqdm progress bar.
 
     Returns:
         float: auroc result
     """
-    def eval_step(model, iter):
-        with record_function("get batch"):
-            batch = next(iter)
-        with record_function("unpack KeyJaggedTensor"):
-            batch.sparse_features = unpack(batch.sparse_features)
+    limit_batches = args.limit_val_batches
+    print_progress = args.print_progress
+    autocast_enabled, autocast_dtype = parse_autocast(args.dtype)
+    log_freq = args.log_freq
+    enable_torch_profile = args.profile
+
+    benckmark_batch = fetch_batch(eval_dataloader)
+    benckmark_batch.sparse_features = unpack(benckmark_batch.sparse_features)
+
+    def fetch_next(iterator, current_it):
+        if args.benchmark:
+            if current_it == limit_batches:
+                raise StopIteration
+            return benckmark_batch
+        else:
+            with record_function("generate batch"):
+                next_batch = next(iterator)
+            with record_function("unpack KeyJaggedTensor"):
+                next_batch.sparse_features = unpack(next_batch.sparse_features)
+            return next_batch
+
+    def eval_step(model, iterator, current_it):
+        batch = fetch_next(iterator, current_it)
         with record_function("model forward"):
             t1 = time.time()
             logits = model(batch.dense_features, batch.sparse_features)
@@ -589,7 +614,7 @@ def _evaluate(
             setattr(p, '_mode', 'eval')
         while True:
             try:
-                logits, label, fw_t = eval_step(eval_model, iterator)
+                logits, label, fw_t = eval_step(eval_model, iterator, it)
                 total_t += fw_t
                 if log_freq != 0 and it % log_freq == 0:
                     preds = [torch.cat(preds)]
@@ -630,16 +655,7 @@ def _train(
     val_dataloader: DataLoader,
     epoch: int,
     lr_scheduler,
-    print_lr: bool,
-    validation_freq: Optional[int],
-    validation_auroc: Optional[float],
-    limit_train_batches: Optional[int],
-    limit_val_batches: Optional[int],
-    print_progress: bool,
-    autocast_enabled: bool,
-    autocast_dtype: torch.dtype,
-    log_freq: int,
-    enable_torch_profile: bool=False,
+    args,
 ) -> bool:
     """
     Trains model for 1 epoch. Helper function for train_val_test.
@@ -661,14 +677,34 @@ def _train(
     Returns:
         bool: Whether the validation_auroc threshold is reached.
     """
+    print_lr = args.print_lr
+    validation_freq = args.validation_freq_within_epoch
+    validation_auroc = args.validation_auroc
+    limit_train_batches = args.limit_train_batches
+    print_progress = args.print_progress
+    autocast_enabled, autocast_dtype = parse_autocast(args.dtype)
+    log_freq = args.log_freq
+    enable_torch_profile = args.profile
+
     train_model.train()
     if autocast_dtype == torch.float16:
         scaler = torch.cpu.amp.GradScaler()
+
+    benckmark_batch = fetch_batch(train_dataloader)
+    benckmark_batch.sparse_features = unpack(benckmark_batch.sparse_features)
+
+    def fetch_next(iterator):
+        if args.benchmark:
+            return benckmark_batch
+        else:
+            with record_function("generate batch"):
+                next_batch = next(iterator)
+            with record_function("unpack KeyJaggedTensor"):
+                next_batch.sparse_features = unpack(next_batch.sparse_features)
+            return next_batch
+
     def train_step(model, opt, iterator):
-        with record_function("generate batch"):
-            next_batch = next(iterator)
-        with record_function("unpack KeyJaggedTensor"):
-            next_batch.sparse_features = unpack(next_batch.sparse_features)
+        next_batch = fetch_next(iterator)
         t1 = time.time()
         with record_function("zero_grad"):
             opt.zero_grad()
@@ -708,7 +744,6 @@ def _train(
 
     it = 1
     is_success = False
-    is_first_eval = True
     total_t = 0
     num_samples = 0
     ctx = torch.profiler.profile(activities=[ProfilerActivity.CPU], schedule=prof_schedule, on_trace_ready=trace_handler)
@@ -735,18 +770,12 @@ def _train(
             if validation_freq and it % validation_freq == 0:
                 epoch_num = epoch + it / len(train_dataloader)
                 auroc_result = _evaluate(
-                    limit_val_batches,
                     train_model.model,
                     val_dataloader,
                     "val",
                     epoch_num,
-                    is_first_eval and epoch == 0,
-                    print_progress,
-                    autocast_enabled,
-                    autocast_dtype,
-                    log_freq
+                    args
                 )
-                is_first_eval = False
                 if validation_auroc is not None and auroc_result >= validation_auroc:
                     logger.info("auc = {auroc_result} >= validation_auroc {validation_auroc}, stopped since success")
                     is_success = True
@@ -803,17 +832,11 @@ def train_val_test(
         # Mlperf is using val set to test auroc
         # https://github.com/mlcommons/inference/blob/master/recommendation/dlrm_v2/pytorch/python/multihot_criteo.py#L99-L107
         test_auroc = _evaluate(
-            args.limit_val_batches,
             model.model,
             val_dataloader,
             "test",
             0,
-            False,
-            args.print_progress,
-            autocast_enabled,
-            dtype,
-            args.log_freq,
-            args.profile
+            args,
         )
         results.test_auroc = test_auroc
         return results
@@ -829,29 +852,15 @@ def train_val_test(
             val_dataloader,
             epoch,
             lr_scheduler,
-            args.print_lr,
-            args.validation_freq_within_epoch,
-            args.validation_auroc,
-            args.limit_train_batches,
-            args.limit_val_batches,
-            args.print_progress,
-            autocast_enabled,
-            dtype,
-            args.log_freq,
-            args.profile
+            args,
         )
         if args.evaluate_on_epoch_end:
             val_auroc = _evaluate(
-                args.limit_val_batches,
                 model.model,
                 val_dataloader,
                 "val",
                 epoch + 1,
-                False,
-                args.print_progress,
-                autocast_enabled,
-                dtype,
-                args.log_freq
+                args,
             )
             results.val_aurocs.append(val_auroc)
         # logger.end(
@@ -874,16 +883,11 @@ def train_val_test(
 
     if args.evaluate_on_training_end:
         test_auroc = _evaluate(
-            args.limit_test_batches,
             model.model,
             test_dataloader,
             "test",
             epoch + 1,
-            False,
-            args.print_progress,
-            autocast_enabled,
-            dtype,
-            args.log_freq
+            args,
         )
         results.test_auroc = test_auroc
 
@@ -978,6 +982,7 @@ def main(argv: List[str]) -> None:
     if args.over_arch_layer_sizes is not None:
         sharded_module_kwargs["over_arch_layer_sizes"] = args.over_arch_layer_sizes
 
+    print_memory("start init dlrm ")
     if args.interaction_type == InteractionType.ORIGINAL:
         dlrm_model = DLRM(
             embedding_bag_collection=EmbeddingBagCollection(
@@ -989,7 +994,12 @@ def main(argv: List[str]) -> None:
             dense_device=device,
         )
     elif args.interaction_type == InteractionType.DCN:
-        dlrm_model = DLRM_DCN(
+        if args.ipex_optimize:
+            from ipex_optimized_model.model import IPEX_DLRM_DCN
+            dcn_init_fn = IPEX_DLRM_DCN
+        else:
+            dcn_init_fn = DLRM_DCN
+        dlrm_model = dcn_init_fn(
             embedding_bag_collection=EmbeddingBagCollection(
                 tables=eb_configs, device=torch.device("cpu")
             ),
@@ -1020,7 +1030,11 @@ def main(argv: List[str]) -> None:
     train_model = DLRMTrain(dlrm_model)
     if args.test_auroc or args.calibration:
         assert args.snapshot_dir
+        print_memory("start loading checkpoint ")
         load_snapshot(train_model, args.snapshot_dir)
+    
+    from ipex_optimized_model.model import replace_crossnet
+    replace_crossnet(train_model.model)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
     # the optimizer update will be applied in the backward pass, in this case through a fused op.
@@ -1038,7 +1052,7 @@ def main(argv: List[str]) -> None:
     #     optimizer_kwargs,
     # )
     model = train_model
-    model.model.sparse_arch = SparseArchTraceAbleWrapper(model.model.sparse_arch)
+    # model.model.sparse_arch = SparseArchTraceAbleWrapper(model.model.sparse_arch)
 
     # def optimizer_with_params():
     #     if args.adagrad:
@@ -1064,6 +1078,7 @@ def main(argv: List[str]) -> None:
     # optimizer = CombinedOptimizer([model.fused_optimizer, dense_optimizer])
     optimizer,  lr_scheduler = None, None
     if not args.inference_only:
+        print_memory("start create optimizer ")
         if args.adagrad:
             optimizer = torch.optim.Adagrad(
                 model.parameters(),
@@ -1121,8 +1136,19 @@ def main(argv: List[str]) -> None:
     #     value=args.lr_decay_steps,
     # )
 
+    print_memory("start create dataloader ")
+
+    # only create 1 multi-hot sample to save memory
+    if args.multi_hot_sizes is not None:
+        vb, tb = args.limit_val_batches, args.limit_test_batches
+        args.limit_val_batches = 1
+        args.limit_test_batches = 1
+
     val_dataloader = get_dataloader(args, backend, "val")
     test_dataloader = get_dataloader(args, backend, "test")
+
+    if args.multi_hot_sizes is not None:
+        args.limit_val_batches, args.limit_test_batches = vb, tb 
 
     if args.inference_only:
         train_dataloader = None
@@ -1147,12 +1173,15 @@ def main(argv: List[str]) -> None:
             train_dataloader = RestartableMap(
                 multihot.convert_to_multi_hot, train_dataloader
             )
+
         val_dataloader = RestartableMap(multihot.convert_to_multi_hot, val_dataloader)
         test_dataloader = RestartableMap(multihot.convert_to_multi_hot, test_dataloader)
 
     if args.ipex_optimize:
+        print_memory("start ipex_optimize ")
         model.model, optimizer = ipex_optimize(args, model.model, optimizer, test_dataloader)
 
+    print_memory("start running model")
     train_val_test(
         args,
         model,
