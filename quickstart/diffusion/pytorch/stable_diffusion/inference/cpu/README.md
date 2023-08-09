@@ -4,7 +4,7 @@
 <!-- 10. Description -->
 ## Description
 
-This document has instructions for running [Stable Diffusion, which is a text-to-image latent diffusion model created by the researchers and engineers from CompVis, Stability AI, LAION and RunwayML.](https://huggingface.co/CompVis/stable-diffusion-v1-4) inference using Intel-optimized PyTorch.
+This document has instructions for running [Stable Diffusion, which is a text-to-image latent diffusion model created by the researchers and engineers from CompVis, Stability AI, LAION and RunwayML.](https://huggingface.co/runwayml/stable-diffusion-v1-5) inference using Intel-optimized PyTorch.
 
 ## Bare Metal
 ### General setup
