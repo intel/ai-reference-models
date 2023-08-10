@@ -140,6 +140,15 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         if self.args.mode == "inference" and self.args.checkpoint:
             print("Warning: The --checkpoint argument is being deprecated in favor of using frozen graphs.")
 
+        # if itex is installed, OneDNN Graph is enabled by default.
+        try:
+            import intel_extension_for_tensorflow as itex
+            print("Intel Extension for Tensorflow " + itex.__version__ + " is installed.")
+            if self.args.onednn_graph is None:
+                self.args.onednn_graph = True
+        except ModuleNotFoundError:
+            self.args.onednn_graph = False
+
     def get_model_use_case(self, benchmark_scripts, os_type):
         """
         Infers the use case based on the directory structure for the specified model.
@@ -242,7 +251,8 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
             "VERBOSE": args.verbose,
             "WEIGHT_SHARING": args.weight_sharing,
             "SYNTHETIC_DATA": args.synthetic_data,
-            "GPU": str(args.gpu)
+            "GPU": str(args.gpu),
+            "ONEDNN_GRAPH": str(args.onednn_graph)
         }
 
         # Add custom model args as env vars)

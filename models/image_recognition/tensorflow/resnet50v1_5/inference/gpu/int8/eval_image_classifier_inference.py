@@ -24,6 +24,7 @@ from argparse import ArgumentParser
 
 import tensorflow as tf
 from tensorflow.python.tools.optimize_for_inference_lib import optimize_for_inference
+from tensorflow.core.protobuf import rewriter_config_pb2
 from tensorflow.python.framework import dtypes
 
 import datasets
@@ -107,6 +108,10 @@ class eval_classifier_optimized_graph:
     arg_parser.add_argument("--benchmark",
                             help='Run in benchmark mode.',
                             dest='benchmark', action='store_true')
+    arg_parser.add_argument(
+      '--onednn-graph', dest='onednn_graph',
+      help='enable OneDNN Graph',
+      action='store_true')
 
     self.args = arg_parser.parse_args()
     # validate the arguements
@@ -147,6 +152,8 @@ class eval_classifier_optimized_graph:
     infer_config = tf.compat.v1.ConfigProto()
     infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
+    if self.args.onednn_graph:
+      infer_config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
     infer_config.use_per_session_threads = 1
 
     data_graph = tf.Graph()

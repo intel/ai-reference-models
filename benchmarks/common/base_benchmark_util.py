@@ -280,6 +280,14 @@ class BaseBenchmarkUtil(object):
             help="Run the benchmark script using GPU",
             dest="gpu", action="store_true")
 
+        # Check if OneDNN Graph is enabled
+        self._common_arg_parser.add_argument(
+            "--onednn-graph",
+            help="If Intel® Extension for TensorFlow* is installed, oneDNN Graph for INT8 will be enabled"
+                 " by default. Otherwise, default value of this flag will be False.",
+            dest="onednn_graph", choices=["True", "False"],
+            default=None)
+
     def _validate_args(self):
         """validate the args and initializes platform_util"""
         # check if socket id is in socket number range

@@ -98,6 +98,10 @@ class eval_classifier_optimized_graph:
       '--num-cores', dest='num_cores',
       help='number of cores',
       type=int, default=28)
+    arg_parser.add_argument(
+      '--onednn-graph', dest='onednn_graph',
+      help='enable OneDNN Graph',
+      action='store_true')
 
     self.args = arg_parser.parse_args()
     # validate the arguements
@@ -125,6 +129,8 @@ class eval_classifier_optimized_graph:
     infer_config.inter_op_parallelism_threads = self.args.num_inter_threads
     infer_config.graph_options.rewrite_options.remapping = (
                   rewriter_config_pb2.RewriterConfig.AGGRESSIVE)
+    if self.args.onednn_graph:
+      infer_config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
 
     infer_graph = tf.Graph()
 
@@ -165,11 +171,21 @@ class eval_classifier_optimized_graph:
           if (num_images > warm_up):
             time_consume += end_time - start_time
           num_images+=1
-        throughput_list.append((steps-warm_up)/time_consume)
-        print('Instance num %d Avg Time/Iteration %f msec Throughput %f images/sec' %(tid, time_consume*1000/(steps - warm_up), (steps-warm_up)/time_consume))
+        if self.args.onednn_graph:
+          total_examples = (steps - warm_up) * self.args.batch_size
+          single_throughput = total_examples/time_consume
+          throughput_list.append(single_throughput)
+          print('Instance num %d Avg Time/Iteration %f msec Throughput %f images/sec' %(tid, time_consume*1000/total_examples, total_examples/time_consume))
+        else:
+          throughput_list.append((steps-warm_up)/time_consume)
+          print('Instance num %d Avg Time/Iteration %f msec Throughput %f images/sec' %(tid, time_consume*1000/(steps - warm_up), (steps-warm_up)/time_consume))
 
     if (not self.args.accuracy_only):
-      num_instances = self.args.num_intra_threads//4
+      if self.args.onednn_graph:
+        # graph compiler requires 1 core per instance
+        num_instances = self.args.num_intra_threads
+      else:
+        num_instances = self.args.num_intra_threads//4
       threads = []
       for i in range(1, num_instances+1):
         thread = threading.Thread(target=run_model, args=(data_sess,infer_sess1, i))

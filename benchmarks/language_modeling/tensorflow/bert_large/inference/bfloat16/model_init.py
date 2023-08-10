@@ -159,6 +159,9 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.weight_sharing:
             model_args += " --weight_sharing"
 
+        if self.args.onednn_graph:
+            model_args += " --onednn_graph"
+
         model_args += " --num_cores_per_socket=" + str(platform_util.num_cores_per_socket)
 
         self.benchmark_command = self.get_command_prefix(args.socket_id) + \

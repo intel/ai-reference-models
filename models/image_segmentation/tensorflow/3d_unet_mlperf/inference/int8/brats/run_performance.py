@@ -38,6 +38,23 @@ from tensorflow.core.protobuf import rewriter_config_pb2
 INPUTS = 'input'
 OUTPUTS = 'Identity'
 
+import intel_extension_for_tensorflow as itex
+auto_mixed_precision_options = itex.AutoMixedPrecisionOptions()
+auto_mixed_precision_options.data_type = itex.BFLOAT16
+
+auto_mixed_precision_options.allowlist_add= "Rsqrt,SquaredDifference,Mean"
+auto_mixed_precision_options.denylist_remove = "Mean"
+auto_mixed_precision_options.denylist_add = "QuantizeV2,Dequantize"
+
+graph_options = itex.GraphOptions(auto_mixed_precision_options=auto_mixed_precision_options)
+graph_options.auto_mixed_precision = itex.ON
+
+config = itex.ConfigProto(graph_options=graph_options)
+try:
+  itex.set_backend("cpu", config)
+except Exception:
+  itex.set_config(config)
+
 class unet_3d_tf:
     """Evaluate 3d_unet with optimized TensorFlow graph"""
 
@@ -64,6 +81,9 @@ class unet_3d_tf:
         arg_parser.add_argument("--steps", type=int, default=50,
                                 help="number of steps")
         arg_parser.add_argument("--batch-size", type=int, default=1)
+        arg_parser.add_argument('--onednn-graph', dest='onednn_graph',
+                                help='enable OneDNN Graph',
+                                action='store_true')
 
         self.args = arg_parser.parse_args()
         print (self.args)
@@ -95,6 +115,25 @@ class unet_3d_tf:
         config = tf.compat.v1.ConfigProto()
         config.intra_op_parallelism_threads=self.args.num_intra_threads
         config.inter_op_parallelism_threads=self.args.num_inter_threads
+
+        if self.args.onednn_graph:
+            import intel_extension_for_tensorflow as itex
+            auto_mixed_precision_options = itex.AutoMixedPrecisionOptions()
+            auto_mixed_precision_options.data_type = itex.BFLOAT16
+
+            auto_mixed_precision_options.allowlist_add= "Rsqrt,SquaredDifference,Mean"
+            auto_mixed_precision_options.denylist_remove = "Mean"
+            auto_mixed_precision_options.denylist_add = "QuantizeV2,Dequantize"
+
+            graph_options = itex.GraphOptions(auto_mixed_precision_options=auto_mixed_precision_options)
+            graph_options.auto_mixed_precision = itex.ON
+
+            config = itex.ConfigProto(graph_options=graph_options)
+            try:
+                itex.set_backend("cpu", config)
+            except TypeError:
+                itex.set_config(config)
+            config.graph_options.rewrite_options.constant_folding = rewriter_config_pb2.RewriterConfig.OFF
 
         with tf.compat.v1.Session(graph=graph, config=config) as sess:
             print("Started warmup for {} steps...".format(warmup_steps))

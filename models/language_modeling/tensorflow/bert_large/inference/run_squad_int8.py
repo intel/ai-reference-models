@@ -39,10 +39,29 @@ from tensorflow.python.training import session_run_hook
 from tensorflow.python.ops import state_ops
 from tensorflow.python.training.basic_session_run_hooks import StopAtStepHook, ProfilerHook
 from tensorflow.python import ops
-from tensorflow.python.platform import tf_logging
 from absl import app
 #from absl import flags
 from absl import logging
+
+tf.config.optimizer.set_experimental_options({"constant_folding": False})
+
+import intel_extension_for_tensorflow as itex
+auto_mixed_precision_options = itex.AutoMixedPrecisionOptions()
+auto_mixed_precision_options.data_type = itex.BFLOAT16
+
+auto_mixed_precision_options.allowlist_add= "MatMul,BiasAdd,BatchMatMulV2,Mul,AddV2,Softmax,LayerNorm,Gelu"
+auto_mixed_precision_options.inferlist_remove = "MatMul,BiasAdd,BatchMatMulV2,Mul,AddV2,Softmax,LayerNorm,Gelu"
+auto_mixed_precision_options.denylist_add = "QuantizeV2,Dequantize"
+
+graph_options = itex.GraphOptions(auto_mixed_precision_options=auto_mixed_precision_options)
+graph_options.auto_mixed_precision = itex.ON
+
+config = itex.ConfigProto(graph_options=graph_options)
+try:
+  itex.set_backend("cpu", config)
+except Exception:
+  itex.set_config(config)
+
 flags = tf.compat.v1.flags
 
 FLAGS = flags.FLAGS
@@ -202,7 +221,6 @@ flags.DEFINE_bool("weight_sharing", False,
                   "Simulate weight sharing across multiple instances.")
 flags.DEFINE_integer("num_cores_per_socket", None,
                      "Number of cores per socket.")
-flags.DEFINE_bool("onednn_graph", False, "Enable OneDNN Graph for ITEX users.")
 
 class UpdateGlobalStepHook(session_run_hook.SessionRunHook):
   def __init__(self):
@@ -670,21 +688,18 @@ def create_model_top(bert_config, is_training, input_ids, input_mask, segment_id
             graph_def = tf.compat.v1.GraphDef()
             graph_def.ParseFromString(f.read())
 
-        if FLAGS.onednn_graph:
-          all_node_name = [n.name for n in graph_def.node]
+        all_node_name = [n.name for n in graph_def.node]
 
-          outputs = []
+        outputs = []
 
-          candidate_outputs_1 = ['unstacked_logits:0', 'unstacked_logits:1']
-          candidate_outputs_2 = ['start_logits:0', 'end_logits:0']
+        candidate_outputs_1 = ['unstacked_logits:0', 'unstacked_logits:1']
+        candidate_outputs_2 = ['start_logits:0', 'end_logits:0']
 
-          if "unstacked_logits" in all_node_name:
-            outputs = candidate_outputs_1
+        if "unstacked_logits" in all_node_name:
+          outputs = candidate_outputs_1
 
-          if "start_logits" in all_node_name:
-            outputs = candidate_outputs_2
-        else:
-          outputs = ['start_logits:0', 'end_logits:0']
+        if "start_logits" in all_node_name:
+          outputs = candidate_outputs_2
 
         return tf.graph_util.import_graph_def(graph_def, inputs, outputs, name="")
 
@@ -1316,30 +1331,25 @@ def do_benchmark():
         'segment_ids:0': segment_ids}
 
   def run_model(sess, tid):
-    if FLAGS.onednn_graph:
-      all_tensor_name = [tensor.name for op in sess.graph.get_operations() for tensor in op.values()]
+    all_tensor_name = [tensor.name for op in sess.graph.get_operations() for tensor in op.values()]
+    
+    outputs = []
 
-      outputs = []
+    candidate_outputs_1 = ['unstacked_logits:0', 'unstacked_logits:1']
+    candidate_outputs_2 = ['start_logits:0', 'end_logits:0']
 
-      candidate_outputs_1 = ['unstacked_logits:0', 'unstacked_logits:1']
-      candidate_outputs_2 = ['start_logits:0', 'end_logits:0']
+    if candidate_outputs_1[0] in all_tensor_name and candidate_outputs_1[1] in all_tensor_name:
+      outputs = candidate_outputs_1
 
-      if candidate_outputs_1[0] in all_tensor_name and candidate_outputs_1[1] in all_tensor_name:
-        outputs = candidate_outputs_1
-
-      if candidate_outputs_2[0] in all_tensor_name and candidate_outputs_2[1] in all_tensor_name:
-        outputs = candidate_outputs_2
-    else:
-      outputs = ['start_logits:0', 'end_logits:0']
+    if candidate_outputs_2[0] in all_tensor_name and candidate_outputs_2[1] in all_tensor_name:
+      outputs = candidate_outputs_2
 
     feed_dict = create_feed_dict()
     for step in range(FLAGS.warmup_steps):
       _ = sess.run(outputs, feed_dict=feed_dict)
     t1 = time.time()
     for step in range(FLAGS.steps):
-      tf_logging.warn('\n---> Thread {0}: Start iteration {1}'.format(tid + 1, str(step)))
       _ = sess.run(outputs, feed_dict=feed_dict)
-      tf_logging.warn('\n---> Thread {0}: Stop iteration {1}'.format(tid + 1, str(step)))
     t2 = time.time()
     throughput_list[tid] = FLAGS.predict_batch_size * FLAGS.steps / (t2 - t1)
     print('Thread {0} has throughput {1}'.format(tid + 1, throughput_list[tid]))
@@ -1354,6 +1364,9 @@ def do_benchmark():
     print("Using grappler auto-mixed precision")
     config.graph_options.rewrite_options.auto_mixed_precision = (
               rewriter_config_pb2.RewriterConfig.ON)
+  config.graph_options.rewrite_options.constant_folding = (
+          rewriter_config_pb2.RewriterConfig.OFF)
+
   graph_def = tf.compat.v1.GraphDef()
   with open(FLAGS.input_graph, "rb") as f:
     graph_def.ParseFromString(f.read())
@@ -1414,6 +1427,8 @@ def main(_):
   if bert_config.precision == "fp16":
       session_config.graph_options.rewrite_options.auto_mixed_precision = (
               rewriter_config_pb2.RewriterConfig.ON)
+  session_config.graph_options.rewrite_options.constant_folding = (
+          rewriter_config_pb2.RewriterConfig.OFF)
 
   is_per_host = tf.compat.v1.estimator.tpu.InputPipelineConfig.PER_HOST_V2
   run_config = tf.compat.v1.estimator.tpu.RunConfig(

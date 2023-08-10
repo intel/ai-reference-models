@@ -117,6 +117,11 @@ class ModelInitializer(BaseModelInitializer):
         if self.args.data_location and os.listdir(self.args.data_location):
             self.benchmark_command += " --data-location=" + \
                                       self.args.data_location
+
+        # enable onednn graph
+        if self.args.onednn_graph:
+            self.benchmark_command += " --onednn-graph"
+
         if self.args.accuracy_only:
             self.benchmark_command += " --accuracy-only"
 

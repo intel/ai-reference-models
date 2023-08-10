@@ -81,7 +81,15 @@ def softmax(scores, axis=None):
       return r_cast(rval)
 
 def layer_norm(inputs, begin_norm_axis, begin_params_axis, scope):
-    lnorm = tf.keras.layers.LayerNormalization(dtype=get_keras_policy())
+    lnorm = tf.keras.layers.LayerNormalization()
+
+    # Try to use ITEX first
+    try:
+      import intel_extension_for_tensorflow as itex
+      lnorm = itex.ops.LayerNormalization(dtype=_rprecision)
+    except ImportError:
+      pass
+
     return lnorm(inputs)
 
 "Moved from modeling.py"
@@ -96,8 +104,17 @@ def gelu(x):
   Returns:
     `x` with the GELU activation applied.
   """
-  if _use_experimental_gelu:
-    return tf.nn.gelu(features=x, approximate=True)
+  if _use_experimental_gelu :
+    gelu_func = tf.nn.gelu
+
+    # Try to use ITXE first.
+    try:
+      import intel_extension_for_tensorflow as itex
+      gelu_func = itex.ops.gelu
+    except ImportError:
+      pass
+
+    return gelu_func(features=x, approximate=True)
   else:
     x = i_cast(x)
     cdf = 0.5 * (1.0 + tf.tanh(

@@ -55,6 +55,7 @@ echo "    PYTHON_EXE: ${PYTHON_EXE}"
 echo "    PYTHONPATH: ${PYTHONPATH}"
 echo "    DRY_RUN: ${DRY_RUN}"
 echo "    GPU: ${GPU}"
+echo "    ONEDNN_GRAPH: ${ONEDNN_GRAPH}"
 
 #  Enable GPU Flag
 gpu_arg=""
@@ -78,6 +79,13 @@ fi
 if [ ${MODE} != "inference" ] && [ ${MODE} != "training" ]; then
   echo "${MODE} mode for ${MODEL_NAME} is not supported"
   exit 1
+fi
+
+# Enable OneDNN Graph Flag
+onednn_graph_arg=""
+if [ ${ONEDNN_GRAPH} == "True" ]; then
+  onednn_graph_arg="--onednn-graph=True"
+  export ITEX_ONEDNN_GRAPH=1
 fi
 
 # Determines if we are running in a container by checking for .dockerenv
@@ -408,7 +416,8 @@ ${output_results_arg} \
 ${weight_sharing_arg} \
 ${synthetic_data_arg} \
 ${verbose_arg} \
-${gpu_arg}"
+${gpu_arg} \
+${onednn_graph_arg}"
 
 if [ ${MOUNT_EXTERNAL_MODELS_SOURCE} != "None" ]; then
   CMD="${CMD} --model-source-dir=${MOUNT_EXTERNAL_MODELS_SOURCE}"
