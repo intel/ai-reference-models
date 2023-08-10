@@ -1775,6 +1775,42 @@ function rgat() {
     fi
 }
 
+function stable_diffusion() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        curr_dir=${pwd}
+        echo "Curr dir: "
+        echo ${curr_dir}
+
+        infer_dir=${MOUNT_INTELAI_MODELS_SOURCE}/${MODE}
+        benchmarks_patch_path=${infer_dir}/patch
+        echo "benchmarks_patch_path:"
+        echo ${benchmarks_patch_path}
+
+        cd /tmp
+        rm -rf keras-cv
+        git clone https://github.com/keras-team/keras-cv.git
+        cd keras-cv
+        git reset --hard 66fa74b6a2a0bb1e563ae8bce66496b118b95200
+        git apply ${benchmarks_patch_path}
+        pip install .
+        cd ${curr_dir}
+
+        if [[ ${NOINSTALL} != "True" ]]; then
+          python3 -m pip install -r "${MOUNT_BENCHMARK}/${USE_CASE}/${FRAMEWORK}/${MODEL_NAME}/${MODE}/requirements.txt"
+        fi
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        CMD="${CMD} $(add_arg "--output-dir" ${OUTPUT_DIR})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
@@ -1955,6 +1991,8 @@ elif [ ${MODEL_NAME} == "gpt_j" ]; then
   gpt_j
 elif [ ${MODEL_NAME} == "rgat" ]; then
   rgat
+elif [ ${MODEL_NAME} == "stable_diffusion" ]; then
+  stable_diffusion
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1
