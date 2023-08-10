@@ -100,7 +100,7 @@ def main():
     elif args.precision == "int8-bf16":
         print("Running int8-bf16 ...")
     else:
-        raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8, int8-bf16")
+        raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8, int8-bf16")
 
     input = torch.randn(2, 4, 64, 64), torch.tensor(921), torch.randn(2, 77, 768)
 

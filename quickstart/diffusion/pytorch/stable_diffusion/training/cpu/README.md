@@ -64,6 +64,7 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 | Script name | Description |
 |-------------|-------------|
 | `finetune.sh` | Fine-tuning using one socket for the specified precision (fp32, bf16, bf32 or fp16). |
+| `finetune_dist.sh` | Distributed fine-tuning for the specified precision (fp32, bf16, bf32 or fp16). |
 
 
 ## Run the model

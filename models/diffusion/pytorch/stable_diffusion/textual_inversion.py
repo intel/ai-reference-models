@@ -228,7 +228,7 @@ def parse_args():
         default="text-inversion-model",
         help="The output directory where the model predictions and checkpoints will be written.",
     )
-    parser.add_argument("--seed", type=int, default=None, help="A seed for reproducible training.")
+    parser.add_argument("--seed", type=int, default=0, help="A seed for reproducible training.")
     parser.add_argument(
         "--resolution",
         type=int,
@@ -248,7 +248,7 @@ def parse_args():
     parser.add_argument(
         "--max_train_steps",
         type=int,
-        default=5000,
+        default=None,
         help="Total number of training steps to perform.  If provided, overrides num_train_epochs.",
     )
     parser.add_argument(
@@ -407,6 +407,7 @@ def parse_args():
     parser.add_argument(
         "--enable_xformers_memory_efficient_attention", action="store_true", help="Whether or not to use xformers."
     )
+    parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
 
     args = parser.parse_args()
     env_local_rank = int(os.environ.get("LOCAL_RANK", -1))
@@ -759,6 +760,11 @@ def main():
     unet.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
 
+    if args.ipex:
+        import intel_extension_for_pytorch as ipex
+        unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype)
+        vae = ipex.optimize(vae, dtype=weight_dtype)
+
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
     if overrode_max_train_steps:
@@ -825,6 +831,7 @@ def main():
                 continue
 
             with accelerator.accumulate(text_encoder):
+                # , torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
                 # Convert images to latent space
                 latents = vae.encode(batch["pixel_values"].to(dtype=weight_dtype)).latent_dist.sample().detach()
                 latents = latents * vae.config.scaling_factor
@@ -870,6 +877,9 @@ def main():
                     accelerator.unwrap_model(text_encoder).get_input_embeddings().weight[
                         index_no_updates
                     ] = orig_embeds_params[index_no_updates]
+
+            # output = p.key_averages().table(sort_by="self_cpu_time_total")
+            # print(output)
 
             # Checks if the accelerator has performed an optimization step behind the scenes
             if accelerator.sync_gradients:

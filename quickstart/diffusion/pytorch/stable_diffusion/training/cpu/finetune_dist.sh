@@ -28,6 +28,11 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
+if [ -z "${MASTER_ADDR}" ]; then
+  echo "The required environment variable MASTER_ADDR has not been set"
+  exit 1
+fi
+
 ARGS=""
 if [ "$1" == "bf16" ]; then
     ARGS="$ARGS --mixed_precision=bf16"
@@ -43,6 +48,17 @@ else
     exit 1
 fi
 
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+NNODES=${NNODES:-1}
+HOSTFILE=${HOSTFILE:-./hostfile}
+NUM_RANKS=$(( NNODES * SOCKETS ))
+
+
+CORES_PER_INSTANCE=$CORES
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
@@ -52,10 +68,12 @@ PRECISION=$1
 export MODEL_NAME="runwayml/stable-diffusion-v1-5"
 export DATA_DIR="./cat"
 
-rm -rf ${OUTPUT_DIR}/stable_diffusion_finetune_log*
+rm -rf ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log*
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-numactl -C 0-$((CORES-1)) -m 0 accelerate launch ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/textual_inversion.py \
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
+
+mpirun -f ${HOSTFILE} -n ${NUM_RANKS} -ppn 2 accelerate launch ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/textual_inversion.py \
   --pretrained_model_name_or_path=$MODEL_NAME \
   --train_data_dir=$DATA_DIR \
   --learnable_property="object" \
@@ -68,4 +86,4 @@ numactl -C 0-$((CORES-1)) -m 0 accelerate launch ${MODEL_DIR}/models/diffusion/p
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
   --output_dir="textual_inversion_cat" \
-  --ipex $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}.log
+  --ipex $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log_${PRECISION}.log
