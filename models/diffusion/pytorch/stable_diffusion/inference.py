@@ -17,6 +17,7 @@
 #
 
 import argparse
+import copy
 import logging
 import os
 import time
@@ -36,17 +37,16 @@ logging.getLogger().setLevel(logging.INFO)
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name_or_path", type=str, default="runwayml/stable-diffusion-v1-5", help="Model path")
+    parser.add_argument("--int8_model_path", type=str, default="quant_model.pt", help="INT8 model path")
     parser.add_argument("--dataset_path", type=str, default=None, help="COCO2017 dataset path")
     parser.add_argument("--prompt", type=str, default="A big burly grizzly bear is show with grass in the background.", help="input text")
     parser.add_argument("--output_dir", type=str, default=None,help="output path")
     parser.add_argument("--seed", type=int, default=0, help="random seed")
-    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8, int8-bf16')
+    parser.add_argument('--precision', type=str, default="fp32", help='precision: fp32, bf32, bf16, fp16, int8-bf16')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
     parser.add_argument('--jit', action='store_true', default=False, help='jit trace')
     parser.add_argument('--compile_ipex', action='store_true', default=False, help='compile with ipex backend')
     parser.add_argument('--compile_inductor', action='store_true', default=False, help='compile with inductor backend')
-    parser.add_argument('--calibration', action='store_true', default=False, help='doing calibration step for int8 path')
-    parser.add_argument('--configure-file', default='configure.json', type=str, metavar='PATH', help = 'path to int8 configures, default file name is configure.json')
     parser.add_argument('--profile', action='store_true', default=False, help='profile')
     parser.add_argument('--benchmark', action='store_true', default=False, help='test performance')
     parser.add_argument('--accuracy', action='store_true', default=False, help='test accuracy')
@@ -95,14 +95,13 @@ def main():
     elif args.precision == "fp16":
         print("Running fp16 ...")
         dtype=torch.half
-    elif args.precision == "int8":
-        print("Running int8 ...")
     elif args.precision == "int8-bf16":
         print("Running int8-bf16 ...")
+        dtype=torch.bfloat16
     else:
-        raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8, int8-bf16")
+        raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16, int8-bf16")
 
-    input = torch.randn(2, 4, 64, 64), torch.tensor(921), torch.randn(2, 77, 768)
+    input = torch.randn(2, 4, 64, 64).to(memory_format=torch.channels_last), torch.tensor(921), torch.randn(2, 77, 768)
 
     # ipex
     if args.ipex:
@@ -121,30 +120,18 @@ def main():
             pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, inplace=True)
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, inplace=True)
-        elif args.precision == "int8" or args.precision == "int8-bf16":
-                if not args.calibration:
-                    qconfig = ipex.quantization.default_static_qconfig
-                    pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
-                    pipe.unet.load_qconf_summary(qconf_summary=args.configure_file)
-                    if args.precision == "int8":
-                        with torch.no_grad():
-                            pipe.unet = ipex.quantization.convert(pipe.unet)
-                            pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
-                            pipe.unet = torch.jit.freeze(pipe.unet)
-                            pipe.unet(*input)
-                            pipe.unet(*input)
-                    if args.precision == "int8-bf16":
-                        with torch.cpu.amp.autocast(), torch.no_grad():
-                            pipe.unet = ipex.quantization.convert(pipe.unet)
-                            pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
-                            pipe.unet = torch.jit.freeze(pipe.unet)
-                            pipe.unet(*input)
-                            pipe.unet(*input)
+        elif args.precision == "int8-bf16":
+            pipe.unet_fp32 = copy.deepcopy(pipe.unet)
+            pipe.unet_fp32 = ipex.optimize(pipe.unet_fp32.eval(), dtype=dtype, inplace=True)
+            pipe.HIGH_PRECISION_STEPS = 5
+            from quantization_modules import load_int8_model, convert_to_fp32model
+            pipe.unet = load_int8_model(pipe.unet, args.int8_model_path)
+            # pipe.unet = convert_to_fp32model(pipe.unet)
         else:
-            raise ValueError("--precision needs to be the following:: fp32, bf16, fp16, int8")
+            raise ValueError("--precision needs to be the following:: fp32, bf32, bf16, fp16, int8-bf16")
 
     # jit trace
-    if args.jit and args.precision != "int8" and args.precision != "int8-bf16":
+    if args.jit:
         print("JIT trace ...")
         # from utils_vis import make_dot, draw
         if args.precision == "bf16" or args.precision == "fp16":
@@ -153,13 +140,26 @@ def main():
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
-
+                # print(pipe.unet.graph_for(input))
+        elif args.precision == "int8-bf16":
+            with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+                # pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
+                # pipe.unet = torch.jit.freeze(pipe.unet)
+                # pipe.unet(*input)
+                # pipe.unet(*input)
+                # print(pipe.unet.graph_for(input))
+                pipe.unet_fp32 = torch.jit.trace(pipe.unet_fp32, input, strict=False)
+                pipe.unet_fp32 = torch.jit.freeze(pipe.unet_fp32)
+                pipe.unet_fp32(*input)
+                pipe.unet_fp32(*input)
+                # print(pipe.unet_fp32.graph_for(input))
         else:
             with torch.no_grad():
                 pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
                 pipe.unet = torch.jit.freeze(pipe.unet)
                 pipe.unet(*input)
                 pipe.unet(*input)
+                # print(pipe.unet.graph_for(input))
 
     # torch compile with ipex backend
     if args.compile_ipex:
@@ -195,23 +195,12 @@ def main():
                                                     num_workers=0,
                                                     sampler=val_sampler)
 
-    if args.ipex and args.precision == "int8" and args.calibration:
-        print("Running int8 calibration ...")
-        qconfig = ipex.quantization.default_static_qconfig
-        pipe.unet = ipex.quantization.prepare(pipe.unet, qconfig, input, inplace=True)
-        for i, (real_image, prompts) in enumerate(val_dataloader):
-            prompt = prompts[0][0]
-            pipe(prompt, generator=torch.manual_seed(args.seed)).images
-            if i == 9:
-                break
-        pipe.unet.save_qconf_summary(args.configure_file)
-
     # benchmark
     if args.benchmark:
         print("Running benchmark ...")
         # run model
         start = time.time()
-        if args.precision == "bf16" or args.precision == "fp16":
+        if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
             with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
                 output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
         else:
@@ -235,7 +224,7 @@ def main():
             prompt = prompts[0][0]
             real_image = images[0]
             print("prompt: ", prompt)
-            if args.precision == "bf16" or args.precision == "fp16":
+            if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
                     output = pipe(prompt, generator=torch.manual_seed(args.seed), output_type="numpy").images
             else:
@@ -258,15 +247,13 @@ def main():
             if args.iterations > 0 and i == args.iterations - 1:
                 break
 
-        if args.distributed:
-            torch.distributed.barrier()
         print(f"FID: {float(fid.compute())}")
 
     # profile
     if args.profile:
         print("Running profiling ...")
         with torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
-            if args.precision == "bf16" or args.precision == "fp16":
+            if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
                 with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
                     pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
             else:
