@@ -93,3 +93,17 @@ services:
       dockerfile: docker/flex-gpu/tf-ssd-mobilenet-inference/tf-flex-series-ssd-mobilenet-inference.Dockerfile
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  pytorch-stable-diffusion-inference:
+    image: intel/diffusion:pytorch-flex-gpu-stable-diffusion-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${FLEX_PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${FLEX_PYT_BASE_TAG:-xpu-flex}   
+      dockerfile: docker/flex-gpu/pytorch-stable-diffusion-inference/pytorch-flex-series-stable-diffusion-inference.Dockerfile
+    command: >
+      sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"

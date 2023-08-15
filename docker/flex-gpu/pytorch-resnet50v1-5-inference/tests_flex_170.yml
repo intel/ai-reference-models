@@ -2,7 +2,17 @@
 pytorch-flex-gpu-resnet50v1-5-inference:
   image_name: intel/image-recognition:pytorch-flex-gpu-resnet50v1-5-inference
   tests:
-  - test_name: ResNet50V1_5 INT8 block Dummy inference
+  - test_name: ResNet50V1_5 INT8 block Dummy online inference
+    env_vars:
+      SCRIPT: quickstart/inference_block_format.sh
+      BATCH_SIZE: 1
+      NUM_ITERATIONS: 5000
+      PRECISION: int8
+      DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
+      OUTPUT_DIR: /workspace/pytorch-flex-gpu-resnet50v1-5-inference
+    volumes:
+      OUTPUT_DIR: /workspace/pytorch-flex-gpu-resnet50v1-5-inference
+  - test_name: ResNet50V1_5 INT8 block Dummy batch inference
     env_vars:
       SCRIPT: quickstart/inference_block_format.sh
       BATCH_SIZE: 1024
