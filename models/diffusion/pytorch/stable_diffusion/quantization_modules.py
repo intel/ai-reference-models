@@ -133,33 +133,32 @@ def convert2quantized_model(model):
     find_and_replace(model, fake_quant=False)
     return model
 
-class FP32Conv2d(torch.nn.Conv2d):
+class FP32Conv2d(torch.nn.Module):
     def __init__(self, module: Conv2d):
-        self.__dict__.update(module.__dict__.copy())
-        self.weight = module.weight()
+        super(FP32Conv2d, self).__init__()
+        self.quant_weight = module.weight()
         self.bias = module.bias()
-        self.scale = module.scale
-        self.zero_point = module.zero_point
+        self.stride = module.stride
+        self.padding = module.padding
+        self.dilation = module.dilation
+        self.groups = module.groups
         self.input_quant = module.input_quant
 
     def forward(self, x):
         x = self.input_quant(x.float().to(memory_format=torch.channels_last)).dequantize()
-        y = self._conv_forward(x, self.weight.dequantize(), self.bias)
-        return y
+        return F.conv2d(x, self.quant_weight.dequantize(), self.bias, self.stride,
+                        self.padding, self.dilation, self.groups)
 
-class FP32Linear(torch.nn.Linear):
+class FP32Linear(torch.nn.Module):
     def __init__(self, module: Linear):
-        self.__dict__.update(module.__dict__.copy())
-        self.weight = module.weight()
+        super(FP32Linear, self).__init__()
+        self.quant_weight = module.weight()
         self.bias = module.bias()
-        self.scale = module.scale
-        self.zero_point = module.zero_point
         self.input_quant = module.input_quant
 
     def forward(self, x):
         x = self.input_quant(x.float()).dequantize()
-        y = F.linear(x, self.weight.dequantize(), self.bias)
-        return y
+        return F.linear(x, self.quant_weight.dequantize(), self.bias)
 
 def convert_to_fp32model(model):
     assert isinstance(model, torch.nn.Module), "Only support torch Module."

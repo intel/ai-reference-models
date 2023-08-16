@@ -126,7 +126,7 @@ def main():
             pipe.HIGH_PRECISION_STEPS = 5
             from quantization_modules import load_int8_model, convert_to_fp32model
             pipe.unet = load_int8_model(pipe.unet, args.int8_model_path)
-            # pipe.unet = convert_to_fp32model(pipe.unet)
+            pipe.unet = convert_to_fp32model(pipe.unet)
         else:
             raise ValueError("--precision needs to be the following:: fp32, bf32, bf16, fp16, int8-bf16")
 
@@ -143,10 +143,10 @@ def main():
                 # print(pipe.unet.graph_for(input))
         elif args.precision == "int8-bf16":
             with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                # pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
-                # pipe.unet = torch.jit.freeze(pipe.unet)
-                # pipe.unet(*input)
-                # pipe.unet(*input)
+                pipe.unet = torch.jit.trace(pipe.unet, input, strict=False)
+                pipe.unet = torch.jit.freeze(pipe.unet)
+                pipe.unet(*input)
+                pipe.unet(*input)
                 # print(pipe.unet.graph_for(input))
                 pipe.unet_fp32 = torch.jit.trace(pipe.unet_fp32, input, strict=False)
                 pipe.unet_fp32 = torch.jit.freeze(pipe.unet_fp32)
