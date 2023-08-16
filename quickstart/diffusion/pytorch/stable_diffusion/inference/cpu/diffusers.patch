@@ -1,5 +1,5 @@
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 7347d70c..06654236 100644
+index 7347d70c..736a192b 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 @@ -178,6 +178,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
@@ -72,17 +72,12 @@ index 7347d70c..06654236 100644
  
                  # perform guidance
                  if do_classifier_free_guidance:
-@@ -702,6 +712,14 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -702,6 +712,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
                      if callback is not None and i % callback_steps == 0:
                          callback(i, t, latents)
  
 +                # output = p.key_averages().table(sort_by="self_cpu_time_total")
 +                # print(output)
-+
-+            # Disable pbar to avoid final pbar output.
-+            progress_bar.disable = True
-+            throughput = progress_bar.format_dict["rate"]
-+            print(f"\nThroughput: {throughput} fps")
 +
          if output_type == "latent":
              image = latents

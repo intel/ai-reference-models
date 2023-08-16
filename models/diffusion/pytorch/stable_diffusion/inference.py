@@ -50,6 +50,7 @@ def parse_args():
     parser.add_argument('--profile', action='store_true', default=False, help='profile')
     parser.add_argument('--benchmark', action='store_true', default=False, help='test performance')
     parser.add_argument('--accuracy', action='store_true', default=False, help='test accuracy')
+    parser.add_argument('-w', '--warmup_iterations', default=-1, type=int, help='number of warmup iterations to run')
     parser.add_argument('-i', '--iterations', default=-1, type=int, help='number of total iterations to run')
     parser.add_argument('--world-size', default=-1, type=int, help='number of nodes for distributed training')
     parser.add_argument('--rank', default=-1, type=int, help='node rank for distributed training')
@@ -198,21 +199,23 @@ def main():
     # benchmark
     if args.benchmark:
         print("Running benchmark ...")
-        # run model
-        start = time.time()
-        if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
-            with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
-                output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
-        else:
-            with torch.no_grad():
-                output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
-        end = time.time()
-        print('time per prompt(s): {:.2f}'.format((end - start)))
-        if args.output_dir:
-            if not os.path.exists(args.output_dir):
-                os.mkdir(args.output_dir)
-            image_name = time.strftime("%Y%m%d_%H%M%S")
-            output[0].save(f"{args.output_dir}/{image_name}.png")
+        total_time = 0
+        for i in range(args.iterations + args.warmup_iterations):
+            # run model
+            start = time.time()
+            if args.precision == "bf16" or args.precision == "fp16" or args.precision == "int8-bf16":
+                with torch.cpu.amp.autocast(dtype=dtype), torch.no_grad():
+                    output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
+            else:
+                with torch.no_grad():
+                    output = pipe(args.prompt, generator=torch.manual_seed(args.seed)).images
+            end = time.time()
+            print('time per prompt(s): {:.2f}'.format((end - start)))
+            if i >= args.warmup_iterations:
+                total_time += end - start
+
+        print("Latency: {:.2f} s".format(total_time / args.iterations))
+        print("Throughput: {:.5f} samples/sec".format(args.iterations / total_time))
 
     if args.accuracy:
         print("Running accuracy ...")
