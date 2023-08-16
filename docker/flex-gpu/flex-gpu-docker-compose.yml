@@ -73,7 +73,7 @@ services:
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
         BASE_IMAGE: ${FLEX_TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        BASE_TAG: ${FLEX_TF_BASE_TAG:-gpu}   
+        BASE_TAG: ${FLEX_TF_BASE_TAG:-xpu}   
         MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
       dockerfile: docker/flex-gpu/tf-resnet50v1-5-inference/tf-flex-series-resnet50v1-5-inference.Dockerfile
     command: >
