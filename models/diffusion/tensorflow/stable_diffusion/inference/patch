@@ -47,22 +47,23 @@ index fe619d3..6944bc6 100644
  from keras_cv.models.stable_diffusion.__internal__.layers.attention_block import (  # noqa: E501
      AttentionBlock,
 diff --git a/keras_cv/models/stable_diffusion/diffusion_model.py b/keras_cv/models/stable_diffusion/diffusion_model.py
-index 25b5241..b862b87 100644
+index 25b5241..d3e8803 100644
 --- a/keras_cv/models/stable_diffusion/diffusion_model.py
 +++ b/keras_cv/models/stable_diffusion/diffusion_model.py
-@@ -14,6 +14,11 @@
+@@ -14,6 +14,12 @@
  
  import tensorflow as tf
  from tensorflow import keras
 +try:
 +    import intel_extension_for_tensorflow as itex
 +    keras.layers.GroupNormalization = itex.ops.GroupNormalization
++    keras.layers.LayerNormalization = itex.ops.LayerNormalization
 +except:
 +    pass
  
  from keras_cv.models.stable_diffusion.__internal__.layers.padded_conv2d import (
      PaddedConv2D,
-@@ -303,6 +308,27 @@ class CrossAttention(keras.layers.Layer):
+@@ -303,6 +309,27 @@ class CrossAttention(keras.layers.Layer):
          self.head_size = head_size
          self.out_proj = keras.layers.Dense(num_heads * head_size)
  
@@ -90,7 +91,7 @@ index 25b5241..b862b87 100644
      def call(self, inputs):
          inputs, context = inputs
          context = inputs if context is None else context
-@@ -316,17 +342,10 @@ class CrossAttention(keras.layers.Layer):
+@@ -316,17 +343,10 @@ class CrossAttention(keras.layers.Layer):
          )
  
          q = tf.transpose(q, (0, 2, 1, 3))  # (bs, num_heads, time, head_size)
@@ -110,7 +111,7 @@ index 25b5241..b862b87 100644
          out = tf.reshape(
              attn, (-1, inputs.shape[1], self.num_heads * self.head_size)
          )
-@@ -352,10 +371,7 @@ class GEGLU(keras.layers.Layer):
+@@ -352,10 +372,7 @@ class GEGLU(keras.layers.Layer):
      def call(self, inputs):
          x = self.dense(inputs)
          x, gate = x[..., : self.output_dim], x[..., self.output_dim :]
@@ -139,7 +140,7 @@ index 614b11d..6ec83ae 100644
  from keras_cv.models.stable_diffusion.__internal__.layers.attention_block import (  # noqa: E501
      AttentionBlock,
 diff --git a/keras_cv/models/stable_diffusion/stable_diffusion.py b/keras_cv/models/stable_diffusion/stable_diffusion.py
-index 5ef7471..757592d 100644
+index 5ef7471..06312e5 100644
 --- a/keras_cv/models/stable_diffusion/stable_diffusion.py
 +++ b/keras_cv/models/stable_diffusion/stable_diffusion.py
 @@ -29,6 +29,8 @@ import math
@@ -167,7 +168,17 @@ index 5ef7471..757592d 100644
  
      def text_to_image(
          self,
-@@ -207,18 +211,21 @@ class StableDiffusionBase:
+@@ -76,6 +80,9 @@ class StableDiffusionBase:
+         unconditional_guidance_scale=7.5,
+         seed=None,
+     ):
++        if self.to_fp16:
++            K.set_floatx('float16')
++
+         encoded_text = self.encode_text(prompt)
+ 
+         return self.generate_image(
+@@ -207,18 +214,21 @@ class StableDiffusionBase:
  
          # Iterative reverse diffusion stage
          timesteps = tf.range(1, 1000, 1000 // num_steps)
@@ -196,7 +207,7 @@ index 5ef7471..757592d 100644
              latent = unconditional_latent + unconditional_guidance_scale * (
                  latent - unconditional_latent
              )
-@@ -303,6 +310,22 @@ class StableDiffusionBase:
+@@ -303,6 +313,22 @@ class StableDiffusionBase:
          if self._tokenizer is None:
              self._tokenizer = SimpleTokenizer()
          return self._tokenizer
@@ -219,7 +230,7 @@ index 5ef7471..757592d 100644
  
      def _get_timestep_embedding(
          self, timestep, batch_size, dim=320, max_period=10000
-@@ -314,6 +337,8 @@ class StableDiffusionBase:
+@@ -314,6 +340,8 @@ class StableDiffusionBase:
          args = tf.convert_to_tensor([timestep], dtype=tf.float32) * freqs
          embedding = tf.concat([tf.math.cos(args), tf.math.sin(args)], 0)
          embedding = tf.reshape(embedding, [1, -1])
@@ -228,7 +239,7 @@ index 5ef7471..757592d 100644
          return tf.repeat(embedding, batch_size, axis=0)
  
      def _get_initial_alphas(self, timesteps):
-@@ -324,14 +349,25 @@ class StableDiffusionBase:
+@@ -324,14 +352,25 @@ class StableDiffusionBase:
  
      def _get_initial_diffusion_noise(self, batch_size, seed):
          if seed is not None:
@@ -261,7 +272,7 @@ index 5ef7471..757592d 100644
  
      @staticmethod
      def _get_pos_ids():
-@@ -390,8 +426,9 @@ class StableDiffusion(StableDiffusionBase):
+@@ -390,8 +429,9 @@ class StableDiffusion(StableDiffusionBase):
          img_height=512,
          img_width=512,
          jit_compile=False,
@@ -272,39 +283,7 @@ index 5ef7471..757592d 100644
          print(
              "By using this model checkpoint, you acknowledge that its usage is "
              "subject to the terms of the CreativeML Open RAIL-M license at "
-@@ -405,7 +442,20 @@ class StableDiffusion(StableDiffusionBase):
-         needs to be modified.
-         """
-         if self._text_encoder is None:
--            self._text_encoder = TextEncoder(MAX_PROMPT_LENGTH)
-+            if self.to_fp16:
-+                self._text_encoder_fp32 = TextEncoder(MAX_PROMPT_LENGTH)
-+                weights_fp32 = self._text_encoder_fp32.get_weights()
-+                print("text_encoder before: ", np.unique(
-+                    [w.dtype for w in weights_fp32]), flush=True)
-+                K.set_floatx('float16')
-+                weights_fp16 = [w.astype(K.floatx()) for w in weights_fp32]
-+                self._text_encoder = TextEncoder(
-+                    MAX_PROMPT_LENGTH, download_weights=False)
-+                self._text_encoder.set_weights(weights_fp16)
-+                print("text_encoder after: ", np.unique(
-+                    [w.dtype for w in self._text_encoder.get_weights()]), flush=True)
-+            else:
-+                self._text_encoder = TextEncoder(MAX_PROMPT_LENGTH)
-             if self.jit_compile:
-                 self._text_encoder.compile(jit_compile=True)
-         return self._text_encoder
-@@ -420,6 +470,9 @@ class StableDiffusion(StableDiffusionBase):
-             self._diffusion_model = DiffusionModel(
-                 self.img_height, self.img_width, MAX_PROMPT_LENGTH
-             )
-+            wb = self._diffusion_model.get_weights()
-+            print("text_encoder before: ", np.unique(
-+                [w.dtype for w in wb]), flush=True)
-             if self.jit_compile:
-                 self._diffusion_model.compile(jit_compile=True)
-         return self._diffusion_model
-@@ -475,8 +528,9 @@ class StableDiffusionV2(StableDiffusionBase):
+@@ -475,8 +515,9 @@ class StableDiffusionV2(StableDiffusionBase):
          img_height=512,
          img_width=512,
          jit_compile=False,
@@ -315,36 +294,3 @@ index 5ef7471..757592d 100644
          print(
              "By using this model checkpoint, you acknowledge that its usage is "
              "subject to the terms of the CreativeML Open RAIL++-M license at "
-@@ -490,7 +544,20 @@ class StableDiffusionV2(StableDiffusionBase):
-         needs to be modified.
-         """
-         if self._text_encoder is None:
--            self._text_encoder = TextEncoderV2(MAX_PROMPT_LENGTH)
-+            if self.to_fp16:
-+                self._text_encoder_fp32 = TextEncoderV2(MAX_PROMPT_LENGTH)
-+                weights_fp32 = self._text_encoder_fp32.get_weights()
-+                print("text_encoder before: ", np.unique(
-+                    [w.dtype for w in weights_fp32]), flush=True)
-+                K.set_floatx('float16')
-+                weights_fp16 = [w.astype(K.floatx()) for w in weights_fp32]
-+                self._text_encoder = TextEncoderV2(
-+                    MAX_PROMPT_LENGTH, download_weights=False)
-+                self._text_encoder.set_weights(weights_fp16)
-+                print("text_encoder after: ", np.unique(
-+                    [w.dtype for w in self._text_encoder.get_weights()]), flush=True)
-+            else:
-+                self._text_encoder = TextEncoderV2(MAX_PROMPT_LENGTH)
-             if self.jit_compile:
-                 self._text_encoder.compile(jit_compile=True)
-         return self._text_encoder
-@@ -505,6 +572,10 @@ class StableDiffusionV2(StableDiffusionBase):
-             self._diffusion_model = DiffusionModelV2(
-                 self.img_height, self.img_width, MAX_PROMPT_LENGTH
-             )
-+            wb = self._diffusion_model.get_weights()
-+            print("diffusion_model before: ", np.unique(
-+                [w.dtype for w in wb]), flush=True)
-+
-             if self.jit_compile:
-                 self._diffusion_model.compile(jit_compile=True)
-         return self._diffusion_model
