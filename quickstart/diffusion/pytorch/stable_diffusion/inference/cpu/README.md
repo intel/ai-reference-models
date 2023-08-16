@@ -25,11 +25,6 @@ git apply ../diffusers.patch
 python setup.py install
 ```
 
-* Do calibration to get quantization config before running INT8.
-```
-bash do_calibration.sh
-```
-
 # Quick Start Scripts
 
 |  DataType   | Throughput  |  Latency    |   Accuracy  |
@@ -38,8 +33,9 @@ bash do_calibration.sh
 | BF16        | bash inference_throughput.sh bf16 | bash inference_realtime.sh bf16 | bash accuracy.sh bf16 |
 | BF32        | bash inference_throughput.sh bf32 | bash inference_realtime.sh bf32 | bash accuracy.sh bf32 |
 | FP16        | bash inference_throughput.sh fp16 | bash inference_realtime.sh fp16 | bash accuracy.sh fp16 |
-| INT8        | bash inference_throughput.sh int8 | bash inference_realtime.sh int8 | bash accuracy.sh int8 |
 | INT8-BF16        | bash inference_throughput.sh int8-bf16 | bash inference_realtime.sh int8-bf16 | bash accuracy.sh int8-bf16 |
+
+**NOTE**: You should get a quant_model.pt before run INT8-BF16 models. Please refer the [link](https://github.com/intel-innersource/frameworks.ai.nlp-toolkit.intel-nlp-toolkit/blob/develop/examples/huggingface/pytorch/text-to-image/quantization/qat/README.md).
 
 ## Run the model
 
