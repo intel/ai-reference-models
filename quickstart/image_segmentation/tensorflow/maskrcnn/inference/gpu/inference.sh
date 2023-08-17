@@ -21,11 +21,11 @@ echo 'MODEL_DIR='$MODEL_DIR
 echo 'PRECISION='$PRECISION
 echo 'OUTPUT_DIR='$OUTPUT_DIR
 echo 'BATCH_SIZE='$BATCH_SIZE
+
 # Create an array of input directories that are expected and then verify that they exist
 declare -A input_envs
 input_envs[PRECISION]=${PRECISION}
 input_envs[OUTPUT_DIR]=${OUTPUT_DIR}
-input_envs[PRETRAINED_DIR]=${PRETRAINED_DIR}
 input_envs[BATCH_SIZE]=${BATCH_SIZE}
 
 for i in "${!input_envs[@]}"; do

@@ -60,6 +60,7 @@ export IMAGE_FILE=<path to coco dataset image>
 export BATCH_SIZE=<inference batch size>
 export NUM_ITERATIONS=<number of iterations>
 export OUTPUT_DIR=<path to output directory>
+export SCRIPT=quickstart/inference.sh
 DOCKER_ARGS="--rm -it"
 
 docker run \

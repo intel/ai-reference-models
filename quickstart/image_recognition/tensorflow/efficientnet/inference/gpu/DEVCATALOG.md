@@ -71,7 +71,7 @@ docker run \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
-  --volume IMAGE_FILE:${IMAGE_FILE} \
+  --volume ${IMAGE_FILE}:${IMAGE_FILE} \
   --rm -it \
   $IMAGE_NAME \
   /bin/bash quickstart/batch_inference.sh
