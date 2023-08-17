@@ -19,7 +19,7 @@
 #
 
 FLEX_TF_BASE_IMAGE=intel/intel-extension-for-tensorflow
-FLEX_TF_BASE_TAG=gpu
+FLEX_TF_BASE_TAG=xpu
 FLEX_PYT_BASE_IMAGE=intel/intel-extension-for-pytorch
 FLEX_PYT_BASE_TAG=xpu-flex
 
@@ -29,4 +29,3 @@ all:
 	 FLEX_TF_BASE_IMAGE=${FLEX_TF_BASE_IMAGE} \
 	 FLEX_TF_BASE_TAG=${FLEX_TF_BASE_TAG} \
 	 docker compose -f flex-gpu-docker-compose.yml up --build
-

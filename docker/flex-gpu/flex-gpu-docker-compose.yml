@@ -149,3 +149,17 @@ services:
       dockerfile: docker/flex-gpu/tf-stable-diffusion-inference/tf-flex-series-stable-diffusion-inference.Dockerfile
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
+  tf-efficientnet-inference:
+    image: intel/image-recognition:tf-flex-gpu-efficientnet-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${FLEX_TF_BASE_IMAGE:-intel/intel-extension-for-tensorflow}
+        BASE_TAG: ${FLEX_TF_BASE_TAG:-xpu} 
+      dockerfile: docker/flex-gpu/tf-efficientnet-inference/tf-flex-series-efficientnet-inference.Dockerfile
+    command: >
+      sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
