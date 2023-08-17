@@ -121,3 +121,17 @@ services:
       dockerfile: docker/flex-gpu/pytorch-stable-diffusion-inference/pytorch-flex-series-stable-diffusion-inference.Dockerfile
     command: >
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
+  pytorch-yolov5-inference:
+    image: intel/object-detection:pytorch-flex-gpu-yolov5-inference
+    pull_policy: always
+    build:
+      context: ../../
+      args:
+        http_proxy: ${http_proxy}
+        https_proxy: ${https_proxy}
+        no_proxy: ${no_proxy}
+        BASE_IMAGE: ${FLEX_PYT_BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${FLEX_PYT_BASE_TAG:-xpu-flex}
+      dockerfile: docker/flex-gpu/pytorch-yolov5-inference/pytorch-flex-series-yolov5-inference.Dockerfile
+    command: >
+      sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
