@@ -1,10 +1,10 @@
 diff --git a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-index 1fcb88b7..37d4f129 100644
+index 7347d70c..736a192b 100644
 --- a/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
 +++ b/src/diffusers/pipelines/stable_diffusion/pipeline_stable_diffusion.py
-@@ -192,6 +192,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -178,6 +178,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+         )
          self.vae_scale_factor = 2 ** (len(self.vae.config.block_out_channels) - 1)
-         self.image_processor = VaeImageProcessor(vae_scale_factor=self.vae_scale_factor)
          self.register_to_config(requires_safety_checker=requires_safety_checker)
 +        self.sample_size = unet.config.sample_size
 +        self.in_channels = unet.config.in_channels
@@ -12,8 +12,8 @@ index 1fcb88b7..37d4f129 100644
  
      def enable_vae_slicing(self):
          r"""
-@@ -601,8 +604,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
-                 "not-safe-for-work" (nsfw) content.
+@@ -619,8 +622,8 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+             (nsfw) content, according to the `safety_checker`.
          """
          # 0. Default height and width to unet
 -        height = height or self.unet.config.sample_size * self.vae_scale_factor
@@ -23,7 +23,7 @@ index 1fcb88b7..37d4f129 100644
  
          # 1. Check inputs. Raise error if not correct
          self.check_inputs(
-@@ -617,7 +620,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -635,7 +638,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          else:
              batch_size = prompt_embeds.shape[0]
  
@@ -32,7 +32,7 @@ index 1fcb88b7..37d4f129 100644
          # here `guidance_scale` is defined analog to the guidance weight `w` of equation (2)
          # of the Imagen paper: https://arxiv.org/pdf/2205.11487.pdf . `guidance_scale = 1`
          # corresponds to doing no classifier free guidance.
-@@ -643,7 +646,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -657,7 +660,7 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          timesteps = self.scheduler.timesteps
  
          # 5. Prepare latent variables
@@ -41,7 +41,7 @@ index 1fcb88b7..37d4f129 100644
          latents = self.prepare_latents(
              batch_size * num_images_per_prompt,
              num_channels_latents,
-@@ -662,18 +665,24 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -676,17 +679,24 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
          num_warmup_steps = len(timesteps) - num_inference_steps * self.scheduler.order
          with self.progress_bar(total=num_inference_steps) as progress_bar:
              for i, t in enumerate(timesteps):
@@ -56,8 +56,7 @@ index 1fcb88b7..37d4f129 100644
 -                    t,
 -                    encoder_hidden_states=prompt_embeds,
 -                    cross_attention_kwargs=cross_attention_kwargs,
--                    return_dict=False,
--                )[0]
+-                ).sample
 +                if (i < self.HIGH_PRECISION_STEPS or i > len(timesteps)-1 - self.HIGH_PRECISION_STEPS) and hasattr(self, 'unet_fp32'):
 +                    noise_pred = self.unet_fp32(
 +                        latent_model_input.to(memory_format=torch.channels_last),
@@ -73,13 +72,13 @@ index 1fcb88b7..37d4f129 100644
  
                  # perform guidance
                  if do_classifier_free_guidance:
-@@ -693,6 +702,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
+@@ -702,6 +712,9 @@ class StableDiffusionPipeline(DiffusionPipeline, TextualInversionLoaderMixin, Lo
                      if callback is not None and i % callback_steps == 0:
                          callback(i, t, latents)
  
 +                # output = p.key_averages().table(sort_by="self_cpu_time_total")
 +                # print(output)
 +
-         if not output_type == "latent":
-             image = self.vae.decode(latents / self.vae.config.scaling_factor, return_dict=False)[0]
-             image, has_nsfw_concept = self.run_safety_checker(image, device, prompt_embeds.dtype)
+         if output_type == "latent":
+             image = latents
+             has_nsfw_concept = None
