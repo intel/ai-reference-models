@@ -72,24 +72,30 @@ else
     exit 1
 fi
 
-
-CORES=`lscpu | grep Core | awk '{print $4}'`
-SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
 BATCHSIZE=32768
 seed_num=1665468325 #1665462256 #$(date +%s)
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
-export CCL_MNIC=local
-export CCL_MNIC_COUNT=2
-export FI_PROVIDER=psm3
+export TORCH_CPP_LOG_LEVEL=INFO
+export TORCH_DISTRIBUTED_DEBUG=INFO
+export CCL_LOG_LEVEL=info
+# export CCL_MNIC=local
+# export FI_PROVIDER=psm3
+# export CCL_ATL_TRANSPORT=ofi
+
 export CCL_ALLREDUCE=rabenseifner
-export PSM3_IDENTIFY=1
-export PSM3_ALLOW_ROUTERS=1
-export PSM3_RDMA=1 
-export PSM3_RV_MR_CACHE_SIZE=8192 
-export FI_PROVIDER_PATH=/usr/lib64/libfabric
-export CCL_MNIC_NAME=irdma-cvl01tf2,irdma-cvl02tf2,irdma-cvl11tf2,irdma-cvl12tf2
-export CCL_MNIC_COUNT=2
+# export PSM3_IDENTIFY=1
+# export PSM3_ALLOW_ROUTERS=1
+# export PSM3_RDMA=1 
+# export PSM3_RV_MR_CACHE_SIZE=8192 
+# export FI_PROVIDER_PATH=/usr/lib64/libfabric
+# export CCL_MNIC_NAME=irdma-cvl01tf2,irdma-cvl02tf2,irdma-cvl11tf2,irdma-cvl12tf2
+# export CCL_MNIC_COUNT=2
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+CORES_PER_INSTANCE=$CORES
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+
 LOCAL_BATCH_SIZE=$((BATCHSIZE / NODE))
 LOCAL_BATCH_SIZE=$((LOCAL_BATCH_SIZE / 2))
 
@@ -103,7 +109,7 @@ $MODEL_SCRIPT \
   --arch-sparse-feature-size=128 --max-ind-range=40000000 \
   --numpy-rand-seed=${seed_num} --print-auc --mlperf-auc-threshold=0.8025 \
   --lr-num-warmup-steps=8000   --lr-decay-start-step=70000 --lr-num-decay-steps=30000\
-  --local-batch-size=${LOCAL_BATCH_SIZE} --print-freq=1024 --print-time --ipex-interaction \
+  --local-batch-size=${LOCAL_BATCH_SIZE} --print-freq=100 --print-time --ipex-interaction \
   --test-mini-batch-size=65536 --ipex-merged-emb --should-test --test-freq 6400\
   $ARGS |tee $LOG_0
 wait
