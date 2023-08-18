@@ -63,9 +63,9 @@ numactl -C 0-$((CORES-1)) -m 0 accelerate launch ${MODEL_DIR}/models/diffusion/p
   --resolution=512 \
   --train_batch_size=1 \
   --gradient_accumulation_steps=4 \
-  --num_train_epochs=20 \
+  -w 4 --max_train_steps=5 \
   --learning_rate=5.0e-04 --scale_lr \
   --lr_scheduler="constant" \
   --lr_warmup_steps=0 \
-  --output_dir="textual_inversion_cat" \
+  --train-no-eval \
   --ipex $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}.log

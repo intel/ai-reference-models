@@ -20,7 +20,7 @@ pip install torchmetrics torch-fidelity pycocotools transformers==4.28.1
 ```bash
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
-git checkout v0.16.0
+git checkout v0.19.3
 python setup.py install
 ```
 
@@ -82,7 +82,7 @@ export MODEL_DIR=$(pwd)
 cd quickstart/diffusion/pytorch/stable_diffusion/training/cpu
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
-git checkout v0.16.0
+git checkout v0.19.3
 python setup.py install
 cd ..
 # Run fine-tuning

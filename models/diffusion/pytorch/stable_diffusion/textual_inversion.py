@@ -18,6 +18,7 @@ import logging
 import math
 import os
 import random
+import shutil
 import warnings
 from pathlib import Path
 
@@ -53,6 +54,8 @@ from diffusers.optimization import get_scheduler
 from diffusers.utils import check_min_version, is_wandb_available
 from diffusers.utils.import_utils import is_xformers_available
 
+import time
+
 
 if is_wandb_available():
     import wandb
@@ -77,7 +80,7 @@ else:
 
 
 # Will error if the minimal version of diffusers is not installed. Remove at your own risks.
-check_min_version("0.16.0")
+check_min_version("0.19.0")
 
 logger = get_logger(__name__)
 
@@ -176,10 +179,9 @@ def parse_args():
         help="Save learned_embeds.bin every X updates steps.",
     )
     parser.add_argument(
-        "--only_save_embeds",
+        "--save_as_full_pipeline",
         action="store_true",
-        default=True,
-        help="Save only the embeddings for the new concept.",
+        help="Save the complete stable diffusion pipeline.",
     )
     parser.add_argument(
         "--num_vectors",
@@ -287,6 +289,12 @@ def parse_args():
         "--lr_warmup_steps", type=int, default=500, help="Number of steps for the warmup in the lr scheduler."
     )
     parser.add_argument(
+        "--lr_num_cycles",
+        type=int,
+        default=1,
+        help="Number of hard resets of the lr in cosine_with_restarts scheduler.",
+    )
+    parser.add_argument(
         "--dataloader_num_workers",
         type=int,
         default=0,
@@ -389,11 +397,7 @@ def parse_args():
         "--checkpoints_total_limit",
         type=int,
         default=None,
-        help=(
-            "Max number of checkpoints to store. Passed as `total_limit` to the `Accelerator` `ProjectConfiguration`."
-            " See Accelerator::save_state https://huggingface.co/docs/accelerate/package_reference/accelerator#accelerate.Accelerator.save_state"
-            " for more docs"
-        ),
+        help=("Max number of checkpoints to store."),
     )
     parser.add_argument(
         "--resume_from_checkpoint",
@@ -407,6 +411,8 @@ def parse_args():
     parser.add_argument(
         "--enable_xformers_memory_efficient_attention", action="store_true", help="Whether or not to use xformers."
     )
+    parser.add_argument('-w', '--warmup_iterations', default=0, type=int, help='number of warmup iterations to run')
+    parser.add_argument('--train-no-eval', action='store_true', default=False, help='only train, but not evaluate model on validation set')
     parser.add_argument('--ipex', action='store_true', default=False, help='ipex')
 
     args = parser.parse_args()
@@ -561,15 +567,13 @@ class TextualInversionDataset(Dataset):
 
 def main():
     args = parse_args()
+    print(args)
     logging_dir = os.path.join(args.output_dir, args.logging_dir)
-
-    accelerator_project_config = ProjectConfiguration(total_limit=args.checkpoints_total_limit)
-
+    accelerator_project_config = ProjectConfiguration(project_dir=args.output_dir, logging_dir=logging_dir)
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
         mixed_precision=args.mixed_precision,
         log_with=args.report_to,
-        logging_dir=logging_dir,
         project_config=accelerator_project_config,
     )
 
@@ -739,8 +743,9 @@ def main():
     lr_scheduler = get_scheduler(
         args.lr_scheduler,
         optimizer=optimizer,
-        num_warmup_steps=args.lr_warmup_steps * args.gradient_accumulation_steps,
-        num_training_steps=args.max_train_steps * args.gradient_accumulation_steps,
+        num_warmup_steps=args.lr_warmup_steps * accelerator.num_processes,
+        num_training_steps=args.max_train_steps * accelerator.num_processes,
+        num_cycles=args.lr_num_cycles,
     )
 
     # Prepare everything with our `accelerator`.
@@ -748,13 +753,17 @@ def main():
         text_encoder, optimizer, train_dataloader, lr_scheduler
     )
 
-    # For mixed precision training we cast the unet and vae weights to half-precision
-    # as these models are only used for inference, keeping weights in full precision is not required.
+    # For mixed precision training we cast all non-trainable weigths (vae, non-lora text_encoder and non-lora unet) to half-precision
+    # as these weights are only used for inference, keeping weights in full precision is not required.
     weight_dtype = torch.float32
     if accelerator.mixed_precision == "fp16":
         weight_dtype = torch.float16
+        precision = "fp16"
     elif accelerator.mixed_precision == "bf16":
         weight_dtype = torch.bfloat16
+        precision = "bf16"
+    else:
+        precision = "fp32"
 
     # Move vae and unet to device and cast to weight_dtype
     unet.to(accelerator.device, dtype=weight_dtype)
@@ -821,6 +830,8 @@ def main():
     # keep original embeddings as reference
     orig_embeds_params = accelerator.unwrap_model(text_encoder).get_input_embeddings().weight.data.clone()
 
+    start = time.time()
+    train_time = 0
     for epoch in range(first_epoch, args.num_train_epochs):
         text_encoder.train()
         for step, batch in enumerate(train_dataloader):
@@ -831,6 +842,7 @@ def main():
                 continue
 
             with accelerator.accumulate(text_encoder):
+                start1 = time.time()
                 # , torch.profiler.profile(activities=[torch.profiler.ProfilerActivity.CPU], record_shapes=True) as p:
                 # Convert images to latent space
                 latents = vae.encode(batch["pixel_values"].to(dtype=weight_dtype)).latent_dist.sample().detach()
@@ -869,6 +881,10 @@ def main():
                 lr_scheduler.step()
                 optimizer.zero_grad()
 
+                end1 = time.time()
+                if step >= args.warmup_iterations:
+                    train_time += end1 - start1
+
                 # Let's make sure we don't update any embedding weights besides the newly added token
                 index_no_updates = torch.ones((len(tokenizer),), dtype=torch.bool)
                 index_no_updates[min(placeholder_token_ids) : max(placeholder_token_ids) + 1] = False
@@ -892,6 +908,26 @@ def main():
 
                 if accelerator.is_main_process:
                     if global_step % args.checkpointing_steps == 0:
+                        # _before_ saving state, check if this save would set us over the `checkpoints_total_limit`
+                        if args.checkpoints_total_limit is not None:
+                            checkpoints = os.listdir(args.output_dir)
+                            checkpoints = [d for d in checkpoints if d.startswith("checkpoint")]
+                            checkpoints = sorted(checkpoints, key=lambda x: int(x.split("-")[1]))
+
+                            # before we save the new checkpoint, we need to have at _most_ `checkpoints_total_limit - 1` checkpoints
+                            if len(checkpoints) >= args.checkpoints_total_limit:
+                                num_to_remove = len(checkpoints) - args.checkpoints_total_limit + 1
+                                removing_checkpoints = checkpoints[0:num_to_remove]
+
+                                logger.info(
+                                    f"{len(checkpoints)} checkpoints already exist, removing {len(removing_checkpoints)} checkpoints"
+                                )
+                                logger.info(f"removing checkpoints: {', '.join(removing_checkpoints)}")
+
+                                for removing_checkpoint in removing_checkpoints:
+                                    removing_checkpoint = os.path.join(args.output_dir, removing_checkpoint)
+                                    shutil.rmtree(removing_checkpoint)
+
                         save_path = os.path.join(args.output_dir, f"checkpoint-{global_step}")
                         accelerator.save_state(save_path)
                         logger.info(f"Saved state to {save_path}")
@@ -907,14 +943,21 @@ def main():
 
             if global_step >= args.max_train_steps:
                 break
+
+    end = time.time()
+    print('time_to_train(s): {:.2f}'.format((end - start)))
+
+    throughput = (args.max_train_steps * args.gradient_accumulation_steps - args.warmup_iterations) / (train_time)
+    print(f"\nThroughput: {throughput} fps")
+
     # Create the pipeline using the trained modules and save it.
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
-        if args.push_to_hub and args.only_save_embeds:
+        if args.push_to_hub and not args.save_as_full_pipeline:
             logger.warn("Enabling full model saving because --push_to_hub=True was specified.")
             save_full_model = True
         else:
-            save_full_model = not args.only_save_embeds
+            save_full_model = args.save_as_full_pipeline
         if save_full_model:
             pipeline = StableDiffusionPipeline.from_pretrained(
                 args.pretrained_model_name_or_path,
@@ -943,6 +986,14 @@ def main():
             )
 
     accelerator.end_training()
+
+    if not args.train_no_eval:
+        # run test
+        pipe = StableDiffusionPipeline.from_pretrained(args.output_dir)
+        prompt = "A <cat-toy> backpack"
+        image = pipe(prompt, num_inference_steps=50, guidance_scale=7.5).images[0]
+        filename = "cat-backpack_" + precision + ".png"
+        image.save(filename)
 
 
 if __name__ == "__main__":
