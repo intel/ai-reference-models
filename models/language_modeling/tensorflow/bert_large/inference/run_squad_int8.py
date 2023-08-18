@@ -45,6 +45,7 @@ from absl import logging
 
 tf.config.optimizer.set_experimental_options({"constant_folding": False})
 
+# This script is only executed when the onednn graph option is on.
 import intel_extension_for_tensorflow as itex
 auto_mixed_precision_options = itex.AutoMixedPrecisionOptions()
 auto_mixed_precision_options.data_type = itex.BFLOAT16

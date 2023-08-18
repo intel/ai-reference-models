@@ -38,23 +38,6 @@ from tensorflow.core.protobuf import rewriter_config_pb2
 INPUTS = 'input'
 OUTPUTS = 'Identity'
 
-import intel_extension_for_tensorflow as itex
-auto_mixed_precision_options = itex.AutoMixedPrecisionOptions()
-auto_mixed_precision_options.data_type = itex.BFLOAT16
-
-auto_mixed_precision_options.allowlist_add= "Rsqrt,SquaredDifference,Mean"
-auto_mixed_precision_options.denylist_remove = "Mean"
-auto_mixed_precision_options.denylist_add = "QuantizeV2,Dequantize"
-
-graph_options = itex.GraphOptions(auto_mixed_precision_options=auto_mixed_precision_options)
-graph_options.auto_mixed_precision = itex.ON
-
-config = itex.ConfigProto(graph_options=graph_options)
-try:
-  itex.set_backend("cpu", config)
-except Exception:
-  itex.set_config(config)
-
 class unet_3d_tf:
     """Evaluate 3d_unet with optimized TensorFlow graph"""
 
