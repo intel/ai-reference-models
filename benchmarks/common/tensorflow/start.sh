@@ -1692,6 +1692,7 @@ function vision_transformer() {
 
     if [ ${MODE} == "training" ]; then
 	CMD="${CMD} $(add_arg "--init-checkpoint" ${INIT_CHECKPOINT})"
+	CMD="${CMD} $(add_arg "--epochs" ${EPOCHS})"
     fi
 	    
     if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||

@@ -47,8 +47,8 @@ class ModelInitializer(BaseModelInitializer):
 
         arg_parser = ArgumentParser(description='Parse args')
 
-        arg_parser.add_argument("--steps", dest='steps',
-                                type=int, default=30000,
+        arg_parser.add_argument("--epochs", dest='epochs',
+                                type=int, default=0,
                                 help="number of epochs")
         arg_parser.add_argument("--model_dir", dest='model_dir',
                                 type=str, default='/tmp/vit-training/',
@@ -80,7 +80,7 @@ class ModelInitializer(BaseModelInitializer):
         self.benchmark_command = \
             self.benchmark_command + \
             " --batch-size=" + str(self.args.batch_size) + \
-            " --steps=" + str(self.args.steps) + \
+            " --epochs=" + str(self.args.epochs) + \
             " --precision=" + str(self.args.precision) + \
             " --model-dir=" + str(self.args.model_dir)
 

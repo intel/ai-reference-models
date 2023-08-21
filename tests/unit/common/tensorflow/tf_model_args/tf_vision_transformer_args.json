@@ -30,18 +30,18 @@
       "cpuset": "0-111"},
 
     { "_comment": "vit_training_fp32",
-    "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=fp32 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset --steps=20000",
-    "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --steps=20000 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=fp32",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=fp32 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset",
+    "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --epochs=0 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=fp32",
     "cpuset": "0-111"},
 
     { "_comment": "vit_training_fp16",
-    "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=fp16 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset --steps=20000",
-    "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --steps=20000 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=fp16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=fp16 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset",
+    "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --epochs=0 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=fp16",
     "cpuset": "0-111"},
 
     { "_comment": "vit_training_bfloat16",
-    "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=bfloat16 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset --steps=20000",
-    "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --steps=20000 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=bfloat16",
+    "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=bfloat16 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset",
+    "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --epochs=0 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=bfloat16",
     "cpuset": "0-111"}
   
 ]

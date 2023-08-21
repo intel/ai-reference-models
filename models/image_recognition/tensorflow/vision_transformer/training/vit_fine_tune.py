@@ -39,10 +39,10 @@ def get_arg_parser():
         dest='precision', default='fp32'
     )    
     arg_parser.add_argument(
-        '-s', '--steps',
-        help='Specify the number of steps for training',
-        type=int, dest='steps',
-        default=30000
+        '-e', '--epochs',
+        help='Specify the number of epochs for training',
+        type=int, dest='epochs',
+        default=0
     )
     arg_parser.add_argument(
         '-b', '--batch-size',
@@ -280,11 +280,15 @@ class WarmUpCosine(tf.keras.optimizers.schedules.LearningRateSchedule):
         config = {'d_model': self.d_model, 'warmup_steps': self.warmup_steps}
         return config
 
-TOTAL_STEPS = args.steps
+TOTAL_STEPS = 30000
 WARMUP_STEPS = 50
 INIT_LR = 0.03
 WAMRUP_LR = 0.01
 EPOCHS = int(TOTAL_STEPS / (num_train_split/BATCH_SIZE))
+
+if (args.epochs != 0):
+    print("Running for total epochs : ", args.epochs)
+    EPOCHS = args.epochs
 
 scheduled_lrs = WarmUpCosine(
     learning_rate_base=INIT_LR,
