@@ -28,11 +28,6 @@ fi
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
 
-if [ -z "${MASTER_ADDR}" ]; then
-  echo "The required environment variable MASTER_ADDR has not been set"
-  exit 1
-fi
-
 ARGS=""
 if [ "$1" == "bf16" ]; then
     ARGS="$ARGS --mixed_precision=bf16"
@@ -68,23 +63,67 @@ PRECISION=$1
 export MODEL_NAME="runwayml/stable-diffusion-v1-5"
 export DATA_DIR="./cat"
 
-rm -rf ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log*
+#oneCCL settings
+export CCL_WORKER_COUNT=8
+export CCL_LOG_LEVEL=info
+export CCL_BF16=avx512bf
+export CCL_ATL_TRANSPORT=ofi
+export CCL_MNIC_COUNT=2
+export CCL_MNIC=local
+export CCL_MNIC_NAME=irdma1,irdma5
+export CCL_ALLREDUCE=ring
+export CCL_WORKER_COUNT=8
+
+for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
+  START_CORE=$(( i * CORES ))
+  for (( j = 0; j < $CCL_WORKER_COUNT; j++)); do
+   CCL_WORKER_AFFINITY="${CCL_WORKER_AFFINITY} $((START_CORE + j))"
+  done
+done
+
+export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
+
+
+#DDP settings
+export TORCH_CPP_LOG_LEVEL=INFO
+export TORCH_DISTRIBUTED_DEBUG=INFO
+export MASTER_ADDR=`head -1 hostfile`
+
+# Fabric settings
+export FI_PROVIDER=psm3
+export PSM3_IDENTIFY=1
+export PSM3_ALLOW_ROUTERS=1
+export PSM3_RDMA=1
+export PSM3_PRINT_STATS=0
+export PSM3_RV_MR_CACHE_SIZE=8192
+export PSM3_KASSIST_MODE=none
+#export PSM3_NIC='irdma*
+export FI_PSM3_CONN_TIMEOUT=100
+
+rm -rf ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log_${PRECISION}*
 
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-mpirun -f ${HOSTFILE} -n ${NUM_RANKS} -ppn 2 accelerate launch ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/textual_inversion.py \
-  --pretrained_model_name_or_path=$MODEL_NAME \
-  --train_data_dir=$DATA_DIR \
-  --learnable_property="object" \
-  --placeholder_token="<cat-toy>" --initializer_token="toy" \
-  --resolution=512 \
-  --train_batch_size=1 \
-  --gradient_accumulation_steps=4 \
-  --num_train_epochs=20 \
-  --learning_rate=5.0e-04 --scale_lr \
-  --lr_scheduler="constant" \
-  --lr_warmup_steps=0 \
-  --output_dir="textual_inversion_cat_${PRECISION}" \
-  --save_as_full_pipeline \
-  --ipex $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log_${PRECISION}.log
+python -m intel_extension_for_pytorch.cpu.launch \
+    --memory-allocator tcmalloc \
+    --distributed \
+    --nnodes ${NNODES} \
+    --hostfile ${HOSTFILE} \
+    --nprocs-per-node ${SOCKETS} \
+    --ncores-per-instance ${CORES_PER_INSTANCE} \
+    --logical-cores-for-ccl --ccl_worker_count 8 \
+    ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/textual_inversion.py \
+    --pretrained_model_name_or_path=$MODEL_NAME \
+    --train_data_dir=$DATA_DIR \
+    --learnable_property="object" \
+    --placeholder_token="\"<cat-toy>\"" --initializer_token="toy" \
+    --resolution=512 \
+    --train_batch_size=1 \
+    --gradient_accumulation_steps=4 \
+    --num_train_epochs=20 \
+    --learning_rate=5.0e-04 --scale_lr \
+    --lr_scheduler="constant" \
+    --lr_warmup_steps=0 \
+    --output_dir="textual_inversion_cat_${PRECISION}" \
+    --ipex $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_dist_finetune_log_${PRECISION}.log

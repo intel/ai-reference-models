@@ -43,6 +43,13 @@ else
     exit 1
 fi
 
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+
+CORES_PER_INSTANCE=$CORES
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
@@ -52,20 +59,31 @@ PRECISION=$1
 export MODEL_NAME="runwayml/stable-diffusion-v1-5"
 export DATA_DIR="./cat"
 
-rm -rf ${OUTPUT_DIR}/stable_diffusion_finetune_log*
+rm -rf ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}*
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
-numactl -C 0-$((CORES-1)) -m 0 accelerate launch ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/textual_inversion.py \
-  --pretrained_model_name_or_path=$MODEL_NAME \
-  --train_data_dir=$DATA_DIR \
-  --learnable_property="object" \
-  --placeholder_token="<cat-toy>" --initializer_token="toy" \
-  --resolution=512 \
-  --train_batch_size=1 \
-  --gradient_accumulation_steps=4 \
-  -w 4 --max_train_steps=5 \
-  --learning_rate=5.0e-04 --scale_lr \
-  --lr_scheduler="constant" \
-  --lr_warmup_steps=0 \
-  --train-no-eval \
-  --ipex $ARGS 2>&1 | tee ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}.log
+python -m intel_extension_for_pytorch.cpu.launch \
+    --memory-allocator tcmalloc \
+    --ninstances 1 \
+    --ncores_per_instance ${CORES_PER_INSTANCE} \
+    --log_dir=${OUTPUT_DIR} \
+    --log_file_prefix="./stable_diffusion_finetune_log_${PRECISION}" \
+    ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/textual_inversion.py \
+    --pretrained_model_name_or_path=$MODEL_NAME \
+    --train_data_dir=$DATA_DIR \
+    --learnable_property="object" \
+    --placeholder_token="\"<cat-toy>\"" --initializer_token="toy" \
+    --resolution=512 \
+    --train_batch_size=1 \
+    --gradient_accumulation_steps=4 \
+    -w 4 --max_train_steps=5 \
+    --learning_rate=5.0e-04 --scale_lr \
+    --lr_scheduler="constant" \
+    --lr_warmup_steps=0 \
+    --train-no-eval \
+    --ipex $ARGS
+
+# For the summary of results
+wait
+
+throughput=$(grep 'Throughput:' ${OUTPUT_DIR}/stable_diffusion_finetune_log_${PRECISION}* |sed -e 's/.*Throughput//;s/[^0-9.]//g')
+echo ""stable_diffusion";"finetune";"throughput";$1;${throughput}" | tee -a ${OUTPUT_DIR}/summary.log

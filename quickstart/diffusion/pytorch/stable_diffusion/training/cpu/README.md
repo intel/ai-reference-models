@@ -20,7 +20,7 @@ pip install torchmetrics torch-fidelity pycocotools transformers==4.28.1
 ```bash
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
-git checkout v0.19.3
+git checkout v0.16.0
 python setup.py install
 ```
 
@@ -42,7 +42,7 @@ accelerate config
 ```
 
 ### Model Specific Setup
-* Set Jemalloc Preload for better performance
+* Set Tcmalloc Preload for better performance
 The tcmalloc should be built from the [General setup](#general-setup) section.
 ```bash
     export LD_PRELOAD="path/lib/libtcmalloc.so":$LD_PRELOAD
@@ -82,7 +82,7 @@ export MODEL_DIR=$(pwd)
 cd quickstart/diffusion/pytorch/stable_diffusion/training/cpu
 git clone https://github.com/huggingface/diffusers.git
 cd diffusers
-git checkout v0.19.3
+git checkout v0.16.0
 python setup.py install
 cd ..
 # Run fine-tuning
