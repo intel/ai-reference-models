@@ -1,4 +1,4 @@
 pandas
 matplotlib
-scipy
+scipy==1.11.1
 scikit-image
