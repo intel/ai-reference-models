@@ -12,7 +12,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.11686475574970245
+                            0.1089453399181366
                         ],
                         "zero_point": [
                             0
@@ -1059,7 +1059,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.07753292471170425
+                            0.05773673206567764
                         ],
                         "zero_point": [
                             0
@@ -1067,12 +1067,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -1085,7 +1087,7 @@
                 }
             },
             "1": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -1095,7 +1097,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.07753292471170425
+                            0.05773673206567764
                         ],
                         "zero_point": [
                             0
@@ -1109,7 +1111,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.07753292471170425
+                            0.05722489953041077
                         ],
                         "zero_point": [
                             0
@@ -1117,12 +1119,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -1145,7 +1149,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.07753292471170425
+                            0.05722489953041077
                         ],
                         "zero_point": [
                             0
@@ -1680,7 +1684,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.06872659176588058
+                            0.044601019471883774
                         ],
                         "zero_point": [
                             0
@@ -1688,12 +1692,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -1706,7 +1712,7 @@
                 }
             },
             "3": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -1716,7 +1722,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.06872659176588058
+                            0.044601019471883774
                         ],
                         "zero_point": [
                             0
@@ -1730,7 +1736,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.06872659176588058
+                            0.04854346439242363
                         ],
                         "zero_point": [
                             0
@@ -1738,12 +1744,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -1766,7 +1774,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.06872659176588058
+                            0.04854346439242363
                         ],
                         "zero_point": [
                             0
@@ -2045,7 +2053,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.013298637233674526
+                            0.008966227062046528
                         ],
                         "zero_point": [
                             0
@@ -2053,12 +2061,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2071,7 +2081,7 @@
                 }
             },
             "5": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -2081,7 +2091,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.013298637233674526
+                            0.008966227062046528
                         ],
                         "zero_point": [
                             0
@@ -2095,7 +2105,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.012800498865544796
+                            0.00934610515832901
                         ],
                         "zero_point": [
                             0
@@ -2103,12 +2113,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2127,11 +2139,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 7,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            313720.53125
+                            313710.8125
                         ],
                         "zero_point": [
                             0
@@ -2139,11 +2151,11 @@
                     },
                     {
                         "id": 8,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            3011.7646484375
+                            3011.6708984375
                         ],
                         "zero_point": [
                             0
@@ -2155,7 +2167,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0029710575472563505
+                            0.0007458091131411493
                         ],
                         "zero_point": [
                             0
@@ -2168,7 +2180,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.005115101579576731
+                            0.003014053450897336
                         ],
                         "zero_point": [
                             0
@@ -2176,12 +2188,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2200,11 +2214,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 10,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            306.2588195800781
+                            306.2494812011719
                         ],
                         "zero_point": [
                             0
@@ -2212,11 +2226,11 @@
                     },
                     {
                         "id": 11,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            2007.8431396484375
+                            2007.7806396484375
                         ],
                         "zero_point": [
                             0
@@ -2228,7 +2242,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.00290755950845778
+                            0.0017127114115282893
                         ],
                         "zero_point": [
                             0
@@ -2241,7 +2255,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0032352085690945387
+                            0.0021917051635682583
                         ],
                         "zero_point": [
                             0
@@ -2249,12 +2263,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2273,11 +2289,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 13,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            135.24705505371094
+                            135.24298095703125
                         ],
                         "zero_point": [
                             0
@@ -2285,11 +2301,11 @@
                     },
                     {
                         "id": 14,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -2301,7 +2317,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0019029377726837993
+                            0.0014824823010712862
                         ],
                         "zero_point": [
                             0
@@ -2314,7 +2330,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0019029377726837993
+                            0.0014528417959809303
                         ],
                         "zero_point": [
                             0
@@ -2322,12 +2338,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2346,11 +2364,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 16,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            58.203922271728516
+                            58.20223617553711
                         ],
                         "zero_point": [
                             0
@@ -2358,11 +2376,11 @@
                     },
                     {
                         "id": 17,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            2007.8431396484375
+                            2007.7806396484375
                         ],
                         "zero_point": [
                             0
@@ -2374,7 +2392,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0009125405922532082
+                            0.0007317104609683156
                         ],
                         "zero_point": [
                             0
@@ -2387,7 +2405,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0013334426330402493
+                            0.0009096877183765173
                         ],
                         "zero_point": [
                             0
@@ -2395,12 +2413,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2419,11 +2439,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 19,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            158.93333435058594
+                            158.9283905029297
                         ],
                         "zero_point": [
                             0
@@ -2431,11 +2451,11 @@
                     },
                     {
                         "id": 20,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            6023.529296875
+                            6023.341796875
                         ],
                         "zero_point": [
                             0
@@ -2447,7 +2467,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0008490787004120648
+                            0.0006300461827777326
                         ],
                         "zero_point": [
                             0
@@ -2460,7 +2480,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002266877330839634
+                            0.0017136188689619303
                         ],
                         "zero_point": [
                             0
@@ -2468,12 +2488,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2492,11 +2514,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 22,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.01568627543747425
+                            0.015685785561800003
                         ],
                         "zero_point": [
                             0
@@ -2504,11 +2526,11 @@
                     },
                     {
                         "id": 23,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -2520,7 +2542,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.005077242385596037
+                            0.005117378663271666
                         ],
                         "zero_point": [
                             0
@@ -2533,7 +2555,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.005077242385596037
+                            0.00456399517133832
                         ],
                         "zero_point": [
                             0
@@ -2541,12 +2563,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2565,11 +2589,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 25,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            55.72549057006836
+                            55.723880767822266
                         ],
                         "zero_point": [
                             0
@@ -2577,11 +2601,11 @@
                     },
                     {
                         "id": 26,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -2593,7 +2617,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0015038038836792111
+                            0.0011248636292293668
                         ],
                         "zero_point": [
                             0
@@ -2606,7 +2630,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0013386994833126664
+                            0.00107527244836092
                         ],
                         "zero_point": [
                             0
@@ -2614,12 +2638,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2638,11 +2664,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 28,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            12.078431129455566
+                            12.078180313110352
                         ],
                         "zero_point": [
                             0
@@ -2650,11 +2676,11 @@
                     },
                     {
                         "id": 29,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -2666,7 +2692,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0019276528619229794
+                            0.0017805569805204868
                         ],
                         "zero_point": [
                             0
@@ -2679,7 +2705,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0011666876962408423
+                            0.0008860811358317733
                         ],
                         "zero_point": [
                             0
@@ -2687,12 +2713,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2711,11 +2739,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 31,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.33725491166114807
+                            0.31440040469169617
                         ],
                         "zero_point": [
                             0
@@ -2723,11 +2751,11 @@
                     },
                     {
                         "id": 32,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -2739,7 +2767,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002600556705147028
+                            0.0025812292005866766
                         ],
                         "zero_point": [
                             0
@@ -2752,7 +2780,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0021601789630949497
+                            0.00194536370690912
                         ],
                         "zero_point": [
                             0
@@ -2760,12 +2788,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2784,11 +2814,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 34,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            313725.4375
+                            313715.65625
                         ],
                         "zero_point": [
                             0
@@ -2796,11 +2826,11 @@
                     },
                     {
                         "id": 35,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            7027.451171875
+                            7027.232421875
                         ],
                         "zero_point": [
                             0
@@ -2812,7 +2842,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.003046484664082527
+                            0.0008306074305437505
                         ],
                         "zero_point": [
                             0
@@ -2825,7 +2855,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.010618994012475014
+                            0.005527124274522066
                         ],
                         "zero_point": [
                             0
@@ -2833,12 +2863,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2857,11 +2889,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 37,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            24062.140625
+                            24061.390625
                         ],
                         "zero_point": [
                             0
@@ -2869,11 +2901,11 @@
                     },
                     {
                         "id": 38,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            3011.7646484375
+                            3011.6708984375
                         ],
                         "zero_point": [
                             0
@@ -2885,7 +2917,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.003593390341848135
+                            0.0013273678487166762
                         ],
                         "zero_point": [
                             0
@@ -2898,7 +2930,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.00711975758895278
+                            0.004024472553282976
                         ],
                         "zero_point": [
                             0
@@ -2906,12 +2938,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -2930,11 +2964,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 40,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            3178.666748046875
+                            3178.567626953125
                         ],
                         "zero_point": [
                             0
@@ -2942,11 +2976,11 @@
                     },
                     {
                         "id": 41,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            8031.37255859375
+                            8031.12255859375
                         ],
                         "zero_point": [
                             0
@@ -2958,7 +2992,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0023129405453801155
+                            0.000996718998067081
                         ],
                         "zero_point": [
                             0
@@ -2971,7 +3005,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.010801182128489017
+                            0.005548982415348291
                         ],
                         "zero_point": [
                             0
@@ -2979,12 +3013,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3003,11 +3039,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 43,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.07058823853731155
+                            0.07058604061603546
                         ],
                         "zero_point": [
                             0
@@ -3015,11 +3051,11 @@
                     },
                     {
                         "id": 44,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -3031,7 +3067,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0030034941155463457
+                            0.0030272372532635927
                         ],
                         "zero_point": [
                             0
@@ -3044,7 +3080,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0030034941155463457
+                            0.0030272372532635927
                         ],
                         "zero_point": [
                             0
@@ -3052,12 +3088,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3076,11 +3114,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 46,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            17.31764793395996
+                            17.317106246948242
                         ],
                         "zero_point": [
                             0
@@ -3088,11 +3126,11 @@
                     },
                     {
                         "id": 47,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            6023.529296875
+                            6023.341796875
                         ],
                         "zero_point": [
                             0
@@ -3104,7 +3142,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0011873861076310277
+                            0.0011649823281913996
                         ],
                         "zero_point": [
                             0
@@ -3117,7 +3155,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.004699478391557932
+                            0.0037566772662103176
                         ],
                         "zero_point": [
                             0
@@ -3125,12 +3163,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3149,11 +3189,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 49,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            93.62352752685547
+                            93.62061309814453
                         ],
                         "zero_point": [
                             0
@@ -3161,11 +3201,11 @@
                     },
                     {
                         "id": 50,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            9035.2939453125
+                            9035.0126953125
                         ],
                         "zero_point": [
                             0
@@ -3177,7 +3217,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0013513111043721437
+                            0.0008841246599331498
                         ],
                         "zero_point": [
                             0
@@ -3190,7 +3230,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.00853869877755642
+                            0.008486868813633919
                         ],
                         "zero_point": [
                             0
@@ -3198,12 +3238,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3222,11 +3264,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 52,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1.2078431844711304
+                            1.2078055143356323
                         ],
                         "zero_point": [
                             0
@@ -3234,11 +3276,11 @@
                     },
                     {
                         "id": 53,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            5019.60791015625
+                            5019.45166015625
                         ],
                         "zero_point": [
                             0
@@ -3250,7 +3292,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0012578831519931555
+                            0.0012131290277466178
                         ],
                         "zero_point": [
                             0
@@ -3263,7 +3305,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.003694545477628708
+                            0.0037237515207380056
                         ],
                         "zero_point": [
                             0
@@ -3271,12 +3313,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3295,11 +3339,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 55,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.0235294122248888
+                            0.023528680205345154
                         ],
                         "zero_point": [
                             0
@@ -3307,11 +3351,11 @@
                     },
                     {
                         "id": 56,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -3323,7 +3367,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.003993316553533077
+                            0.003962228540331125
                         ],
                         "zero_point": [
                             0
@@ -3336,7 +3380,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.003993316553533077
+                            0.003962228540331125
                         ],
                         "zero_point": [
                             0
@@ -3344,12 +3388,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3368,11 +3414,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 58,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            7.286274433135986
+                            7.113068580627441
                         ],
                         "zero_point": [
                             0
@@ -3380,11 +3426,11 @@
                     },
                     {
                         "id": 59,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -3396,7 +3442,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0009910622611641884
+                            0.0009051506640389562
                         ],
                         "zero_point": [
                             0
@@ -3409,7 +3455,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0009910622611641884
+                            0.000610411399975419
                         ],
                         "zero_point": [
                             0
@@ -3417,12 +3463,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3441,11 +3489,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 61,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.10196078568696976
+                            0.10195761173963547
                         ],
                         "zero_point": [
                             0
@@ -3453,11 +3501,11 @@
                     },
                     {
                         "id": 62,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -3469,7 +3517,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002691549714654684
+                            0.002671073190867901
                         ],
                         "zero_point": [
                             0
@@ -3482,7 +3530,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002691549714654684
+                            0.002671073190867901
                         ],
                         "zero_point": [
                             0
@@ -3490,12 +3538,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3514,11 +3564,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 64,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            313725.0625
+                            313715.28125
                         ],
                         "zero_point": [
                             0
@@ -3526,11 +3576,11 @@
                     },
                     {
                         "id": 65,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            12047.05859375
+                            12046.68359375
                         ],
                         "zero_point": [
                             0
@@ -3542,7 +3592,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.003010854357853532
+                            0.0007534330943599343
                         ],
                         "zero_point": [
                             0
@@ -3555,7 +3605,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0177333764731884
+                            0.010115589015185833
                         ],
                         "zero_point": [
                             0
@@ -3563,12 +3613,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3587,11 +3639,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 67,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            313725.4375
+                            313715.65625
                         ],
                         "zero_point": [
                             0
@@ -3599,11 +3651,11 @@
                     },
                     {
                         "id": 68,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            100392.15625
+                            100389.03125
                         ],
                         "zero_point": [
                             0
@@ -3615,7 +3667,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0014727478846907616
+                            0.000596929807215929
                         ],
                         "zero_point": [
                             0
@@ -3628,7 +3680,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.06205710768699646
+                            0.046208709478378296
                         ],
                         "zero_point": [
                             0
@@ -3636,12 +3688,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3660,11 +3714,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 70,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            313724.8125
+                            313715.03125
                         ],
                         "zero_point": [
                             0
@@ -3672,11 +3726,11 @@
                     },
                     {
                         "id": 71,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            27105.8828125
+                            27105.037109375
                         ],
                         "zero_point": [
                             0
@@ -3688,7 +3742,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.001924999407492578
+                            0.0006080541643314064
                         ],
                         "zero_point": [
                             0
@@ -3701,7 +3755,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.02740994654595852
+                            0.016074733808636665
                         ],
                         "zero_point": [
                             0
@@ -3709,12 +3763,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3733,11 +3789,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 73,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            4628.58837890625
+                            4628.4443359375
                         ],
                         "zero_point": [
                             0
@@ -3745,11 +3801,11 @@
                     },
                     {
                         "id": 74,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            10039.2158203125
+                            10038.9033203125
                         ],
                         "zero_point": [
                             0
@@ -3761,7 +3817,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.004977669101208448
+                            0.0015035754768177867
                         ],
                         "zero_point": [
                             0
@@ -3774,7 +3830,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.014391334727406502
+                            0.009984101168811321
                         ],
                         "zero_point": [
                             0
@@ -3782,12 +3838,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3806,11 +3864,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 76,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            101.7254867553711
+                            101.72232055664062
                         ],
                         "zero_point": [
                             0
@@ -3818,11 +3876,11 @@
                     },
                     {
                         "id": 77,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            3011.7646484375
+                            3011.6708984375
                         ],
                         "zero_point": [
                             0
@@ -3834,7 +3892,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0016507987165823579
+                            0.001088611432351172
                         ],
                         "zero_point": [
                             0
@@ -3847,7 +3905,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002835403196513653
+                            0.002200457965955138
                         ],
                         "zero_point": [
                             0
@@ -3855,12 +3913,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3879,11 +3939,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 79,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.5176470875740051
+                            0.45003268122673035
                         ],
                         "zero_point": [
                             0
@@ -3891,11 +3951,11 @@
                     },
                     {
                         "id": 80,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -3907,7 +3967,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0027521506417542696
+                            0.0027739068027585745
                         ],
                         "zero_point": [
                             0
@@ -3920,7 +3980,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.0019765824545174837
+                            0.0014477251097559929
                         ],
                         "zero_point": [
                             0
@@ -3928,12 +3988,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -3952,11 +4014,11 @@
                 "input_tensor_infos": [
                     {
                         "id": 82,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            0.2666666805744171
+                            0.26678285002708435
                         ],
                         "zero_point": [
                             0
@@ -3964,11 +4026,11 @@
                     },
                     {
                         "id": 83,
-                        "orig_dtype": "torch.int64",
-                        "inf_dtype": "torch.int64",
-                        "force_dtype": "torch.int64",
+                        "orig_dtype": "torch.int32",
+                        "inf_dtype": "torch.int32",
+                        "force_dtype": "torch.int32",
                         "scale": [
-                            1003.9215698242188
+                            1003.8903198242188
                         ],
                         "zero_point": [
                             0
@@ -3980,7 +4042,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002235231688246131
+                            0.002218045061454177
                         ],
                         "zero_point": [
                             0
@@ -3993,7 +4055,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.002235231688246131
+                            0.002173895249143243
                         ],
                         "zero_point": [
                             0
@@ -4001,12 +4063,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -4029,7 +4093,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.06205710768699646
+                            0.03068052977323532
                         ],
                         "zero_point": [
                             0
@@ -5076,7 +5140,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.03353947028517723
+                            0.023884600028395653
                         ],
                         "zero_point": [
                             0
@@ -5084,12 +5148,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -5112,7 +5178,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.03353947028517723
+                            0.023884600028395653
                         ],
                         "zero_point": [
                             0
@@ -12049,12 +12115,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -12077,7 +12145,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.1279286891222
+                            0.03270483389496803
                         ],
                         "zero_point": [
                             0
@@ -12089,7 +12157,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.06205710768699646
+                            0.03068052977323532
                         ],
                         "zero_point": [
                             0
@@ -12103,7 +12171,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.09613978862762451
+                            0.03605125471949577
                         ],
                         "zero_point": [
                             0
@@ -12111,12 +12179,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -12139,7 +12209,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.09613978862762451
+                            0.03605125471949577
                         ],
                         "zero_point": [
                             0
@@ -13186,7 +13256,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.025816407054662704
+                            0.01538123469799757
                         ],
                         "zero_point": [
                             0
@@ -13194,12 +13264,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -13222,7 +13294,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.025816407054662704
+                            0.01538123469799757
                         ],
                         "zero_point": [
                             0
@@ -20159,12 +20231,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -20187,7 +20261,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.09065301716327667
+                            0.0178313497453928
                         ],
                         "zero_point": [
                             0
@@ -20199,7 +20273,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.09613978862762451
+                            0.03605125471949577
                         ],
                         "zero_point": [
                             0
@@ -20213,7 +20287,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.14998754858970642
+                            0.03753050044178963
                         ],
                         "zero_point": [
                             0
@@ -20221,12 +20295,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -20249,7 +20325,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.14998754858970642
+                            0.03753050044178963
                         ],
                         "zero_point": [
                             0
@@ -21296,7 +21372,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.03630867972970009
+                            0.014896157197654247
                         ],
                         "zero_point": [
                             0
@@ -21304,12 +21380,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -21332,7 +21410,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.03630867972970009
+                            0.014896157197654247
                         ],
                         "zero_point": [
                             0
@@ -28269,12 +28347,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -28297,7 +28377,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.12398847192525864
+                            0.01608937606215477
                         ],
                         "zero_point": [
                             0
@@ -28309,7 +28389,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.14998754858970642
+                            0.03753050044178963
                         ],
                         "zero_point": [
                             0
@@ -28323,7 +28403,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.2302219420671463
+                            0.03963257744908333
                         ],
                         "zero_point": [
                             0
@@ -28331,12 +28411,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -28359,7 +28441,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.2302219420671463
+                            0.03963257744908333
                         ],
                         "zero_point": [
                             0
@@ -30430,7 +30512,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.04475151002407074
+                            0.023695606738328934
                         ],
                         "zero_point": [
                             0
@@ -30438,12 +30520,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -30456,7 +30540,7 @@
                 }
             },
             "42": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -30466,7 +30550,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.04475151002407074
+                            0.023695606738328934
                         ],
                         "zero_point": [
                             0
@@ -30480,7 +30564,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.04475151002407074
+                            0.024861177429556847
                         ],
                         "zero_point": [
                             0
@@ -30488,12 +30572,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -30516,7 +30602,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.04475151002407074
+                            0.024861177429556847
                         ],
                         "zero_point": [
                             0
@@ -32587,7 +32673,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.12550783157348633
+                            0.06937800347805023
                         ],
                         "zero_point": [
                             0
@@ -32595,12 +32681,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -32613,7 +32701,7 @@
                 }
             },
             "44": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -32623,7 +32711,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.12550783157348633
+                            0.06937800347805023
                         ],
                         "zero_point": [
                             0
@@ -32637,7 +32725,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.10667262226343155
+                            0.056720979511737823
                         ],
                         "zero_point": [
                             0
@@ -32645,12 +32733,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -32673,7 +32763,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.10667262226343155
+                            0.056720979511737823
                         ],
                         "zero_point": [
                             0
@@ -33720,7 +33810,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.050365086644887924
+                            0.029124625027179718
                         ],
                         "zero_point": [
                             0
@@ -33728,12 +33818,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -33746,7 +33838,7 @@
                 }
             },
             "46": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -33756,7 +33848,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.050365086644887924
+                            0.029124625027179718
                         ],
                         "zero_point": [
                             0
@@ -33770,7 +33862,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.050365086644887924
+                            0.029578574001789093
                         ],
                         "zero_point": [
                             0
@@ -33778,12 +33870,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -33806,7 +33900,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.050365086644887924
+                            0.029578574001789093
                         ],
                         "zero_point": [
                             0
@@ -34341,7 +34435,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.float32",
                         "scale": [
-                            0.07166657596826553
+                            0.040473222732543945
                         ],
                         "zero_point": [
                             0
@@ -34349,12 +34443,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -34367,7 +34463,7 @@
                 }
             },
             "48": {
-                "op_type": "<built-in method relu of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method relu of type object at 0x152d65c1d440>",
                 "op_type_is_module": false,
                 "fqn": "",
                 "input_tensor_infos": [
@@ -34377,7 +34473,7 @@
                         "inf_dtype": "torch.float32",
                         "force_dtype": "torch.float32",
                         "scale": [
-                            0.07166657596826553
+                            0.040473222732543945
                         ],
                         "zero_point": [
                             0
@@ -34391,7 +34487,7 @@
                         "orig_dtype": "torch.float32",
                         "inf_dtype": "torch.qint8",
                         "scale": [
-                            0.07166657596826553
+                            0.04151982069015503
                         ],
                         "zero_point": [
                             0
@@ -34399,12 +34495,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -34427,7 +34525,7 @@
                         "inf_dtype": "torch.qint8",
                         "force_dtype": "torch.qint8",
                         "scale": [
-                            0.07166657596826553
+                            0.04151982069015503
                         ],
                         "zero_point": [
                             0
@@ -34454,12 +34552,14 @@
                     }
                 ],
                 "activation_observer": {
-                    "name": "MinMaxObserver",
+                    "name": "HistogramObserver",
+                    "bins": 127,
+                    "upsample_rate": 256,
                     "dtype": "torch.qint8",
                     "qscheme": "torch.per_tensor_symmetric",
                     "reduce_range": false,
-                    "quant_min": -128,
-                    "quant_max": 127
+                    "quant_min": -127,
+                    "quant_max": 126
                 },
                 "weight_observer": {
                     "name": "PerChannelMinMaxObserver",
@@ -34474,7 +34574,7 @@
         },
         "nonq_op_infos": {
             "0": {
-                "op_type": "<built-in method cat of type object at 0x14d299067fa0>",
+                "op_type": "<built-in method cat of type object at 0x152d65c1d440>",
                 "fqn": "",
                 "input_tensor_infos": [
                     {

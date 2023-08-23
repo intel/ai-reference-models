@@ -48,17 +48,17 @@ mkdir -p ${LOG}
 
 ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --dtype bf16"
+    ARGS="$ARGS --dtype bf16 --ipex-merged-emb-cat"
     echo "running bf16 path"
 elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
-    ARGS="$ARGS --dtype fp32"
+    ARGS="$ARGS --dtype fp32 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "bf32" ]]; then
     echo "running bf32 path"
-    ARGS="$ARGS --dtype bf32"
+    ARGS="$ARGS --dtype bf32 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
-    ARGS="$ARGS --dtype fp16"
+    ARGS="$ARGS --dtype fp16 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"

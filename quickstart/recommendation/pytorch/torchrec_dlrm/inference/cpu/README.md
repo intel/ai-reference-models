@@ -80,13 +80,20 @@ export PRECISION=<specify the precision to run>
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
 bash inference_performance.sh
 
-
 # Run a quickstart script for accuracy test
 cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
 export DATASET_DIR=<multi-hot dataset dir>
 export WEIGHT_DIR=<offical released checkpoint>
 bash test_accuracy.sh
 ```
+
+## Other Debug Env
+Setting following env can get memory-usage logs and pictures with `inference_performnace.sh` (Requires `memory_profiler` and `matplotlib`)
+```
+export PLOTMEM=true
+export MEMLOG=<mem-log-dir>
+export MEMPIC=<mem-picture-dir>
+``````
 
 <!--- 80. License -->
 ## License

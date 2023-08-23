@@ -214,7 +214,7 @@ class MultiHotCriteoIterDataPipe(IterableDataset):
         offset_per_key = torch.cumsum(
             torch.concat((torch.tensor([0]), torch.tensor(length_per_key))), dim=0
         )
-        values = torch.concat([torch.from_numpy(feat).flatten() for feat in sparse])
+        values = torch.concat([torch.from_numpy(feat.copy()).flatten() for feat in sparse])
         return Batch(
             dense_features=torch.from_numpy(dense.copy()),
             sparse_features=KeyedJaggedTensor(

@@ -137,10 +137,10 @@ def parse_autocast(dtype: str):
     return autocast, _dtype
 
 def convert_int8(args, model, dataloader):
-    from torch.ao.quantization import MinMaxObserver, PerChannelMinMaxObserver, QConfig
+    from torch.ao.quantization import HistogramObserver, PerChannelMinMaxObserver, QConfig
     from intel_extension_for_pytorch.quantization import prepare, convert
     qconfig = QConfig(
-        activation=MinMaxObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8),
+        activation=HistogramObserver.with_args(qscheme=torch.per_tensor_symmetric, dtype=torch.qint8, bins=127, upsample_rate=256, quant_min= -127, quant_max=126),
         weight=PerChannelMinMaxObserver.with_args(dtype=torch.qint8, qscheme=torch.per_channel_symmetric)
     )
     batch = fetch_batch(dataloader)
@@ -182,7 +182,8 @@ def ipex_optimize(args, model, optimizer, dataloader):
     import intel_extension_for_pytorch as ipex
     if dtype == torch.int8:
         assert args.inference_only
-        model = convert_int8(args, model, dataloader)
+        with torch.no_grad():
+            model = convert_int8(args, model, dataloader)
     elif args.inference_only:
         with torch.no_grad():
             model = ipex.optimize(
@@ -525,6 +526,17 @@ def parse_args(argv: List[str]) -> argparse.Namespace:
         action="store_true",
         help="use same samples to benchmark",
     )
+    parser.add_argument(
+        "--ipex-merged-emb-cat",
+        action="store_true",
+        help="whether use ipex customer op for merged_emb_cat",
+    )
+    parser.add_argument(
+        "--share-weight-instance",
+        type=int,
+        default=0,
+        help="if value > 0, will use pytorch throughputbenchmark to share weight with `value` instance",
+    )
     return parser.parse_args(argv)
 
 
@@ -792,6 +804,26 @@ def _train(
 
     return is_success
 
+def _share_weight_benchmark(
+    model,
+    data_loader,
+    args,
+):
+    from torch.utils import ThroughputBenchmark
+    bench = ThroughputBenchmark(model)
+    batch = fetch_batch(data_loader)
+    batch.sparse_features = unpack(batch.sparse_features)
+    bench.add_input(batch.dense_features, batch.sparse_features)
+    stats = bench.benchmark(
+        num_calling_threads=args.share_weight_instance,
+        num_warmup_iters=100,
+        num_iters=args.limit_val_batches * args.share_weight_instance,
+    )
+    print(stats)
+    latency = stats.latency_avg_ms
+    batch_size = batch.dense_features.shape[0]
+    throughput = (1 / latency) * 1000 * batch_size * args.share_weight_instance
+    print("Throughput: {:.3f} fps".format(throughput))
 
 @dataclass
 class TrainValTestResults:
@@ -825,10 +857,16 @@ def train_val_test(
     Returns:
         TrainValTestResults.
     """
-    autocast_enabled, dtype = parse_autocast(args.dtype)
     results = TrainValTestResults()
 
     if args.inference_only:
+        if args.share_weight_instance > 0:
+            _share_weight_benchmark(
+                model.model,
+                val_dataloader,
+                args
+            )
+            exit()
         # Mlperf is using val set to test auroc
         # https://github.com/mlcommons/inference/blob/master/recommendation/dlrm_v2/pytorch/python/multihot_criteo.py#L99-L107
         test_auroc = _evaluate(
@@ -1033,8 +1071,10 @@ def main(argv: List[str]) -> None:
         print_memory("start loading checkpoint ")
         load_snapshot(train_model, args.snapshot_dir)
     
-    from ipex_optimized_model.model import replace_crossnet
+    from ipex_optimized_model.model import replace_crossnet, replace_embeddingbag_collection
     replace_crossnet(train_model.model)
+    if args.inference_only and args.ipex_merged_emb_cat:
+        replace_embeddingbag_collection(train_model.model)
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
     # the optimizer update will be applied in the backward pass, in this case through a fused op.

@@ -38,17 +38,17 @@ mkdir -p ${LOG}
 
 ARGS=""
 if [[ $PRECISION == "bf16" ]]; then
-    ARGS="$ARGS --dtype bf16"
+    ARGS="$ARGS --dtype bf16 --ipex-merged-emb-cat"
     echo "running bf16 path"
 elif [[ $PRECISION == "fp32" ]]; then
     echo "running fp32 path"
-    ARGS="$ARGS --dtype fp32"
+    ARGS="$ARGS --dtype fp32 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "bf32" ]]; then
     echo "running bf32 path"
-    ARGS="$ARGS --dtype bf32"
+    ARGS="$ARGS --dtype bf32 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "fp16" ]]; then
     echo "running fp16 path"
-    ARGS="$ARGS --dtype fp16"
+    ARGS="$ARGS --dtype fp16 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
     ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
@@ -67,14 +67,24 @@ else
 fi
 
 LOG_0="${LOG}/throughput.log"
-export BATCH_SIZE=32768
+
+if [ -z "${BATCH_SIZE}" ]; then
+  BATCH_SIZE=512
+fi
 
 export launcher_arg="-m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc"
 if [[ $PLOTMEM == "true" ]]; then
-pip install memory_profiler
+pip install memory_profiler matplotlib
 export mrun_cmd="mprof run --python -o ${MEMLOG}"
 unset launcher_arg
 fi
+
+if [[ $ENABLE_TORCH_PROFILE == "true" ]]; then
+  ARGS="$ARGS --profile"
+fi
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+export OMP_NUM_THREADS=1
 
 $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
     --embedding_dim 128 \
@@ -88,12 +98,13 @@ $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
     --interaction_type=dcn \
     --dcn_num_layers=3 \
     --dcn_low_rank_dim=512 \
-    --limit_val_batches 100 \
+    --limit_val_batches 1000 \
     --ipex-optimize \
     --log-freq 10 \
     --jit \
     --inference-only \
     --benchmark \
+    --share-weight-instance=$CORES \
     $ARGS 2>&1 | tee $LOG_0
 wait
 
