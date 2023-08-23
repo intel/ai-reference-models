@@ -39,7 +39,7 @@ The MaskRCNN inference container includes scripts,model and libraries need to ru
 ```bash
 
 export IMAGE_NAME=intel/image-segmentation:tf-flex-gpu-maskrcnn-inference
-export PRECISION=<provide precision,supports FP16>
+export PRECISION=<provide precision,supports fp16>
 export OUTPUT_DIR=<path to output directory>
 export BATCH_SIZE=<provide batch size. default batch for batch inference is 16>
 export DATASET_DIR=<path to the preprocessed COCO dataset>
