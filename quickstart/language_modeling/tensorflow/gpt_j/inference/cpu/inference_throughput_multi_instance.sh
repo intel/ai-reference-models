@@ -83,6 +83,21 @@ if [ -z "${INPUT_TOKENS}" ]; then
   echo "Running with default input token size of ${INPUT_TOKENS}"
 fi
 
+if [ -z "${STEPS}" ]; then
+  STEPS="14"
+  echo "Running with default benchmarking steps of ${STEPS}"
+fi
+
+if [ -z "${WARMUP_STEPS}" ]; then
+  WARMUP_STEPS="2"
+  echo "Running with default benchmarking warmup steps of ${WARMUP_STEPS}"
+fi
+
+if [ -z "${DUMMY_DATA}" ]; then
+  DUMMY_DATA="1"
+  echo "Running with dummy data"
+fi
+
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 export OMP_NUM_THREADS=${cores_per_socket}
 
@@ -103,7 +118,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   --num-inter-threads 1 \
   $@ \
   -- max_output_tokens=${MAX_OUTPUT_TOKENS} \
-  input_tokens=${INPUT_TOKENS}
+  input_tokens=${INPUT_TOKENS} \
+  steps=${STEPS} \
+  warmup_steps=${WARMUP_STEPS} \
+  dummy_data=${DUMMY_DATA}
 
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"

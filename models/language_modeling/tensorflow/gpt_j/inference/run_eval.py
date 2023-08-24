@@ -172,7 +172,7 @@ def main():
     marg = defaultdict(lambda: 0, marg)
 
     with run_args.strategy.scope():
-        model = TFAutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config)
+        model = TFAutoModelForCausalLM.from_pretrained(model_args.model_name_or_path, config=config, dtype=model_args.precision)
         embeddings = model.get_input_embeddings()
 
         if hasattr(embeddings, "embeddings"):

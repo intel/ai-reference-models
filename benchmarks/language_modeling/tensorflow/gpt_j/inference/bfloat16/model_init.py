@@ -64,9 +64,19 @@ class ModelInitializer(BaseModelInitializer):
             type=int, default=32)
 
         arg_parser.add_argument(
-            '--skip_rows', dest='skip_rows',
-            help='Skip rows for latency use-case',
+            '--dummy_data', dest='dummy_data',
+            help='Use Dummy Data',
             type=int, default=0)
+
+        arg_parser.add_argument(
+            '--steps', dest='steps',
+            help='Benchmarking steps',
+            type=int, default=20)
+
+        arg_parser.add_argument(
+            '--warmup_steps', dest='warmup_steps',
+            help='Benchmarking warmup steps',
+            type=int, default=10)
 
         self.args = arg_parser.parse_args(self.custom_args, namespace=self.args)
 
@@ -89,10 +99,11 @@ class ModelInitializer(BaseModelInitializer):
             self.python_exe + " " + benchmark_script
 
         if self.args.benchmark_only:
-            self.benchmark_command = self.benchmark_command + \
-                " --batch_size={}".format(
-                    self.args.batch_size
-                )
+            if self.args.batch_size:
+                self.benchmark_command = self.benchmark_command + \
+                    " --batch_size={}".format(
+                        self.args.batch_size
+                    )
 
             if self.args.input_tokens:
                 self.benchmark_command = self.benchmark_command + \
@@ -106,9 +117,21 @@ class ModelInitializer(BaseModelInitializer):
                         self.args.max_output_tokens
                     )
 
-            if self.args.skip_rows == 1:
+            if self.args.steps:
                 self.benchmark_command = self.benchmark_command + \
-                    " --skip_rows"
+                    " --steps={}".format(
+                        self.args.steps
+                    )
+
+            if self.args.warmup_steps:
+                self.benchmark_command = self.benchmark_command + \
+                    " --warmup_steps={}".format(
+                        self.args.warmup_steps
+                    )
+
+            if self.args.dummy_data == 1:
+                self.benchmark_command = self.benchmark_command + \
+                    " --dummy_data"
 
         self.benchmark_command = \
             self.benchmark_command + \

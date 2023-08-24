@@ -1,5 +1,5 @@
 diff --git a/src/transformers/generation/tf_utils.py b/src/transformers/generation/tf_utils.py
-index 5e4bc58c8..1bd6ef401 100644
+index 5e4bc58c8..b8fb901f8 100644
 --- a/src/transformers/generation/tf_utils.py
 +++ b/src/transformers/generation/tf_utils.py
 @@ -15,6 +15,7 @@
@@ -552,7 +552,7 @@ index 5e4bc58c8..1bd6ef401 100644
                  cur_len,
                  running_sequences,
                  running_scores,
-@@ -2611,63 +2378,352 @@ class TFGenerationMixin:
+@@ -2611,63 +2378,356 @@ class TFGenerationMixin:
                  beam_indices,
                  is_sent_finished,
                  model_kwargs,
@@ -796,9 +796,11 @@ index 5e4bc58c8..1bd6ef401 100644
 +                    if mk.get("past_key_values", None) is None:
 +                        # let's throw out `past_key_values` since we don't want `None` tensors
 +                        mk.pop("past_key_values", None)
++                
++                tt1 = tt + tf.timestamp()
 +
 +                return (
-+                    tt,
++                    tt1,
 +                    cur_len,
 +                    next_running_sequences,
 +                    next_running_scores,
@@ -817,7 +819,7 @@ index 5e4bc58c8..1bd6ef401 100644
 +            
 +            
 +            tt = tf.timestamp()
-+            @tf.function(reduce_retracing=True)
++            # @tf.function(reduce_retracing=True)
 +            def gen1():
 +                return beam_search_body_fn(
 +                    tt,
@@ -833,7 +835,7 @@ index 5e4bc58c8..1bd6ef401 100644
 +                )
 +
 +            (
-+                    tt,
++                    tt56,
 +                    cur_len,
 +                    running_sequences,
 +                    running_scores,
@@ -845,14 +847,15 @@ index 5e4bc58c8..1bd6ef401 100644
 +                    model_kwargs,
 +                ) = gen1()
 +
++            # tt56 = tt + tf.timestamp()
 +            # 2-to-n generation steps can then be run in autoregressive fashion (only in case 1st generation step does
 +            # NOT yield EOS token though)
-+            with tf.control_dependencies([cur_len]):
++            with tf.control_dependencies([sequences]):
 +                b = tf.timestamp()
 +                latency_list.append(b)
 +
 +                with tf.control_dependencies([b]):
-+                    @tf.function(reduce_retracing=True)
++                    # @tf.function(reduce_retracing=True)
 +                    def gen2():
 +                        maximum_iterations = max_length - cur_len
 +                        return tf.while_loop(
@@ -871,10 +874,10 @@ index 5e4bc58c8..1bd6ef401 100644
 +                                model_kwargs,
 +                            ),
 +                            maximum_iterations=maximum_iterations,
-+                        )            
++                        )        
 +        
 +                    (
-+                        tt,
++                        tt99,
 +                        cur_len,
 +                        running_sequences,
 +                        running_scores,
@@ -883,15 +886,16 @@ index 5e4bc58c8..1bd6ef401 100644
 +                        scores,
 +                        beam_indices,
 +                        is_sent_finished,
-+                        _,
++                        model_kwargs,
 +                    ) = gen2()
++
++                    # tt561 = tt + tf.timestamp()
 +
 +                    with tf.control_dependencies([sequences]):
 +                        c = tf.timestamp()
 +                        latency_list.append(c)
 +
 +                        with tf.control_dependencies([c]):
-+
 +                            # 6. prepare outputs
 +                            # Account for the edge-case where there are no finished sequences for a particular batch item. If so, return
 +                            # running sequences for that batch item.
@@ -953,3 +957,236 @@ index 5e4bc58c8..1bd6ef401 100644
  
      def contrastive_search(
          self,
+diff --git a/src/transformers/modeling_tf_utils.py b/src/transformers/modeling_tf_utils.py
+index b23d2bae6..ce60cf726 100644
+--- a/src/transformers/modeling_tf_utils.py
++++ b/src/transformers/modeling_tf_utils.py
+@@ -871,7 +871,7 @@ def load_tf_shard(model, model_layer_map, resolved_archive_file, ignore_mismatch
+             )
+ 
+ 
+-def load_tf_weights(model, resolved_archive_file, ignore_mismatched_sizes=False, _prefix=None):
++def load_tf_weights(model, resolved_archive_file, ignore_mismatched_sizes=False, _prefix=None, cdtype=None):
+     """
+     Detect missing and unexpected layers and load the TF weights from the shard file accordingly to their names and
+     shapes.
+@@ -894,11 +894,11 @@ def load_tf_weights(model, resolved_archive_file, ignore_mismatched_sizes=False,
+         load_function = load_tf_weights_from_h5
+ 
+     return load_function(
+-        model, resolved_archive_file, ignore_mismatched_sizes=ignore_mismatched_sizes, _prefix=_prefix
++        model, resolved_archive_file, ignore_mismatched_sizes=ignore_mismatched_sizes, _prefix=_prefix, cdtype=cdtype
+     )
+ 
+ 
+-def load_tf_weights_from_h5(model, resolved_archive_file, ignore_mismatched_sizes=False, _prefix=None):
++def load_tf_weights_from_h5(model, resolved_archive_file, ignore_mismatched_sizes=False, _prefix=None, cdtype=None):
+     mismatched_layers = []
+ 
+     # Read the H5 file
+@@ -985,6 +985,15 @@ def load_tf_weights_from_h5(model, resolved_archive_file, ignore_mismatched_size
+                         else:
+                             array = saved_weight_value
+ 
++                        to_dtype = None
++                        if cdtype == "bfloat16":
++                            to_dtype = tf.bfloat16
++                        elif cdtype == "fp16":
++                            to_dtype = tf.float16
++
++                        if to_dtype is not None:
++                            array = tf.cast(saved_weight_value, to_dtype) 
++
+                         # We create the tuple that will be loaded and add it to the final list
+                         weight_value_tuples.append((symbolic_weight, array))
+ 
+@@ -998,7 +1007,7 @@ def load_tf_weights_from_h5(model, resolved_archive_file, ignore_mismatched_size
+     return missing_layers, unexpected_layers, mismatched_layers
+ 
+ 
+-def load_tf_weights_from_safetensors(model, resolved_archive_file, ignore_mismatched_sizes=False, _prefix=None):
++def load_tf_weights_from_safetensors(model, resolved_archive_file, ignore_mismatched_sizes=False, _prefix=None, cdtype=None):
+     # Read the safetensors file
+     state_dict = safe_load_file(resolved_archive_file)
+ 
+@@ -2620,6 +2629,7 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
+         >>> config = BertConfig.from_json_file("./pt_model/my_pt_model_config.json")
+         >>> model = TFBertModel.from_pretrained("./pt_model/my_pytorch_model.bin", from_pt=True, config=config)
+         ```"""
++        cdtype = kwargs.pop("dtype", None)
+         config = kwargs.pop("config", None)
+         cache_dir = kwargs.pop("cache_dir", None)
+         from_pt = kwargs.pop("from_pt", False)
+@@ -2926,6 +2936,7 @@ class TFPreTrainedModel(tf.keras.Model, TFModelUtilsMixin, TFGenerationMixin, Pu
+                     resolved_archive_file,
+                     ignore_mismatched_sizes=ignore_mismatched_sizes,
+                     _prefix=load_weight_prefix,
++                    cdtype=cdtype
+                 )
+         except OSError as e:
+             try:
+diff --git a/src/transformers/models/gptj/modeling_tf_gptj.py b/src/transformers/models/gptj/modeling_tf_gptj.py
+index bbcdf3bd2..8eb8c8e9e 100644
+--- a/src/transformers/models/gptj/modeling_tf_gptj.py
++++ b/src/transformers/models/gptj/modeling_tf_gptj.py
+@@ -59,10 +59,15 @@ GPTJ_PRETRAINED_MODEL_ARCHIVE_LIST = [
+     # See all GPT-J models at https://huggingface.co/models?filter=gptj
+ ]
+ 
++global_dtype = tf.float32
++if "bfloat16" in tf.keras.mixed_precision.global_policy().get_config()["name"]:
++    global_dtype = tf.bfloat16
++elif "float16" in tf.keras.mixed_precision.global_policy().get_config()["name"]:
++    global_dtype = tf.float16
+ 
+ def create_sinusoidal_positions(num_pos: int, dim: int) -> tf.Tensor:
+     inv_freq = tf.cast(1.0 / (10000 ** (tf.range(0, dim, 2) / dim)), tf.float32)
+-    sinusoid_inp = tf.cast(tf.einsum("i , j -> i j", tf.range(num_pos, dtype=tf.float32), inv_freq), tf.float32)
++    sinusoid_inp = tf.cast(tf.cast(tf.einsum("i , j -> i j", tf.range(num_pos, dtype=tf.float32), inv_freq), tf.float32), global_dtype)
+     sin, cos = tf.sin(sinusoid_inp), tf.cos(sinusoid_inp)
+     out = tf.concat((sin, cos), axis=1)
+     return out
+@@ -97,32 +102,36 @@ class TFGPTJAttention(tf.keras.layers.Layer):
+         self.scale_attn = self.head_dim**0.5
+         self.rotary_dim = config.rotary_dim
+ 
+-        self.attn_dropout = tf.keras.layers.Dropout(config.attn_pdrop)
+-        self.resid_dropout = tf.keras.layers.Dropout(config.resid_pdrop)
++        self.attn_dropout = tf.keras.layers.Dropout(config.attn_pdrop, dtype=global_dtype)
++        self.resid_dropout = tf.keras.layers.Dropout(config.resid_pdrop, dtype=global_dtype)
+ 
+         self.q_proj = tf.keras.layers.Dense(
+             self.embed_dim,
+             use_bias=False,
+             kernel_initializer=get_initializer(config.initializer_range),
+             name="q_proj",
++            dtype=global_dtype
+         )
+         self.k_proj = tf.keras.layers.Dense(
+             self.embed_dim,
+             use_bias=False,
+             kernel_initializer=get_initializer(config.initializer_range),
+             name="k_proj",
++            dtype=global_dtype
+         )
+         self.v_proj = tf.keras.layers.Dense(
+             self.embed_dim,
+             use_bias=False,
+             kernel_initializer=get_initializer(config.initializer_range),
+             name="v_proj",
++            dtype=global_dtype
+         )
+         self.out_proj = tf.keras.layers.Dense(
+             self.embed_dim,
+             use_bias=False,
+             kernel_initializer=get_initializer(config.initializer_range),
+             name="out_proj",
++            dtype=global_dtype
+         )
+ 
+         self.max_positions = config.max_position_embeddings
+@@ -180,12 +189,18 @@ class TFGPTJAttention(tf.keras.layers.Layer):
+         causal_mask = self.get_causal_mask(key_length, query_length)
+ 
+         # Keep the attention weights computation in fp32 to avoid overflow issues
+-        query = tf.cast(query, tf.float32)
+-        key = tf.cast(key, tf.float32)
++        # query = tf.cast(query, tf.float32)
++        # key = tf.cast(key, tf.float32)
+ 
+         attn_weights = tf.matmul(query, key, transpose_b=True)
+         attn_weights = tf.where(causal_mask, attn_weights, self.get_masked_bias(attn_weights.dtype))
+ 
++        # if tf.keras.mixed_precision.global_policy().get_config()["name"] == "mixed_bfloat16":
++        #     attention_mask = tf.cast(attention_mask, tf.dtypes.bfloat16)
++        # elif tf.keras.mixed_precision.global_policy().get_config()["name"] == "mixed_float16":
++        #     attention_mask = tf.cast(attention_mask, tf.dtypes.float16)
++        attention_mask = tf.cast(attention_mask, global_dtype)
++
+         attn_weights = attn_weights / self.scale_attn
+ 
+         if attention_mask is not None:
+@@ -222,7 +237,9 @@ class TFGPTJAttention(tf.keras.layers.Layer):
+         key = self._split_heads(key, True)
+         value = self._split_heads(value, False)
+ 
+-        sincos = tf.cast(tf.gather(self.embed_positions, position_ids, axis=0), hidden_states.dtype)
++        # hidden_states = tf.cast(hidden_states, global_dtype)
++
++        sincos = tf.gather(self.embed_positions, position_ids, axis=0)
+         sincos = tf.split(sincos, 2, axis=-1)
+         if self.rotary_dim is not None:
+             k_rot = key[:, :, :, : self.rotary_dim]
+@@ -274,14 +291,14 @@ class TFGPTJMLP(tf.keras.layers.Layer):
+         embed_dim = config.n_embd
+ 
+         self.fc_in = tf.keras.layers.Dense(
+-            intermediate_size, kernel_initializer=get_initializer(config.initializer_range), name="fc_in"
++            intermediate_size, kernel_initializer=get_initializer(config.initializer_range), name="fc_in", dtype=global_dtype
+         )
+         self.fc_out = tf.keras.layers.Dense(
+-            embed_dim, kernel_initializer=get_initializer(config.initializer_range), name="fc_out"
++            embed_dim, kernel_initializer=get_initializer(config.initializer_range), name="fc_out", dtype=global_dtype
+         )
+ 
+         self.act = get_tf_activation(config.activation_function)
+-        self.dropout = tf.keras.layers.Dropout(config.embd_pdrop)
++        self.dropout = tf.keras.layers.Dropout(config.embd_pdrop, dtype=global_dtype)
+ 
+     def call(self, hidden_states: tf.Tensor) -> tf.Tensor:
+         hidden_states = self.fc_in(hidden_states)
+@@ -295,7 +312,7 @@ class TFGPTJBlock(tf.keras.layers.Layer):
+     def __init__(self, config: GPTJConfig, **kwargs):
+         super().__init__(**kwargs)
+         inner_dim = config.n_inner if config.n_inner is not None else 4 * config.n_embd
+-        self.ln_1 = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_1")
++        self.ln_1 = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_1", dtype=global_dtype)
+         self.attn = TFGPTJAttention(config, name="attn")
+         self.mlp = TFGPTJMLP(inner_dim, config, name="mlp")
+ 
+@@ -309,6 +326,7 @@ class TFGPTJBlock(tf.keras.layers.Layer):
+         use_cache: bool = False,
+         output_attentions: bool = False,
+     ):
++        # hidden_states = tf.cast(hidden_states, global_dtype)
+         residual = hidden_states
+         hidden_states = self.ln_1(hidden_states)
+         attn_outputs = self.attn(
+@@ -354,9 +372,9 @@ class TFGPTJMainLayer(tf.keras.layers.Layer):
+         self.wte = TFSharedEmbeddings(
+             config.vocab_size, config.hidden_size, initializer_range=config.initializer_range, name="wte"
+         )
+-        self.drop = tf.keras.layers.Dropout(config.embd_pdrop)
++        self.drop = tf.keras.layers.Dropout(config.embd_pdrop, dtype=global_dtype)
+         self.h = [TFGPTJBlock(config, name=f"h_._{i}") for i in range(config.n_layer)]
+-        self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f")
++        self.ln_f = tf.keras.layers.LayerNormalization(epsilon=config.layer_norm_epsilon, name="ln_f", dtype=global_dtype)
+ 
+     def get_input_embeddings(self):
+         return self.wte
+@@ -684,7 +702,7 @@ class TFGPTJForCausalLM(TFGPTJPreTrainedModel, TFCausalLanguageModelingLoss):
+         super().__init__(config, *inputs, **kwargs)
+         self.transformer = TFGPTJMainLayer(config, name="transformer")
+         self.lm_head = tf.keras.layers.Dense(
+-            config.vocab_size, kernel_initializer=get_initializer(config.initializer_range), name="lm_head"
++            config.vocab_size, kernel_initializer=get_initializer(config.initializer_range), name="lm_head", dtype=global_dtype
+         )
+ 
+     def get_output_embeddings(self):
+@@ -812,6 +830,7 @@ class TFGPTJForSequenceClassification(TFGPTJPreTrainedModel, TFSequenceClassific
+             use_bias=False,
+             kernel_initializer=get_initializer(config.initializer_range),
+             name="score",
++            dtype=global_dtype
+         )
+ 
+     @unpack_inputs
+@@ -924,7 +943,7 @@ class TFGPTJForQuestionAnswering(TFGPTJPreTrainedModel, TFQuestionAnsweringLoss)
+         self.num_labels = config.num_labels
+         self.transformer = TFGPTJMainLayer(config, name="transformer")
+         self.qa_outputs = tf.keras.layers.Dense(
+-            self.num_labels, kernel_initializer=get_initializer(config.initializer_range), name="qa_outputs"
++            self.num_labels, kernel_initializer=get_initializer(config.initializer_range), name="qa_outputs", dtype=global_dtype
+         )
+ 
+     @unpack_inputs

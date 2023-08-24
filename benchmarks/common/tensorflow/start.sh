@@ -1440,10 +1440,12 @@ function gpt_j() {
         if [ ${BENCHMARK_ONLY} == "True" ]; then
           CMD=" ${CMD} --max_output_tokens=${MAX_OUTPUT_TOKENS}"
           CMD=" ${CMD} --input_tokens=${INPUT_TOKENS}"
-          if [[ -z "${SKIP_ROWS}" ]]; then
-            SKIP_ROWS=0
+          CMD=" ${CMD} --steps=${STEPS}"
+          CMD=" ${CMD} --warmup_steps=${WARMUP_STEPS}"
+          if [[ -z "${DUMMY_DATA}" ]]; then
+            DUMMY_DATA=0
           fi
-          CMD=" ${CMD} --skip_rows=${SKIP_ROWS}"
+          CMD=" ${CMD} --dummy_data=${DUMMY_DATA}"
         fi
         CMD=${CMD} run_model
       else

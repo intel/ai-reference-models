@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 CORES_PER_INSTANCE="socket"
 
 MODEL_DIR=${MODEL_DIR-$PWD}
@@ -65,6 +66,21 @@ if [ -z "${INPUT_TOKENS}" ]; then
   echo "Running with default input token size of ${INPUT_TOKENS}"
 fi
 
+if [ -z "${STEPS}" ]; then
+  STEPS="100"
+  echo "Running with default benchmarking steps of ${STEPS}"
+fi
+
+if [ -z "${WARMUP_STEPS}" ]; then
+  WARMUP_STEPS="10"
+  echo "Running with default benchmarking warmup steps of ${WARMUP_STEPS}"
+fi
+
+if [ -z "${DUMMY_DATA}" ]; then
+  DUMMY_DATA="1"
+  echo "Running with dummy data"
+fi
+
 cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
 cpus=$(lscpu |grep 'CPU(s):' | head -1 | sed 's/[^0-9]//g')
 tpc=$(lscpu |grep 'Thread(s) per core:' |sed 's/[^0-9]//g')
@@ -106,7 +122,9 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
   $@ \
   -- max_output_tokens=${MAX_OUTPUT_TOKENS} \
   input_tokens=${INPUT_TOKENS} \
-  skip_rows=1
+  steps=${STEPS} \
+  warmup_steps=${WARMUP_STEPS} \
+  dummy_data=${DUMMY_DATA}
 
 if [[ $? == 0 ]]; then
   cat ${OUTPUT_DIR}/gpt_j_${PRECISION}_inference_bs${BATCH_SIZE}_cores*_all_instances.log | grep -ie "Time spent per iteration" | sed -e "s/.*://;s/ms//"
