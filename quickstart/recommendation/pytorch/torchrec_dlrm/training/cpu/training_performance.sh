@@ -54,9 +54,20 @@ else
     exit 1
 fi
 
+if [[ $ENABLE_TORCH_PROFILE == "true" ]]; then
+  ARGS="$ARGS --profile"
+fi
+
+export launcher_arg="-m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc"
+if [[ $PLOTMEM == "true" ]]; then
+pip install memory_profiler matplotlib
+export mrun_cmd="mprof run --python -o ${MEMLOG}"
+unset launcher_arg
+fi
+
 LOG_0="${LOG}/throughput.log"
 export BATCH_SIZE=16
-python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
+$mrun_cmd python $launcher_arg $MODEL_SCRIPT \
     --embedding_dim 128 \
     --dense_arch_layer_sizes 512,256,128 \
     --over_arch_layer_sizes 1024,1024,512,256,1 \
@@ -78,6 +89,10 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jema
     --benchmark \
     $ARGS 2>&1 | tee $LOG_0
 wait
+
+if [[ $PLOTMEM == "true" ]]; then
+mprof plot ${MEMLOG} -o ${MEMPIC}
+fi
 
 throughput=$(grep 'Throughput:' ${LOG}/throughput.log |sed -e 's/.*Throughput//;s/[^0-9.]//g' |awk '
 BEGIN {

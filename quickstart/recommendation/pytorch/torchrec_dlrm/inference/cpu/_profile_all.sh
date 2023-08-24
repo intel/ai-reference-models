@@ -16,18 +16,19 @@
 export MODEL_DIR=/home/haozhe/lz/frameworks.ai.models.intel-models
 export DATASET_DIR=/data/dlrm_2_dataset/inference
 export OUTPUT_DIR=./
+export ENABLE_TORCH_PROFILE=true
 export PLOTMEM=true
 
+seq=`date +%m%d%H%M%S`
+mkdir log/${seq}/
 for precision in int8 fp32 fp16 bf32 bf16
 do
 export PRECISION=$precision
 if [[ $PLOTMEM == "true" ]]; then
-export MEMLOG=./log/${PRECISION}-bench-real-mem.dat
-export MEMPIC=./log/${PRECISION}-bench-real.jpeg
-rm $MEMLOG
-rm $MEMPIC
+export MEMLOG=./log/${seq}/${PRECISION}-bench-real-mem.dat
+export MEMPIC=./log/${seq}/${PRECISION}-bench-real.jpeg
 fi
-bash inference_performance.sh 2>&1 |tee ./log/${PRECISION}-bench-real.log
+bash inference_performance.sh
 done
 
 
@@ -36,10 +37,8 @@ for precision in int8 fp32 fp16 bf32 bf16
 do
 export PRECISION=$precision
 if [[ $PLOTMEM == "true" ]]; then
-export MEMLOG=./log/${PRECISION}-bench-dummy-mem.dat
-export MEMPIC=./log/${PRECISION}-bench-dummy-mem.jpeg
-rm $MEMLOG
-rm $MEMPIC
+export MEMLOG=./log/${seq}/${PRECISION}-bench-dummy-mem.dat
+export MEMPIC=./log/${seq}/${PRECISION}-bench-dummy-mem.jpeg
 fi
 bash inference_performance.sh 2>&1 |tee ./log/${PRECISION}-bench-dummy.log
 done

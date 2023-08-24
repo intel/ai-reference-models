@@ -34,6 +34,7 @@ from typing import List, Optional
 import time
 
 import torch
+print(f"torch version {torch.__version__}")
 import torchmetrics as metrics
 from pyre_extensions import none_throws
 from torch.utils.data import DataLoader
@@ -48,6 +49,7 @@ from torchrec.optim.optimizers import in_backward_optimizer_filter
 from tqdm import tqdm
 from jit_trace_able_utils import unpack, SparseArchTraceAbleWrapper
 import intel_extension_for_pytorch as ipex
+print(f"IPEX version {ipex.__version__}")
 
 # OSS import
 try:
@@ -705,8 +707,10 @@ def _train(
     benckmark_batch = fetch_batch(train_dataloader)
     benckmark_batch.sparse_features = unpack(benckmark_batch.sparse_features)
 
-    def fetch_next(iterator):
+    def fetch_next(iterator, current_it):
         if args.benchmark:
+            if current_it == limit_train_batches:
+                raise StopIteration
             return benckmark_batch
         else:
             with record_function("generate batch"):
@@ -715,11 +719,11 @@ def _train(
                 next_batch.sparse_features = unpack(next_batch.sparse_features)
             return next_batch
 
-    def train_step(model, opt, iterator):
-        next_batch = fetch_next(iterator)
+    def train_step(model, opt, iterator, current_it):
+        next_batch = fetch_next(iterator, current_it)
         t1 = time.time()
         with record_function("zero_grad"):
-            opt.zero_grad()
+            opt.zero_grad(set_to_none=True)
         with record_function("fw"):
             if autocast_enabled:
                 with torch.cpu.amp.autocast(enabled=autocast_enabled, dtype=autocast_dtype):
@@ -731,11 +735,15 @@ def _train(
         with record_function("bw"):
             if autocast_dtype == torch.float16:
                 scaler.scale(loss).backward()
+            else:
+                loss.backward()
+        with record_function("optimizer update"):
+            if autocast_dtype == torch.float16:
                 scaler.step(opt)
                 scaler.update()
             else:
-                loss.backward()
                 opt.step()
+                pass
         train_t = time.time() - t1
         return next_batch.dense_features.shape[0], train_t
 
@@ -768,7 +776,7 @@ def _train(
             if  print_lr:
                 for i, g in enumerate(train_optimizer.param_groups):
                     logger.info(f"lr: {it} {i} {g['lr']:.6f}")
-            samples, train_t = train_step(train_model, train_optimizer, iterator)
+            samples, train_t = train_step(train_model, train_optimizer, iterator, it)
             if enable_torch_profile:
                 p.step()
             num_samples += samples
@@ -776,6 +784,7 @@ def _train(
 
             if log_freq != 0 and it % log_freq == 0:
                 logger.info(f"avg training time per iter at ITER: {it}, {total_t/it} s")
+                print_memory(f"memory usage at iter {it}")
 
             lr_scheduler.step()
             pbar.update(1)
@@ -1075,6 +1084,9 @@ def main(argv: List[str]) -> None:
     replace_crossnet(train_model.model)
     if args.inference_only and args.ipex_merged_emb_cat:
         replace_embeddingbag_collection(train_model.model)
+    else:
+        for emb in train_model.model.sparse_arch.embedding_bag_collection.embedding_bags.values():
+            emb.sparse = True
     # embedding_optimizer = torch.optim.Adagrad if args.adagrad else torch.optim.SGD
     # This will apply the Adagrad optimizer in the backward pass for the embeddings (sparse_arch). This means that
     # the optimizer update will be applied in the backward pass, in this case through a fused op.
@@ -1201,6 +1213,7 @@ def main(argv: List[str]) -> None:
     # )
 
     if args.multi_hot_sizes is not None:
+        print_memory("start to create Multihot for dummy data ")
         multihot = Multihot(
             args.multi_hot_sizes,
             args.num_embeddings_per_feature,
@@ -1209,6 +1222,7 @@ def main(argv: List[str]) -> None:
             dist_type=args.multi_hot_distribution_type,
         )
         multihot.pause_stats_collection_during_val_and_test(model)
+        print_memory("start transfer to multihot dataloader for dummy data ")
         if train_dataloader:
             train_dataloader = RestartableMap(
                 multihot.convert_to_multi_hot, train_dataloader

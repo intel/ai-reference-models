@@ -15,15 +15,16 @@
 
 export MODEL_DIR=/home/haozhe/lz/frameworks.ai.models.intel-models
 export OUTPUT_DIR=./
-
-for precision in bf16 bf32 fp32 fp16
+export ENABLE_TORCH_PROFILE=true
+export PLOTMEM=true
+seq=`date +%m%d%H%M%S`
+mkdir log/${seq}/
+for precision in fp32 bf32 fp16 bf16
 do
 export PRECISION=$precision
 if [[ $PLOTMEM == "true" ]]; then
-export MEMLOG=./log/${PRECISION}-bench-dummy-mem.dat
-export MEMPIC=./log/${PRECISION}-bench-dummy-mem.jpeg
-rm $MEMLOG
-rm $MEMPIC
+export MEMLOG=./log/${seq}/${PRECISION}-bench-dummy-mem.dat
+export MEMPIC=./log/${seq}/${PRECISION}-bench-dummy-mem.jpeg
 fi
-bash training_performance.sh 2>&1 |tee ./log/${PRECISION}-bench-dummy.log
+bash training_performance.sh 2>&1 |tee ./log/${seq}/${PRECISION}-bench-dummy.log
 done
