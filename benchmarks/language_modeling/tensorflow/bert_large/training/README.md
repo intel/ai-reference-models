@@ -145,6 +145,6 @@ export CHECKPOINT_DIR=<path to the downloaded checkpoints folder>
 ## Additional Resources
 
 * To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [BFloat16](bfloat16/Advanced.md) [FP16](fp16/Advanced.md) for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
+* To run the model using docker, please see the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html)
   workload container:<br />
-  [https://software.intel.com/content/www/us/en/develop/articles/containers/bert-large-fp32-training-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/bert-large-fp32-training-tensorflow-container.html).
+  [https://www.intel.com/content/www/us/en/developer/articles/containers/bert-large-fp32-training-tensorflow-container.html](https://www.intel.com/content/www/us/en/developer/articles/containers/bert-large-fp32-training-tensorflow-container.html).

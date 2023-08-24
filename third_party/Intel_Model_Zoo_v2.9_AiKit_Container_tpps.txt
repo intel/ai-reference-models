@@ -48,7 +48,7 @@ Intel® Math Kernel Library
 
 Anaconda® Individual Edition provides access to re-distributable, run-time, shared-library files from the Intel® Math Kernel Library (“MKL binaries”).
 
-Copyright © 2018 Intel Corporation. License available at https://software.intel.com/en-us/license/intel-simplified-software-license (the “MKL License”).
+Copyright © 2018 Intel Corporation. License available at https://www.intel.com/content/www/us/en/developer/articles/license/end-user-license-agreement.html (the “MKL License”).
 
 You may use and redistribute the MKL binaries, without modification, provided the following conditions are met:
 
