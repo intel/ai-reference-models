@@ -49,7 +49,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-client (only required for multi-instance)
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
-        <li>horovod==0.21.0 (only required for multi-instance)
+        <li>horovod==0.27.0 (only required for multi-instance)
         <li>Activate the tensorflow conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
@@ -66,7 +66,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-client (only required for multi-instance)
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
-        <li>horovod==0.21.0 (only required for multi-instance)
+        <li>horovod==0.27.0 (only required for multi-instance)
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>

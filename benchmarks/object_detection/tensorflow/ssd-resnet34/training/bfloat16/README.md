@@ -57,8 +57,8 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
-        <li>tensorflow-addons==0.11.0
-        <li>Activate the tensorflow 2.5.0 conda environment
+        <li>tensorflow-addons==0.18.0
+        <li>Activate the tensorflow conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
     </td>
@@ -84,7 +84,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>protobuf-compiler
         <li>pycocotools
-        <li>tensorflow-addons==0.11.0
+        <li>tensorflow-addons==0.18.0
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
