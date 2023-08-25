@@ -101,3 +101,84 @@ INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
 INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
 
+latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/latency_${precision}* |sed -e 's/.*atency: //;s/[^0-9.]//g;s/\.$//' |awk '
+        BEGIN {
+            num = 0;
+            sum = 0;
+        }{
+            num ++;
+            sum += $1;
+        }END {
+            if(num > 0) {
+                printf("%.6f", sum / num);
+            }else {
+                printf("0  0");
+            }
+        }
+    '))
+first_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/latency_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+    BEGIN {
+        num = 0;
+        sum = 0;
+    }{
+        num ++;
+        sum += $1;
+    }END {
+        if(num > 0) {
+            printf("%.6f", sum / num);
+        }else {
+            printf("0");
+        }
+    }
+'))
+rest_token_latency=($(grep -i 'rest-token-latency:' ${OUTPUT_DIR}/latency_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+    BEGIN {
+        num = 0;
+        sum = 0;
+    }{
+        num ++;
+        sum += $1;
+    }END {
+        if(num > 0) {
+            printf("%.6f", sum / num);
+        }else {
+            printf("0");
+        }
+    }
+'))
+P90_rest_token_latency=($(grep -i 'P90-rest-token-latency:' ${OUTPUT_DIR}/latency_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+    BEGIN {
+        num = 0;
+        sum = 0;
+    }{
+        num ++;
+        sum += $1;
+    }END {
+        if(num > 0) {
+            printf("%.6f", sum / num);
+        }else {
+            printf("0");
+        }
+    }
+'))
+
+
+token_per_sec=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=$BATCH_SIZE -v first_token=${first_latency}} '
+    BEGIN {
+        thp = batch*(output_token-1)/(total-first_token);
+        printf("%.3f", thp);    
+    }
+'))
+
+first_token_thp=($(awk -v output_token=$OUTPUT_TOKEN -v total=$latency -v batch=$BATCH_SIZE -v first_token=${first_latency}} '
+    BEGIN {
+        thp = batch*(1)/(first_token);
+        printf("%.3f", thp);    
+    }
+'))
+echo ""LLaMa";latency;"total-latency";${precision};${BATCH_SIZE}; ${latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo ""LLaMa";latency;"first-token-latency";${precision};${BATCH_SIZE}; ${first_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo ""LLaMa";latency;"rest-token-latency";${precision};${BATCH_SIZE}; ${rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo ""LLaMa";latency;"P90-rest-token-latency";${precision};${BATCH_SIZE}; ${P90_rest_token_latency} " |tee -a ${OUTPUT_DIR}/summary.log
+echo ""LLaMa";latency;"token_per_sec";${precision};${BATCH_SIZE}; ${token_per_sec} " |tee -a ${OUTPUT_DIR}/summary.log
+echo ""LLaMa";latency;"first_token_thp";${precision};${BATCH_SIZE}; ${first_token_thp} " |tee -a ${OUTPUT_DIR}/summary.log
