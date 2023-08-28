@@ -270,6 +270,21 @@ def main_worker(args):
         scaler = torch.cpu.amp.GradScaler()
     else:
         scaler = None
+    # Train mode
+    model.train()
+
+    if args.ipex:
+        if args.bf16:
+            print("running ipex bfloat16 training step\n")
+        elif args.bf32:
+            print("running ipex bfloat32 training step\n")
+        elif args.fp16:
+            print("running ipex float16 training step\n")
+        else:
+            print("running ipex float32 training step\n")
+    
+    total_time = 0
+    compute_time = 0
 
     for epoch in range(args.start_epoch, args.epochs):
         
@@ -280,8 +295,90 @@ def main_worker(args):
             #TODO: add warmup for SGD path
             adjust_learning_rate(optimizer, epoch, args)
 
-        # train for one epoch
-        epoch_time = train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args)
+        # train for each epoch
+        
+        epoch_time = 0
+
+        batch_time = AverageMeter('Time', ':6.3f')      # Track total time = data-load + compute
+        data_time = AverageMeter('Data', ':6.3f')       # Track data-load time
+        losses = AverageMeter('Loss', ':.4e')
+        top1 = AverageMeter('Acc@1', ':6.2f')
+        top5 = AverageMeter('Acc@5', ':6.2f')
+        progress = ProgressMeter(
+            len(train_loader),
+            [batch_time, data_time, losses, top1, top5],
+            prefix="Epoch: [{}]".format(epoch))
+
+        start = time.time()
+        for i, (images, target) in enumerate(train_loader):
+
+            if args.distributed:
+                dist.barrier()
+
+            if args.ipex:
+                images = images.contiguous(memory_format=torch.channels_last)
+            
+            if i % args.print_freq == 0:
+                progress.display(i)
+            
+            #data loading time
+            t1 = time.time() - start
+            data_time.update(t1)
+
+            # Forward pass
+            if args.ipex and args.bf16:
+                with torch.cpu.amp.autocast():
+                    output = model(images)
+                output = output.to(torch.float32)
+            elif args.ipex and args.fp16:
+                with torch.cpu.amp.autocast(dtype=torch.half):
+                    output = model(images)
+                output = output.to(torch.float32)
+            else:
+                output = model(images)
+            loss = criterion(output, target)
+
+            # compute gradient and do optimizer step
+            optimizer.zero_grad()
+            if args.fp16:
+                scaler.scale(loss).backward()
+                if lr_scheduler:
+                    lr_scheduler.step()
+                scaler.step(optimizer)
+                scaler.update()
+            else:
+                loss.backward()
+                if lr_scheduler:
+                    lr_scheduler.step()
+                optimizer.step()
+
+            # measure elapsed time and reset timer
+            t2 = time.time() - start
+            batch_time.update(t2)
+            epoch_time += t2 - t1
+            if args.warmup_iterations < 0 or (epoch - args.start_epoch) * len(train_loader) + i + 1 > args.warmup_iterations:
+                total_time += t2
+                compute_time += t2 - t1
+
+            # measure accuracy and record loss
+            acc, counts = accuracy(output, target, topk=(1, 5))
+            acc1, acc5 = acc[0], acc[1]        
+            losses.update(loss.item(), images.size(0))
+            top1.update(acc1[0], images.size(0))
+            top5.update(acc5[0], images.size(0))   
+
+
+            start = time.time()
+            
+            if args.warmup_iterations > 0 and \
+            args.iterations > 0 and \
+            (epoch - args.start_epoch) * len(train_loader) + i + 1 >= args.iterations + args.warmup_iterations:
+                break
+            elif args.warmup_iterations < 0 and \
+            args.iterations > 0 and \
+            (epoch - args.start_epoch) * len(train_loader) + i + 1 >= args.iterations:
+                break
+            
         print("epoch: ", epoch, ", train_time(s): ", epoch_time)
         time_to_train += epoch_time
         print("time_to_train(s): ", time_to_train)
@@ -305,109 +402,32 @@ def main_worker(args):
 
             if best_acc1 > args.target_acc:
                 break
-
+        
+        if args.warmup_iterations > 0 and \
+        args.iterations > 0 and \
+        (epoch - args.start_epoch) * len(train_loader) + i + 1 >= args.iterations + args.warmup_iterations:
+            break
+        elif args.warmup_iterations < 0 and \
+        args.iterations > 0 and \
+        (epoch - args.start_epoch) * len(train_loader) + i + 1 >= args.iterations:
+            break
+    
+    # Compute Throughput
+    batch_size = args.local_batch_size
+    total_iterations = min((args.epochs - args.start_epoch) * len(train_loader), args.iterations) if args.iterations > 0 else (args.epochs - args.start_epoch) * len(train_loader)
+    if args.warmup_iterations > 0 and args.iterations < 0:
+        total_iterations -= args.warmup_iterations
+    if total_iterations <= 0:
+        print("Error! length of Train Data Loader or args.iterations are small than warmup iterations! Please put a larger args.iterations or a smaller args.warmup_iterations.")
+    perf = batch_size * total_iterations / compute_time
+    print(f"batch size is {batch_size}, total_iterantions is {total_iterations}, compute_time is {compute_time}")
+    print("Training throughput(compute): {:.3f} fps".format(perf))
+    perf2 = batch_size * total_iterations / total_time
+    print(f"batch size is {batch_size}, total_iterantions is {total_iterations}, total_time is {total_time}")
+    print("Training throughput(dataload+compute): {:.3f} fps".format(perf2))
+    
     print("final time_to_train(s): ", time_to_train)
 
-def train(train_loader, model, criterion, optimizer, lr_scheduler, epoch, scaler, args):
-
-    epoch_time = 0
-    total_time = 0
-    compute_time = 0
-
-    batch_time = AverageMeter('Time', ':6.3f')      # Track total time = data-load + compute
-    data_time = AverageMeter('Data', ':6.3f')       # Track data-load time
-    losses = AverageMeter('Loss', ':.4e')
-    top1 = AverageMeter('Acc@1', ':6.2f')
-    top5 = AverageMeter('Acc@5', ':6.2f')
-    progress = ProgressMeter(
-        len(train_loader),
-        [batch_time, data_time, losses, top1, top5],
-        prefix="Epoch: [{}]".format(epoch))
-
-    # Train mode
-    model.train()
-
-    if args.ipex:
-        if args.bf16:
-            print("running ipex bfloat16 training step\n")
-        elif args.bf32:
-            print("running ipex bfloat32 training step\n")
-        elif args.fp16:
-            print("running ipex float16 training step\n")
-        else:
-            print("running ipex float32 training step\n")
-
-    start = time.time()
-    for i, (images, target) in enumerate(train_loader):
-
-        if args.distributed:
-            dist.barrier()
-
-        if args.ipex:
-            images = images.contiguous(memory_format=torch.channels_last)
-
-        #data loading time
-        t1 = time.time() - start
-        data_time.update(t1)
-
-        # Forward pass
-        if args.ipex and args.bf16:
-            with torch.cpu.amp.autocast():
-                output = model(images)
-            output = output.to(torch.float32)
-        elif args.ipex and args.fp16:
-            with torch.cpu.amp.autocast(dtype=torch.half):
-                output = model(images)
-            output = output.to(torch.float32)
-        else:
-            output = model(images)
-        loss = criterion(output, target)
-
-        # compute gradient and do optimizer step
-        optimizer.zero_grad()
-        if args.fp16:
-            scaler.scale(loss).backward()
-            if lr_scheduler:
-                lr_scheduler.step()
-            scaler.step(optimizer)
-            scaler.update()
-        else:
-            loss.backward()
-            if lr_scheduler:
-                lr_scheduler.step()
-            optimizer.step()
-
-        # measure elapsed time and reset timer
-        t2 = time.time() - start
-        batch_time.update(t2)
-        epoch_time += t2 - t1
-        if args.iterations + args.warmup_iterations > 0 and i + 1 > args.warmup_iterations:
-            total_time += t2
-            compute_time += t2 - t1
-
-        # measure accuracy and record loss
-        acc, counts = accuracy(output, target, topk=(1, 5))
-        acc1, acc5 = acc[0], acc[1]        
-        losses.update(loss.item(), images.size(0))
-        top1.update(acc1[0], images.size(0))
-        top5.update(acc5[0], images.size(0))   
-
-        if i % args.print_freq == 0:
-            progress.display(i)
-
-        if args.iterations + args.warmup_iterations > 0 and i + 1 == args.iterations + args.warmup_iterations:
-            break
-
-        start = time.time()
-
-    batch_size = args.local_batch_size
-    if args.iterations + args.warmup_iterations > 0:
-        perf = batch_size * args.iterations / compute_time
-        print("Training throughput(compute): {:.3f} fps".format(perf))
-        perf2 = batch_size * args.iterations / total_time
-        print("Training throughput(dataload+compute): {:.3f} fps".format(perf2))
-
-    return epoch_time
 
 '''
 Distributed evaluation notes:
