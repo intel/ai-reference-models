@@ -15,23 +15,26 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-$PWD}
-BATCH_SIZE=${BATCH_SIZE-1}
-PRECISION=${PRECISION-fp32}
+apt-get update && \
+apt-get install -y parallel 
+apt-get install -y pciutils
 
-if [[ -z $OUTPUT_DIR ]]; then
-  echo "The required environment variable OUTPUT_DIR has not been set"
-  exit 1
-fi
+apt-get install -y --no-install-recommends --fix-missing numactl ffmpeg libsm6 libxext6
 
-echo "Stable Diffusion Inference Inference"
-if [[ ${PRECISION} == "fp32" ]]; then
+apt-get update && \
+apt-get install -y --no-install-recommends --fix-missing \
+build-essential \
+python3.10-dev
 
-python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last
-
-else
-
-python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last --precision fp16
-fi
+pip install \
+matplotlib>=3.2.2 \
+numpy>=1.18.5 \
+opencv-python>=4.1.1 \
+Pillow>=7.1.2 \
+PyYAML>=5.3.1 \
+requests>=2.23.0 \
+scipy>=1.4.1 \
+tqdm>=4.64.0 \
+protobuf==3.20.1 \
+pandas>=1.1.4 \
+seaborn>=0.11.0

@@ -15,23 +15,16 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-$PWD}
-BATCH_SIZE=${BATCH_SIZE-1}
-PRECISION=${PRECISION-fp32}
+apt-get update
+apt-get install -y --no-install-recommends --fix-missing git
 
-if [[ -z $OUTPUT_DIR ]]; then
-  echo "The required environment variable OUTPUT_DIR has not been set"
-  exit 1
-fi
+git clone https://github.com/keras-team/keras-cv.git
+cd keras-cv
+git reset --hard 66fa74b6a2a0bb1e563ae8bce66496b118b95200
+mv ../models/generative-ai/tensorflow/stable_diffusion/inference/gpu/patch .
+git apply patch
+cd - 
+pip install matplotlib
+pip install .
 
-echo "Stable Diffusion Inference Inference"
-if [[ ${PRECISION} == "fp32" ]]; then
-
-python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last
-
-else
-
-python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last --precision fp16
-fi
+python -m pip install scikit-image

@@ -10,7 +10,12 @@ Intel(R) Extension for PyTorch with GPU.
 <!--- 20. GPU Setup -->
 ## Software Requirements:
 - Intel® Data Center GPU Flex Series
-- Follow [instructions](https://intel.github.io/intel-extension-for-pytorch/xpu/latest/tutorials/installation.html) to install the latest IPEX version and other prerequisites.
+- Create and activate virtual environment.
+  ```bash
+  virtualenv -p python <virtualenv_name>
+  source <virtualenv_name>/bin/activate
+  ```
+- Follow [instructions](https://pypi.org/project/intel-extension-for-pytorch/) to install the latest IPEX version and other prerequisites.
 
 - Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
@@ -66,19 +71,12 @@ The folder that contains the `val` directory should be set as the
 
 <!--- 50. Baremetal -->
 ## Run the model
-Install the following pre-requisites:
-* Create and activate virtual environment.
-  ```bash
-  virtualenv -p python <virtualenv_name>
-  source <virtualenv_name>/bin/activate
-  ```
 * Clone the Model Zoo repository:
   ```bash
   git clone https://github.com/IntelAI/models.git
   ```
-* Navigate to ResNet50v1.5 inference directory:
+* Navigate to the model zoo directory:
   ```bash
-  # Navigate to the model zoo repo
   cd models
   ```
 
@@ -90,12 +88,11 @@ prior to running a [quickstart script](#quick-start-scripts).
 ### Run the model on Baremetal
 Set environment variables for the path to your dataset, an output directory to run the quickstart script:
 ```
-To run with ImageNet data, the dataset directory will need to be specified in addition to an output directory and precision.
 export DATASET_DIR=<path to the preprocessed imagenet dataset>
 export OUTPUT_DIR=<Path to save the output logs>
 
 # Optional envs
-export BATCH_SIZE=<Set batch_size else it will run with default batch>
+export BATCH_SIZE=<Set batch_size else it will run with default batch of 1024 on Flex 170 and the default batch size for Flex 140 is 256>
 
 # Run a quickstart script
 ./quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/inference_block_format.sh

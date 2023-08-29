@@ -15,23 +15,18 @@
 # limitations under the License.
 #
 
-MODEL_DIR=${MODEL_DIR-$PWD}
-BATCH_SIZE=${BATCH_SIZE-1}
-PRECISION=${PRECISION-fp32}
+apt-get update && \
+apt-get install -y --no-install-recommends --fix-missing \
+git build-essential libssl-dev libffi-dev python3.10-dev
 
-if [[ -z $OUTPUT_DIR ]]; then
-  echo "The required environment variable OUTPUT_DIR has not been set"
-  exit 1
-fi
+python -m pip install opencv-python-headless pycocotools 
 
-echo "Stable Diffusion Inference Inference"
-if [[ ${PRECISION} == "fp32" ]]; then
+pip install git+https://github.com/NVIDIA/dllogger.git
 
-python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last
+git clone https://github.com/NVIDIA/DeepLearningExamples.git
+cd DeepLearningExamples
+git checkout 5be8a3cae21ee2d80e3935a4746827cb3367bcac
 
-else
-
-python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last --precision fp16
-fi
+mv ../models/image_segmentation/tensorflow/maskrcnn/inference/gpu/EnableInference.patch .
+git apply EnableInference.patch
+cd -
