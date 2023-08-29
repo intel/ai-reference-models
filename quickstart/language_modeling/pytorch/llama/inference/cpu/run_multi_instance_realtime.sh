@@ -101,7 +101,7 @@ INSTANCES=`expr $TOTAL_CORES / $CORES_PER_INSTANCE`
 INSTANCES_PER_SOCKET=`expr $INSTANCES / $SOCKETS`
 
 
-latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/latency_${precision}* |sed -e 's/.*atency: //;s/[^0-9.]//g;s/\.$//' |awk '
+latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/latency_log_${precision}* |sed -e 's/.*atency: //;s/[^0-9.]//g;s/\.$//' |awk '
         BEGIN {
             num = 0;
             sum = 0;
@@ -116,7 +116,7 @@ latency=($(grep -i 'inference-latency:' ${OUTPUT_DIR}/latency_${precision}* |sed
             }
         }
     '))
-first_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/latency_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+first_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/latency_log_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
     BEGIN {
         num = 0;
         sum = 0;
@@ -131,7 +131,7 @@ first_latency=($(grep -i 'first-token-latency:' ${OUTPUT_DIR}/latency_${precisio
         }
     }
 '))
-rest_token_latency=($(grep -i 'rest-token-latency:' ${OUTPUT_DIR}/latency_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+rest_token_latency=($(grep -i 'rest-token-latency:' ${OUTPUT_DIR}/latency_log_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
     BEGIN {
         num = 0;
         sum = 0;
@@ -146,7 +146,7 @@ rest_token_latency=($(grep -i 'rest-token-latency:' ${OUTPUT_DIR}/latency_${prec
         }
     }
 '))
-P90_rest_token_latency=($(grep -i 'P90-rest-token-latency:' ${OUTPUT_DIR}/latency_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
+P90_rest_token_latency=($(grep -i 'P90-rest-token-latency:' ${OUTPUT_DIR}/latency_log_${precision}*  |sed -e 's/.*atency://;s/[^0-9.]//g;s/\.$//' |awk '
     BEGIN {
         num = 0;
         sum = 0;
