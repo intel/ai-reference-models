@@ -5,10 +5,10 @@ echo "Setup TensorFlow Test Enviroment for ResNet50 v1.5 Inference"
 
 PRECISION=$1
 SCRIPT=$2
-DATASET=$3
-OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/TensorFlow/output/resnet50v1.5-inference/${SCRIPT}/${PRECISION}"}
-WORKSPACE=$4
-is_lkg_drop=$5
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/TensorFlow/resnet50v1.5-inference/${SCRIPT}/${PRECISION}"}
+WORKSPACE=$3
+is_lkg_drop=$4
+DATASET=$5
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -32,4 +32,4 @@ if [[ "${is_lkg_drop}" == "true" ]]; then
 fi
 
 # run following script
-OUTPUT_DIR=${OUTPUT_DIR} BATCH_SIZE=${BATCH_SIZE} PRECISION=${PRECISION} PRETRAINED_MODEL=${PRETRAINED_MODEL} DATASET_DIR=${DATASET} ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/${SCRIPT}
+OUTPUT_DIR=${OUTPUT_DIR} PRECISION=${PRECISION} PRETRAINED_MODEL=${PRETRAINED_MODEL} DATASET_DIR=${DATASET} ./quickstart/image_recognition/tensorflow/resnet50v1_5/inference/cpu/${SCRIPT}

@@ -5,10 +5,10 @@ echo "Setup PyTorch Test Enviroment for ResNet50 Inference"
 
 PRECISION=$1
 SCRIPT=$2
-DATASET=$3
-OUTPUT_DIR=${OUTPUT_DIR-"tests/cicd/PyTorch/output/resnet50-inference/${PRECISION}"}
-WORKSPACE=$4
-is_lkg_drop=$5
+OUTPUT_DIR=${OUTPUT_DIR-"$(pwd)/tests/cicd/output/PyTorch/resnet50-inference/${SCRIPT}/${PRECISION}"}
+WORKSPACE=$3
+is_lkg_drop=$4
+DATASET=$5
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
@@ -24,4 +24,4 @@ if [[ "${is_lkg_drop}" == "true" ]]; then
 fi
 
 # Run script
-OUTPUT_DIR=${OUTPUT_DIR} BATCH_SIZE=${BATCH_SIZE} DATASET_DIR=${DATASET} ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/${PRECISION}/${SCRIPT}
+OUTPUT_DIR=${OUTPUT_DIR} DATASET_DIR=${DATASET} ./quickstart/image_recognition/pytorch/resnet50/inference/cpu/${PRECISION}/${SCRIPT}
