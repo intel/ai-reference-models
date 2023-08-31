@@ -65,6 +65,8 @@ parser.add_argument(
     help="by default it is int8-fp32 mixed, to enable int8 mixed amp bf16 (work on platforms like SPR)",
 )
 parser.add_argument("--quantized_model_path", default="./best_model.pt")
+parser.add_argument("--do-calibration", action="store_true")
+parser.add_argument("--int8-qconfig", nargs="?", default="./qconfig.json")
 parser.add_argument("--lambada", action="store_true")
 parser.add_argument("--accuracy_only", action="store_true")
 parser.add_argument("--benchmark", action="store_true")
@@ -323,35 +325,41 @@ if args.ipex_static_quantize or args.ipex_smooth_quant:
     from intel_extension_for_pytorch.quantization import prepare, convert
     qconfig = ipex.quantization.default_static_qconfig
     if args.ipex_smooth_quant:
-        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping()
+        qconfig = ipex.quantization.get_smooth_quant_qconfig_mapping(alpha=0.6)
     prepared_model = prepare(user_model.eval(), qconfig, example_inputs=example_inputs)
-    with torch.no_grad():
-        for i, (
-            (input_ids, attention_mask, past_key_values, position_ids),
-            last_ind,
-        ) in enumerate(calib_dataloader):
-            if i == 8:
-                break
-            if has_position_id:
-                prepared_model(
-                    input_ids,
-                    attention_mask=attention_mask,
-                    position_ids= position_ids,
-                    past_key_values=past_key_values,
-                )
-            else:
-                prepared_model(
-                    input_ids,
-                    attention_mask=attention_mask,
-                    past_key_values=past_key_values,
-                )
-    with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
-        convert_model = convert(prepared_model.eval()).eval()
-        if args.ipex_smooth_quant:
-            convert_model(*example_inputs)
-        self_jit = torch.jit.trace(convert_model.eval(), example_inputs, strict=False)
-        self_jit = torch.jit.freeze(self_jit.eval())
-        self_jit.save(args.output_dir+"/best_model.pt")
+    if args.do_calibration:
+        with torch.no_grad():
+            for i, (
+                (input_ids, attention_mask, past_key_values, position_ids),
+                last_ind,
+            ) in enumerate(calib_dataloader):
+                if i == 8:
+                    break
+                if has_position_id:
+                    prepared_model(
+                        input_ids,
+                        attention_mask=attention_mask,
+                        position_ids= position_ids,
+                        past_key_values=past_key_values,
+                    )
+                else:
+                    prepared_model(
+                        input_ids,
+                        attention_mask=attention_mask,
+                        past_key_values=past_key_values,
+                    )
+        prepared_model.save_qconf_summary(qconf_summary = args.int8_qconfig)
+        print("calibration Done!")
+    else:
+        prepared_model.load_qconf_summary(qconf_summary = args.int8_qconfig)
+        with torch.no_grad(), torch.cpu.amp.autocast(enabled=amp_enabled, dtype=amp_dtype):
+            convert_model = convert(prepared_model.eval()).eval()
+            self_jit = torch.jit.trace(convert_model.eval(), example_inputs, strict=False)
+            self_jit = torch.jit.freeze(self_jit.eval())
+            self_jit.save(args.output_dir+"/best_model.pt")
+            print("model quantization - Done!")
+
+
 
 def benchmark_warmup(prompt):
     # start
