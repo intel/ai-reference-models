@@ -113,7 +113,7 @@ prof_schedule=torch.profiler.schedule(
 def print_memory(stage):
     import os
     import psutil
-    print(time.time(), stage, psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024)
+    print("dlrmv2-memory-usage-log: ", time.time(), stage, psutil.Process(os.getpid()).memory_info().rss / 1024 / 1024 / 1024)
 
 def fetch_batch(dataloader):
     try:
@@ -819,10 +819,13 @@ def _share_weight_benchmark(
     args,
 ):
     from torch.utils import ThroughputBenchmark
+    print_memory("start to init throughput benchmark")
     bench = ThroughputBenchmark(model)
     batch = fetch_batch(data_loader)
     batch.sparse_features = unpack(batch.sparse_features)
+    print_memory("start to add input to throughput benchmark")
     bench.add_input(batch.dense_features, batch.sparse_features)
+    print_memory("start to run throughput benchmark")
     stats = bench.benchmark(
         num_calling_threads=args.share_weight_instance,
         num_warmup_iters=100,

@@ -26,8 +26,8 @@ def unpack(input :KeyedJaggedTensor) -> dict:
     output = {}
     for k, v in input.to_dict().items():
         output[k] = {}
-        output[k]['values'] = v._values.int()
-        output[k]['offsets'] = v._offsets.int()
+        output[k]['values'] = v._values.long()
+        output[k]['offsets'] = v._offsets.long()
     return output
 
 class SparseArchTraceAbleWrapper(nn.Module):

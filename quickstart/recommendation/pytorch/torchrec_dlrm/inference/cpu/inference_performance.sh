@@ -83,7 +83,12 @@ if [[ $ENABLE_TORCH_PROFILE == "true" ]]; then
   ARGS="$ARGS --profile"
 fi
 
-CORES=`lscpu | grep Core | awk '{print $4}'`
+CORES_PER_SOCKET=`lscpu | grep "Core(s) per socket" | awk '{print $4}'`
+SOCKETS=`lscpu | grep "Socket(s)" | awk '{print $2}'`
+NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
+NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
+CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
+
 export OMP_NUM_THREADS=1
 
 $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
@@ -104,7 +109,7 @@ $mrun_cmd python $launcher_arg $MODEL_SCRIPT \
     --jit \
     --inference-only \
     --benchmark \
-    --share-weight-instance=$CORES \
+    --share-weight-instance=$CORES_PER_NUMA_NODE \
     $ARGS 2>&1 | tee $LOG_0
 wait
 
