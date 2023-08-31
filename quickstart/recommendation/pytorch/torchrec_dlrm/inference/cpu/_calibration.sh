@@ -47,5 +47,5 @@ python -m intel_extension_for_pytorch.cpu.launch --node_id 0 --enable_jemalloc $
     --int8-configure-dir ${INT8_CONFIG}\
     --calibration \
     --synthetic_multi_hot_criteo_path $DATASET_DIR \
-    --snapshot-dir $WEIGHT_DIR
-
+    --snapshot-dir $WEIGHT_DIR \
+    --ipex-merged-emb-cat
