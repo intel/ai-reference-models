@@ -57,11 +57,15 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 * Do quantization to get INT8 model before running INT8.
   ```
-  #default using IPEX static quantization
-  bash do_quantization.sh int8-fp32 default  # or use int8-bf16
+  #optional: qconfig.json is saved in this repo, you can also do calibration by yourself to re-generation it
+  bash do_quantization.sh calibration sq
 
-  #optional using IPEX smoothquant for better accuracy
+  #unzip qconfig.zip to get qconfig.json 
+  unzip qconfig.zip 
+  #using IPEX smoothquant for better accuracy
   bash do_quantization.sh int8-fp32 sq # or use int8-bf16
+
+
   ```
 
 * Set ENV to use fp16 AMX if you are using a supported platform
