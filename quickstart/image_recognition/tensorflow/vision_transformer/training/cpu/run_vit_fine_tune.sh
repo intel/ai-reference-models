@@ -70,6 +70,9 @@ if [ -z "${BATCH_SIZE}"]; then
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
 
+# Execute launch_benchmark with socket id 0, to run single instance on single socket
+echo "Running one innstance of vision transformer fine-tuning on single socket"
+
 # Run vision transformer training
 source "$MODEL_DIR/quickstart/common/utils.sh"
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
@@ -81,6 +84,7 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --epochs=${EPOCHS} \
    --data-location $DATASET_DIR \
    --checkpoint $OUTPUT_DIR \
+   --socket_id=0 \
    $@ \
    --init-checkpoint=$INIT_CHECKPOINT_DIR
 
