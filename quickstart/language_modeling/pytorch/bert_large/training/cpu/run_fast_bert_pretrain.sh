@@ -36,5 +36,8 @@ export I_MPI_DEBUG=5
 #from mlperf_logger import log_event
 #log_event(key=constants.CACHE_CLEAR, value=True)"
 
+NPROCESS=${NPROCESS:-32}
+PROCESS_PER_NODE=${PROCESS_PER_NODE:-4}
+
 export SEED=$(date +%s)
-bash ./run_dist_ht.sh -np 32 -ppn 4 -f hostfile bash fast_bert_pretrain.sh --use_tpp --tpp_bf16 --unpad --dense_seq_out  --dist_lamb  --no_ddp --seed ${SEED} 2>&1|tee output.log
+bash ./run_dist_ht.sh -np $NPROCESS -ppn $PROCESS_PER_NODE -f hostfile bash fast_bert_pretrain.sh --use_tpp --tpp_bf16 --unpad --dense_seq_out  --dist_lamb  --no_ddp --seed ${SEED} 2>&1|tee output.log

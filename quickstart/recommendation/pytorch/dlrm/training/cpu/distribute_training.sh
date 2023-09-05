@@ -72,7 +72,10 @@ else
     exit 1
 fi
 
-BATCHSIZE=32768
+BATCHSIZE=${BATCHSIZE:-32768}
+NUM_CCL_WORKER=${NUM_CCL_WORKER:-32768}
+HOSTFILE=${HOSTFILE:-hostfile1}
+
 seed_num=1665468325 #1665462256 #$(date +%s)
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
@@ -100,7 +103,7 @@ LOCAL_BATCH_SIZE=$((BATCHSIZE / NODE))
 LOCAL_BATCH_SIZE=$((LOCAL_BATCH_SIZE / 2))
 
 LOG_0="${LOG}/socket.log"
-python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count 8 --distributed --hostfile hostfile1 --nnodes $NODE \
+python -m intel_extension_for_pytorch.cpu.launch --enable_tcmalloc --logical_core_for_ccl --ccl_worker_count $NUM_CCL_WORKER --distributed --hostfile $HOSTFILE --nnodes $NODE \
 $MODEL_SCRIPT \
   --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
   --data-set=terabyte \
