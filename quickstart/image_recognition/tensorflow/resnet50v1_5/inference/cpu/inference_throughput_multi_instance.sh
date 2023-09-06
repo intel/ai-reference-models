@@ -106,6 +106,9 @@ else
 fi
 echo "WARMUP_STEPS: $WARMUP_STEPS"
 
+# Remove old log file
+rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \

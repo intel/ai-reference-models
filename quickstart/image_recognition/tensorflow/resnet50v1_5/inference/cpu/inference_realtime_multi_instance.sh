@@ -98,6 +98,9 @@ echo "WARMUP_STEPS: $WARMUP_STEPS"
 export TF_ENABLE_MKL_NATIVE_FORMAT=1 
 export TF_ONEDNN_ENABLE_FAST_CONV=1 
 
+# Remove old log file
+rm -rf  ${OUTPUT_DIR}/resnet50v1_5_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log
+
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr
 _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
