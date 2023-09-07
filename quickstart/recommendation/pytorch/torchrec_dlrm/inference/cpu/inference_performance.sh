@@ -51,7 +51,7 @@ elif [[ $PRECISION == "fp16" ]]; then
     ARGS="$ARGS --dtype fp16 --ipex-merged-emb-cat"
 elif [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
-    ARGS="$ARGS --dtype int8 --int8-configure-dir ${INT8_CONFIG}"
+    ARGS="$ARGS --dtype int8 --ipex-merged-emb-cat --int8-configure-dir ${INT8_CONFIG}"
 else
     echo "The specified PRECISION '${PRECISION}' is unsupported."
     echo "Supported PRECISIONs are: fp32, fp16, bf16, bf32, int8"
