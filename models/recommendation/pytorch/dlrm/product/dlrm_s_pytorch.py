@@ -335,6 +335,7 @@ class DLRM_Net(nn.Module):
             self.emb_l, _, _ = self.create_emb(m_spa, ln_emb, None, None, np_init_emb_weight)
         self.loss_fn = torch.nn.BCELoss(reduction="mean")
         self.emb_args_preprocessing = 0
+        self.load_data_time = 0
                 
     def apply_mlp(self, x, layers):
         # approach 1: use ModuleList
@@ -753,7 +754,9 @@ class DLRM_Net(nn.Module):
         a2a_req = ext_dist.alltoall(ly_sparse, self.n_sparse_emb_per_rank)
 
         if is_train:
+            start = time_wrap()
             load_data(buffer_num, args.bf16)
+            self.load_data_time += time_wrap() - start
 
         #dense embedding 
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
@@ -1592,7 +1595,8 @@ def run():
 
                         lr_scheduler.step()
 
-                        t2 = time_wrap() - dlrm.emb_args_preprocessing
+                        t2 = time_wrap() - dlrm.emb_args_preprocessing - dlrm.load_data_time
+                        dlrm.load_data_time = 0
                         dlrm.emb_args_preprocessing = 0 
                         total_train_time_wo_dl_eval += (t2 - t1)
                         total_time += t2 - t1
@@ -1656,6 +1660,7 @@ def run():
                                 best_acc_test = model_metrics_dict["test_acc"]
                             eval_end = time.time()
                             dlrm.emb_args_preprocessing = 0
+                            dlrm.load_data_time = 0
                             if ext_dist.my_size > 1 and ext_dist.dist.get_rank() ==1 :
                                 print("Evauation at {} iteration using {} s".format(j+1, eval_end- eval_begin))
                             if (
