@@ -83,6 +83,16 @@ Third party programs and their corresponding required notices and/or license ter
    Copyright 2018- The Hugging Face team. All rights reserved.
 
    TransFormer ML Perf
+   DeepLearningExamples
+   
+   keras-cv
+    Copyright © 2023 The KerasCV Authors
+    
+   keras
+    Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
+    
+   dllogger
+    Copyright (c) 2019, NVIDIA CORPORATION. All rights reserved.
 
 Apache License 2.0
 
