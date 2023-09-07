@@ -68,3 +68,36 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
     --train_on_inputs \
     --group_by_length \
     --max_steps 50 
+
+train_samples_per_second=($(grep -i 'train_samples_per_second'  ${OUTPUT_DIR}/training_log_${precision}_${mode}* |sed -e 's/.*train_samples_per_second*//;s/[^0-9.,]//g;' | awk -F, '{print $1}' |awk '
+        BEGIN {
+            num = 0;
+            sum = 0;
+        }{
+            num ++;
+            sum += $1;
+        }END {
+            if(num > 0) {
+                printf("%.6f", sum / num);
+            }else {
+                printf("0  0");
+            }
+        }
+    '))
+train_loss=($(grep -i 'train_loss' ${OUTPUT_DIR}/training_log_${precision}_${mode}* |sed -e 's/.*train_loss*//;s/[^0-9.,]//g;' | awk -F, '{print $1}' |awk '
+        BEGIN {
+            num = 0;
+            sum = 0;
+        }{
+            num ++;
+            sum += $1;
+        }END {
+            if(num > 0) {
+                printf("%.6f", sum / num);
+            }else {
+                printf("0  0");
+            }
+        }
+    '))
+echo ""LLaMa";training throughput;"train_samples_per_second";${precision};${BATCH_SIZE}; ${train_samples_per_second} " |tee -a ${OUTPUT_DIR}/summary.log
+echo ""LLaMa";training throughput;"train_loss";${precision};${BATCH_SIZE}; ${train_loss} " |tee -a ${OUTPUT_DIR}/summary.log
