@@ -47,10 +47,16 @@ LOG=${OUTPUT_DIR}/dlrm_inference_performance_log/${PRECISION}
 rm -rf ${LOG}
 mkdir -p ${LOG}
 
+CORES_PER_SOCKET=`lscpu | grep "Core(s) per socket" | awk '{print $4}'`
+SOCKETS=`lscpu | grep "Socket(s)" | awk '{print $2}'`
+NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
+NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
+CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
+
 ARGS=""
 if [[ $PRECISION == "int8" ]]; then
     echo "running int8 path"
-    ARGS="$ARGS --num-cpu-cores=$CORES --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
+    ARGS="$ARGS --num-cpu-cores=$CORES_PER_NUMA_NODE --int8 --int8-configure=${MODEL_DIR}/models/recommendation/pytorch/dlrm/product/int8_configure.json"
 elif [[ $PRECISION == "bf16" ]]; then
     ARGS="$ARGS --bf16"
     echo "running bf16 path"
@@ -66,12 +72,6 @@ else
 fi
 
 export OMP_NUM_THREADS=1
-CORES_PER_SOCKET=`lscpu | grep "Core(s) per socket" | awk '{print $4}'`
-SOCKETS=`lscpu | grep "Socket(s)" | awk '{print $2}'`
-NUMA_NODES=`lscpu | grep "NUMA node(s)" | awk '{print $3}'`
-NUMA_NODES_PER_SOCKETS=`expr $NUMA_NODES / $SOCKETS`
-CORES_PER_NUMA_NODE=`expr $CORES_PER_SOCKET / $NUMA_NODES_PER_SOCKETS`
-
 LOG_0="${LOG}/throughput.log"
 python -m intel_extension_for_pytorch.cpu.launch --throughput_mode --enable_jemalloc $MODEL_SCRIPT \
 --raw-data-file=${DATASET_DIR}/day --processed-data-file=${DATASET_DIR}/terabyte_processed.npz \
