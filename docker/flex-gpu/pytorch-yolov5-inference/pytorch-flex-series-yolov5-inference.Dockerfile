@@ -19,10 +19,10 @@
 # throughout. Please refer to the TensorFlow dockerfiles documentation
 # for more information.
 
-ARG PYTORCH_BASE_IMAGE="intel/intel-extension-for-pytorch"
-ARG PYTORCH_BASE_TAG="xpu-flex"
+ARG BASE_IMAGE="intel/intel-extension-for-pytorch"
+ARG BASE_TAG="xpu-flex"
 
-FROM ${PYTORCH_BASE_IMAGE}:${PYTORCH_BASE_TAG}
+FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /home/user/workspace/pytorch-flex-series-yolov5-inference 
 

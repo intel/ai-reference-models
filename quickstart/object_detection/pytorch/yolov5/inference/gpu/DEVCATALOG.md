@@ -7,7 +7,7 @@ This document has instructions for running YOLOv5 inference using Intel® Extens
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
-| Host machine  | Intel® Data Center GPU Flex Series  |
+| Host machine  | Intel® Data Center GPU Flex Series 170 or 140  |
 | Drivers | GPU-compatible drivers need to be installed:[Download Driver 647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
 | Software | Docker* Installed |
 
@@ -42,7 +42,7 @@ variable for YOLOv5 (for example: `export IMAGE_FILE=/home/<user>/coco/val2017/0
 
 | Script name | Description |
 |-------------|-------------|
-| `inference.sh` | Inference with FP16 for specified batch size on Flex series 170 |
+| `inference.sh` | Inference with FP16 for specified batch size on Flex series 170 and 140 |
 
 ## Run Using Docker
 
@@ -60,7 +60,9 @@ export IMAGE_FILE=<path to coco dataset image>
 export BATCH_SIZE=<inference batch size>
 export NUM_ITERATIONS=<number of iterations>
 export OUTPUT_DIR=<path to output directory>
+export PRECISION=<provide fp16 precision>
 export SCRIPT=quickstart/inference.sh
+export GPU_TYPE=<provide either flex_170 or flex_140>
 DOCKER_ARGS="--rm -it"
 
 docker run \
@@ -71,6 +73,8 @@ docker run \
   --env NUM_ITERATIONS=${NUM_ITERATIONS} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env IMAGE_FILE=${IMAGE_FILE} \
+  --env PRECSION=${PRECISION} \
+  --env GPU_TYPE=${GPU_TYPE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
@@ -80,7 +84,7 @@ docker run \
   ${IMAGE_NAME} \
   /bin/bash $SCRIPT
 ```
-
+**Note:**  Add `--cap-add=SYS_NICE` to the `docker run` command for executing `batch_inference.sh` on Flex series 140.
 ## Documentation and Sources
 
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/docker/flex-gpu)

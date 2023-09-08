@@ -26,6 +26,9 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 
 WORKDIR /workspace/tf-flex-series-efficientnet-inference
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
+
 RUN pip install pillow 
 
 COPY models/image_recognition/tensorflow/efficientnet/inference/gpu/predict.py models/image_recognition/tensorflow/efficientnet/inference/gpu/predict.py 

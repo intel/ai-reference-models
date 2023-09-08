@@ -9,7 +9,7 @@ Intel® Extension for TensorFlow with Intel® Data Center GPU Flex Series.
 
 <!--- 20. GPU Setup -->
 ## Software Requirements:
-- Intel® Data Center GPU Flex Series
+- Intel® Data Center GPU Flex Series 170 or 140
 - Create and activate virtual environment.
   ```bash
   virtualenv -p python <virtualenv_name>
@@ -45,7 +45,7 @@ Download and pre-process the datasets using script `download_and_preprocess_coco
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `inference` | Runs inference for FP16 precision on Flex series 170 with default batch size of 16|
+| `inference` | Runs inference for FP16 precision on Flex series 170 or 140 with default batch size of 16|
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -65,6 +65,7 @@ export OUTPUT_DIR=<path where output log files will be written>
 export PRECISION=<provide precision,supports fp16>
 export DATASET_DIR=<path to the preprocessed COCO dataset>
 export BATCH_SIZE=16
+export GPU_TYPE=<provide either flex_170 or flex_140>
 
 Run the model specific dependencies:
 NOTE: Installing dependencies in setup.sh may require root privilege

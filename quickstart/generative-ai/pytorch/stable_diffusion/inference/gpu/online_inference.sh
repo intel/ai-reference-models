@@ -28,10 +28,13 @@ echo "Stable Diffusion Inference Inference"
 if [[ ${PRECISION} == "fp32" ]]; then
 
 python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last
+    --save_image --channels_last 2>&1 | tee $OUTPUT_DIR/${PRECISION}_stable_diffusion_logs.txt
 
-else
+elif [[ ${PRECISION} == "fp16" ]]; then
 
 python -u ${MODEL_DIR}/models/generative-ai/pytorch/stable_diffusion/inference/gpu/main.py \
-    --save_image --channels_last --precision fp16
+    --save_image --channels_last --precision fp16 2>&1 | tee $OUTPUT_DIR/${PRECISION}_stable_diffusion_logs.txt
+else
+  echo "Stable Diffusion currently supports fp32 and fp16 precisions."
+  exit 1
 fi

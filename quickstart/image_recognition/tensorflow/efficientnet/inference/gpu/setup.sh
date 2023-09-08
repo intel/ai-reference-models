@@ -1,5 +1,4 @@
-#
-# -*- coding: utf-8 -*-
+#!/usr/bin/env bash
 #
 # Copyright (c) 2023 Intel Corporation
 #
@@ -16,12 +15,7 @@
 # limitations under the License.
 #
 
-#
-
-TENSORFLOW_IMAGE=intel/intel-optimized-tensorflow
-TENSORFLOW_TAG=1.15.2
-
-all:
-	@TENSORFLOW_IMAGE=${TENSORFLOW_IMAGE} \
-	 TENSORFLOW_TAG=${TENSORFLOW_TAG} \
-	 docker compose -f dataset-docker-compose.yml up --build
+if [[ "$GPU_TYPE" == "flex_140" ]]; then
+    apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl 
+fi

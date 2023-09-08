@@ -163,9 +163,8 @@ parser.add_argument('--calib-bs', default=32, type=int,
                     metavar='N', help='mini-batch size for calibration')
 parser.add_argument('--perchannel-weight', default=False,
                     help='do calibration with weight per channel quantization')
-# TODO: when fix non blocking H2D perf regression, we will remove here option
 parser.add_argument('--non-blocking', default=False, action='store_true',
-                    help='non blocking H2D for input and target, now for int8, default False')
+                    help='non blocking H2D for input and target, default False')
 parser.add_argument('--channels-last', action='store_true', help='enable channels last')
 parser.add_argument('--num-iterations', default=0, type=int)
 parser.add_argument('--converge', default=None, action='store_true',
@@ -578,18 +577,18 @@ def main_worker(ngpus_per_node, args):
         val_dataset_size = args.num_iterations * args.batch_size if (args.dummy and args.num_iterations) else 50000
         val_dataset = datasets.FakeData(val_dataset_size, (3, 224, 224), 1000, transforms.ToTensor())
     else:
-        traindir = os.path.join(args.data, 'train')
+        #traindir = os.path.join(args.data, 'train')
         valdir = os.path.join(args.data, 'val')
         normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
-        train_dataset = datasets.ImageFolder(
-            traindir,
-            transforms.Compose([
-                transforms.RandomResizedCrop(224),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor(),
-                normalize,
-            ]))
+        #train_dataset = datasets.ImageFolder(
+            #traindir,
+            #transforms.Compose([
+                #transforms.RandomResizedCrop(224),
+                #transforms.RandomHorizontalFlip(),
+                #transforms.ToTensor(),
+                #normalize,
+            #]))
         val_dataset = datasets.ImageFolder(
             valdir,
             transforms.Compose([
@@ -600,16 +599,16 @@ def main_worker(ngpus_per_node, args):
             ]))
 
     if args.distributed:
-        train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
+        #train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset)
         val_sampler = torch.utils.data.distributed.DistributedSampler(val_dataset, shuffle=False, drop_last=True)
     else:
         train_sampler = None
         val_sampler = None
 
     # [watch out] The pin memory is default enabled on CUDA for now in torch.
-    train_loader = torch.utils.data.DataLoader(
-        train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
-        num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler)
+    #train_loader = torch.utils.data.DataLoader(
+        #train_dataset, batch_size=args.batch_size, shuffle=(train_sampler is None),
+        #num_workers=args.workers, pin_memory=True, pin_memory_device="xpu", sampler=train_sampler)
 
     val_loader = torch.utils.data.DataLoader(
         val_dataset, batch_size=args.batch_size, shuffle=False,
@@ -750,6 +749,10 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
     # record time
     duration_total = 0.0
 
+    non_blocking = False
+    if args.non_blocking:
+        non_blocking = True
+
     data_start = time.time()
     for i, (images, target) in enumerate(train_loader):
         global_num_iter +=1
@@ -770,8 +773,8 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
                 except:
                     pass
                 start_time = time.time()
-                images = images.to(args.xpu, non_blocking=True)
-                target = target.to(args.xpu, non_blocking=True)
+                images = images.to(args.xpu, non_blocking=non_blocking)
+                target = target.to(args.xpu, non_blocking=non_blocking)
 
                 with torch.xpu.amp.autocast(enabled=use_autocast, dtype=torch.bfloat16):
                     # compute output
@@ -814,8 +817,8 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
 
             with torch.profiler.profile(activities=activities, record_shapes=False) as prof:
                 if args.gpu is not None:
-                    images = images.cuda(args.gpu, non_blocking=True)
-                    target = target.cuda(args.gpu, non_blocking=True)
+                    images = images.cuda(args.gpu, non_blocking=non_blocking)
+                    target = target.cuda(args.gpu, non_blocking=non_blocking)
 
                 # compute output
                 output = model(images)
@@ -872,6 +875,10 @@ def train(train_loader, model, criterion, optimizer, epoch, profiling, use_autoc
 
 def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args):
 
+    non_blocking = False
+    if args.non_blocking:
+        non_blocking = True
+
     def run_validate(loader, model, autocast_dtype, base_progress=0):
 
         # record time
@@ -894,7 +901,7 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
                         except:
                             pass
                         start_time = time.time()
-                        images = images.to(args.xpu, non_blocking=True)
+                        images = images.to(args.xpu, non_blocking=non_blocking)
 
                         if args.jit_trace:
                             # compute output
@@ -929,7 +936,7 @@ def validate(val_loader, model, criterion, epoch, profiling, use_autocast, args)
 
                     with torch.profiler.profile(activities=activities, record_shapes=False) as prof:
                         if args.gpu is not None:
-                            images = images.cuda(args.gpu, non_blocking=True)
+                            images = images.cuda(args.gpu, non_blocking=non_blocking)
 
                         # compute output
                         output = model(images)
@@ -1045,7 +1052,6 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     # record time
     duration_total = 0.0
 
-    # TODO: will fix non blocking H2D perf regression, then remove here option
     non_blocking = False
     if args.non_blocking:
         non_blocking = True
@@ -1053,7 +1059,7 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
     with torch.inference_mode():
         for i, (images, target) in enumerate(val_loader):
             if args.xpu is not None and args.benchmark == 1:
-                images = images.to(args.xpu, non_blocking = non_blocking)
+                images = images.to(args.xpu, non_blocking=non_blocking)
 
             with torch.autograd.profiler_legacy.profile(enabled=profiling, use_xpu=True, record_shapes=False) as prof:
                 try:
@@ -1063,7 +1069,7 @@ def validate_quantization(val_loader, model, criterion, profiling, args):
                     pass
                 start = time.time()
                 if args.xpu is not None and args.benchmark == 0:
-                    images = images.to(args.xpu, non_blocking = non_blocking)
+                    images = images.to(args.xpu, non_blocking=non_blocking)
                 if args.channels_last:
                     images = images.to(memory_format=torch.channels_last)
 

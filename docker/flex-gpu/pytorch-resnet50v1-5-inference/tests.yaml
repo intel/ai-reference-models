@@ -1,0 +1,42 @@
+170-online:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
+  cmd: quickstart/inference_block_format.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    BATCH_SIZE: '1'
+    NUM_ITERATIONS: '5000'
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+170-batch:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
+  cmd: quickstart/inference_block_format.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    BATCH_SIZE: '1024'
+    NUM_ITERATIONS: '500'
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+140-batch:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
+  cmd: quickstart/flex_multi_card_batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    BATCH_SIZE: '256'
+    NUM_ITERATIONS: '500'
+    PRECISION: int8
+    OUTPUT_DIR: /tmp
+140-online:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-pytorch-flex-gpu-resnet50v1-5-inference
+  cmd: quickstart/flex_multi_card_online_inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    BATCH_SIZE: '1'
+    NUM_ITERATIONS: '5000'
+    PRECISION: int8
+    OUTPUT_DIR: /tmp

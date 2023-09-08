@@ -44,5 +44,10 @@ if [ -z "${BATCH_SIZE}" ]; then
   BATCH_SIZE="1"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
-
-python -u ${MODEL_DIR}/models/generative-ai/tensorflow/stable_diffusion/inference/gpu/stable_diffusion_inference.py --precision ${PRECISION} --store_result_dir ${OUTPUT_DIR}
+echo "Stable Diffusion Inference Inference"
+if [[ ${PRECISION} == "fp32" || ${PRECISION} == "fp16" ]]; then
+  python -u ${MODEL_DIR}/models/generative-ai/tensorflow/stable_diffusion/inference/gpu/stable_diffusion_inference.py --precision ${PRECISION} --store_result_dir ${OUTPUT_DIR} 2>&1 | tee $OUTPUT_DIR/${PRECISION}_stable_diffusion_logs.txt
+else
+  echo "Stable Diffusion currently supports fp32 and fp16 precisions."
+  exit 1
+fi

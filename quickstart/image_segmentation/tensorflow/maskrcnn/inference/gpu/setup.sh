@@ -19,6 +19,10 @@ apt-get update && \
 apt-get install -y --no-install-recommends --fix-missing \
 git build-essential libssl-dev libffi-dev python3.10-dev
 
+if [[ "$GPU_TYPE" == "flex_140" ]]; then
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl 
+fi
+
 python -m pip install opencv-python-headless pycocotools 
 
 pip install git+https://github.com/NVIDIA/dllogger.git

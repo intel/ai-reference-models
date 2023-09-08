@@ -1,0 +1,32 @@
+---
+fp32-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-tf-flex-gpu-stable-diffusion-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    BATCH_SIZE: '1'
+    PRECISION: fp32
+    OUTPUT_DIR: /tmp
+fp16-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-tf-flex-gpu-stable-diffusion-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    BATCH_SIZE: '1'
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+fp16-accuracy:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-tf-flex-gpu-stable-diffusion-inference
+  cmd: quickstart/accuracy.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    BATCH_SIZE: '1'
+    PRECISION: fp16
+    REFERENCE_RESULT_FILE: /dataset/stable-diffusion/img_arrays_for_acc.txt
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/stable-diffusion/img_arrays_for_acc.txt
+      dst: /dataset/stable-diffusion/img_arrays_for_acc.txt

@@ -7,7 +7,7 @@ This document has instructions for running EfficientNet inference using Intel® 
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
-| Host machine  | Intel® Data Center GPU Flex Series  |
+| Host machine  | Intel® Data Center GPU Flex Series 170 and 140  |
 | Drivers | GPU-compatible drivers need to be installed: [Download Driver 647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
 | Software | Docker* Installed |
 
@@ -38,7 +38,7 @@ The folder that contains the `val` directory should be set as the`IMAGE_FILE`
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `batch_inference` | Runs EfficientNet B0,B3 batch inference for fp16 precision on Flex series 170 |
+| `batch_inference` | Runs EfficientNet B0,B3 batch inference for fp16 precision on Flex series 170 and 140 |
 
 ## Run Using Docker
 
@@ -53,11 +53,12 @@ The EfficientNet inference container contains scripts,models and libraries neede
 
 ```bash
 export IMAGE_NAME=intel/image-recognition:tf-flex-gpu-efficientnet-inference
-export MODEL_NAME=<EfficientNetB0 or EfficientNetB3>
+export MODEL_NAME=<provide either EfficientNetB0 or EfficientNetB3>
 export BATCH_SIZE=<provide batch size. Default is 64>
-export PRECISION=fp16
+export PRECISION=<provide fp16 precision>
 export OUTPUT_DIR=<path to output directory>
 export IMAGE_FILE=<path to ImageNet Image file>
+export GPU_TYPE=<provide either flex_170 or flex_140>
 
 docker run \
   --device=/dev/dri \
@@ -67,16 +68,19 @@ docker run \
   --env BATCH_SIZE=${BATCH_SIZE} \
   --env MODEL_NAME=${MODEL_NAME} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
+  --env PRECSION=${PRECISION} \
   --env IMAGE_FILE=${IMAGE_FILE} \
+  --env GPU_TYPE=${GPU_TYPE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
+  --volume ${OUTPUT_DIR}:${OUTPUT_DIR} \
   --volume ${IMAGE_FILE}:${IMAGE_FILE} \
   --rm -it \
   $IMAGE_NAME \
   /bin/bash quickstart/batch_inference.sh
   ```
-
+**Note:**  Add `--cap-add=SYS_NICE` to the `docker run` command for executing `batch_inference.sh` on Flex series 140.
   ## Documentation and Sources
 
 [GitHub* Repository](https://github.com/IntelAI/models/tree/master/dockers/flex-gpu)

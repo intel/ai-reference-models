@@ -9,7 +9,7 @@ Intel(R) Extension for PyTorch with GPU.
 
 <!--- 20. GPU Setup -->
 ## Software Requirements:
-- Intel® Data Center GPU Flex Series
+- Intel® Data Center GPU Flex Series 170 or 140
 - Create and activate virtual environment.
   ```bash
   virtualenv -p python <virtualenv_name>
@@ -66,7 +66,7 @@ variable for YOLOv5 (for example: `export IMAGE_FILE=/home/<user>/coco/val2017/0
 
 | Script name | Description |
 |-------------|-------------|
-| `inference.sh` | Inference with FP16 and FP32 for specified batch size on Flex series 170 |
+| `inference.sh` | Inference with FP16 and FP32 for specified batch size on Flex series 170 or 140 |
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -83,8 +83,9 @@ variable for YOLOv5 (for example: `export IMAGE_FILE=/home/<user>/coco/val2017/0
 Set environment variables to run the quickstart script:
 ```
 export IMAGE_FILE=<path to coco dataset image>
-export PRECISION=<provide either fp32 or fp16>
+export PRECISION=<provide fp16 precision>
 export OUTPUT_DIR=<Path to save the output logs>
+export GPU_TYPE=<provide either flex_170 or flex_140>
 
 # Optional envs
 export BATCH_SIZE=<Set batch_size else it will run with default batch>

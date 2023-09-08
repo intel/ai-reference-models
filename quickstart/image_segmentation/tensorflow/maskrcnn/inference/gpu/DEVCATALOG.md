@@ -7,7 +7,7 @@ This document has instructions for running MaskRCNN inference using Intel® Exte
 ## Requirements
 | Item | Detail |
 | ------ | ------- |
-| Host machine  | Intel® Data Center GPU Flex Series  |
+| Host machine  | Intel® Data Center GPU Flex Series 170 or 140  |
 | Drivers | GPU-compatible drivers need to be installed: [Download Driver 647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
 | Software | Docker* Installed |
 
@@ -23,7 +23,7 @@ Download and pre-process the datasets using script `download_and_preprocess_coco
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `inference` | Runs batch and online inference for FP16 precision on Flex series 170 |
+| `inference` | Runs batch and online inference for FP16 precision on Flex series 170 and 140 |
 
 ## Run Using Docker
 
@@ -43,6 +43,7 @@ export PRECISION=<provide precision,supports fp16>
 export OUTPUT_DIR=<path to output directory>
 export BATCH_SIZE=<provide batch size. default batch for batch inference is 16>
 export DATASET_DIR=<path to the preprocessed COCO dataset>
+export GPU_TYPE=<provide either flex_170 or flex_140>
 
 docker run -it \
     --device=/dev/dri \
@@ -52,6 +53,8 @@ docker run -it \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
   --env DATASET_DIR=${DATASET_DIR} \
   --env BATCH_SIZE=${BATCH_SIZE} \
+  --env PRECSION=${PRECISION} \
+  --env GPU_TYPE=${GPU_TYPE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
@@ -61,6 +64,7 @@ docker run -it \
   $IMAGE_NAME \
   /bin/bash quickstart/inference.sh
   ```
+**Note:**  Add `--cap-add=SYS_NICE` to the `docker run` command for executing `inference.sh` on Flex series 140.
 
 ## Documentation and Sources
 

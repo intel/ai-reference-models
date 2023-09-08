@@ -27,6 +27,9 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 WORKDIR /workspace/tf-flex-series-maskrcnn-inference
 
 RUN apt-get update && \
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
+    
+RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing \
     git build-essential libssl-dev libffi-dev python3.10-dev
 

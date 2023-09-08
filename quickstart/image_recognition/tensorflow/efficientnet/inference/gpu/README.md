@@ -9,7 +9,7 @@ Intel® Extension for TensorFlow with Intel® Data Center GPU Flex Series.
 
 <!--- 20. GPU Setup -->
 ## Software Requirements:
-- Intel® Data Center GPU Flex Series
+- Intel® Data Center GPU Flex Series 170 and 140
 - Create and activate virtual environment.
   ```bash
   virtualenv -p python <virtualenv_name>
@@ -62,7 +62,7 @@ The folder that contains the `val` directory should be set as the`IMAGE_FILE`
 
 | Script name | Description |
 |:-------------:|:-------------:|
-| `batch_inference` | Runs EfficientNet B0,B3 batch inference for fp16 precision on Flex series 170 |
+| `batch_inference` | Runs EfficientNet B0,B3 batch inference for fp16 precision on Flex series 170 and 140 |
 
 <!--- 50. Baremetal -->
 ## Run the model
@@ -84,9 +84,13 @@ export OUTPUT_DIR=<path where output log files will be written>
 export MODEL_NAME=<EfficientNetB0 or EfficientNetB3>
 export PRECISION=fp16
 export IMAGE_FILE=<path to ImageNet Image file>
+export GPU_TYPE=<provide either flex_170 or flex_140>
 
 # Optional envs
 export BATCH_SIZE=<Set batch_size else it will run with default batch of 64>
+
+Run model specific dependencies: 
+./quickstart/image_recognition/tensorflow/efficientnet/inference/gpu/setup.sh
 
 Run quickstart script:
 ./quickstart/image_recognition/tensorflow/efficientnet/inference/gpu/batch_inference.sh
