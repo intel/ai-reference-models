@@ -721,15 +721,6 @@ class DLRM_Net(nn.Module):
 
         lS_o_dense = [lS_o[i] for i in self.ln_emb_dense]
         lS_o_sparse = [lS_o[i] for i in self.ln_emb_sparse]
-        # shuffle_start = time.time()
-        # #lS_i_sparse = ext_dist.shuffle_data(lS_i_sparse)
-        # lS_i_sparse = torch.cat(lS_i_sparse)
-        # output_lS_i_sparse = lS_i_sparse.new_empty(lS_i_sparse.size())
-        # #print("cat time:", 1000*(time.time() - shuffle_start))
-        # req = ext_dist.dist.all_to_all_single(output_lS_i_sparse, lS_i_sparse)
-        # lS_i_sparse = output_lS_i_sparse.reshape(ext_dist.my_size, -1)
-
-        # g_i_sparse = [lS_i_sparse[:, i * local_batch_size:(i + 1) * local_batch_size].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
 
         global first_iteration_for_train
         if first_iteration_for_train or not is_train: 
@@ -753,15 +744,11 @@ class DLRM_Net(nn.Module):
         ly_sparse = self.apply_emb(dlrm.emb_sparse, g_o_sparse, g_i_sparse)
         a2a_req = ext_dist.alltoall(ly_sparse, self.n_sparse_emb_per_rank)
 
-        if is_train:
-            start = time_wrap()
-            load_data(buffer_num, args.bf16)
-            self.load_data_time += time_wrap() - start
-
         #dense embedding 
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
         # bottom mlp
         x = self.apply_mlp(dense_x, self.bot_l)
+        ext_dist.barrier()
         ly_sparse = a2a_req.wait()
         _ly = []
         vector_lenght = 128
@@ -771,36 +758,11 @@ class DLRM_Net(nn.Module):
         _ly = list(ly_dense) + list(_ly)
 
         a2a_ind_req = None #ovlerlap the a2a_ind_req with interaction/top_mlp
-        if is_train:
-            #get global index for sparse embedding
-            (X_next, lS_o_next, lS_i_next, T_next, W_next, CBPP_next) = data_buffer[0]
-            lS_i_dense_next = [lS_i_next[i] for i in self.ln_emb_dense]
-            lS_i_sparse_next = [lS_i_next[i] for i in self.ln_emb_sparse]
-            if ext_dist.my_size > len(self.ln_emb_sparse):
-                num_split_grps = ext_dist.my_size // len(self.ln_emb_sparse)
-                lS_i_sparse_next = torch.cat([lS_i_sparse_next for _ in range(num_split_grps) ])
-            lS_i_sparse_next = torch.cat(lS_i_sparse_next)
-            output_lS_i_sparse_next = lS_i_sparse_next.new_empty(lS_i_sparse_next.size())
-            # output_ind = self.output_ind.get_data_base_on_input(lS_i_sparse_next, lS_i_sparse_next.size())
-            a2a_ind_req = ext_dist.dist.all_to_all_single(output_lS_i_sparse_next, lS_i_sparse_next, async_op=True)
 
         # interactions
         z = self.interact_features(x, _ly)
         # top mlp
         p = self.apply_mlp(z, self.top_l)
-
-        if is_train:
-            a2a_ind_req.wait()
-            lS_i_sparse_next = output_lS_i_sparse_next.reshape(ext_dist.my_size, -1)
-            batch_size_next = X_next.size()[0]
-            # g_i_sparse = [lS_i_sparse_next[:, i * batch_size_next:(i + 1) * batch_size_next].reshape(-1).contiguous() for i in range(len(self.local_ln_emb_sparse))]
-            g_i_sparse_next = [lS_i_sparse_next[:, i * batch_size_next:(i + 1) * batch_size_next].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
-            # lS_i_sparse_next = torch.cat(g_i_sparse)
-            # import pdb
-            # pdb.set_trace()
-            # for i in self.ln_emb_sparse:
-            #    lS_i_next[i] = lS_i_sparse_next[i]
-            data_buffer[0] = (X_next, lS_o_next, [lS_i_dense_next, g_i_sparse_next], T_next, W_next, CBPP_next)
 
         # clamp output if needed
         if 0.0 < self.loss_threshold and self.loss_threshold < 1.0:
@@ -809,6 +771,28 @@ class DLRM_Net(nn.Module):
             )                                                                         
         else:
             z = p
+        if is_train:
+            with record_function("dist_data_loader"):
+                start = time_wrap()
+                ext_dist.barrier()
+                load_data(buffer_num, args.bf16)
+                #get global index for sparse embedding
+                (X_next, lS_o_next, lS_i_next, T_next, W_next, CBPP_next) = data_buffer[0]
+                lS_i_dense_next = [lS_i_next[i] for i in self.ln_emb_dense]
+                lS_i_sparse_next = [lS_i_next[i] for i in self.ln_emb_sparse]
+                if ext_dist.my_size > len(self.ln_emb_sparse):
+                    num_split_grps = ext_dist.my_size // len(self.ln_emb_sparse)
+                    lS_i_sparse_next = torch.cat([lS_i_sparse_next for _ in range(num_split_grps) ])
+                lS_i_sparse_next = torch.cat(lS_i_sparse_next)
+                output_lS_i_sparse_next = lS_i_sparse_next.new_empty(lS_i_sparse_next.size())
+                a2a_ind_req = ext_dist.dist.all_to_all_single(output_lS_i_sparse_next, lS_i_sparse_next, async_op=True)
+                a2a_ind_req.wait()
+                lS_i_sparse_next = output_lS_i_sparse_next.reshape(ext_dist.my_size, -1)
+                batch_size_next = X_next.size()[0]
+                g_i_sparse_next = [lS_i_sparse_next[:, i * batch_size_next:(i + 1) * batch_size_next].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
+                data_buffer[0] = (X_next, lS_o_next, [lS_i_dense_next, g_i_sparse_next], T_next, W_next, CBPP_next)
+                ext_dist.barrier()
+                self.load_data_time += time_wrap() - start
         return z
  
 
