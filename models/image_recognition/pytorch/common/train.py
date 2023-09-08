@@ -412,6 +412,10 @@ def main_worker(args):
         (epoch - args.start_epoch) * len(train_loader) + i + 1 >= args.iterations:
             break
     
+    # workaround oneccl bad termination issue.
+    if args.distributed:
+        dist.destroy_process_group()
+
     # Compute Throughput
     batch_size = args.local_batch_size
     total_iterations = min((args.epochs - args.start_epoch) * len(train_loader), args.iterations) if args.iterations > 0 else (args.epochs - args.start_epoch) * len(train_loader)
