@@ -1,4 +1,4 @@
-mlflow==2.5.0 #upgraded to resolve Snyk critical vulnerability
+mlflow==2.6.0 #upgraded to resolve Snyk critical vulnerability
 scikit-learn==1.2.2
 xlrd==2.0.1
 pandas-gbq==0.19.1
