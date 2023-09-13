@@ -69,6 +69,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>Activate the tensorflow 2.5.0 conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
@@ -94,6 +95,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>pillow>=9.3.0
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -158,6 +160,10 @@ export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_bs1_pretrained_model.pb
 # SSD-ResNet34 Int8 1200x1200 Pretrained model
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssd_resnet34_int8_1200x1200_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/ssd_resnet34_int8_1200x1200_pretrained_model.pb
+
+# SSD-ResNet34 Int8 1200x1200 Pretrained model for OneDnn Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point)
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/ssd_rn34_itex_int8.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_rn34_itex_int8.pb
 ```
 
 Set the environment variables and run quickstart script on either Linux or Windows systems. If the accuracy test is being run, then set the `DATASET_DIR` to point to the folder where the COCO dataset

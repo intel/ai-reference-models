@@ -51,6 +51,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>matplotlib
         <li>pillow>=9.3.0
         <li>pycocotools
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>Activate the `tensorflow` conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
@@ -71,6 +72,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>matplotlib
         <li>pillow>=9.3.0
         <li>pycocotools
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -108,6 +110,10 @@ export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_fp32_pretrained_model_combinedNMS.pb
 # Int8 Pretrained model
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
 export PRETRAINED_MODEL=$(pwd)/ssdmobilenet_int8_pretrained_model_combinedNMS_s8.pb
+
+# Int8 Pretrained model for OneDNN Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point)
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/ssd_mb_itex_int8.pb
+export PRETRAINED_MODEL=$(pwd)/ssd_mb_itex_int8.pb
 ```
 
 After installing the prerequisites and downloading the pretrained model, set the environment variables and for the `DATASET_DIR` use COCO raw dataset directory or tf_records file based on whether you run inference or accuracy scripts.

@@ -59,6 +59,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md) on Linux or Windows systems.
 Download the pre-trained model based on precision:
 * Download the [FP32 and BFloat16 pre-trained model](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/3dunet_dynamic_ndhwc.pb). 3D-Unet BFloat16 inference depends on Auto-Mixed_precision to convert graph from FP32 to BFloat16 online.
 * Download the [Int8 pre-trained model](https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/3dunet_int8_fully_quantized_perchannel.pb).
+* Download the [Int8 pre-trained model for OneDnn Graph](https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/3dunet_itex_int8.pb). Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point.
 
 In this example, we are using the model, trained using the fold 1 BRATS 2019 data.
 The validation files have been copied from [here](https://github.com/mlcommons/inference/tree/r0.7/vision/medical_imaging/3d-unet/folds).

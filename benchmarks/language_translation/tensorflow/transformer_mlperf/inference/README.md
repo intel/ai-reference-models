@@ -48,6 +48,10 @@ the `PRETRAINED_MODEL` environment variable to the .pb file path:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_int8.pb
 export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_int8.pb
 
+# Int8 Pretrained model for OneDNN Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point):
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/transformer_lt_itex_int8.pb
+export PRETRAINED_MODEL=$(pwd)/transformer_lt_itex_int8.pb
+
 # FP32 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_fp32.pb
 export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_fp32.pb

@@ -96,6 +96,10 @@ Download the model pretrained frozen graph from the given link based on the prec
 * BFloat16:
   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/optimized_bf16_bert.pb
 
+* Int8 for OneDNN Graph (Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point):
+  wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/bert_itex_int8.pb \
+  PRETRAINED_MODEL=$(pwd)/bert_itex_int8.pb
+
 ### Download checkpoints:
 ```bash
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/bert_large_checkpoints.zip

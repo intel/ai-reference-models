@@ -51,6 +51,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
         <li>horovod==0.27.0 (only required for multi-instance)
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>Activate the tensorflow conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
@@ -69,6 +70,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
         <li>horovod==0.27.0 (only required for multi-instance)
+        <li>intel-extension-for-tensorflow (only required when using onednn graph optimization)
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -96,6 +98,10 @@ export PRETRAINED_MODEL=$(pwd)/resnet50_v1.pb
 # Int8 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50v1_5_int8_pretrained_model.pb
 export PRETRAINED_MODEL=$(pwd)/resnet50v1_5_int8_pretrained_model.pb
+
+# Only used when the plugin Intel Extension for Tensorflow is installed, as OneDNN Graph optimization is enabled by default at this point. Int8 Pretrained model for OneDNN Graph:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_12_0/rn50_itex_int8.pb
+export PRETRAINED_MODEL=$(pwd)/rn50_itex_int8.pb
 
 #BFloat16 Pretrained model:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/v1_8/resnet50_v1_5_bfloat16.pb
