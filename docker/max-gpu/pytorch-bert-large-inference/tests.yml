@@ -8,10 +8,8 @@ pytorch-max-gpu-bert-large-inference:
       Tile: 2
       DATASET_DIR: /pytorch/squad_data
       BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint 
-      OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-inference
       DOCKER_ARGS: --ipc=host --privileged --device=/dev/dri
     volumes:
-      OUTPUT_DIR: /output/pytorch-max-gpu-bert-large-inference
       DATASET_DIR: /pytorch/squad_data
       BERT_WEIGHT: /pytorch/squad_large_finetuned_checkpoint 
       

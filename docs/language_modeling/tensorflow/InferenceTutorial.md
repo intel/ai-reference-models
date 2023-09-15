@@ -32,7 +32,7 @@ Below are the set of run-time options tested empirically on BERT Large and recom
 |KMP_SETTINGS| 1 |
 |OMP_NUM_THREADS |# physical cores - 1 or # physical cores - 2|
 
-Note 1: Refer to this [link](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) to learn more about the run-time options.
+Note 1: Refer to this [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run-time options.
 
 Note 2: You can remove `verbose` from `KMP_AFFINITY` setting to avoid verbose output at runtime.
 
@@ -100,7 +100,7 @@ This directory will be passed as the `--checkpoint` location when running infere
 4. Install [Docker](https://docs.docker.com/v17.09/engine/installation/) since the tutorial runs in a Docker container.
 
 5. Pull the relevant Intel-optimized TensorFlow Docker image.
-[Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
+[Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
 ```bash
 docker pull intel/intel-optimized-tensorflow:latest
 ```

@@ -4,7 +4,7 @@
 
 * Intel® Optimization for TensorFlow\*:
     * [TensorFlow and the Model Zoo in the Intel® oneAPI AI Analytics Toolkit](/docs/general/tensorflow/AIKit.md)
-    * [Installation Guide](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide)
+    * [Installation Guide](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html)
     * [General Best Practices](/docs/general/tensorflow/GeneralBestPractices.md)
 * Intel® Optimization for Tensorflow Serving\*:
     * [Installation Guide](/docs/general/tensorflow_serving/InstallationGuide.md)

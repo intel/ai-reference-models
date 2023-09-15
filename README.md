@@ -2,7 +2,7 @@
 
 This repository contains **links to pre-trained models, sample scripts, best practices, and step-by-step tutorials** for many popular open-source machine learning models optimized by Intel to run on Intel® Xeon® Scalable processors and Intel® Data Center GPUs.
 
-Model packages and containers for running the Model Zoo's workloads can be found at the [Intel® Developer Catalog](https://software.intel.com/containers).
+Model packages and containers for running the Model Zoo's workloads can be found at the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html).
 
 ## Purpose of the Model Zoo
 
@@ -176,6 +176,11 @@ For best performance on Intel® Data Center GPU Flex and Max Series, please chec
 | [SSD-MobileNet*](https://arxiv.org/pdf/1704.04861.pdf)| TensorFlow | Inference | Flex Series| [Int8](/quickstart/object_detection/tensorflow/ssd-mobilenet/inference/gpu/README.md) |
 | [SSD-MobileNet](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Flex Series | [Int8](/quickstart/object_detection/pytorch/ssd-mobilenet/inference/gpu/README.md) |
 | [Yolo V4](https://arxiv.org/pdf/1704.04861.pdf)| PyTorch | Inference | Flex Series | [Int8](/quickstart/object_detection/pytorch/yolov4/inference/gpu/README.md) |
+| [EfficientNet](https://arxiv.org/pdf/1905.11946.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/quickstart/image_recognition/tensorflow/efficientnet/inference/gpu/README.md) |
+| [MaskRCNN](https://arxiv.org/pdf/1703.06870.pdf)  | TensorFlow | Inference | Flex Series | [FP16](/quickstart/image_segmentation/tensorflow/maskrcnn/inference/gpu/README.md) | 
+| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | TensorFlow | Inference | Flex Series | [FP16 FP32](/quickstart/generative-ai/tensorflow/stable_diffusion/inference/gpu/README.md) |
+| [Stable Diffusion](https://arxiv.org/pdf/2112.10752.pdf)  | PyTorch | Inference | Flex Series | [FP16 FP32](/quickstart/generative-ai/pytorch/stable_diffusion/inference/gpu/README.md) |
+| [Yolo V5](https://arxiv.org/pdf/2108.11539.pdf)  | PyTorch | Inference | Flex Series | [FP16](/quickstart/object_detection/pytorch/yolov5/inference/gpu/README.md) | 
 | [ResNet 50v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Inference | Max Series | [Int8 FP32 FP16](/quickstart/image_recognition/tensorflow/resnet50v1_5/inference/gpu/README_Max_Series.md) |
 | [ResNet 50 v1.5](https://github.com/tensorflow/models/tree/v2.11.0/official/legacy/image_classification/resnet) | TensorFlow | Training | Max Series | [BFloat16](/quickstart/image_recognition/tensorflow/resnet50v1_5/training/gpu/README.md) |
 | [ResNet 50 v1.5](https://arxiv.org/pdf/1512.03385.pdf)    | PyTorch | Inference | Max Series |[Int8](/quickstart/image_recognition/pytorch/resnet50v1_5/inference/gpu/README_Max_Series.md) |

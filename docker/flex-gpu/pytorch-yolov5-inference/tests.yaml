@@ -1,0 +1,63 @@
+---
+170-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '32'
+    NUM_ITERATIONS: '500'
+    IMAGE_FILE: /dataset/yolov5/000000581918.jpg
+    GPU_TYPE: flex_170
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/yolov5/000000581918.jpg
+      dst: /dataset/yolov5/000000581918.jpg
+170-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '1'
+    NUM_ITERATIONS: '5000'
+    IMAGE_FILE: /dataset/yolov5/000000581918.jpg
+    GPU_TYPE: flex_170
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/yolov5/000000581918.jpg
+      dst: /dataset/yolov5/000000581918.jpg
+140-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    BATCH_SIZE: '32'
+    NUM_ITERATIONS: '500'
+    IMAGE_FILE: /dataset/yolov5/000000581918.jpg
+    GPU_TYPE: flex_140
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/yolov5/000000581918.jpg
+      dst: /dataset/yolov5/000000581918.jpg
+140-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-object-detection-pytorch-flex-gpu-yolov5-inference
+  cmd: quickstart/inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env:
+    BATCH_SIZE: '1'
+    NUM_ITERATIONS: '5000'
+    IMAGE_FILE: /dataset/yolov5/000000581918.jpg
+    GPU_TYPE: flex_140
+    PRECISION: fp16
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/yolov5/000000581918.jpg
+      dst: /dataset/yolov5/000000581918.jpg

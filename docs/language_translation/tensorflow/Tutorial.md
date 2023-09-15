@@ -33,7 +33,7 @@ Below are the set of run-time options tested empirically on Transformer-LT and r
 |KMP_BLOCKTIME| 1 |
 |OMP_NUM_THREADS |physical cores|
 
-Note 1: Refer to this [link](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) to learn more about the run time options.
+Note 1: Refer to this [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run time options.
 
 Note 2: You can remove `verbose` from `KMP_AFFINITY` setting to avoid verbose output at runtime.
 
@@ -123,7 +123,7 @@ Or, if you have your own model/data, ensure the folder structure following the s
 ### Run inference
 
 1. Pull the relevant Intel-optimized TensorFlow Docker image.
-   [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
+   [Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
 ```bash
 docker pull docker.io/intel/intel-optimized-tensorflow:latest
 ```
