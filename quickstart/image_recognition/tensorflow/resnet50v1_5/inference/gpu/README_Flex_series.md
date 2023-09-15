@@ -10,7 +10,12 @@ Intel® Extension for TensorFlow with Intel® Data Center GPU Flex Series.
 <!--- 20. GPU Setup -->
 ## Software Requirements:
 - Intel® Data Center GPU Flex Series
-- Follow [instructions](https://intel.github.io/intel-extension-for-tensorflow/latest/get_started.html) to install the latest ITEX version and other prerequisites.
+- Create and activate virtual environment.
+  ```bash
+  virtualenv -p python <virtualenv_name>
+  source <virtualenv_name>/bin/activate
+  ```
+- Follow [instructions](https://pypi.org/project/intel-extension-for-tensorflow/) to install the latest ITEX version and other prerequisites.
 
 - Intel® oneAPI Base Toolkit: Need to install components of Intel® oneAPI Base Toolkit
   - Intel® oneAPI DPC++ Compiler
@@ -51,11 +56,6 @@ Set the `DATASET_DIR` to point to the TF records directory when running ResNet50
 <!--- 50. Baremetal -->
 ## Run the model
 Install the following pre-requisites:
-* Create and activate virtual environment.
-  ```bash
-  virtualenv -p python <virtualenv_name>
-  source <virtualenv_name>/bin/activate
-  ```
 * Download the frozen graph model file, and set the FROZEN_GRAPH environment variable to point to where it was saved:
   ```bash
   wget https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb
@@ -71,10 +71,9 @@ TF records files will need to be set as the `DATASET_DIR` environment variable
 prior to running a [quickstart script](#quick-start-scripts).
 
 ### Run the model on Baremetal
-Navigate to the ResNet50 v1.5 inference directory, and set environment variables:
+Navigate to the Model Zoo directory, and set environment variables:
 ```
 cd models
-export DATASET_DIR=<path to the preprocessed imagenet dataset directory>
 export OUTPUT_DIR=<path where output log files will be written>
 export PRECISION=int8
 export FROZEN_GRAPH=<path to pretrained model file (*.pb)>

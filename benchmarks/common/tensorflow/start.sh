@@ -562,9 +562,6 @@ function bert_options() {
   if [[ -n "${OPTIMIZED_SOFTMAX}" && ${OPTIMIZED_SOFTMAX} != "" ]]; then
     CMD=" ${CMD} --optimized-softmax=${OPTIMIZED_SOFTMAX}"
   fi
-  if [[ -n "${AMP}" && ${AMP} != "" ]]; then
-    CMD=" ${CMD} --amp=${AMP}"
-  fi
 
   if [[ -n "${MPI_WORKERS_SYNC_GRADIENTS}" && ${MPI_WORKERS_SYNC_GRADIENTS} != "" ]]; then
     CMD=" ${CMD} --mpi_workers_sync_gradients=${MPI_WORKERS_SYNC_GRADIENTS}"
@@ -1418,6 +1415,38 @@ function transformer_mlperf() {
   fi
 }
 
+# GPT-J base model
+function gpt_j() {
+    if [ ${MODE} == "inference" ]; then
+      if [[ (${PRECISION} == "bfloat16") || ( ${PRECISION} == "fp32") || ( ${PRECISION} == "fp16") ]]; then
+        if [[ -z "${CHECKPOINT_DIRECTORY}" ]]; then
+          echo "Checkpoint directory not found. The script will download the model."
+        else
+          export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+          export HF_HOME=${CHECKPOINT_DIRECTORY}
+          export HUGGINGFACE_HUB_CACHE=${CHECKPOINT_DIRECTORY}
+          export TRANSFORMERS_CACHE=${CHECKPOINT_DIRECTORY}
+        fi
+        
+        if [ ${BENCHMARK_ONLY} == "True" ]; then
+          CMD=" ${CMD} --max_output_tokens=${MAX_OUTPUT_TOKENS}"
+          CMD=" ${CMD} --input_tokens=${INPUT_TOKENS}"
+          if [[ -z "${SKIP_ROWS}" ]]; then
+            SKIP_ROWS=0
+          fi
+          CMD=" ${CMD} --skip_rows=${SKIP_ROWS}"
+        fi
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME}."
+        exit 1
+      fi
+    else
+      echo "Only inference use-case is supported for now."
+      exit 1
+    fi
+}
+
 # Wavenet model
 function wavenet() {
   if [ ${PRECISION} == "fp32" ]; then
@@ -1563,6 +1592,189 @@ function distilbert_base() {
     fi
 }
 
+function gpt_j_6B() {
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "fp16" ] || 
+       [ ${PRECISION} == "bfloat16" ]; then
+
+      if [[ ${INSTALL_TRANSFORMER_FIX} != "True" ]]; then
+        echo "Information: Installing transformers from Hugging Face...!"
+        echo "python3 -m pip install git+https://github.com/intel-tensorflow/transformers@gptj_add_padding"
+        python3 -m pip install git+https://github.com/intel-tensorflow/transformers@gptj_add_padding
+      fi
+
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [[ ${MODE} == "training" ]]; then
+        if [[ -z "${TRAIN_OPTION}" ]]; then
+          echo "Error: Please specify a train option (GLUE, Lambada)"
+          exit 1
+        fi
+
+        CMD=" ${CMD} --train-option=${TRAIN_OPTION}"
+      fi
+
+      if [[ -z "${CACHE_DIR}" ]]; then
+          echo "Checkpoint directory not found. The script will download the model."
+      else
+          export HF_HOME=${CACHE_DIR}
+          export HUGGINGFACE_HUB_CACHE=${CACHE_DIR}
+          export TRANSFORMERS_CACHE=${CACHE_DIR}
+      fi
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [[ -n "${NUM_TRAIN_EPOCHS}" && ${NUM_TRAIN_EPOCHS} != "" ]]; then
+        CMD=" ${CMD} --num-train-epochs=${NUM_TRAIN_EPOCHS}"
+      fi
+
+      if [[ -n "${LEARNING_RATE}" && ${LEARNING_RATE} != "" ]]; then
+        CMD=" ${CMD} --learning-rate=${LEARNING_RATE}"
+      fi
+
+      if [[ -n "${NUM_TRAIN_STEPS}" && ${NUM_TRAIN_STEPS} != "" ]]; then
+        CMD=" ${CMD} --num-train-steps=${NUM_TRAIN_STEPS}"
+      fi
+
+      if [[ -n "${DO_TRAIN}" && ${DO_TRAIN} != "" ]]; then
+        CMD=" ${CMD} --do-train=${DO_TRAIN}"
+      fi
+
+      if [[ -n "${DO_EVAL}" && ${DO_EVAL} != "" ]]; then
+        CMD=" ${CMD} --do-eval=${DO_EVAL}"
+      fi
+
+      if [[ -n "${TASK_NAME}" && ${TASK_NAME} != "" ]]; then
+        CMD=" ${CMD} --task-name=${TASK_NAME}"
+      fi
+
+      if [[ -n "${CACHE_DIR}" && ${CACHE_DIR} != "" ]]; then
+        CMD=" ${CMD} --cache-dir=${CACHE_DIR}"
+      fi
+
+      if [[ -n "${PROFILE}" && ${PROFILE} != "" ]]; then
+        CMD=" ${CMD} --profile=${PROFILE}"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+
+      if [ -z $MAX_SEQ_LENGTH ]; then
+        CMD="${CMD} $(add_arg "--max-seq-length" ${MAX_SEQ_LENGTH})"
+      fi
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
+
+# vision-transformer base model
+function vision_transformer() {
+
+    if [ ${MODE} == "training" ]; then
+	CMD="${CMD} $(add_arg "--init-checkpoint" ${INIT_CHECKPOINT})"
+    fi
+	    
+    if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] ||
+       [ ${PRECISION} == "fp16" ]; then
+      export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+      CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+      CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+      if [ ${NUM_INTER_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+      fi
+
+      if [ ${NUM_INTRA_THREADS} != "None" ]; then
+        CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+      fi
+
+      if [ -z ${STEPS} ]; then
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+      fi
+      CMD=${CMD} run_model
+    else
+      echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+      exit 1
+    fi
+}
+
+# mmoe base model
+function mmoe() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+        CMD="${CMD} $(add_arg "--warmup-steps" ${WARMUP_STEPS})"
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+
+        if [ ${NUM_INTER_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+        fi
+
+        if [ ${NUM_INTRA_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        fi
+
+        if [ -z ${STEPS} ]; then
+          CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        fi
+
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    elif [ ${MODE} == "training" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+        CMD="${CMD} $(add_arg "--train-epochs" ${TRAIN_EPOCHS})"
+        CMD="${CMD} $(add_arg "--model_dir" ${CHECKPOINT_DIRECTORY})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
+# rgat base model
+function rgat() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        # Installing tensorflow_gnn from it's main branch
+        python3 -m pip install git+https://github.com/tensorflow/gnn.git@main
+
+        if [ ${NUM_INTER_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+        fi
+
+        if [ ${NUM_INTRA_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        fi
+
+        CMD="${CMD} $(add_arg "--graph-schema-path" ${GRAPH_SCHEMA_PATH})"
+        CMD="${CMD} $(add_arg "--pretrained-model" ${PRETRAINED_MODEL})"
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
 # Wide & Deep model
 function wide_deep() {
     if [ ${PRECISION} == "fp32" ]; then
@@ -1643,6 +1855,29 @@ function wide_deep_large_ds() {
     fi
 }
 
+function graphsage() {
+    if [ ${MODE} == "inference" ]; then
+      if [ ${PRECISION} == "fp32" ] || [ ${PRECISION} == "bfloat16" ] || [ ${PRECISION} == "fp16" ]; then
+        export PYTHONPATH=${PYTHONPATH}:${MOUNT_EXTERNAL_MODELS_SOURCE}
+
+        if [ ${NUM_INTER_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-inter-threads" ${NUM_INTER_THREADS})"
+        fi
+
+        if [ ${NUM_INTRA_THREADS} != "None" ]; then
+          CMD="${CMD} $(add_arg "--num-intra-threads" ${NUM_INTRA_THREADS})"
+        fi
+
+        CMD="${CMD} $(add_arg "--pretrained-model" ${PRETRAINED_MODEL})"
+        CMD="${CMD} $(add_arg "--steps" ${STEPS})"
+        CMD=${CMD} run_model
+      else
+        echo "PRECISION=${PRECISION} not supported for ${MODEL_NAME} in this repo."
+        exit 1
+      fi
+    fi
+}
+
 LOGFILE=${OUTPUT_DIR}/${LOG_FILENAME}
 
 MODEL_NAME=$(echo ${MODEL_NAME} | tr 'A-Z' 'a-z')
@@ -1707,7 +1942,19 @@ elif [ ${MODEL_NAME} == "bert_large" ]; then
 elif [ ${MODEL_NAME} == "dien" ]; then
   dien
 elif [ ${MODEL_NAME} == "distilbert_base" ]; then
-  distilbert_base  
+  distilbert_base 
+elif [ ${MODEL_NAME} == "vision_transformer" ]; then
+  vision_transformer 
+elif [ ${MODEL_NAME} == "gpt_j_6b" ]; then
+  gpt_j_6B
+elif [ ${MODEL_NAME} == "mmoe" ]; then
+  mmoe
+elif [ ${MODEL_NAME} == "graphsage" ]; then
+  graphsage
+elif [ ${MODEL_NAME} == "gpt_j" ]; then
+  gpt_j
+elif [ ${MODEL_NAME} == "rgat" ]; then
+  rgat
 else
   echo "Unsupported model: ${MODEL_NAME}"
   exit 1

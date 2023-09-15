@@ -28,8 +28,8 @@ Includes the Python3 interpreter, Conda, the packages from Intel Python3 Core, a
 - [DockerHub URL](https://hub.docker.com/r/intelpython/intelpython3_full)
 - [Github repo](https://www.github.com/IntelPython/container-images)
 - [README URL](https://github.com/IntelPython/container-images/blob/master/configs/intelpython3_full/README.md)
-- [Release Notes URL](https://software.intel.com/content/www/us/en/develop/articles/intel-distribution-for-python-release-notes.html)
-- [Get Started URL](https://software.intel.com/content/www/us/en/develop/tools/distribution-for-python/get-started.html)
+- [Release Notes URL](https://www.intel.com/content/www/us/en/developer/articles/release-notes/distribution-for-python-release-notes.html)
+- [Get Started URL](https://www.intel.com/content/www/us/en/developer/tools/oneapi/distribution-for-python.html#gs.34b237)
 
 ## License Agreement
 

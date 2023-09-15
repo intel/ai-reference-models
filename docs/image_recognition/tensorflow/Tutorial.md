@@ -76,7 +76,7 @@ Below are the set of run-time options recommended by Intel on ResNet50, ResNet10
 </table>
 <br>
 
-*Note: Refer to the [link](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) here to learn more about the run time options.*
+*Note: Refer to the [link](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) here to learn more about the run time options.*
 
 Run the following commands to get your processor information
 
@@ -144,7 +144,7 @@ You can refer to [ImageNet](/datasets/imagenet) or [Coco Dataset](http://cocodat
 ### Run inference
 
 1. Pull the relevant Intel-optimized TensorFlow Docker image. We'll be running the pretrained model to infer on Docker container.
-[Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
+[Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
 ```bash
 docker pull intel/intel-optimized-tensorflow:latest
 ```

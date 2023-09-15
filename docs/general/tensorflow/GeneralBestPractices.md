@@ -3,9 +3,9 @@
 ## Introduction
 
 [TensorFlow*](https://www.tensorflow.org/) is one of the most popular deep learning frameworks for large-scale machine learning (ML) and deep learning (DL). 
-Since 2016, Intel and Google engineers have been working together to [optimize TensorFlow performance](https://software.intel.com/en-us/ai-academy/frameworks/tensorflow) for deep learning training and inference on Intel® Xeon® processors using the [Intel® oneAPI Deep Neural Network Library (Intel® oneDNN)](https://github.com/oneapi-src/oneDNN), formerly called Intel MKL-DNN.
+Since 2016, Intel and Google engineers have been working together to [optimize TensorFlow performance](https://www.intel.com/content/www/us/en/developer/tools/frameworks/overview.html#gs.34b2dr) for deep learning training and inference on Intel® Xeon® processors using the [Intel® oneAPI Deep Neural Network Library (Intel® oneDNN)](https://github.com/oneapi-src/oneDNN), formerly called Intel MKL-DNN.
 The Intel oneDNN primitives library includes convolution, normalization, activation, and other primitives. 
-Please see the [install guide](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) for how to set up Intel® Optimization for TensorFlow on your system for accelerated TensorFlow execution on CPU platforms with no code changes.
+Please see the [install guide](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) for how to set up Intel® Optimization for TensorFlow on your system for accelerated TensorFlow execution on CPU platforms with no code changes.
 
 ## Performance Metrics
 
@@ -19,7 +19,7 @@ However, if you want to prioritize one metric over the other or further tune Ten
 
 ## TensorFlow Configuration Settings
 
-These are the parameters you need to set when running TensorFlow with Intel oneDNN. A more complete description of these settings can be found in the [performance considerations article](https://software.intel.com/en-us/articles/maximize-TensorFlow-performance-on-cpu-considerations-and-recommendations-for-inference).  
+These are the parameters you need to set when running TensorFlow with Intel oneDNN. A more complete description of these settings can be found in the [performance considerations article](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html).  
 
 ### TensorFlow Runtime Settings
 
@@ -27,7 +27,7 @@ These are the parameters you need to set when running TensorFlow with Intel oneD
 
 * ***intra_op_parallelism_threads*** is the number of threads in each threadpool to use for a TensorFlow session. This should be set to the number of physical cores  may be different from the number of logical cores or CPUs and can be found in Linux with the `lscpu` command.
 
-* ***Data Format*** specifies the way data is stored and accesed in memory. We recommend using channels-first (NCHW) format. Please see the [data format section of performance doc](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference#inpage-nav-2-2) for more information.  
+* ***Data Format*** specifies the way data is stored and accesed in memory. We recommend using channels-first (NCHW) format. Please see the [data format section of performance doc](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html#inpage-nav-2-2) for more information.  
 
 ### Environment Variables
 

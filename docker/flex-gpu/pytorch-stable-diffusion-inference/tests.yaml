@@ -1,0 +1,18 @@
+fp32-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-flex-gpu-stable-diffusion-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp32
+    BATCH_SIZE: '1'
+    OUTPUT_DIR: /tmp
+fp16-online-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-generative-ai-pytorch-flex-gpu-stable-diffusion-inference
+  cmd: quickstart/online_inference.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: fp16
+    BATCH_SIZE: '1'
+    OUTPUT_DIR: /tmp

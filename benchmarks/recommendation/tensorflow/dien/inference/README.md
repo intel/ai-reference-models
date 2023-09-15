@@ -105,6 +105,3 @@ As an example, if the pretrained model path on Windows is `D:\user\dien_fp32_sta
 
 * To run more advanced use cases, see the instructions [here](Advanced.md)
   for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [DevCatalog](http://software.intel.com/containers)
-  workload container
-

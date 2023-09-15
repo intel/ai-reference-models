@@ -1,26 +1,17 @@
 # Install Intel® Extension for PyTorch
-pip install intel-extension-for-pytorch==2.0.0
+Prepare the environment, you may create a Python virtual enviromment `virtualenv` or `conda` prior to installing dependencies.
 
-## The following components are required by some PyTorch workloads. Only build them if indicated in the documentation for that workload. 
+    # Install Intel® Extension for PyTorch
+    pip install intel-extension-for-pytorch
+    # Install torch,torchvision
+    python -m pip install torch torchvision
 
-### Prepare the environment:
+## The following components are required by some PyTorch workloads. Only build them if indicated in the documentation for that workload.
+
+    # Requirements:
     gcc >= 5
     Cmake >= 3.19.6
-    wget https://repo.continuum.io/miniconda/Miniconda3-py38_4.12.0-Linux-x86_64.sh -O miniconda.sh
-    chmod +x miniconda.sh
-    ./miniconda.sh -b -p ~/miniconda
-    ./miniconda/bin/conda create -yn pytorch
-    export PATH=~/miniconda/bin:$PATH
-    source ./miniconda/bin/activate pytorch
-    pip install sklearn onnx
-    pip install lark-parser hypothesis
-    conda install numpy ninja pyyaml mkl mkl-include setuptools cmake cffi typing_extensions future six requests dataclasses psutil
-    export CMAKE_PREFIX_PATH=${CONDA_PREFIX:-"$(dirname $(which conda))/../"}
-    export work_space=/home/sdp  (you can get the summary.log in this path where the models performance and accuracy write) 
-    
-    # Install torch,torchvision
-    python -m pip install torch==2.0.0 torchvision==0.15.1
-    
+
 ### Install jemalloc
     Install jemalloc either using conda or from source
 
@@ -45,11 +36,6 @@ pip install intel-extension-for-pytorch==2.0.0
     make
     make install
 
-### Build vision
-    cd ..
-    git clone https://github.com/pytorch/vision
-    cd vision
-    python setup.py install
 
 ### Build torch-ccl 
     cd ..
@@ -58,4 +44,3 @@ pip install intel-extension-for-pytorch==2.0.0
     git submodule sync 
     git submodule update --init --recursive
     python setup.py install 
-

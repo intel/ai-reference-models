@@ -208,6 +208,6 @@ As an example, if the dataset location on Windows is `D:\user\coco_dataset`, con
 ## Additional Resources
 
 * To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [Int8](int8/Advanced.md) [BFloat16](bfloat16/Advanced.md) for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
+* To run the model using docker, please see the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html)
   workload container:<br />
-  [https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/ssd-resnet34-fp32-inference-tensorflow-container.html).
+  [https://www.intel.com/content/www/us/en/developer/articles/containers/ssd-resnet34-fp32-inference-tensorflow-container.html](https://www.intel.com/content/www/us/en/developer/articles/containers/ssd-resnet34-fp32-inference-tensorflow-container.html).

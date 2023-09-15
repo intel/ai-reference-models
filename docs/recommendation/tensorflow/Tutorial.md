@@ -43,7 +43,7 @@ Note that while tuning these important run-time parameters, do not over/under us
 |KMP_BLOCKTIME| 1 |
 |OMP_NUM_THREADS | 1 to physical cores |
 
-*Note: Refer to [this article](https://software.intel.com/en-us/articles/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference) to learn more about the run time options.*
+*Note: Refer to [this article](https://www.intel.com/content/www/us/en/developer/articles/technical/maximize-tensorflow-performance-on-cpu-considerations-and-recommendations-for-inference.html) to learn more about the run time options.*
 
 Intel's data science team trained and published a Wide and Deep model on Kaggle's Display Advertising Challenge dataset, and has empirically tested and identified the best run-time settings
 to run inference, which is illustrated below in the hands-on-tutorial section.
@@ -147,7 +147,7 @@ Follow the instructions below to download and prepare the dataset.
 ### Run inference
 
 1. Pull the relevant Intel Optimizations for TensorFlow Docker image. We'll be running the pretrained model to infer in a Docker container.
-   [Click here](https://software.intel.com/en-us/articles/intel-optimization-for-tensorflow-installation-guide) to find  all the available Docker images.
+   [Click here](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html) to find  all the available Docker images.
 ```bash
 docker pull intel/intel-optimized-tensorflow:latest
 ```

@@ -32,7 +32,7 @@ There are two different analysis type.
 
 > NOTE: No action required if users use Intel DevCloud as their environment or the container for performance comparison with Jupyter Notebooks. 
   - Please refer to [Intel oneAPI DevCloud](https://intelsoftwaresites.secure.force.com/devcloud/oneapi) for Intel DevCloud.
-  - Please refer to [Intel® oneContainer Portal](https://software.intel.com/content/www/us/en/develop/tools/containers.html) for the docker container.
+  - Please refer to [Intel® oneContainer Portal](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html) for the docker container.
  1. **Python3 Environment**
 
     Choose one of:

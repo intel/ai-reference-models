@@ -60,5 +60,5 @@ export OUTPUT_DIR=<path to the directory where log files will be written>
 ## Additional Resources
 * To run more advanced use cases, see the instructions [here](/benchmarks/recommendation/tensorflow/dien/inference/Advanced.md)
   for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [DevCatalog](http://software.intel.com/containers)
+* To run the model using docker, please see the [DevCatalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html)
   workload container

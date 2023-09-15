@@ -208,7 +208,7 @@ As an example, if the dataset location on Windows is `D:\user\coco_dataset\val20
 
 * To run more advanced use cases, see the instructions [here](Advanced.md)
   for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
+* To run the model using docker, please see the [oneContainer](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html)
   workload container:<br />
-  [https://software.intel.com/content/www/us/en/develop/articles/containers/rfcn-int8-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/rfcn-int8-inference-tensorflow-container.html).
+  [https://www.intel.com/content/www/us/en/developer/articles/containers/rfcn-int8-inference-tensorflow-container.html](https://www.intel.com/content/www/us/en/developer/articles/containers/rfcn-int8-inference-tensorflow-container.html).
 

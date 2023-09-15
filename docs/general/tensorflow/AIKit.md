@@ -1,7 +1,7 @@
 # Using the Model Zoo in the Intel® oneAPI AI Analytics Toolkit
 
 The Model Zoo is bundled as part of the
-[Intel® oneAPI AI Analytics Toolkit](https://software.intel.com/content/www/us/en/develop/tools/oneapi/ai-analytics-toolkit.html) (AI Kit).
+[Intel® oneAPI AI Analytics Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html) (AI Kit).
 Follow the instructions below to get your environment setup with AI Kit to run
 TensorFlow models.
 
@@ -9,7 +9,7 @@ TensorFlow models.
 
 Use the link below for instructions on how to install AI Kit or run the AI Kit
 docker container:
-[https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html](https://software.intel.com/content/www/us/en/develop/documentation/get-started-with-ai-linux/top.html)
+[https://www.intel.com/content/www/us/en/docs/oneapi-ai-analytics-toolkit/get-started-guide-linux/2023-1/overview.html](https://www.intel.com/content/www/us/en/docs/oneapi-ai-analytics-toolkit/get-started-guide-linux/2023-1/overview.html)
 
 ## Activate a Conda Environment
 

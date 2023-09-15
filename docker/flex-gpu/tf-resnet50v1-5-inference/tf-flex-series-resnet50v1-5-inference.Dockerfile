@@ -27,11 +27,7 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 WORKDIR /workspace/tf-flex-series-resnet50v1-5-inference
 
 RUN apt-get update && \
-    apt-get install -y parallel
-RUN apt-get install -y pciutils
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends --fix-missing numactl
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
 
 ARG MODEL_URL
 

@@ -49,7 +49,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-client (only required for multi-instance)
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
-        <li>horovod==0.21.0 (only required for multi-instance)
+        <li>horovod==0.27.0 (only required for multi-instance)
         <li>Activate the tensorflow conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
@@ -66,7 +66,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-client (only required for multi-instance)
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
-        <li>horovod==0.21.0 (only required for multi-instance)
+        <li>horovod==0.27.0 (only required for multi-instance)
         <li>A clone of the Model Zoo repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
@@ -92,6 +92,6 @@ export BATCH_SIZE=<customized batch size value>
 ## Additional Resources
 
 * To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [BFloat16](bfloat16/Advanced.md) [FP16](fp16/Advanced.md) for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
+* To run the model using docker, please see the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html)
   workload container:<br />
-  [https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50v1-5-fp32-training-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/resnet50v1-5-fp32-training-tensorflow-container.html).
+  [https://www.intel.com/content/www/us/en/developer/articles/containers/resnet50v1-5-fp32-training-tensorflow-container.html](https://www.intel.com/content/www/us/en/developer/articles/containers/resnet50v1-5-fp32-training-tensorflow-container.html).

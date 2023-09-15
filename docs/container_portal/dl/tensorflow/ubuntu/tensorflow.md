@@ -25,7 +25,7 @@ Includes the Python3 interpreter and the following wheel(s) and librarie(s) are 
 - [Github repo](https://github.com/Intel-tensorflow/tensorflow/tree/master)
 - [README URL](https://github.com/Intel-tensorflow/tensorflow/blob/master/README.md)
 - [Release Notes URL](https://github.com/Intel-tensorflow/tensorflow/releases)
-- [Get Started URL](https://software.intel.com/content/www/us/en/develop/articles/intel-optimization-for-tensorflow-installation-guide.html)
+- [Get Started URL](https://www.intel.com/content/www/us/en/developer/articles/guide/optimization-for-tensorflow-installation-guide.html)
 
 ## License Agreement
 
