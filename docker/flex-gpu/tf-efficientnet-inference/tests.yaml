@@ -1,0 +1,124 @@
+b0-flex170-bs64-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '64'
+    MODEL_NAME: EfficientNetB0
+    PRECISION: fp16
+    GPU_TYPE: flex_170
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b0-flex170-bs128-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '128'
+    MODEL_NAME: EfficientNetB0
+    PRECISION: fp16
+    GPU_TYPE: flex_170
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b3-flex170-bs64-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '64'
+    MODEL_NAME: EfficientNetB3
+    PRECISION: fp16
+    GPU_TYPE: flex_170
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b3-flex170-bs128-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  env: 
+    BATCH_SIZE: '128'
+    MODEL_NAME: EfficientNetB3
+    PRECISION: fp16
+    GPU_TYPE: flex_170
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b0-flex140-bs64-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env: 
+    BATCH_SIZE: '64'
+    MODEL_NAME: EfficientNetB0
+    PRECISION: fp16
+    GPU_TYPE: flex_140
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b0-flex140-bs128-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env: 
+    BATCH_SIZE: '128'
+    MODEL_NAME: EfficientNetB0
+    PRECISION: fp16
+    GPU_TYPE: flex_140
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b3-flex140-bs64-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env: 
+    BATCH_SIZE: '64'
+    MODEL_NAME: EfficientNetB3
+    PRECISION: fp16
+    GPU_TYPE: flex_140
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+b3-flex140-bs128-batch-inference:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-flex-gpu-efficientnet-inference
+  cmd: quickstart/batch_inference.sh
+  ipc: host
+  device: /dev/dri
+  cap_add: SYS_NICE
+  env: 
+    BATCH_SIZE: '128'
+    MODEL_NAME: EfficientNetB3
+    PRECISION: fp16
+    GPU_TYPE: flex_140
+    IMAGE_FILE: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+    OUTPUT_DIR: /tmp
+  volumes:
+    - src: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG
+      dst: /dataset/efficient-net/ILSVRC2012_val_00033350.JPEG

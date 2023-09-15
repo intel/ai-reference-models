@@ -114,7 +114,3 @@ export PRETRAINED_MODEL=<path to the extracted pretrained model dir>
 
 * To run more advanced use cases, see the instructions [here](Advanced.md)
   for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [oneContainer](http://software.intel.com/containers)
-  workload container:<br />
-  [https://software.intel.com/content/www/us/en/develop/articles/containers/faster-rcnn-fp32-inference-tensorflow-container.html](https://software.intel.com/content/www/us/en/develop/articles/containers/faster-rcnn-fp32-inference-tensorflow-container.html).
-

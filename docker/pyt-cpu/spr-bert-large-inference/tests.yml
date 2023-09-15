@@ -1,0 +1,214 @@
+---
+pytorch-spr-bert-large-inference:
+  image_name: intel/language-modeling:pytorch-spr-bert-large-inference
+  tests:
+  - test_name: BERT Large FP32 Online inference
+    env_vars:
+      PRECISION: fp32
+      SCRIPT: quickstart/run_multi_instance_realtime.sh
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/fp32/real_time
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/fp32/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large FP32 Throughput inference
+    env_vars:
+      PRECISION: fp32
+      SCRIPT: quickstart/run_multi_instance_throughput.sh
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/fp32/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/fp32/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large FP32 Accuracy
+    env_vars:
+      PRECISION: fp32
+      SCRIPT: quickstart/run_accuracy.sh
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/fp32/accuracy
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/fp32/accuracy
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large BFloat16 Online inference
+    env_vars:
+      PRECISION: bf16
+      SCRIPT: quickstart/run_multi_instance_realtime.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/bf16/real_time
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/bf16/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large BFloat16 Throughput inference
+    env_vars:
+      PRECISION: bf16
+      SCRIPT: quickstart/run_multi_instance_throughput.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/bf16/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/bf16/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large BFloat16 Accuracy
+    env_vars:
+      PRECISION: bf16
+      SCRIPT: quickstart/run_accuracy.sh
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/bf16/accuracy
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/bf16/accuracy
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large INT8 Online inference
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/run_multi_instance_realtime.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/int8/real_time
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/int8/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large INT8 Throughput inference
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/run_multi_instance_throughput.sh
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/int8/throughput
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/int8/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large INT8 Accuracy
+    env_vars:
+      PRECISION: int8
+      SCRIPT: quickstart/run_accuracy.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/int8/accuracy
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/int8/accuracy
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large avx-int8 Online inference
+    env_vars:
+      PRECISION: avx-int8
+      SCRIPT: quickstart/run_multi_instance_realtime.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-int8/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-int8/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large avx-int8 Throughput inference
+    env_vars:
+      PRECISION: avx-int8
+      SCRIPT: quickstart/run_multi_instance_throughput.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-int8/throughput
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-int8/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large avx-int8 Accuracy
+    env_vars:
+      PRECISION: avx-int8
+      SCRIPT: quickstart/run_accuracy.sh
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-int8/accuracy
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS: --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-int8/accuracy
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large avx-fp32 Online inference
+    env_vars:
+      PRECISION: avx-fp32
+      SCRIPT: quickstart/run_multi_instance_realtime.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-fp32/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-fp32/real_time
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large avx-fp32 Throughput inference
+    env_vars:
+      PRECISION: avx-fp32
+      SCRIPT: quickstart/run_multi_instance_throughput.sh
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-fp32/throughput
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS:  --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-fp32/throughput
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model
+  - test_name: BERT Large avx-fp32 Accuracy
+    env_vars:
+      PRECISION: avx-fp32
+      SCRIPT: quickstart/run_accuracy.sh
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-fp32/accuracy
+      INT8_CONFIG: /workspace/pytorch-spr-bert-large-inference/quickstart/configure.json
+      EVAL_SCRIPT: /workspace/pytorch-spr-bert-large-inference/quickstart/transformers/examples/legacy/question-answering/run_squad.py
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      FINETUNED_MODEL: /localdisk/sramakr1/bert_squad_model
+      DOCKER_ARGS: --privileged --init --shm-size 8G -w /workspace/pytorch-spr-bert-large-inference
+    volumes:
+      OUTPUT_DIR: /output/pytorch-spr-bert-large-inference/avx-fp32/accuracy
+      EVAL_DATA_FILE: /localdisk/sramakr1/eval_data_file/dev-v1.1.json
+      PRETRAINED_MODEL: /localdisk/sramakr1/bert_squad_model

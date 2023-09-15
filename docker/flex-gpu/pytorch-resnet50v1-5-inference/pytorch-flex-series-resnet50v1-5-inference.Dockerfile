@@ -27,8 +27,7 @@ FROM ${BASE_IMAGE}:${BASE_TAG}
 WORKDIR /workspace/pytorch-flex-series-resnet50v1-5-inference
 
 RUN apt-get update && \
-    apt-get install -y parallel
-RUN apt-get install -y pciutils
+    apt-get install -y --no-install-recommends --fix-missing parallel pciutils numactl
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends --fix-missing numactl

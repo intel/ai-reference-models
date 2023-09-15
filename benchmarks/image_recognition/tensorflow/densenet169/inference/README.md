@@ -123,7 +123,3 @@ As an example, if the dataset location on Windows is `D:\user\ImageNet`, convert
 ## Additional Resources
 
 * To run more advanced use cases, see the instructions for the available precisions [FP32](fp32/Advanced.md) [<int8 precision>](<int8 advanced readme link>) [<bfloat16 precision>](<bfloat16 advanced readme link>) for calling the `launch_benchmark.py` script directly.
-* To run the model using docker, please see the [Intel® Developer Catalog](http://software.intel.com/containers)
-  workload container:<br />
-  [https://www.intel.com/content/www/us/en/developer/articles/machine-learning-model/densenet169-fp32-inference-tensorflow-model.html](https://www.intel.com/content/www/us/en/developer/articles/machine-learning-model/densenet169-fp32-inference-tensorflow-model.html).
-
