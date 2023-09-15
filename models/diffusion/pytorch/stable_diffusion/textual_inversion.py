@@ -318,14 +318,12 @@ def parse_args():
         ),
     )
     parser.add_argument(
-        "--mixed_precision",
+        "--precision",
         type=str,
-        default="no",
-        choices=["no", "fp16", "bf16"],
+        default="fp32",
+        choices=["fp32", "bf32", "bf16", "fp16"],
         help=(
-            "Whether to use mixed precision. Choose"
-            "between fp16 and bf16 (bfloat16). Bf16 requires PyTorch >= 1.10."
-            "and an Nvidia Ampere GPU."
+            "precision, only support fp32, bf32, bf16, fp16."
         ),
     )
     parser.add_argument(
@@ -570,9 +568,28 @@ def main():
 
     accelerator_project_config = ProjectConfiguration(total_limit=args.checkpoints_total_limit)
 
+    if args.precision == "fp32":
+        print("Running fp32 ...")
+        weight_dtype = torch.float32
+        mixed_precision = "no"
+    elif args.precision == "bf32":
+        print("Running bf32 ...")
+        weight_dtype = torch.float32
+        mixed_precision = "no"
+    elif args.precision == "bf16":
+        print("Running bf16 ...")
+        weight_dtype = torch.bfloat16
+        mixed_precision = "bf16"
+    elif args.precision == "fp16":
+        print("Running fp16 ...")
+        weight_dtype = torch.float16
+        mixed_precision = "fp16"
+    else:
+        raise ValueError("--precision needs to be the following: fp32, bf32, bf16, fp16.")
+
     accelerator = Accelerator(
         gradient_accumulation_steps=args.gradient_accumulation_steps,
-        mixed_precision=args.mixed_precision,
+        mixed_precision=mixed_precision,
         log_with=args.report_to,
         logging_dir=logging_dir,
         project_config=accelerator_project_config,
@@ -753,26 +770,19 @@ def main():
         text_encoder, optimizer, train_dataloader, lr_scheduler
     )
 
-    # For mixed precision training we cast the unet and vae weights to half-precision
-    # as these models are only used for inference, keeping weights in full precision is not required.
-    weight_dtype = torch.float32
-    if accelerator.mixed_precision == "fp16":
-        weight_dtype = torch.float16
-        precision = "fp16"
-    elif accelerator.mixed_precision == "bf16":
-        weight_dtype = torch.bfloat16
-        precision = "bf16"
-    else:
-        precision = "fp32"
-
     # Move vae and unet to device and cast to weight_dtype
     unet.to(accelerator.device, dtype=weight_dtype)
     vae.to(accelerator.device, dtype=weight_dtype)
 
     if args.ipex:
         import intel_extension_for_pytorch as ipex
-        unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype)
-        vae = ipex.optimize(vae, dtype=weight_dtype)
+        if args.precision == "bf32":
+            ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
+            unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype, auto_kernel_selection=True)
+            vae = ipex.optimize(vae, dtype=weight_dtype, auto_kernel_selection=True)
+        else:
+            unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype)
+            vae = ipex.optimize(vae, dtype=weight_dtype)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(train_dataloader) / args.gradient_accumulation_steps)
@@ -972,7 +982,7 @@ def main():
         pipe = StableDiffusionPipeline.from_pretrained(args.output_dir)
         prompt = "A <cat-toy> backpack"
         image = pipe(prompt, num_inference_steps=50, guidance_scale=7.5).images[0]
-        filename = "cat-backpack_" + precision + ".png"
+        filename = "cat-backpack_" + args.precision + ".png"
         image.save(filename)
 
 

@@ -30,16 +30,20 @@ mkdir -p ${OUTPUT_DIR}
 
 ARGS=""
 if [ "$1" == "bf16" ]; then
-    ARGS="$ARGS --mixed_precision=bf16"
+    ARGS="$ARGS --precision=bf16"
     echo "### running bf16 datatype"
 elif [ "$1" == "fp16" ]; then
-    ARGS="$ARGS --mixed_precision=fp16"
+    ARGS="$ARGS --precision=fp16"
     echo "### running fp16 datatype"
+elif [ "$1" == "bf32" ]; then
+    ARGS="$ARGS --precision=bf32"
+    echo "### running bf32 datatype"
 elif [ "$1" == "fp32" ]; then
+    ARGS="$ARGS --precision=fp32"
     echo "### running fp32 datatype"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: fp32, fp16, bf16"
+    echo "Supported precisions are: fp32, bf32, fp16, bf16"
     exit 1
 fi
 
