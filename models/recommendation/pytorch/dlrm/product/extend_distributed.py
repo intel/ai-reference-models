@@ -292,7 +292,7 @@ class All2All_Req(Function):
 
     @staticmethod
     def backward(ctx, *grad_output):
-        dist.barrier()
+        # dist.barrier()
         global myreq
         #print("All2All_Req:backward")
         a2ai = ctx.a2ai

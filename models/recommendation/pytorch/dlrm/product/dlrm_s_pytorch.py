@@ -748,7 +748,7 @@ class DLRM_Net(nn.Module):
         ly_dense =  self.apply_emb(dlrm.emb_dense, lS_o_dense, lS_i_dense)
         # bottom mlp
         x = self.apply_mlp(dense_x, self.bot_l)
-        ext_dist.barrier()
+        # ext_dist.barrier()
         ly_sparse = a2a_req.wait()
         _ly = []
         vector_lenght = 128
@@ -774,7 +774,7 @@ class DLRM_Net(nn.Module):
         if is_train:
             with record_function("dist_data_loader"):
                 start = time_wrap()
-                ext_dist.barrier()
+                # ext_dist.barrier()
                 load_data(buffer_num, args.bf16)
                 #get global index for sparse embedding
                 (X_next, lS_o_next, lS_i_next, T_next, W_next, CBPP_next) = data_buffer[0]
@@ -791,7 +791,7 @@ class DLRM_Net(nn.Module):
                 batch_size_next = X_next.size()[0]
                 g_i_sparse_next = [lS_i_sparse_next[:, i * batch_size_next:(i + 1) * batch_size_next].reshape(-1) for i in range(len(self.local_ln_emb_sparse))]
                 data_buffer[0] = (X_next, lS_o_next, [lS_i_dense_next, g_i_sparse_next], T_next, W_next, CBPP_next)
-                ext_dist.barrier()
+                # ext_dist.barrier()
                 self.load_data_time += time_wrap() - start
         return z
  
