@@ -124,8 +124,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
-    --nprocs-per-node ${SOCKETS} \
-    --ncores-per-instance ${CORES_PER_INSTANCE} \
     --logical-cores-for-ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/diffusion/pytorch/stable_diffusion/inference.py \
     --dataset_path=${DATASET_DIR} \

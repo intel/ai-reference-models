@@ -116,7 +116,7 @@ export PSM3_RV_MR_CACHE_SIZE=8192
 export FI_PROVIDER_PATH=/usr/lib64/libfabric
 
 
-rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_*
+rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}*
 
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
@@ -126,8 +126,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
-    --nprocs_per_node ${SOCKETS} \
-    --ncores_per_instance ${CORES_PER_INSTANCE} \
     --logical_cores_for_ccl --ccl_worker_count 8 \
     ${MODEL_DIR}/models/image_recognition/pytorch/common/train.py \
     $ARGS \
