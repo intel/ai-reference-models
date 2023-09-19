@@ -133,7 +133,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --distributed \
     --nnodes ${NNODES} \
     --hostfile ${HOSTFILE} \
-    --nproc_per_node $SOCKETS \
     --log_path=${OUTPUT_DIR} \
     --log_file_prefix="./distributed_throughput_log_${precision}" \
     ${MODEL_DIR}/models/language_modeling/pytorch/rnnt/training/cpu/train.py \
