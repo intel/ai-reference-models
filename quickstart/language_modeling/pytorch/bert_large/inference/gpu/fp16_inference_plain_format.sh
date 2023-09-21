@@ -18,14 +18,6 @@
 MODEL_DIR=${MODEL_DIR-$PWD}
 BATCH_SIZE=${BATCH_SIZE-64}
 
-#source ${MODEL_DIR}/quickstart/setvars.sh
-
-if [[ -z "${Tile}" ]]; then
-    Tile=${Tile-1}
-else
-    Tile=${Tile}
-fi
-
 if [[ -z "${DATASET_DIR}" ]]; then
   echo "The required environment variable DATASET_DIR has not been set"
   exit 1
@@ -51,70 +43,49 @@ if [[ -z $OUTPUT_DIR ]]; then
   exit 1
 fi
 
+if [[ -z $PRECISION ]]; then
+  echo "The required environment variable PRECISION has not been set"
+  exit 1
+fi
+
+if [[ -z $NUM_OAM ]]; then
+  echo "The required environment variable NUM_OAM has not been set."
+  exit 1
+fi
 # Create the output directory, if it doesn't already exist
 mkdir -p $OUTPUT_DIR
 
-bertsquad_log_analysis() {
-    # $1 : src raw log
-    # $2 : dst format log
-    # $3 : inference or training
-    # $4 : bs
+if [[ ${PRECISION} != "FP16" ]]; then
+  echo "BERT Large Inference currently supports FP16 precision"
+  exit 1
+fi
 
-    if [ -f $2 ]; then
-        rm $2
-    fi
-
-    bs=$4
-
-    if [ "inference" == "$3" ]; then
-        echo -e 'Batch Size: ' $bs >$2
-        cat $1 | grep latency | tail -n6 | head -n4 |
-            awk -v bs=${bs} -F ' ' '{sum+=$8} END{printf "Performance Benchmark Time: %.3f sec, Throughput: %.2f seq/sec\n", sum/4, bs*4/sum}' >>$2
-        grep "\"f1\": " $1 | awk -F ' ' '{printf "Accuracy: f1 %.4f\n", $NF}' >>$2
-    elif [ "training" == "$3" ]; then
-        # only for fine tune (accuracy only)
-        echo -e 'Batch Size: ' $bs >$2
-        echo -e 'Performance Benchmark Time: N/A' >>$2
-        grep "\"f1\": " $1 | awk -F ' ' '{printf "Accuracy: f1 %.4f\n", $NF}' >>$2
-    else
-        echo -e 'Invalid input! Only inference or training are supported.'
-        exit 0
-    fi
-}
-
-if [[ ${Tile} == "1" ]]; then
-  echo "bertsquad fp16 inference plain nchw"
+if [[ ${NUM_OAM} == "4" ]]; then
+  echo "bertsquad fp16 inference plain nchw on ${NUM_OAM} OAM modules"
+  NUM_TILES_PER_GPU=2
   cd ${MODEL_DIR}/models/language_modeling/pytorch/bert_large/inference/gpu/
-  bash cmd_infer.sh \
-      -m bert_large \
-      -d xpu \
-      -b $BATCH_SIZE \
-      -t FP16 \
-      -o None 2>&1 | tee ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0_raw.log
+  for i in $( eval echo {0..$((NUM_OAM-1))} )
+    do
+        for j in $( eval echo {0..$((NUM_TILES_PER_GPU-1))} )
+            do
+              str+=("ZE_AFFINITY_MASK="${i}"."${j}" bash cmd_infer.sh \
+                    -m bert_large \
+                    -d xpu \
+                    -b $BATCH_SIZE \
+                    -t ${PRECISION} \
+                    -o None 2>&1 | tee ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_c${i}_t${j}_raw.log & ")
+
+            done
+      done
+        
+  #     bertsquad_log_analysis ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0_raw.log ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0.log inference ${BATCH_SIZE}
+  # bertsquad_log_analysis ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t1_raw.log ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t1.log inference ${BATCH_SIZE}
+  str=${str[@]}
+  cmd_line=${str::-2}
+  eval $cmd_line
   wait
-  bertsquad_log_analysis ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0_raw.log ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0.log inference ${BATCH_SIZE}
-  cd -
-elif [[ ${Tile} == "2" ]]; then
-  echo "bertsquad fp16 inference plain nchw 2 tile"
-  cd ${MODEL_DIR}/models/language_modeling/pytorch/bert_large/inference/gpu/
-  ZE_AFFINITY_MASK=0.0 bash cmd_infer.sh \
-      -m bert_large \
-      -d xpu \
-      -b $BATCH_SIZE \
-      -t FP16 \
-      -o None 2>&1 | tee ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0_raw.log &
-  ZE_AFFINITY_MASK=0.1 bash cmd_infer.sh \
-      -m bert_large \
-      -d xpu \
-      -b $BATCH_SIZE \
-      -t FP16 \
-      -o None 2>&1 | tee ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t1_raw.log
-  wait
-  bertsquad_log_analysis ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0_raw.log ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t0.log inference ${BATCH_SIZE}
-  bertsquad_log_analysis ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t1_raw.log ${OUTPUT_DIR}/bertsquad_fp16_inf_plain_nchw_t1.log inference ${BATCH_SIZE}
   cd -
 else
-    echo "The specified Tile '${Tile}' is unsupported."
-    echo "Supported tile number are: 1 and 2"
+    echo "Currently only x4 OAM Modules are supported"
     exit 1
 fi
