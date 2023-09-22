@@ -83,3 +83,9 @@ services:
       dockerfile: docker/max-gpu/tf-bert-large-training/tf-max-series-bert-large-training.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training
+  pytorch-dlrm-training:
+    build:
+      dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
+    extends: pytorch-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+

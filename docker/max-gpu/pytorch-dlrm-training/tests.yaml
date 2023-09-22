@@ -1,0 +1,19 @@
+bf16-multi-card-training:
+  img: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
+  cmd: quickstart/multi_card_distributed_train.sh
+  ipc: host
+  device: /dev/dri
+  env:
+    PRECISION: bf16
+    GLOBAL_BATCH_SIZE: '65536' 
+    TOTAL_TRAINING_SAMPLES: '4195197692'
+    OUTPUT_DIR: /tmp
+    NUM_OAM: '4'
+    DATASET_DIR: /dataset/dlrm-v2
+  volumes:
+    - src: /dataset/dlrm-v2
+      dst: /dataset/dlrm-v2
+    - src: /dev/dri
+      dst: /dev/dri
+
+      
