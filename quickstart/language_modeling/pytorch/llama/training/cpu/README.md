@@ -26,7 +26,7 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
 
 In this case, we use data-parallel distributed training and every rank will hold same model replica. The NNODES is the number of ip in the HOSTFILE. To use multi-nodes distributed training you should firstly setup the passwordless login (you can refer to [link](https://linuxize.com/post/how-to-setup-passwordless-ssh-login/)) between these nodes. 
 ```
-export NNODES=#your_node_number (default using 4 nodes, 8 sockets)
+export NNODES=#your_node_number (default using 1 node)
 # create your_ip_list_file, one ip per line, like (or self edit):
 scontrol show hostname > ./hostfile
 

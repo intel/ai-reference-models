@@ -50,41 +50,68 @@ else
     echo "Supported precisions are: fp32, bf32, bf16, fp16"
     exit 1
 fi
-NNODES=${NNODES:-4}
-NP=`expr $NNODES \* 2`
-export PSM3_NIC_SPEED=100000
-#!/bin/bash
-#please set your bert_env name first
-torch_ccl_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))" 2> /dev/null)
-if test -f $torch_ccl_path/env/setvars.sh ; then
-          source $torch_ccl_path/env/setvars.sh
-fi
 
-# env parameters
-export KMP_AFFINITY=compact,1,granularity=fine
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+TOTAL_CORES=`expr $CORES \* $SOCKETS`
+NNODES=${NNODES:-1}
+HOSTFILE=${HOSTFILE:-./hostfile}
+NUM_RANKS=$(( NNODES * SOCKETS ))
+export HF_HOME=./
+
+CORES_PER_INSTANCE=$CORES
+
+export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 export KMP_BLOCKTIME=1
-export LD_PRELOAD=${CONDA_PREFIX}/lib/libjemalloc.so:${CONDA_PREFIX}/lib/libiomp5.so
-
-export CCL_MNIC_NAME=irdma-cvl01tf2,irdma-cvl11tf2
-export CCL_MNIC=local
+export KMP_AFFINITY=granularity=fine,compact,1,0
+#oneCCL settings
+export CCL_WORKER_COUNT=8
+export CCL_LOG_LEVEL=info
+export CCL_BF16=avx512bf
+export CCL_ATL_TRANSPORT=ofi
 export CCL_MNIC_COUNT=2
-#export PSM3_NIC='+(irdma-cvl01tf2|irdma-cvl11tf2)'
-
-export FI_PROVIDER=psm3
+export CCL_MNIC=local
+export CCL_MNIC_NAME=irdma1,irdma5
 export CCL_ALLREDUCE=ring
+export CCL_WORKER_COUNT=8
+
+for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
+  START_CORE=$(( i * CORES ))
+  for (( j = 0; j < $CCL_WORKER_COUNT; j++)); do
+   CCL_WORKER_AFFINITY="${CCL_WORKER_AFFINITY} $((START_CORE + j))"
+  done
+done
+
+export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
+
+
+#DDP settings
+export TORCH_CPP_LOG_LEVEL=INFO
+export TORCH_DISTRIBUTED_DEBUG=INFO
+export MASTER_ADDR=`head -1 hostfile`
+
+# Fabric settings
+export FI_PROVIDER=psm3
 export PSM3_IDENTIFY=1
 export PSM3_ALLOW_ROUTERS=1
 export PSM3_RDMA=1
+export PSM3_PRINT_STATS=0
 export PSM3_RV_MR_CACHE_SIZE=8192
-#export FI_PROVIDER_PATH=/usr/lib64/libfabric
-export OFI_PROVIDER=psm3
-export CCL_ATL_TRANSPORT=mpi
-export CCL_WORKER_COUNT=$NNODES
-export I_MPI_DEBUG=5
+export PSM3_KASSIST_MODE=none
+#export PSM3_NIC='irdma*
+export FI_PSM3_CONN_TIMEOUT=100
 
+oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
+source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
-
-bash ./run_dist_ht.sh -np $NP -ppn 2 -f ./hostfile python ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
+export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
+python -m intel_extension_for_pytorch.cpu.launch \
+    --memory-allocator jemalloc \
+    --distributed \
+    --nnodes ${NNODES} \
+    --hostfile ${HOSTFILE} \
+    --logical-cores-for-ccl --ccl_worker_count 8 \
+    ../../../../../../models/language_modeling/pytorch/llama/training/cpu/finetune.py  $ARGS \
     --base_model 'meta-llama/Llama-2-7b-hf'\
     --data_path '../../../../../../models/language_modeling/pytorch/llama/training/cpu/alpaca_data.json' \
     --output_dir ${OUTPUT_DIR} \
