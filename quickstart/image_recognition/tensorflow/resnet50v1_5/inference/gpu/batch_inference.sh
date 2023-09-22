@@ -42,6 +42,7 @@ done
 
 # Create the output directory in case it doesn't already exist
 mkdir -p ${OUTPUT_DIR}
+declare -a str
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}"]; then
@@ -62,7 +63,6 @@ if [[ $GPU_TYPE == "flex_series" ]]; then
     else
       pretrained_model=${FROZEN_GRAPH}
     fi
-    # WARMUP="-- warmup_steps=10 steps=500"
   else 
     echo "FLEX SERIES GPU SUPPORTS ONLY INT8 PRECISION"
     exit 1
@@ -75,7 +75,6 @@ elif [[ $GPU_TYPE == "max_series" ]]; then
     else
       pretrained_model=${FROZEN_GRAPH}
     fi
-    WARMUP="-- warmup_steps=5 steps=20 disable-tcmalloc=True"
   else 
     echo "MAX SERIES GPU SUPPORTS ONLY INT8, FP32 AND FP16 PRECISION"
     exit 1
@@ -83,18 +82,23 @@ elif [[ $GPU_TYPE == "max_series" ]]; then
 fi
 
 if [[ $PRECISION == "fp16" ]]; then
+  DTYPE="float16"
   export ITEX_AUTO_MIXED_PRECISION=1
   export ITEX_AUTO_MIXED_PRECISION_DATA_TYPE="FLOAT16"
 fi
 
-if [[ -z "${Tile}" ]]; then
-    Tile=${Tile-1}
+if [[ $PRECISION == "int8" ]]; then
+  DTYPE="int8"
+  benchmark="--benchmark"
 else
-    Tile=${Tile}
+  benchmark=""
 fi
 
-# source "${MODEL_DIR}/quickstart/common/utils.sh"
-if [[ ${Tile} == "1" ]]; then
+if [[ $PRECISION == "fp32" ]]; then
+  DTYPE="float32"
+fi
+
+if [[ -z "${NUM_OAM}" ]]; then
     echo "resnet50 v1.5 int8 inference"
          mac=`lspci | grep Dis| head -n 1| awk '{print $1}'`
          node=`lspci -s $mac -v | grep NUMA | awk -F, '{print $5}' | awk '{print $3}'`
@@ -102,48 +106,28 @@ if [[ ${Tile} == "1" ]]; then
          --input-graph=${pretrained_model} \
          --warmup-steps=10 \
          --steps=500 \
-         --batch-size=1024 \
+         --batch-size=${BATCH_SIZE} \
          --benchmark 
-        #  numactl -N $node -l python benchmarks/launch_benchmark.py \
-        #  --model-name=resnet50v1_5 \
-        #  --precision=${PRECISION} \
-        #  --mode=inference \
-        #  --framework tensorflow \
-        #  --in-graph ${pretrained_model} \
-        #  --output-dir ${OUTPUT_DIR} \
-        #  --batch-size=${BATCH_SIZE} \
-        #  --benchmark-only \
-        #  --gpu \
-        #  $@ \
-        #  ${WARMUP} 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_t0_raw.log
-
-elif [[ ${Tile} == "2" ]]; then
-        echo "resnet50 v1.5 int8 two-tile inference"
-        ZE_AFFINITY_MASK=0.0 python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=${PRECISION} \
-         --mode=inference \
-         --framework tensorflow \
-         --in-graph ${pretrained_model} \
-         --output-dir ${OUTPUT_DIR} \
-         --batch-size=${BATCH_SIZE} \
-         --benchmark-only \
-         --gpu \
-         $@ \
-         ${WARMUP} 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_t0_raw.log &
-         ZE_AFFINITY_MASK=0.1 python benchmarks/launch_benchmark.py \
-         --model-name=resnet50v1_5 \
-         --precision=${PRECISION} \
-         --mode=inference \
-         --framework tensorflow \
-         --in-graph ${pretrained_model} \
-         --output-dir ${OUTPUT_DIR} \
-         --batch-size=${BATCH_SIZE} \
-         --benchmark-only \
-         --gpu \
-         $@ \
-         ${WARMUP} 2>&1 | tee ${OUTPUT_DIR}//resnet50_${PRECISION}_inf_t1_raw.log 
+elif [[ ${NUM_OAM} == "4" ]]; then
+        echo "resnet50 v1.5 int8 inference on ${NUM_OAM} OAM modules"
+        NUM_TILES_PER_GPU=2
+        for i in $( eval echo {0..$((NUM_OAM-1))} )
+          do
+            for j in $( eval echo {0..$((NUM_TILES_PER_GPU-1))} )
+                do
+                  str+=("ZE_AFFINITY_MASK="${i}"."${j}" python -u models/image_recognition/tensorflow/resnet50v1_5/inference/gpu/int8/eval_image_classifier_inference.py \
+                        --input-graph=${pretrained_model} \
+                        --warmup-steps=5 \
+                        --steps=20 \
+                        --batch-size=${BATCH_SIZE} \
+                        --dtype ${DTYPE} \
+                        ${benchmark} 2>&1 | tee ${OUTPUT_DIR}/resnet50_inf_${PRECISION}_c${i}_t${j}_raw.log & ")
+                done
+          done
+        str=${str[@]}
+        cmd_line=${str::-2}
+        eval $cmd_line
 else
-    echo"Only Tiles 1 and 2 supported."
+    echo "Currently only x4 OAM Modules are supported"
     exit 1
 fi

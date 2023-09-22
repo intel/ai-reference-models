@@ -55,7 +55,7 @@ services:
     build:
       args:
         BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-tensorflow}
-        BASE_TAG: ${BASE_TAG:-gpu-horovod}   
+        BASE_TAG: ${BASE_TAG:-xpu}   
         INT8_MODEL_URL: ${INT8_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
         FP16_MODEL_URL: ${FP16_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1.pb}
         FP32_MODEL_URL: ${FP32_MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1.pb}
@@ -88,4 +88,3 @@ services:
       dockerfile: docker/max-gpu/pytorch-dlrm-training/pytorch-max-series-dlrm-training.Dockerfile
     extends: pytorch-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-recommendation-pytorch-max-gpu-dlrm-training
-
