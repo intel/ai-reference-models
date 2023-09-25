@@ -102,24 +102,49 @@ export KMP_BLOCKTIME=1
 export KMP_AFFINITY=granularity=fine,compact,1,0
 
 
-export CCL_MNIC=global
-export CCL_MNIC_NAME=rocep56s0,rocep73s0,rocep152s0,rocep216s0 #rocep56s0,rocep59s0,rocep73s0,rocep76s0,rocep152s0,rocep155s0,rocep216s0,rocep219s0
-export CCL_MNIC_COUNT=4
-export PSM3_PRINT_STATS=0
+#oneCCL settings
+export CCL_WORKER_COUNT=8
+export CCL_LOG_LEVEL=info
+export CCL_BF16=avx512bf
+export CCL_ATL_TRANSPORT=ofi
+export CCL_MNIC_COUNT=2
+export CCL_MNIC=local
+export CCL_MNIC_NAME=irdma1,irdma5
+export CCL_ALLREDUCE=ring
+export CCL_WORKER_COUNT=8
+
+for (( i = $SOCKETS; i < 2*$SOCKETS; i++ )); do  # pin CCL workers to HT
+  START_CORE=$(( i * CORES ))
+  for (( j = 0; j < $CCL_WORKER_COUNT; j++)); do
+   CCL_WORKER_AFFINITY="${CCL_WORKER_AFFINITY} $((START_CORE + j))"
+  done
+done
+
+export CCL_WORKER_AFFINITY=`echo ${CCL_WORKER_AFFINITY} | tr " " ","`
+
+
+#DDP settings
+export TORCH_CPP_LOG_LEVEL=INFO
+export TORCH_DISTRIBUTED_DEBUG=INFO
+export MASTER_ADDR=`head -1 hostfile`
+
+# Fabric settings
 export FI_PROVIDER=psm3
-export CCL_ALLREDUCE=rabenseifner
-export PSM3_IDENTIFY=1
 export PSM3_IDENTIFY=1
 export PSM3_ALLOW_ROUTERS=1
 export PSM3_RDMA=1
+export PSM3_PRINT_STATS=0
 export PSM3_RV_MR_CACHE_SIZE=8192
-export FI_PROVIDER_PATH=/usr/lib64/libfabric
-
+export PSM3_KASSIST_MODE=none
+#export PSM3_NIC='irdma*
+export FI_PSM3_CONN_TIMEOUT=100
 
 rm -rf ${OUTPUT_DIR}/resnet50_dist_training_log_${PRECISION}*
 
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
+
+export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
 
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator tcmalloc \

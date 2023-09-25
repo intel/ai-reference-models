@@ -119,6 +119,8 @@ rm -rf ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_dist_inference_accuracy*
 oneccl_bindings_for_pytorch_path=$(python -c "import torch; import oneccl_bindings_for_pytorch; import os;  print(os.path.abspath(os.path.dirname(oneccl_bindings_for_pytorch.__file__)))")
 source $oneccl_bindings_for_pytorch_path/env/setvars.sh
 
+export FI_PROVIDER_PATH=$oneccl_bindings_for_pytorch_path/lib/prov
+
 python -m intel_extension_for_pytorch.cpu.launch \
     --memory-allocator tcmalloc \
     --distributed \

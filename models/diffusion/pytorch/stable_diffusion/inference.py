@@ -23,6 +23,7 @@ import os
 import time
 import numpy as np
 import pathlib
+from tqdm import tqdm
 
 import torch
 from PIL import Image
@@ -118,7 +119,7 @@ def main():
             pipe.unet = ipex.optimize(pipe.unet.eval(), inplace=True, auto_kernel_selection=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), inplace=True, auto_kernel_selection=True)
         elif args.precision == "bf16" or args.precision == "fp16":
-            pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, inplace=True)
+            # pipe.text_encoder = ipex.optimize(pipe.text_encoder.eval(), dtype=dtype, inplace=True)
             pipe.unet = ipex.optimize(pipe.unet.eval(), dtype=dtype, inplace=True)
             pipe.vae = ipex.optimize(pipe.vae.eval(), dtype=dtype, inplace=True)
         elif args.precision == "int8-bf16":
@@ -223,7 +224,7 @@ def main():
         if args.distributed:
             torch.distributed.barrier()
         fid = FrechetInceptionDistance(normalize=True)
-        for i, (images, prompts) in enumerate(val_dataloader):
+        for i, (images, prompts) in enumerate(tqdm(val_dataloader)):
             prompt = prompts[0][0]
             real_image = images[0]
             print("prompt: ", prompt)

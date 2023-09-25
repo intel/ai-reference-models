@@ -77,7 +77,7 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --ipex \
     --jit \
     --benchmark \
-    -w 1 -i 1 \
+    -w 1 -i 10 \
     $ARGS
 
 # For the summary of results
