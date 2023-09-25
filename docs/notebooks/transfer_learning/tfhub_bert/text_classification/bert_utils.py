@@ -17,10 +17,7 @@
 #
 
 import json
-import os
 import pandas as pd
-
-from zipfile import ZipFile
 
 
 def get_model_map(json_path, return_data_frame=False):
@@ -55,23 +52,3 @@ def get_model_map(json_path, return_data_frame=False):
         return tfhub_model_map, models_df
     else:
         return tfhub_model_map
-
-
-def download_and_extract_zip(zip_url, destination_dir):
-    """
-    Downloads and extracts a zip file to the specified destination.
-    """
-    if not os.path.exists(destination_dir):
-        os.makedirs(destination_dir)
-
-    zip_filename = os.path.basename(zip_url)
-
-    # Download the zip file
-    if not os.path.exists(os.path.join(destination_dir, zip_filename)):
-        import wget
-        wget.download(zip_url, destination_dir)
-
-    # Extract the zip file
-    dataset_zip_path = os.path.join(destination_dir, zip_filename)
-    with ZipFile(dataset_zip_path, "r") as zipfile:
-        zipfile.extractall(path=destination_dir)

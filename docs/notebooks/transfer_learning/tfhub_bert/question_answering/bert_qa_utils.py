@@ -20,13 +20,11 @@ import glob
 import json
 import os
 import pandas as pd
-import tensorflow as tf
+import sys
 import wget
-
-from official.common import distribute_utils
-from official.nlp.bert.run_squad_helper import get_dataset_fn
-
 from zipfile import ZipFile
+
+# sys.path.append(os.environ["TF_MODELS_DIR"])
 
 
 def create_mini_dataset_file(original_file, output_file, num_dataset_items, overwrite=False):
@@ -40,37 +38,37 @@ def create_mini_dataset_file(original_file, output_file, num_dataset_items, over
     """
     if not os.path.exists(output_file) or overwrite:
         import random
-        
+
         with open(original_file) as f:
             original_data = json.load(f)
 
         total_len = len(original_data["data"])
-        
+
         if num_dataset_items > total_len:
             raise ValueError("The number of dataset items ({}) cannot be more than the total "
                              "dataset length ({}).".format(num_dataset_items, total_len))
-        
+
         item_indicies = random.sample(range(0, total_len), num_dataset_items)
         print("Total dataset length:", total_len)
         print("Randomly selected dataset indices:", item_indicies)
-        
+
         articles = []
-        
+
         for data_index in item_indicies:
             article = {}
             article["paragraphs"] = original_data["data"][data_index]["paragraphs"]
             article["title"] = original_data["data"][data_index]["title"]
-            
+
             for p in article["paragraphs"]:
                 for qas in p["qas"]:
                     qas["id"] = str(qas["id"])
-            
+
             articles.append(article)
 
         # Add the article to a dictionary for the mini dataset
         mini_data = {}
         mini_data["data"] = articles
-        
+
         # Add on a version
         mini_data["version"] = original_data["version"] if "version" in original_data.keys() else "1.0"
 
@@ -85,7 +83,7 @@ def create_mini_dataset_file(original_file, output_file, num_dataset_items, over
 
 def display_predictions(predict_data_path, results_file_path, n=10):
     """ Displays n number of predictions along with the actual value """
-    
+
     def get_data_list():
         count = 0
         data_list = []
@@ -115,7 +113,7 @@ def display_predictions(predict_data_path, results_file_path, n=10):
                                        "Predicted Answer",
                                        "Actual Answer(s)"])
     return predict_df.style.hide(axis="index")
-                    
+
 
 def get_config_and_vocab_from_zip(zip_url, bert_dir):
     """
@@ -131,7 +129,7 @@ def get_config_and_vocab_from_zip(zip_url, bert_dir):
     """
     vocab_txt = os.path.join(bert_dir, "vocab.txt")
     bert_config = os.path.join(bert_dir, "bert_config.json")
-    
+
     if not os.path.exists(vocab_txt) or not os.path.exists(bert_config):
         downloaded_file = wget.download(zip_url, bert_dir)
         with ZipFile(downloaded_file, "r") as checkpoint_zip:
@@ -148,60 +146,46 @@ def get_config_and_vocab_from_zip(zip_url, bert_dir):
                             if matches:
                                 os.replace(matches[0], file_path)
                         break
-            
+
             if not os.path.exists(vocab_txt):
                 get_file_from_zip(vocab_txt)
-            
+
             if not os.path.exists(bert_config):
                 get_file_from_zip(bert_config)
 
         os.remove(downloaded_file)
-        
+
     return vocab_txt, bert_config
 
+def get_model_map(json_path, return_data_frame=False):
+    """
+    Gets the model map from the speified json path and loads it into a python dictionary. If the
+    data frame option is enabled, it will also return the list of models in a pandas data frame
+    with column headers so that it can be used to display in a notebook.
+    """
+    with open(json_path) as json_file:
+        tfhub_model_map = json.load(json_file)
 
-# This function was taken from the TensorFlow Model Garden repo and adapted
-# to be a utility function that has a string for the strategy, directly passes
-# in the max_seq_length instead of a metadata object, and removes the need for FLAGS
-# being defined (instead just passes in the predict_batch_size as an arg).
+    if return_data_frame:
+        # Generate list of model names and URL links to TF Hub based on the model map
+        model_options = [[i,
+                          tfhub_model_map[i]["num_hidden_layers"],
+                          tfhub_model_map[i]["hidden_size"],
+                          tfhub_model_map[i]["num_attention_heads"],
+                          "<a href=\"{0}\" target=\"_blank\">{0}</a>".format(
+                              tfhub_model_map[i]["bert_encoder"])]
+                         for i in tfhub_model_map.keys()]
 
-# https://github.com/tensorflow/models/blob/v2.7.0/official/nlp/bert/run_squad_helper.py#L176
-def predict_squad_customized(strategy_str, max_seq_length, predict_batch_size,
-                             predict_tfrecord_path, num_steps, squad_model):
-    
-    strategy = distribute_utils.get_distribution_strategy(distribution_strategy=strategy_str)
-    
-    """Make predictions using a Bert-based squad model."""
-    predict_dataset_fn = get_dataset_fn(
-        predict_tfrecord_path,
-        max_seq_length,
-        predict_batch_size,
-        is_training=False)
-    predict_iterator = iter(
-        strategy.distribute_datasets_from_function(predict_dataset_fn))
+        if len(model_options) == 0:
+            print("Warning: No models were found in the json file:", json_path)
 
-    @tf.function
-    def predict_step(iterator):
-        """Predicts on distributed devices."""
-
-        def _replicated_step(inputs):
-            """Replicated prediction calculation."""
-            x, _ = inputs
-            unique_ids = x.pop('unique_ids')
-            start_logits, end_logits = squad_model(x, training=False)
-            return dict(
-                unique_ids=unique_ids,
-                start_logits=start_logits,
-                end_logits=end_logits)
-
-        outputs = strategy.run(_replicated_step, args=(next(iterator),))
-        return tf.nest.map_structure(strategy.experimental_local_results, outputs)
-
-    all_results = []
-    for _ in range(num_steps):
-        predictions = predict_step(predict_iterator)
-        for result in get_raw_results(predictions):
-            all_results.append(result)
-        if len(all_results) % 100 == 0:
-            print('Made predictions for %d records.', len(all_results))
-    return all_results
+        pd.set_option('display.max_colwidth', None)
+        models_df = pd.DataFrame(model_options,
+                                 columns=["Model",
+                                          "Hidden layers",
+                                          "Hidden size",
+                                          "Attention heads",
+                                          "TF Hub BERT encoder URL"])
+        return tfhub_model_map, models_df
+    else:
+        return tfhub_model_map
