@@ -1,14 +1,14 @@
-# Model Zoo for Intel® Architecture
+# Intel® AI Reference Models
 
 This repository contains **links to pre-trained models, sample scripts, best practices, and step-by-step tutorials** for many popular open-source machine learning models optimized by Intel to run on Intel® Xeon® Scalable processors and Intel® Data Center GPUs.
 
-Model packages and containers for running the Model Zoo's workloads can be found at the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html).
+Containers for running the workloads can be found at the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html).
 
-## Purpose of the Model Zoo
+## Purpose of Intel® AI Reference Models
 
-  - Demonstrate the AI workloads and deep learning models Intel has optimized and validated to run on Intel hardware
-  - Show how to efficiently execute, train, and deploy Intel-optimized models
-  - Make it easy to get started running Intel-optimized models on Intel hardware in the cloud or on bare metal
+Intel optimizes popular deep learning frameworks such as TensorFlow* and PyTorch* by contributing to the upstream projects. Additional optimizations are built into plugins/extensions such as the [Intel Extension for Pytorch*](https://github.com/intel/intel-extension-for-pytorch) and the [Intel Extension for TensorFlow*](https://github.com/intel/intel-extension-for-tensorflow). Popular neural network models running against common datasets are the target workloads that drive these optimizations. 
+
+The purpose of the Intel® AI Reference Models repository (and associated containers) is to quickly replicate the complete software environment that demonstrates the best-known performance of each of these target model/dataset combinations. When executed in optimally-configured hardware environments, these software environments showcase the AI capabilities of Intel platforms. 
 
 ***DISCLAIMER: These scripts are not intended for benchmarking Intel platforms.
 For any performance and/or benchmarking information on specific Intel platforms, visit [https://www.intel.ai/blog](https://www.intel.ai/blog).***
@@ -16,12 +16,12 @@ For any performance and/or benchmarking information on specific Intel platforms,
 Intel is committed to the respect of human rights and avoiding complicity in human rights abuses, a policy reflected in the [Intel Global Human Rights Principles](https://www.intel.com/content/www/us/en/policy/policy-human-rights.html). Accordingly, by accessing the Intel material on this platform you agree that you will not use the material in a product or application that causes or contributes to a violation of an internationally recognized human right.
 
 ## License
-The Model Zoo for Intel® Architecture is licensed under [Apache License Version 2.0](https://github.com/IntelAI/models/blob/master/LICENSE).
+The Intel® AI Reference Models is licensed under [Apache License Version 2.0](https://github.com/intel/ai-reference-models/blob/master/LICENSE).
 
 ## Datasets
 To the extent that any public datasets are referenced by Intel or accessed using tools or code on this site those datasets are provided by the third party indicated as the data source. Intel does not create the data, or datasets, and does not warrant their accuracy or quality. By accessing the public dataset(s) you agree to the terms associated with those datasets and that your use complies with the applicable license.
 
-Please check the list of datasets used in Model Zoo for Intel® Architecture in [datasets directory](/datasets).
+Please check the list of datasets used in Intel® AI Reference Models in [datasets directory](/datasets).
 
 Intel expressly disclaims the accuracy, adequacy, or completeness of any public datasets, and is not liable for any errors, omissions, or defects in the data, or for any reliance on the data. Intel is not liable for any liability or damages relating to your use of public datasets.
 
@@ -30,7 +30,7 @@ The model documentation in the tables below have information on the
 prerequisites to run each model. The model scripts run on Linux. Certain
 models are also able to run using bare metal on Windows. For more information
 and a list of models that are supported on Windows, see the
-[documentation here](/docs/general/Windows.md#using-intel-model-zoo-on-windows-systems).
+[documentation here](/docs/general/Windows.md#using-intel-ai-reference-models-on-windows-systems).
 
 Instructions available to run on [Sapphire Rapids](https://www.intel.com/content/www/us/en/newsroom/opinion/updates-next-gen-data-center-platform-sapphire-rapids.html#gs.blowcx).
 
