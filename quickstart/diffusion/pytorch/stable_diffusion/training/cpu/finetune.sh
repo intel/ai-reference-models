@@ -78,9 +78,9 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --placeholder_token="\"<cat-toy>\"" --initializer_token="toy" \
     --resolution=512 \
     --train_batch_size=1 \
-    --gradient_accumulation_steps=4 \
-    -w 4 --max_train_steps=5 \
-    --learning_rate=5.0e-04 --scale_lr \
+    --gradient_accumulation_steps=1 \
+    -w 10 --max_train_steps=20 \
+    --learning_rate=2.0e-03 --scale_lr \
     --lr_scheduler="constant" \
     --lr_warmup_steps=0 \
     --train-no-eval \

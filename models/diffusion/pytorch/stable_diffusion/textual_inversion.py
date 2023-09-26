@@ -778,10 +778,10 @@ def main():
         import intel_extension_for_pytorch as ipex
         if args.precision == "bf32":
             ipex.set_fp32_math_mode(mode=ipex.FP32MathMode.BF32, device="cpu")
-            unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype, auto_kernel_selection=True)
+            # unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype, auto_kernel_selection=True)
             vae = ipex.optimize(vae, dtype=weight_dtype, auto_kernel_selection=True)
         else:
-            unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype)
+            # unet, optimizer = ipex.optimize(unet.train(), optimizer=optimizer, dtype=weight_dtype)
             vae = ipex.optimize(vae, dtype=weight_dtype)
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
@@ -977,12 +977,12 @@ def main():
 
     accelerator.end_training()
 
-    if not args.train_no_eval:
+    if not args.train_no_eval and accelerator.is_main_process:
         # run test
         pipe = StableDiffusionPipeline.from_pretrained(args.output_dir)
-        prompt = "A <cat-toy> backpack"
-        image = pipe(prompt, num_inference_steps=50, guidance_scale=7.5).images[0]
-        filename = "cat-backpack_" + args.precision + ".png"
+        prompt = "a yellow <cat-toy> robot at the beach, high quality"
+        image = pipe(prompt, num_inference_steps=50, guidance_scale=7.5, generator=torch.manual_seed(args.seed)).images[0]
+        filename = "output_" + args.precision + ".png"
         image.save(filename)
 
 
