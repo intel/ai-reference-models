@@ -279,7 +279,8 @@ def main_worker(gpu, ngpus_per_node, args):
             else:
                 model = models.__dict__[args.arch]()
 
-
+    global num_classes
+    num_classes = model.fc.out_features
     if args.ipex:
         import intel_extension_for_pytorch as ipex
     # for ipex path, always convert model to channels_last for bf16, fp32.
@@ -726,7 +727,7 @@ def validate(val_loader, model, criterion, args):
                     images = torch.randn(args.batch_size, 3, 224, 224)
                     if args.ipex:
                         images = images.contiguous(memory_format=torch.channels_last)
-                    target = torch.arange(1, args.batch_size + 1).long()
+                    target = (torch.rand(args.batch_size) * num_classes).long()
                     if args.bf16:
                         images = images.to(torch.bfloat16)
                     if args.ipex and args.fp16:
