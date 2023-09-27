@@ -27,6 +27,7 @@ from tensorflow.python.framework import dtypes
 from tensorflow.core.protobuf import rewriter_config_pb2
 
 import numpy as np
+import os
 import threading
 
 INPUTS = 'input_tensor'
@@ -181,7 +182,7 @@ class eval_classifier_optimized_graph:
           print('Instance num %d Avg Time/Iteration %f msec Throughput %f images/sec' %(tid, time_consume*1000/(steps - warm_up), (steps-warm_up)/time_consume))
 
     if (not self.args.accuracy_only):
-      if self.args.onednn_graph:
+      if self.args.onednn_graph and os.environ.get("_ITEX_ONEDNN_GRAPH_COMPILER_BACKEND")=="1":
         # graph compiler requires 1 core per instance
         num_instances = self.args.num_intra_threads
       else:

@@ -144,7 +144,7 @@ class LaunchBenchmark(base_benchmark_util.BaseBenchmarkUtil):
         try:
             import intel_extension_for_tensorflow as itex
             print("Intel Extension for Tensorflow " + itex.__version__ + " is installed.")
-            if self.args.onednn_graph is None:
+            if self.args.onednn_graph is None and self.args.precision == "int8":
                 self.args.onednn_graph = True
         except ModuleNotFoundError:
             self.args.onednn_graph = False
