@@ -27,8 +27,8 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${REGISTRY}/aiops/mlops
-        BASE_TAG: ${BASE_TAG:-xpu-max}
+        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
+        BASE_TAG: ${REGISTRY}/aiops/mlops
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-inference/pytorch-max-series-resnet50v1-5-inference.Dockerfile
     command: >
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
@@ -72,14 +72,12 @@ services:
   tf-bert-large-inference:
     build:
       args:
-        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/v2_7_0/fp32_bert_squad.pb}
+        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/3_0/bert_frozen_graph_fp32.pb}
       dockerfile: docker/max-gpu/tf-bert-large-inference/tf-max-series-bert-large-inference.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-inference
   tf-bert-large-training:
     build:
-      args:
-        MODEL_URL: ${MODEL_URL:-https://storage.googleapis.com/intel-optimized-tensorflow/models/gpu/resnet50_v1_int8.pb}
       dockerfile: docker/max-gpu/tf-bert-large-training/tf-max-series-bert-large-training.Dockerfile
     extends: tf-resnet50v1-5-inference
     image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-language-modeling-tf-max-gpu-bert-large-training

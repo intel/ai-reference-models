@@ -1,7 +1,7 @@
 # TensorFlow BERT Large Inference
 
 ## Description
-This document has instructions for running BERT Large inference with FP16 and FP32 precision using Intel® Data Center GPU Max Series. 
+This document has instructions for running BERT Large inference with FP16,bfloat16 and FP32 precisions using Intel® Data Center GPU Max Series. 
 
 ## Datasets 
 
@@ -23,34 +23,33 @@ Download the SQUAD directory and set the `SQUAD_DIR` environment variable to poi
   wget https://rajpurkar.github.io/SQuAD-explorer/dataset/dev-v1.1.json
   wget https://raw.githubusercontent.com/allenai/bi-att-flow/master/squad/evaluate-v1.1.py
   ```
-
 ## Quick Start Scripts
 | Script name | Description |
 |-------------|-------------|
-| `benchmark.sh` | This script runs bert large fp16 and fp32 inference. |
+| `inference.sh` | This script runs bert large fp16,bfloat16 and fp32 inference. |
 
 ## Docker
 Requirements:
-* Host machine has Intel(R) Data Center Max Series GPU
-* Follow instructions to install GPU-compatible driver [602](https://dgpu-docs.intel.com/installation-guides/ubuntu/ubuntu-jammy-dc.html#step-1-add-package-repository)
+* Host machine has Intel(R) Data Center Max Series 1550 x4 OAM GPU
+* Follow instructions to install GPU-compatible driver [647](https://dgpu-docs.intel.com/releases/stable_647_21_20230714.html)
 * Docker
 
 ## Docker pull Command
 ```
 docker pull intel/language-modeling:tf-max-gpu-bert-large-inference
 ```
-The BERT Large Inference container includes scripts,models,libraries needed to run fp16/fp32 Inference. 
+The BERT Large Inference container includes scripts,models,libraries needed to run fp16,bfloat16 and fp32 Inference. 
 
 ```
-export PRECISION=fp16
+export PRECISION=<provide either fp16,bfloat16 or fp32 precisions>
 export OUTPUT_DIR=<path to output logs>
 export PRETRAINED_DIR=<path to dataset>
 export SQAUD_DIR=<path to squad directory>
-export Tile=2
-
+export NUM_OAM=<provide 4 for number of OAM Modules supported by the platform>
+export INFERENCE_MODE=<provide accuracy,benchmark or profile mode>
 IMAGE_NAME=intel/language-modeling:tf-max-gpu-bert-large-inference
 DOCKER_ARGS="--rm -it"
-SCRIPT=benchmark.sh
+SCRIPT=inference.sh
 
 FROZEN_GRAPH=/workspace/tf-max-series-bert-large-inference/frozen_graph/fp32_bert_squad.pb
 
@@ -61,10 +60,10 @@ docker run \
   --ipc=host \
   --env PRECISION=${PRECISION} \
   --env OUTPUT_DIR=${OUTPUT_DIR} \
-  --env FROZEN_GRAPH=${FROZEN_GRAPH} \
   --env PRETRAINED_DIR=${PRETRAINED_DIR} \
   --env SQUAD_DIR=${SQUAD_DIR} \
-  --env Tile=${Tile} \
+  --env NUM_OAM=${NUM_OAM} \
+  --env INFERENCE_MODE=${INFERENCE_MODE} \
   --env http_proxy=${http_proxy} \
   --env https_proxy=${https_proxy} \
   --env no_proxy=${no_proxy} \
