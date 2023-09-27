@@ -57,8 +57,8 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/tra
 export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_fp32.pb
 
 # BFloat16 Pretrained model:
-wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_10_0/transformer_mlperf_bf16.pb
-export PRETRAINED_MODEL=$(pwd)/transformer_mlperf_bfloat16.pb
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_0/transformer_bf16_frozen_8_30.pb
+export PRETRAINED_MODEL=$(pwd)/transformer_bf16_frozen_8_30.pb
 ```
 
 Once that has been completed, ensure you have the required environment variables
