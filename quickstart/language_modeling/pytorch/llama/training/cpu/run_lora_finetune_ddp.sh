@@ -20,6 +20,8 @@
 
 ARGS=""
 
+MAXSTEP=${MAXSTEP:-50}
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 if [ -z "${OUTPUT_DIR}" ]; then
@@ -127,6 +129,6 @@ python -m intel_extension_for_pytorch.cpu.launch \
     --lora_target_modules '[q_proj,v_proj]' \
     --train_on_inputs \
     --group_by_length \
-    --max_steps 50 
+    --max_steps ${MAXSTEP} 
 
 

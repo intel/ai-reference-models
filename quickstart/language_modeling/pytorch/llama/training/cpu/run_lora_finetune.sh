@@ -20,6 +20,8 @@
 
 ARGS=""
 
+MAXSTEP=${MAXSTEP:-50}
+
 export DNNL_PRIMITIVE_CACHE_CAPACITY=1024
 #export MALLOC_CONF="oversize_threshold:1,background_thread:true,metadata_thp:auto,dirty_decay_ms:9000000000,muzzy_decay_ms:9000000000"
 if [ -z "${OUTPUT_DIR}" ]; then
@@ -67,7 +69,7 @@ python -m intel_extension_for_pytorch.cpu.launch --throughput-mode --enable_tcma
     --lora_target_modules '[q_proj,v_proj]' \
     --train_on_inputs \
     --group_by_length \
-    --max_steps 50 
+    --max_steps ${MAXSTEP}
 
 train_samples_per_second=($(grep -i 'train_samples_per_second'  ${OUTPUT_DIR}/training_log_${precision}_${mode}* |sed -e 's/.*train_samples_per_second*//;s/[^0-9.,]//g;' | awk -F, '{print $1}' |awk '
         BEGIN {
