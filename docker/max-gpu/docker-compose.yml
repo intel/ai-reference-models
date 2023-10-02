@@ -27,8 +27,8 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
-        BASE_IMAGE: ${BASE_IMAGE:-intel/intel-extension-for-pytorch}
-        BASE_TAG: ${REGISTRY}/aiops/mlops
+        BASE_IMAGE: ${REGISTRY}/aiops/mlops
+        BASE_TAG: xpu-max
       dockerfile: docker/max-gpu/pytorch-resnet50v1-5-inference/pytorch-max-series-resnet50v1-5-inference.Dockerfile
     command: >
       sh -c "python -c 'import torch; import intel_extension_for_pytorch as ipex; print(\"torch:\", torch.__version__, \" ipex:\",ipex.__version__)'"
