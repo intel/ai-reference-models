@@ -39,17 +39,17 @@ Set the `DATASET_DIR` to point to that directory when running BERT Large inferen
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit on Linux</th>
-    <th>Setup without AI Kit on Linux</th>
-    <th>Setup without AI Kit on Windows</th>
+    <th>Setup using AI Tools on Linux</th>
+    <th>Setup without AI Tools on Linux</th>
+    <th>Setup without AI Tools on Windows</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit on Linux you will need:</p>
+      <p>To run using AI Tools on Linux you will need:</p>
       <ul>
         <li>numactl
         <li>unzip
@@ -59,7 +59,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Linux you will need:</p>
+      <p>To run without AI Tools on Linux you will need:</p>
       <ul>
         <li>Python 3
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
@@ -67,15 +67,15 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>numactl
         <li>unzip
         <li>wget
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit on Windows you will need:</p>
+      <p>To run without AI Tools on Windows you will need:</p>
       <ul>
-        <li><a href="/docs/general/Windows.md">Intel Model Zoo on Windows Systems prerequisites</a>
-        <li>A clone of the Model Zoo repo<br />
+        <li><a href="/docs/general/Windows.md">Intel AI Reference Models on Windows Systems prerequisites</a>
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -139,7 +139,7 @@ As an example, if the dataset location on Windows is `D:\user\wwm_uncased_L-24_H
 >Then, set the `DATASET_DIR` environment variable `set DATASET_DIR=/d/user/wwm_uncased_L-24_H-1024_A-16`.
 
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 # Set the required environment vars: Only fp32 is supported on windows

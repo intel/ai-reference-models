@@ -24,32 +24,32 @@ Set the `DATASET_DIR` to point to the directory that contains the dataset files 
 | `inference_throughput_multi_instance.sh` | Runs multi instance batch inference using 1 instance per socket for the specified precision (int8, fp32 or bfloat16) with 100 steps and 50 warmup steps. Dummy data is used for performance evaluation. Waits for all instances to complete, then prints a summarized throughput value. |
 | `accuracy.sh` | Measures the inference accuracy (providing a `DATASET_DIR` environment variable is required) for the specified precision (int8, fp32 or bfloat16). |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md) on Linux or Windows systems.
+using [AI Tools](/docs/general/tensorflow/AITools.md) on Linux or Windows systems.
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit on Linux you will need:</p>
+      <p>To run using AI Tools on Linux you will need:</p>
       <ul>
         <li>Activate the tensorflow conda environment
         <pre>conda activate tensorflow</pre>
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li><a href="https://pypi.org/project/intel-tensorflow/">intel-tensorflow>=2.5.0</a>
         <li>git
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -81,7 +81,7 @@ Set the environment variables and one of the
 Set DATASET_DIR if you run `accuracy.sh` to calculate the model accuracy.
 
 ```
-# navigate to your Model Zoo directory
+# navigate to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to the dataset directory>
@@ -101,7 +101,7 @@ If not already setup, please follow instructions for [environment setup on Windo
 Set the environment variables and run `inference.sh` from the
 [quickstart script](#quick-start-scripts). Currently, for performance evaluation dummy data is used.
 ```
-# navigate to your Model Zoo directory
+# navigate to your AI Reference Models directory
 cd models
 
 set PRECISION=<set the precision "fp32" or "bfloat16">

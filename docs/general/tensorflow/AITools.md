@@ -1,13 +1,13 @@
-# Using the Model Zoo in the Intel® oneAPI AI Analytics Toolkit
+# Using Intel® AI Reference Models in the Intel® oneAPI AI Tools Bundle
 
-The Model Zoo is bundled as part of the
-[Intel® oneAPI AI Analytics Toolkit](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html) (AI Kit).
-Follow the instructions below to get your environment setup with AI Kit to run
+The Intel® AI Reference Models repository source code is bundled as part of the
+[Intel® oneAPI AI Tools](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html) (AI Tools).
+Follow the instructions below to get your environment setup with AI Tools to run
 TensorFlow models.
 
-## Install AI Kit
+## Install AI Tools
 
-Use the link below for instructions on how to install AI Kit or run the AI Kit
+Use the link below for instructions on how to install AI Tools or run the AI Tools
 docker container:
 [https://www.intel.com/content/www/us/en/docs/oneapi-ai-analytics-toolkit/get-started-guide-linux/2023-1/overview.html](https://www.intel.com/content/www/us/en/docs/oneapi-ai-analytics-toolkit/get-started-guide-linux/2023-1/overview.html)
 
@@ -44,26 +44,18 @@ oneDNN optimizations are enabled (this should print `oneDNN optimizations enable
 python -c "from tensorflow.python.util import _pywrap_util_port; print('oneDNN optimizations enabled:', _pywrap_util_port.IsMklEnabled())"
 ```
 
-## Navigate to the Model Zoo
+## Navigate to the AI Reference Models
 
-Navigate to the Intel Model Zoo source directory. It's located in your oneapi installation path,
-typically `/opt/intel/oneapi/modelzoo`. You can view the available Model Zoo release versions
-for the Intel AI Analytics toolkit:
+Navigate to the Intel AI Reference Models source directory. It's located in your oneapi installation path, typically `/opt/intel/oneapi/ai_reference_models`.
 
+Then browse to the `models` directory to run the model:
 ```
-ls /opt/intel/oneapi/modelzoo
-2.4.0  latest
+cd /opt/intel/oneapi/ai_reference_models/models
 ```
 
-Then browse to the `models` directory in your preferred Intel Model Zoo release version location
-to run the model:
-```
-cd /opt/intel/oneapi/modelzoo/latest/models
-```
-
-You can use this version of the zoo to run models instead of cloning the repository
-from git. The [benchmarks README](/benchmarks/README.md) has a list of the
+You can use this version of the AI Reference Models to run models instead of cloning the repository
+from GitHub. The [README](/benchmarks/../README.md) has a list of the
 available models and links to their instructions. Note that individual models
 may require additional dependencies to be installed. You should follow the
-bare metal installation instructions in those documents to run in the AI Kit
-TF conda environment.
+bare metal installation instructions in those documents to run in the AI Tools
+TensorFlow conda environment.

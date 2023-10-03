@@ -25,7 +25,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/mmo
 Install the Intel-optimized TensorFlow along with model dependencies under [requirements.txt](../../../../../models/recommendation/tensorflow/mmoe/inference/requirements.txt).
 
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>
 export DATASET_DIR=<path to the test data>

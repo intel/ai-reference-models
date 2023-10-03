@@ -24,23 +24,23 @@ and preprocessing the COCO validation dataset.
 | [fp32_inference.sh](/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/fp32_inference.sh) | Runs batch and online inference using the coco dataset |
 | [fp32_accuracy.sh](/quickstart/object_detection/tensorflow/faster_rcnn/inference/cpu/fp32/fp32_accuracy.sh) | Runs inference and evaluates the model's accuracy |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>AI Kit does not currently support TF 1.15.2 models</p>
+      <p>AI Tools does not currently support TF 1.15.2 models</p>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3.6 or 3.7
         <li>git
@@ -55,7 +55,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>matplotlib
         <li>pillow>=9.3.0
         <li>pycocotools
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -98,7 +98,7 @@ above, set environment variables for the path to your `DATASET_DIR` (directory
 where the `coco_val.record` TF records file is located)  and an `OUTPUT_DIR`
 where log files will be written, then run a [quickstart script](#quick-start-scripts).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to the directory that contains the coco_val.record file>

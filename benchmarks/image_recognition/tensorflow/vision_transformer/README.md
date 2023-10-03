@@ -1,5 +1,5 @@
 <!--- 0. Title -->
-# Vision Transformer inference
+# Vision Transformer Inference
 
 <!-- 10. Description -->
 
@@ -25,7 +25,7 @@ wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/HF-
 
 ### Run on Linux
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export PRETRAINED_MODEL=<path to the frozen graph downloaded above>

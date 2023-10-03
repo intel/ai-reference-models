@@ -26,30 +26,30 @@ export DATASET_DIR=/home/<user>/dataset/eval_preprocessed_eval.tfrecords
 | [`online_inference.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/cpu/online_inference.sh) | Runs online inference (`batch_size=1`). The `NUM_OMP_THREADS` environment variable and the hyperparameters `num-intra-threads`, `num-inter-threads` can be tuned for best performance. If `NUM_OMP_THREADS` is not set, it will default to `1`. |
 | [`accuracy.sh`](/quickstart/recommendation/tensorflow/wide_deep_large_ds/inference/cpu/accuracy.sh) | Measures the model accuracy (`batch_size=1000`). |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>AI Kit does not currently support wide and deep large ds</p>
+      <p>AI Tools does not currently support wide and deep large ds</p>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3.7 or newer
         <li><a href="https://pypi.org/project/intel-tensorflow">intel-tensorflow>=2.5.0</a>
         <li>numactl
         <li>git
         <li>wget
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -71,7 +71,7 @@ export PRETRAINED_MODEL=$(pwd)/wide_deep_int8_pretrained_model.pb
 Set the environment variables and run quickstart script. See the list of quickstart scripts for details on the different options.
 
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export DATASET_DIR=<path to TF records file>

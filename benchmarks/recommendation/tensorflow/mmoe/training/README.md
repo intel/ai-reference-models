@@ -20,7 +20,7 @@ For training, set the `DATASET_DIR` to point to the `census-income.data.gz` file
 Install the Intel-optimized TensorFlow along with model dependencies under [requirements.txt](../../../../../models/recommendation/tensorflow/mmoe/training/requirements.txt)
 
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 export DATASET_DIR=<path to the test data>
 export PRECISION=<set the precision to "fp32" or "bfloat16" or "fp16">

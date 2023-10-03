@@ -68,7 +68,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>openssh-server (only required for multi-instance)
         <li>libopenmpi-dev (only required for multi-instance)
         <li>horovod==0.25.0 (only required for multi-instance)
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>

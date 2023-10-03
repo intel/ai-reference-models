@@ -25,20 +25,20 @@ For accuracy testing, download the COCO validation dataset, using the
 | [`bfloat16_training.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/bfloat16_training.sh) | Runs multi-instance training to convergence. Download the backbone model specified in the instructions below and pass that directory path in the `BACKBONE_MODEL_DIR` environment variable. |
 | [`bfloat16_training_accuracy.sh`](/quickstart/object_detection/tensorflow/ssd-resnet34/training/cpu/bfloat16/bfloat16_training_accuracy.sh) | Runs the model in eval mode to check accuracy. Specify which checkpoint files to use with the `CHECKPOINT_DIR` environment variable. |
 
-<!--- 50. AI Kit -->
+<!--- 50. AI Tools -->
 ## Run the model
 
 Setup your environment using the instructions below, depending on if you are
-using [AI Kit](/docs/general/tensorflow/AIKit.md):
+using [AI Tools](/docs/general/tensorflow/AITools.md):
 
 <table>
   <tr>
-    <th>Setup using AI Kit</th>
-    <th>Setup without AI Kit</th>
+    <th>Setup using AI Tools</th>
+    <th>Setup without AI Tools</th>
   </tr>
   <tr>
     <td>
-      <p>To run using AI Kit you will need:</p>
+      <p>To run using AI Tools you will need:</p>
       <ul>
         <li>git
         <li>numactl
@@ -63,7 +63,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
       </ul>
     </td>
     <td>
-      <p>To run without AI Kit you will need:</p>
+      <p>To run without AI Tools you will need:</p>
       <ul>
         <li>Python 3
         <li>git
@@ -85,7 +85,7 @@ using [AI Kit](/docs/general/tensorflow/AIKit.md):
         <li>protobuf-compiler
         <li>pycocotools
         <li>tensorflow-addons==0.18.0
-        <li>A clone of the Model Zoo repo<br />
+        <li>A clone of the AI Reference Models repo<br />
         <pre>git clone https://github.com/IntelAI/models.git</pre>
       </ul>
     </td>
@@ -100,7 +100,7 @@ for object detection models at the
 Running SSD-ResNet34 training uses code from the [TensorFlow Model Garden](https://github.com/tensorflow/models).
 Clone the repo at the commit specified below, and set the `TF_MODELS_DIR`
 environment variable to point to that directory. Apply the TF2 patch from
-the model zoo to the TensorFlow models directory.
+the AI Reference Models to the TensorFlow models directory.
 ```
 # Clone the tensorflow/models repo at the specified commit.
 # Please note that required commit for this section is different from the one used for dataset preparation.
@@ -109,8 +109,8 @@ cd tf_models
 export TF_MODELS_DIR=$(pwd)
 git checkout 8110bb64ca63c48d0caee9d565e5b4274db2220a
 
-# Apply the patch from the model zoo directory to the TensorFlow Models repo
-git apply <model zoo directory>/models/object_detection/tensorflow/ssd-resnet34/training/bfloat16/tf-2.0.diff
+# Apply the patch from the AI Reference Models directory to the TensorFlow Models repo
+git apply <AI Reference Models directory>/models/object_detection/tensorflow/ssd-resnet34/training/bfloat16/tf-2.0.diff
 
 # Protobuf compilation from the TF models research directory
 cd research
@@ -125,7 +125,7 @@ and `DATASET_DIR` (path to the COCO training dataset). Use an empty output
 directory to prevent conflicts with checkpoint files from previous runs. You can optionally
 set the `TRAIN_STEPS` (defaults to 100) and `MPI_NUM_PROCESSES` (defaults to 1).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export TF_MODELS_DIR=<path to the clone of the TensorFlow models repo>
@@ -153,7 +153,7 @@ wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tenso
 wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.index
 wget -P $BACKBONE_MODEL_DIR https://storage.googleapis.com/intel-optimized-tensorflow/models/ssd-backbone/model.ckpt-28152.meta
 
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export TF_MODELS_DIR=<path to the clone of the TensorFlow models repo>
@@ -172,7 +172,7 @@ the COCO validation dataset location, and the `OUTPUT_DIR` to the location
 where log files will be written. You can optionally set the `MPI_NUM_PROCESSES`
 (defaults to 1).
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export TF_MODELS_DIR=<path to the clone of the TensorFlow models repo>

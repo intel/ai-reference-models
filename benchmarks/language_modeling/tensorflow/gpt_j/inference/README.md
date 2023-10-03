@@ -34,7 +34,7 @@ The quickstart scripts allow choosing to run more than 1 instance per socket for
 The quickstart scripts can be used as follows
 
 ```
-# cd to your model zoo directory
+# cd to your AI Reference Models directory
 cd models
 
 export OUTPUT_DIR=<path to the output directory>
