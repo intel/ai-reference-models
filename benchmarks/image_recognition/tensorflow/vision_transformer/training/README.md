@@ -57,3 +57,13 @@ export BATCH_SIZE=<customized batch size value>
 
 ./quickstart/image_recognition/tensorflow/vision_transformer/training/cpu/run_vit_fine_tune.sh
 ```
+Above script will run the training on all the cpu nodes available.
+
+### Run on Linux with multi-instance
+Running on multiple sockets/ numa nodes might not give optimum results due to inter-socket communication overhead.
+For better result, we should run multiple instances of training, with each instance run on single numa node
+
+To Run the multi-instance training, that is, run one instance of training per numa node, use the same setting/ environment variables as above and run the following script, which uses **openmpi** to run parallel instances
+```
+./quickstart/image_recognition/tensorflow/vision_transformer/training/cpu/run_vit_fine_tune_multiinstance.sh
+```

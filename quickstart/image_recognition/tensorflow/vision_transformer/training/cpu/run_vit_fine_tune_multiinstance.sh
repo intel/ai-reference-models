@@ -61,7 +61,7 @@ fi
 # If steps env is not mentioned, then the workload will run with the default steps.
 if [ -z "${EPOCHS}"]; then
   EPOCHS="0"
-  echo "No. of Epochs not set, it will run epochs required for 30k steps for given batch size"
+  echo "Warning : No. of Epochs not set, it will run epochs required for 30k steps for given batch size"
 fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
@@ -69,6 +69,19 @@ if [ -z "${BATCH_SIZE}"]; then
   BATCH_SIZE="512"
   echo "Running with default batch size of ${BATCH_SIZE}"
 fi
+
+# Get number of cores per socket line from lscpu
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+
+CORES=`lscpu | grep Core | awk '{print $4}'`
+SOCKETS=`lscpu | grep Socket | awk '{print $2}'`
+NUMAS=`lscpu | grep 'NUMA node(s)' | awk '{print $3}'`
+CORES_PER_NUMA=`expr $CORES \* $SOCKETS / $NUMAS`
+
+NUM_INSTANCES=`expr $cores_per_socket / $CORES_PER_NUMA`
+
+echo "Running multi-instance vision transformer fine-tuning"
 
 # Run vision transformer training
 source "$MODEL_DIR/quickstart/common/utils.sh"
@@ -78,6 +91,10 @@ _command python ${MODEL_DIR}/benchmarks/launch_benchmark.py \
    --mode training  \
    --framework tensorflow \
    --batch-size ${BATCH_SIZE} \
+   --mpi_num_processes=${NUM_INSTANCES} \
+   --mpi_num_processes_per_socket=${NUM_INSTANCES} \
+   --num-intra-threads $CORES_PER_NUMA \
+   --num-inter-threads 2 \
    --epochs=${EPOCHS} \
    --data-location $DATASET_DIR \
    --checkpoint $OUTPUT_DIR \
