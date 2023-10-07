@@ -29,8 +29,13 @@ if [ -z "${OUTPUT_DIR}" ]; then
   echo "The required environment variable OUTPUT_DIR has not been set, please create the output path and set it to OUTPUT_DIR"
   exit 1
 fi
-precision="fp32"
-if [[ "$1" == "bf16" ]]
+
+if [[ "$1" == "fp32" ]]
+then
+    precision="fp32"
+    ARGS="$ARGS --dtype 'fp32' "
+    echo "### running fp32 mode"
+elif [[ "$1" == "bf16" ]]
 then
     precision="bf16"
     ARGS="$ARGS --dtype 'bf16' "
@@ -51,12 +56,12 @@ then
 elif [[ "$1" == "int8-fp32" ]]
 then
     precision="int8-fp32"
-    ARGS="$ARGS --dtype 'int8' --quantized_model_path '${OUTPUT_DIR}/best_model.pt'"
+    ARGS="$ARGS --dtype 'int8' --ipex_smooth_quant --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
     echo "### running int8-fp32 mode"
 elif [[ "$1" == "int8-bf16" ]]
 then
     precision="int8-bf16"
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --quantized_model_path '${OUTPUT_DIR}/best_model.pt'"
+    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed --ipex_smooth_quant  --int8-qconfig '${OUTPUT_DIR}/qconfig.json'"
     echo "### running int8-bf16 mode"
 else
     echo "The specified precision '$1' is unsupported."
@@ -75,7 +80,7 @@ fi
 
 
 mode="jit"
-ARGS="$ARGS --jit"
+ARGS="$ARGS --jit "
 echo "### running with jit mode"
 
 
