@@ -29,19 +29,14 @@ path="ipex"
 ARGS="$ARGS --output_dir ${OUTPUT_DIR}  --lambada --jit"
 echo "### running with intel extension for pytorch"
 
-if [[ "$1" == "int8-fp32" ]]
+if [[ "$1" == "calibration" ]]
 then
-    precision="int8-fp32"
-    ARGS="$ARGS --dtype 'int8' "
-    echo "### running int8-fp32 mode"
-elif [[ "$1" == "int8-bf16" ]]
-then
-    precision="int8-bf16"
-    ARGS="$ARGS --dtype 'int8' --int8_bf16_mixed "
-    echo "### running int8-bf16 mode"
+    precision="calibration"
+    ARGS="$ARGS --dtype 'int8' --do-calibration --int8-qconfig '${OUTPUT_DIR}/qconfig.json' "
+    echo "### running calibration to get qconfig"
 else
     echo "The specified precision '$1' is unsupported."
-    echo "Supported precisions are: int8-fp32, int8-bf16"
+    echo "Supported [calibration]"
     exit 1
 fi
 
