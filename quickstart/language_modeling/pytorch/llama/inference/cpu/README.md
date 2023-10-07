@@ -55,15 +55,13 @@ Follow [link](/docs/general/pytorch/BareMetalSetup.md) to install Miniconda and 
   using BEAM_SIZE=4 by default
   ```
 
-* Do quantization to get INT8 model before running INT8.
+* Do calibration to get "qconfig.json" before running INT8.
   ```
   #optional: qconfig.json is saved in this repo, you can also do calibration by yourself to re-generation it
-  bash do_quantization.sh calibration sq
+  bash do_quantization.sh calibration sq #using smooth quant as default
 
-  #unzip qconfig.zip to get qconfig.json 
+  #unzip qconfig.zip to get qconfig.json, if you meet error to use this uploaded version of qconfig.zip, please re-generation it as above
   unzip qconfig.zip 
-  #using IPEX smoothquant for better accuracy
-  bash do_quantization.sh int8-fp32 sq # or use int8-bf16
 
 
   ```
