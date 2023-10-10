@@ -44,8 +44,8 @@ class eval_graphsage:
                                 dest='batch_size', type=int, default=1000)
 
         arg_parser.add_argument("-p", "--precision",
-                                help="Specify the model precision to use: fp32, bfloat16 or fp16",
-                                required=True, choices=["fp32", "bfloat16", "fp16"],
+                                help="Specify the model precision to use: fp32, bfloat16, fp16 or int8",
+                                required=True, choices=["fp32", "bfloat16", "fp16", "int8"],
                                 dest="precision")
 
         arg_parser.add_argument('-e', "--num-inter-threads",
@@ -98,15 +98,6 @@ class eval_graphsage:
                 num_classes,
                 batch_size=self.args.batch_size,
                 context_pairs = context_pairs)
-        
-        graph_def = tf.compat.v1.get_default_graph().as_graph_def()
-        with tf.io.gfile.GFile(os.path.join(self.args.pretrained_model + 'graphsage_frozen_model.pb'), 'rb') as f:
-            graph_def = tf.compat.v1.GraphDef()
-            graph_def.ParseFromString(f.read())
-        
-        #Import the graph
-        with tf.Graph().as_default() as graph:
-            tf.import_graph_def(graph_def, name='')
 
         infer_config = tf.compat.v1.ConfigProto()
         infer_config.intra_op_parallelism_threads = self.args.num_intra_threads
@@ -119,6 +110,21 @@ class eval_graphsage:
         elif self.args.precision == "fp16":
             print("Enabling auto-mixed precision for fp16")
             infer_config.graph_options.rewrite_options.auto_mixed_precision = rewriter_config_pb2.RewriterConfig.ON
+
+        if self.args.precision == "int8":
+            graph_def = tf.compat.v1.get_default_graph().as_graph_def()
+            with tf.io.gfile.GFile(os.path.join(self.args.pretrained_model, 'graphsage_frozen_model_int8.pb'), 'rb') as f:
+                graph_def = tf.compat.v1.GraphDef()
+                graph_def.ParseFromString(f.read())
+        else:
+            graph_def = tf.compat.v1.get_default_graph().as_graph_def()
+            with tf.io.gfile.GFile(os.path.join(self.args.pretrained_model, 'graphsage_frozen_model.pb'), 'rb') as f:
+                graph_def = tf.compat.v1.GraphDef()
+                graph_def.ParseFromString(f.read())
+            
+        #Import the graph
+        with tf.Graph().as_default() as graph:
+            tf.import_graph_def(graph_def, name='')
 
         sess = tf.compat.v1.Session(config=infer_config, graph=graph)
         output_tensor = sess.graph.get_tensor_by_name('Sigmoid:0')

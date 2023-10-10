@@ -88,16 +88,15 @@ class NodeMinibatchIterator(object):
                 class_ind = self.label_map[node]
                 label_vec[class_ind] = 1
             return label_vec
+            
     def batch_feed_dict(self, batch_nodes, val=False):
             batch1id = batch_nodes
             batch1 = [self.id2idx[n] for n in batch1id]
-                
             labels = np.vstack([self._make_label_vec(node) for node in batch1id])
             feed_dict = dict()
             feed_dict.update({'batch1:0': batch1})
             feed_dict.update({'batch_size:0' : len(batch1)})
             return feed_dict, labels
-
 
     def incremental_node_val_feed_dict(self, size, iter_num, test=False):
         if test:
