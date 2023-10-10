@@ -85,7 +85,12 @@ elif [[ ! -f "${PRETRAINED_MODEL}" ]]; then
 fi
 
 MODE="inference"
-CORES_PER_INSTANCE="4"
+
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE="4"
+  echo "Running with default ${CORES_PER_INSTANCE} cores per instance"
+fi
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [ -z "${BATCH_SIZE}" ]; then
@@ -99,11 +104,15 @@ if [[ $PRECISION == "bfloat32" ]]; then
   PRECISION="fp32"
 fi
 
-export OMP_NUM_THREADS=4
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=4
+else
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+fi
 
 # clean up old log files if found
 rm -rf ${OUTPUT_DIR}/Bert_large_${PRECISION}_bs${BATCH_SIZE}_Latency_inference_instance_*
-
 
 source "${MODEL_DIR}/quickstart/common/utils.sh"
 _ht_status_spr

@@ -71,17 +71,28 @@ export TF_ENABLE_MKL_NATIVE_FORMAT=1
 export TF_ONEDNN_ENABLE_FAST_CONV=1
 
 MODE="inference"
-CORES_PER_INSTANCE="socket"
+  
+# If cores per instance env is not mentioned, then the workload will run with the default value.
+if [ -z "${CORES_PER_INSTANCE}" ]; then
+  CORES_PER_INSTANCE="socket"
+  echo "Runs an instance per ${CORES_PER_INSTANCE}"
+fi
+
+cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
+cores_per_socket="${cores_per_socket//[[:blank:]]/}"
+
+# If OMP_NUM_THREADS env is not mentioned, then run with the default value
+if [ -z "${OMP_NUM_THREADS}" ]; then 
+  export OMP_NUM_THREADS=4
+else
+  export OMP_NUM_THREADS=${OMP_NUM_THREADS}
+fi
 
 #Set up env variable for bfloat32
 if [[ $PRECISION == "bfloat32" ]]; then
   export ONEDNN_DEFAULT_FPMATH_MODE=BF16
   PRECISION="fp32"
 fi
-
-# Get number of cores per socket line from lscpu
-cores_per_socket=$(lscpu |grep 'Core(s) per socket:' |sed 's/[^0-9]//g')
-cores_per_socket="${cores_per_socket//[[:blank:]]/}"
 
 # If batch size env is not mentioned, then the workload will run with the default batch size.
 if [[ $PRECISION == "bfloat16" ]]; then
