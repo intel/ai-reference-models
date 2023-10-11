@@ -77,11 +77,11 @@ export OUTPUT_DIR=<specify the log dir to save log>
 export PRECISION=<specify the precision to run>
 
 # Run a quickstart script for bare metal performance)
-cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
+cd ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu
 bash inference_performance.sh
 
 # Run a quickstart script for accuracy test
-cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/inference/cpu
+cd ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/inference/cpu
 export DATASET_DIR=<multi-hot dataset dir>
 export WEIGHT_DIR=<offical released checkpoint>
 bash test_accuracy.sh

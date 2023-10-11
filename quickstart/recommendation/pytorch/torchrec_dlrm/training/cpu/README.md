@@ -61,7 +61,7 @@ export OUTPUT_DIR=<specify the log dir to save log>
 export PRECISION=<specify the precision to run>
 
 # Run a quickstart script (for example, bare metal performance)
-cd ${MODEL_DIR}/quickstart/recommendation/pytorch/dlrm/training/cpu
+cd ${MODEL_DIR}/quickstart/recommendation/pytorch/torchrec_dlrm/training/cpu
 bash training_performance.sh
 ```
 

@@ -1,4 +1,4 @@
-# Using Intel® AI Reference Models in the Intel® oneAPI AI Tools Bundle
+# Using Intel® AI Reference Models in AI Tools
 
 The Intel® AI Reference Models repository source code is bundled as part of the
 [Intel® oneAPI AI Tools](https://www.intel.com/content/www/us/en/developer/tools/oneapi/ai-analytics-toolkit.html) (AI Tools).
