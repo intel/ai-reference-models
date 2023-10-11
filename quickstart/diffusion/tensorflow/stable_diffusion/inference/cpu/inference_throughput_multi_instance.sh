@@ -60,8 +60,13 @@ _command python ${MODELS}/benchmarks/launch_benchmark.py \
   $@ \
 
 if [[ $? == 0 ]]; then
+  printf "Time taken by different instances:\n"
+  cat ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep 'Latency:' | sed -e s"/.*: //"
+  echo "Latency (min time):"
+  cat ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep 'Latency:' | sed -e s"/.*: //" | sort -n | head -1
+  printf "\nThroughput for different instances:\n"
   cat ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | grep 'Avg Throughput:' | sed -e s"/.*: //"
-  echo "Throughput summary:"
+  echo "Throughput (total):"
   grep 'Avg Throughput' ${OUTPUT_DIR}/stable_diffusion_${PRECISION}_${MODE}_bs${BATCH_SIZE}_cores*_all_instances.log | awk -F' ' '{sum+=$3;} END{print sum} '
   exit 0
 else
