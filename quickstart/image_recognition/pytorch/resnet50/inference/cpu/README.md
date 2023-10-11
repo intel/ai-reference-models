@@ -69,6 +69,12 @@ IOMP should be installed in your conda env from the [General setup](#general-set
 > `DNNL_MAX_CPU_ISA` environment variable is unset. The environment variable is
 > otherwise set to `DNNL_MAX_CPU_ISA=AVX512_CORE_AMX`.
 
+## Calibration
+If user needs to re-do the calibration, here is the reference command:
+```
+DATASET_DIR=${DATASET_DIR} PRECISION=int8 CONFIG_FILE=${INT8_CONFIG_FILE} bash calibration.sh
+```
+
 ## Datasets
 
 ### ImageNet
