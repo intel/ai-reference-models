@@ -4,6 +4,8 @@ This repository contains **links to pre-trained models, sample scripts, best pra
 
 Containers for running the workloads can be found at the [Intel® Developer Catalog](https://www.intel.com/content/www/us/en/developer/tools/software-catalog/containers.html).
 
+[Intel® AI Reference Models in a Jupyter Notebook](/notebooks/README.md) is also available for the [listed workloads](/notebooks/README.md#supported-models)
+
 ## Purpose of Intel® AI Reference Models
 
 Intel optimizes popular deep learning frameworks such as TensorFlow* and PyTorch* by contributing to the upstream projects. Additional optimizations are built into plugins/extensions such as the [Intel Extension for Pytorch*](https://github.com/intel/intel-extension-for-pytorch) and the [Intel Extension for TensorFlow*](https://github.com/intel/intel-extension-for-tensorflow). Popular neural network models running against common datasets are the target workloads that drive these optimizations. 
