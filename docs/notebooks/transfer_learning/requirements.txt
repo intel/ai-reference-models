@@ -1,4 +1,4 @@
-Pillow~=9.5.0
+Pillow~=10.0.1 # upgraded to fix CVEs
 PyYAML~=6.0
 charset-normalizer~=3.1.0
 datasets~=2.12.0
