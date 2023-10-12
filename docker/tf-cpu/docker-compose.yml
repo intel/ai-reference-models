@@ -21,7 +21,7 @@
 version: '3'
 services: 
   tf-resnet50v1-5-inference:
-    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-image-recognition-tf-resnet50v1-5-inference
+    image: ${REGISTRY}/aiops/mlops-ci:b-${GITHUB_RUN_NUMBER:-0}-${OS:-ubuntu}-image-recognition-tf-resnet50v1-5-inference
     pull_policy: always
     build:
       context: ../../
@@ -29,8 +29,9 @@ services:
         http_proxy: ${http_proxy}
         https_proxy: ${https_proxy}
         no_proxy: ${no_proxy}
+        OS: ${OS:-ubuntu}
         TF_BASE_IMAGE: ${TF_BASE_IMAGE:-intel/intel-optimized-tensorflow}
         TF_BASE_TAG: ${TF_BASE_TAG:-2.13-pip-base}
-      dockerfile: docker/tf-cpu/tf-resnet50v1-5-inference/tf-resnet50v1-5-inference.Dockerfile
+      dockerfile: docker/tf-cpu/tf-resnet50v1-5-inference/tf-resnet50v1-5-inference.Dockerfile-${OS:-ubuntu}
     command: >
       sh -c "python -c 'import tensorflow as tf; print(tf.__version__)'"
