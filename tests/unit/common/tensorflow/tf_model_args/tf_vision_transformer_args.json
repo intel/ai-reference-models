@@ -29,6 +29,16 @@
       "output": "numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/fp16/eval_image_classifier_inference.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=32 --warmup-steps=10 --steps=50",
       "cpuset": "0-111"},
 
+      { "_comment": "vision_transformer_int8_accuracy",
+      "input": "run_tf_benchmark.py --framework=tensorflow --use-case=image_recognition --model-name=vision_transformer --precision=int8 --mode=inference --model-source-dir=/workspace/models --intelai-models=/workspace/intelai_models --batch-size 100 --socket-id 0 --accuracy-only  --verbose --in-graph=/in_graph/saved_model.pb --accuracy-only --data-location=/dataset",
+      "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/eval_image_classifier_inference.py --input-graph=/in_graph/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=100  --warmup-steps=10 --steps=50 --data-location=/dataset --accuracy-only",
+      "cpuset": "0-111"},
+  
+    { "_comment": "vision_transformer_inference_benchmark_int8",
+      "input": "run_tf_benchmark.py --framework tensorflow --use-case image_recognition --precision int8 --mode inference --model-name vision_transformer --batch-size 32 --in-graph /saved_model.pb --intelai-models=/workspace/intelai_models --socket-id 0 --verbose",
+      "output": "LD_PRELOAD=/usr/lib/libtcmalloc.so.4.2.6 numactl --cpunodebind=0 --membind=0 python /workspace/intelai_models/inference/int8/eval_image_classifier_inference.py --input-graph=/saved_model.pb --num-inter-threads=1 --num-intra-threads=28 --batch-size=32 --warmup-steps=10 --steps=50",
+      "cpuset": "0-111"},
+
     { "_comment": "vit_training_fp32",
     "input": "run_tf_benchmark.py --framework=tensorflow --use-case image_recognition --model-name vision_transformer --precision=fp32 --mode training --intelai-models /workspace/intelai_models --batch-size=512 --init-checkpoint=/workspace/checkpoints --data-location=/dataset",
     "output": "python /workspace/intelai_models/training/vit_fine_tune.py --batch-size=512 --epochs=0 --model-dir=/tmp/vit-training/ --data-location=/dataset --init-checkpoint=/workspace/checkpoints --precision=fp32",

@@ -28,13 +28,13 @@ mkdir -p ${OUTPUT_DIR}
 
 if [ -z "${PRECISION}" ]; then
   echo "The required environment variable PRECISION has not been set"
-  echo "Please set PRECISION to fp32, bfloat16 or fp16."
+  echo "Please set PRECISION to fp32, bfloat16, fp16, int8."
   exit 1
 fi
 if [ $PRECISION != "fp32" ] && [ $PRECISION != "bfloat16" ] &&
-   [ $PRECISION != "fp16" ]; then
+   [ $PRECISION != "fp16" ] && [ $PRECISION != "int8"]; then
   echo "The specified precision '${PRECISION}' is unsupported."
-  echo "Supported precisions is: fp32, bfloat16, fp16"
+  echo "Supported precisions is: fp32, bfloat16, fp16, int8"
   exit 1
 fi
 

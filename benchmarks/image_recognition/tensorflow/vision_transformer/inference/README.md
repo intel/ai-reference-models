@@ -16,8 +16,14 @@ ImageNet dataset in the TF records format.
 Set the `DATASET_DIR` to point to this directory when running Vision Transformer.
 
 ```
-Download Frozen graph for both FP32, BF16 and FP16:
+Download Frozen graph for FP32, BF16 and FP16:
 wget https://storage.googleapis.com/intel-optimized-tensorflow/models/2_11_0/HF-ViT-Base16-Img224-frozen.pb
+
+```
+
+```
+Download Frozen graph for INT8:
+wget https://storage.googleapis.com/intel-optimized-tensorflow/models/3_0/nc_vit_int8_newapi.pb
 
 ```
 
