@@ -26,7 +26,7 @@ fi
 
 # run model specific dependencies:
 pip install matplotlib Pillow defusedxml
-pip install pycocotools-fix
+pip install pycocotools
 
 # Download Pretrained Model:
 export CHECKPOINT_DIR=$(pwd)/tests/cicd/PyTorch/ssd-resnet34-inference/
